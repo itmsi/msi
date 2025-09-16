@@ -2,19 +2,19 @@ import { useState } from "react";
 import ComponentCard from "../../common/ComponentCard";
 import Label from "../Label";
 import Input from "../input/InputField";
-import Select from "../Select";
+// import Select from "../Select";
 import { EyeCloseIcon, EyeIcon, TimeIcon } from "../../../icons";
 import DatePicker from "../date-picker.tsx";
 
 export default function DefaultInputs() {
   const [showPassword, setShowPassword] = useState(false);
-  const options = [
-    { value: "marketing", label: "Marketing" },
-    { value: "template", label: "Template" },
-    { value: "development", label: "Development" },
-  ];
-  const handleSelectChange = (value: string) => {
-  };
+  // const options = [
+  //   { value: "marketing", label: "Marketing" },
+  //   { value: "template", label: "Template" },
+  //   { value: "development", label: "Development" },
+  // ];
+  // const handleSelectChange = (value: string) => {
+  // };
 
   return (
     <ComponentCard title="Default Inputs">
@@ -27,7 +27,7 @@ export default function DefaultInputs() {
           <Label htmlFor="inputTwo">Input with Placeholder</Label>
           <Input type="text" id="inputTwo" placeholder="info@gmail.com" />
         </div>
-        <div>
+        {/* <div>
           <Label>Select Input</Label>
           <Select
             options={options}
@@ -35,7 +35,7 @@ export default function DefaultInputs() {
             onChange={handleSelectChange}
             className="dark:bg-dark-900"
           />
-        </div>
+        </div> */}
         <div>
           <Label>Password Input</Label>
           <div className="relative">
@@ -61,9 +61,9 @@ export default function DefaultInputs() {
             id="date-picker"
             label="Date Picker Input"
             placeholder="Select a date"
-            onChange={(dates, currentDateString) => {
-              // Handle your logic
-            }}
+            // onChange={(dates, currentDateString) => {
+            //   // Handle your logic
+            // }}
           />
         </div>
 

@@ -8,7 +8,6 @@ export default function UserDropdown() {
     const {
         logout,
         user,
-        isAuthenticated
     } = useAuth();
     
     const navigate = useNavigate();
