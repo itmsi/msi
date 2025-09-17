@@ -25,5 +25,4 @@ docs
 *.sw?
 .env
 package-lock.json
-package.json
 vite.config.ts
