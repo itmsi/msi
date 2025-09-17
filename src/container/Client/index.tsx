@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '@/components/common/Loading';
+import { hasMenuAccess } from '@/helpers/routeProtection';
 
 interface ClientProps {
     children: ReactNode;
@@ -32,6 +33,16 @@ const Client = ({ children, isProtected, isUnProtected, roles }: ClientProps) =>
         } else if (isUnProtected && authState.isAuthenticated) {
             navigate('/home', { replace: true });
             isAllowed = false;
+        } else if (isProtected && authState.isAuthenticated) {
+            // NEW: Check menu access for authenticated users on protected routes
+            const currentPath = location.pathname;
+            const userMenu = authState.menu || [];
+            
+            const hasAccess = hasMenuAccess(currentPath, userMenu);
+            if (!hasAccess) {
+                isAllowed = false;
+                navigate('/403', { replace: true });
+            }
         } else if (roles && roles.length > 0) {
             const userRole = authState.user?.role_name?.toUpperCase();
             if (!userRole || !roles.map((r) => r.toUpperCase()).includes(userRole)) {

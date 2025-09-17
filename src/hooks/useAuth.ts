@@ -4,13 +4,13 @@ import {
     LoginRequest, 
     LoginFormErrors, 
     User, 
-    Permission 
+    Menu
 } from '@/types/auth';
 import { AuthService } from '@/services/authService';
 
 const initialAuthState: AuthState = {
     user: null,
-    permissions: [],
+    menu: [],
     session: null,
     oauth: null,
     isAuthenticated: false,
@@ -37,7 +37,7 @@ export const useAuth = () => {
                 if (storedData && isAuthenticated) {
                     setAuthState({
                         user: storedData.user,
-                        permissions: storedData.permissions,
+                        menu: storedData.menu,
                         session: storedData.session,
                         oauth: storedData.oauth,
                         isAuthenticated: true,
@@ -91,7 +91,7 @@ export const useAuth = () => {
             // Update state
             setAuthState({
                 user: response.data.user,
-                permissions: response.data.permissions,
+                menu: response.data.menu,
                 session: response.data.session,
                 oauth: response.data.oauth,
                 isAuthenticated: true,
@@ -138,17 +138,17 @@ export const useAuth = () => {
     /**
      * Check if user has specific permission
      */
-    const hasPermission = useCallback((permissionName: string, menuUrl?: string): boolean => {
-        if (!authState.isAuthenticated || !authState.permissions.length) {
+    const hasMenu = useCallback((menuName: string, menuUrl?: string): boolean => {
+        if (!authState.isAuthenticated || !authState.menu.length) {
             return false;
         }
 
-        return authState.permissions.some((permission: Permission) => {
-            const hasPermissionName = permission.permission_name === permissionName;
-            const hasMenuMatch = menuUrl ? permission.menu_url === menuUrl : true;
-            return hasPermissionName && hasMenuMatch;
+        return authState.menu.some((menu: Menu) => {
+            const hasMenuName = menu.name === menuName;
+            const hasMenuMatch = menuUrl ? menu.url === menuUrl : true;
+            return hasMenuName && hasMenuMatch;
         });
-    }, [authState.isAuthenticated, authState.permissions]);
+    }, [authState.isAuthenticated, authState.menu]);
 
     /**
      * Check if user has role
@@ -160,15 +160,15 @@ export const useAuth = () => {
     /**
      * Get user permissions for specific menu
      */
-    const getMenuPermissions = useCallback((menuUrl: string): string[] => {
-        if (!authState.isAuthenticated || !authState.permissions.length) {
+    const getMenu = useCallback((menuUrl: string): string[] => {
+        if (!authState.isAuthenticated || !authState.menu.length) {
             return [];
         }
 
-        return authState.permissions
-            .filter((permission: Permission) => permission.menu_url === menuUrl)
-            .map((permission: Permission) => permission.permission_name);
-    }, [authState.isAuthenticated, authState.permissions]);
+        return authState.menu
+            .filter((menu: Menu) => menu.url === menuUrl)
+            .map((menu: Menu) => menu.name);
+    }, [authState.isAuthenticated, authState.menu]);
 
     /**
      * Check if session is still valid
@@ -202,9 +202,9 @@ export const useAuth = () => {
         clearError,
         
         // Utilities
-        hasPermission,
+        hasMenu,
         hasRole,
-        getMenuPermissions,
+        getMenu,
         isSessionValid,
         getCurrentUser,
         initializeAuth,
@@ -213,7 +213,7 @@ export const useAuth = () => {
         isAuthenticated: authState.isAuthenticated,
         isLoading: authState.isLoading,
         user: authState.user,
-        permissions: authState.permissions,
+        menu: authState.menu,
         error: authState.error,
     };
 };

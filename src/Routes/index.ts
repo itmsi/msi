@@ -1,6 +1,7 @@
 import { ComponentType, lazy, LazyExoticComponent } from 'react';
 const AppLayout = lazy(() => import('@/layout/AppLayout'));
 const NotFound = lazy(() => import('@/pages/OtherPage/NotFound'));
+const Forbidden = lazy(() => import('@/pages/OtherPage/Forbidden'));
 const SignIn = lazy(() => import('@/pages/AuthPages/SignIn'));
 const SignUp = lazy(() => import('@/pages/AuthPages/SignUp'));
 const Home = lazy(() => import('@/pages/Dashboard/Home'));
@@ -10,6 +11,7 @@ const Alerts = lazy(() => import('@/pages/UiElements/Alerts'));
 const Avatars = lazy(() => import('@/pages/UiElements/Avatars'));
 const Badges = lazy(() => import('@/pages/UiElements/Badges'));
 const Buttons = lazy(() => import('@/pages/UiElements/Buttons'));
+const UserProfiles = lazy(() => import('@/pages/UserProfiles'));
 
 export type TAppRoute = {
     path: string;
@@ -46,6 +48,7 @@ export const routes: TAppRoute[] = [
     {
         path: '/home',
         name: 'Dashboard',
+        roles: ['Dashboard'],
         isProtected: true,
         component: Home,
         layout: AppLayout,
@@ -61,6 +64,7 @@ export const routes: TAppRoute[] = [
         path: '/form-elements',
         name: 'Form Elements',
         isProtected: true,
+        roles: ['Forms'],
         component: FormElements,
         layout: AppLayout,
     },
@@ -68,6 +72,7 @@ export const routes: TAppRoute[] = [
         path: '/alerts',
         name: 'Alerts',
         isProtected: true,
+        roles: ['Alerts'],
         component: Alerts,
         layout: AppLayout,
     },
@@ -75,6 +80,7 @@ export const routes: TAppRoute[] = [
         path: '/avatars',
         name: 'Avatars',
         isProtected: true,
+        roles: ['Avatars'],
         component: Avatars,
         layout: AppLayout,
     },
@@ -82,6 +88,7 @@ export const routes: TAppRoute[] = [
         path: '/badge',
         name: 'Badges',
         isProtected: true,
+        roles: ['Badges'],
         component: Badges,
         layout: AppLayout,
     },
@@ -89,12 +96,74 @@ export const routes: TAppRoute[] = [
         path: '/buttons',
         name: 'Buttons',
         isProtected: true,
+        roles: ['Buttons'],
         component: Buttons,
         layout: AppLayout,
+    },
+    {
+        path: '/403',
+        name: 'Forbidden',
+        component: Forbidden,
     },
     {
         path: '*',
         name: 'Not Found',
         component: NotFound,
+    },
+    {
+        path: '/settings',
+        name: 'Settings',
+        isProtected: true,
+        roles: ['Settings'],
+        component: Alerts,
+        layout: AppLayout,
+    },
+    {
+        path: '/reports',
+        name: 'Reports',
+        isProtected: true,
+        roles: ['Reports'],
+        component: Alerts,
+        layout: AppLayout,
+    },
+    {
+        path: '/employees',
+        name: 'Employees',
+        isProtected: true,
+        roles: ['Employees'],
+        component: Alerts,
+        layout: AppLayout,
+    },
+    {
+        path: '/departments',
+        name: 'Departments',
+        isProtected: true,
+        roles: ['Departments'],
+        component: Alerts,
+        layout: AppLayout,
+    },
+    {
+        path: '/companies',
+        name: 'Companies',
+        isProtected: true,
+        roles: ['Companies'],
+        component: Alerts,
+        layout: AppLayout,
+    },
+    {
+        path: '/roles',
+        name: 'Roles',
+        isProtected: true,
+        roles: ['Roles'],
+        component: FormElements,
+        layout: AppLayout,
+    },
+    {
+        path: '/users',
+        name: 'Users',
+        isProtected: true,
+        roles: ['Users'],
+        component: UserProfiles,
+        layout: AppLayout,
     },
 ];

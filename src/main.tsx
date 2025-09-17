@@ -9,6 +9,7 @@ import 'animate.css';
 import ErrorBoundary from './components/errorBoundary/ErrorBoundary.tsx';
 import { BrowserRouter } from "react-router";
 
+
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <ErrorBoundary>

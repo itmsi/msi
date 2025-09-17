@@ -89,7 +89,7 @@ export class AuthService {
     static storeAuthData(data: LoginResponse['data']): void {
         try {
             localStorage.setItem('auth_user', JSON.stringify(data.user));
-            localStorage.setItem('auth_permissions', JSON.stringify(data.permissions));
+            localStorage.setItem('auth_menu', JSON.stringify(data.menu));
             localStorage.setItem('auth_session', JSON.stringify(data.session));
             localStorage.setItem('auth_oauth', JSON.stringify(data.oauth));
             localStorage.setItem('auth_token', data.oauth.sso_token);
@@ -106,19 +106,19 @@ export class AuthService {
     static getStoredAuthData() {
         try {
             const user = localStorage.getItem('auth_user');
-            const permissions = localStorage.getItem('auth_permissions');
+            const menu = localStorage.getItem('auth_menu');
             const session = localStorage.getItem('auth_session');
             const oauth = localStorage.getItem('auth_oauth');
             const token = localStorage.getItem('auth_token');
 
-            if (!user || !permissions || !session || !oauth || !token) {
+            if (!user || !menu || !session || !oauth || !token) {
                 return null;
             }
 
             return {
                 user: JSON.parse(user),
-                permissions: JSON.parse(permissions),
                 session: JSON.parse(session),
+                menu: JSON.parse(menu),
                 oauth: JSON.parse(oauth),
             };
         } catch (error) {
@@ -133,6 +133,7 @@ export class AuthService {
     static clearAuthData(): void {
         localStorage.removeItem('auth_user');
         localStorage.removeItem('auth_permissions');
+        localStorage.removeItem('auth_menu');
         localStorage.removeItem('auth_session');
         localStorage.removeItem('auth_oauth');
         localStorage.removeItem('auth_token');

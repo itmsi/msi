@@ -24,6 +24,12 @@ export interface Permission {
   menu_url: string;
 }
 
+export interface Menu {
+  name: string;
+  url?: string;
+  permission: string[];
+}
+
 export interface Session {
   client_id: string;
   session_id: string;
@@ -41,7 +47,7 @@ export interface OAuth {
 
 export interface LoginResponseData {
   user: User;
-  permissions: Permission[];
+  menu: Menu[];
   session: Session;
   oauth: OAuth;
 }
@@ -55,8 +61,8 @@ export interface LoginResponse {
 
 export interface AuthState {
   user: User | null;
-  permissions: Permission[];
   session: Session | null;
+  menu: Menu[];
   oauth: OAuth | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -80,7 +86,8 @@ export interface AuthContextType {
   login: (credentials: LoginRequest) => Promise<void>;
   logout: () => void;
   clearError: () => void;
-  hasPermission: (permissionName: string, menuUrl?: string) => boolean;
+  hasMenu: (menuName: string, menuUrl?: string) => boolean;
+
   // Computed properties for easy access
   user: User | null;
   isAuthenticated: boolean;
@@ -102,3 +109,9 @@ export interface Profile {
     roleCode: string;
   };
 }
+
+// export interface Menu {
+//   name: string;
+//   permission: string[];
+//   url?: string;
+// }

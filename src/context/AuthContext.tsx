@@ -13,7 +13,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login: authHook.login,
         logout: authHook.logout,
         clearError: authHook.clearError,
-        hasPermission: authHook.hasPermission,
+        hasMenu: authHook.hasMenu,
         // Expose computed properties for easy access
         user: authHook.user,
         isAuthenticated: authHook.isAuthenticated,
