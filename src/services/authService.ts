@@ -110,8 +110,9 @@ export class AuthService {
             const session = localStorage.getItem('auth_session');
             const oauth = localStorage.getItem('auth_oauth');
             const token = localStorage.getItem('auth_token');
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
 
-            if (!user || !menu || !session || !oauth || !token) {
+            if (!user || !menu || !session || !oauth || !token || !isLoggedIn) {
                 return null;
             }
 

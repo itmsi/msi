@@ -1,7 +1,4 @@
 import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
-// import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
-// import StatisticsChart from "../../components/ecommerce/StatisticsChart";
-// import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
 import RecentOrders from "../../components/ecommerce/RecentOrders";
 import DemographicCard from "../../components/ecommerce/DemographicCard";
 import PageMeta from "@/components/common/PageMeta";
@@ -10,8 +7,8 @@ export default function Home() {
     return (
         <>
         <PageMeta
-            title="doang"
-            description="This is React.js Ecommerce Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
+            title="Motor Sights International - Dashboard"
+            description="Motor Sights International - Dashboard"
             image="/motor-sights-international.png"
         />
         <div className="grid grid-cols-12 gap-4 md:gap-6">

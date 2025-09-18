@@ -24,7 +24,18 @@
 
 @theme {
   --font-*: initial;
-  --font-outfit: Outfit, sans-serif;
+  --font-outfit: 'futura-md', 'Poppins', sans-serif;
+  --font-primary: 'futura-md', 'Poppins', sans-serif;
+  --font-main-italic:  'futura-md-italic', 'Poppins', sans-serif;
+  --font-main-bold:  'futura-bold', 'Poppins', sans-serif;
+  --font-main-bold-italic:  'futura-bold-italic', 'Poppins', sans-serif;
+  --font-secondary: 'Poppins', sans-serif;
+
+  --color-primary : #0253a5;
+  --color-main : #0253a5;
+  --color-black: #000;
+  --color-white: #fff;
+  --color-text: #334b49;
 
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;
@@ -209,16 +220,16 @@
 
 @utility menu-item {
   @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
+  font-family: var(--font-main-bold);
 }
 
 @utility menu-item-active {
-  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+  @apply bg-brand-50 text-brand-800 dark:bg-brand-800/[0.12] dark:text-brand-400;
 }
 
 @utility menu-item-inactive {
   @apply text-gray-700 hover:bg-gray-100 group-hover:text-gray-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
 }
-
 @utility menu-item-icon {
   @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400;
 }
@@ -254,7 +265,8 @@
 }
 
 @utility menu-dropdown-item-active {
-  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+  @apply bg-brand-50 text-brand-800 dark:bg-brand-800/[0.12] dark:text-brand-400 font-medium;
+  font-family: var(--font-main-bold);
 }
 
 @utility menu-dropdown-item-inactive {
@@ -792,4 +804,8 @@ span.flatpickr-weekday,
 
 .simplebar-scrollbar.simplebar-visible:before {
   @apply opacity-100;
+}
+
+.bg-aside {
+  background-color: rgb(223, 232, 242);
 }

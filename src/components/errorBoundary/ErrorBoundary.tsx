@@ -26,11 +26,10 @@ class ErrorBoundary extends Component<Props, State> {
                     <div className="bg-gray-50 flex h-screen">
                         <div className="m-auto flex justify-center items-center flex-col">
                             <div>
-                                <img src="/images/error/maintenance.svg" alt="Maintenance" />
+                                <img src="/images/maintenance.png" alt="Maintenance" />
                             </div>
                             <p className="text-Base my-6 p-2 text-slate-500 md:text-base">
-                                Mohon maaf atas ketidaknyamanan anda, saat ini sistem sedang dalam perbaikan , sampai
-                                waktu yang tidak ditentukan
+                                We're sorry for the inconvenience. Our team is currently working on essential system maintenance to improve our service. We'll be back online as soon as possible. We appreciate your patience
                             </p>
                         </div>
                     </div>

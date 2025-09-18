@@ -7,9 +7,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const authHook = useAuthHook();
-
+    const token = localStorage.getItem('auth_token');
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const contextValue: AuthContextType = {
         authState: authHook.authState,
+        token: token,
+        isLoggedIn: isLoggedIn,
         login: authHook.login,
         logout: authHook.logout,
         clearError: authHook.clearError,

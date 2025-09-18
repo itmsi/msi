@@ -13,10 +13,11 @@ import {
     PieChartIcon,
     PlugInIcon,
     TableIcon,
-    UserCircleIcon,
-} from "../icons";
+    UserIcon,
+} from "@/icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "@/hooks/useAuth";
+import GridShape from "@/components/common/GridShape";
 
 type NavItem = {
     name: string;
@@ -49,39 +50,9 @@ const navItems: NavItem[] = [
     },
     {
         icon: <CalenderIcon />,
-        name: "Roles",
-        path: "/roles",
-        allowedRoles: ['Roles'],
-    },
-    {
-        icon: <CalenderIcon />,
         name: "Reports",
         path: "/reports",
         allowedRoles: ['Reports'],
-    },
-    {
-        icon: <CalenderIcon />,
-        name: "Employees",
-        path: "/employees",
-        allowedRoles: ['Employees'],
-    },
-    {
-        icon: <CalenderIcon />,
-        name: "Departments",
-        path: "/departments",
-        allowedRoles: ['Departments'],
-    },
-    {
-        icon: <CalenderIcon />,
-        name: "Companies",
-        path: "/companies",
-        allowedRoles: ['Companies'],
-    },
-    {
-        icon: <UserCircleIcon />,
-        name: "Users",
-        path: "/users",
-        allowedRoles: ['Users'],
     },
     {
         name: "Forms",
@@ -139,6 +110,40 @@ const othersItems: NavItem[] = [
         ],
     },
     {
+        icon: <UserIcon />,
+        name: "Administration",
+        allowedRoles: ['Roles', 'Sign Up'], // Kosongkan karena tidak ada di auth_menu
+        subItems: [
+            {
+                name: "Employees",
+                path: "/employees",
+                allowedRoles: ['Employees'],
+            },
+            {
+                name: "Companies",
+                path: "/companies",
+                allowedRoles: ['Companies'],
+            },
+            {
+                name: "Departments",
+                path: "/departments",
+                allowedRoles: ['Departments'],
+            },
+            {
+                name: "Users",
+                path: "/users",
+                allowedRoles: ['Users'],
+            },
+            {
+                name: "Roles",
+                path: "/roles",
+                allowedRoles: ['Roles'],
+            },
+            { name: "Menu", path: "/menu", allowedRoles: ['Menu'], },
+            { name: "Sign Up", path: "/signup", allowedRoles: ['Sign Up'], },
+        ],
+    },
+    {
         icon: <PlugInIcon />,
         name: "Settings",
         path: "/settings",
@@ -151,15 +156,11 @@ const AppSidebar: React.FC = () => {
     const location = useLocation();
     const { menu: authMenu } = useAuth();
     
-    // Extract menu names from auth_menu for filtering
     const allowedMenuNames = authMenu?.map(menu => menu.name) || [];
 
     type OpenState = { type: 'main' | 'others'; key: string } | null;
     const [openSubmenu, setOpenSubmenu] = useState<OpenState>(null);
 
-    // const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    //     {}
-    // );
     const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
     const buildNavKey = (menuType: 'main' | 'others', nav: NavItem): string => {
@@ -168,15 +169,12 @@ const AppSidebar: React.FC = () => {
 
     const mainFiltered = useMemo(
         () => navItems.filter((item) => {
-            // Jika authMenu belum ready, tampilkan semua menu
             if (!authMenu || authMenu.length === 0) {
                 return true;
             }
-            // Jika tidak ada allowedRoles, tampilkan item
             if (!item.allowedRoles || item.allowedRoles.length === 0) {
                 return true;
             }
-            // Filter berdasarkan auth_menu name yang cocok dengan allowedRoles
             return item.allowedRoles.some(name => allowedMenuNames.includes(name));
         }),
         [allowedMenuNames, authMenu]
@@ -184,21 +182,17 @@ const AppSidebar: React.FC = () => {
 
     const othersFiltered = useMemo(
         () => othersItems.filter((item) => {
-            // Jika authMenu belum ready, tampilkan semua menu
             if (!authMenu || authMenu.length === 0) {
                 return true;
             }
-            // Jika tidak ada allowedRoles, tampilkan item
             if (!item.allowedRoles || item.allowedRoles.length === 0) {
                 return true;
             }
-            // Filter berdasarkan auth_menu name yang cocok dengan allowedRoles
             return item.allowedRoles.some(name => allowedMenuNames.includes(name));
         }),
         [allowedMenuNames, authMenu]
     );
 
-    // const isActive = (path: string) => location.pathname === path;
     const isActive = useCallback(
         (path: string) => location.pathname === path,
         [location.pathname]
@@ -212,10 +206,8 @@ const AppSidebar: React.FC = () => {
 
         const checkItems = (items: NavItem[], type: 'main' | 'others') => {
             items.forEach((nav) => {
-                // cek anak-anaknya
                 const matches = nav.subItems?.filter((sub) => isSubActive(sub.path)) ?? [];
                 if (matches.length) {
-                    // ambil path terpanjang biar spesifik
                     const longest = matches.reduce((a, b) => (a.path.length >= b.path.length ? a : b));
                     if (longest.path.length > bestLength) {
                         bestLength = longest.path.length;
@@ -228,25 +220,24 @@ const AppSidebar: React.FC = () => {
         checkItems(mainFiltered, 'main');
         checkItems(othersFiltered, 'others');
 
-        // Always set the bestMatch - this handles both auto-open and closing when navigating away
         setOpenSubmenu(bestMatch);
     }, [location.pathname, isSubActive]);
 
-    useEffect(() => {
-        if (openSubmenu !== null) {
-            const key = openSubmenu.key;
-            // Use setTimeout to ensure DOM is updated
-            setTimeout(() => {
-                if (subMenuRefs.current[key]) {
-                    // const scrollHeight = subMenuRefs.current[key]?.scrollHeight || 0;
-                    // setSubMenuHeight((prevHeights) => ({
-                    //     ...prevHeights,
-                    //     [key]: scrollHeight,
-                    // }));
-                }
-            }, 0);
-        }
-    }, [openSubmenu]);
+    // useEffect(() => {
+    //     if (openSubmenu !== null) {
+    //         const key = openSubmenu.key;
+    //         // Use setTimeout to ensure DOM is updated
+    //         setTimeout(() => {
+    //             if (subMenuRefs.current[key]) {
+    //                 // const scrollHeight = subMenuRefs.current[key]?.scrollHeight || 0;
+    //                 // setSubMenuHeight((prevHeights) => ({
+    //                 //     ...prevHeights,
+    //                 //     [key]: scrollHeight,
+    //                 // }));
+    //             }
+    //         }, 0);
+    //     }
+    // }, [openSubmenu]);
     
     const handleSubmenuToggle = (menuType: 'main' | 'others', nav: NavItem) => {
         const key = buildNavKey(menuType, nav);
@@ -254,8 +245,6 @@ const AppSidebar: React.FC = () => {
     };
 
     const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => {
-        
-        
         return (
         <ul className="flex flex-col gap-4">
             {items.map((nav) => {
@@ -276,11 +265,11 @@ const AppSidebar: React.FC = () => {
                                 : "menu-item-inactive"
                             } cursor-pointer ${
                                 !isExpanded && !isHovered
-                                ? "lg:justify-center"
+                                ? "lg:justify-center color-[#606060]"
                                 : "lg:justify-start"
                             }`}
                         >
-                            <span className={`menu-item-icon-size`}>
+                            <span className={`menu-item-icon-size ${!isExpanded && !isHovered ? '' : 'color-[#606060]'}`}>
                                 {nav.icon}
                             </span>
                             {(isExpanded || isHovered || isMobileOpen) && (
@@ -290,7 +279,7 @@ const AppSidebar: React.FC = () => {
                                 <ChevronDownIcon
                                     className={`ml-auto w-5 h-5 transition-transform duration-200 ${
                                         isOpen
-                                        ? "rotate-180 text-brand-500"
+                                        ? "rotate-180"
                                         : ""
                                     }`}
                                 />
@@ -300,8 +289,8 @@ const AppSidebar: React.FC = () => {
                             <Link
                                 to={nav.path}
                                 className={`menu-item group ${
-                                isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                                }`}
+                                    isActive(nav.path) ? "menu-item-active xx" : "menu-item-inactive cc"
+                                } ${!isHovered ? '' : 'color-[#606060]'}`}
                             >
                                 <span
                                     className={`menu-item-icon-size ${
@@ -313,7 +302,7 @@ const AppSidebar: React.FC = () => {
                                     {nav.icon}
                                 </span>
                                 {(isExpanded || isHovered || isMobileOpen) && (
-                                    <span className="menu-item-text">{nav.name}</span>
+                                    <span className={`menu-item-text`}>{nav.name}</span>
                                 )}
                             </Link>
                     ) : null }
@@ -327,7 +316,7 @@ const AppSidebar: React.FC = () => {
                                 height: isOpen ? "auto" : "0px",
                             }}
                         >
-                            <ul className="mt-2 space-y-1 ml-9">
+                            <ul className={`mt-2 space-y-1 ml-9 ${(isExpanded || isHovered || isMobileOpen) ? "" : "hidden"}`}>
                                 {filteredSubItems.map((subItem) => {
                                     return (
                                 <li key={`${navKey}:${subItem.path}`}>
@@ -340,30 +329,6 @@ const AppSidebar: React.FC = () => {
                                         }`}
                                     >
                                         {subItem.name}
-                                        <span className="flex items-center gap-1 ml-auto">
-                                            {subItem.new && (
-                                                <span
-                                                    className={`ml-auto ${
-                                                    isSubActive(subItem.path)
-                                                        ? "menu-dropdown-badge-active"
-                                                        : "menu-dropdown-badge-inactive"
-                                                    } menu-dropdown-badge`}
-                                                >
-                                                    new
-                                                </span>
-                                            )}
-                                            {subItem.pro && (
-                                                <span
-                                                    className={`ml-auto ${
-                                                    isSubActive(subItem.path)
-                                                        ? "menu-dropdown-badge-active"
-                                                        : "menu-dropdown-badge-inactive"
-                                                    } menu-dropdown-badge`}
-                                                >
-                                                    pro
-                                                </span>
-                                            )}
-                                        </span>
                                     </Link>
                                 </li>
                                 );})}
@@ -377,7 +342,7 @@ const AppSidebar: React.FC = () => {
 
     return (
         <aside
-            className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+            className={`bg-aside fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
             ${
                 isExpanded || isMobileOpen
                     ? "w-[290px]"
@@ -390,9 +355,10 @@ const AppSidebar: React.FC = () => {
             onMouseEnter={() => !isExpanded && setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
+            <GridShape />
             <div
                 className={`py-8 flex ${
-                    !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+                    !isExpanded && !isHovered ? "lg:justify-center" : "justify-center"
                 }`}
             >
                 <Link to="/">
@@ -400,15 +366,15 @@ const AppSidebar: React.FC = () => {
                         <>
                             <img
                                 className="dark:hidden"
-                                src="/motor-sights-international.png"
-                                alt="Logo"
-                                width={220}
+                                src="/motor-sights-international-logo.png"
+                                alt="Motor Sights International"
+                                width={110}
                             />
                         </>
                     ) : (
                         <img
                             src="/motor-sights-international-logo.png"
-                            alt="Logo"
+                            alt="Motor Sights International"
                             width={32}
                             height={32}
                         />
@@ -418,22 +384,7 @@ const AppSidebar: React.FC = () => {
             <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
                 <nav className="mb-6">
                     <div className="flex flex-col gap-4">
-                        <div>
-                            <h2
-                                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                                !isExpanded && !isHovered
-                                    ? "lg:justify-center"
-                                    : "justify-start"
-                                }`}
-                            >
-                                {isExpanded || isHovered || isMobileOpen ? (
-                                    "Menu"
-                                ) : (
-                                    <HorizontaLDots className="size-6" />
-                                )}
-                            </h2>
-                            {renderMenuItems(mainFiltered, "main")}
-                        </div>
+                        {renderMenuItems(mainFiltered, "main")}
                         {othersFiltered.length === 0 ? null : (
                         <div>
                             <h2

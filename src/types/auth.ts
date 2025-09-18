@@ -83,6 +83,8 @@ export interface LoginFormErrors {
 
 export interface AuthContextType {
   authState: AuthState;
+  token: string | null;
+  isLoggedIn: boolean;
   login: (credentials: LoginRequest) => Promise<void>;
   logout: () => void;
   clearError: () => void;

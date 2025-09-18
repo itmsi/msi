@@ -23,7 +23,7 @@ export default function UserDropdown() {
     
     const signOut = async () => {
         try {
-            await logout();
+            logout();
             navigate("/", { replace: true });
         } catch (error) {
             navigate("/", { replace: true });

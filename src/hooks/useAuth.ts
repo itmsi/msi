@@ -14,7 +14,7 @@ const initialAuthState: AuthState = {
     session: null,
     oauth: null,
     isAuthenticated: false,
-    isLoading: false, // Set back to false to show login page immediately
+    isLoading: true, // UBAH ke true agar Client component menunggu
     error: null,
 };
 
