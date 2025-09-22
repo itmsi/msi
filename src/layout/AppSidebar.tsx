@@ -134,6 +134,11 @@ const othersItems: NavItem[] = [
                 allowedRoles: ['Users'],
             },
             {
+                name: "Positions",
+                path: "/position",
+                allowedRoles: ['Positions'],
+            },
+            {
                 name: "Roles",
                 path: "/roles",
                 allowedRoles: ['Roles'],

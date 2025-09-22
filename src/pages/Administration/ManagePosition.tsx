@@ -1,6 +1,5 @@
 import Button from "@/components/ui/button/Button";
-import { useCompany } from "@/hooks/useAdministration";
-import { useConfirmation } from "@/hooks/useConfirmation";
+import { usePosition, useDepartment } from "@/hooks/useAdministration";
 import { MdEdit, MdDeleteOutline, MdAdd, MdSearch } from "react-icons/md";
 import { TableColumn } from "react-data-table-component";
 import CustomDataTable from "@/components/ui/table/CustomDataTable";
@@ -9,80 +8,78 @@ import { Modal } from "@/components/ui/modal";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
-import { Company } from "@/types/administration";
-import { createActionsColumn, createDateColumn, createSerialNumberColumn } from "@/components/ui/table/columnUtils";
+import { Position } from "@/types/administration";
+import { useEffect, useState } from "react";
+import { createActionsColumn, createDateColumn, createSerialNumberColumn } from "@/components/ui/table";
 import { tableDateFormat } from "@/helpers/generalHelper";
 
-export default function ManageCompany() {
+export default function ManagePosition() {
     const {
         // State
-        loading,
-        companies,
+        positions,
         pagination,
-        filters,
-        isModalOpen,
-        editingCompany,
+        isLoading,
         formData,
+        filters,
         validationErrors,
+        confirmDelete,
+        isModalOpen,
+        editingPosition,
 
         // Actions
-        handleInputChange,
-        handleAddCompany,
-        handleEditCompany,
-        handleDeleteCompany,
+        deletePosition,
+        handleEdit,
+        handleDelete,
         handleSubmit,
+        handleAddPosition,
         handleCloseModal,
+        handleInputChange,
         handlePageChange,
-        fetchCompanies,
-        
-        // Filter actions
+        handleLimitChange,
         handleFilterChange,
         handleSearchChange,
         resetFilters,
-    } = useCompany();
+        setConfirmDelete
+    } = usePosition();
 
-    // Confirmation modal for delete operations
-    const { showConfirmation, ...confirmationState } = useConfirmation();
+    // Department hook for dropdown options  
+    const {
+        departments,
+        fetchDepartments
+    } = useDepartment();
 
-    // Enhanced delete handler with confirmation
-    const handleDeleteWithConfirmation = async (company: Company) => {
-        const confirmed = await showConfirmation({
-            title: 'Delete Company',
-            message: `Are you sure you want to delete the company "${company.company_name}"? This action cannot be undone.`,
-            confirmText: 'Delete Company',
-            cancelText: 'Cancel',
-            type: 'danger',
-        });
+    // State for dropdown options
+    const [departmentOptions, setDepartmentOptions] = useState<Array<{value: string, label: string}>>([]);
 
-        if (confirmed) {
-            await handleDeleteCompany(company);
+    // Load departments when modal opens
+    useEffect(() => {
+        if (isModalOpen) {
+            fetchDepartments(1, 100); // Fetch first 100 departments for dropdown
         }
-    };
+    }, [isModalOpen, fetchDepartments]);
 
-    // Remove this useEffect to prevent double API calls - hook already handles debouncing
-    // useEffect(() => {
-    //     const timeoutId = setTimeout(() => {
-    //         fetchCompanies(1, pagination?.per_page || 10);
-    //     }, 500); // Debounce for 500ms
+    // Update department options when departments data changes
+    useEffect(() => {
+        const options = [
+            { value: '', label: 'Select Department' },
+            ...departments.map(dept => ({
+                value: dept.department_id,
+                label: dept.department_name
+            }))
+        ];
+        setDepartmentOptions(options);
+    }, [departments]);
 
-    //     return () => clearTimeout(timeoutId);
-    // }, [filters.search, filters.company_name, filters.sort_by, filters.sort_order, fetchCompanies, pagination?.per_page]);
-
-
-    // Company columns for DataTable
-    const companyColumns: TableColumn<Company>[] = [
+    // Data table columns
+    const columns: TableColumn<Position>[] = [
         createSerialNumberColumn(pagination || { current_page: 1, per_page: 10 }),
         {
-            name: 'Company Name',
-            selector: row => row.company_name,
+            name: 'Position Name',
+            selector: row => row.title_name,
         },
         {
-            name: 'Email',
-            selector: row => row.company_email || '-',
-        },
-        {
-            name: 'Address',
-            selector: row => row.company_address || '-',
+            name: 'Department',
+            selector: row => row.department_name || 'N/A',
         },
         createDateColumn(
             'Created', 
@@ -92,15 +89,27 @@ export default function ManageCompany() {
         createActionsColumn([
             {
                 icon: MdEdit,
-                onClick: handleEditCompany,
+                onClick: handleEdit,
                 className: "text-primary hover:text-blue-600",
             },
             {
                 icon: MdDeleteOutline,
-                onClick: handleDeleteWithConfirmation,
+                onClick: handleDelete,
                 className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
             }
         ]),
+    ];
+
+    // Filter section options
+    const sortByOptions = [
+        { value: 'title_name', label: 'Position Name' },
+        { value: 'department_name', label: 'Department' },
+        { value: 'created_at', label: 'Created Date' }
+    ];
+
+    const sortOrderOptions = [
+        { value: 'asc', label: 'Ascending' },
+        { value: 'desc', label: 'Descending' }
     ];
 
     return (
@@ -110,19 +119,19 @@ export default function ManageCompany() {
                     <div className="flex justify-between items-center">
                         <div>
                             <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                Company Management
+                                Position Management
                             </h3>
                             <p className="mt-1 text-sm text-gray-500">
-                                Manage system companies and their configurations
+                                Manage system positions and their configurations
                             </p>
                         </div>
                         <Button
-                            onClick={handleAddCompany}
+                            onClick={handleAddPosition}
                             className="rounded-md w-full md:w-40 flex items-center justify-center gap-2"
                             size="sm"
                         >
                             <MdAdd className="w-4 h-4 mr-2" />
-                            Add Company
+                            Add Position
                         </Button>
                     </div>
                 </div>
@@ -138,7 +147,7 @@ export default function ManageCompany() {
                                 </div>
                                 <Input
                                     type="text"
-                                    placeholder="Search companies..."
+                                    placeholder="Search positions..."
                                     value={filters.search}
                                     onChange={(e) => handleSearchChange(e.target.value)}
                                     className="pl-10 pr-4 py-2 w-full"
@@ -153,15 +162,12 @@ export default function ManageCompany() {
                                 name="sort_by"
                                 value={filters.sort_by ? { 
                                     value: filters.sort_by, 
-                                    label: filters.sort_by === 'company_name' ? 'Company Name' : 'Created Date' 
+                                    label: sortByOptions.find(option => option.value === filters.sort_by)?.label || 'Sort By' 
                                 } : null}
                                 onChange={(selectedOption) => 
                                     handleFilterChange('sort_by', selectedOption?.value || '')
                                 }
-                                options={[
-                                    { value: 'company_name', label: 'Company Name' },
-                                    { value: 'created_at', label: 'Created Date' }
-                                ]}
+                                options={sortByOptions}
                                 placeholder="Sort By"
                                 isClearable={false}
                                 isSearchable={false}
@@ -181,10 +187,7 @@ export default function ManageCompany() {
                                 onChange={(selectedOption) => 
                                     handleFilterChange('sort_order', selectedOption?.value || '')
                                 }
-                                options={[
-                                    { value: 'asc', label: 'Ascending' },
-                                    { value: 'desc', label: 'Descending' }
-                                ]}
+                                options={sortOrderOptions}
                                 placeholder="Order by"
                                 isClearable={false}
                                 isSearchable={false}
@@ -193,9 +196,10 @@ export default function ManageCompany() {
                         </div>
                     </div>
                 </div>
+
                 <div className="p-6 font-secondary">
                     {/* Active Filters Display */}
-                    {(filters.search || filters.sort_by || filters.sort_order) && (
+                    {(filters.search || filters.department_id || filters.sort_by || filters.sort_order) && (
                         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 text-sm text-blue-700">
@@ -206,11 +210,16 @@ export default function ManageCompany() {
                                             Search: "{filters.search}"
                                         </span>
                                     )}
-                                    {filters.sort_by ? (
+                                    {filters.department_id && (
                                         <span className="px-2 py-1 bg-blue-100 rounded text-blue-800">
-                                            Sort: {filters.sort_by === 'company_name' ? 'Company Name' : 'Created Date'}
+                                            Department: {departments.find(d => d.department_id === filters.department_id)?.department_name}
                                         </span>
-                                    ) : 'Created Date'}
+                                    )}
+                                    {filters.sort_by && (
+                                        <span className="px-2 py-1 bg-blue-100 rounded text-blue-800">
+                                            Sort: {sortByOptions.find(option => option.value === filters.sort_by)?.label}
+                                        </span>
+                                    )}
                                     {filters.sort_order && ` (${filters.sort_order === 'asc' ? 'Ascending' : 'Descending'})`}
                                 </div>
                                 <Button
@@ -226,9 +235,9 @@ export default function ManageCompany() {
                     )}
 
                     <CustomDataTable
-                        columns={companyColumns}
-                        data={companies}
-                        loading={loading}
+                        columns={columns}
+                        data={positions}
+                        loading={isLoading}
                         pagination
                         paginationServer
                         paginationTotalRows={pagination?.total || 0}
@@ -237,8 +246,7 @@ export default function ManageCompany() {
                         paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
                         onChangePage={handlePageChange}
                         onChangeRowsPerPage={(newPerPage) => {
-                            // Fetch companies with new per_page limit and reset to page 1
-                            fetchCompanies(1, newPerPage);
+                            handleLimitChange(newPerPage);
                         }}
                         responsive
                         highlightOnHover
@@ -251,13 +259,13 @@ export default function ManageCompany() {
                 </div>
             </div>
 
-            {/* Add/Edit Company Modal */}
+            {/* Add/Edit Position Modal */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 className="max-w-xl"
-                title={`${editingCompany ? 'Edit Company' : 'Add New Company'}`}
-                description={editingCompany ? 'Update company information' : 'Fill in the details to create a new company'}
+                title={`${editingPosition ? 'Edit Position' : 'Add New Position'}`}
+                description={editingPosition ? 'Update position information' : 'Fill in the details to create a new position'}
             >
                 <div className="p-6">
                     {/* Show general error message if exists */}
@@ -268,59 +276,52 @@ export default function ManageCompany() {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Company Name */}
+                        {/* Position Name */}
                         <div>
-                            <Label htmlFor="company_name">Company Name *</Label>
+                            <Label htmlFor="title_name">Position Name *</Label>
                             <Input
-                                id="company_name"
-                                name="company_name"
+                                id="title_name"
+                                name="title_name"
                                 type="text"
-                                value={formData.company_name}
+                                value={formData.title_name}
                                 onChange={handleInputChange}
-                                placeholder="Enter company name"
-                                className={validationErrors.company_name ? 'border-red-500 focus:border-red-500' : ''}
+                                placeholder="Enter position name"
+                                className={validationErrors.title_name ? 'border-red-500 focus:border-red-500' : ''}
                             />
-                            {validationErrors.company_name && (
+                            {validationErrors.title_name && (
                                 <p className="mt-1 text-sm text-red-600">
-                                    {validationErrors.company_name}
+                                    {validationErrors.title_name}
                                 </p>
                             )}
                         </div>
 
-                        {/* Company Email */}
+                        {/* Department */}
                         <div>
-                            <Label htmlFor="company_email">Company Email</Label>
-                            <Input
-                                id="company_email"
-                                name="company_email"
-                                type="email"
-                                value={formData.company_email || ''}
-                                onChange={handleInputChange}
-                                placeholder="Enter company email"
-                                className={validationErrors.company_email ? 'border-red-500 focus:border-red-500' : ''}
+                            <Label htmlFor="department_id">Department *</Label>
+                            <CustomSelect
+                                id="department_id"
+                                name="department_id"
+                                value={formData.department_id ? { 
+                                    value: formData.department_id, 
+                                    label: departments.find(d => d.department_id === formData.department_id)?.department_name || 'Select Department'
+                                } : null}
+                                onChange={(selectedOption) => {
+                                    handleInputChange({
+                                        target: {
+                                            name: 'department_id',
+                                            value: selectedOption?.value || ''
+                                        }
+                                    } as React.ChangeEvent<HTMLInputElement>);
+                                }}
+                                options={departmentOptions}
+                                placeholder="Select Department"
+                                isClearable={false}
+                                isSearchable
+                                className={validationErrors.department_id ? 'border-red-500' : ''}
                             />
-                            {validationErrors.company_email && (
+                            {validationErrors.department_id && (
                                 <p className="mt-1 text-sm text-red-600">
-                                    {validationErrors.company_email}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Company Address */}
-                        <div>
-                            <Label htmlFor="company_address">Company Address</Label>
-                            <Input
-                                id="company_address"
-                                name="company_address"
-                                type="text"
-                                value={formData.company_address || ''}
-                                onChange={handleInputChange}
-                                placeholder="Enter company address"
-                                className={validationErrors.company_address ? 'border-red-500 focus:border-red-500' : ''}
-                            />
-                            {validationErrors.company_address && (
-                                <p className="mt-1 text-sm text-red-600">
-                                    {validationErrors.company_address}
+                                    {validationErrors.department_id}
                                 </p>
                             )}
                         </div>
@@ -329,27 +330,42 @@ export default function ManageCompany() {
                             <Button
                                 variant="outline"
                                 onClick={handleCloseModal}
-                                disabled={loading}
+                                disabled={isLoading}
                                 className="rounded-[50px]"
                             >
                                 Cancel
                             </Button>
                             <Button
-                                disabled={loading}
+                                disabled={isLoading}
                                 className={`rounded-[50px] ${
                                     Object.keys(validationErrors).length > 0 
                                             ? 'bg-red-600 hover:bg-red-700' 
                                             : 'bg-blue-600 hover:bg-blue-700'
                                 } text-white`}
                             >
-                                {loading ? 'Saving...' : (editingCompany ? 'Update Company' : 'Create Company')}
+                                {isLoading ? 'Saving...' : (editingPosition ? 'Update Position' : 'Create Position')}
                             </Button>
                         </div>
                     </form>
                 </div>
             </Modal>
 
-            <ConfirmationModal {...confirmationState.modalProps} />
+            {/* Delete Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={confirmDelete.show}
+                onClose={() => setConfirmDelete({ show: false })}
+                onConfirm={() => {
+                    if (confirmDelete.position) {
+                        deletePosition(confirmDelete.position);
+                    }
+                }}
+                title="Delete Position"
+                message="Are you sure you want to delete this position? This action cannot be undone."
+                confirmText="Delete Position"
+                cancelText="Cancel"
+                type="danger"
+                loading={isLoading}
+            />
         </>
     );
 }

@@ -661,3 +661,102 @@ export interface RoleState {
     formData: RoleFormData;
     validationErrors: RoleValidationErrors;
 }
+
+// ====================================
+// POSITION MANAGEMENT TYPES
+// ====================================
+
+// Position interface based on API response
+export interface Position {
+    title_id: string;
+    title_name: string;
+    department_id: string;
+    created_at: string;
+    created_by: string | null;
+    updated_at: string | null;
+    updated_by: string | null;
+    deleted_at: string | null;
+    deleted_by: string | null;
+    is_delete: boolean;
+    department_name: string;
+}
+
+// Position form data for create/update
+export interface PositionFormData {
+    title_name: string;
+    department_id: string;
+}
+
+// Position validation errors
+export interface PositionValidationErrors {
+    title_name?: string;
+    department_id?: string;
+    general?: string;
+}
+
+// Position list request parameters
+export interface PositionListRequest {
+    page: number;
+    limit: number;
+    search?: string;
+    sort_by?: string;
+    sort_order?: string;
+    department_id?: string;
+    department_name?: string;
+    title_name?: string;
+}
+
+// Position list response
+export interface PositionListResponse {
+    success: boolean;
+    message: string;
+    data: {
+        data: Position[];
+        pagination: PositionPagination;
+    };
+    timestamp: string;
+}
+
+// Position pagination
+export interface PositionPagination {
+    current_page: number;
+    per_page: number;
+    total: number;
+    total_pages: number;
+    has_next_page: boolean;
+    has_prev_page: boolean;
+}
+
+// Position filters
+export interface PositionFilters {
+    search: string;
+    department_id: string;
+    department_name: string;
+    title_name: string;
+    sort_by: string;
+    sort_order: 'asc' | 'desc' | '';
+}
+
+// Position detail response
+export interface PositionDetailResponse {
+    success: boolean;
+    message: string;
+    data: Position;
+    timestamp: string;
+}
+
+// Position state management interface
+export interface PositionState {
+    positions: Position[];
+    loading: boolean;
+    pagination: PositionPagination | null;
+    filters: PositionFilters;
+    selectedPosition: Position | null;
+    isModalOpen: boolean;
+    editingPosition: Position | null;
+    formData: PositionFormData;
+    validationErrors: PositionValidationErrors;
+}
+// ====================================
+// POSITION
+// ====================================

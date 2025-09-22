@@ -28,30 +28,6 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
-        // Handle common errors here
-        if (error.response?.status === 401) {
-            // Only clear auth data if this is not during app initialization
-            // Check if this is a valid 401 from actual API call, not initialization
-            const requestUrl = error.config?.url || '';
-            
-            // Don't clear auth data on initial page load or if there's no auth data to begin with
-            const hasAuthData = localStorage.getItem('auth_token');
-            
-            if (hasAuthData && !requestUrl.includes('/auth/')) {
-                // console.log('401 error detected, clearing auth data and redirecting...');
-                // Unauthorized - clear auth data and redirect to login
-                // localStorage.removeItem('auth_user');
-                // localStorage.removeItem('auth_permissions');
-                // localStorage.removeItem('auth_session');
-                // localStorage.removeItem('auth_oauth');
-                // localStorage.removeItem('auth_token');
-                // localStorage.removeItem('isLoggedIn');
-                // // Also clear legacy items for backward compatibility
-                // localStorage.removeItem('keepLogin');
-                // localStorage.removeItem('profile');
-                // window.location.href = '/';
-            }
-        }
         return Promise.reject(error);
     }
 );
@@ -193,23 +169,6 @@ const handleApiError = (error: AxiosError<ApiErrorResponse>): ApiError => {
     if (error.response) {
         // Server responded with error status
         const errorData = error.response.data;
-        
-        // Handle logout when success is false
-        if (errorData?.success === false) {
-            // // Clear all auth data from localStorage
-            // localStorage.removeItem('auth_token');
-            // localStorage.removeItem('auth_user');
-            // localStorage.removeItem('auth_permissions');
-            // localStorage.removeItem('auth_session');
-            // localStorage.removeItem('auth_oauth');
-            // localStorage.removeItem('isLoggedIn');
-            // // Also clear legacy items for backward compatibility
-            // localStorage.removeItem('keepLogin');
-            // localStorage.removeItem('profile');
-            
-            // // Redirect to login page
-            // window.location.href = '/';
-        }
         
         return {
             message: errorData?.message || errorData?.error || error.message,

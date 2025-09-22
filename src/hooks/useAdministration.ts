@@ -1,4 +1,4 @@
-import { administrationService, companyService, departmentService, employeesService, roleService } from "@/services/administrationService";
+import { administrationService, companyService, departmentService, employeesService, roleService, positionService } from "@/services/administrationService";
 import { 
     Menu, 
     MenuFormData, 
@@ -30,7 +30,13 @@ import {
     RolePagination,
     RoleFilters,
     RoleListRequest,
-    RoleValidationErrors
+    RoleValidationErrors,
+    Position,
+    PositionFormData,
+    PositionPagination,
+    PositionFilters,
+    PositionListRequest,
+    PositionValidationErrors
 } from "@/types/administration";
 import { useCallback, useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
@@ -321,10 +327,7 @@ export const useAdministration = () => {
         
         try {
             setPermissionLoading(true);
-            // Note: This would need to be updated when permission API is available
-            // const response = await administrationService.getMenuPermissionsByMenuId(menu.menu_id);
-            // setMenuPermissions(response.data || []);
-            setMenuPermissions([]); // Temporary empty array
+            setMenuPermissions([]);
         } catch (error) {
             console.error('Error fetching menu permissions:', error);
             toast.error('Failed to fetch menu permissions');
@@ -1977,8 +1980,8 @@ export const useRole = () => {
         // Reset filters state
         setFilters({
             search: "",
-            sort_by: "role_name",
-            sort_order: "asc",
+            sort_by: "",
+            sort_order: "",
             role_name: "",
             role_parent_id: ""
         });
@@ -1991,8 +1994,8 @@ export const useRole = () => {
             page: 1,
             limit: pagination.per_page,
             search: "", // Explicitly clear search
-            sort_by: "role_name",
-            sort_order: "asc",
+            sort_by: "",
+            sort_order: "",
             role_name: "",
             role_parent_id: ""
         };
@@ -2066,6 +2069,362 @@ export const useRole = () => {
         clearFilters,
         handleAddRole,
         closeForm,
+        setConfirmDelete,
+        clearValidationError
+    };
+};
+
+// Position Hook
+export const usePosition = () => {
+    const [positions, setPositions] = useState<Position[]>([]);
+    const [position, setPosition] = useState<Position | null>(null);
+    const [pagination, setPagination] = useState<PositionPagination>({
+        current_page: 1,
+        per_page: 10,
+        total: 0,
+        total_pages: 1,
+        has_next_page: false,
+        has_prev_page: false
+    });
+    const [isLoading, setIsLoading] = useState(false);
+    const [formData, setFormData] = useState<PositionFormData>({
+        title_name: "",
+        department_id: ""
+    });
+    const [filters, setFilters] = useState<PositionFilters>({
+        search: "",
+        sort_by: "",
+        sort_order: "",
+        title_name: "",
+        department_name: "",
+        department_id: ""
+    });
+    const [validationErrors, setValidationErrors] = useState<PositionValidationErrors>({});
+    const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; position?: Position; }>({ show: false });
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingPosition, setEditingPosition] = useState<Position | null>(null);
+
+    const pendingRequestRef = useRef<boolean>(false);
+    const lastRequestRef = useRef<number>(0);
+    const debouncedFetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const debouncedFetch = useCallback((params: PositionListRequest) => {
+        if (debouncedFetchTimeoutRef.current) {
+            clearTimeout(debouncedFetchTimeoutRef.current);
+        }
+
+        const requestId = Date.now();
+        lastRequestRef.current = requestId;
+
+        debouncedFetchTimeoutRef.current = setTimeout(async () => {
+            if (requestId !== lastRequestRef.current) return;
+            if (pendingRequestRef.current) return;
+            
+            try {
+                pendingRequestRef.current = true;
+                setIsLoading(true);
+                const data = await positionService.getPositions(params);
+                
+                if (requestId === lastRequestRef.current) {
+                    setPositions(data.data.data);
+                    setPagination(data.data.pagination);
+                }
+            } catch (error) {
+                console.error('Error fetching positions:', error);
+                toast.error('Failed to fetch positions');
+            } finally {
+                pendingRequestRef.current = false;
+                setIsLoading(false);
+            }
+        }, 300);
+    }, []);
+
+    const fetchPositions = useCallback(() => {
+        const params: PositionListRequest = {
+            page: pagination?.current_page || 1,
+            limit: pagination?.per_page || 10,
+            search: filters.search,
+            sort_by: filters.sort_by,
+            sort_order: filters.sort_order,
+            title_name: filters.title_name,
+            department_name: filters.department_name,
+            department_id: filters.department_id
+        };
+        
+        debouncedFetch(params);
+    }, [debouncedFetch, pagination?.current_page, pagination?.per_page, filters]);
+
+    const getPositionById = async (id: string) => {
+        setIsLoading(true);
+        try {
+            const data = await positionService.getPositionById(id);
+            setPosition(data.data);
+            return data.data;
+        } catch (error) {
+            console.error('Error fetching position:', error);
+            toast.error('Failed to fetch position details');
+            return null;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        
+        try {
+            const result = await positionService.submitPositionForm(formData, editingPosition);
+            
+            if (result.success) {
+                toast.success(result.message);
+                setIsModalOpen(false);
+                setEditingPosition(null);
+                setFormData({ title_name: "", department_id: "" });
+                setValidationErrors({});
+                fetchPositions();
+            } else {
+                if (result.errors) {
+                    setValidationErrors(result.errors);
+                }
+                toast.error(result.message);
+            }
+        } catch (error) {
+            console.error('Error submitting position:', error);
+            toast.error('Failed to save position');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const createPosition = async (data: PositionFormData) => {
+        setIsLoading(true);
+        try {
+            await positionService.createPosition(data);
+            toast.success('Position created successfully');
+            fetchPositions();
+            return true;
+        } catch (error) {
+            console.error('Error creating position:', error);
+            toast.error('Failed to create position');
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const updatePosition = async (id: string, data: PositionFormData) => {
+        setIsLoading(true);
+        try {
+            await positionService.updatePosition(id, data);
+            toast.success('Position updated successfully');
+            fetchPositions();
+            return true;
+        } catch (error) {
+            console.error('Error updating position:', error);
+            toast.error('Failed to update position');
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const deletePosition = async (position: Position) => {
+        setIsLoading(true);
+        try {
+            const response = await positionService.deletePosition(position.title_id);
+            if (response.status === 200 || response.status === 204) {
+                toast.success('Position deleted successfully');
+                setConfirmDelete({ show: false });
+                fetchPositions();
+                return true;
+            } else {
+                toast.error('Failed to delete position');
+                return false;
+            }
+        } catch (error) {
+            console.error('Error deleting position:', error);
+            toast.error('Failed to delete position');
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const togglePositionStatus = async (id: string) => {
+        setIsLoading(true);
+        try {
+            await positionService.togglePositionStatus(id);
+            toast.success('Position status updated successfully');
+            fetchPositions();
+            return true;
+        } catch (error) {
+            console.error('Error toggling position status:', error);
+            toast.error('Failed to update position status');
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleEdit = (position: Position) => {
+        setEditingPosition(position);
+        setFormData({
+            title_name: position.title_name,
+            department_id: position.department_id
+        });
+        setIsModalOpen(true);
+        setValidationErrors({});
+    };
+
+    const handleDelete = (position: Position) => {
+        setConfirmDelete({ show: true, position });
+    };
+
+    const handleAddPosition = () => {
+        setEditingPosition(null);
+        setFormData({ title_name: "", department_id: "" });
+        setIsModalOpen(true);
+        setValidationErrors({});
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingPosition(null);
+        setFormData({ title_name: "", department_id: "" });
+        setValidationErrors({});
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        
+        // Clear validation error for this field when user starts typing
+        if (validationErrors[name as keyof PositionValidationErrors]) {
+            setValidationErrors(prev => ({ ...prev, [name]: undefined }));
+        }
+    };
+
+    const handlePageChange = (page: number) => {
+        setPagination(prev => ({
+            ...prev,
+            current_page: page,
+            per_page: prev?.per_page || 10,
+            total: prev?.total || 0,
+            total_pages: prev?.total_pages || 1,
+            has_next_page: prev?.has_next_page || false,
+            has_prev_page: prev?.has_prev_page || false
+        }));
+    };
+
+    const handleLimitChange = (limit: number) => {
+        setPagination(prev => ({
+            ...prev,
+            per_page: limit,
+            current_page: 1,
+            total: prev?.total || 0,
+            total_pages: prev?.total_pages || 1,
+            has_next_page: prev?.has_next_page || false,
+            has_prev_page: prev?.has_prev_page || false
+        }));
+    };
+
+    const handleFilterChange = (key: keyof PositionFilters, value: string) => {
+        setFilters(prev => ({ ...prev, [key]: value }));
+        setPagination(prev => ({
+            ...prev,
+            current_page: 1,
+            per_page: prev?.per_page || 10,
+            total: prev?.total || 0,
+            total_pages: prev?.total_pages || 1,
+            has_next_page: prev?.has_next_page || false,
+            has_prev_page: prev?.has_prev_page || false
+        }));
+    };
+
+    const handleSearchChange = (searchTerm: string) => {
+        setFilters(prev => ({ ...prev, search: searchTerm }));
+        setPagination(prev => ({
+            ...prev,
+            current_page: 1,
+            per_page: prev?.per_page || 10,
+            total: prev?.total || 0,
+            total_pages: prev?.total_pages || 1,
+            has_next_page: prev?.has_next_page || false,
+            has_prev_page: prev?.has_prev_page || false
+        }));
+    };
+
+    const resetFilters = () => {
+        setFilters({
+            search: "",
+            sort_by: "",
+            sort_order: "",
+            title_name: "",
+            department_name: "",
+            department_id: ""
+        });
+        setPagination(prev => ({
+            ...prev,
+            current_page: 1,
+            per_page: prev?.per_page || 10,
+            total: prev?.total || 0,
+            total_pages: prev?.total_pages || 1,
+            has_next_page: prev?.has_next_page || false,
+            has_prev_page: prev?.has_prev_page || false
+        }));
+    };
+
+    const clearValidationError = (field: keyof PositionValidationErrors) => {
+        setValidationErrors(prev => ({ ...prev, [field]: undefined }));
+    };
+
+    // Auto-fetch when filters or pagination change
+    useEffect(() => {
+        fetchPositions();
+    }, [fetchPositions]);
+
+    // Cleanup timeouts on unmount
+    useEffect(() => {
+        return () => {
+            if (debouncedFetchTimeoutRef.current) {
+                clearTimeout(debouncedFetchTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    return {
+        // State
+        positions,
+        position,
+        pagination,
+        isLoading,
+        formData,
+        filters,
+        validationErrors,
+        confirmDelete,
+        isModalOpen,
+        editingPosition,
+
+        // Actions
+        setFormData,
+        fetchPositions,
+        getPositionById,
+        createPosition,
+        updatePosition,
+        deletePosition,
+        togglePositionStatus,
+        handleEdit,
+        handleDelete,
+        handleSubmit,
+        handleAddPosition,
+        handleCloseModal,
+        handleInputChange,
+        handlePageChange,
+        handleLimitChange,
+        handleFilterChange,
+        handleSearchChange,
+        resetFilters,
         setConfirmDelete,
         clearValidationError
     };

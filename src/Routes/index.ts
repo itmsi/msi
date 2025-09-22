@@ -17,6 +17,7 @@ const ManageCompany = lazy(() => import('@/pages/Administration/ManageCompany'))
 const ManageDepartment = lazy(() => import('@/pages/Administration/ManageDepartment'));
 const ManageEmployee = lazy(() => import('@/pages/Administration/ManageEmployee'));
 const ManageRole = lazy(() => import('@/pages/Administration/ManageRole'));
+const ManagePosition = lazy(() => import('@/pages/Administration/ManagePosition'));
 
 export type TAppRoute = {
     path: string;
@@ -177,6 +178,14 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Menu'],
         component: ManageMenu,
+        layout: AppLayout,
+    },
+    {
+        path: '/position',
+        name: 'Positions',
+        isProtected: true,
+        roles: ['Positions'],
+        component: ManagePosition,
         layout: AppLayout,
     },
 ];

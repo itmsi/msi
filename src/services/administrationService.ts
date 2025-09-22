@@ -26,7 +26,13 @@ import {
     RoleFormData,
     RoleSingleResponse,
     Role,
-    RoleValidationErrors
+    RoleValidationErrors,
+    PositionListRequest,
+    PositionListResponse,
+    PositionFormData,
+    PositionDetailResponse,
+    Position,
+    PositionValidationErrors
 } from '@/types/administration';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -567,5 +573,133 @@ export class roleService {
     // Toggle role status (if needed for active/inactive functionality)
     static async toggleRoleStatus(roleId: string): Promise<{ status: number }> {
         return await apiPut(`${API_BASE_URL}/roles/${roleId}/toggle-status`, {});
+    }
+}
+
+// ====================================
+// POSITION SERVICE
+// ====================================
+
+export class positionService {
+    static async getPositions(params: PositionListRequest): Promise<PositionListResponse> {
+        // Filter out empty parameters to avoid sending unnecessary data
+        const filteredParams: Record<string, unknown> = {
+            page: params.page,
+            limit: params.limit
+        };
+
+        // Only include non-empty optional parameters
+        if (params.search && params.search.trim() !== '') {
+            filteredParams.search = params.search.trim();
+        }
+        
+        if (params.sort_by && params.sort_by.trim() !== '') {
+            filteredParams.sort_by = params.sort_by;
+        }
+        
+        if (params.sort_order && params.sort_order.trim() !== '') {
+            filteredParams.sort_order = params.sort_order;
+        }
+        
+        if (params.department_id && params.department_id.trim() !== '') {
+            filteredParams.department_id = params.department_id.trim();
+        }
+        
+        if (params.department_name && params.department_name.trim() !== '') {
+            filteredParams.department_name = params.department_name.trim();
+        }
+        
+        if (params.title_name && params.title_name.trim() !== '') {
+            filteredParams.title_name = params.title_name.trim();
+        }
+
+        const response = await apiPost(`${API_BASE_URL}/titles/get`, filteredParams);
+        return response.data as PositionListResponse;
+    }
+
+    static async getPositionById(id: string): Promise<PositionDetailResponse> {
+        return await apiGet(`${API_BASE_URL}/titles/${id}`) as unknown as PositionDetailResponse;
+    }
+
+    static async submitPositionForm(
+        formData: PositionFormData, 
+        editingPosition: Position | null = null
+    ): Promise<{
+        success: boolean;
+        errors?: PositionValidationErrors;
+        message: string;
+    }> {
+        try {
+            // Basic validation
+            const errors: PositionValidationErrors = {};
+            
+            if (!formData.title_name || formData.title_name.trim() === '') {
+                errors.title_name = 'Position name is required';
+            }
+            
+            if (!formData.department_id || formData.department_id.trim() === '') {
+                errors.department_id = 'Department is required';
+            }
+
+            if (Object.keys(errors).length > 0) {
+                return {
+                    success: false,
+                    errors,
+                    message: 'Please fix the validation errors'
+                };
+            }
+
+            // Clean form data
+            const cleanFormData = {
+                title_name: formData.title_name.trim(),
+                department_id: formData.department_id.trim()
+            };
+
+            // Submit to API
+            let response: { status: number };
+            
+            if (editingPosition) {
+                response = await this.updatePosition(editingPosition.title_id, cleanFormData);
+            } else {
+                response = await this.createPosition(cleanFormData);
+            }
+
+            if (response.status === 200 || response.status === 201) {
+                return {
+                    success: true,
+                    message: editingPosition ? 'Position updated successfully' : 'Position created successfully'
+                };
+            } else {
+                return {
+                    success: false,
+                    errors: { general: 'Failed to save position. Please try again.' },
+                    message: 'Failed to save position'
+                };
+            }
+        } catch (error) {
+            console.error('Error in submitPositionForm:', error);
+            return {
+                success: false,
+                errors: { general: 'An unexpected error occurred. Please try again.' },
+                message: 'An unexpected error occurred'
+            };
+        }
+    }
+
+    static async createPosition(data: PositionFormData): Promise<{ status: number }> {
+        return await apiPost(`${API_BASE_URL}/titles/create`, data as unknown as Record<string, unknown>);
+    }
+
+    static async updatePosition(id: string, data: PositionFormData): Promise<{ status: number }> {
+        return await apiPut(`${API_BASE_URL}/titles/${id}`, data as unknown as Record<string, unknown>);
+    }
+
+    static async deletePosition(id: string): Promise<{ status: number }> {
+        return await apiDelete(`${API_BASE_URL}/titles/${id}`);
+    }
+
+    // Toggle position status (if needed for active/inactive functionality)
+    static async togglePositionStatus(positionId: string): Promise<{ status: number }> {
+        return await apiPut(`${API_BASE_URL}/titles/${positionId}/toggle-status`, {});
     }
 }

@@ -243,24 +243,6 @@ export default function ManageRole() {
                         </div>
                     )}
 
-                    {/* Results Summary */}
-                    <div className="mb-4 flex justify-between items-center">
-                        <div className="text-sm text-gray-600">
-                            {isLoading ? (
-                                <span>Loading...</span>
-                            ) : pagination ? (
-                                <span>
-                                    Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to{' '}
-                                    {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of{' '}
-                                    {pagination.total} results
-                                    {activeFiltersCount > 0 && ' (filtered)'}
-                                </span>
-                            ) : (
-                                <span>No results found</span>
-                            )}
-                        </div>
-                    </div>
-
                     <CustomDataTable
                         columns={columns}
                         data={roles}

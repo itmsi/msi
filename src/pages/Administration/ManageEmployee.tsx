@@ -322,22 +322,6 @@ export default function ManageEmployee() {
                                     )}
                                 </div>
 
-                                {/* Position */}
-                                <div>
-                                    <Label htmlFor="title_id">Position ID *</Label>
-                                    <Input
-                                        id="title_id"
-                                        type="text"
-                                        value={formData.title_id}
-                                        onChange={(e) => handleInputChange('title_id', e.target.value)}
-                                        placeholder="Enter position"
-                                        error={!!validationErrors.title_id}
-                                    />
-                                    {validationErrors.title_id && (
-                                        <span className="text-sm text-red-500">{validationErrors.title_id}</span>
-                                    )}
-                                </div>
-
                                 {/* Department */}
                                 <div>
                                     <Label htmlFor="department_id">Department *</Label>
