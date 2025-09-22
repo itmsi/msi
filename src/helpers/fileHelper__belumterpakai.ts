@@ -12,7 +12,7 @@ export const downloadFile = async (
 ): Promise<boolean> => {
     try {
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
         
         if (!token) {
             toast.error('Authentication required');
@@ -74,7 +74,7 @@ export const viewFile = (
 ): boolean => {
     try {
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
         
         if (!token) {
             toast.error('Authentication required');
@@ -115,7 +115,7 @@ export const downloadMultipleFiles = async (
 ): Promise<boolean> => {
     try {
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
         
         if (!token) {
             toast.error('Authentication required');
@@ -191,7 +191,7 @@ export const checkFileExists = async (
 ): Promise<boolean> => {
     try {
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
         
         if (!token) {
             return false;

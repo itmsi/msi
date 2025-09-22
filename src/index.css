@@ -328,7 +328,7 @@
 }
 
 /* third-party libraries CSS */
-.apexcharts-legend-text {
+/* .apexcharts-legend-text {
   @apply !text-gray-700 dark:!text-gray-400;
 }
 
@@ -380,7 +380,7 @@
 
 #chartSixteen .apexcharts-legend {
   @apply !p-0 !pl-6;
-}
+} */
 
 .jvectormap-container {
   @apply !bg-gray-50 dark:!bg-gray-900;
@@ -808,4 +808,43 @@ span.flatpickr-weekday,
 
 .bg-aside {
   background-color: rgb(223, 232, 242);
+}
+.font-primary {
+  font-family: var(--font-primary);
+}
+.font-secondary {
+  font-family: var(--font-secondary);
+}
+.font-primary-bold {
+  font-family: var(--font-main-bold);
+  font-weight: normal;
+}
+p {
+  font-family: var(--font-secondary);
+}
+
+/* Custom DataTable header centering */
+[data-tag="allowRowEvents"] th[data-column-id="1"],
+[data-tag="allowRowEvents"] th[data-column-id]:has([data-center="true"]),
+[data-tag="allowRowEvents"] div[data-center="true"] {
+  text-align: center !important;
+}
+
+/* React Data Table Component center alignment */
+.rdt_TableCol[data-center="true"],
+.rdt_TableCell[data-center="true"] {
+  text-align: center !important;
+  justify-content: center !important;
+}
+
+/* Fallback for center columns */
+.table-center-column {
+  text-align: center !important;
+  justify-content: center !important;
+}
+
+.table-center-column > div {
+  justify-content: center !important;
+  display: flex !important;
+  align-items: center !important;
 }

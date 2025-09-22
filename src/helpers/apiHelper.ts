@@ -12,7 +12,7 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         // Try to get token from new auth system first, then fallback to legacy
-        const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
 
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -47,7 +47,6 @@ api.interceptors.response.use(
                 // localStorage.removeItem('auth_token');
                 // localStorage.removeItem('isLoggedIn');
                 // // Also clear legacy items for backward compatibility
-                // localStorage.removeItem('token');
                 // localStorage.removeItem('keepLogin');
                 // localStorage.removeItem('profile');
                 // window.location.href = '/';
@@ -194,17 +193,38 @@ const handleApiError = (error: AxiosError<ApiErrorResponse>): ApiError => {
     if (error.response) {
         // Server responded with error status
         const errorData = error.response.data;
+        
+        // Handle logout when success is false
+        if (errorData?.success === false) {
+            // // Clear all auth data from localStorage
+            // localStorage.removeItem('auth_token');
+            // localStorage.removeItem('auth_user');
+            // localStorage.removeItem('auth_permissions');
+            // localStorage.removeItem('auth_session');
+            // localStorage.removeItem('auth_oauth');
+            // localStorage.removeItem('isLoggedIn');
+            // // Also clear legacy items for backward compatibility
+            // localStorage.removeItem('keepLogin');
+            // localStorage.removeItem('profile');
+            
+            // // Redirect to login page
+            // window.location.href = '/';
+        }
+        
         return {
             message: errorData?.message || errorData?.error || error.message,
             status: error.response.status,
         };
+        
     } else if (error.request) {
         // Request was made but no response received
+        console.log({'api error request': error.request});
         return {
             message: 'Network error - no response from server',
         };
     } else {
         // Something else happened
+        console.log({'api error message': error.message});
         return {
             message: error.message || 'An unexpected error occurred',
         };

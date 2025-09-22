@@ -67,3 +67,9 @@ export const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
 export const hasChanged = <T extends object>(oldData: T, newData: Partial<T>, keys: (keyof T)[]): boolean => {
     return keys.some((key) => oldData[key] !== newData[key]);
 };
+
+export const tableDateFormat = {
+    day: '2-digit' as const,
+    month: 'short' as const,
+    year: 'numeric' as const
+}

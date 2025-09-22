@@ -58,7 +58,7 @@ const navItems: NavItem[] = [
         name: "Forms",
         icon: <ListIcon />,
         allowedRoles: ['Forms'], // Kosongkan karena 'Forms' tidak ada di auth_menu
-        subItems: [{ name: "Form Elements", path: "/form-elements", pro: false, allowedRoles: ['Forms'] }],
+        subItems: [{ name: "Form Elements", path: "/form-elements", allowedRoles: ['Forms'] }],
     },
     {
         name: "Tables",
@@ -112,7 +112,6 @@ const othersItems: NavItem[] = [
     {
         icon: <UserIcon />,
         name: "Administration",
-        allowedRoles: ['Roles', 'Sign Up'], // Kosongkan karena tidak ada di auth_menu
         subItems: [
             {
                 name: "Employees",

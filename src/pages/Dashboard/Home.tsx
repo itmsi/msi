@@ -1,5 +1,4 @@
 import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
-import RecentOrders from "../../components/ecommerce/RecentOrders";
 import DemographicCard from "../../components/ecommerce/DemographicCard";
 import PageMeta from "@/components/common/PageMeta";
 
@@ -30,9 +29,6 @@ export default function Home() {
             <DemographicCard />
             </div>
 
-            <div className="col-span-12 xl:col-span-7">
-            <RecentOrders />
-            </div>
         </div>
         </>
     );

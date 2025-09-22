@@ -12,6 +12,11 @@ const Avatars = lazy(() => import('@/pages/UiElements/Avatars'));
 const Badges = lazy(() => import('@/pages/UiElements/Badges'));
 const Buttons = lazy(() => import('@/pages/UiElements/Buttons'));
 const UserProfiles = lazy(() => import('@/pages/UserProfiles'));
+const ManageMenu = lazy(() => import('@/pages/Administration/ManageMenu'));
+const ManageCompany = lazy(() => import('@/pages/Administration/ManageCompany'));
+const ManageDepartment = lazy(() => import('@/pages/Administration/ManageDepartment'));
+const ManageEmployee = lazy(() => import('@/pages/Administration/ManageEmployee'));
+const ManageRole = lazy(() => import('@/pages/Administration/ManageRole'));
 
 export type TAppRoute = {
     path: string;
@@ -131,7 +136,7 @@ export const routes: TAppRoute[] = [
         name: 'Employees',
         isProtected: true,
         roles: ['Employees'],
-        component: Alerts,
+        component: ManageEmployee,
         layout: AppLayout,
     },
     {
@@ -139,7 +144,7 @@ export const routes: TAppRoute[] = [
         name: 'Departments',
         isProtected: true,
         roles: ['Departments'],
-        component: Alerts,
+        component: ManageDepartment,
         layout: AppLayout,
     },
     {
@@ -147,7 +152,7 @@ export const routes: TAppRoute[] = [
         name: 'Companies',
         isProtected: true,
         roles: ['Companies'],
-        component: Alerts,
+        component: ManageCompany,
         layout: AppLayout,
     },
     {
@@ -155,7 +160,7 @@ export const routes: TAppRoute[] = [
         name: 'Roles',
         isProtected: true,
         roles: ['Roles'],
-        component: FormElements,
+        component: ManageRole,
         layout: AppLayout,
     },
     {
@@ -164,6 +169,14 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Users'],
         component: UserProfiles,
+        layout: AppLayout,
+    },
+    {
+        path: '/menu',
+        name: 'Menu',
+        isProtected: true,
+        roles: ['Menu'],
+        component: ManageMenu,
         layout: AppLayout,
     },
 ];

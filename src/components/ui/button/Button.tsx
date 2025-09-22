@@ -1,4 +1,6 @@
+import clsx from "clsx";
 import { ReactNode } from "react";
+import { twMerge } from "tailwind-merge";
 
 interface ButtonProps {
   children: ReactNode; // Button text or content
@@ -30,18 +32,23 @@ const Button: React.FC<ButtonProps> = ({
   // Variant Classes
   const variantClasses = {
     primary:
-      "bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300",
+      "bg-[#0253a5] text-white shadow-theme-xs hover:bg-[#003061] hover:shadow-md disabled:bg-brand-300",
     outline:
       "bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300",
   };
 
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-lg transition ${className} ${
-        sizeClasses[size]
-      } ${variantClasses[variant]} ${
-        disabled ? "cursor-not-allowed opacity-50" : ""
-      }`}
+      className={clsx(
+          twMerge(
+              `inline-flex items-center justify-center gap-2 rounded-lg transition ${
+                sizeClasses[size]
+              } ${variantClasses[variant]} ${
+                disabled ? "cursor-not-allowed opacity-50" : ""
+              }`,
+              className,
+          ),
+      )}
       onClick={onClick}
       disabled={disabled}
     >

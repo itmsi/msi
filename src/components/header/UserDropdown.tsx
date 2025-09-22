@@ -24,9 +24,11 @@ export default function UserDropdown() {
     const signOut = async () => {
         try {
             logout();
-            navigate("/", { replace: true });
+            // Redirect to login page
+            window.location.href = '/';
         } catch (error) {
-            navigate("/", { replace: true });
+            // Redirect to login page
+            window.location.href = '/';
         }
     }
 

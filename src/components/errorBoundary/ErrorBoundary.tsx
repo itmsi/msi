@@ -28,8 +28,10 @@ class ErrorBoundary extends Component<Props, State> {
                             <div>
                                 <img src="/images/maintenance.png" alt="Maintenance" />
                             </div>
-                            <p className="text-Base my-6 p-2 text-slate-500 md:text-base">
-                                We're sorry for the inconvenience. Our team is currently working on essential system maintenance to improve our service. We'll be back online as soon as possible. We appreciate your patience
+                            <p className="text-center my-6 p-2 text-slate-500 md:text-base">
+                                We're sorry for the inconvenience.<br />
+                                Our team is currently working on essential system maintenance to improve our service. <br />
+                                We'll be back online as soon as possible. We appreciate your patience
                             </p>
                         </div>
                     </div>

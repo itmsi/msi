@@ -118,6 +118,8 @@ export const useAuth = () => {
      */
     const logout = useCallback(async () => {
         try {
+            console.log('🔒 Logging out user...');
+            
             AuthService.clearAuthData();
             setAuthState(initialAuthState);
             setFormErrors({});
