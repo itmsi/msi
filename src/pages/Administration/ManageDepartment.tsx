@@ -306,7 +306,7 @@ export default function ManageDepartment() {
                         </div>
 
                         {/* Modal Actions */}
-                        <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+                        <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                             <Button
                                 variant="outline"
                                 onClick={handleCloseModal}

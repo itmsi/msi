@@ -58,7 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
 
     const contentClasses = isFullscreen
         ? "w-full h-full"
-        : "relative w-full rounded-3xl bg-white dark:bg-gray-900";
+        : "relative w-full rounded-3xl bg-white";
 
     // Animation variants for the backdrop
     const backdropVariants = {
@@ -127,7 +127,7 @@ export const Modal: React.FC<ModalProps> = ({
                         {showCloseButton && (
                             <motion.button
                                 onClick={onClose}
-                                className="absolute right-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white sm:right-6 sm:top-6 sm:h-11 sm:w-11"
+                                className="absolute right-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700:bg-gray-700:text-white sm:right-6 sm:top-6 sm:h-11 sm:w-11"
                                 initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
                                 animate={{ opacity: 1, rotate: 0, scale: 1 }}
                                 exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
