@@ -5,7 +5,7 @@ pipeline {
     agent any
     
     tools {
-        nodejs 'NodeJS-18'  // Menggunakan Node.js versi 18 yang lebih stabil
+        nodejs 'NodeJS'  // Menggunakan tool NodeJS versi 22.17.0 yang sudah dikonfigurasi
     }
     
     stages {
