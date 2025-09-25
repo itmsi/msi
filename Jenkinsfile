@@ -66,22 +66,23 @@ pipeline {
                     // Trigger deployment webhook ke Motorsights
                     sh """
                         echo '📤 Triggering deployment webhook...'
+                        TIMESTAMP=\$(date -u +%Y-%m-%dT%H:%M:%SZ)
                         curl --location 'https://webhook-bangjeje.motorsights.com/webhook/deploy/sistem-b' \\
                             --header 'Content-Type: application/json' \\
-                            --data '{
-                                "ref": "refs/heads/develop",
-                                "commits": [
+                            --data "{
+                                \\"ref\\": \\"refs/heads/develop\\",
+                                \\"commits\\": [
                                     {
-                                        "id": "${env.GIT_COMMIT}",
-                                        "message": "Deploy from Jenkins Build #${env.BUILD_NUMBER}",
-                                        "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                                        \\"id\\": \\"${env.GIT_COMMIT}\\",
+                                        \\"message\\": \\"Deploy from Jenkins Build #${env.BUILD_NUMBER}\\",
+                                        \\"timestamp\\": \\"\$TIMESTAMP\\"
                                     }
                                 ],
-                                "repository": {
-                                    "name": "msi-fe-apps",
-                                    "full_name": "itmsi/msi"
+                                \\"repository\\": {
+                                    \\"name\\": \\"msi-fe-apps\\",
+                                    \\"full_name\\": \\"itmsi/msi\\"
                                 }
-                            }'
+                            }"
                         echo '✅ Webhook sent successfully!'
                     """
                 }
