@@ -44,6 +44,7 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
 
     const [currentDashboard, setCurrentDashboard] = useState<PowerBIDashboard | null>(null);
     const [loadingDashboard, setLoadingDashboard] = useState(false);
+    const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
 
     const isEditMode = mode === 'edit';
     const pageTitle = isEditMode ? 'Edit Dashboard' : 'Create New Dashboard';
@@ -189,15 +190,27 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
             </div>
         );
     }
+    
+    // Handle window resize for responsive table
+    // useEffect(() => {
+    //     const handleResize = () => {
+    //         setIsMobile(window.innerWidth < 768);
+    //     };
+
+    //     window.addEventListener('resize', handleResize);
+    //     return () => window.removeEventListener('resize', handleResize);
+    // }, []);
 
     const columns: TableColumn<Employee>[] = [
         {
             name: 'Employee Name',
             selector: row => row.employee_name,
+            grow: 2,
         },
         {
             name: 'Position',
             selector: row => row.title_name || 'N/A',
+            omit: isMobile && true
         },
         {
             name: 'Company',
@@ -232,8 +245,8 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
                 </div>
 
                 {/* Content */}
-                <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="bg-white rounded-2xl shadow-sm grid grid-cols-3 gap-2 md:gap-2">
-                    <div className="md:col-span-1 p-8 relative">
+                <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="bg-white rounded-2xl shadow-sm grid lg:grid-cols-3 gap-2 md:gap-2">
+                    <div className="lg:col-span-1 p-8 relative">
                         <div className="space-y-8">
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Basic Information</h2>
                             <div>
@@ -337,44 +350,47 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
                                 </div>
                             </div>
                         </div>
-                        <div className="absolute top-7 bottom-7 right-0 border-r border-gray-300 mx-3"></div>
+                        <div className="absolute top-7 bottom-7 right-0 border-r border-gray-300 mx-3 hidden lg:block"></div>
                     </div>
-                    <div className="md:col-span-2 p-8 ps-0 relative">
-                        <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">User Access</h2>
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Add Employee
-                            </label>
-                            <CustomSelect
-                                value={null}
-                                onChange={handleAddEmployee}
-                                options={getAvailableEmployees()}
-                                className="w-full"
-                                placeholder={getAvailableEmployees().length > 0 ? "Select Employee" : "No employees available"}
-                                isClearable={true}
-                                isDisabled={getAvailableEmployees().length === 0}
-                            />
-                        </div>
-                        <div>
-                            <h3 className="text-md font-medium text-gray-900 mb-4">Employees with Access ({formData.employeeHasPowerBi.length})</h3>
-                            {formData.employeeHasPowerBi.length > 0 ? (
-                                <div className="font-secondary">
-                                <CustomDataTable
-                                    columns={columns}
-                                    data={getEmployeesWithAccess()}
-                                    loading={employeeLoading}
-                                    pagination={false}
+                    <div className="lg:col-span-2 p-8 lg:ps-0 relative">
+                        <div className="space-y-8">
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">User Access</h2>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Add Employee
+                                </label>
+                                <CustomSelect
+                                    value={null}
+                                    onChange={handleAddEmployee}
+                                    options={getAvailableEmployees()}
+                                    className="w-full"
+                                    placeholder={getAvailableEmployees().length > 0 ? "Select Employee" : "No employees available"}
+                                    isClearable={true}
+                                    isDisabled={getAvailableEmployees().length === 0}
                                 />
-                                </div>
-                            ) : (
-                                <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                                    <div className="text-gray-400 mb-2">
-                                        <MdAdd size={48} className="mx-auto mb-2" />
+                            </div>
+                            <div>
+                                <h3 className="text-md font-medium text-gray-900 mb-4">Employees with Access ({formData.employeeHasPowerBi.length})</h3>
+                                {formData.employeeHasPowerBi.length > 0 ? (
+                                    <div className="font-secondary">
+                                    <CustomDataTable
+                                        columns={columns}
+                                        data={getEmployeesWithAccess()}
+                                        loading={employeeLoading}
+                                        pagination={false}
+                                        
+                                    />
                                     </div>
-                                    <p className="text-gray-500 font-medium">No employees with access</p>
-                                    <p className="text-gray-400 text-sm">Add employees from the dropdown above to grant dashboard access</p>
-                                </div>
-                            )}
+                                ) : (
+                                    <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                                        <div className="text-gray-400 mb-2">
+                                            <MdAdd size={48} className="mx-auto mb-2" />
+                                        </div>
+                                        <p className="text-gray-500 font-medium">No employees with access</p>
+                                        <p className="text-gray-400 text-sm">Add employees from the dropdown above to grant dashboard access</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 

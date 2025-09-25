@@ -62,47 +62,47 @@ const DashboardPowerBI = () => {
             switch (category) {
                 case 'Sales Report':
                     return {
-                        icon: <LuChartNoAxesCombined className={`${text ? 'h-3 w-3' : 'h-6 w-6'}`} />,
+                        icon: <LuChartNoAxesCombined className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-blue-100 text-blue-800 border border-blue-200'
                     };
                 case 'Customer Analytics':
                     return {
-                        icon: <FaMagnifyingGlassChart className={`${text ? 'h-3 w-3' : 'h-6 w-6'}`} />,
+                        icon: <FaMagnifyingGlassChart className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-green-100 text-green-800 border border-green-200'
                     };
                 case 'Financial Report':
                     return {
-                        icon: <MdAccountBalance className={`${text ? 'h-3 w-3' : 'h-6 w-6'}`} />,
+                        icon: <MdAccountBalance className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-purple-100 text-purple-800 border border-purple-200'
                     };
                 case 'HR Report':
                     return {
-                        icon: <MdPeople className={`${text ? 'h-3 w-3' : 'h-6 w-6'}`} />,
+                        icon: <MdPeople className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-orange-100 text-orange-800 border border-orange-200'
                     };
                 case 'Inventory Report':
                     return {
-                        icon: <MdInventory className={`${text ? 'h-3 w-3' : 'h-6 w-6'}`} />,
+                        icon: <MdInventory className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-indigo-100 text-indigo-800 border border-indigo-200'
                     };
                 case 'Quality Control':
                     return {
-                        icon: <MdVerified className={`${text ? 'h-3 w-3' : 'h-6 w-6'}`} />,
+                        icon: <MdVerified className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-teal-100 text-teal-800 border border-teal-200'
                     };
                 case 'Marketing Report':
                     return {
-                        icon: <HiSpeakerphone className={`${text ? 'h-3 w-3' : 'h-6 w-6'}`} />,
+                        icon: <HiSpeakerphone className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-pink-100 text-pink-800 border border-pink-200'
                     };
                 case 'Operations Report':
                     return {
-                        icon: <MdTrendingUp className={`${text ? 'h-3 w-3' : 'h-6 w-6'}`} />,
+                        icon: <MdTrendingUp className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-cyan-100 text-cyan-800 border border-cyan-200'
                     };
                 default:
                     return {
-                        icon: <MdBarChart className={`${text ? 'h-3 w-3' : 'h-6 w-6'}`} />,
+                        icon: <MdBarChart className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-gray-100 text-gray-800 border border-gray-200'
                     };
             }
@@ -124,25 +124,18 @@ const DashboardPowerBI = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * .1, duration: 0.1, ease: "easeOut" }}
-            className="bg-white rounded-lg shadow-sm break-inside-avoid mb-4 bg-gray-200 p-4 rounded-lg group hover:shadow-lg hover:bg-[#0253a5] hover:text-white transition duration-300 overflow-hidden"
+            className="bg-white rounded-lg shadow-sm break-inside-avoid mb-4 bg-gray-200 p-5 rounded-lg group hover:shadow-lg hover:bg-[#0253a5] hover:text-white transition duration-300 overflow-hidden"
         >
-            <div 
-                className="p-4"
-            >
+            <div>
                 {/* Header */}
                 <div className="flex items-start justify-between mb-3">
                     <div>
                         <h3 
-                            className="text-lg font-normal font-primary-bold text-gray-900 line-clamp-2 group-hover:text-white leading-tight mb-2 cursor-pointer" 
+                            className="text-md lg:text-sm font-normal font-primary-bold text-gray-900 group-hover:text-white leading-tight mb-2 cursor-pointer" 
                             onClick={() => handleOpenDashboard(dashboard.link)}
                         >
                             {dashboard.title}
                         </h3>
-                        <span 
-                            className='block text-xs text-gray-400 font-secondary group-hover:text-white'
-                        >
-                            {formatDate(dashboard.created_at)}
-                        </span>
                     </div>
                     <div 
                         className="flex gap-2 ml-2"
@@ -153,14 +146,13 @@ const DashboardPowerBI = () => {
                 
                 {/* Description */}
                 <p 
-                    className="text-sm text-gray-600 mb-4 line-clamp-2 group-hover:text-white"
+                    className="text-sm lg:text-xs text-gray-600 mb-4 group-hover:text-white"
                 >
                     {dashboard.description}
                 </p>
 
                 {/* Category Badge */}
-                <div
-                >
+                <div onClick={() => handleOpenDashboard(dashboard.link)} className='cursor-pointer'                >
                     <StatusBadge category={dashboard.category_name} />
                 </div>
             </div>
@@ -189,7 +181,7 @@ const DashboardPowerBI = () => {
 
             {/* Filters */}
             <div className="p-4 flex justify-center">
-                <div className="relative w-30/60">
+                <div className="relative lg:w-30/60 w-full">
                     <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                         <MdSearch />
                     </div>
@@ -204,11 +196,11 @@ const DashboardPowerBI = () => {
 
             {/* Category Tabs */}
             <div className="p-4 flex w-auto flex-wrap justify-center">
-                <div className="inline-flex gap-2 bg-gray-100 border border-gray-100 p-1 rounded-lg">
+                <div className="inline-flex overflow-x-auto gap-2 bg-gray-100 border border-gray-100 p-1 rounded-lg">
                     {categoryOptions.length > 0 && (
                     <button
                         onClick={() => handleCategoryChangeImmediate('')}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors transition duration-300 font-secondary ${
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors transition duration-300 font-secondary min-w-[180px] ${
                             activeTab === '' || filters.category_id === ''
                                 ? 'bg-white text-gray-800 font-medium' 
                                 : 'text-gray-400 hover:bg-gray-300'
@@ -221,7 +213,7 @@ const DashboardPowerBI = () => {
                         <button
                             key={option.value}
                             onClick={() => handleCategoryChangeImmediate(option.value)}
-                            className={`px-4 py-3 rounded-lg text-sm font-medium font-secondary transition-colors transition duration-300 ${
+                            className={`px-4 py-3 rounded-lg text-sm font-medium font-secondary transition-colors transition duration-300 min-w-[180px] ${
                                 activeTab === option.value || filters.category_id === option.value
                                     ? 'bg-white text-gray-800 font-medium' 
                                     : 'text-gray-400 hover:bg-gray-300'
@@ -257,7 +249,7 @@ const DashboardPowerBI = () => {
                 {!loading && (
                     <>
                         <motion.div 
-                            className="columns-2 md:columns-3 lg:columns-5 gap-4 pt-4"
+                            className="columns-2 md:columns-3 lg:columns-4 gap-4 pt-4"
                             // key="list"
                             // initial="hidden"
                             // animate="visible"
