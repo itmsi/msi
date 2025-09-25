@@ -30,7 +30,6 @@ const Client = ({ children, isProtected, isUnProtected, roles }: ClientProps) =>
         }
 
         // Additional check: if not authenticated but we have user data,
-        // it might be a temporary state during refresh
         if (!authState.isAuthenticated && authState.user) {
             return;
         }
@@ -63,7 +62,7 @@ const Client = ({ children, isProtected, isUnProtected, roles }: ClientProps) =>
             // User must have both menu access AND role access
             if (!hasMenuPermission || !hasRoleAccess) {
                 isAllowed = false;
-                navigate('/403', { replace: true });
+                // navigate('/403', { replace: true });
             }
         }
 

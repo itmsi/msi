@@ -455,6 +455,7 @@ export interface Employee {
     deleted_by: string | null;
     is_delete: boolean;
     gender_id: string | null;
+    company_id: string;
     department_id: string;
     employee_mobile: string | null;
     employee_office_number: string | null;
@@ -476,6 +477,7 @@ export interface EmployeeFormData {
     employee_name: string;
     employee_email?: string;
     title_id: string;
+    company_id: string;
     department_id: string;
     employee_mobile?: string | null;
     employee_office_number?: string | null;
@@ -491,6 +493,7 @@ export interface EmployeeValidationErrors {
     employee_email?: string;
     title_id?: string;
     department_id?: string;
+    company_id?: string;
     employee_mobile?: string;
     employee_office_number?: string;
     employee_address?: string;

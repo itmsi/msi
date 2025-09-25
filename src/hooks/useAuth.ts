@@ -118,13 +118,11 @@ export const useAuth = () => {
      */
     const logout = useCallback(async () => {
         try {
-            console.log('🔒 Logging out user...');
-            
             AuthService.clearAuthData();
             setAuthState(initialAuthState);
             setFormErrors({});
         } catch (error) {
-            console.error('❌ useAuth: Error during logout:', error);
+            console.error('useAuth: Error during logout:', error);
             throw error;
         }
     }, []);

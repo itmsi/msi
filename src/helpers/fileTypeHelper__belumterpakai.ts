@@ -191,7 +191,7 @@ export const getFileActions = (filename: string) => {
         return { view: 'Open', download: 'Download' };
     }
 };
-export const isRoleUser = (): string => {
+export const isUser = (): string => {
     const profileString = localStorage.getItem("auth_user");
     const profile = profileString ? JSON.parse(profileString) : null;
     const roleCode = profile?.roles?.roleCode;

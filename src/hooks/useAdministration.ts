@@ -1228,6 +1228,36 @@ export const useDepartment = () => {
         };
     }, []);
 
+    // Fetch departments by company (for dropdown filtering)
+    const fetchDepartmentsByCompany = useCallback(async (companyId: string) => {
+        try {
+            if (!companyId) {
+                setDepartments([]);
+                return;
+            }
+
+            const requestParams: DepartmentListRequest = {
+                page: 1,
+                limit: 100,
+                sort_by: 'department_name',
+                sort_order: 'asc',
+                company_id: companyId
+            };
+
+            const response = await departmentService.getDepartments(requestParams);
+
+            if (response.success) {
+                setDepartments(response.data.data || []);
+            } else {
+                console.error('Failed to fetch departments by company');
+                setDepartments([]);
+            }
+        } catch (error) {
+            console.error('Error fetching departments by company:', error);
+            setDepartments([]);
+        }
+    }, []);
+
     return {
         // State
         loading,
@@ -1248,6 +1278,7 @@ export const useDepartment = () => {
         handleCloseModal,
         handlePageChange,
         fetchDepartments,
+        fetchDepartmentsByCompany, // New function for dropdown filtering
         
         // Filter actions
         handleFilterChange,
@@ -1257,7 +1288,7 @@ export const useDepartment = () => {
 };
 
 // Employee Hook
-export const useEmployees = () => {
+export const useEmployees = (autoInit: boolean = true) => {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [employee, setEmployee] = useState<Employee | null>(null);
     const [pagination, setPagination] = useState<EmployeePagination>({
@@ -1271,7 +1302,9 @@ export const useEmployees = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState<EmployeeFormData>({
         employee_name: "",
+        employee_email: "",
         title_id: "",
+        company_id: "",
         department_id: ""
     });
     const [filters, setFilters] = useState<EmployeeFilters>({
@@ -1322,10 +1355,10 @@ export const useEmployees = () => {
         }, 300);
     }, []);
 
-    const fetchEmployees = useCallback(() => {
+    const fetchEmployees = useCallback((page?: number, limit?: number) => {
         const params: EmployeeListRequest = {
-            page: pagination.current_page,
-            limit: pagination.per_page,
+            page: page || pagination.current_page,
+            limit: limit || pagination.per_page,
             search: filters.search,
             sort_by: filters.sort_by,
             sort_order: filters.sort_order,
@@ -1359,7 +1392,9 @@ export const useEmployees = () => {
             setShowForm(false);
             setFormData({
                 employee_name: "",
+                employee_email: "",
                 title_id: "",
+                company_id: "",
                 department_id: ""
             });
             fetchEmployees();
@@ -1384,7 +1419,9 @@ export const useEmployees = () => {
             setEditingEmployee(null);
             setFormData({
                 employee_name: "",
+                employee_email: "",
                 title_id: "",
+                company_id: "",
                 department_id: ""
             });
             fetchEmployees();
@@ -1434,6 +1471,8 @@ export const useEmployees = () => {
         setFormData({
             employee_name: employee.employee_name,
             title_id: employee.title_id.toString(),
+            employee_email: employee.employee_email,
+            company_id: employee.company_id.toString(),
             department_id: employee.department_id.toString()
         });
         setShowForm(true);
@@ -1538,7 +1577,9 @@ export const useEmployees = () => {
         setFormData({
             employee_name: "",
             title_id: "",
-            department_id: ""
+            department_id: "",
+            company_id: "",
+            employee_email: ""
         });
         setValidationErrors({});
     };
@@ -1549,14 +1590,18 @@ export const useEmployees = () => {
         setFormData({
             employee_name: "",
             title_id: "",
-            department_id: ""
+            department_id: "",
+            company_id: "",
+            employee_email: ""
         });
         setValidationErrors({});
     };
 
     useEffect(() => {
-        fetchEmployees();
-    }, [fetchEmployees]);
+        if (autoInit) {
+            fetchEmployees();
+        }
+    }, [fetchEmployees, autoInit]);
 
     useEffect(() => {
         return () => {
@@ -2139,10 +2184,10 @@ export const usePosition = () => {
         }, 300);
     }, []);
 
-    const fetchPositions = useCallback(() => {
+    const fetchPositions = useCallback((page?: number, limit?: number) => {
         const params: PositionListRequest = {
-            page: pagination?.current_page || 1,
-            limit: pagination?.per_page || 10,
+            page: page || pagination?.current_page || 1,
+            limit: limit || pagination?.per_page || 10,
             search: filters.search,
             sort_by: filters.sort_by,
             sort_order: filters.sort_order,
@@ -2153,6 +2198,35 @@ export const usePosition = () => {
         
         debouncedFetch(params);
     }, [debouncedFetch, pagination?.current_page, pagination?.per_page, filters]);
+
+    // New function to fetch positions by department_id for dropdown
+    const fetchPositionsByDepartment = useCallback(async (departmentId: string) => {
+        if (!departmentId) {
+            setPositions([]); // Clear positions if no department selected
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            const params: PositionListRequest = {
+                page: 1,
+                limit: 100, // Get more positions for dropdown
+                department_id: departmentId
+            };
+            const response = await positionService.getPositions(params);
+            if (response.success) {
+                setPositions(response.data.data || []);
+            } else {
+                console.error('Failed to fetch positions by department');
+                setPositions([]);
+            }
+        } catch (error) {
+            console.error('Error fetching positions by department:', error);
+            setPositions([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
     const getPositionById = async (id: string) => {
         setIsLoading(true);
@@ -2409,6 +2483,7 @@ export const usePosition = () => {
         // Actions
         setFormData,
         fetchPositions,
+        fetchPositionsByDepartment,
         getPositionById,
         createPosition,
         updatePosition,

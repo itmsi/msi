@@ -1,5 +1,5 @@
 import Button from "@/components/ui/button/Button";
-import { useEmployees, useCompany, useDepartment } from "@/hooks/useAdministration";
+import { useEmployees, useDepartment, usePosition, useCompany } from "@/hooks/useAdministration";
 import { MdEdit, MdDeleteOutline, MdAdd, MdSearch } from "react-icons/md";
 import { TableColumn } from "react-data-table-component";
 import CustomDataTable from "@/components/ui/table/CustomDataTable";
@@ -10,8 +10,7 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import { Employee } from "@/types/administration";
 import { useEffect, useState } from "react";
-import { createActionsColumn, createDateColumn, createSerialNumberColumn } from "@/components/ui/table";
-import { tableDateFormat } from "@/helpers/generalHelper";
+import { createActionsColumn, createSerialNumberColumn } from "@/components/ui/table";
 
 export default function ManageEmployee() {
     const {
@@ -49,28 +48,52 @@ export default function ManageEmployee() {
         fetchCompanies
     } = useCompany();
 
-    // Department hook for dropdown options  
+    // Department hook for dropdown options
     const {
         departments,
-        fetchDepartments
+        fetchDepartmentsByCompany
     } = useDepartment();
 
-    // State for dropdown options
-    const [companyOptions, setCompanyOptions] = useState<Array<{value: string, label: string}>>([]);
-    const [departmentOptions, setDepartmentOptions] = useState<Array<{value: string, label: string}>>([]);
+    // Position hook for dropdown options
+    const {
+        positions,
+        fetchPositionsByDepartment
+    } = usePosition();
 
-    // Load companies and departments when modal opens
+    // State for dropdown options
+    const [departmentOptions, setDepartmentOptions] = useState<Array<{value: string, label: string}>>([]);
+    const [positionOptions, setPositionOptions] = useState<Array<{value: string, label: string}>>([]);
+    const [companyOptions, setCompanyOptions] = useState<Array<{value: string, label: string}>>([]);
+
+    // Load companies when modal opens (for both create and update)
     useEffect(() => {
         if (showForm) {
             fetchCompanies(1, 100); // Fetch first 100 companies for dropdown
-            fetchDepartments(1, 100); // Fetch first 100 departments for dropdown
         }
-    }, [showForm, fetchCompanies, fetchDepartments]);
+    }, [showForm, fetchCompanies]);
+
+    // Fetch departments when company is selected
+    useEffect(() => {
+        if (formData.company_id && showForm) {
+            fetchDepartmentsByCompany(formData.company_id);
+        } else {
+            // Clear departments if no company selected
+            setDepartmentOptions([]);
+        }
+    }, [formData.company_id, showForm, fetchDepartmentsByCompany]);
+
+    // Fetch positions when department is selected
+    useEffect(() => {
+        if (formData.department_id && showForm) {
+            fetchPositionsByDepartment(formData.department_id);
+        } else {
+            setPositionOptions([]);
+        }
+    }, [formData.department_id, showForm, fetchPositionsByDepartment]);
 
     // Update company options when companies data changes
     useEffect(() => {
         const options = [
-            { value: '', label: 'Select Company' },
             ...companies.map(company => ({
                 value: company.company_id.toString(),
                 label: company.company_name
@@ -82,7 +105,6 @@ export default function ManageEmployee() {
     // Update department options when departments data changes
     useEffect(() => {
         const options = [
-            { value: '', label: 'Select Department' },
             ...departments.map(dept => ({
                 value: dept.department_id.toString(),
                 label: dept.department_name
@@ -91,12 +113,50 @@ export default function ManageEmployee() {
         setDepartmentOptions(options);
     }, [departments]);
 
+    // Update position options when positions data changes
+    useEffect(() => {
+        const options = [
+            ...positions.map(position => ({
+                value: position.title_id.toString(),
+                label: position.title_name
+            }))
+        ];
+        setPositionOptions(options);
+    }, [positions]);
+
+    // Reset department and position options when modal is closed
+    useEffect(() => {
+        if (!showForm) {
+            setDepartmentOptions([]);
+            setPositionOptions([]);
+        }
+    }, [showForm]);
+
     // Form input handlers
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({
             ...prev,
             [field]: value
         }));
+
+        // Clear department and position when company changes
+        if (field === 'company_id') {
+            setFormData(prev => ({
+                ...prev,
+                [field]: value,
+                department_id: '', // Clear department selection
+                title_id: '' // Clear position selection
+            }));
+        }
+
+        // Clear position when department changes
+        if (field === 'department_id') {
+            setFormData(prev => ({
+                ...prev,
+                [field]: value,
+                title_id: '' // Clear position selection
+            }));
+        }
     };
 
     // Form submission
@@ -131,11 +191,10 @@ export default function ManageEmployee() {
             name: 'Company',
             selector: row => row.company_name || 'N/A',
         },
-        createDateColumn(
-            'Created', 
-            'created_at', 
-            tableDateFormat
-        ),
+        {
+            name: 'Email',
+            selector: row => row.employee_email || 'N/A',
+        },
         createActionsColumn([
             {
                 icon: MdEdit,
@@ -163,11 +222,6 @@ export default function ManageEmployee() {
         { value: 'asc', label: 'Ascending' },
         { value: 'desc', label: 'Descending' }
     ];
-
-    // Active filters count
-    const activeFiltersCount = Object.values(filters).filter(value => 
-        value !== '' && value !== 'employee_name' && value !== 'asc'
-    ).length;
 
     return (
         <>
@@ -322,6 +376,37 @@ export default function ManageEmployee() {
                                     )}
                                 </div>
 
+                                <div>
+                                    <Label htmlFor="employee_email">Employee email *</Label>
+                                    <Input
+                                        id="employee_email"
+                                        type="text"
+                                        value={formData.employee_email}
+                                        onChange={(e) => handleInputChange('employee_email', e.target.value)}
+                                        placeholder="Enter employee email"
+                                        error={!!validationErrors.employee_email}
+                                    />
+                                    {validationErrors.employee_email && (
+                                        <span className="text-sm text-red-500">{validationErrors.employee_email}</span>
+                                    )}
+                                </div>
+
+                                {/* Company */}
+                                <div>
+                                    <Label htmlFor="company_id">Company *</Label>
+                                    <CustomSelect
+                                        options={companyOptions}
+                                        value={companyOptions.find(option => option.value === formData.company_id) || null}
+                                        onChange={(option) => handleInputChange('company_id', option?.value || '')}
+                                        placeholder="Select Company"
+                                        isClearable={false}
+                                        isSearchable={true}
+                                    />
+                                    {validationErrors.company_id && (
+                                        <span className="text-sm text-red-500">{validationErrors.company_id}</span>
+                                    )}
+                                </div>
+
                                 {/* Department */}
                                 <div>
                                     <Label htmlFor="department_id">Department *</Label>
@@ -329,14 +414,33 @@ export default function ManageEmployee() {
                                         options={departmentOptions}
                                         value={departmentOptions.find(option => option.value === formData.department_id) || null}
                                         onChange={(option) => handleInputChange('department_id', option?.value || '')}
-                                        placeholder="Select Department"
-                                        isClearable={true}
+                                        placeholder="Select Company first"
+                                        isClearable={false}
                                         isSearchable={true}
+                                        disabled={!formData.company_id}
                                     />
                                     {validationErrors.department_id && (
                                         <span className="text-sm text-red-500">{validationErrors.department_id}</span>
                                     )}
                                 </div>
+
+                                {/* Position */}
+                                <div>
+                                    <Label htmlFor="title_id">Position *</Label>
+                                    <CustomSelect
+                                        options={positionOptions}
+                                        value={positionOptions.find(option => option.value === formData.title_id) || null}
+                                        onChange={(option) => handleInputChange('title_id', option?.value || '')}
+                                        placeholder='Select Department first'
+                                        isClearable={false}
+                                        isSearchable={true}
+                                        disabled={!formData.department_id}
+                                    />
+                                    {validationErrors.title_id && (
+                                        <span className="text-sm text-red-500">{validationErrors.title_id}</span>
+                                    )}
+                                </div>
+                                
                             </div>
 
                             {/* Form Actions */}

@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { createActionsColumn, createDateColumn, createSerialNumberColumn } from "@/components/ui/table";
 import { tableDateFormat } from "@/helpers/generalHelper";
 
-export default function ManageRole() {
+export default function ManageUser() {
     const {
         // State
         roles,
@@ -276,6 +276,15 @@ export default function ManageRole() {
             >
                 <div className="p-6">
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* General Error Message */}
+                        {validationErrors.general && (
+                            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <p className="text-sm text-red-600">
+                                    {validationErrors.general}
+                                </p>
+                            </div>
+                        )}
+
                         {/* Role Name */}
                         <div>
                             <Label htmlFor="role_name">Role Name *</Label>

@@ -296,7 +296,7 @@ export default function ManageDepartment() {
                                 onChange={(option) => handleInputChange('company_id', option?.value || '')}
                                 placeholder="Select a company..."
                                 isLoading={loading}
-                                isClearable
+                                isClearable={false}
                             />
                             {validationErrors.company_id && (
                                 <p className="mt-1 text-sm text-red-600">

@@ -5,10 +5,6 @@
 
 Clone the repository using the following command:
 
-```bash
-git clone https://github.com/itmsi/msi.git
-```
-
 > Windows Users: place the repository near the root of your drive if you face issues while cloning.
 
 1. Install dependencies:

@@ -97,7 +97,7 @@ export const Modal: React.FC<ModalProps> = ({
         <AnimatePresence mode="wait">
             {isOpen && (
                 <motion.div 
-                    className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-99999"
+                    className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-999"
                     initial="hidden"
                     animate="visible"
                     exit="exit"

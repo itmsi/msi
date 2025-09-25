@@ -48,6 +48,10 @@ interface CustomDataTableProps<T> {
     // Density options
     dense?: boolean;
     
+    // Fixed header options
+    fixedHeader?: boolean;
+    fixedHeaderScrollHeight?: string;
+    
     className?: string;
 }
 
@@ -90,14 +94,19 @@ const CustomDataTable = <T extends Record<string, any>>({
     expandableRowsComponent,
     
     // Custom styling
-    headerBackground = 'rgba(2, 83, 165, 0.1)',
+    headerBackground = '#dfe8f2',
     hoverBackground = 'rgba(223, 232, 242, 0.3)',
     borderRadius = '8px',
     
     // Density
     dense = false,
     
+    // Fixed header
+    fixedHeader = false,
+    fixedHeaderScrollHeight = '400px',
+    
     className = '',
+    ...props 
 }: CustomDataTableProps<T>) => {
     
     // Default custom styles with customization options
@@ -151,7 +160,7 @@ const CustomDataTable = <T extends Record<string, any>>({
             style: {
                 fontSize: '14px',
                 minHeight: '56px',
-                backgroundColor: '#fafafa',
+                backgroundColor: '#ffffff',
                 borderTop: '1px solid #e5e7eb',
                 color: '#374151',
             },
@@ -255,6 +264,7 @@ const CustomDataTable = <T extends Record<string, any>>({
         <div className={`bg-white overflow-hidden ${className}`}>
             <StyleSheetManager shouldForwardProp={(prop) => !['center', 'allowOverflow'].includes(prop)}>
                 <DataTable
+                    {...props}
                     columns={columns}
                     data={data}
                     progressPending={loading}
@@ -294,6 +304,10 @@ const CustomDataTable = <T extends Record<string, any>>({
                     
                     // Density
                     dense={dense}
+                    
+                    // Fixed header
+                    fixedHeader={fixedHeader}
+                    fixedHeaderScrollHeight={fixedHeaderScrollHeight}
                 />
             </StyleSheetManager>
         </div>

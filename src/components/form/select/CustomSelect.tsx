@@ -26,7 +26,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
     onChange,
     ...props 
 }) => {
-    const handleChange = (newValue: SingleValue<Option> | MultiValue<Option>, actionMeta: ActionMeta<Option>) => {
+    const handleChange = (newValue: SingleValue<Option> | MultiValue<Option>, _actionMeta: ActionMeta<Option>) => {
         // actionMeta = untuk melakukan tracing jenis aksi yang terjadi
         if (onChange) {
             // Handle single select
@@ -239,6 +239,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             onChange={handleChange}
             isSearchable={isSearchable}
             isClearable={isClearable}
+            
         />
     );
 };

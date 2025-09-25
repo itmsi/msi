@@ -18,6 +18,12 @@ const ManageDepartment = lazy(() => import('@/pages/Administration/ManageDepartm
 const ManageEmployee = lazy(() => import('@/pages/Administration/ManageEmployee'));
 const ManageRole = lazy(() => import('@/pages/Administration/ManageRole'));
 const ManagePosition = lazy(() => import('@/pages/Administration/ManagePosition'));
+const DashboardPowerBI = lazy(() => import('@/pages/PowerBI/DashboardPowerBI'));
+const ManagePowerBi = lazy(() => import('@/pages/PowerBI/ManagePowerBi'));
+const CategoryPowerBi = lazy(() => import('@/pages/PowerBI/CategoryPowerBi'));
+const CreatePowerBi = lazy(() => import('@/pages/PowerBI/CreatePowerBi'));
+const EditPowerBi = lazy(() => import('@/pages/PowerBI/EditPowerBi'));
+// PowerBiForm is imported by Create and Edit components, no need to add here
 
 export type TAppRoute = {
     path: string;
@@ -32,12 +38,6 @@ export type TAppRoute = {
     subRoutes?: TAppRoute[];
 };
 
-// semua routes ini masih menerima semua role karena blm dapet dokumen terkait page mana aja yang bisa di akses sama role mana aja, kedepannya tinggal remove dan add saja apabila sudah ada klasifikasi nya.
-
-// const ROLES_PRODUCTION = import.meta.env.VITE_ALL_ROLE_CODE_PRODUCTION?.split(',') ?? [];
-// const ROLES_SUPERADMIN = import.meta.env.VITE_ROLE_CODE_SUPER_ADMIN?.split(',') ?? [];
-
-// const ROLES_PRODUCTION_ADMIN = [...ROLES_PRODUCTION, ...ROLES_SUPERADMIN];
 export const routes: TAppRoute[] = [
     {
         path: '/',
@@ -186,6 +186,46 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Positions'],
         component: ManagePosition,
+        layout: AppLayout,
+    },
+    {
+        path: '/power-bi/dashboard',
+        name: 'Dashboard Power BI',
+        isProtected: true,
+        roles: ['Dashboard Power BI'],
+        component: DashboardPowerBI,
+        layout: AppLayout,
+    },
+    {
+        path: '/power-bi/manage/create',
+        name: 'Manage Power BI',
+        isProtected: true,
+        roles: ['Manage Power BI'],
+        component: CreatePowerBi,
+        layout: AppLayout,
+    },
+    {
+        path: '/power-bi/manage/edit/:id',
+        name: 'Manage Power BI',
+        isProtected: true,
+        roles: ['Manage Power BI'],
+        component: EditPowerBi,
+        layout: AppLayout,
+    },
+    {
+        path: '/power-bi/manage',
+        name: 'Manage Power BI',
+        isProtected: true,
+        roles: ['Manage Power BI'],
+        component: ManagePowerBi,
+        layout: AppLayout,
+    },
+    {
+        path: '/power-bi/category',
+        name: 'Category Power BI',
+        isProtected: true,
+        roles: ['Category Power BI'],
+        component: CategoryPowerBi,
         layout: AppLayout,
     },
 ];

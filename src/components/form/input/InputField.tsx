@@ -1,5 +1,7 @@
+import clsx from "clsx";
 import type React from "react";
 import type { FC } from "react";
+import { twMerge } from "tailwind-merge";
 
 interface InputProps {
   type?: "text" | "number" | "email" | "password" | "date" | "time" | string;
@@ -64,7 +66,12 @@ const Input: FC<InputProps> = ({
         step={step}
         maxLength={maxLength}
         disabled={disabled}
-        className={inputClasses}
+        className={clsx(
+          twMerge(
+            inputClasses,
+            className,
+          ),
+      )}
         onKeyDown={onKeyPress}
       />
 

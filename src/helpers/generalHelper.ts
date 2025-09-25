@@ -73,3 +73,11 @@ export const tableDateFormat = {
     month: 'short' as const,
     year: 'numeric' as const
 }
+
+export const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+};

@@ -32,7 +32,6 @@ export default function ManageMenu() {
 
         // Actions
         handleInputChange,
-        handleSelectChange,
         handleAddMenu,
         handleEditMenu,
         handleDeleteMenu,
@@ -303,31 +302,6 @@ export default function ManageMenu() {
                             </p>
                         </div>
 
-                        <div>
-                            <Label htmlFor="menu_parent_id">Parent Menu</Label>
-                            <CustomSelect
-                                id="menu_parent_id"
-                                name="menu_parent_id"
-                                isClearable={false}
-                                value={formData.menu_parent_id ? { value: formData.menu_parent_id, label: menus.find(m => m.menu_id === formData.menu_parent_id)?.menu_name || '' } : null}
-                                onChange={handleSelectChange('menu_parent_id')}
-                                options={[
-                                    { value: '', label: 'No Parent' },
-                                    ...menus.filter(menu => !menu.is_delete).map(menu => ({
-                                        value: menu.menu_id,
-                                        label: menu.menu_name
-                                    }))
-                                ]}
-                                placeholder="Select parent menu"
-                                error={validationErrors.menu_parent_id}
-                                disabled={loading}
-                            />
-                            {validationErrors.menu_parent_id && (
-                                <p className="mt-1 text-sm text-red-600">
-                                    {validationErrors.menu_parent_id}
-                                </p>
-                            )}
-                        </div>
                     </div>
 
                     <div className="mt-8 flex justify-end space-x-3">

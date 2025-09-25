@@ -1,8 +1,36 @@
 import { Menu } from '@/types/auth';
 import { routes } from '@/Routes';
 
+/**
+ * Get route name from path, supports both static and dynamic routes
+ * @param path - The current URL path
+ * @returns Route name or empty string if not found
+ */
 export const getRouteNameFromPath = (path: string): string => {
-    const route = routes.find(route => route.path === path);
+    // First, try exact match for static routes (more efficient)
+    let route = routes.find(route => route.path === path);
+
+    // If no exact match found, try pattern matching for dynamic routes
+    if (!route) {
+        route = routes.find(routeItem => {
+            const routePattern = routeItem.path;
+            
+            // Skip if no parameters in route pattern
+            if (!routePattern.includes(':')) {
+                return false;
+            }
+            
+            // Convert route pattern to regex
+            const regexPattern = routePattern
+                .replace(/:[^/]+/g, '[^/]+')    // Replace :param with [^/]+
+                .replace(/\//g, '\\/');          // Escape forward slashes
+                
+            const regex = new RegExp(`^${regexPattern}$`);
+            
+            return regex.test(path);
+        });
+    }
+    
     return route?.name || '';
 };
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
+import { GrLineChart } from "react-icons/gr";
 
 // Assume these icons are imported from an icon library
 import {
@@ -40,7 +41,7 @@ const navItems: NavItem[] = [
         icon: <GridIcon />,
         name: "Dashboard",
         allowedRoles: ['Dashboard'],
-        subItems: [{ name: "Ecommerce", path: "/home", allowedRoles: ['Dashboard'], }],
+        subItems: [{ name: "Main", path: "/home", allowedRoles: ['Dashboard'], }],
     },
     {
         icon: <CalenderIcon />,
@@ -73,6 +74,16 @@ const navItems: NavItem[] = [
         subItems: [
             { name: "Blank Page", path: "/blank", allowedRoles: ['Pages', 'Blank Page', '404 Error'], },
             { name: "404 Error", path: "/error-404", allowedRoles: ['Pages', 'Blank Page', '404 Error'], },
+        ],
+    },
+    {
+        name: "Power BI",
+        icon: <GrLineChart />,
+        allowedRoles: ['Dashboard Power BI', 'Manage Power BI'],
+        subItems: [
+            { name: "Dashboard", path: "/power-bi/dashboard", allowedRoles: ['Dashboard Power BI'], },
+            { name: "Category", path: "/power-bi/category", allowedRoles: ['Category Power BI'], },
+            { name: "Manage", path: "/power-bi/manage", allowedRoles: ['Manage Power BI'], },
         ],
     },
 ];
@@ -198,11 +209,35 @@ const AppSidebar: React.FC = () => {
     );
 
     const isActive = useCallback(
-        (path: string) => location.pathname === path,
+        (path: string) => {
+            // Exact match untuk root paths
+            if (path === location.pathname) {
+                return true;
+            }
+            
+            // Check if current path starts with the path (untuk nested routes)
+            // Tambahkan trailing slash untuk menghindari partial match yang salah
+            const normalizedPath = path.endsWith('/') ? path : path + '/';
+            const normalizedCurrentPath = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/';
+            
+            return normalizedCurrentPath.startsWith(normalizedPath);
+        },
         [location.pathname]
     );
 
-    const isSubActive = useCallback((subPath: string) => location.pathname === subPath, [location.pathname]);
+    const isSubActive = useCallback((subPath: string) => {
+        // Exact match untuk root paths
+        if (subPath === location.pathname) {
+            return true;
+        }
+        
+        // Check if current path starts with the sub path (untuk nested routes)
+        // Tambahkan trailing slash untuk menghindari partial match yang salah
+        const normalizedSubPath = subPath.endsWith('/') ? subPath : subPath + '/';
+        const normalizedCurrentPath = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/';
+        
+        return normalizedCurrentPath.startsWith(normalizedSubPath);
+    }, [location.pathname]);
 
     useEffect(() => {
         let bestMatch: OpenState = null;
@@ -265,7 +300,7 @@ const AppSidebar: React.FC = () => {
                             onClick={() => handleSubmenuToggle(menuType, nav)}
                             className={`menu-item group ${
                                 isOpen
-                                ? "menu-item-active"
+                                ? "menu-item-active ccc"
                                 : "menu-item-inactive"
                             } cursor-pointer ${
                                 !isExpanded && !isHovered
@@ -346,7 +381,7 @@ const AppSidebar: React.FC = () => {
 
     return (
         <aside
-            className={`bg-aside fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+            className={`bg-aside fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 shadow-[0 0px 15px -8px #0055b5] 
             ${
                 isExpanded || isMobileOpen
                     ? "w-[290px]"
