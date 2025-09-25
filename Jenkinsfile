@@ -50,64 +50,6 @@ pipeline {
                 sh 'npm run --silent 2>/dev/null || echo "No scripts defined"'
             }
         }
-        
-        stage('Build Project') {
-            steps {
-                echo '🔨 Building React.js project...'
-                script {
-                    try {
-                        sh 'npm run build'
-                        echo '✅ Build completed successfully!'
-                    } catch (Exception e) {
-                        echo '❌ Build failed: ' + e.getMessage()
-                        echo '📋 Checking build logs...'
-                        sh 'ls -la dist/ || echo "No dist folder found"'
-                        throw e
-                    }
-                }
-            }
-        }
-        
-        stage('Deploy to Dev Server') {
-            steps {
-                echo '🚀 Deploying to development server via webhook...'
-                script {
-                    try {
-                        // Trigger deployment webhook ke Motorsights
-                        def webhookResponse = sh(
-                            script: """
-                                echo '📤 Triggering deployment webhook...'
-                                TIMESTAMP=\$(date -u +%Y-%m-%dT%H:%M:%SZ)
-                                curl --location 'https://webhook-bangjeje.motorsights.com/webhook/deploy/sistem-b' \\
-                                    --header 'Content-Type: application/json' \\
-                                    --data "{
-                                        \\"ref\\": \\"refs/heads/develop\\",
-                                        \\"commits\\": [
-                                            {
-                                                \\"id\\": \\"${env.GIT_COMMIT}\\",
-                                                \\"message\\": \\"Deploy from Jenkins Build #${env.BUILD_NUMBER}\\",
-                                                \\"timestamp\\": \\"\$TIMESTAMP\\"
-                                            }
-                                        ],
-                                        \\"repository\\": {
-                                            \\"name\\": \\"msi-fe-apps\\",
-                                            \\"full_name\\": \\"itmsi/msi\\"
-                                        }
-                                    }" \\
-                                    --write-out "HTTP Status: %{http_code}\\n"
-                            """,
-                            returnStdout: true
-                        )
-                        echo '✅ Webhook sent successfully!'
-                        echo '📋 Webhook Response: ' + webhookResponse
-                    } catch (Exception e) {
-                        echo '❌ Webhook deployment failed: ' + e.getMessage()
-                        echo '⚠️ Continuing pipeline despite webhook failure...'
-                        // Tidak throw error agar pipeline tetap success
-                    }
-                }
-            }
-        }
     }
     
     post {
