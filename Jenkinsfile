@@ -50,6 +50,43 @@ pipeline {
                 sh 'npm run --silent 2>/dev/null || echo "No scripts defined"'
             }
         }
+        
+        stage('Build Project') {
+            steps {
+                echo '🔨 Building React.js project...'
+                sh 'npm run build'
+                echo '✅ Build completed successfully!'
+            }
+        }
+        
+        stage('Deploy to Dev Server') {
+            steps {
+                echo '🚀 Deploying to development server via webhook...'
+                script {
+                    // Trigger deployment webhook ke Motorsights
+                    sh """
+                        echo '📤 Triggering deployment webhook...'
+                        curl --location 'https://webhook-bangjeje.motorsights.com/webhook/deploy/sistem-b' \\
+                            --header 'Content-Type: application/json' \\
+                            --data '{
+                                "ref": "refs/heads/develop",
+                                "commits": [
+                                    {
+                                        "id": "${env.GIT_COMMIT}",
+                                        "message": "Deploy from Jenkins Build #${env.BUILD_NUMBER}",
+                                        "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                                    }
+                                ],
+                                "repository": {
+                                    "name": "msi-fe-apps",
+                                    "full_name": "itmsi/msi"
+                                }
+                            }'
+                        echo '✅ Webhook sent successfully!'
+                    """
+                }
+            }
+        }
     }
     
     post {
