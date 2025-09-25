@@ -1,5 +1,5 @@
-# Jenkinsfile untuk React.js - Sederhana (Pull dan Install Dependencies)
-# Simpan sebagai Jenkinsfile di root repository
+// Jenkinsfile untuk React.js - Sederhana (Pull dan Install Dependencies)
+// Simpan sebagai Jenkinsfile di root repository
 
 pipeline {
     agent any
