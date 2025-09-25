@@ -5,15 +5,8 @@ pipeline {
     agent any
     
     tools {
-        nodejs 'NodeJS'  // Nama tool Node.js yang dikonfigurasi di Jenkins
+        nodejs 'NodeJS-18'  // Menggunakan Node.js versi 18 yang lebih stabil
     }
-    
-    // Alternatif dengan Docker (uncomment jika menggunakan Docker):
-    // agent {
-    //     docker {
-    //         image 'node:18-alpine'
-    //     }
-    // }
     
     stages {
         stage('Checkout') {
