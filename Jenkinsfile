@@ -1,18 +1,15 @@
-// Jenkinsfile untuk React.js - Sederhana (Pull dan Install Dependencies)
+// Jenkinsfile untuk Git Pull Sederhana
 // Simpan sebagai Jenkinsfile di root repository
 
 pipeline {
     agent any
     
-    tools {
-        nodejs 'NodeJS'  // Menggunakan tool NodeJS versi 22.17.0 yang sudah dikonfigurasi
-    }
-    
     stages {
-        stage('Checkout') {
+        stage('Git Pull') {
             steps {
                 echo '📥 Pulling code from repository...'
                 checkout scm
+                echo '✅ Code pulled successfully!'
             }
         }
         
@@ -25,46 +22,20 @@ pipeline {
                 echo 'Workspace: ' + env.WORKSPACE
             }
         }
-        
-        stage('Node.js Info') {
-            steps {
-                echo '🟢 Node.js Information:'
-                sh 'node --version || echo "Node.js not installed"'
-                sh 'npm --version || echo "npm not installed"'
-            }
-        }
-        
-        stage('Install Dependencies') {
-            steps {
-                echo '📦 Installing React.js dependencies...'
-                sh 'npm install'
-                echo '✅ Dependencies installed successfully!'
-            }
-        }
-        
-        stage('Verify Installation') {
-            steps {
-                echo '🔍 Verifying installation:'
-                sh 'ls -la node_modules/ | head -10'
-                echo '📊 Package.json scripts available:'
-                sh 'npm run --silent 2>/dev/null || echo "No scripts defined"'
-            }
-        }
     }
     
     post {
         always {
             echo '✅ Pipeline completed!'
             echo 'Build finished at: ' + new Date().toString()
-            echo 'React.js project ready for development!'
         }
         
         success {
-            echo '🎉 Success: Dependencies installed successfully!'
+            echo '🎉 Success: Code pulled successfully!'
         }
         
         failure {
-            echo '❌ Failed: Check npm install logs for errors'
+            echo '❌ Failed: Check git pull logs for errors'
         }
     }
 }
