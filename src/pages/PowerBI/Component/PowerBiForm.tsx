@@ -397,6 +397,7 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
                     {/* Action Buttons */}
                     <div className="flex md:col-span-3 justify-end gap-4 p-6 border-t">
                         <Button
+                            type="button"
                             variant="outline"
                             onClick={() => navigate('/power-bi/manage')}
                             className="px-6 rounded-full"

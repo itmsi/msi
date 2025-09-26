@@ -16,7 +16,6 @@ import { useDashboardView } from '../../hooks/usePowerBI';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { PowerBIDashboard } from '@/types/powerbi';
 import Input from '@/components/form/input/InputField';
-import { formatDate } from '@/helpers/generalHelper';
 import PageMeta from '@/components/common/PageMeta';
 
 const DashboardPowerBI = () => {

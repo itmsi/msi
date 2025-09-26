@@ -263,6 +263,7 @@ export default function CategoryPowerBi() {
 
                         <div className="flex justify-end gap-2 pt-4">
                             <Button
+                                type="button"
                                 onClick={() => setShowFormModal(false)}
                                 className="px-5 py-3.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-[50px] hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                             >

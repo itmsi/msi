@@ -147,6 +147,7 @@ export default function ConfirmationModal({
                         )}
                     </Button>
                     <Button
+                        type="button"
                         variant="outline"
                         className="rounded-[50px]"
                         onClick={onClose}
