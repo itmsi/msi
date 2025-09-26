@@ -169,20 +169,20 @@ const handleApiError = (error: AxiosError<ApiErrorResponse>): ApiError => {
     if (error.response) {
         // Server responded with error status
         const errorData = error.response.data;
-        if (errorData?.success === false) {
+        if (errorData?.message === 'Token sudah expired') {
             // // Clear all auth data from localStorage
-            // localStorage.removeItem('auth_token');
-            // localStorage.removeItem('auth_user');
-            // localStorage.removeItem('auth_permissions');
-            // localStorage.removeItem('auth_session');
-            // localStorage.removeItem('auth_oauth');
-            // localStorage.removeItem('isLoggedIn');
-            // // Also clear legacy items for backward compatibility
-            // localStorage.removeItem('keepLogin');
-            // localStorage.removeItem('profile');
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_user');
+            localStorage.removeItem('auth_permissions');
+            localStorage.removeItem('auth_session');
+            localStorage.removeItem('auth_oauth');
+            localStorage.removeItem('isLoggedIn');
+            // Also clear legacy items for backward compatibility
+            localStorage.removeItem('keepLogin');
+            localStorage.removeItem('profile');
             
             // Redirect to login page
-            // window.location.href = '/';
+            window.location.href = '/';
         }
         return {
             message: errorData?.message || errorData?.error || error.message,

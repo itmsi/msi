@@ -44,7 +44,7 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
 
     const [currentDashboard, setCurrentDashboard] = useState<PowerBIDashboard | null>(null);
     const [loadingDashboard, setLoadingDashboard] = useState(false);
-    const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
+    const [isMobile] = useState<boolean>(window.innerWidth < 768);
 
     const isEditMode = mode === 'edit';
     const pageTitle = isEditMode ? 'Edit Dashboard' : 'Create New Dashboard';
