@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPostMultipart, apiPut, apiPutMultipart } from '@/helpers/apiHelper';
+import { apiDelete, apiGet, apiPost, apiPostMultipart, apiPut, apiPutMultipart } from '@/helpers/apiHelper';
 import { 
     PowerBIListRequest, 
     PowerBIListResponse,
@@ -158,7 +158,7 @@ export class dashboardService {
     // Delete PowerBI Dashboard
     static async deleteDashboard(id: string): Promise<{ success: boolean; data: any; message?: string }> {
         try {
-            const response = await apiPost(`${API_BASE_URL}/powerbi/${id}`, { _method: 'DELETE' });
+            const response = await apiDelete(`${API_BASE_URL}/powerbi/${id}`);
             return response.data as { success: boolean; data: any; message?: string };
         } catch (error) {
             return {
@@ -243,7 +243,7 @@ export class categoryService {
     // Delete Category
     static async deleteCategory(id: string): Promise<{ success: boolean; data: any; message?: string }> {
         try {
-            const response = await apiPost(`${API_BASE_URL}/categories/${id}`, { _method: 'DELETE' });
+            const response = await apiDelete(`${API_BASE_URL}/categories/${id}`);
             return response.data as { success: boolean; data: any; message?: string };
         } catch (error) {
             return {

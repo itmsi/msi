@@ -100,13 +100,11 @@ export default function CategoryPowerBi() {
             name: 'Name',
             selector: row => row.name,
             sortable: true,
-            minWidth: '200px',
         },
         {
             name: 'Description',
             selector: row => row.description,
             wrap: true,
-            minWidth: '300px',
         },
         {
             name: 'Created At',
@@ -116,7 +114,6 @@ export default function CategoryPowerBi() {
                 day: 'numeric'
             }),
             sortable: true,
-            minWidth: '120px',
         },
         createActionsColumn([
             {
@@ -239,7 +236,7 @@ export default function CategoryPowerBi() {
                 className="max-w-xl"
             >
                 <div className="p-6">
-                    <form onSubmit={handleSubmitForm} className="space-y-6">
+                    <form onSubmit={(e) => { e.preventDefault(); handleSubmitForm(); }} className="space-y-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Name *
@@ -266,14 +263,12 @@ export default function CategoryPowerBi() {
 
                         <div className="flex justify-end gap-2 pt-4">
                             <Button
-                                variant="outline"
                                 onClick={() => setShowFormModal(false)}
-                                className="rounded-[50px]"
+                                className="px-5 py-3.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-[50px] hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                             >
                                 Cancel
                             </Button>
                             <Button
-                                onClick={handleSubmitForm}
                                 disabled={!formData.name || loading}
                                 className="rounded-[50px]"
                             >

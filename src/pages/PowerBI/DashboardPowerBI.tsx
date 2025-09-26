@@ -259,7 +259,7 @@ const DashboardPowerBI = () => {
                         >
                             {dashboards.map((dashboard, index) => (
                                 <DashboardCard 
-                                    key={dashboard.powerbi_id}
+                                    key={index}
                                     dashboard={dashboard} 
                                     index={index}
                                 />

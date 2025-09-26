@@ -48,21 +48,33 @@ const Client = ({ children, isProtected, isUnProtected, roles }: ClientProps) =>
             const routeName = getRouteNameFromPath(currentPath);
             const userMenu = authState.menu || [];
             
-            // Check menu access based on route name
-            const hasMenuPermission = hasMenuAccess(routeName, userMenu);
-            
-            // Check role access if roles are specified
-            let hasRoleAccess = true;
+            // Check if user is admin first (static role)
+            let isAdmin = false;
             if (roles && roles.length > 0) {
-                const userMenuNames = userMenu.map(menu => menu.name.toUpperCase());
                 const requiredRoles = roles.map(role => role.toUpperCase());
-                hasRoleAccess = requiredRoles.some(role => userMenuNames.includes(role));
+                isAdmin = requiredRoles.includes('ADMIN');
             }
             
-            // User must have both menu access AND role access
-            if (!hasMenuPermission || !hasRoleAccess) {
-                isAllowed = false;
-                // navigate('/403', { replace: true });
+            // If admin, bypass all permission checks
+            if (isAdmin) {
+                // Admin can access everything, no need to check menu or role permissions
+            } else {
+                // For non-admin users, check normal permissions
+                const hasMenuPermission = hasMenuAccess(routeName, userMenu);
+                
+                // Check role access if roles are specified
+                let hasRoleAccess = true;
+                if (roles && roles.length > 0) {
+                    const userMenuNames = userMenu.map(menu => menu.name.toUpperCase());
+                    const requiredRoles = roles.map(role => role.toUpperCase());
+                    hasRoleAccess = requiredRoles.some(role => userMenuNames.includes(role));
+                }
+                
+                // User must have both menu access AND role access
+                if (!hasMenuPermission || !hasRoleAccess) {
+                    isAllowed = false;
+                    navigate('/403', { replace: true });
+                }
             }
         }
 

@@ -185,10 +185,28 @@ export const useDashboard = (autoInit: boolean = true) => {
         });
     }, [fetchDashboards]);
 
-    // Search change handler
+    // Search change handler - reset category when searching
     const handleSearchChange = useCallback((searchValue: string) => {
-        handleFilterChange('search', searchValue);
-    }, [handleFilterChange]);
+        setFilters(prev => {
+            const newFilters = {
+                ...prev,
+                search: searchValue,
+                category_id: '' // Reset category when searching to search all categories
+            };
+            
+            // Clear existing debounce
+            if (debounceTimer.current) {
+                clearTimeout(debounceTimer.current);
+            }
+            
+            // Create new debounced API call with latest filters
+            debounceTimer.current = setTimeout(() => {
+                fetchDashboards(1, 10, newFilters); // Pass newFilters directly
+            }, 300);
+            
+            return newFilters;
+        });
+    }, [fetchDashboards]);
 
     // Category filter change handler
     const handleCategoryChange = useCallback((category_id: string) => {
@@ -594,15 +612,46 @@ export const useDashboardView = () => {
         });
     }, [fetchDashboards]);
 
-    // Search change handler
+    // Search change handler - reset category when searching
     const handleSearchChange = useCallback((searchValue: string) => {
-        handleFilterChange('search', searchValue);
-    }, [handleFilterChange]);
+        setFilters(prev => {
+            const newFilters = {
+                ...prev,
+                search: searchValue,
+                category_id: '' // Reset category when searching to search all categories
+            };
+            
+            if (debounceTimer.current) {
+                clearTimeout(debounceTimer.current);
+            }
+            
+            debounceTimer.current = setTimeout(() => {
+                fetchDashboards(1, 10, newFilters);
+            }, 300);
+            
+            return newFilters;
+        });
+    }, [fetchDashboards]);
 
     // Category filter change handler
     const handleCategoryChange = useCallback((category_id: string) => {
-        handleFilterChange('category_id', category_id);
-    }, [handleFilterChange]);
+        setFilters(prev => {
+            const newFilters = {
+                ...prev,
+                search: '',
+                category_id: category_id // Only update category_id, keep search unchanged
+            };
+            
+            if (debounceTimer.current) {
+                clearTimeout(debounceTimer.current);
+            }
+            
+            // No debouncing for category change - immediate fetch
+            fetchDashboards(1, 10, newFilters);
+            
+            return newFilters;
+        });
+    }, [fetchDashboards]);
 
     // Clear filters
     const clearFilters = useCallback(() => {

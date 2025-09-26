@@ -216,7 +216,6 @@ const AppSidebar: React.FC = () => {
             }
             
             // Check if current path starts with the path (untuk nested routes)
-            // Tambahkan trailing slash untuk menghindari partial match yang salah
             const normalizedPath = path.endsWith('/') ? path : path + '/';
             const normalizedCurrentPath = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/';
             

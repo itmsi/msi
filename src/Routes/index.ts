@@ -165,10 +165,10 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/users',
-        name: 'Users',
+        path: '/profile',
+        name: 'Profile',
         isProtected: true,
-        roles: ['Users'],
+        roles: ['ADMIN'],
         component: UserProfiles,
         layout: AppLayout,
     },

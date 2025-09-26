@@ -10,7 +10,8 @@ interface ButtonProps {
   endIcon?: ReactNode; // Icon after the text
   onClick?: () => void; // Click handler
   disabled?: boolean; // Disabled state
-  className?: string; // Disabled state
+  className?: string; // Additional CSS classes
+  type?: "button" | "submit" | "reset"; // Button type
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -22,6 +23,7 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   className = "",
   disabled = false,
+  type = "submit",
 }) => {
   // Size Classes
   const sizeClasses = {
@@ -49,6 +51,7 @@ const Button: React.FC<ButtonProps> = ({
               className,
           ),
       )}
+      type={type}
       onClick={onClick}
       disabled={disabled}
     >

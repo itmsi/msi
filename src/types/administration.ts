@@ -460,7 +460,6 @@ export interface Employee {
     employee_mobile: string | null;
     employee_office_number: string | null;
     employee_address: string | null;
-    employee_exmail_account: string | null;
     employee_channel: string | null;
     employee_activation_status: string | null;
     employee_disabled: boolean;
