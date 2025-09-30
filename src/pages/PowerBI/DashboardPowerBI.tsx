@@ -59,32 +59,32 @@ const DashboardPowerBI = () => {
     const StatusBadge = ({ category, text = true }: { category: string, text?: boolean }) => {
         const getBadgeStyle = (category: string) => {
             switch (category) {
-                case 'Sales Report':
+                case 'Purchasing':
                     return {
                         icon: <LuChartNoAxesCombined className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-blue-100 text-blue-800 border border-blue-200'
                     };
-                case 'Customer Analytics':
+                case 'HCCA':
                     return {
                         icon: <FaMagnifyingGlassChart className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-green-100 text-green-800 border border-green-200'
                     };
-                case 'Financial Report':
+                case 'Process Excellence':
                     return {
                         icon: <MdAccountBalance className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-purple-100 text-purple-800 border border-purple-200'
                     };
-                case 'HR Report':
+                case 'Customs & Supply Chain':
                     return {
                         icon: <MdPeople className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-orange-100 text-orange-800 border border-orange-200'
                     };
-                case 'Inventory Report':
+                case 'ETI':
                     return {
                         icon: <MdInventory className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-indigo-100 text-indigo-800 border border-indigo-200'
                     };
-                case 'Quality Control':
+                case 'Order Management':
                     return {
                         icon: <MdVerified className={`${text ? 'h-3 w-3' : 'h-5 w-5'}`} />,
                         className: 'bg-teal-100 text-teal-800 border border-teal-200'
