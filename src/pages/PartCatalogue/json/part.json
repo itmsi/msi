@@ -1,0 +1,5 @@
+[
+  { "serial": 1, "partNumber": "P-001", "name": "Bolt", "qty": 12 },
+  { "serial": 2, "partNumber": "P-002", "name": "Washer", "qty": 8 },
+  { "serial": 3, "partNumber": "P-003", "name": "Gear", "qty": 2 }
+]

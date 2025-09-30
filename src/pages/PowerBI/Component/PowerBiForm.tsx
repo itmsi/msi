@@ -53,7 +53,7 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
 
     useEffect(() => {
         fetchCategories(1, 100);
-        fetchEmployees(1, 500);
+        fetchEmployees(1, 1000);
     }, []);
 
     useEffect(() => {

@@ -10,7 +10,7 @@ import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import { Company } from "@/types/administration";
-import { createActionsColumn, createDateColumn, createSerialNumberColumn } from "@/components/ui/table/columnUtils";
+import { createActionsColumn, createDateColumn } from "@/components/ui/table/columnUtils";
 import { tableDateFormat } from "@/helpers/generalHelper";
 
 export default function ManageCompany() {
@@ -59,19 +59,8 @@ export default function ManageCompany() {
         }
     };
 
-    // Remove this useEffect to prevent double API calls - hook already handles debouncing
-    // useEffect(() => {
-    //     const timeoutId = setTimeout(() => {
-    //         fetchCompanies(1, pagination?.per_page || 10);
-    //     }, 500); // Debounce for 500ms
-
-    //     return () => clearTimeout(timeoutId);
-    // }, [filters.search, filters.company_name, filters.sort_by, filters.sort_order, fetchCompanies, pagination?.per_page]);
-
-
     // Company columns for DataTable
     const companyColumns: TableColumn<Company>[] = [
-        createSerialNumberColumn(pagination || { current_page: 1, per_page: 10 }),
         {
             name: 'Company Name',
             selector: row => row.company_name,

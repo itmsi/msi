@@ -40,41 +40,8 @@ const navItems: NavItem[] = [
     {
         icon: <GridIcon />,
         name: "Dashboard",
-        allowedRoles: ['Dashboard'],
-        subItems: [{ name: "Main", path: "/home", allowedRoles: ['Dashboard'], }],
-    },
-    {
-        icon: <CalenderIcon />,
-        name: "Calendar",
-        path: "/calendar",
-        allowedRoles: ['Calendar'], // Tidak ada Calendar di auth_menu, jadi kita map ke Settings atau hapus allowedRoles
-    },
-    {
-        icon: <CalenderIcon />,
-        name: "Reports",
-        path: "/reports",
-        allowedRoles: ['Reports'],
-    },
-    {
-        name: "Forms",
-        icon: <ListIcon />,
-        allowedRoles: ['Forms'], // Kosongkan karena 'Forms' tidak ada di auth_menu
-        subItems: [{ name: "Form Elements", path: "/form-elements", allowedRoles: ['Forms'] }],
-    },
-    {
-        name: "Tables",
-        icon: <TableIcon />,
-        allowedRoles: ['Tables'], // Kosongkan karena 'Tables' tidak ada di auth_menu
-        subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false, allowedRoles: ['Tables'] }],
-    },
-    {
-        name: "Pages",
-        icon: <PageIcon />,
-        allowedRoles: ['Pages', 'Blank Page', '404 Error'],
-        subItems: [
-            { name: "Blank Page", path: "/blank", allowedRoles: ['Pages', 'Blank Page', '404 Error'], },
-            { name: "404 Error", path: "/error-404", allowedRoles: ['Pages', 'Blank Page', '404 Error'], },
-        ],
+        allowedRoles: ['ADMIN'],
+        subItems: [{ name: "Main", path: "/home", allowedRoles: ['ADMIN'], }],
     },
     {
         name: "Power BI",
@@ -89,15 +56,6 @@ const navItems: NavItem[] = [
 ];
 
 const othersItems: NavItem[] = [
-    {
-        icon: <PieChartIcon />,
-        name: "Charts",
-        allowedRoles: ['Line Chart', 'Bar Chart'], // Kosongkan karena 'Charts' tidak ada di auth_menu
-        subItems: [
-            { name: "Line Chart", path: "/line-chart", allowedRoles: [], },
-            { name: "Bar Chart", path: "/bar-chart", allowedRoles: [], },
-        ],
-    },
     {
         icon: <BoxCubeIcon />,
         name: "UI Elements",
@@ -157,12 +115,6 @@ const othersItems: NavItem[] = [
             { name: "Menu", path: "/menu", allowedRoles: ['Menu'], },
             { name: "Sign Up", path: "/signup", allowedRoles: ['Sign Up'], },
         ],
-    },
-    {
-        icon: <PlugInIcon />,
-        name: "Settings",
-        path: "/settings",
-        allowedRoles: ['Settings'],
     },
 ];
 
@@ -283,6 +235,10 @@ const AppSidebar: React.FC = () => {
     };
 
     const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => {
+        
+            console.log({
+                items,
+            });
         return (
         <ul className="flex flex-col gap-4">
             {items.map((nav) => {
@@ -293,87 +249,89 @@ const AppSidebar: React.FC = () => {
                 );
                 const isOpen = openSubmenu?.type === menuType && openSubmenu?.key === navKey;
                 return (
-                <li key={navKey}>
-                    {filteredSubItems?.length ? (
-                        <button
-                            onClick={() => handleSubmenuToggle(menuType, nav)}
-                            className={`menu-item group ${
-                                isOpen
-                                ? "menu-item-active ccc"
-                                : "menu-item-inactive"
-                            } cursor-pointer ${
-                                !isExpanded && !isHovered
-                                ? "lg:justify-center color-[#606060]"
-                                : "lg:justify-start"
-                            }`}
-                        >
-                            <span className={`menu-item-icon-size ${!isExpanded && !isHovered ? '' : 'color-[#606060]'}`}>
-                                {nav.icon}
-                            </span>
-                            {(isExpanded || isHovered || isMobileOpen) && (
-                                <span className="menu-item-text">{nav.name}</span>
-                            )}
-                            {(isExpanded || isHovered || isMobileOpen) && (
-                                <ChevronDownIcon
-                                    className={`ml-auto w-5 h-5 transition-transform duration-200 ${
+                    <>
+                        <li key={navKey}>
+                            {filteredSubItems?.length ? (
+                                <button
+                                    onClick={() => handleSubmenuToggle(menuType, nav)}
+                                    className={`menu-item group ${
                                         isOpen
-                                        ? "rotate-180"
-                                        : ""
-                                    }`}
-                                />
-                            )}
-                        </button>
-                    ) : nav.path ? (
-                            <Link
-                                to={nav.path}
-                                className={`menu-item group ${
-                                    isActive(nav.path) ? "menu-item-active xx" : "menu-item-inactive cc"
-                                } ${!isHovered ? '' : 'color-[#606060]'}`}
-                            >
-                                <span
-                                    className={`menu-item-icon-size ${
-                                        isActive(nav.path)
-                                        ? "menu-item-icon-active"
-                                        : "menu-item-icon-inactive"
+                                        ? "menu-item-active ccc"
+                                        : "menu-item-inactive"
+                                    } cursor-pointer ${
+                                        !isExpanded && !isHovered
+                                        ? "lg:justify-center color-[#606060]"
+                                        : "lg:justify-start"
                                     }`}
                                 >
-                                    {nav.icon}
-                                </span>
-                                {(isExpanded || isHovered || isMobileOpen) && (
-                                    <span className={`menu-item-text`}>{nav.name}</span>
-                                )}
-                            </Link>
-                    ) : null }
-                    {filteredSubItems?.length && (
-                        <div
-                            ref={(el) => {
-                                subMenuRefs.current[navKey] = el;
-                            }}
-                            className="overflow-hidden transition-all duration-300"
-                            style={{
-                                height: isOpen ? "auto" : "0px",
-                            }}
-                        >
-                            <ul className={`mt-2 space-y-1 ml-9 ${(isExpanded || isHovered || isMobileOpen) ? "" : "hidden"}`}>
-                                {filteredSubItems.map((subItem) => {
-                                    return (
-                                <li key={`${navKey}:${subItem.path}`}>
+                                    <span className={`menu-item-icon-size ${!isExpanded && !isHovered ? '' : 'color-[#606060]'}`}>
+                                        {nav.icon}
+                                    </span>
+                                    {(isExpanded || isHovered || isMobileOpen) && (
+                                        <span className="menu-item-text">{nav.name}</span>
+                                    )}
+                                    {(isExpanded || isHovered || isMobileOpen) && (
+                                        <ChevronDownIcon
+                                            className={`ml-auto w-5 h-5 transition-transform duration-200 ${
+                                                isOpen
+                                                ? "rotate-180"
+                                                : ""
+                                            }`}
+                                        />
+                                    )}
+                                </button>
+                            ) : nav.path ? (
                                     <Link
-                                        to={subItem.path}
-                                        className={`menu-dropdown-item ${
-                                            isSubActive(subItem.path)
-                                            ? "menu-dropdown-item-active"
-                                            : "menu-dropdown-item-inactive"
-                                        }`}
+                                        to={nav.path}
+                                        className={`menu-item group ${
+                                            isActive(nav.path) ? "menu-item-active xx" : "menu-item-inactive cc"
+                                        } ${!isHovered ? '' : 'color-[#606060]'}`}
                                     >
-                                        {subItem.name}
+                                        <span
+                                            className={`menu-item-icon-size ${
+                                                isActive(nav.path)
+                                                ? "menu-item-icon-active"
+                                                : "menu-item-icon-inactive"
+                                            }`}
+                                        >
+                                            {nav.icon}
+                                        </span>
+                                        {(isExpanded || isHovered || isMobileOpen) && (
+                                            <span className={`menu-item-text`}>{nav.name}</span>
+                                        )}
                                     </Link>
-                                </li>
-                                );})}
-                            </ul>
-                        </div>
-                    )}
-                </li>
+                            ) : null }
+                            {filteredSubItems?.length ? (
+                                <div
+                                    ref={(el) => {
+                                        subMenuRefs.current[navKey] = el;
+                                    }}
+                                    className="overflow-hidden transition-all duration-300"
+                                    style={{
+                                        height: isOpen ? "auto" : "0px",
+                                    }}
+                                >
+                                    <ul className={`mt-2 space-y-1 ml-9 ${(isExpanded || isHovered || isMobileOpen) ? "" : "hidden"}`}>
+                                        {filteredSubItems.map((subItem) => {
+                                            return (
+                                        <li key={`${navKey}:${subItem.path}`}>
+                                            <Link
+                                                to={subItem.path}
+                                                className={`menu-dropdown-item ${
+                                                    isSubActive(subItem.path)
+                                                    ? "menu-dropdown-item-active"
+                                                    : "menu-dropdown-item-inactive"
+                                                }`}
+                                            >
+                                                {subItem.name}
+                                            </Link>
+                                        </li>
+                                        );})}
+                                    </ul>
+                                </div>
+                            ) : null}
+                        </li>
+                    </>
             )})}
         </ul>
     )};
@@ -433,7 +391,7 @@ const AppSidebar: React.FC = () => {
                                 }`}
                             >
                                 {isExpanded || isHovered || isMobileOpen ? (
-                                    "Others"
+                                    ""
                                 ) : (
                                     <HorizontaLDots />
                                 )}
