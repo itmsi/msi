@@ -1,5 +1,5 @@
 import React from 'react';
-import DataTable, { TableColumn, TableStyles } from 'react-data-table-component';
+import DataTable, { TableColumn, TableStyles, ConditionalStyles } from 'react-data-table-component';
 import { StyleSheetManager } from 'styled-components';
 
 interface CustomDataTableProps<T> {
@@ -22,6 +22,12 @@ interface CustomDataTableProps<T> {
     onSelectedRowsChange?: (state: { allSelected: boolean; selectedCount: number; selectedRows: T[] }) => void;
     clearSelectedRows?: boolean;
     
+    // Row events
+    onRowClicked?: (row: T, event: React.MouseEvent<Element>) => void;
+    onRowDoubleClicked?: (row: T, event: React.MouseEvent<Element>) => void;
+    onRowMouseEnter?: (row: T, event: React.MouseEvent<Element>) => void;
+    onRowMouseLeave?: (row: T, event: React.MouseEvent<Element>) => void;
+    
     // Search props
     subHeader?: boolean;
     subHeaderComponent?: React.ReactNode;
@@ -39,6 +45,7 @@ interface CustomDataTableProps<T> {
     progressComponent?: React.ReactNode;
     expandableRows?: boolean;
     expandableRowsComponent?: React.ComponentType<{ data: T }>;
+    conditionalRowStyles?: ConditionalStyles<T>[];
     
     // Custom styling options
     headerBackground?: string;
@@ -75,6 +82,12 @@ const CustomDataTable = <T extends Record<string, any>>({
     onSelectedRowsChange,
     clearSelectedRows = false,
     
+    // Row events
+    onRowClicked,
+    onRowDoubleClicked,
+    onRowMouseEnter,
+    onRowMouseLeave,
+    
     // Search
     subHeader = false,
     subHeaderComponent,
@@ -92,6 +105,7 @@ const CustomDataTable = <T extends Record<string, any>>({
     progressComponent,
     expandableRows = false,
     expandableRowsComponent,
+    conditionalRowStyles,
     
     // Custom styling
     headerBackground = '#dfe8f2',
@@ -284,6 +298,12 @@ const CustomDataTable = <T extends Record<string, any>>({
                     onSelectedRowsChange={onSelectedRowsChange}
                     clearSelectedRows={clearSelectedRows}
                     
+                    // Row events
+                    onRowClicked={onRowClicked}
+                    onRowDoubleClicked={onRowDoubleClicked}
+                    onRowMouseEnter={onRowMouseEnter}
+                    onRowMouseLeave={onRowMouseLeave}
+                    
                     // Search
                     subHeader={subHeader}
                     subHeaderComponent={subHeaderComponent}
@@ -301,6 +321,7 @@ const CustomDataTable = <T extends Record<string, any>>({
                     progressComponent={progressComponent || defaultProgressComponent}
                     expandableRows={expandableRows}
                     expandableRowsComponent={expandableRowsComponent}
+                    conditionalRowStyles={conditionalRowStyles}
                     
                     // Density
                     dense={dense}

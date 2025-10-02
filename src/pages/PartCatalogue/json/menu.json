@@ -1,0 +1,553 @@
+{
+  "code": 200,
+  "data": [
+    {
+      "id": "SIS-5255847923",
+      "masterId": "SIS-2448820",
+      "partNumber": null,
+      "partName": "(WP10.340E32)卡车用柴油机",
+      "softtype": "EngineProduct",
+      "epcType": "ORDER_NUMBER",
+      "children": [
+        {
+          "id": "SIS-586217679",
+          "masterId": "SIS-1291953",
+          "partNumber": "GRP100010952",
+          "partName": "Engine Block Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-1862437932",
+              "masterId": "SIS-586197491",
+              "partNumber": "612600900224",
+              "partName": "Engine Block Assembly",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": [
+                {
+                  "id": "SIS-1573408059",
+                  "masterId": "SIS-1490965638",
+                  "partNumber": "1001980963",
+                  "partName": "Crankcase Pre-assembly",
+                  "softtype": "ServicePart",
+                  "epcType": "PART",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "SIS-118883746",
+          "masterId": "SIS-348886",
+          "partNumber": "GRP100010632",
+          "partName": "正时齿轮室结合组",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-1038628406",
+          "masterId": "SIS-1293867",
+          "partNumber": "GRP100010349",
+          "partName": "Front End Cover Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-3056180874",
+          "masterId": "SIS-3056110899",
+          "partNumber": "1010462359",
+          "partName": "Oil-gas Separator Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-32385173",
+              "masterId": "SIS-349225",
+              "partNumber": "612600013164",
+              "partName": "Oil-gas Separator",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "SIS-127925046",
+          "masterId": "SIS-42465292",
+          "partNumber": "GRP100011106",
+          "partName": "dipstick Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-28089799",
+              "masterId": "SIS-26212600",
+              "partNumber": "612600012685",
+              "partName": "Dipstick Assembly",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "SIS-2079103850",
+          "masterId": "SIS-210773952",
+          "partNumber": "GRP100011231",
+          "partName": "Oil Filling Pipe Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-303384304",
+          "masterId": "SIS-303215419",
+          "partNumber": "1000157285",
+          "partName": "Flywheel Housing Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-2593414066",
+          "masterId": "SIS-351806",
+          "partNumber": "GRP100020314",
+          "partName": "Crankshaft Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-2587834790",
+              "masterId": "SIS-2583219075",
+              "partNumber": "1006466586",
+              "partName": "Crankshaft Assembly",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": [
+                {
+                  "id": "SIS-273439436",
+                  "masterId": "SIS-268247441",
+                  "partNumber": "1000072539",
+                  "partName": "Crankshaft Subassembly",
+                  "softtype": "ServicePart",
+                  "epcType": "PART",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "SIS-1389221",
+          "masterId": "SIS-1295521",
+          "partNumber": "GRP100020228",
+          "partName": "Flywheel Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-134782226",
+          "masterId": "SIS-133722981",
+          "partNumber": "GRP100020402",
+          "partName": "Crankshaft Pulley Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-2362433",
+          "masterId": "SIS-759983",
+          "partNumber": "GRP100030009",
+          "partName": "Piston and Connecting Rod Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-125126740",
+              "masterId": "SIS-352457",
+              "partNumber": "612600030053",
+              "partName": "Piston Ring Set",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            },
+            {
+              "id": "SIS-1937937208",
+              "masterId": "SIS-274057",
+              "partNumber": "61500030009",
+              "partName": "Connecting Rod Assembly",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "SIS-12346400",
+          "masterId": "SIS-1295861",
+          "partNumber": "GRP100040230",
+          "partName": "Cylinder Head Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-201318287",
+              "masterId": "SIS-352785",
+              "partNumber": "612600040282",
+              "partName": "Cylinder Head Subassembly",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "SIS-2624569306",
+          "masterId": "SIS-67796548",
+          "partNumber": "GRP100050036",
+          "partName": "Valve Train Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-125137726",
+              "masterId": "SIS-275636",
+              "partNumber": "612600050085",
+              "partName": "Camshaft Assembly",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            },
+            {
+              "id": "SIS-118890012",
+              "masterId": "SIS-353987",
+              "partNumber": "612600050179",
+              "partName": "Brake Rocker Arm Assembly",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            },
+            {
+              "id": "SIS-124999075",
+              "masterId": "SIS-276499",
+              "partNumber": "612600050177",
+              "partName": "Intake Rocker Arm Assembly",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            },
+            {
+              "id": "SIS-2008951419",
+              "masterId": "SIS-276141",
+              "partNumber": "61560050053",
+              "partName": "Idler Gear Assembly",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            },
+            {
+              "id": "SIS-182648902",
+              "masterId": "SIS-181969043",
+              "partNumber": "612600050270",
+              "partName": "EVB Bracket Assembly",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "SIS-1400843",
+          "masterId": "SIS-1302084",
+          "partNumber": "GRP100060761",
+          "partName": "Thermostat Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-3013557238",
+          "masterId": "SIS-1303755",
+          "partNumber": "GRP100060737",
+          "partName": "Tensioner And Belt Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-1406619",
+          "masterId": "SIS-1303954",
+          "partNumber": "GRP100070090",
+          "partName": "Oil Pump Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-1655127739",
+              "masterId": "SIS-280385",
+              "partNumber": "612600070364",
+              "partName": "Oil Pump Idle Gear Set",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "SIS-714536811",
+          "masterId": "SIS-401223",
+          "partNumber": "GRP100070082",
+          "partName": "Oil Filter Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-714539505",
+              "masterId": "SIS-440490191",
+              "partNumber": "1000424654",
+              "partName": "Oil Filter",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "SIS-1641017827",
+          "masterId": "SIS-771283",
+          "partNumber": "GRP100070065",
+          "partName": "Oil suction strainer Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-62272059",
+          "masterId": "SIS-58269751",
+          "partNumber": "GRP100070185",
+          "partName": "Oil cooler Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-1035624510",
+          "masterId": "SIS-998066987",
+          "partNumber": "1000726728",
+          "partName": "Fuel Injector Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-25404785",
+          "masterId": "SIS-358916",
+          "partNumber": "GR615081429",
+          "partName": "High Pressure Fuel Pipe Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-25439909",
+              "masterId": "SIS-358935",
+              "partNumber": "612600081310",
+              "partName": "High-pressure Fuel Pipe Assembly",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "SIS-2482346828",
+          "masterId": "SIS-998068313",
+          "partNumber": "1000726730",
+          "partName": "Fuel Injection Pump Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-1008971572",
+          "masterId": "SIS-776037",
+          "partNumber": "GRP100080630",
+          "partName": "Fuel Filter Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-1008971675",
+              "masterId": "SIS-775560150",
+              "partNumber": "1000619021",
+              "partName": "Fuel Filter",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "SIS-3092984708",
+          "masterId": "SIS-1428179820",
+          "partNumber": "1001806718",
+          "partName": "Alternator Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-2547611876",
+          "masterId": "SIS-2547340022",
+          "partNumber": "1006515669",
+          "partName": "Generator Support  Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-288806668",
+          "masterId": "SIS-170514177",
+          "partNumber": "GRP100980004",
+          "partName": "Starter Motor Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-2014971",
+          "masterId": "SIS-1315144",
+          "partNumber": "GRP100090301",
+          "partName": "火焰预热结合组",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-11037982",
+              "masterId": "SIS-1315167",
+              "partNumber": "612600090787",
+              "partName": "Flame Preheater Assembly",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "SIS-2068774148",
+          "masterId": "SIS-1152056620",
+          "partNumber": "1001135361",
+          "partName": "Exhaust Manifold Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-1035624587",
+          "masterId": "SIS-998072130",
+          "partNumber": "1000726729",
+          "partName": "Turbocharger Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-1368873826",
+          "masterId": "SIS-781527",
+          "partNumber": "GRP100110394",
+          "partName": "Turbocharger Oil Pipe Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-1168381952",
+          "masterId": "SIS-64989542",
+          "partNumber": "GRP100111203",
+          "partName": "Compressor Pipe Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-2763870972",
+          "masterId": "SIS-2763516430",
+          "partNumber": "1007979026",
+          "partName": "Intercooler Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-1713734586",
+          "masterId": "SIS-36249018",
+          "partNumber": "GRP104130029",
+          "partName": "Hydraulic Pump Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": []
+        },
+        {
+          "id": "SIS-1933914432",
+          "masterId": "SIS-1321046",
+          "partNumber": "GRP100150004",
+          "partName": "Oil Pan Group",
+          "softtype": "ServicePart",
+          "epcType": "PART",
+          "children": [
+            {
+              "id": "SIS-2796748676",
+              "masterId": "SIS-788239",
+              "partNumber": "612600150382",
+              "partName": "Oil Pan Set",
+              "softtype": "ServicePart",
+              "epcType": "PART",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "SIS-27090341",
+          "masterId": "SIS-19581212",
+          "partNumber": "WXBWP10010317",
+          "partName": "四配套维修包",
+          "softtype": "WXBPart",
+          "epcType": "REPAIR_KIT",
+          "children": []
+        },
+        {
+          "id": "SIS-24297785",
+          "masterId": "SIS-19581247",
+          "partNumber": "WXBWP10020320",
+          "partName": "Gasket Repair Package",
+          "softtype": "WXBPart",
+          "epcType": "REPAIR_KIT",
+          "children": []
+        },
+        {
+          "id": "SIS-24303309",
+          "masterId": "SIS-19558730",
+          "partNumber": "WXBWP10030308",
+          "partName": "胶圈维修包",
+          "softtype": "WXBPart",
+          "epcType": "REPAIR_KIT",
+          "children": []
+        },
+        {
+          "id": "SIS-24051627",
+          "masterId": "SIS-19489279",
+          "partNumber": "WXBWP10040295",
+          "partName": "碗形塞维修包",
+          "softtype": "WXBPart",
+          "epcType": "REPAIR_KIT",
+          "children": []
+        }
+      ]
+    }
+  ],
+  "msg": ""
+}

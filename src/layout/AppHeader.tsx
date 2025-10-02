@@ -91,7 +91,7 @@ const AppHeader: React.FC = () => {
 
                     <button
                         onClick={toggleApplicationMenu}
-                        className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99 hover:bg-gray-100:bg-gray-800 lg:hidden"
+                        className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99 hover:bg-gray-100:bg-gray-800 hidden"
                     >
                         <svg
                             width="24"
@@ -109,6 +109,13 @@ const AppHeader: React.FC = () => {
                         </svg>
                     </button>
 
+                    <div
+                        className={`${
+                            isApplicationMenuOpen ? "lg:hidden" : "lg:hidden"
+                        }`}
+                    >
+                        <UserDropdown />
+                    </div>
                 </div>
                 <div
                     className={`${

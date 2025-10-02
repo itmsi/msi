@@ -406,6 +406,11 @@ export class employeesService {
         return response.data as EmployeeDetailResponse;
     }
 
+    static async getEmployeeDetail(id: string): Promise<any> {
+        const response = await apiGet(`${API_BASE_URL}/employees/${id}`);
+        return response.data;
+    }
+
     static async createEmployee(data: EmployeeFormData): Promise<{ status: number }> {
         return await apiPost(`${API_BASE_URL}/employees/create`, data as unknown as Record<string, unknown>);
     }

@@ -36,9 +36,11 @@ import {
     PositionPagination,
     PositionFilters,
     PositionListRequest,
-    PositionValidationErrors
+    PositionValidationErrors,
+    EmployeeDetailData
 } from "@/types/administration";
 import { useCallback, useState, useEffect, useRef } from "react";
+
 import toast from "react-hot-toast";
 
 const getErrorMessage = (error: unknown): string => {
@@ -2502,5 +2504,239 @@ export const usePosition = () => {
         resetFilters,
         setConfirmDelete,
         clearValidationError
+    };
+};
+
+export const useEmployeeDetail = () => {
+    const [employee, setEmployee] = useState<EmployeeDetailData | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [validationErrors, setValidationErrors] = useState<EmployeeValidationErrors>({});
+    const [formData, setFormData] = useState<EmployeeFormData>({
+        employee_name: '',
+        employee_email: '',
+        title_id: '',
+        company_id: '',
+        department_id: '',
+        employee_mobile: '',
+        employee_office_number: '',
+        employee_address: '',
+        employee_phone: '',
+        gender_id: '',
+        island_id: ''
+    });
+
+    // Fetch employee by ID
+    const fetchEmployee = useCallback(async (id: string): Promise<void> => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const response = await employeesService.getEmployeeDetail(id);
+            
+            if (response.success && response.data) {
+                // Map the response data to our EmployeeDetailData structure
+                const employeeData: EmployeeDetailData = {
+                    ...response.data,
+                    employee_exmail_account: response.data.employee_exmail_account || null,
+                    password: response.data.password || null,
+                    employee_foto: response.data.employee_foto || null,
+                    permission_detail: response.data.permission_detail || []
+                };
+                setEmployee(employeeData);
+                
+                // Set form data from employee data
+                setFormData({
+                    employee_name: response.data.employee_name,
+                    employee_email: response.data.employee_email,
+                    title_id: response.data.title_id,
+                    company_id: response.data.company_id,
+                    department_id: response.data.department_id,
+                    employee_mobile: response.data.employee_mobile || '',
+                    employee_office_number: response.data.employee_office_number || '',
+                    employee_address: response.data.employee_address || '',
+                    employee_phone: response.data.employee_phone || '',
+                    gender_id: response.data.gender_id || '',
+                    island_id: response.data.island_id || ''
+                });
+            } else {
+                setError(response.message || 'Failed to fetch employee details');
+            }
+        } catch (err) {
+            const errorMessage = getErrorMessage(err);
+            setError(errorMessage);
+            toast.error(`Failed to fetch employee: ${errorMessage}`);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    // Update employee
+    const updateEmployee = useCallback(async (id: string, data: EmployeeFormData): Promise<boolean> => {
+        setIsUpdating(true);
+        setValidationErrors({});
+
+        try {
+            const response = await employeesService.updateEmployee(id, data);
+            
+            if (response.status === 200 || response.status === 201) {
+                toast.success('Employee updated successfully');
+                
+                // Refresh employee data
+                await fetchEmployee(id);
+                return true;
+            } else {
+                toast.error('Failed to update employee');
+                return false;
+            }
+        } catch (err: any) {
+            const errorMessage = getErrorMessage(err);
+            
+            // Handle validation errors
+            if (err.response?.status === 422 && err.response?.data?.errors) {
+                setValidationErrors(err.response.data.errors);
+                toast.error('Please check the form for errors');
+            } else if (err.response?.status === 400 && err.response?.data?.message) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error(`Failed to update employee: ${errorMessage}`);
+            }
+            return false;
+        } finally {
+            setIsUpdating(false);
+        }
+    }, [fetchEmployee]);
+
+    return {
+        employee,
+        setEmployee,
+        isLoading,
+        isUpdating,
+        error,
+        validationErrors,
+        formData,
+        setFormData,
+        fetchEmployee,
+        updateEmployee
+    };
+};
+
+// Custom hook untuk dropdown tanpa auto-fetch
+export const useDropdownData = () => {
+    // Company state
+    const [companies, setCompanies] = useState<Company[]>([]);
+    const [companiesLoading, setCompaniesLoading] = useState(false);
+
+    // Department state
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [departmentsLoading, setDepartmentsLoading] = useState(false);
+
+    // Position state
+    const [positions, setPositions] = useState<Position[]>([]);
+    const [positionsLoading, setPositionsLoading] = useState(false);
+
+    // Fetch companies
+    const fetchCompanies = useCallback(async (page: number = 1, limit: number = 100) => {
+        setCompaniesLoading(true);
+        try {
+            const params = {
+                page,
+                limit,
+                sort_by: 'company_name',
+                sort_order: 'asc',
+                search: '',
+                company_name: ''
+            };
+            const response = await companyService.getCompanies(params);
+            if (response.success) {
+                setCompanies(response.data.data || []);
+            }
+        } catch (error) {
+            console.error('Error fetching companies:', error);
+            setCompanies([]);
+        } finally {
+            setCompaniesLoading(false);
+        }
+    }, []);
+
+    // Fetch departments by company
+    const fetchDepartmentsByCompany = useCallback(async (companyId: string) => {
+        if (!companyId) {
+            setDepartments([]);
+            return;
+        }
+
+        setDepartmentsLoading(true);
+        try {
+            const params = {
+                page: 1,
+                limit: 100,
+                sort_by: 'department_name',
+                sort_order: 'asc',
+                search: '',
+                company_id: companyId,
+                company_name: '',
+                department_name: '',
+                department_parent_id: ''
+            };
+            const response = await departmentService.getDepartments(params);
+            if (response.success) {
+                setDepartments(response.data.data || []);
+            }
+        } catch (error) {
+            console.error('Error fetching departments:', error);
+            setDepartments([]);
+        } finally {
+            setDepartmentsLoading(false);
+        }
+    }, []);
+
+    // Fetch positions by department
+    const fetchPositionsByDepartment = useCallback(async (departmentId: string) => {
+        if (!departmentId) {
+            setPositions([]);
+            return;
+        }
+
+        setPositionsLoading(true);
+        try {
+            const params = {
+                page: 1,
+                limit: 100,
+                sort_by: 'title_name',
+                sort_order: 'asc',
+                search: '',
+                title_name: '',
+                department_name: '',
+                department_id: departmentId
+            };
+            const response = await positionService.getPositions(params);
+            if (response.success) {
+                setPositions(response.data.data || []);
+            }
+        } catch (error) {
+            console.error('Error fetching positions:', error);
+            setPositions([]);
+        } finally {
+            setPositionsLoading(false);
+        }
+    }, []);
+
+    return {
+        // Companies
+        companies,
+        companiesLoading,
+        fetchCompanies,
+
+        // Departments
+        departments,
+        departmentsLoading,
+        fetchDepartmentsByCompany,
+
+        // Positions
+        positions,
+        positionsLoading,
+        fetchPositionsByDepartment,
     };
 };

@@ -122,7 +122,7 @@ const DashboardPowerBI = () => {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * .1, duration: 0.1, ease: "easeOut" }}
+            transition={{ delay: index * .05, duration: 0.1, ease: "easeOut" }}
             className="bg-white rounded-lg shadow-sm break-inside-avoid mb-4 bg-gray-200 p-5 rounded-lg group hover:shadow-lg hover:bg-[#0253a5] hover:text-white transition duration-300 overflow-hidden"
         >
             <div>
@@ -249,12 +249,12 @@ const DashboardPowerBI = () => {
                     <>
                         <motion.div 
                             className="columns-2 md:columns-3 lg:columns-4 gap-4 pt-4"
-                            // key="list"
-                            // initial="hidden"
-                            // animate="visible"
-                            // exit="exit"
+                            key="list"
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
                             // variants={formVariants}
-                            // transition={{ duration: 1 }}
+                            transition={{ duration: .1 }}
                         >
                             {dashboards.map((dashboard, index) => (
                                 <DashboardCard 

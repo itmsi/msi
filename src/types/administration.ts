@@ -471,6 +471,28 @@ export interface Employee {
     company_name: string;
 }
 
+// Permission detail interface for employee detail response
+export interface EmployeePermissionDetail {
+    permission_id: string;
+    permission_name: string;
+    permission_status: boolean;
+}
+
+// Menu permission interface for employee detail response
+export interface EmployeeMenuPermission {
+    menu_id: string;
+    menu_name: string;
+    permission_detail: EmployeePermissionDetail[];
+}
+
+// Employee detailed data interface (extends Employee with additional fields)
+export interface EmployeeDetailData extends Employee {
+    employee_exmail_account: string | null;
+    password: string | null;
+    employee_foto: string | null;
+    permission_detail: EmployeeMenuPermission[];
+}
+
 // Employee form data for create/update
 export interface EmployeeFormData {
     employee_name: string;
@@ -484,6 +506,7 @@ export interface EmployeeFormData {
     employee_phone?: string | null;
     gender_id?: string | null;
     island_id?: string;
+    permission_detail?: EmployeeMenuPermission[];
 }
 
 // Employee validation errors

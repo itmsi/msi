@@ -120,24 +120,24 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({
 }) => {
     const getCategoryStyle = (category: string) => {
         switch (category) {
-            case 'Sales Report':
-                return 'bg-blue-100 text-blue-800 border-blue-200';
-            case 'Customer Analytics':
-                return 'bg-green-100 text-green-800 border-green-200';
-            case 'Financial Report':
-                return 'bg-purple-100 text-purple-800 border-purple-200';
-            case 'HR Report':
-                return 'bg-orange-100 text-orange-800 border-orange-200';
-            case 'Inventory Report':
-                return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-            case 'Quality Control':
-                return 'bg-teal-100 text-teal-800 border-teal-200';
+            case 'Purchasing':
+                return 'bg-blue-100 text-blue-800 border border-blue-200';
+            case 'HCCA':
+                return 'bg-green-100 text-green-800 border border-green-200';
+            case 'Process Excellence':
+                return 'bg-purple-100 text-purple-800 border border-purple-200';
+            case 'Customs & Supply Chain':
+                return 'bg-orange-100 text-orange-800 border border-orange-200';
+            case 'ETI':
+                return 'bg-indigo-100 text-indigo-800 border border-indigo-200';
+            case 'Order Management':
+                return 'bg-teal-100 text-teal-800 border border-teal-200';
             case 'Marketing Report':
-                return 'bg-pink-100 text-pink-800 border-pink-200';
+                return 'bg-pink-100 text-pink-800 border border-pink-200';
             case 'Operations Report':
-                return 'bg-cyan-100 text-cyan-800 border-cyan-200';
+                return 'bg-cyan-100 text-cyan-800 border border-cyan-200';
             default:
-                return 'bg-gray-100 text-gray-800 border-gray-200';
+                return 'bg-gray-100 text-gray-800 border border-gray-200';
         }
     };
 

@@ -44,11 +44,11 @@ export default function UserDropdown() {
                 onClick={toggleDropdown}
                 className="flex items-center text-gray-700 dropdown-toggle"
             >
-                <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
+                <span className="mr-3 overflow-hidden rounded-full h-8 w-8 lg:h-11 lg:w-11">
                     <img src="/images/avatar.png" alt="User" />
                 </span>
 
-                <span className="block mr-1 font-medium text-theme-sm">
+                <span className="block mr-1 font-medium text-theme-sm lg:flex hidden">
                     {userData.employee_name || 'Guest User'}
                 </span>
                 <svg

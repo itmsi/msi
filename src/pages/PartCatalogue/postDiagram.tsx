@@ -1,5 +1,9 @@
 import { DC98259800002 } from "@/icons";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { MdZoomIn, MdZoomOut, MdCenterFocusStrong } from "react-icons/md";
+import { TableColumn } from 'react-data-table-component';
+import { CustomDataTable } from "@/components/ui/table";
+import PartCataloguePage from ".";
 
 interface Part {
     id: string;
@@ -23,6 +27,53 @@ const parts: Part[] = [
 
 export default function ExplodedView() {
     const [selected, setSelected] = useState<string | null>(null);
+    const [zoom, setZoom] = useState<number>(1);
+    const [panX, setPanX] = useState<number>(0);
+    const [panY, setPanY] = useState<number>(0);
+    const [isDragging, setIsDragging] = useState<boolean>(false);
+    const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+    const [isDragOccurred, setIsDragOccurred] = useState<boolean>(false);
+    const svgContainerRef = useRef<HTMLDivElement>(null);
+    const svgRef = useRef<SVGSVGElement>(null);
+    const tableContainerRef = useRef<HTMLDivElement>(null);
+
+    // Zoom functions
+    const handleZoomIn = useCallback(() => {
+        setZoom(prev => Math.min(prev * 1.2, 5)); // Max zoom 5x
+    }, []);
+
+    const handleZoomOut = useCallback(() => {
+        setZoom(prev => Math.max(prev / 1.2, 0.1)); // Min zoom 0.1x
+    }, []);
+
+    const handleFitToView = useCallback(() => {
+        setZoom(1);
+        setPanX(0);
+        setPanY(0);
+    }, []);
+
+    // Mouse wheel zoom
+    const handleWheel = useCallback((event: React.WheelEvent) => {
+        event.preventDefault();
+        const delta = event.deltaY > 0 ? 0.9 : 1.1;
+        setZoom(prev => Math.min(Math.max(prev * delta, 0.1), 5));
+    }, []);
+
+    // Pan functions
+    const handleMouseDown = useCallback((event: React.MouseEvent) => {
+        if (event.button === 0) { // Left mouse button
+            event.preventDefault();
+            setIsDragging(true);
+            setIsDragOccurred(false);
+            setDragStart({ x: event.clientX - panX, y: event.clientY - panY });
+        }
+    }, [panX, panY]);
+
+    const handleMouseUp = useCallback(() => {
+        setIsDragging(false);
+        // Reset drag detection after a short delay
+        setTimeout(() => setIsDragOccurred(false), 100);
+    }, []);
 
     // Clean up existing highlights
     const clearHighlights = useCallback(() => {
@@ -59,12 +110,49 @@ export default function ExplodedView() {
     }, []);
 
     // Handle part selection
-    const handlePartSelect = useCallback((partId: string) => {
+    const handlePartSelect = useCallback((partId: string, source: 'table' | 'svg' = 'svg') => {
         setSelected(current => current === partId ? null : partId);
+        
+        if (source === 'table') {
+            // Scroll SVG to show the selected part
+            // scrollToSvgPart(partId);
+        } else {
+            // Scroll to corresponding table row for CustomDataTable
+            setTimeout(() => {
+                if (partId) {
+                    // Find the selected part index
+                    const partIndex = parts.findIndex(part => part.id === partId);
+                    if (partIndex !== -1) {
+                        // Find the DataTable container
+                        const dataTableContainer = document.querySelector('.rdt_TableBody') as HTMLElement;
+                        if (dataTableContainer) {
+                            // Find all table rows
+                            const tableRows = dataTableContainer.querySelectorAll('.rdt_TableRow');
+                            if (tableRows[partIndex]) {
+                                const targetRow = tableRows[partIndex] as HTMLElement;
+                                
+                                // Scroll to the target row
+                                targetRow.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center',
+                                    inline: 'nearest'
+                                });
+                            }
+                        }
+                    }
+                }
+            }, 100); // Small delay to ensure DOM is updated
+        }
     }, []);
+
 
     // Improved click handler with better event handling and larger click area
     const handleSvgClick = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
+        // Don't handle click if dragging occurred
+        if (isDragOccurred) {
+            return;
+        }
+        
         event.preventDefault();
         event.stopPropagation();
         
@@ -89,7 +177,7 @@ export default function ExplodedView() {
         }
 
         if (partGroup && partGroup.id) {
-            handlePartSelect(partGroup.id);
+            handlePartSelect(partGroup.id, 'svg');
         }
     }, [handlePartSelect]);
 
@@ -189,59 +277,190 @@ export default function ExplodedView() {
         }
     }, [selected, clearHighlights, addHighlight]);
 
-    return (
-        <div className="flex gap-6 p-6">
-            {/* SVG Diagram */}
-            <div className="border rounded-lg shadow-md bg-white">
-                <DC98259800002
-                    className="w-[800px] h-auto cursor-pointer"
-                    onClick={handleSvgClick}
-                    style={{ userSelect: 'none' }}
-                />
-            </div>
+    // Global mouse events for panning
+    useEffect(() => {
+        const handleGlobalMouseMove = (event: MouseEvent) => {
+            if (isDragging) {
+                setIsDragOccurred(true);
+                setPanX(event.clientX - dragStart.x);
+                setPanY(event.clientY - dragStart.y);
+            }
+        };
 
-            {/* Parts List */}
-            <div className="border rounded-2xl shadow-md bg-white p-4 min-w-[400px]">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">Parts List</h3>
-                <div className="max-h-[600px] overflow-y-auto">
-                    <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-white">
-                            <tr className="bg-gray-100">
-                                <th className="border p-3 text-left text-sm font-medium text-gray-700">Part Number</th>
-                                <th className="border p-3 text-left text-sm font-medium text-gray-700">Name</th>
-                                <th className="border p-3 text-left text-sm font-medium text-gray-700">Qty</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {parts.map((part) => (
-                                <tr
-                                    key={part.id}
-                                    className={`cursor-pointer transition-colors duration-200 ${
-                                        selected === part.id 
-                                            ? "bg-yellow-100 border-yellow-300" 
-                                            : "hover:bg-gray-50"
-                                    }`}
-                                    onClick={() => handlePartSelect(part.id)}
-                                >
-                                    <td className="border p-3 text-sm font-mono">{part.part_number}</td>
-                                    <td className="border p-3 text-sm">{part.name}</td>
-                                    <td className="border p-3 text-sm text-center">{part.quantity}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+        const handleGlobalMouseUp = () => {
+            setIsDragging(false);
+            // Reset drag detection after a short delay
+            setTimeout(() => setIsDragOccurred(false), 100);
+        };
+
+        if (isDragging) {
+            document.addEventListener('mousemove', handleGlobalMouseMove);
+            document.addEventListener('mouseup', handleGlobalMouseUp);
+        }
+
+        return () => {
+            document.removeEventListener('mousemove', handleGlobalMouseMove);
+            document.removeEventListener('mouseup', handleGlobalMouseUp);
+        };
+    }, [isDragging, dragStart]);
+
+    const columns: TableColumn<Part>[] = [
+        {
+            name: 'Part Number',
+            selector: row => row.part_number,
+            sortable: true,
+            wrap: true,
+        },
+        {
+            name: 'Name',
+            selector: row => row.name,
+            sortable: true,
+            wrap: true,
+        },
+        {
+            name: 'Qty',
+            selector: row => row.quantity,
+            sortable: true,
+            wrap: true,
+        }
+    ];
+    return (
+            <div className="bg-white shadow rounded-lg">
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-gray-200">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h3 className="text-lg leading-6 font-primary-bold text-gray-900"> Front Accessories Of Frame 车架前端附件</h3>
+                            <p className="mt-1 text-sm text-gray-500">MS 700 - DC98259800002</p>
+                        </div>
+                    </div>
                 </div>
                 
-                {/* Selected Part Info */}
-                {selected && (
-                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <h4 className="font-medium text-yellow-800">Selected Part:</h4>
-                        <p className="text-sm text-yellow-700">
-                            {parts.find(p => p.id === selected)?.name} ({selected})
-                        </p>
+                <div className="grid grid-cols-1 lg:grid-cols-6 gap-2 px-6 py-4">
+                    <div className="md:col-span-1">
+                        <PartCataloguePage />
                     </div>
-                )}
+                    {/* SVG Diagram */}
+                    <div className="bg-white md:col-span-4 relative overflow-hidden" style={{ height: '600px' }}>
+                        {/* Zoom Controls */}
+                        <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 bg-white rounded-lg shadow-lg p-2 opacity-70 hover:opacity-100 transition duration-300">
+                            <button
+                                onClick={handleZoomIn}
+                                className="p-2 hover:bg-gray-100 rounded transition-colors"
+                                title="Zoom In"
+                            >
+                                <MdZoomIn size={20} />
+                            </button>
+                            <button
+                                onClick={handleZoomOut}
+                                className="p-2 hover:bg-gray-100 rounded transition-colors"
+                                title="Zoom Out"
+                            >
+                                <MdZoomOut size={20} />
+                            </button>
+                            <button
+                                onClick={handleFitToView}
+                                className="p-2 hover:bg-gray-100 rounded transition-colors"
+                                title="Fit to View"
+                            >
+                                <MdCenterFocusStrong size={20} />
+                            </button>
+                            <div className="text-xs text-center text-gray-500 px-1">
+                                {Math.round(zoom * 100)}%
+                            </div>
+                        </div>
+                        
+                        {/* SVG Container */}
+                        <div
+                            ref={svgContainerRef}
+                            className={`w-full h-full flex items-center justify-center ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+                            style={{ 
+                                transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
+                                transformOrigin: 'center center'
+                            }}
+                            onWheel={handleWheel}
+                            onMouseDown={handleMouseDown}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                        >
+                            <DC98259800002
+                                ref={svgRef}
+                                className="w-full h-auto"
+                                onClick={handleSvgClick}
+                                style={{ userSelect: 'none' }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Parts List */}
+                    <div className="bg-white p-4 md:col-span-2">
+                        <div ref={tableContainerRef} className="max-h-[600px] overflow-y-auto">
+                            <CustomDataTable
+                                columns={columns}
+                                data={parts}
+                                loading={false}
+                                pagination={false}
+                                paginationServer
+                                paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
+                                responsive
+                                highlightOnHover
+                                striped={false}
+                                persistTableHead
+                                borderRadius="8px"
+                                fixedHeader={true}
+                                className="w-full"
+                                onRowClicked={(row: Part) => handlePartSelect(row.id, 'table')}
+                                fixedHeaderScrollHeight="600px"
+                                conditionalRowStyles={[
+                                    {
+                                        when: (row: Part) => row.id === selected,
+                                        style: {
+                                            backgroundColor: 'rgba(255, 235, 59, 0.3)',
+                                            borderLeft: '4px solid #FFC107',
+                                        },
+                                    },
+                                ]}
+                            />
+                            {/* <table className="w-full table-fixed">
+                                <thead className="sticky top-0 bg-white">
+                                    <tr className="bg-[#dfe8f2]">
+                                        <th className="border p-3 text-left text-sm font-medium text-gray-700 rounded-l-xs">Part Number</th>
+                                        <th className="border p-3 text-left text-sm font-medium text-gray-700">Name</th>
+                                        <th className="border p-3 text-left text-sm font-medium text-gray-700 rounded-r-xs">Qty</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {parts.map((part) => (
+                                        <tr
+                                            key={part.id}
+                                            data-part-id={part.id}
+                                            className={`cursor-pointer transition-colors duration-200 ${
+                                                selected === part.id 
+                                                    ? "bg-yellow-100 border-yellow-300" 
+                                                    : "hover:bg-gray-50"
+                                            }`}
+                                            onClick={() => handlePartSelect(part.id)}
+                                        >
+                                            <td className="border p-3 text-sm font-mono">{part.part_number}</td>
+                                            <td className="border p-3 text-sm">{part.name}</td>
+                                            <td className="border p-3 text-sm text-center">{part.quantity}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table> */}
+                        </div>
+                        
+                        {/* Selected Part Info */}
+                        {/* {selected && (
+                            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <h4 className="font-medium text-yellow-800">Selected Part:</h4>
+                                <p className="text-sm text-yellow-700">
+                                    {parts.find(p => p.id === selected)?.name} ({selected})
+                                </p>
+                            </div>
+                        )} */}
+                    </div>
+                </div>
             </div>
-        </div>
     );
 }

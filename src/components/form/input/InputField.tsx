@@ -43,7 +43,7 @@ const Input: FC<InputProps> = ({
     let inputClasses = `font-secondary h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3:text-white/30 ${className}`;
 
     if (disabled) {
-        inputClasses += ` text-gray-500 border-gray-300 opacity-40 bg-gray-100 opacity-40`;
+        inputClasses += ` text-gray-500 border-gray-300 opacity-80 bg-gray-100`;
     } else if (error) {
         inputClasses += `  border-error-500 focus:border-error-300 focus:ring-error-500/20:border-error-800`;
     } else if (success) {

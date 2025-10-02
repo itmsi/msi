@@ -16,6 +16,7 @@ const ManageMenu = lazy(() => import('@/pages/Administration/ManageMenu'));
 const ManageCompany = lazy(() => import('@/pages/Administration/ManageCompany'));
 const ManageDepartment = lazy(() => import('@/pages/Administration/ManageDepartment'));
 const ManageEmployee = lazy(() => import('@/pages/Administration/ManageEmployee'));
+const EditEmployee = lazy(() => import('@/pages/Administration/EditEmployee'));
 const ManageRole = lazy(() => import('@/pages/Administration/ManageRole'));
 const ManagePosition = lazy(() => import('@/pages/Administration/ManagePosition'));
 const DashboardPowerBI = lazy(() => import('@/pages/PowerBI/DashboardPowerBI'));
@@ -23,7 +24,7 @@ const ManagePowerBi = lazy(() => import('@/pages/PowerBI/ManagePowerBi'));
 const CategoryPowerBi = lazy(() => import('@/pages/PowerBI/CategoryPowerBi'));
 const CreatePowerBi = lazy(() => import('@/pages/PowerBI/CreatePowerBi'));
 const EditPowerBi = lazy(() => import('@/pages/PowerBI/EditPowerBi'));
-// const TextingPartCatalogue = lazy(() => import('@/pages/PartCatalogue/postDiagram'));
+const TextingPartCatalogue = lazy(() => import('@/pages/PartCatalogue/postDiagram'));
 // PowerBiForm is imported by Create and Edit components, no need to add here
 
 export type TAppRoute = {
@@ -142,6 +143,22 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
+        path: '/employees/create',
+        name: 'Employees',
+        isProtected: true,
+        roles: ['Employees'],
+        component: EditEmployee,
+        layout: AppLayout,
+    },
+    {
+        path: '/employees/edit/:id',
+        name: 'Employees',
+        isProtected: true,
+        roles: ['Employees'],
+        component: EditEmployee,
+        layout: AppLayout,
+    },
+    {
         path: '/departments',
         name: 'Departments',
         isProtected: true,
@@ -229,12 +246,12 @@ export const routes: TAppRoute[] = [
         component: CategoryPowerBi,
         layout: AppLayout,
     },
-    // {
-    //     path: '/example-part-catalogue',
-    //     name: 'Example Part Catalogue',
-    //     isProtected: false,
-    //     roles: ['Example Part Catalogue'],
-    //     component: TextingPartCatalogue,
-    //     layout: AppLayout,
-    // },
+    {
+        path: '/example-part-catalogue',
+        name: 'Example Part Catalogue',
+        isProtected: false,
+        roles: ['Example Part Catalogue'],
+        component: TextingPartCatalogue,
+        layout: AppLayout,
+    },
 ];
