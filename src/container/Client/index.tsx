@@ -2,16 +2,17 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '@/components/common/Loading';
-import { hasMenuAccess, getRouteNameFromPath } from '@/helpers/routeProtection';
+import { hasMenuAccess, hasPermissionAccess, getRouteNameFromPath } from '@/helpers/routeProtection';
 
 interface ClientProps {
     children: ReactNode;
     isProtected?: boolean;
     isUnProtected?: boolean;
     roles?: string[];
+    requiredPermissions?: string[];
 }
 
-const Client = ({ children, isProtected, isUnProtected, roles }: ClientProps) => {
+const Client = ({ children, isProtected, isUnProtected, roles, requiredPermissions }: ClientProps) => {
     const { authState } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
@@ -70,8 +71,17 @@ const Client = ({ children, isProtected, isUnProtected, roles }: ClientProps) =>
                     hasRoleAccess = requiredRoles.some(role => userMenuNames.includes(role));
                 }
                 
-                // User must have both menu access AND role access
-                if (!hasMenuPermission || !hasRoleAccess) {
+                // Check permission-based access if requiredPermissions are specified
+                let hasRequiredPermissions = true;
+                if (requiredPermissions && requiredPermissions.length > 0) {
+                    // User must have ALL required permissions (not just one)
+                    hasRequiredPermissions = requiredPermissions.every(permission => 
+                        hasPermissionAccess(routeName, permission, userMenu)
+                    );
+                }
+                
+                // User must have menu access AND role access AND required permissions
+                if (!hasMenuPermission || !hasRoleAccess || !hasRequiredPermissions) {
                     isAllowed = false;
                     navigate('/403', { replace: true });
                 }
@@ -83,6 +93,7 @@ const Client = ({ children, isProtected, isUnProtected, roles }: ClientProps) =>
         isProtected, 
         isUnProtected, 
         roles, 
+        requiredPermissions,
         authState.isLoading,
         authState.isAuthenticated,
         authState.user,

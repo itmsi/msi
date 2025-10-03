@@ -337,11 +337,11 @@ export default function ExplodedView() {
                 </div>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-6 gap-2 px-6 py-4">
-                    <div className="md:col-span-1">
+                    {/* <div className="md:col-span-1">
                         <PartCataloguePage />
-                    </div>
+                    </div> */}
                     {/* SVG Diagram */}
-                    <div className="bg-white md:col-span-4 relative overflow-hidden" style={{ height: '600px' }}>
+                    <div className="bg-white md:col-span-4 relative overflow-hidden" style={{ height: '700px' }}>
                         {/* Zoom Controls */}
                         <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 bg-white rounded-lg shadow-lg p-2 opacity-70 hover:opacity-100 transition duration-300">
                             <button

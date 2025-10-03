@@ -37,6 +37,7 @@ export type TAppRoute = {
     isProtected?: boolean;
     isUnProtected?: boolean;
     roles?: string[];
+    requiredPermissions?: string[]; // New: required permissions for this route
     subRoutes?: TAppRoute[];
 };
 
@@ -139,6 +140,7 @@ export const routes: TAppRoute[] = [
         name: 'Employees',
         isProtected: true,
         roles: ['Employees'],
+        requiredPermissions: ['read'],
         component: ManageEmployee,
         layout: AppLayout,
     },
@@ -147,6 +149,7 @@ export const routes: TAppRoute[] = [
         name: 'Employees',
         isProtected: true,
         roles: ['Employees'],
+        requiredPermissions: ['create'],
         component: EditEmployee,
         layout: AppLayout,
     },
@@ -155,6 +158,7 @@ export const routes: TAppRoute[] = [
         name: 'Employees',
         isProtected: true,
         roles: ['Employees'],
+        requiredPermissions: ['update'],
         component: EditEmployee,
         layout: AppLayout,
     },
@@ -211,6 +215,7 @@ export const routes: TAppRoute[] = [
         name: 'Dashboard Power BI',
         isProtected: true,
         roles: ['Dashboard Power BI'],
+        requiredPermissions: ['read'],
         component: DashboardPowerBI,
         layout: AppLayout,
     },
@@ -219,6 +224,7 @@ export const routes: TAppRoute[] = [
         name: 'Manage Power BI',
         isProtected: true,
         roles: ['Manage Power BI'],
+        requiredPermissions: ['create'],
         component: CreatePowerBi,
         layout: AppLayout,
     },
@@ -227,6 +233,7 @@ export const routes: TAppRoute[] = [
         name: 'Manage Power BI',
         isProtected: true,
         roles: ['Manage Power BI'],
+        requiredPermissions: ['update'],
         component: EditPowerBi,
         layout: AppLayout,
     },
@@ -235,6 +242,7 @@ export const routes: TAppRoute[] = [
         name: 'Manage Power BI',
         isProtected: true,
         roles: ['Manage Power BI'],
+        requiredPermissions: ['read'],
         component: ManagePowerBi,
         layout: AppLayout,
     },
@@ -243,6 +251,7 @@ export const routes: TAppRoute[] = [
         name: 'Category Power BI',
         isProtected: true,
         roles: ['Category Power BI'],
+        requiredPermissions: ['read'],
         component: CategoryPowerBi,
         layout: AppLayout,
     },

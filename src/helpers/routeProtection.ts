@@ -42,3 +42,23 @@ export const hasMenuAccess = (routeName: string, authMenu: Menu[]): boolean => {
     
     return authMenu.some(menu => menu.name === routeName);
 };
+
+export const hasPermissionAccess = (routeName: string, requiredPermission: string, authMenu: Menu[]): boolean => {
+    const unprotectedRouteNames = ['Sign In', 'Sign Up'];
+    if (unprotectedRouteNames.includes(routeName)) {
+        return true;
+    }
+    
+    const menu = authMenu.find(menu => menu.name === routeName);
+    if (!menu) {
+        return false;
+    }
+    
+    // Check if user has the required permission for this menu
+    return menu.permission.includes(requiredPermission);
+};
+
+export const getMenuPermissions = (routeName: string, authMenu: Menu[]): string[] => {
+    const menu = authMenu.find(menu => menu.name === routeName);
+    return menu?.permission || [];
+};

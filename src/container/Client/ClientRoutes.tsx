@@ -15,6 +15,7 @@ const ClientRoutes = () => {
             isProtected,
             isUnProtected,
             roles,
+            requiredPermissions,
         } = route;
 
         // fallback layout ke parent kalau subRoute nggak punya
@@ -26,11 +27,12 @@ const ClientRoutes = () => {
             element = <EffectiveLayout>{element}</EffectiveLayout>;
         }
 
-        return isProtected || isUnProtected || roles?.length ? (
+        return isProtected || isUnProtected || roles?.length || requiredPermissions?.length ? (
             <Client
                 isProtected={isProtected}
                 isUnProtected={isUnProtected}
                 roles={roles}
+                requiredPermissions={requiredPermissions}
             >
                 {element}
             </Client>
