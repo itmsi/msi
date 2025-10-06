@@ -8,10 +8,15 @@ import CustomSelect from "@/components/form/select/CustomSelect";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 import Input from "@/components/form/input/InputField";
 import { Employee } from "@/types/administration";
-import { createActionsColumn, createSerialNumberColumn } from "@/components/ui/table";
+import { createActionsColumn } from "@/components/ui/table";
+import { usePermissions } from "@/hooks/usePermissions";
+import { PermissionGate } from "@/components/common/PermissionComponents";
+// import { PermissionButton, PermissionGate } from "@/components/common/PermissionComponents";
 
 export default function ManageEmployee() {
     const navigate = useNavigate();
+    const pagePermissions = usePermissions();
+
     
     const {
         // State
@@ -32,9 +37,8 @@ export default function ManageEmployee() {
         setConfirmDelete
     } = useEmployees();
 
-    // Data table columns
+    // Data table columns dengan permission-based actions
     const columns: TableColumn<Employee>[] = [
-        createSerialNumberColumn(pagination || { current_page: 1, per_page: 10 }),
         {
             name: 'Employee Name',
             selector: row => row.employee_name,
@@ -59,14 +63,18 @@ export default function ManageEmployee() {
             {
                 icon: MdEdit,
                 onClick: (row) => navigate(`/employees/edit/${row.employee_id}`),
-                className: "text-primary hover:text-blue-600",
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                tooltip: 'Edit',
+                permission: 'update'
             },
             {
                 icon: MdDeleteOutline,
-                onClick: handleDelete,
+                onClick: (row) => handleDelete(row.employee_id),
                 className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                tooltip: 'Delete',
+                permission: 'delete'
             }
-        ]),
+        ])
     ];
 
     // Filter section options
@@ -96,14 +104,16 @@ export default function ManageEmployee() {
                                 Manage Employee information and hierarchy
                             </p>
                         </div>
-                        <Button
-                            onClick={() => navigate('/employees/create')}
-                            className="flex items-center gap-2"
-                            size="sm"
-                        >
-                            <MdAdd className="w-4 h-4" />
-                            Add Employee
-                        </Button>
+                        <PermissionGate permission="create">
+                            <Button
+                                onClick={() => navigate('/employees/create')}
+                                className="flex items-center gap-2"
+                                size="sm"
+                            >
+                                <MdAdd className="w-4 h-4" />
+                                Add Employee
+                            </Button>
+                        </PermissionGate>
                     </div>
                 </div>
 

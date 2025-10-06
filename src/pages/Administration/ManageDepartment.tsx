@@ -12,6 +12,7 @@ import Input from "@/components/form/input/InputField";
 import { Department } from "@/types/administration";
 import { createActionsColumn, createDateColumn, createSerialNumberColumn } from "@/components/ui/table/columnUtils";
 import { useEffect, useState } from "react";
+import { PermissionButton, PermissionGate } from "@/components/common/PermissionComponents";
 
 export default function ManageDepartment() {
     const {
@@ -108,15 +109,17 @@ export default function ManageDepartment() {
         createActionsColumn([
             {
                 icon: MdEdit,
-                onClick: (row: Department) => handleEditDepartment(row),
+                onClick: handleEditDepartment,
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'Edit Department'
+                tooltip: 'Edit',
+                permission: 'update'
             },
             {
                 icon: MdDeleteOutline,
-                onClick: (row: Department) => handleDeleteWithConfirmation(row),
+                onClick: handleDeleteWithConfirmation,
                 className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
-                tooltip: 'Delete Department'
+                tooltip: 'Delete',
+                permission: 'delete'
             }
         ])
     ];
@@ -146,14 +149,17 @@ export default function ManageDepartment() {
                                 Manage department information and hierarchy
                             </p>
                         </div>
-                        <Button 
-                            onClick={handleAddDepartment}
-                            className="flex items-center gap-2"
-                            size="sm"
-                        >
-                            <MdAdd className="w-5 h-5" />
-                            Add Department
-                        </Button>
+
+                        <PermissionGate permission="create">
+                            <Button
+                                onClick={handleAddDepartment}
+                                className="flex items-center gap-2"
+                                size="sm"
+                            >
+                                <MdAdd className="w-5 h-5" />
+                                Add Department
+                            </Button>
+                        </PermissionGate>
                     </div>
                 </div>
 

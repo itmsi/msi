@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDashboard } from "@/hooks/usePowerBI";
 import { useEmployees } from "@/hooks/useAdministration";
+import { useAuth } from "@/context/AuthContext";
 import Input from "@/components/form/input/InputField";
 import Button from "@/components/ui/button/Button";
 import { MdKeyboardArrowLeft, MdSave, MdAdd, MdEdit, MdDeleteOutline } from "react-icons/md";
@@ -9,7 +10,7 @@ import { PowerBIDashboard, EmployeeHasPowerBi } from "@/types/powerbi";
 import { Employee } from "@/types/administration";
 import { TableColumn } from "react-data-table-component";
 import CustomSelect from "@/components/form/select/CustomSelect";
-import CustomDataTable, { createActionsColumn } from "@/components/ui/table";
+import CustomDataTable from "@/components/ui/table";
 
 interface PowerBiFormProps {
     mode: 'create' | 'edit';
@@ -18,6 +19,7 @@ interface PowerBiFormProps {
 
 export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
     const navigate = useNavigate();
+    const { authState } = useAuth();
     const {
         loading,
         categoryOptions,
@@ -56,6 +58,26 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
         fetchEmployees(1, 1000);
     }, []);
 
+    // Auto-assign current user untuk mode create
+    useEffect(() => {
+        if (!isEditMode && authState.user?.employee_id) {
+            const currentUserId = authState.user.employee_id;
+            
+            // Check apakah current user sudah ada di access list
+            const userExists = formData.employeeHasPowerBi.some(emp => emp.employee_id === currentUserId);
+            
+            if (!userExists) {
+                setFormData(prev => ({
+                    ...prev,
+                    employeeHasPowerBi: [
+                        ...prev.employeeHasPowerBi,
+                        { employee_id: currentUserId }
+                    ]
+                }));
+            }
+        }
+    }, [isEditMode, authState.user?.employee_id]);
+
     useEffect(() => {
         if (isEditMode && dashboardId) {
             const fetchDashboardData = async () => {
@@ -90,8 +112,31 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
         }
     }, [isEditMode, dashboardId]);
 
+    // Function untuk memastikan current user otomatis memiliki access
+    const ensureCurrentUserAccess = (employeeAccess: EmployeeHasPowerBi[]): EmployeeHasPowerBi[] => {
+        const currentUserId = authState.user?.employee_id;
+        
+        if (!currentUserId) {
+            return employeeAccess;
+        }
+
+        // Check apakah current user sudah ada dalam access list
+        const currentUserExists = employeeAccess.some(emp => emp.employee_id === currentUserId);
+        
+        if (!currentUserExists) {
+            // Auto-assign current user ke access list
+            return [
+                ...employeeAccess,
+                { employee_id: currentUserId }
+            ];
+        }
+        
+        return employeeAccess;
+    };
+
     const handleSubmit = async () => {
-        // e.preventDefault();
+        // Pastikan current user otomatis memiliki access
+        const finalEmployeeAccess = ensureCurrentUserAccess(formData.employeeHasPowerBi);
         
         if (isEditMode && dashboardId) {
             const result = await updateDashboard(dashboardId, {
@@ -100,7 +145,7 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
                 category_id: formData.category_id,
                 link: formData.link,
                 status: formData.status,
-                employeeHasPowerBi: formData.employeeHasPowerBi
+                employeeHasPowerBi: finalEmployeeAccess
             });
 
             if (result.success) {
@@ -113,7 +158,7 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
                 category_id: formData.category_id,
                 link: formData.link,
                 status: formData.status,
-                employeeHasPowerBi: formData.employeeHasPowerBi
+                employeeHasPowerBi: finalEmployeeAccess
             });
 
             if (result.success) {
@@ -139,6 +184,14 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
     };
 
     const handleRemoveEmployee = (employeeId: string) => {
+        const currentUserId = authState.user?.employee_id;
+        
+        // Mencegah current user menghapus dirinya sendiri
+        if (employeeId === currentUserId) {
+            alert('You cannot remove yourself from the access list. You are automatically assigned as the creator.');
+            return;
+        }
+        
         setFormData(prev => ({
             ...prev,
             employeeHasPowerBi: prev.employeeHasPowerBi.filter(emp => emp.employee_id !== employeeId)
@@ -191,16 +244,6 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
         );
     }
     
-    // Handle window resize for responsive table
-    // useEffect(() => {
-    //     const handleResize = () => {
-    //         setIsMobile(window.innerWidth < 768);
-    //     };
-
-    //     window.addEventListener('resize', handleResize);
-    //     return () => window.removeEventListener('resize', handleResize);
-    // }, []);
-
     const columns: TableColumn<Employee>[] = [
         {
             name: 'Employee Name',
@@ -216,13 +259,31 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
             name: 'Company',
             selector: row => row.company_name || 'N/A',
         },
-        createActionsColumn([
-            {
-                icon: MdDeleteOutline,
-                onClick: (row: Employee) => handleRemoveEmployee(row.employee_id),
-                className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
-            }
-        ]),
+        {
+            name: 'Actions',
+            cell: (row: Employee) => {
+                const isCurrentUser = row.employee_id === authState.user?.employee_id;
+                
+                return (
+                    <div className="flex items-center gap-2">
+                        {isCurrentUser ? (
+                            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-md font-medium">
+                                Creator
+                            </span>
+                        ) : (
+                            <button
+                                onClick={() => handleRemoveEmployee(row.employee_id)}
+                                className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                                title="Remove Access"
+                            >
+                                <MdDeleteOutline className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
+                );
+            },
+            ignoreRowClick: true,
+        },
     ];
     return (
         <div className="bg-gray-50 overflow-auto">
@@ -355,6 +416,22 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
                     <div className="lg:col-span-2 p-8 lg:ps-0 relative">
                         <div className="space-y-8">
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">User Access</h2>
+                            
+                            {/* Auto-access notification */}
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex-shrink-0">
+                                        <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span className="text-blue-600 text-sm">ℹ</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-sm text-blue-800">
+                                        <p className="font-medium">Automatic Access Assignment</p>
+                                        <p className="mt-1">You will automatically have access to this dashboard as the creator. You cannot remove yourself from the access list.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Add Employee

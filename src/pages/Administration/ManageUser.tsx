@@ -10,8 +10,9 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import { Role } from "@/types/administration";
 import { useEffect, useState } from "react";
-import { createActionsColumn, createDateColumn, createSerialNumberColumn } from "@/components/ui/table";
+import { createActionsColumn, createDateColumn } from "@/components/ui/table";
 import { tableDateFormat } from "@/helpers/generalHelper";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 export default function ManageUser() {
     const {
@@ -75,7 +76,6 @@ export default function ManageUser() {
 
     // Data table columns
     const columns: TableColumn<Role>[] = [
-        createSerialNumberColumn(pagination || { current_page: 1, per_page: 10 }),
         {
             name: 'Role Name',
             selector: row => row.role_name,
@@ -97,11 +97,15 @@ export default function ManageUser() {
                 icon: MdEdit,
                 onClick: handleEdit,
                 className: "text-primary hover:text-blue-600",
+                permission: 'update',
+                tooltip: 'Edit'
             },
             {
                 icon: MdDeleteOutline,
                 onClick: handleDelete,
                 className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                permission: 'delete',
+                tooltip: 'Delete'
             }
         ]),
     ];
@@ -135,14 +139,17 @@ export default function ManageUser() {
                                 Manage Role information and hierarchy
                             </p>
                         </div>
-                        <Button
-                            onClick={handleAddRole}
-                            className="flex items-center gap-2"
-                            size="sm"
-                        >
-                            <MdAdd className="w-4 h-4" />
-                            Add Role
-                        </Button>
+                        
+                        <PermissionGate permission="create">
+                            <Button
+                                onClick={handleAddRole}
+                                className="flex items-center gap-2"
+                                size="sm"
+                            >
+                                <MdAdd className="w-4 h-4" />
+                                Add Role
+                            </Button>
+                        </PermissionGate>
                     </div>
                 </div>
 

@@ -16,6 +16,7 @@ const ManageMenu = lazy(() => import('@/pages/Administration/ManageMenu'));
 const ManageCompany = lazy(() => import('@/pages/Administration/ManageCompany'));
 const ManageDepartment = lazy(() => import('@/pages/Administration/ManageDepartment'));
 const ManageEmployee = lazy(() => import('@/pages/Administration/ManageEmployee'));
+const CreateEmployee = lazy(() => import('@/pages/Administration/CreateEmployee'));
 const EditEmployee = lazy(() => import('@/pages/Administration/EditEmployee'));
 const ManageRole = lazy(() => import('@/pages/Administration/ManageRole'));
 const ManagePosition = lazy(() => import('@/pages/Administration/ManagePosition'));
@@ -150,7 +151,7 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Employees'],
         requiredPermissions: ['create'],
-        component: EditEmployee,
+        component: CreateEmployee,
         layout: AppLayout,
     },
     {

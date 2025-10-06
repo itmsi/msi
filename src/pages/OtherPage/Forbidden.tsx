@@ -1,24 +1,28 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
+import PageMeta from "../../components/common/PageMeta";
 
 export default function Forbidden() {
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 text-center">
-                <div className="mb-6">
-                    <h1 className="text-6xl font-bold text-red-500 mb-4">403</h1>
-                    <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-                        Access Forbidden
-                    </h2>
-                    <p className="text-gray-600">
-                        You don't have permission to access this page. 
-                        This page is not available in your menu access.
-                    </p>
-                </div>
-                
+        <>
+        <PageMeta
+            title="Motor Sights International - 404 Not Found"
+            description="This is the 403 Forbidden page for Motor Sights International"
+            image="/motor-sights-international.png"
+        />
+        <div className="relative flex flex-col justify-center items-center min-h-screen overflow-hidden z-1 bg-[#0253a5]">
+            <div className="mx-auto w-[80%] text-center rounded-[30px] pb-8 bg-white shadow-lg">
+                {/* <div className="absolute bottom-0 w-full"> */}
+                    <img src="/images/error/403.svg" alt="403" className="w-full" />
+                {/* </div> */}
+                <p className="mb-6 text-base text-gray-700 sm:text-lg">
+                    You don't have permission to access this page. 
+                    This page is not available in your menu access.
+                </p>
+
                 <div className="space-y-4">
                     <Link 
                         to="/home" 
-                        className="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-200"
+                        className="inline-flex items-center justify-center rounded-lg px-5 py-3.5 text-sm font-medium bg-[#0253a5] text-white shadow-theme-xs hover:bg-[#003061] hover:shadow-md disabled:bg-brand-300"
                     >
                         Go to Dashboard
                     </Link>
@@ -32,13 +36,8 @@ export default function Forbidden() {
                         </button>
                     </div>
                 </div>
-                
-                <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-500">
-                        If you believe this is an error, please contact your administrator.
-                    </p>
-                </div>
             </div>
         </div>
+        </>
     );
 }

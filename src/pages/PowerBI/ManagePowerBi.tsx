@@ -11,6 +11,7 @@ import CustomSelect from "@/components/form/select/CustomSelect";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 import { ActiveStatusBadge, CategoryBadge } from "@/components/ui/badge";
 import PageMeta from "@/components/common/PageMeta";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 export default function ManagePowerBi() {
     const navigate = useNavigate();
@@ -94,13 +95,15 @@ export default function ManagePowerBi() {
                 icon: MdEdit,
                 onClick: (row: PowerBIDashboard) => handleEdit(row),
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'Edit'
+                tooltip: 'Edit',
+                permission: 'update'
             },
             {
                 icon: MdDeleteOutline,
                 onClick: (row: PowerBIDashboard) => handleDelete(row),
                 className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
-                tooltip: 'Delete'
+                tooltip: 'Delete',
+                permission: 'delete'
             }
         ])
     ];
@@ -121,14 +124,17 @@ export default function ManagePowerBi() {
                             <h3 className="text-lg leading-6 font-primary-bold text-gray-900">Manage PowerBI Dashboards</h3>
                             <p className="mt-1 text-sm text-gray-500">Create, edit, and manage your PowerBI dashboards</p>
                         </div>
-                        <Button
-                            onClick={handleCreate}
-                            className="rounded-md w-full md:w-50 font-secondary font-medium flex items-center justify-center gap-2"
-                            size="sm"
-                        >
-                            <MdAdd className="h-4 w-4" />
-                            Add New Power BI
-                        </Button>
+                        
+                        <PermissionGate permission="create">
+                            <Button
+                                onClick={handleCreate}
+                                className="rounded-md w-full md:w-50 font-secondary font-medium flex items-center justify-center gap-2"
+                                size="sm"
+                            >
+                                <MdAdd className="h-4 w-4" />
+                                Add New Power BI
+                            </Button>
+                        </PermissionGate>
                     </div>
                 </div>
 

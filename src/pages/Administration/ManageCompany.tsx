@@ -12,6 +12,7 @@ import Input from "@/components/form/input/InputField";
 import { Company } from "@/types/administration";
 import { createActionsColumn, createDateColumn } from "@/components/ui/table/columnUtils";
 import { tableDateFormat } from "@/helpers/generalHelper";
+import { PermissionButton, PermissionGate } from "@/components/common/PermissionComponents";
 
 export default function ManageCompany() {
     const {
@@ -82,14 +83,18 @@ export default function ManageCompany() {
             {
                 icon: MdEdit,
                 onClick: handleEditCompany,
-                className: "text-primary hover:text-blue-600",
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                tooltip: 'Edit',
+                permission: 'update'
             },
             {
                 icon: MdDeleteOutline,
                 onClick: handleDeleteWithConfirmation,
                 className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                tooltip: 'Delete',
+                permission: 'delete'
             }
-        ]),
+        ])
     ];
 
     return (
@@ -105,14 +110,16 @@ export default function ManageCompany() {
                                 Manage system companies and their configurations
                             </p>
                         </div>
-                        <Button
-                            onClick={handleAddCompany}
-                            className="rounded-md w-full md:w-40 flex items-center justify-center gap-2"
-                            size="sm"
-                        >
-                            <MdAdd className="w-4 h-4 mr-2" />
-                            Add Company
-                        </Button>
+                        <PermissionGate permission="create">
+                            <Button
+                                onClick={handleAddCompany}
+                                className="rounded-md w-full md:w-40 flex items-center justify-center gap-2"
+                                size="sm"
+                            >
+                                <MdAdd className="w-4 h-4 mr-2" />
+                                Add Company
+                            </Button>
+                        </PermissionGate>
                     </div>
                 </div>
 

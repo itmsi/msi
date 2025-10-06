@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiDelete } from '@/helpers/apiHelper';
+import { apiGet, apiPost, apiPut, apiDelete, apiPostMultipart } from '@/helpers/apiHelper';
 import { 
     LegacyMenuFormData, 
     MenuApiResponse, 
@@ -413,6 +413,20 @@ export class employeesService {
 
     static async createEmployee(data: EmployeeFormData): Promise<{ status: number }> {
         return await apiPost(`${API_BASE_URL}/employees/create`, data as unknown as Record<string, unknown>);
+    }
+
+    // Create employee with photo support using multipart
+    static async createEmployeeWithPhoto(formData: FormData): Promise<{ success: boolean; data?: any; message?: string; errors?: any }> {
+        try {
+            const response = await apiPostMultipart(`${API_BASE_URL}/employees/create`, formData);
+            return response.data as { success: boolean; data?: any; message?: string; errors?: any };
+        } catch (error: any) {
+            return {
+                success: false,
+                message: error.message || 'Failed to create employee',
+                errors: error.errors
+            };
+        }
     }
 
     static async updateEmployee(id: string, data: EmployeeFormData): Promise<{ status: number }> {

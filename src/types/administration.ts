@@ -485,12 +485,19 @@ export interface EmployeeMenuPermission {
     permission_detail: EmployeePermissionDetail[];
 }
 
+// System permission interface for new nested structure
+export interface EmployeeSystemPermission {
+    system_id: string;
+    system_name: string;
+    permission_detail: EmployeeMenuPermission[];
+}
+
 // Employee detailed data interface (extends Employee with additional fields)
 export interface EmployeeDetailData extends Employee {
     employee_exmail_account: string | null;
     password: string | null;
     employee_foto: string | null;
-    permission_detail: EmployeeMenuPermission[];
+    permission_detail: EmployeeSystemPermission[]; // Updated to new structure
 }
 
 // Employee form data for create/update
@@ -506,7 +513,7 @@ export interface EmployeeFormData {
     employee_phone?: string | null;
     gender_id?: string | null;
     island_id?: string;
-    permission_detail?: EmployeeMenuPermission[];
+    permission_detail?: EmployeeSystemPermission[]; // Updated to new structure
 }
 
 // Employee validation errors
@@ -522,6 +529,7 @@ export interface EmployeeValidationErrors {
     employee_phone?: string;
     gender_id?: string;
     island_id?: string;
+    employee_foto?: string;
 }
 
 // Employee list request parameters

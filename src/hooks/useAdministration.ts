@@ -2740,3 +2740,62 @@ export const useDropdownData = () => {
         fetchPositionsByDepartment,
     };
 };
+
+// Create Employee Hook
+export const useCreateEmployee = () => {
+    const [isCreating, setIsCreating] = useState(false);
+    const [validationErrors, setValidationErrors] = useState<EmployeeValidationErrors>({});
+
+    // Create employee with photo
+    const createEmployee = useCallback(async (formData: FormData): Promise<{ success: boolean; message?: string; errors?: any }> => {
+        setIsCreating(true);
+        setValidationErrors({});
+
+        try {
+            const response = await employeesService.createEmployeeWithPhoto(formData);
+            
+            if (response.success) {
+                toast.success('Employee created successfully!');
+                return { success: true };
+            } else {
+                // Handle validation errors from server
+                if (response.errors) {
+                    setValidationErrors(response.errors);
+                }
+                toast.error(response.message || 'Failed to create employee');
+                return { 
+                    success: false, 
+                    message: response.message, 
+                    errors: response.errors 
+                };
+            }
+        } catch (err: any) {
+            const errorMessage = getErrorMessage(err);
+            
+            // Handle validation errors
+            if (err.response?.status === 422 && err.response?.data?.errors) {
+                setValidationErrors(err.response.data.errors);
+                toast.error('Please check the form for errors');
+            } else if (err.response?.status === 400 && err.response?.data?.message) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error(`Failed to create employee: ${errorMessage}`);
+            }
+            
+            return { 
+                success: false, 
+                message: errorMessage, 
+                errors: err.response?.data?.errors 
+            };
+        } finally {
+            setIsCreating(false);
+        }
+    }, []);
+
+    return {
+        isCreating,
+        validationErrors,
+        setValidationErrors,
+        createEmployee
+    };
+};

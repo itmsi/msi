@@ -10,8 +10,9 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import { Position } from "@/types/administration";
 import { useEffect, useState } from "react";
-import { createActionsColumn, createDateColumn, createSerialNumberColumn } from "@/components/ui/table";
+import { createActionsColumn, createDateColumn } from "@/components/ui/table";
 import { tableDateFormat } from "@/helpers/generalHelper";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 export default function ManagePosition() {
     const {
@@ -54,7 +55,7 @@ export default function ManagePosition() {
     // Load departments when modal opens
     useEffect(() => {
         if (isModalOpen) {
-            fetchDepartments(1, 100); // Fetch first 100 departments for dropdown
+            fetchDepartments(1, 100);
         }
     }, [isModalOpen, fetchDepartments]);
 
@@ -72,7 +73,6 @@ export default function ManagePosition() {
 
     // Data table columns
     const columns: TableColumn<Position>[] = [
-        createSerialNumberColumn(pagination || { current_page: 1, per_page: 10 }),
         {
             name: 'Position Name',
             selector: row => row.title_name,
@@ -91,11 +91,15 @@ export default function ManagePosition() {
                 icon: MdEdit,
                 onClick: handleEdit,
                 className: "text-primary hover:text-blue-600",
+                permission: 'update',
+                tooltip: 'Edit'
             },
             {
                 icon: MdDeleteOutline,
                 onClick: handleDelete,
                 className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                permission: 'delete',
+                tooltip: 'Delete'
             }
         ]),
     ];
@@ -125,14 +129,17 @@ export default function ManagePosition() {
                                 Manage system positions and their configurations
                             </p>
                         </div>
-                        <Button
-                            onClick={handleAddPosition}
-                            className="rounded-md w-full md:w-40 flex items-center justify-center gap-2"
-                            size="sm"
-                        >
-                            <MdAdd className="w-4 h-4 mr-2" />
-                            Add Position
-                        </Button>
+                        
+                        <PermissionGate permission="create">
+                            <Button
+                                onClick={handleAddPosition}
+                                className="rounded-md w-full md:w-40 flex items-center justify-center gap-2"
+                                size="sm"
+                            >
+                                <MdAdd className="w-4 h-4 mr-2" />
+                                Add Position
+                            </Button>
+                        </PermissionGate>
                     </div>
                 </div>
 

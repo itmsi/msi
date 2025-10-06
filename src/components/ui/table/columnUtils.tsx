@@ -1,6 +1,7 @@
 import React from 'react';
 import { TableColumn } from 'react-data-table-component';
 import Button from '../button/Button';
+import { PermissionButton } from '@/components/common/PermissionComponents';
 
 // Common column configurations with React components
 export const createSerialNumberColumn = (pagination?: { current_page: number; per_page: number }): TableColumn<any> => ({
@@ -100,6 +101,7 @@ export const createDateColumn = (
 export const createActionsColumn = (actions: Array<{
     icon: React.ComponentType<any>;
     onClick: (row: any) => void;
+    permission?: string;
     className?: string;
     tooltip?: string;
     condition?: (row: any) => boolean;
@@ -112,17 +114,16 @@ export const createActionsColumn = (actions: Array<{
                 .map((action, index) => {
                     const Icon = action.icon;
                     return (
-                        <Button
+                        <PermissionButton
                             key={index}
-                            size="sm"
-                            variant="outline"
+                            permission={action?.permission || 'read'}
                             onClick={() => action.onClick(row)}
                             className={`p-2 rounded-md text-sm font-medium transition-colors ${
                                 action.className || 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                             }`}
                         >
                             <Icon className="w-4 h-4" />
-                        </Button>
+                        </PermissionButton>
                     );
                 })}
         </div>
@@ -133,6 +134,42 @@ export const createActionsColumn = (actions: Array<{
     // allowOverflow: true, // Removed to prevent styled-components warning
     // button: true,
 });
+// export const createActionsColumn = (actions: Array<{
+//     icon: React.ComponentType<any>;
+//     onClick: (row: any) => void;
+//     className?: string;
+//     tooltip?: string;
+//     condition?: (row: any) => boolean;
+// }>): TableColumn<any> => ({
+//     name: 'Actions',
+//     cell: (row: any) => (
+//         <div className="flex items-center gap-3">
+//             {actions
+//                 .filter(action => !action.condition || action.condition(row))
+//                 .map((action, index) => {
+//                     const Icon = action.icon;
+//                     return (
+//                         <Button
+//                             key={index}
+//                             size="sm"
+//                             variant="outline"
+//                             onClick={() => action.onClick(row)}
+//                             className={`p-2 rounded-md text-sm font-medium transition-colors ${
+//                                 action.className || 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+//                             }`}
+//                         >
+//                             <Icon className="w-4 h-4" />
+//                         </Button>
+//                     );
+//                 })}
+//         </div>
+//     ),
+//     width: '200px',
+//     center: true, // This handles both header and cell centering
+//     ignoreRowClick: true,
+//     // allowOverflow: true, // Removed to prevent styled-components warning
+//     // button: true,
+// });
 
 // Badge component for status display
 export const StatusBadge: React.FC<{

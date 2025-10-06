@@ -10,7 +10,8 @@ import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import { Menu } from "@/types/administration";
-import { createActionsColumn, createSerialNumberColumn } from "@/components/ui/table/columnUtils";
+import { createActionsColumn } from "@/components/ui/table/columnUtils";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 export default function ManageMenu() {
     const {
@@ -69,18 +70,8 @@ export default function ManageMenu() {
         }
     };
 
-    // Remove this useEffect to prevent double API calls - hook already handles debouncing
-    // useEffect(() => {
-    //     const timeoutId = setTimeout(() => {
-    //         fetchMenus(1, pagination?.per_page || 10);
-    //     }, 500); // Debounce for 500ms
-
-    //     return () => clearTimeout(timeoutId);
-    // }, [filters.search, filters.menu_name, filters.sort_by, filters.sort_order, fetchMenus, pagination?.per_page]);
-
     // Menu columns for DataTable - Updated for new Menu interface
     const menuColumns: TableColumn<Menu>[] = [
-        createSerialNumberColumn(pagination || { current_page: 1, per_page: 10 }),
         {
             name: 'Menu Name',
             selector: row => row.menu_name,
@@ -90,16 +81,22 @@ export default function ManageMenu() {
                 icon: MdEdit,
                 onClick: handleEditMenu,
                 className:"text-primary hover:text-blue-600",
+                permission: 'update',
+                tooltip: 'Edit'
             },
             {
                 icon: MdDeleteOutline,
                 onClick: handleDeleteWithConfirmation,
                 className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                permission: 'delete',
+                tooltip: 'Delete'
             },
             {
                 icon: MdOutlineShield,
                 onClick: handlePermissionMenu,
                 className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                permission: 'read',
+                tooltip: 'Read'
             }
         ]),
 
@@ -117,14 +114,17 @@ export default function ManageMenu() {
                             Manage system menus and their configurations
                         </p>
                     </div>
-                    <Button
-                        onClick={handleAddMenu}
-                        className="items-center gap-2"
-                        size="sm"
-                    >
-                        <MdAdd className="w-4 h-4 mr-2" />
-                        Add Menu
-                    </Button>
+                    
+                    <PermissionGate permission="create">
+                        <Button
+                            onClick={handleAddMenu}
+                            className="items-center gap-2"
+                            size="sm"
+                        >
+                            <MdAdd className="w-4 h-4 mr-2" />
+                            Add Menu
+                        </Button>
+                    </PermissionGate>
                 </div>
             </div>
 

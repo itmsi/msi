@@ -9,7 +9,6 @@ import PageMeta from "@/components/common/PageMeta";
 import LoadingSpinner from "@/components/common/Loading";
 import { useProfile, profileToFormData } from "@/hooks/useProfile";
 import { ProfileFormData } from "@/types/profile";
-import TextArea from "@/components/form/input/TextArea";
 
 export default function UserProfiles() {
     const {

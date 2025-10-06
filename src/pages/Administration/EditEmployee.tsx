@@ -4,11 +4,11 @@ import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import CustomSelect from "@/components/form/select/CustomSelect";
-import { MdArrowBack, MdEdit, MdKeyboardArrowLeft, MdSave } from "react-icons/md";
+import { MdArrowBack, MdEdit, MdKeyboardArrowLeft, MdSave, MdExpandMore, MdExpandLess } from "react-icons/md";
 import LoadingSpinner from "@/components/common/Loading";
 import PageMeta from "@/components/common/PageMeta";
 import { useDropdownData, useEmployeeDetail } from "@/hooks/useAdministration";
-import { EmployeePermissionDetail, EmployeeMenuPermission } from "@/types/administration";
+import { EmployeePermissionDetail, EmployeeMenuPermission, EmployeeSystemPermission } from "@/types/administration";
 import Switch from "@/components/form/switch/Switch";
 import TextArea from "@/components/form/input/TextArea";
 
@@ -44,6 +44,10 @@ export default function EditEmployee() {
     const [departmentOptions, setDepartmentOptions] = useState<Array<{value: string, label: string}>>([]);
     const [positionOptions, setPositionOptions] = useState<Array<{value: string, label: string}>>([]);
     const [companyOptions, setCompanyOptions] = useState<Array<{value: string, label: string}>>([]);
+    
+    // State for accordion expansion
+    const [expandedSystems, setExpandedSystems] = useState<Set<string>>(new Set());
+    const [hasInitiallyExpanded, setHasInitiallyExpanded] = useState(false);
 
     // Fetch employee details on component mount
     useEffect(() => {
@@ -51,6 +55,15 @@ export default function EditEmployee() {
             fetchEmployee(id);
         }
     }, [id]);
+
+    // Auto-expand first system when employee data loads (only once)
+    useEffect(() => {
+        if (employee && employee.permission_detail && employee.permission_detail.length > 0 && !hasInitiallyExpanded) {
+            const firstSystemId = employee.permission_detail[0].system_id;
+            setExpandedSystems(new Set([firstSystemId]));
+            setHasInitiallyExpanded(true);
+        }
+    }, [employee?.permission_detail, hasInitiallyExpanded]);
 
     // Load companies when component mounts
     useEffect(() => {
@@ -179,12 +192,66 @@ export default function EditEmployee() {
         });
     };
 
-    // Permission change handler with CRUD logic
-    const handlePermissionChange = (menuId: string, permissionId: string, checked: boolean) => {
+    // Toggle accordion expansion
+    const toggleSystemExpansion = (systemId: string) => {
+        setExpandedSystems(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(systemId)) {
+                newSet.delete(systemId);
+            } else {
+                newSet.add(systemId);
+            }
+            return newSet;
+        });
+    };
+
+    // Check if all permissions in system are checked
+    const isSystemAllChecked = (systemId: string): boolean => {
+        if (!employee) return false;
+        
+        const system = employee.permission_detail.find(sys => sys.system_id === systemId);
+        if (!system) return false;
+
+        return system.permission_detail.every(menu => 
+            menu.permission_detail.every(permission => permission.permission_status)
+        );
+    };
+
+    // Toggle all permissions in a system
+    const toggleSystemAllPermissions = (systemId: string, checked?: boolean) => {
         if (!employee) return;
 
-        // Get the permission name to determine CRUD type
-        const currentMenu = employee.permission_detail.find(menu => menu.menu_id === menuId);
+        const newStatus = checked !== undefined ? checked : !isSystemAllChecked(systemId);
+
+        const updatedEmployee = {
+            ...employee,
+            permission_detail: employee.permission_detail.map((system: EmployeeSystemPermission) => {
+                if (system.system_id === systemId) {
+                    return {
+                        ...system,
+                        permission_detail: system.permission_detail.map((menu: EmployeeMenuPermission) => ({
+                            ...menu,
+                            permission_detail: menu.permission_detail.map((permission: EmployeePermissionDetail) => ({
+                                ...permission,
+                                permission_status: newStatus
+                            }))
+                        }))
+                    };
+                }
+                return system;
+            })
+        };
+
+        setEmployee(updatedEmployee);
+    };
+
+    // Permission change handler with CRUD logic
+    const handlePermissionChange = (systemId: string, menuId: string, permissionId: string, checked: boolean) => {
+        if (!employee) return;
+
+        // Find the system, menu, and permission
+        const currentSystem = employee.permission_detail.find(system => system.system_id === systemId);
+        const currentMenu = currentSystem?.permission_detail.find(menu => menu.menu_id === menuId);
         const currentPermission = currentMenu?.permission_detail.find(perm => perm.permission_id === permissionId);
         
         if (!currentPermission) return;
@@ -201,53 +268,61 @@ export default function EditEmployee() {
         // Update the employee's permission_detail
         const updatedEmployee = {
             ...employee,
-            permission_detail: employee.permission_detail.map((menu: EmployeeMenuPermission) => {
-                if (menu.menu_id === menuId) {
-                    let updatedPermissions = menu.permission_detail.map((permission: EmployeePermissionDetail) => {
-                        if (permission.permission_id === permissionId) {
-                            return {
-                                ...permission,
-                                permission_status: checked
-                            };
-                        }
-                        return permission;
-                    });
-
-                    // Apply CRUD logic
-                    if (checked && isCUD) {
-                        // If checking Create/Update/Delete, automatically check Read
-                        updatedPermissions = updatedPermissions.map(permission => {
-                            const pName = permission.permission_name.toLowerCase();
-                            if (pName.includes('read') || pName.includes('view')) {
-                                return {
-                                    ...permission,
-                                    permission_status: true
-                                };
-                            }
-                            return permission;
-                        });
-                    } else if (!checked && isRead) {
-                        // If unchecking Read, automatically uncheck Create/Update/Delete
-                        updatedPermissions = updatedPermissions.map(permission => {
-                            const pName = permission.permission_name.toLowerCase();
-                            if (pName.includes('write') || pName.includes('create') || 
-                                pName.includes('edit') || pName.includes('update') || 
-                                pName.includes('delete') || pName.includes('remove')) {
-                                return {
-                                    ...permission,
-                                    permission_status: false
-                                };
-                            }
-                            return permission;
-                        });
-                    }
-
+            permission_detail: employee.permission_detail.map((system: EmployeeSystemPermission) => {
+                if (system.system_id === systemId) {
                     return {
-                        ...menu,
-                        permission_detail: updatedPermissions
+                        ...system,
+                        permission_detail: system.permission_detail.map((menu: EmployeeMenuPermission) => {
+                            if (menu.menu_id === menuId) {
+                                let updatedPermissions = menu.permission_detail.map((permission: EmployeePermissionDetail) => {
+                                    if (permission.permission_id === permissionId) {
+                                        return {
+                                            ...permission,
+                                            permission_status: checked
+                                        };
+                                    }
+                                    return permission;
+                                });
+
+                                // Apply CRUD logic
+                                if (checked && isCUD) {
+                                    // If checking Create/Update/Delete, automatically check Read
+                                    updatedPermissions = updatedPermissions.map(permission => {
+                                        const pName = permission.permission_name.toLowerCase();
+                                        if (pName.includes('read') || pName.includes('view')) {
+                                            return {
+                                                ...permission,
+                                                permission_status: true
+                                            };
+                                        }
+                                        return permission;
+                                    });
+                                } else if (!checked && isRead) {
+                                    // If unchecking Read, automatically uncheck Create/Update/Delete
+                                    updatedPermissions = updatedPermissions.map(permission => {
+                                        const pName = permission.permission_name.toLowerCase();
+                                        if (pName.includes('write') || pName.includes('create') || 
+                                            pName.includes('edit') || pName.includes('update') || 
+                                            pName.includes('delete') || pName.includes('remove')) {
+                                            return {
+                                                ...permission,
+                                                permission_status: false
+                                            };
+                                        }
+                                        return permission;
+                                    });
+                                }
+
+                                return {
+                                    ...menu,
+                                    permission_detail: updatedPermissions
+                                };
+                            }
+                            return menu;
+                        })
                     };
                 }
-                return menu;
+                return system;
             })
         };
 
@@ -340,152 +415,237 @@ export default function EditEmployee() {
                         </div>
                     </div>
 
+
                     {/* Employee Information */}
-                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
-                        <div className="md:col-span-1 p-8 relative">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Basic Information</h2>
-                                {/* Employee Name */}
-                                <div className="md:col-span-2">
-                                    <Label htmlFor="employee_name">Name</Label>
-                                    <Input
-                                        id="employee_name"
-                                        type="text"
-                                        value={formData.employee_name}
-                                        onChange={(e) => handleInputChange('employee_name', e.target.value)}
-                                        placeholder="Enter employee name"
-                                        error={!!validationErrors.employee_name}
-                                    />
-                                    {validationErrors.employee_name && (
-                                        <span className="text-sm text-red-500">{validationErrors.employee_name}</span>
-                                    )}
+                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm">
+                        
+                        {/* PROFILE HEADER */}
+                        <div className="p-8 border-b border-gray-200">
+                            <div className="flex flex-col items-center gap-6 sm:flex-row">
+                                <div className="relative">
+                                    <div className="w-24 h-24 overflow-hidden border-2 border-gray-200 rounded-full bg-gray-100">
+                                        {employee.employee_foto && (
+                                            <img 
+                                                src={employee.employee_foto} 
+                                                alt="Profile Preview" 
+                                                className="w-full h-full object-cover"
+                                            />
+                                        )}
+                                    </div>
                                 </div>
-
-                                {/* Employee Email */}
-                                <div className="md:col-span-2">
-                                    <Label htmlFor="employee_email">Email</Label>
-                                    <Input
-                                        id="employee_email"
-                                        type="email"
-                                        value={formData.employee_email || ''}
-                                        onChange={(e) => handleInputChange('employee_email', e.target.value)}
-                                        placeholder="Enter employee email"
-                                        error={!!validationErrors.employee_email}
-                                    />
-                                    {validationErrors.employee_email && (
-                                        <span className="text-sm text-red-500">{validationErrors.employee_email}</span>
-                                    )}
-                                </div>
-
-                                {/* Company */}
-                                <div className="md:col-span-2">
-                                    <Label htmlFor="company_id">Company *</Label>
-                                    <CustomSelect
-                                        options={companyOptions}
-                                        value={companyOptions.find(option => option.value === formData.company_id) || null}
-                                        onChange={(option) => handleInputChange('company_id', option?.value || '')}
-                                        placeholder="Select Company"
-                                        isClearable={false}
-                                        isSearchable={true}
-                                    />
-                                    {validationErrors.company_id && (
-                                        <span className="text-sm text-red-500">{validationErrors.company_id}</span>
-                                    )}
-                                </div>
-
-                                {/* Department */}
-                                <div className="md:col-span-2">
-                                    <Label htmlFor="department_id">Department *</Label>
-                                    <CustomSelect
-                                        options={departmentOptions}
-                                        value={departmentOptions.find(option => option.value === formData.department_id) || null}
-                                        onChange={(option) => handleInputChange('department_id', option?.value || '')}
-                                        placeholder="Select Company first"
-                                        isClearable={false}
-                                        isSearchable={true}
-                                        disabled={!formData.company_id}
-                                    />
-                                    {validationErrors.department_id && (
-                                        <span className="text-sm text-red-500">{validationErrors.department_id}</span>
-                                    )}
-                                </div>
-
-                                {/* Position */}
-                                <div className="md:col-span-2">
-                                    <Label htmlFor="title_id">Position *</Label>
-                                    <CustomSelect
-                                        options={positionOptions}
-                                        value={positionOptions.find(option => option.value === formData.title_id) || null}
-                                        onChange={(option) => handleInputChange('title_id', option?.value || '')}
-                                        placeholder="Select Department first"
-                                        isClearable={false}
-                                        isSearchable={true}
-                                        disabled={!formData.department_id}
-                                    />
-                                    {validationErrors.title_id && (
-                                        <span className="text-sm text-red-500">{validationErrors.title_id}</span>
-                                    )}
-                                </div>
-
-                                {/* Employee Mobile */}
-                                <div className="md:col-span-2">
-                                    <Label htmlFor="employee_mobile">Mobile Phone</Label>
-                                    <Input
-                                        id="employee_mobile"
-                                        type="tel"
-                                        value={formData.employee_mobile || ''}
-                                        onChange={(e) => handleInputChange('employee_mobile', e.target.value)}
-                                        placeholder="Enter mobile phone"
-                                    />
-                                </div>
-
-                                {/* Employee Office Number */}
-                                <div className="md:col-span-2">
-                                    <Label htmlFor="employee_office_number">Office Phone</Label>
-                                    <Input
-                                        id="employee_office_number"
-                                        type="tel"
-                                        value={formData.employee_office_number || ''}
-                                        onChange={(e) => handleInputChange('employee_office_number', e.target.value)}
-                                        placeholder="Enter office phone"
-                                    />
-                                </div>
-
-                                {/* Employee Address */}
-                                <div className="md:col-span-2">
-                                    <Label htmlFor="employee_address">Address</Label>
-                                    <TextArea
-                                        value={formData.employee_address || ''}
-                                        onChange={(e) => handleInputChange('employee_address', e.target.value)}
-                                        placeholder="Enter employee address"
-                                    />
+                                
+                                <div className="text-center sm:text-left">
+                                    <h2 className="text-2xl font-primary-bold text-gray-900 mb-2">
+                                        {employee?.employee_name}
+                                    </h2>
+                                    <div className="space-y-1 text-sm text-gray-600">
+                                        <p className="font-medium">{employee?.title_name}</p>
+                                        <p>{employee?.department_name} • {employee?.company_name}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="absolute top-7 bottom-7 right-0 border-r border-gray-300 hidden lg:block mx-3"></div>
                         </div>
+                        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+                            <div className="md:col-span-1 p-8 relative">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Basic Information</h2>
+                                    {/* Employee Name */}
+                                    <div className="md:col-span-2">
+                                        <Label htmlFor="employee_name">Name</Label>
+                                        <Input
+                                            id="employee_name"
+                                            type="text"
+                                            value={formData.employee_name}
+                                            onChange={(e) => handleInputChange('employee_name', e.target.value)}
+                                            placeholder="Enter employee name"
+                                            error={!!validationErrors.employee_name}
+                                        />
+                                        {validationErrors.employee_name && (
+                                            <span className="text-sm text-red-500">{validationErrors.employee_name}</span>
+                                        )}
+                                    </div>
 
-                            {/* Permissions Section - Editable Checkboxes */}
+                                    {/* Employee Email */}
+                                    <div className="md:col-span-2">
+                                        <Label htmlFor="employee_email">Email</Label>
+                                        <Input
+                                            id="employee_email"
+                                            type="email"
+                                            value={formData.employee_email || ''}
+                                            onChange={(e) => handleInputChange('employee_email', e.target.value)}
+                                            placeholder="Enter employee email"
+                                            error={!!validationErrors.employee_email}
+                                        />
+                                        {validationErrors.employee_email && (
+                                            <span className="text-sm text-red-500">{validationErrors.employee_email}</span>
+                                        )}
+                                    </div>
+
+                                    {/* Company */}
+                                    <div className="md:col-span-2">
+                                        <Label htmlFor="company_id">Company *</Label>
+                                        <CustomSelect
+                                            options={companyOptions}
+                                            value={companyOptions.find(option => option.value === formData.company_id) || null}
+                                            onChange={(option) => handleInputChange('company_id', option?.value || '')}
+                                            placeholder="Select Company"
+                                            isClearable={false}
+                                            isSearchable={true}
+                                        />
+                                        {validationErrors.company_id && (
+                                            <span className="text-sm text-red-500">{validationErrors.company_id}</span>
+                                        )}
+                                    </div>
+
+                                    {/* Department */}
+                                    <div className="md:col-span-2">
+                                        <Label htmlFor="department_id">Department *</Label>
+                                        <CustomSelect
+                                            options={departmentOptions}
+                                            value={departmentOptions.find(option => option.value === formData.department_id) || null}
+                                            onChange={(option) => handleInputChange('department_id', option?.value || '')}
+                                            placeholder="Select Company first"
+                                            isClearable={false}
+                                            isSearchable={true}
+                                            disabled={!formData.company_id}
+                                        />
+                                        {validationErrors.department_id && (
+                                            <span className="text-sm text-red-500">{validationErrors.department_id}</span>
+                                        )}
+                                    </div>
+
+                                    {/* Position */}
+                                    <div className="md:col-span-2">
+                                        <Label htmlFor="title_id">Position *</Label>
+                                        <CustomSelect
+                                            options={positionOptions}
+                                            value={positionOptions.find(option => option.value === formData.title_id) || null}
+                                            onChange={(option) => handleInputChange('title_id', option?.value || '')}
+                                            placeholder="Select Department first"
+                                            isClearable={false}
+                                            isSearchable={true}
+                                            disabled={!formData.department_id}
+                                        />
+                                        {validationErrors.title_id && (
+                                            <span className="text-sm text-red-500">{validationErrors.title_id}</span>
+                                        )}
+                                    </div>
+
+                                    {/* Employee Mobile */}
+                                    <div className="md:col-span-2">
+                                        <Label htmlFor="employee_mobile">Mobile Phone</Label>
+                                        <Input
+                                            id="employee_mobile"
+                                            type="tel"
+                                            value={formData.employee_mobile || ''}
+                                            onChange={(e) => handleInputChange('employee_mobile', e.target.value)}
+                                            placeholder="Enter mobile phone"
+                                        />
+                                    </div>
+
+                                    {/* Employee Office Number */}
+                                    <div className="md:col-span-2">
+                                        <Label htmlFor="employee_office_number">Office Phone</Label>
+                                        <Input
+                                            id="employee_office_number"
+                                            type="tel"
+                                            value={formData.employee_office_number || ''}
+                                            onChange={(e) => handleInputChange('employee_office_number', e.target.value)}
+                                            placeholder="Enter office phone"
+                                        />
+                                    </div>
+
+                                    {/* Employee Address */}
+                                    <div className="md:col-span-2">
+                                        <Label htmlFor="employee_address">Address</Label>
+                                        <TextArea
+                                            value={formData.employee_address || ''}
+                                            onChange={(e) => handleInputChange('employee_address', e.target.value)}
+                                            placeholder="Enter employee address"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="absolute top-7 bottom-7 right-0 border-r border-gray-300 hidden lg:block mx-3"></div>
+                            </div>
+
+                            {/* Permissions Section - Accordion with Select All */}
                             {employee && employee.permission_detail && employee.permission_detail.length > 0 && (
                                 <div className="md:col-span-2 p-8 lg:ps-0">
                                     <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Permission</h2>
                                     <div className="space-y-4 max-h-[770px] overflow-y-auto">
-                                        {employee.permission_detail.map((menu: EmployeeMenuPermission) => (
-                                            <div key={menu.menu_id} className="border border-gray-200 rounded-lg p-4">
-                                                <h5 className="font-medium text-gray-900 mb-3">{menu.menu_name}</h5>
-                                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                                                    {sortPermissionsByCRUD(menu.permission_detail).map((permission: EmployeePermissionDetail) => (
-                                                        <div key={permission.permission_id}>
-                                                            <Switch
-                                                                label={permission.permission_name}
-                                                                checked={permission.permission_status || false}
-                                                                className="capitalize font-secondary font-normal"
-                                                                onChange={(checked) => handlePermissionChange(menu.menu_id, permission.permission_id, checked)}
-                                                            />
+                                        {employee.permission_detail.map((system: EmployeeSystemPermission) => {
+                                            const isExpanded = expandedSystems.has(system.system_id);
+                                            const isAllChecked = isSystemAllChecked(system.system_id);
+                                            
+                                            return (
+                                                <div key={system.system_id} className="border border-gray-300 rounded-lg overflow-hidden">
+                                                    {/* Accordion Header */}
+                                                    <div className="bg-gray-50 border-b border-gray-200">
+                                                        <div className="flex items-center justify-between p-4">
+                                                            <div className="flex items-center gap-3">
+                                                                {/* Select All Switch */}
+                                                                <div onClick={(e) => e.stopPropagation()}>
+                                                                    <Switch
+                                                                        label="Select All"
+                                                                        checked={isAllChecked}
+                                                                        className="capitalize font-secondary font-normal"
+                                                                        onChange={(checked) => toggleSystemAllPermissions(system.system_id, checked)}
+                                                                    />
+                                                                </div>
+                                                                
+                                                                {/* Clickable System Name Area */}
+                                                                <div 
+                                                                    className="flex items-center cursor-pointer hover:text-primary transition-colors"
+                                                                    onClick={() => toggleSystemExpansion(system.system_id)}
+                                                                >
+                                                                    {/* System Name */}
+                                                                    <h4 className="font-semibold text-lg text-gray-900">
+                                                                        {system.system_name}
+                                                                    </h4>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {/* Expand/Collapse Button */}
+                                                            <div
+                                                                onClick={() => toggleSystemExpansion(system.system_id)}
+                                                                className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+                                                            >
+                                                                {isExpanded ? (
+                                                                    <MdExpandLess className="w-6 h-6" />
+                                                                ) : (
+                                                                    <MdExpandMore className="w-6 h-6" />
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                    ))}
+                                                    </div>
+                                                    
+                                                    {/* Accordion Content */}
+                                                    {isExpanded && (
+                                                        <div className="p-6">
+                                                            <div className="space-y-4">
+                                                                {system.permission_detail.map((menu: EmployeeMenuPermission) => (
+                                                                    <div key={menu.menu_id} className="border border-gray-200 rounded-lg p-4">
+                                                                        <h5 className="font-medium text-gray-900 mb-3">{menu.menu_name}</h5>
+                                                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                                                                            {sortPermissionsByCRUD(menu.permission_detail).map((permission: EmployeePermissionDetail) => (
+                                                                                <div key={permission.permission_id}>
+                                                                                    <Switch
+                                                                                        label={permission.permission_name}
+                                                                                        checked={permission.permission_status || false}
+                                                                                        className="capitalize font-secondary font-normal"
+                                                                                        onChange={(checked) => handlePermissionChange(system.system_id, menu.menu_id, permission.permission_id, checked)}
+                                                                                    />
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
@@ -509,6 +669,7 @@ export default function EditEmployee() {
                                     {isUpdating ? 'Saving...' : 'Update Employee'}
                                 </Button>
                             </div>
+                        </div>
                     </form>
                 </div>
             </div>
