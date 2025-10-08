@@ -1,7 +1,7 @@
 import React from 'react';
 import { TableColumn } from 'react-data-table-component';
-import Button from '../button/Button';
 import { PermissionButton } from '@/components/common/PermissionComponents';
+import { Tooltip } from '../tooltip';
 
 // Common column configurations with React components
 export const createSerialNumberColumn = (pagination?: { current_page: number; per_page: number }): TableColumn<any> => ({
@@ -101,7 +101,7 @@ export const createDateColumn = (
 export const createActionsColumn = (actions: Array<{
     icon: React.ComponentType<any>;
     onClick: (row: any) => void;
-    permission?: string;
+    permission?: 'create' | 'read' | 'update' | 'delete';
     className?: string;
     tooltip?: string;
     condition?: (row: any) => boolean;
@@ -114,16 +114,17 @@ export const createActionsColumn = (actions: Array<{
                 .map((action, index) => {
                     const Icon = action.icon;
                     return (
-                        <PermissionButton
-                            key={index}
-                            permission={action?.permission || 'read'}
-                            onClick={() => action.onClick(row)}
-                            className={`p-2 rounded-md text-sm font-medium transition-colors ${
-                                action.className || 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                            }`}
-                        >
-                            <Icon className="w-4 h-4" />
-                        </PermissionButton>
+                        <Tooltip key={index} content={action.tooltip} position="top">
+                            <PermissionButton
+                                permission={action.permission || 'read'}
+                                onClick={() => action.onClick(row)}
+                                className={`p-2 rounded-md text-sm font-medium transition-colors relative ${
+                                    action.className || 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                            >
+                                <Icon className="w-4 h-4" />
+                            </PermissionButton>
+                        </Tooltip>
                     );
                 })}
         </div>

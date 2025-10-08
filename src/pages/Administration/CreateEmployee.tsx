@@ -14,6 +14,7 @@ import { toast } from "react-hot-toast";
 interface CreateEmployeeFormData {
     employee_name: string;
     employee_email: string;
+    employee_password: string;
     company_id: string;
     department_id: string;
     title_id: string;
@@ -48,6 +49,7 @@ export default function CreateEmployee() {
     const [formData, setFormData] = useState<CreateEmployeeFormData>({
         employee_name: '',
         employee_email: '',
+        employee_password: '',
         company_id: '',
         department_id: '',
         title_id: '',
@@ -217,6 +219,12 @@ export default function CreateEmployee() {
             errors.employee_email = 'Please enter a valid email address';
         }
         
+        if (!formData.employee_password.trim()) {
+            errors.employee_password = 'Password is required';
+        } else if (formData.employee_password.length < 6) {
+            errors.employee_password = 'Password must be at least 6 characters long';
+        }
+        
         if (!formData.company_id) {
             errors.company_id = 'Company is required';
         }
@@ -249,6 +257,7 @@ export default function CreateEmployee() {
             // Append text fields
             submitData.append('employee_name', formData.employee_name);
             submitData.append('employee_email', formData.employee_email);
+            submitData.append('employee_password', formData.employee_password);
             submitData.append('company_id', formData.company_id);
             submitData.append('department_id', formData.department_id);
             submitData.append('title_id', formData.title_id);
@@ -318,7 +327,7 @@ export default function CreateEmployee() {
                                     <Label htmlFor="employee_foto">Employee Photo</Label>
                                     <div className="mt-2">
                                         {photoPreview ? (
-                                            <div className="relative">
+                                            <div className="relative inline-flex">
                                                 <img 
                                                     src={photoPreview} 
                                                     alt="Employee Preview" 
@@ -381,7 +390,7 @@ export default function CreateEmployee() {
                                 </div>
 
                                 {/* Employee Email */}
-                                <div className="md:col-span-4">
+                                <div className="md:col-span-2">
                                     <Label htmlFor="employee_email">Email *</Label>
                                     <Input
                                         id="employee_email"
@@ -393,6 +402,22 @@ export default function CreateEmployee() {
                                     />
                                     {validationErrors.employee_email && (
                                         <span className="text-sm text-red-500">{validationErrors.employee_email}</span>
+                                    )}
+                                </div>
+
+                                {/* Employee Password */}
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="employee_password">Password *</Label>
+                                    <Input
+                                        id="employee_password"
+                                        type="password"
+                                        value={formData.employee_password}
+                                        onChange={(e) => handleInputChange('employee_password', e.target.value)}
+                                        placeholder="Enter employee password"
+                                        error={!!validationErrors.employee_password}
+                                    />
+                                    {validationErrors.employee_password && (
+                                        <span className="text-sm text-red-500">{validationErrors.employee_password}</span>
                                     )}
                                 </div>
 

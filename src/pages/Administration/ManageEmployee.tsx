@@ -1,7 +1,7 @@
 import Button from "@/components/ui/button/Button";
 import { useNavigate } from "react-router";
 import { useEmployees } from "@/hooks/useAdministration";
-import { MdEdit, MdDeleteOutline, MdAdd, MdSearch } from "react-icons/md";
+import { MdEdit, MdDeleteOutline, MdAdd, MdSearch, MdRefresh } from "react-icons/md";
 import { TableColumn } from "react-data-table-component";
 import CustomDataTable from "@/components/ui/table/CustomDataTable";
 import CustomSelect from "@/components/form/select/CustomSelect";
@@ -9,13 +9,10 @@ import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 import Input from "@/components/form/input/InputField";
 import { Employee } from "@/types/administration";
 import { createActionsColumn } from "@/components/ui/table";
-import { usePermissions } from "@/hooks/usePermissions";
 import { PermissionGate } from "@/components/common/PermissionComponents";
-// import { PermissionButton, PermissionGate } from "@/components/common/PermissionComponents";
 
 export default function ManageEmployee() {
     const navigate = useNavigate();
-    const pagePermissions = usePermissions();
 
     
     const {
@@ -25,16 +22,20 @@ export default function ManageEmployee() {
         isLoading,
         filters,
         confirmDelete,
+        confirmResetPassword,
 
         // Actions
         deleteEmployee,
         handleDelete,
+        resetEmployeePassword,
+        handleResetPassword,
         handlePageChange,
         handleLimitChange,
         handleFilterChange,
         handleSearchChange,
         clearFilters,
-        setConfirmDelete
+        setConfirmDelete,
+        setConfirmResetPassword
     } = useEmployees();
 
     // Data table columns dengan permission-based actions
@@ -73,6 +74,13 @@ export default function ManageEmployee() {
                 className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
                 tooltip: 'Delete',
                 permission: 'delete'
+            },
+            {
+                icon: MdRefresh,
+                onClick: (row) => handleResetPassword(row.employee_id),
+                className: 'text-green-600 hover:text-red-700 hover:bg-red-50',
+                tooltip: 'Reset Password',
+                permission: 'update'
             }
         ])
     ];
@@ -232,6 +240,21 @@ export default function ManageEmployee() {
                 title="Delete Employee"
                 message="Are you sure you want to delete this employee? This action cannot be undone."
                 confirmText="Delete"
+                cancelText="Cancel"
+            />
+
+            {/* Reset Password Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={confirmResetPassword.show}
+                onClose={() => setConfirmResetPassword({ show: false })}
+                onConfirm={() => {
+                    if (confirmResetPassword.employeeId) {
+                        resetEmployeePassword(confirmResetPassword.employeeId);
+                    }
+                }}
+                title="Reset Employee Password"
+                message="Are you sure you want to reset the password for this employee?"
+                confirmText="Reset Password"
                 cancelText="Cancel"
             />
         </>

@@ -1320,6 +1320,7 @@ export const useEmployees = (autoInit: boolean = true) => {
     });
     const [validationErrors, setValidationErrors] = useState<EmployeeValidationErrors>({});
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; employeeId?: string; }>({ show: false });
+    const [confirmResetPassword, setConfirmResetPassword] = useState<{ show: boolean; employeeId?: string; }>({ show: false });
     const [showForm, setShowForm] = useState(false);
     const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
 
@@ -1481,8 +1482,30 @@ export const useEmployees = (autoInit: boolean = true) => {
         setValidationErrors({});
     };
 
+    const resetEmployeePassword = async (id: string) => {
+        setIsLoading(true);
+        try {
+            const res = await employeesService.resetEmployeePassword(id);
+            setConfirmResetPassword({ show: false });
+            fetchEmployees();
+            console.log({res});
+
+            toast.success(res.message || 'Password reset successfully');
+            return true;
+        } catch (error) {
+            console.error('Error resetting employee password:', error);
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleDelete = (employeeId: string) => {
         setConfirmDelete({ show: true, employeeId });
+    };
+
+    const handleResetPassword = (employeeId: string) => {
+        setConfirmResetPassword({ show: true, employeeId });
     };
 
     const handlePageChange = (page: number) => {
@@ -1626,6 +1649,7 @@ export const useEmployees = (autoInit: boolean = true) => {
         filters,
         validationErrors,
         confirmDelete,
+        confirmResetPassword,
         showForm,
         editingEmployee,
 
@@ -1639,6 +1663,8 @@ export const useEmployees = (autoInit: boolean = true) => {
         toggleEmployeeStatus,
         handleEdit,
         handleDelete,
+        handleResetPassword,
+        resetEmployeePassword,
         handlePageChange,
         handleLimitChange,
         handleFilterChange,
@@ -1646,7 +1672,8 @@ export const useEmployees = (autoInit: boolean = true) => {
         clearFilters,
         handleAddEmployee,
         closeForm,
-        setConfirmDelete
+        setConfirmDelete,
+        setConfirmResetPassword
     };
 };
 

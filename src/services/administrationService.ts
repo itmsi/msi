@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiDelete, apiPostMultipart } from '@/helpers/apiHelper';
+import { apiGet, apiPost, apiPut, apiDelete, apiPostMultipart, ApiResponse } from '@/helpers/apiHelper';
 import { 
     LegacyMenuFormData, 
     MenuApiResponse, 
@@ -435,6 +435,10 @@ export class employeesService {
 
     static async deleteEmployee(id: string): Promise<{ status: number }> {
         return await apiDelete(`${API_BASE_URL}/employees/${id}`);
+    }
+
+    static async resetEmployeePassword(id: string): Promise<ApiResponse> {
+        return await apiPut(`${API_BASE_URL}/employees/reset_password`, { employee_id: id });
     }
 
     // Toggle employee status (if needed for active/inactive functionality)

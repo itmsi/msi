@@ -520,6 +520,7 @@ export interface EmployeeFormData {
 export interface EmployeeValidationErrors {
     employee_name?: string;
     employee_email?: string;
+    employee_password?: string;
     title_id?: string;
     department_id?: string;
     company_id?: string;

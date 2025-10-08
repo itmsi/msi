@@ -584,14 +584,12 @@ export default function EditEmployee() {
                                                         <div className="flex items-center justify-between p-4">
                                                             <div className="flex items-center gap-3">
                                                                 {/* Select All Switch */}
-                                                                <div onClick={(e) => e.stopPropagation()}>
                                                                     <Switch
                                                                         label="Select All"
                                                                         checked={isAllChecked}
                                                                         className="capitalize font-secondary font-normal"
                                                                         onChange={(checked) => toggleSystemAllPermissions(system.system_id, checked)}
                                                                     />
-                                                                </div>
                                                                 
                                                                 {/* Clickable System Name Area */}
                                                                 <div 
