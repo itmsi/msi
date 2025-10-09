@@ -26,6 +26,7 @@ const CategoryPowerBi = lazy(() => import('@/pages/PowerBI/CategoryPowerBi'));
 const CreatePowerBi = lazy(() => import('@/pages/PowerBI/CreatePowerBi'));
 const EditPowerBi = lazy(() => import('@/pages/PowerBI/EditPowerBi'));
 const TextingPartCatalogue = lazy(() => import('@/pages/PartCatalogue/postDiagram'));
+const Trackme = lazy(() => import('@/pages/Trackme/trackme'));
 // PowerBiForm is imported by Create and Edit components, no need to add here
 
 export type TAppRoute = {
@@ -263,5 +264,12 @@ export const routes: TAppRoute[] = [
         roles: ['Example Part Catalogue'],
         component: TextingPartCatalogue,
         layout: AppLayout,
+    },
+    {
+        path: '/trackme',
+        name: 'Trackme',
+        isProtected: false,
+        roles: ['Trackme'],
+        component: Trackme,
     },
 ];

@@ -74,10 +74,44 @@ export const tableDateFormat = {
     year: 'numeric' as const
 }
 
-export const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
+export const formatDate = (dateString: string, includeTime: boolean = false) => {
+    const date = new Date(dateString);
+    
+    if (includeTime) {
+        return date.toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    }
+    
+    return date.toLocaleDateString('id-ID', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
+    });
+};
+
+// Fungsi tambahan untuk format DateTime yang lebih spesifik
+export const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-GB', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+};
+
+// Fungsi untuk format waktu saja
+export const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
     });
 };
