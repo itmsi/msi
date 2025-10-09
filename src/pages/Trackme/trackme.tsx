@@ -344,6 +344,14 @@ export default function TrackMe() {
         endDate: new Date()
     });
 
+    // Helper function to format date to local ISO string
+    const formatToLocalDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     // View mode state
     const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
     const [selectedItem, setSelectedItem] = useState<OwnTracksItem | null>(null);
@@ -366,15 +374,21 @@ export default function TrackMe() {
     const debouncedUserId = useDebounce(userIdInput, 500);
     const debouncedDeviceId = useDebounce(deviceIdInput, 500);
     
-    // Filters state
-    const [filters, setFilters] = useState<OwnTracksFilters>({
-        page: 1,
-        limit: 100,
-        user_id: '',
-        device_id: '',
-        type: '',
-        start_date: '',
-        end_date: ''
+
+    // Initialize filters with proper date format
+    const [filters, setFilters] = useState<OwnTracksFilters>(() => {
+        const startDate = subDays(new Date(), 7);
+        const endDate = new Date();
+        
+        return {
+            page: 1,
+            limit: 100,
+            user_id: '',
+            device_id: '',
+            type: '',
+            start_date: formatToLocalDate(startDate) + 'T00:00:00+07:00',
+            end_date: formatToLocalDate(endDate) + 'T23:59:59+07:00'
+        };
     });
 
     // Type options for filter
@@ -429,14 +443,6 @@ export default function TrackMe() {
 
     const handleDateRangeChange = (startDate: Date, endDate: Date) => {
         setSelectedDateRange({ startDate, endDate });
-        
-        // Format dates to local timezone YYYY-MM-DD format
-        const formatToLocalDate = (date: Date) => {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        };
         
         const newFilters = {
             ...filters,
