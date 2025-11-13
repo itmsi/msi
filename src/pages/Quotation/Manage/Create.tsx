@@ -1472,7 +1472,7 @@ export default function CreateQuotation() {
                                     </div>
 
                                     {/* Delivery Fee */}
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
                                         <Label htmlFor="manage_quotation_delivery_fee">Delivery Fee</Label>
                                         <Input
                                             id="manage_quotation_delivery_fee"
@@ -1485,7 +1485,7 @@ export default function CreateQuotation() {
                                         />
                                     </div>
                                     {/* Other Fee */}
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
                                         <Label htmlFor="manage_quotation_other">Other Fee</Label>
                                         <Input
                                             id="manage_quotation_other"
@@ -1498,8 +1498,8 @@ export default function CreateQuotation() {
                                         />
                                     </div>
 
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                                        <Label>Grand Total</Label>
+                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-300 pt-4 mt-4'>
+                                        <Label className='font-bold text-lg'>Grand Total</Label>
                                         <Input
                                             type="text"
                                             onKeyPress={handleKeyPress}
@@ -1546,6 +1546,14 @@ export default function CreateQuotation() {
                                             {(parseFloat(formData.manage_quotation_payment_nominal || '0')).toLocaleString('id-ID')}
                                         </div> */}
                                     </div>
+                                    {/* <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                        <Label>
+                                            Remaining Payment
+                                        </Label>
+                                        <div className="text-lg font-medium">
+                                            {formData.manage_quotation_payment_nominal || '0'}
+                                        </div>
+                                    </div> */}
                                 </div>
                             </div>
                         </div>

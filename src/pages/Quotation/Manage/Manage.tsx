@@ -73,13 +73,13 @@ const ManageQuotations: React.FC = () => {
                     <span className="font-medium text-[#0253a5]">{row.manage_quotation_no}</span>
                 ),
             },
-            {
-                name: 'Customer',
-                selector: (row) => row.customer_id,
-                cell: (row) => (
-                    <span className="text-sm">{row.customer_id.substring(0, 20)}...</span>
-                ),
-            },
+            // {
+            //     name: 'Customer',
+            //     selector: (row) => row.customer_id,
+            //     cell: (row) => (
+            //         <span className="text-sm">{row.customer_id.substring(0, 20)}...</span>
+            //     ),
+            // },
             createDateColumn('Quotation Date', 'manage_quotation_date', tableDateFormat),
             createDateColumn('Valid Until', 'manage_quotation_valid_date', tableDateFormat),
             {
