@@ -6,11 +6,6 @@ const SignIn = lazy(() => import('@/pages/AuthPages/SignIn'));
 const SignUp = lazy(() => import('@/pages/AuthPages/SignUp'));
 const Home = lazy(() => import('@/pages/Dashboard/Home'));
 const Blank = lazy(() => import('@/pages/Blank'));
-const FormElements = lazy(() => import('@/pages/Forms/FormElements'));
-const Alerts = lazy(() => import('@/pages/UiElements/Alerts'));
-const Avatars = lazy(() => import('@/pages/UiElements/Avatars'));
-const Badges = lazy(() => import('@/pages/UiElements/Badges'));
-const Buttons = lazy(() => import('@/pages/UiElements/Buttons'));
 const UserProfiles = lazy(() => import('@/pages/UserProfiles'));
 const ManageMenu = lazy(() => import('@/pages/Administration/ManageMenu'));
 const ManageCompany = lazy(() => import('@/pages/Administration/ManageCompany'));
@@ -25,9 +20,28 @@ const ManagePowerBi = lazy(() => import('@/pages/PowerBI/ManagePowerBi'));
 const CategoryPowerBi = lazy(() => import('@/pages/PowerBI/CategoryPowerBi'));
 const CreatePowerBi = lazy(() => import('@/pages/PowerBI/CreatePowerBi'));
 const EditPowerBi = lazy(() => import('@/pages/PowerBI/EditPowerBi'));
-const TextingPartCatalogue = lazy(() => import('@/pages/PartCatalogue/postDiagram'));
 const Trackme = lazy(() => import('@/pages/Trackme/trackme'));
-// PowerBiForm is imported by Create and Edit components, no need to add here
+const ManageCustomers = lazy(() => import('@/pages/Administration/Customers/Manage'));
+const CreateCustomers = lazy(() => import('@/pages/Administration/Customers/Create'));
+const EditCustomers = lazy(() => import('@/pages/Administration/Customers/Edit'));
+const ManageBank = lazy(() => import('@/pages/Administration/Bank/Manage'));
+const CreateBank = lazy(() => import('@/pages/Administration/Bank/Create'));
+const EditBank = lazy(() => import('@/pages/Administration/Bank/Edit'));
+
+const ManageItemsProduct = lazy(() => import('@/pages/Quotation/Product/Manage'));
+const CreateItemsProduct = lazy(() => import('@/pages/Quotation/Product/Create'));
+const EditItemsProduct = lazy(() => import('@/pages/Quotation/Product/Edit'));
+
+const ManageQuotation = lazy(() => import('@/pages/Quotation/Manage/Manage'));
+const CreateQuotation = lazy(() => import('@/pages/Quotation/Manage/Create'));
+// const EditItemsProduct = lazy(() => import('@/pages/Quotation/Product/Edit'));
+// const ManageItemsProduct = lazy(() => import('@/pages/Quotation/Product/Manage'));
+const AccessoriesProduct = lazy(() => import('@/pages/Quotation/Accessories/Manage'));
+
+const CreateTNC = lazy(() => import('@/pages/Quotation/TermCondition/Create'));
+const TNCManage = lazy(() => import('@/pages/Quotation/TermCondition/Manage'));
+const TNCEdit = lazy(() => import('@/pages/Quotation/TermCondition/Edit'));
+// const EditItemsProduct = lazy(() => import('@/pages/Quotation/Product/Edit'));
 
 export type TAppRoute = {
     path: string;
@@ -72,46 +86,6 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/form-elements',
-        name: 'Form Elements',
-        isProtected: true,
-        roles: ['Forms'],
-        component: FormElements,
-        layout: AppLayout,
-    },
-    {
-        path: '/alerts',
-        name: 'Alerts',
-        isProtected: true,
-        roles: ['Alerts'],
-        component: Alerts,
-        layout: AppLayout,
-    },
-    {
-        path: '/avatars',
-        name: 'Avatars',
-        isProtected: true,
-        roles: ['Avatars'],
-        component: Avatars,
-        layout: AppLayout,
-    },
-    {
-        path: '/badge',
-        name: 'Badges',
-        isProtected: true,
-        roles: ['Badges'],
-        component: Badges,
-        layout: AppLayout,
-    },
-    {
-        path: '/buttons',
-        name: 'Buttons',
-        isProtected: true,
-        roles: ['Buttons'],
-        component: Buttons,
-        layout: AppLayout,
-    },
-    {
         path: '/403',
         name: 'Forbidden',
         component: Forbidden,
@@ -120,22 +94,6 @@ export const routes: TAppRoute[] = [
         path: '*',
         name: 'Not Found',
         component: NotFound,
-    },
-    {
-        path: '/settings',
-        name: 'Settings',
-        isProtected: true,
-        roles: ['Settings'],
-        component: Alerts,
-        layout: AppLayout,
-    },
-    {
-        path: '/reports',
-        name: 'Reports',
-        isProtected: true,
-        roles: ['Reports'],
-        component: Alerts,
-        layout: AppLayout,
     },
     {
         path: '/employees',
@@ -258,13 +216,162 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/example-part-catalogue',
-        name: 'Example Part Catalogue',
-        isProtected: false,
-        roles: ['Example Part Catalogue'],
-        component: TextingPartCatalogue,
+        path: '/customers',
+        name: 'Customer Quotation',
+        isProtected: true,
+        roles: ['Customer Quotation'],
+        component: ManageCustomers,
         layout: AppLayout,
     },
+    {
+        path: '/customers/create',
+        name: 'Customer Quotation',
+        isProtected: true,
+        roles: ['Customer Quotation'],
+        requiredPermissions: ['create'],
+        component: CreateCustomers,
+        layout: AppLayout,
+    },
+    {
+        path: '/customers/edit/:id',
+        name: 'Customer Quotation',
+        isProtected: true,
+        roles: ['Customer Quotation'],
+        requiredPermissions: ['update'],
+        component: EditCustomers,
+        layout: AppLayout,
+    },
+    {
+        path: '/bank-accounts',
+        name: 'Bank Quotation',
+        isProtected: true,
+        roles: ['Bank Quotation'],
+        component: ManageBank,
+        layout: AppLayout,
+    },
+    {
+        path: '/bank-accounts/create',
+        name: 'Bank Quotation',
+        isProtected: true,
+        roles: ['Bank Quotation'],
+        requiredPermissions: ['create'],
+        component: CreateBank,
+        layout: AppLayout,
+    },
+    {
+        path: '/bank-accounts/edit/:id',
+        name: 'Bank Quotation',
+        isProtected: true,
+        roles: ['Bank Quotation'],
+        requiredPermissions: ['update'],
+        component: EditBank,
+        layout: AppLayout,
+    },
+
+    
+    {
+        path: '/quotations/products',
+        name: 'Product Quotation',
+        isProtected: true,
+        roles: ['Product Quotation'],
+        component: ManageItemsProduct,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations/products/create',
+        name: 'Product Quotation',
+        isProtected: true,
+        roles: ['Product Quotation'],
+        requiredPermissions: ['create'],
+        component: CreateItemsProduct,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations/products/edit/:id',
+        name: 'Product Quotation',
+        isProtected: true,
+        roles: ['Product Quotation'],
+        requiredPermissions: ['update'],
+        component: EditItemsProduct,
+        layout: AppLayout,
+    },
+
+    {
+        path: '/quotations/manage',
+        name: 'Manage Quotation',
+        isProtected: true,
+        roles: ['Manage Quotation'],
+        component: ManageQuotation,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations/manage/create',
+        name: 'Manage Quotation',
+        isProtected: true,
+        roles: ['Manage Quotation'],
+        requiredPermissions: ['create'],
+        component: CreateQuotation,
+        layout: AppLayout,
+    },
+    
+    // {
+    //     path: '/quotations/products',
+    //     name: 'Product Quotation',
+    //     isProtected: true,
+    //     roles: ['Product Quotation'],
+    //     component: ManageItemsProduct,
+    //     layout: AppLayout,
+    // },
+    {
+        path: '/quotations/accessories',
+        name: 'Accessories Quotation',
+        isProtected: true,
+        roles: ['Accessories Quotation'],
+        requiredPermissions: ['read'],
+        component: AccessoriesProduct,
+        layout: AppLayout,
+    },
+    
+    {
+        path: '/quotations/term-condition/create',
+        name: 'TNC Quotation',
+        isProtected: true,
+        roles: ['TNC Quotation'],
+        requiredPermissions: ['create'],
+        component: CreateTNC,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations/term-condition',
+        name: 'TNC Quotation',
+        isProtected: false,
+        roles: ['TNC Quotation'],
+        requiredPermissions: ['read'],
+        component: TNCManage,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations/term-condition/edit/:id',
+        name: 'TNC Quotation',
+        isProtected: true,
+        roles: ['TNC Quotation'],
+        requiredPermissions: ['update'],
+        component: TNCEdit,
+        layout: AppLayout,
+    },
+
+
+    // {
+    //     path: '/customers/create',
+    //     name: 'Customer Quotation',
+    //     isProtected: true,
+    //     roles: ['Customer Quotation'],
+    //     requiredPermissions: ['create'],
+    //     component: CreateCustomers,
+    //     layout: AppLayout,
+    // },
+
+
     {
         path: '/trackme',
         name: 'Trackme',

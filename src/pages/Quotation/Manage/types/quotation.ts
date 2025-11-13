@@ -1,0 +1,266 @@
+// Quotation Types
+export interface QuotationItemSpecification {
+    manage_quotation_item_specification_label: string;
+    manage_quotation_item_specification_value: string;
+}
+
+export interface QuotationItemAccessory {
+    accessory_id: string;
+    quantity: number;
+    description: string;
+    accessory_part_number: string;
+    accessory_part_name: string;
+    accessory_specification: string;
+    accessory_brand: string;
+    accessory_remark: string;
+    accessory_region: string;
+    accessory_description: string;
+}
+
+export interface QuotationItem {
+    componen_product_id: string;
+    componen_product_name: string;
+    code_unique?: string;
+    segment: string;
+    msi_model: string;
+    wheel_no: string;
+    engine?: string;
+    volume?: string;
+    horse_power?: string;
+    market_price?: string;
+    quantity: number;
+    price: string;
+    product_type?: string;
+    componen_product_unit_model?: string;
+    selling_price_star_1?: string;
+    selling_price_star_2?: string;
+    selling_price_star_3?: string;
+    selling_price_star_4?: string;
+    selling_price_star_5?: string;
+    total: string;
+    description: string;
+    image: string;
+    manage_quotation_item_accessories?: QuotationItemAccessory[]; // Nested accessories
+    manage_quotation_item_specifications?: QuotationItemSpecification[]; // Nested specifications
+}
+
+export interface QuotationAccessory {
+    accessory_id: string;
+    accessory_part_name: string;
+    accessory_part_number: string;
+    accessory_brand: string;
+    accessory_specification: string;
+    quantity: number;
+    description: string;
+}
+
+export interface QuotationFormData {
+    customer_id: string;
+    employee_id: string;
+    bank_account_id?: string;
+    bank_account_name?: string;
+    bank_account_number?: string;
+    bank_account_type?: string;
+    bank_account_bank_name?: string; // Added for API payload
+    manage_quotation_date: string;
+    manage_quotation_valid_date: string;
+    manage_quotation_grand_total?: string;
+    manage_quotation_ppn?: string;
+    manage_quotation_delivery_fee?: string;
+    manage_quotation_other?: string;
+    manage_quotation_payment_presentase?: string;
+    manage_quotation_payment_nominal?: string;
+    manage_quotation_description?: string;
+    manage_quotation_shipping_term?: string;
+    manage_quotation_franco?: string;
+    manage_quotation_lead_time?: string;
+    term_content_id?: string;
+    term_content_directory?: string;
+    include_aftersales_page?: boolean; // Added for API payload
+    include_msf_page?: boolean;        // Added for API payload
+    status: 'submit' | 'draft';
+    manage_quotation_items: QuotationItem[];
+    manage_quotation_item_accessories: QuotationAccessory[];
+}
+
+// Select option interfaces
+export interface CustomerOption {
+    value: string;
+    label: string;
+    email?: string;
+    phone?: string;
+}
+
+export interface EmployeeOption {
+    value: string;
+    label: string;
+    email?: string;
+    department?: string;
+}
+
+export interface ProductOption {
+    value: string;
+    label: string;
+    code: string;
+    price?: string;
+    description?: string;
+}
+
+export interface AccessoryOption {
+    value: string;
+    label: string;
+    code: string;
+    price?: string;
+    description?: string;
+}
+
+export interface BankOption {
+    value: string;
+    label: string;
+    bank_account_name: string;
+    bank_account_number: string;
+    bank_account_type: string;
+}
+
+// API Response types
+export interface CustomerResponse {
+    success: boolean;
+    data: {
+        data: Array<{
+            customer_id: string;
+            customer_name: string;
+            customer_email: string;
+            customer_phone: string;
+        }>;
+        pagination: {
+            current_page: number;
+            per_page: number;
+            total: number;
+        };
+    };
+}
+
+export interface EmployeeResponse {
+    success: boolean;
+    data: {
+        data: Array<{
+            employee_id: string;
+            employee_name: string;
+            employee_email: string;
+            department_name?: string;
+        }>;
+        pagination: {
+            current_page: number;
+            per_page: number;
+            total: number;
+        };
+    };
+}
+
+export interface SpecificationResponse {
+    success: boolean;
+    data: Array<{
+        specification_id: string;
+        specification_name: string;
+        specification_code: string;
+        specification_price?: string;
+        specification_description?: string;
+    }>;
+}
+
+export interface AccessoriesResponse {
+    success: boolean;
+    data: Array<{
+        accessories_id: string;
+        accessories_name: string;
+        accessories_code: string;
+        accessories_price?: string;
+        accessories_description?: string;
+    }>;
+}
+
+export interface BankResponse {
+    success: boolean;
+    data: {
+        data: Array<{
+            bank_account_id: string;
+            bank_account_name: string;
+            bank_account_number: string;
+            bank_account_type: string;
+        }>;
+        pagination: {
+            current_page: number;
+            per_page: number;
+            total: number;
+        };
+    };
+}
+
+export interface QuotationValidationErrors {
+    customer_id?: string;
+    employee_id?: string;
+    bank_account_id?: string;
+    manage_quotation_date?: string;
+    manage_quotation_valid_date?: string;
+    manage_quotation_delivery_fee?: string;
+    manage_quotation_other?: string;
+    manage_quotation_payment_presentase?: string;
+    manage_quotation_description?: string;
+    manage_quotation_items?: string;
+}
+
+export interface QuotationRequest {
+    page: number;
+    limit: number;
+    sort_order: 'asc' | 'desc';
+    search: string;
+}
+export interface QuotationPagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+export interface ManageQuotationListResponse {
+    status: boolean;
+    message: string;
+    data: {
+        items: ManageQuotationItem[];
+        pagination: QuotationPagination;
+    };
+}
+
+export interface ManageQuotationItem {
+    manage_quotation_id: string;
+    manage_quotation_no: string;
+    customer_id: string;
+    employee_id: string;
+    manage_quotation_date: string;
+    manage_quotation_valid_date: string;
+    manage_quotation_grand_total: string;
+    manage_quotation_ppn: string;
+    manage_quotation_delivery_fee: string;
+    manage_quotation_other: string;
+    manage_quotation_payment_presentase: string;
+    manage_quotation_payment_nominal: string;
+    manage_quotation_description: string | null;
+    manage_quotation_shipping_term: string | null;
+    manage_quotation_franco: string | null;
+    manage_quotation_lead_time: string | null;
+    bank_account_name: string;
+    bank_account_number: string;
+    bank_account_bank_name: string;
+    term_content_id: string;
+    term_content_directory: string;
+    include_aftersales_page: boolean;
+    include_msf_page: boolean;
+    status: string;
+    created_by: string;
+    updated_by: string | null;
+    deleted_by: string | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    is_delete: boolean;
+}

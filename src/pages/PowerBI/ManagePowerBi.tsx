@@ -1,4 +1,4 @@
-import { useDashboard } from "@/hooks/usePowerBI";
+import { useDashboard } from "@/hooks/powerbi/usePowerBI";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdAdd, MdEdit, MdDeleteOutline, MdSearch } from "react-icons/md";
@@ -64,13 +64,11 @@ export default function ManagePowerBi() {
         {
             name: 'Title',
             selector: row => row.title,
-            sortable: true,
         },
         {
             name: 'Category',
             selector: row => row.category_name,
             cell: (row: PowerBIDashboard) => <CategoryBadge category={row.category_name} showText={true} size="sm" />,
-            sortable: true,
         },
         {
             name: 'Description',

@@ -20,6 +20,7 @@ interface InputProps {
     error?: boolean;
     onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     hint?: string;
+    readonly?: boolean;
 }
 
 const Input: FC<InputProps> = ({
@@ -39,6 +40,7 @@ const Input: FC<InputProps> = ({
     error = false,
     onKeyPress,
     hint,
+    readonly = false,
 }) => {
     let inputClasses = `font-secondary h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3:text-white/30 ${className}`;
 
@@ -48,6 +50,8 @@ const Input: FC<InputProps> = ({
         inputClasses += `  border-error-500 focus:border-error-300 focus:ring-error-500/20:border-error-800`;
     } else if (success) {
         inputClasses += `  border-success-500 focus:border-success-300 focus:ring-success-500/20:border-success-800`;
+    } else if (readonly) {
+        inputClasses += `  border-gray-300 border-0 border-b-1 rounded-none focus:border-gray-300 focus:ring-gray-300`;
     } else {
         inputClasses += ` bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20:border-brand-800`;
     }
@@ -66,6 +70,7 @@ const Input: FC<InputProps> = ({
                 step={step}
                 maxLength={maxLength}
                 disabled={disabled}
+                readOnly={readonly}
                 className={clsx(
                     twMerge(
                         inputClasses,

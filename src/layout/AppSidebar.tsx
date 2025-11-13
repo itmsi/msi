@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
-import { GrLineChart } from "react-icons/gr";
+import { GrDocumentVerified, GrLineChart } from "react-icons/gr";
 
 // Assume these icons are imported from an icon library
 import {
-    BoxCubeIcon,
     ChevronDownIcon,
     GridIcon,
     HorizontaLDots,
@@ -48,22 +47,20 @@ const navItems: NavItem[] = [
             { name: "Manage", path: "/power-bi/manage", allowedRoles: ['Manage Power BI'], },
         ],
     },
+    {
+        name: "Quotation",
+        icon: <GrDocumentVerified />,
+        allowedRoles: ['Product Quotation', 'Accessories Quotation', 'Manage Quotation'],
+        subItems: [
+            { name: "Manage", path: "/quotations/manage", allowedRoles: ['Manage Quotation'], },
+            { name: "Product", path: "/quotations/products", allowedRoles: ['Product Quotation'], },
+            { name: "Accessories", path: "/quotations/accessories", allowedRoles: ['Accessories Quotation'], },
+            { name: "Term Condition", path: "/quotations/term-condition", allowedRoles: ['TNC Quotation'], }
+        ],
+    }
 ];
 
 const othersItems: NavItem[] = [
-    {
-        icon: <BoxCubeIcon />,
-        name: "UI Elements",
-        allowedRoles: ['Alerts', 'Avatar', 'Badge', 'Buttons', 'Images', 'Videos'], // Kosongkan karena tidak ada di auth_menu
-        subItems: [
-            { name: "Alerts", path: "/alerts", allowedRoles: ['Alerts'], },
-            { name: "Avatar", path: "/avatars", allowedRoles: ['Avatar'], },
-            { name: "Badge", path: "/badge", allowedRoles: ['Badge'], },
-            { name: "Buttons", path: "/buttons", allowedRoles: ['Buttons'], },
-            { name: "Images", path: "/images", allowedRoles: ['Images'], },
-            { name: "Videos", path: "/videos", allowedRoles: ['Videos'], },
-        ],
-    },
     {
         icon: <PlugInIcon />,
         name: "Authentication",
@@ -107,8 +104,26 @@ const othersItems: NavItem[] = [
                 path: "/roles",
                 allowedRoles: ['Roles'],
             },
-            { name: "Menu", path: "/menu", allowedRoles: ['Menu'], },
-            { name: "Sign Up", path: "/signup", allowedRoles: ['Sign Up'], },
+            { 
+                name: "Customers", 
+                path: "/customers", 
+                allowedRoles: ['Customer Quotation']
+            },
+            { 
+                name: "Bank Accounts", 
+                path: "/bank-accounts", 
+                allowedRoles: ['Bank Quotation']
+            },
+            { 
+                name: "Menu", 
+                path: "/menu", 
+                allowedRoles: ['Menu'], 
+            },
+            { 
+                name: "Sign Up", 
+                path: "/signup", 
+                allowedRoles: ['Sign Up'], 
+            },
         ],
     },
 ];

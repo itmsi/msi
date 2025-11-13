@@ -12,7 +12,7 @@ import Input from "@/components/form/input/InputField";
 import { Company } from "@/types/administration";
 import { createActionsColumn, createDateColumn } from "@/components/ui/table/columnUtils";
 import { tableDateFormat } from "@/helpers/generalHelper";
-import { PermissionButton, PermissionGate } from "@/components/common/PermissionComponents";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 export default function ManageCompany() {
     const {

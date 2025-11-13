@@ -10,9 +10,9 @@ import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import { Department } from "@/types/administration";
-import { createActionsColumn, createDateColumn, createSerialNumberColumn } from "@/components/ui/table/columnUtils";
+import { createActionsColumn, createDateColumn } from "@/components/ui/table/columnUtils";
 import { useEffect, useState } from "react";
-import { PermissionButton, PermissionGate } from "@/components/common/PermissionComponents";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 export default function ManageDepartment() {
     const {
@@ -95,7 +95,6 @@ export default function ManageDepartment() {
 
     // Department columns for DataTable
     const departmentColumns: TableColumn<Department>[] = [
-        createSerialNumberColumn(pagination || { current_page: 1, per_page: 10 }),
         {
             name: 'Department Name',
             selector: (row: Department) => row.department_name,
@@ -210,7 +209,7 @@ export default function ManageDepartment() {
 
                 {/* Data Table */}
                 <div className="p-6 font-secondary">
-                    {(filters.search || filters.sort_by || filters.sort_order) && (
+                    {/* {(filters.search || filters.sort_by || filters.sort_order) && (
                         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 text-sm text-blue-700">
@@ -241,7 +240,7 @@ export default function ManageDepartment() {
                                 </Button>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
                     <CustomDataTable
                         columns={departmentColumns}

@@ -8,7 +8,7 @@ import { Modal } from "@/components/ui/modal";
 import CustomDataTable, { createActionsColumn } from "@/components/ui/table";
 import Button from "@/components/ui/button/Button";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
-import { useDashboard } from "@/hooks/usePowerBI";
+import { useDashboard } from "@/hooks/powerbi/usePowerBI";
 import PageMeta from "@/components/common/PageMeta";
 import { PermissionGate } from "@/components/common/PermissionComponents";
 

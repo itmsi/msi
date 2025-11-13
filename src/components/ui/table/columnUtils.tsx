@@ -95,7 +95,8 @@ export const createDateColumn = (
             : date.toLocaleDateString();
     },
     center: true,
-    width: '120px',
+    wrap: true,
+    width: '150px',
 });
 
 export const createActionsColumn = (actions: Array<{

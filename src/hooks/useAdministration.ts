@@ -1294,12 +1294,10 @@ export const useEmployees = (autoInit: boolean = true) => {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [employee, setEmployee] = useState<Employee | null>(null);
     const [pagination, setPagination] = useState<EmployeePagination>({
-        current_page: 1,
-        per_page: 10,
+        page: 1,
+        limit: 10,
         total: 0,
-        total_pages: 1,
-        has_next_page: false,
-        has_prev_page: false
+        totalPages: 1
     });
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState<EmployeeFormData>({
@@ -1328,7 +1326,7 @@ export const useEmployees = (autoInit: boolean = true) => {
     const lastRequestRef = useRef<number>(0);
     const debouncedFetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const debouncedFetch = useCallback((params: EmployeeListRequest) => {
+    const debouncedFetch = useCallback((params: EmployeeListRequest, appendData: boolean = false) => {
         if (debouncedFetchTimeoutRef.current) {
             clearTimeout(debouncedFetchTimeoutRef.current);
         }
@@ -1346,7 +1344,13 @@ export const useEmployees = (autoInit: boolean = true) => {
                 const data = await employeesService.getEmployees(params);
                 
                 if (requestId === lastRequestRef.current) {
-                    setEmployees(data.data.data);
+                    // For infinite scroll (appendData = true), combine existing data with new data
+                    // For regular fetch (appendData = false), replace data
+                    if (appendData && params.page && params.page > 1) {
+                        setEmployees(prev => [...prev, ...data.data.data]);
+                    } else {
+                        setEmployees(data.data.data);
+                    }
                     setPagination(data.data.pagination);
                 }
             } catch (error) {
@@ -1358,10 +1362,10 @@ export const useEmployees = (autoInit: boolean = true) => {
         }, 300);
     }, []);
 
-    const fetchEmployees = useCallback((page?: number, limit?: number) => {
+    const fetchEmployees = useCallback((page?: number, limit?: number, appendData: boolean = false) => {
         const params: EmployeeListRequest = {
-            page: page || pagination.current_page,
-            limit: limit || pagination.per_page,
+            page: page !== undefined ? page : pagination.page,
+            limit: limit !== undefined ? limit : pagination.limit,
             search: filters.search,
             sort_by: filters.sort_by,
             sort_order: filters.sort_order,
@@ -1370,8 +1374,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             department_name: filters.department_name
         };
 
-        debouncedFetch(params);
-    }, [debouncedFetch, pagination.current_page, pagination.per_page, filters]);
+        debouncedFetch(params, appendData);
+    }, [debouncedFetch, pagination.page, pagination.limit, filters]);
 
     const getEmployeeById = async (id: string) => {
         setIsLoading(true);
@@ -1509,17 +1513,17 @@ export const useEmployees = (autoInit: boolean = true) => {
     };
 
     const handlePageChange = (page: number) => {
-        setPagination(prev => ({ ...prev, current_page: page }));
+        fetchEmployees(page, pagination.limit, false);
     };
 
     const handleLimitChange = (limit: number) => {
-        setPagination(prev => ({ ...prev, per_page: limit, current_page: 1 }));
+        fetchEmployees(1, limit, false);
     };
 
     const handleFilterChange = (key: keyof EmployeeFilters, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
         if (key !== 'search') {
-            setPagination(prev => ({ ...prev, current_page: 1 }));
+            setPagination(prev => ({ ...prev, page: 1 }));
         }
     };
 
@@ -1541,7 +1545,7 @@ export const useEmployees = (autoInit: boolean = true) => {
             // Create params with the new value instead of using stale state
             const params: EmployeeListRequest = {
                 page: 1, // Reset to first page when filtering
-                limit: pagination.per_page,
+                limit: pagination.limit,
                 search: filterKey === 'search' ? value : filters.search,
                 sort_by: filterKey === 'sort_by' ? value : filters.sort_by,
                 sort_order: filterKey === 'sort_order' ? value : filters.sort_order,
@@ -1551,11 +1555,11 @@ export const useEmployees = (autoInit: boolean = true) => {
             };
             
             // Update pagination to first page if filtering
-            setPagination(prev => ({ ...prev, current_page: 1 }));
+            setPagination(prev => ({ ...prev, page: 1 }));
             
-            debouncedFetch(params);
+            debouncedFetch(params, false); // Don't append data for search
         }, 500);
-    }, [pagination.per_page, filters, debouncedFetch]);
+    }, [pagination.limit, filters, debouncedFetch]);
 
     const handleSearchChange = useCallback((value: string) => {
         handleFilterChangeDebounced('search', value);
@@ -1579,12 +1583,12 @@ export const useEmployees = (autoInit: boolean = true) => {
         });
         
         // Reset pagination
-        setPagination(prev => ({ ...prev, current_page: 1 }));
+        setPagination(prev => ({ ...prev, page: 1 }));
         
         // Immediately fetch with cleared filters
         const clearedParams: EmployeeListRequest = {
             page: 1,
-            limit: pagination.per_page,
+            limit: pagination.limit,
             search: "",
             sort_by: "",
             sort_order: "",
@@ -1593,7 +1597,7 @@ export const useEmployees = (autoInit: boolean = true) => {
             department_name: ""
         };
         
-        debouncedFetch(clearedParams);
+        debouncedFetch(clearedParams, false);
     };
 
     const handleAddEmployee = () => {
@@ -1626,7 +1630,8 @@ export const useEmployees = (autoInit: boolean = true) => {
         if (autoInit) {
             fetchEmployees();
         }
-    }, [fetchEmployees, autoInit]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [autoInit]);
 
     useEffect(() => {
         return () => {

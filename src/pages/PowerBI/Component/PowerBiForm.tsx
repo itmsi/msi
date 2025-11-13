@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDashboard } from "@/hooks/usePowerBI";
+import { useDashboard } from "@/hooks/powerbi/usePowerBI";
 import { useEmployees } from "@/hooks/useAdministration";
 import { useAuth } from "@/context/AuthContext";
 import Input from "@/components/form/input/InputField";

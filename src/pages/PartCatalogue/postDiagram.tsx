@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { MdZoomIn, MdZoomOut, MdCenterFocusStrong } from "react-icons/md";
 import { TableColumn } from 'react-data-table-component';
 import { CustomDataTable } from "@/components/ui/table";
-import PartCataloguePage from ".";
 
 interface Part {
     id: string;

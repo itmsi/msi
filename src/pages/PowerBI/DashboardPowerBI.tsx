@@ -12,7 +12,7 @@ import {
 import { LuChartNoAxesCombined } from "react-icons/lu";
 import { FaMagnifyingGlassChart } from "react-icons/fa6";
 import { HiSpeakerphone } from "react-icons/hi";
-import { useDashboardView } from '../../hooks/usePowerBI';
+import { useDashboardView } from '../../hooks/powerbi/usePowerBI';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { PowerBIDashboard } from '@/types/powerbi';
 import Input from '@/components/form/input/InputField';

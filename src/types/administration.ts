@@ -559,12 +559,10 @@ export interface EmployeeListResponse {
 
 // Employee pagination
 export interface EmployeePagination {
-    current_page: number;
-    per_page: number;
+    page: number;
+    limit: number;
     total: number;
-    total_pages: number;
-    has_next_page: boolean;
-    has_prev_page: boolean;
+    totalPages: number;
 }
 
 // Employee filters

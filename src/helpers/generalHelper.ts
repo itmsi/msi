@@ -48,6 +48,39 @@ export const parseNumberInput = (value: string | undefined | null, isZero?: bool
     }
     return value;
 };
+
+export const formatNumberInput = (value: string | number | undefined | null): string => {
+    if (!value && value !== 0) return '';
+    const cleanFormatValue = value.toString().replace(/[^\d]/g, '');
+    if (!cleanFormatValue) return '';
+    return new Intl.NumberFormat('id-ID').format(parseInt(cleanFormatValue));
+};
+
+export const parseFormatNumber = (formatValue: string): string => {
+    if (!formatValue) return '';
+    return formatValue.replace(/\./g, '');
+};
+
+export const resetFormatNumbers = (
+    formData: any, 
+    numericFields: string[] = []
+): any => {
+    const resetData = { ...formData };
+    const fieldsToReset = numericFields.length > 0 
+        ? numericFields 
+        : Object.keys(resetData).filter(key => {
+            const value = resetData[key];
+            return typeof value === 'string' && /^\d{1,3}(\.\d{3})*$/.test(value);
+        });
+    
+    fieldsToReset.forEach(field => {
+        if (resetData[field]) {
+            resetData[field] = parseFormatNumber(resetData[field].toString());
+        }
+    });
+    
+    return resetData;
+};
 export const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (
         [8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
@@ -62,6 +95,16 @@ export const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
         e.preventDefault();
     }
+};
+export const handlePercentageInput = (
+    inputValue: string, 
+    min: number = 0, 
+    max: number = 100
+): string => {
+    const numericValue = inputValue.replace(/[^\d]/g, '');
+    const percentage = parseInt(numericValue) || 0;
+    const validatedPercentage = Math.min(max, Math.max(min, percentage));
+    return validatedPercentage.toString();
 };
 
 export const hasChanged = <T extends object>(oldData: T, newData: Partial<T>, keys: (keyof T)[]): boolean => {
