@@ -68,7 +68,7 @@ export class QuotationService {
         return response.data as ManageQuotationListResponse;
     }
 
-    static async deleteAccessories(accessoryId: string): Promise<{ status: number }> {
-        return await apiDelete(`${API_BASE_URL}/quotation/manage-quotation/${accessoryId}`);
+    static async deleteQuotation(quotationId: string): Promise<{ status: number }> {
+        return await apiDelete(`${API_BASE_URL}/quotation/manage-quotation/${quotationId}`);
     }
 }

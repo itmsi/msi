@@ -84,12 +84,32 @@ export const useQuotation = () => {
         }, 500);
     }, [pagination.limit]);
 
+    const deleteQuotation = useCallback(async (quotation_id: string) => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+            await QuotationService.deleteQuotation(quotation_id);
+            // Remove from local state
+            setQuotations(prev => prev.filter(quotation => quotation.manage_quotation_id !== quotation_id));
+            return true;
+        } catch (err) {
+            setError('Failed to delete quotations');
+            console.error('Delete quotations error:', err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+
     return {
         quotations,
         pagination,
         loading,
         error,
         filters,
+        deleteQuotation,
         fetchQuotations,
         handleSearchChange,
     };

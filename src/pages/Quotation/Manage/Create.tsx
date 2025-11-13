@@ -809,54 +809,48 @@ export default function CreateQuotation() {
         }
 
         try {
-            // Update formData with final calculations and status before submission
-            setFormData(prev => {
-                const finalCalculations = calculateGrandTotal(prev);
-                
-                let updatedFormData = {
-                    ...prev,
-                    status,
-                    manage_quotation_grand_total: finalCalculations.grandTotal,
-                    manage_quotation_payment_nominal: finalCalculations.paymentNominal
-                };
-                
-                // Clean up manage_quotation_items - remove unnecessary fields for API
-                const cleanedItems = updatedFormData.manage_quotation_items.map(item => {
-                    const { 
-                        product_type, 
-                        image, 
-                        componen_product_unit_model, 
-                        selling_price_star_1, 
-                        selling_price_star_2, 
-                        selling_price_star_3, 
-                        selling_price_star_4, 
-                        selling_price_star_5,
-                        ...cleanedItem 
-                    } = item;
-                    return cleanedItem;
-                });
-                
-                // Prepare API payload
-                const apiPayload: any = {
-                    ...updatedFormData,
-                    manage_quotation_items: cleanedItems
-                };
-                
-                // Clean up number formatting for API
-                const finalPayload = resetQuotationFormattedNumbers(apiPayload);
-                
-                // Submit to API
-                createQuotation(finalPayload).then(response => {
-                    if (response.success) {
-                        toast.success(`Quotation ${status === 'submit' ? 'submitted' : 'saved as draft'} successfully`);
-                        navigate('/quotations/manage');
-                    }
-                }).catch((error: any) => {
-                    toast.error(error.message || 'Failed to save quotation');
-                });
-
-                return updatedFormData;
+            // Calculate final values
+            const finalCalculations = calculateGrandTotal(formData);
+            
+            const updatedFormData = {
+                ...formData,
+                status,
+                manage_quotation_grand_total: finalCalculations.grandTotal,
+                manage_quotation_payment_nominal: finalCalculations.paymentNominal
+            };
+            
+            // Clean up manage_quotation_items - remove unnecessary fields for API
+            const cleanedItems = updatedFormData.manage_quotation_items.map(item => {
+                const { 
+                    product_type, 
+                    image, 
+                    componen_product_unit_model, 
+                    selling_price_star_1, 
+                    selling_price_star_2, 
+                    selling_price_star_3, 
+                    selling_price_star_4, 
+                    selling_price_star_5,
+                    ...cleanedItem 
+                } = item;
+                return cleanedItem;
             });
+            
+            // Prepare API payload
+            const apiPayload: any = {
+                ...updatedFormData,
+                manage_quotation_items: cleanedItems
+            };
+            
+            // Clean up number formatting for API
+            const finalPayload = resetQuotationFormattedNumbers(apiPayload);
+            
+            // Submit to API
+            const response = await createQuotation(finalPayload);
+            
+            if (response.success) {
+                toast.success(`Quotation ${status === 'submit' ? 'submitted' : 'saved as draft'} successfully`);
+                navigate('/quotations/manage');
+            }
         } catch (error: any) {
             toast.error(error.message || 'Failed to save quotation');
         }

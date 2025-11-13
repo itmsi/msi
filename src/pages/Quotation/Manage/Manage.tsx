@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { MdAdd, MdEdit, MdSearch, MdClear, MdVisibility } from 'react-icons/md';
+import { MdAdd, MdEdit, MdSearch, MdClear, MdVisibility, MdDeleteOutline } from 'react-icons/md';
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useQuotationManagement } from './hooks/useQuotationManagement';
@@ -12,6 +12,7 @@ import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { createActionsColumn, createDateColumn } from '@/components/ui/table';
 import { tableDateFormat } from '@/helpers/generalHelper';
+import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 
 const ManageQuotations: React.FC = () => {
     const navigate = useNavigate();
@@ -23,6 +24,7 @@ const ManageQuotations: React.FC = () => {
         pagination,
         loading,
         error,
+        confirmDelete,
         handlePageChange,
         handleRowsPerPageChange,
         handleSearchChange,
@@ -30,7 +32,10 @@ const ManageQuotations: React.FC = () => {
         handleClearFilters,
         handleFilterChange,
         handleEdit,
-        handleView
+        handleView,
+        handleDelete,
+        confirmDeleteQuotations,
+        cancelDelete,
     } = useQuotationManagement();
 
     // Helper function to format currency
@@ -97,24 +102,31 @@ const ManageQuotations: React.FC = () => {
                 center: true,
             },
             createDateColumn('Created At', 'created_at', tableDateFormat),
-            // createActionsColumn([
-            //     {
-            //         icon: MdVisibility,
-            //         onClick: handleView,
-            //         className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
-            //         tooltip: 'View',
-            //         permission: 'read',
-            //     },
-            //     {
-            //         icon: MdEdit,
-            //         onClick: handleEdit,
-            //         className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-            //         tooltip: 'Edit',
-            //         permission: 'update',
-            //     },
-            // ]),
+            createActionsColumn([
+                // {
+                //     icon: MdVisibility,
+                //     onClick: handleView,
+                //     className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                //     tooltip: 'View',
+                //     permission: 'read',
+                // },
+                // {
+                //     icon: MdEdit,
+                //     onClick: handleEdit,
+                //     className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                //     tooltip: 'Edit',
+                //     permission: 'update',
+                // },
+                {
+                    icon: MdDeleteOutline,
+                    onClick: handleDelete,
+                    className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                    tooltip: 'Delete',
+                    permission: 'delete'
+                }
+            ]),
         ],
-        [handleView, handleEdit]
+        [handleView, handleEdit, handleDelete]
     );
 
     const SearchAndFilters = useMemo(() => (
@@ -247,6 +259,17 @@ const ManageQuotations: React.FC = () => {
                     />
                 </div>
             </div>
+            
+            {/* Delete Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={confirmDelete.show}
+                onClose={cancelDelete}
+                onConfirm={confirmDeleteQuotations}
+                title="Delete Quotation"
+                message="Are you sure you want to delete this quotation? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+            />
         </>
     );
 };
