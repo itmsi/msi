@@ -256,6 +256,7 @@ const ManageQuotations: React.FC = () => {
                         striped={false}
                         persistTableHead
                         borderRadius="8px"
+                        onRowClicked={handleEdit}
                     />
                 </div>
             </div>

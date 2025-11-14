@@ -53,7 +53,7 @@ export const useQuotationManagement = () => {
 
     // Navigation handlers
     const handleEdit = useCallback((quotation: any) => {
-        navigate(`/quotations/edit/${quotation.manage_quotation_id}`);
+        navigate(`/quotations/manage/edit/${quotation.manage_quotation_id}`);
     }, [navigate]);
 
     const handleView = useCallback((quotation: any) => {

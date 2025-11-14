@@ -79,7 +79,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
 
     useEffect(() => {
         if (initialData) {
-            const initializedAccessories = (initialData as any).accessories?.map((acc: any, index: number) => ({
+            const initializedAccessories = (initialData as any).manage_quotation_item_accessories?.map((acc: any, index: number) => ({
                 accessory_id: acc.id || acc.accessory_id || `acc_${index}`,
                 accessory_part_name: acc.componen_product_name || acc.accessory_part_name || '',
                 accessory_part_number: acc.code_unique || acc.accessory_part_number || '',
@@ -137,20 +137,26 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
 
     const editableSpecifications = React.useMemo(() => {
         if (!initialData) return [];
-        
+
         const existingSpecs = initialData.componen_product_specifications || [];
         const editableSpecs = [];
         
+        // Map by matching label names, not by index
         for (let i = 0; i < defaultSpecifications.length; i++) {
             const defaultSpec = defaultSpecifications[i];
-            const existingSpec = existingSpecs[i];
+            
+            // Find matching specification by label name
+            const existingSpec = existingSpecs.find(spec => 
+                spec.componen_product_specification_label === defaultSpec.label ||
+                spec.specification_label_name === defaultSpec.label
+            );
             
             editableSpecs.push({
                 componen_product_specification_label: defaultSpec.label,
-                componen_product_specification_value: existingSpec?.componen_product_specification_value || defaultSpec.value || '',
+                componen_product_specification_value: existingSpec?.componen_product_specification_value || existingSpec?.specification_value_name || defaultSpec.value || '',
                 componen_product_specification_description: existingSpec?.componen_product_specification_description || null,
                 specification_label_name: defaultSpec.label,
-                specification_value_name: existingSpec?.componen_product_specification_value || defaultSpec.value || ''
+                specification_value_name: existingSpec?.componen_product_specification_value || existingSpec?.specification_value_name || defaultSpec.value || ''
             });
         }
         

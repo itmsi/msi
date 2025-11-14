@@ -83,30 +83,6 @@ export class CustomerUtilityService {
         return 'incomplete';
     }
 
-    static searchCustomersLocally(customers: Customer[], searchTerm: string): Customer[] {
-        if (!searchTerm.trim()) return customers;
-
-        const term = searchTerm.toLowerCase();
-        
-        return customers.filter(customer => 
-            (customer.customer_name || '').toLowerCase().includes(term) ||
-            (customer.customer_email || '').toLowerCase().includes(term) ||
-            (customer.customer_phone || '').includes(term) ||
-            (customer.customer_address || '').toLowerCase().includes(term)
-        );
-    }
-
-    static sortCustomers(customers: Customer[], field: keyof Customer, order: 'asc' | 'desc' = 'asc'): Customer[] {
-        return [...customers].sort((a, b) => {
-            const aValue = (a[field] || '').toString().toLowerCase();
-            const bValue = (b[field] || '').toString().toLowerCase();
-
-            if (aValue < bValue) return order === 'asc' ? -1 : 1;
-            if (aValue > bValue) return order === 'asc' ? 1 : -1;
-            return 0;
-        });
-    }
-
     private static isValidEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);

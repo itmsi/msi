@@ -264,3 +264,84 @@ export interface ManageQuotationItem {
     deleted_at: string | null;
     is_delete: boolean;
 }
+export interface ManageQuotationResponse {
+    status: boolean;
+    message: string;
+    data: ManageQuotationData;
+}
+
+export interface ManageQuotationData {
+    manage_quotation_id: string;
+    manage_quotation_no: string;
+    customer_id: string;
+    employee_id: string;
+    manage_quotation_date: string;
+    manage_quotation_valid_date: string;
+    manage_quotation_grand_total: string;
+    manage_quotation_ppn: string;
+    manage_quotation_delivery_fee: string;
+    manage_quotation_other: string;
+    manage_quotation_payment_presentase: string;
+    manage_quotation_payment_nominal: string;
+    manage_quotation_description: string | null;
+    created_at: string;
+    created_by: string;
+    updated_at: string;
+    updated_by: string | null;
+    deleted_at: string | null;
+    deleted_by: string | null;
+    is_delete: boolean;
+    status: string;
+    manage_quotation_shipping_term: string;
+    manage_quotation_franco: string;
+    manage_quotation_lead_time: string;
+    term_content_directory: string;
+    term_content_payload?: string;
+    term_content_id: string;
+    include_aftersales_page: boolean;
+    include_msf_page: boolean;
+    bank_account_name: string;
+    bank_account_number: string;
+    bank_account_bank_name: string;
+
+    manage_quotation_items: ManageQuotationItem[];
+}
+export interface ManageQuotationItem {
+    manage_quotation_item_id: string;
+    manage_quotation_id: string;
+    componen_product_id: string;
+    code_unique: string;
+    segment: string;
+    msi_model: string;
+    wheel_no: string;
+    engine: string;
+    volume: string;
+    horse_power: string;
+    market_price: string;
+    componen_product_name: string;
+    quantity: number;
+    price: string;
+    total: string;
+    description: string;
+    created_by: string;
+    updated_by: string | null;
+    deleted_by: string | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    is_delete: boolean;
+
+    cp_code_unique: string;
+    cp_segment: string;
+    cp_msi_model: string;
+    cp_wheel_no: string;
+    cp_engine: string;
+    cp_volume: string;
+    cp_horse_power: string;
+    cp_market_price: string;
+    cp_componen_product_name: string;
+    cp_image: string;
+
+    manage_quotation_item_accessories: QuotationItemAccessory[];
+    manage_quotation_item_specifications: QuotationItemSpecification[];
+}

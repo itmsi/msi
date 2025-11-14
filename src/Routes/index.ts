@@ -34,7 +34,7 @@ const EditItemsProduct = lazy(() => import('@/pages/Quotation/Product/Edit'));
 
 const ManageQuotation = lazy(() => import('@/pages/Quotation/Manage/Manage'));
 const CreateQuotation = lazy(() => import('@/pages/Quotation/Manage/Create'));
-// const EditItemsProduct = lazy(() => import('@/pages/Quotation/Product/Edit'));
+const EditQuotation = lazy(() => import('@/pages/Quotation/Manage/Edit'));
 // const ManageItemsProduct = lazy(() => import('@/pages/Quotation/Product/Manage'));
 const AccessoriesProduct = lazy(() => import('@/pages/Quotation/Accessories/Manage'));
 
@@ -313,15 +313,15 @@ export const routes: TAppRoute[] = [
         component: CreateQuotation,
         layout: AppLayout,
     },
-    
-    // {
-    //     path: '/quotations/products',
-    //     name: 'Product Quotation',
-    //     isProtected: true,
-    //     roles: ['Product Quotation'],
-    //     component: ManageItemsProduct,
-    //     layout: AppLayout,
-    // },
+    {
+        path: '/quotations/manage/edit/:quotationId',
+        name: 'Manage Quotation',
+        isProtected: true,
+        roles: ['Manage Quotation'],
+        requiredPermissions: ['update'],
+        component: EditQuotation,
+        layout: AppLayout,
+    },
     {
         path: '/quotations/accessories',
         name: 'Accessories Quotation',
