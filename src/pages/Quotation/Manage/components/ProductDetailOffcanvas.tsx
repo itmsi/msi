@@ -24,14 +24,12 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
     productId,
     isOpen,
     onClose,
-    onSave,
     onChange,
     initialData,
     readOnly = false
 }) => {
     const [error, setError] = useState<string | null>(null);
     const [showImageModal, setShowImageModal] = useState(false);
-    const [hasChanges, setHasChanges] = useState(false);
 
     const [activeTab, setActiveTab] = useState<'specifications' | 'accessories'>('specifications');
     const [accessories, setAccessories] = useState<QuotationAccessory[]>([]);
@@ -69,17 +67,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
     useEffect(() => {
         if (!isOpen) {
             setError(null);
-            setHasChanges(false);
         } else if (!initialData || initialData.componen_product_id !== productId) {
             setError('Product data not available');
         } else {
             setError(null);
-        }
-    }, [productId, isOpen, initialData]);
-
-    useEffect(() => {
-        if (initialData) {
-            const initializedAccessories = (initialData as any).manage_quotation_item_accessories?.map((acc: any, index: number) => ({
+            
+            // Initialize accessories from initialData
+            const initializedAccessories = (initialData.accessories || []).map((acc: any, index: number) => ({
                 accessory_id: acc.id || acc.accessory_id || `acc_${index}`,
                 accessory_part_name: acc.componen_product_name || acc.accessory_part_name || '',
                 accessory_part_number: acc.code_unique || acc.accessory_part_number || '',
@@ -87,11 +81,11 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 accessory_specification: acc.specification || acc.accessory_specification || '',
                 quantity: acc.quantity || 1,
                 description: acc.description || ''
-            })) || [];
+            }));
             
             setAccessories(initializedAccessories);
         }
-    }, [initialData]);
+    }, [productId, isOpen, initialData]);
 
     const handleFieldUpdate = useCallback((field: keyof ItemProduct, value: string) => {
         if (!initialData || !onChange) return;
@@ -102,7 +96,6 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         };
         
         onChange(updatedData);
-        setHasChanges(true);
     }, [initialData, onChange]);
 
     const handleSpecificationUpdate = useCallback((index: number, value: string) => {
@@ -132,7 +125,6 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         
         updatedData.componen_product_specifications = updatedSpecs;
         onChange(updatedData);
-        setHasChanges(true);
     }, [initialData, defaultSpecifications, onChange]);
 
     const editableSpecifications = React.useMemo(() => {
