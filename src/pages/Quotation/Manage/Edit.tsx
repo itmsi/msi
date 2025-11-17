@@ -1090,7 +1090,7 @@ export default function EditQuotation() {
                                             <Input
                                                 id="quotation_number"
                                                 type="text"
-                                                value={`###/IEC-MSI/${new Date().getFullYear()}`}
+                                                value={quotationData?.manage_quotation_no || `###/IEC-MSI/${new Date().getFullYear()}`}
                                                 disabled={true}
                                             />
                                         </div>

@@ -17,7 +17,6 @@ export const STAR_LEVELS = [1, 2, 3, 4, 5] as const;
 export type StarLevel = typeof STAR_LEVELS[number];
 
 export class ItemProductService {
-    // Get list of component products with pagination and search
     static async getItemProduct(params: Partial<ItemProductRequest> = {}): Promise<ItemProductResponse> {
         const defaultParams: ItemProductRequest = {
             page: 1,
@@ -31,12 +30,10 @@ export class ItemProductService {
         return response.data as ItemProductResponse;
     }
 
-    // Get single component product by ID
     static async getItemProductById(productId: string): Promise<ApiResponse<{ status: boolean; message: string; data: ItemProduct }>> {
         return await apiGet<{ status: boolean; message: string; data: ItemProduct }>(`${API_BASE_URL}/quotation/componen_product/${productId}`, { componen_product_id: productId });
     }
 
-    // Create new component product
     static async createItemProduct(productData: ItemProductFormData): Promise<{ success: boolean; data?: any; message?: string; errors?: any }> {
         try {
             const response = await apiPost(`${API_BASE_URL}/quotation/componen_product/create`, productData as unknown as Record<string, unknown>);
@@ -51,18 +48,15 @@ export class ItemProductService {
         }
     }
 
-    // Update existing component product
     static async updateItemProduct(productId: string, productData: Partial<Omit<ItemProduct, 'componen_product_id'>>): Promise<ItemProduct> {
         const response = await apiPut<{ data: ItemProduct }>(`${API_BASE_URL}/quotation/componen_product/${productId}`, productData);
         return response.data.data;
     }
 
-    // Delete component product
     static async deleteItemProduct(productId: string): Promise<{ status: number }> {
         return await apiDelete(`${API_BASE_URL}/quotation/componen_product/${productId}`);
     }
 
-    // Search component products with filters
     static async searchItemProducts(searchQuery: string, filters?: Record<string, any>): Promise<ItemProductResponse> {
         const searchParams = {
             search: searchQuery,
@@ -75,7 +69,6 @@ export class ItemProductService {
         return await this.getItemProduct(searchParams);
     }
 
-    // Helper: Get product options for select dropdown
     static formatProductOptions(products: ItemProduct[]) {
         return products.map(product => ({
             value: product.componen_product_id,
@@ -84,7 +77,6 @@ export class ItemProductService {
         }));
     }
 
-    // Helper: Get selling price by star level  
     static getSellingPriceByStar(product: ItemProduct, starLevel: 1 | 2 | 3 | 4 | 5): string {
         const priceMap = {
             1: product.selling_price_star_1,
@@ -96,7 +88,6 @@ export class ItemProductService {
         return priceMap[starLevel];
     }
 
-    // Helper: Format price for display
     static formatPrice(price: string | number): string {
         const numPrice = typeof price === 'string' ? parseFloat(price) : price;
         return new Intl.NumberFormat('id-ID', {

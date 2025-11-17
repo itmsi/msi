@@ -133,7 +133,7 @@ export const Offcanvas: React.FC<OffcanvasProps> = ({
                                 transition={{ delay: 0.1 }}
                             >
                                 <div>
-                                    <h3 className="text-lg font-semibold text-gray-900">
+                                    <h3 className="text-lg font-primary-bold font-medium text-gray-900">
                                         {title}
                                     </h3>
                                     {description && (

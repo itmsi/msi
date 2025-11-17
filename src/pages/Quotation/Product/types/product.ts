@@ -34,7 +34,8 @@ export interface ItemProduct {
     componen_product_specifications: ProductSpecification[];
     // Additional fields for quotation integration
     specifications?: any[]; // For form editing
-    accessories?: any[]; // For form editing
+    accessories?: any[]; // For form editing (create mode)
+    manage_quotation_item_accessories?: any[]; // For form editing (edit mode)
 }
 
 export interface ProductSpecification {

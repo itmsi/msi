@@ -36,7 +36,6 @@ export default function EditProduct() {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     
-    // Hook for product operations
     const { 
         isLoading,
         isUpdating,
@@ -47,7 +46,6 @@ export default function EditProduct() {
         updateProduct 
     } = useProductEdit();
     
-    // State for form data
     const [formData, setFormData] = useState<EditProductFormData>({
         code_unique: '',
         segment: '',
@@ -67,13 +65,14 @@ export default function EditProduct() {
         volume: '',
         componen_product_unit_model: ''
     });
+    
+    const [specifications, setSpecifications] = useState<any[]>([]);
 
-    // Load product data when component mounts
     useEffect(() => {
         if (id) {
             loadProductData(id);
         }
-    }, [id, loadProduct]);
+    }, [id]); 
 
     const loadProductData = async (productId: string) => {
         try {
@@ -100,6 +99,11 @@ export default function EditProduct() {
                     volume: product.volume || '',
                     componen_product_unit_model: product.componen_product_unit_model || ''
                 });
+                
+                // Load specifications
+                if (product.componen_product_specifications) {
+                    setSpecifications(product.componen_product_specifications);
+                }
             } else {
                 toast.error('Gagal memuat data produk');
                 navigate('/quotations/products');
@@ -118,13 +122,11 @@ export default function EditProduct() {
             [field]: value
         }));
 
-        // Clear validation error when user starts typing
         if (validationErrors[field as keyof ItemProductValidationErrors]) {
             clearFieldError(field as keyof ItemProductValidationErrors);
         }
     };
 
-    // Handle number input changes with formatting
     const handleNumberInputChange = (field: keyof EditProductFormData, value: string) => {
         const formattedValue = formatNumberInput(value);
         handleInputChange(field, formattedValue);
@@ -155,7 +157,6 @@ export default function EditProduct() {
         }
 
         if (Object.keys(errors).length > 0) {
-            // Handle validation errors if needed
             return false;
         }
 
@@ -262,7 +263,7 @@ export default function EditProduct() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Basic Information Section */}
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                        <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
                             Informasi Dasar
                         </h2>
                         
@@ -399,7 +400,7 @@ export default function EditProduct() {
 
                     {/* Pricing Section */}
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                        <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
                             Informasi Harga
                         </h2>
                         
@@ -502,7 +503,7 @@ export default function EditProduct() {
 
                     {/* Description Section */}
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                        <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
                             Deskripsi Produk
                         </h2>
                         
@@ -521,40 +522,38 @@ export default function EditProduct() {
                     </div>
 
                     {/* Specifications Section */}
-                    {productData?.componen_product_specifications && productData.componen_product_specifications.length > 0 && (
+                    {specifications.length > 0 && (
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
                                 Spesifikasi Produk
                             </h2>
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {productData.componen_product_specifications.map((spec) => (
-                                    <div 
-                                        key={spec.componen_product_specification_id} 
-                                        className="p-4 bg-gray-50 rounded-lg border"
-                                    >
-                                        <div className="space-y-2">
-                                            <div>
-                                                <span className="text-sm font-medium text-gray-500">Label:</span>
-                                                <p className="text-gray-900 font-medium">
-                                                    {spec.specification_label_name}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <span className="text-sm font-medium text-gray-500">Value:</span>
-                                                <p className="text-gray-900">
-                                                    {spec.specification_value_name}
-                                                </p>
-                                            </div>
-                                            {spec.componen_product_specification_description && (
-                                                <div>
-                                                    <span className="text-sm font-medium text-gray-500">Deskripsi:</span>
-                                                    <p className="text-gray-600 text-sm">
-                                                        {spec.componen_product_specification_description}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
+                                {specifications.map((spec, index) => (
+                                    <div key={`${spec.specification_label_name}-${index}`}>
+                                        <Label htmlFor={`spec_${index}`}>
+                                            {spec.specification_label_name || spec.componen_product_specification_label}
+                                        </Label>
+                                        <Input
+                                            id={`spec_${index}`}
+                                            type="text"
+                                            value={spec.specification_value_name || spec.componen_product_specification_value || ''}
+                                            onChange={(e) => {
+                                                const newSpecs = [...specifications];
+                                                newSpecs[index] = {
+                                                    ...newSpecs[index],
+                                                    specification_value_name: e.target.value,
+                                                    componen_product_specification_value: e.target.value
+                                                };
+                                                setSpecifications(newSpecs);
+                                            }}
+                                            placeholder="Masukkan nilai spesifikasi"
+                                        />
+                                        {spec.componen_product_specification_description && (
+                                            <p className="mt-1 text-xs text-gray-500">
+                                                {spec.componen_product_specification_description}
+                                            </p>
+                                        )}
                                     </div>
                                 ))}
                             </div>

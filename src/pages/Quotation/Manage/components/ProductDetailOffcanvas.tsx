@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
-import { MdAdd, MdDelete } from 'react-icons/md';
+import { MdAdd, MdDelete, MdDeleteOutline } from 'react-icons/md';
 import { ItemProduct } from '../../Product/types/product';
 import { QuotationAccessory } from '../types/quotation';
 import Input from '../../../../components/form/input/InputField';
@@ -9,6 +9,7 @@ import CustomAsyncSelect from '../../../../components/form/select/CustomAsyncSel
 import CustomDataTable from "../../../../components/ui/table/CustomDataTable";
 import { TableColumn } from "react-data-table-component";
 import { useAsyncSelect, SelectOption } from '../../hooks/useAsyncSelect';
+import { createActionsColumn } from '@/components/ui/table';
 
 interface ProductDetailOffcanvasProps {
     productId: string | null;
@@ -73,7 +74,8 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
             setError(null);
             
             // Initialize accessories from initialData
-            const initializedAccessories = (initialData.accessories || []).map((acc: any, index: number) => ({
+            const accessoriesSource = initialData.manage_quotation_item_accessories || initialData.accessories || [];
+            const initializedAccessories = accessoriesSource.map((acc: any, index: number) => ({
                 accessory_id: acc.id || acc.accessory_id || `acc_${index}`,
                 accessory_part_name: acc.componen_product_name || acc.accessory_part_name || '',
                 accessory_part_number: acc.code_unique || acc.accessory_part_number || '',
@@ -190,6 +192,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         if (initialData && onChange) {
             onChange({
                 ...initialData,
+                manage_quotation_item_accessories: updatedAccessories,
                 accessories: updatedAccessories
             });
         }
@@ -206,6 +209,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         if (initialData && onChange) {
             onChange({
                 ...initialData,
+                manage_quotation_item_accessories: updatedAccessories,
                 accessories: updatedAccessories
             });
         }
@@ -213,53 +217,54 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         toast.success('Accessory removed successfully');
     }, [accessories, initialData, onChange]);
 
-    const accessoryColumns: TableColumn<QuotationAccessory>[] = [
+    const accessoryColumns: TableColumn<QuotationAccessory>[] = React.useMemo(() => [
         {
             name: 'Accessory Name',
             selector: (row: QuotationAccessory) => row.accessory_part_name,
-            sortable: true,
-            width: '200px'
+            cell: (row) => (
+                <div className=" items-center gap-3 py-2">
+                    <div className="font-medium text-gray-900">
+                        {row.accessory_part_name}
+                    </div>
+                    <div className="block text-sm text-gray-500">{row.accessory_part_number}</div>
+                    <div className="block text-sm text-gray-500">{row.accessory_brand ? ` - ${row.accessory_brand}` : ''}</div>
+                </div>
+            ),
+            wrap: true,
         },
-        {
-            name: 'Part Number',
-            selector: (row: QuotationAccessory) => row.accessory_part_number || '-',
-            sortable: true,
-            width: '150px'
-        },
-        {
-            name: 'Brand',
-            selector: (row: QuotationAccessory) => row.accessory_brand || '-',
-            sortable: true,
-            width: '120px'
-        },
-        {
-            name: 'Specification',
-            selector: (row: QuotationAccessory) => row.accessory_specification || '-',
-            sortable: true,
-            width: '150px'
-        },
+        // {
+        //     name: 'Part Number',
+        //     selector: (row: QuotationAccessory) => row.accessory_part_number || '-',
+        // },
+        // {
+        //     name: 'Brand',
+        //     selector: (row: QuotationAccessory) => row.accessory_brand || '-',
+        // },
+        // {
+        //     name: 'Specification',
+        //     selector: (row: QuotationAccessory) => row.accessory_specification || '-',
+        // },
         {
             name: 'Quantity',
             selector: (row: QuotationAccessory) => row.quantity,
-            sortable: true,
-            width: '100px'
-        },
-        {
-            name: 'Actions',
             width: '100px',
-            cell: (_row: QuotationAccessory, index: number) => (
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => removeAccessoryItem(index)}
-                        className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                        title="Remove Accessory"
-                    >
-                        <MdDelete size={14} />
-                    </button>
-                </div>
-            )
-        }
-    ];
+            center: true,
+        },
+        createActionsColumn([
+            {
+                icon: MdDeleteOutline,
+                onClick: (row: QuotationAccessory) => {
+                    const index = accessories.findIndex(acc => acc.accessory_id === row.accessory_id);
+                    if (index !== -1) {
+                        removeAccessoryItem(index);
+                    }
+                },
+                className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                tooltip: 'Delete',
+                permission: 'delete'
+            }
+        ]),
+    ], [accessories, removeAccessoryItem]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -278,7 +283,6 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
             document.body.style.overflow = 'unset';
         };
     }, [showImageModal]);
-
     const renderProductInfo = () => {
         if (error) {
             return (
@@ -358,15 +362,15 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     {initialData.msi_model || 'n/a'}
                                 </p>
                                 <p className="text-gray-700 text-sm">
-                                    {initialData.engine || 'n/a'} - {initialData.componen_product_unit_model || 'n/a'}
+                                    {initialData.engine || 'n/a'} - {initialData.segment || 'n/a'}
                                 </p>
                                 
                                 <p className="text-gray-700 text-sm">
                                     {initialData.segment || '-'}
                                 </p>
-                                <p className="text-gray-700 text-sm">
+                                {/* <p className="text-gray-700 text-sm">
                                     {initialData.product_type || 'n/a'}
-                                </p>
+                                </p> */}
                         </div>
                     </div>
                     
@@ -408,7 +412,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                     <div className='product-spesification-information'>
                     {/* Product Basic Info */}
                     <div className="border-b border-gray-200 pb-6">
-                        <h4 className="text-lg font-semibold text-gray-900 my-4">Informasi Dasar</h4>
+                        <h4 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Informasi Dasar</h4>
                         <div className="grid grid-cols-3 gap-4">
                             <div className='md:col-span-3'>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -675,7 +679,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                     <div className='product-accessories-information'>
                         {/* Accessories Section */}
                         
-                        <h4 className="text-lg font-semibold text-gray-900 mb-4">Accessories</h4>
+                        <h4 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Accessories</h4>
                         
                         {/* Add Accessory */}
                         <div className="flex gap-4 mb-6">
