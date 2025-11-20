@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MdArrowBack, MdKeyboardArrowLeft, MdSave } from 'react-icons/md';
+import { MdKeyboardArrowLeft, MdSave } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/ui/button/Button';
 import Input from '../../../components/form/input/InputField';
@@ -63,6 +63,9 @@ const CreateTermCondition: React.FC = () => {
             setLoading(false);
         }
     };
+console.log({
+    error
+});
 
     return (
         <>

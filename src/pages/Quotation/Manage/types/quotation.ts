@@ -429,6 +429,7 @@ export interface ManageQuotationItemPDF {
     manage_quotation_lead_time: string | null;
     componen_product_unit_model: string;
     componen_product_name: string;
+    product_type: string;
     quantity: number;
     price: string;
     total: string;

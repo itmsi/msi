@@ -34,8 +34,15 @@ export class ItemProductService {
         return await apiGet<{ status: boolean; message: string; data: ItemProduct }>(`${API_BASE_URL}/quotation/componen_product/${productId}`, { componen_product_id: productId });
     }
 
-    static async createItemProduct(productData: ItemProductFormData): Promise<{ success: boolean; data?: any; message?: string; errors?: any }> {
+    static async createItemProduct(productData: ItemProductFormData | FormData): Promise<{ success: boolean; data?: any; message?: string; errors?: any }> {
         try {
+            // Check if productData is FormData (for multipart uploads)
+            if (productData instanceof FormData) {
+                const response = await apiPost(`${API_BASE_URL}/quotation/componen_product/create`, productData);
+                return response.data as { success: boolean; data?: any; message?: string; errors?: any };
+            }
+            
+            // Regular JSON create
             const response = await apiPost(`${API_BASE_URL}/quotation/componen_product/create`, productData as unknown as Record<string, unknown>);
             return response.data as { success: boolean; data?: any; message?: string; errors?: any };
         } catch (error: any) {

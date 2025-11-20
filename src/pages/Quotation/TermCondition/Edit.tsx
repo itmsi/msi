@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Button from "../../../components/ui/button/Button";
 import Input from "../../../components/form/input/InputField";
-import { MdArrowBack, MdKeyboardArrowLeft, MdPerson, MdSave } from "react-icons/md";
+import { MdKeyboardArrowLeft,MdSave } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
 import { PermissionGate } from "@/components/common/PermissionComponents";
 import { TermConditionService } from "./services/termconditionService";
@@ -111,6 +111,9 @@ const EditTermCondition: React.FC = () => {
             </div>
         );
     }
+console.log({
+    error
+});
 
     return (
         <>

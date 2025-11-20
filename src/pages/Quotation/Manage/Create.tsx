@@ -891,7 +891,7 @@ export default function CreateQuotation() {
                     {/* Form */}
                     <form onSubmit={(e) => handleSubmit(e, 'submit')} className="space-y-6">
                         <div className='md:grid-cols-5 grid gap-6'>
-                            <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-3">
+                            <div className="bg-white rounded-2xl shadow-sm p-6 lg:col-span-3">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">Quotation Detail</h2>
                                 <div className='md:grid-cols-2 grid gap-x-5'>
                                     <div className="md:col-span-1 space-y-3">
@@ -1066,7 +1066,7 @@ export default function CreateQuotation() {
 
                             </div>
                             
-                            <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-2 space-y-3">
+                            <div className="bg-white rounded-2xl shadow-sm p-6 lg:col-span-2 space-y-3">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">Beneficiary Details</h2>
                                 {/* GET BANK */}
                                 <div>
@@ -1138,7 +1138,7 @@ export default function CreateQuotation() {
                         <div className='md:grid-cols-5 grid gap-6'>
 
                             {/* Products Section */}
-                            <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5">
+                            <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5 col-span-1">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Products</h2>
                                 
                                 {/* Add Product */}

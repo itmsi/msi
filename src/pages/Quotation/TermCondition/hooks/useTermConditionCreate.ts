@@ -24,7 +24,7 @@ export const useCreateTermConditions = () => {
         try {
             const response = await TermConditionService.createTermCondition(termConditionData);
             
-            if (response.success) {
+            if (response.status) {
                 toast.success('Term condition created successfully!');
                 return { success: true };
             } else {

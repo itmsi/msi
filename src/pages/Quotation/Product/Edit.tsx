@@ -11,6 +11,7 @@ import { toast } from "react-hot-toast";
 import { useProductEdit } from "./hooks/useProductEdit";
 import { ItemProductValidationErrors } from "./types/product";
 import { handleKeyPress, formatNumberInput } from "@/helpers/generalHelper";
+import CustomSelect from "@/components/form/select/CustomSelect";
 
 // Form data type for editing
 interface EditProductFormData {
@@ -261,6 +262,12 @@ export default function EditProduct() {
         );
     }
 
+    const companyOptions = [
+        { value: 1, label: 'OFF ROAD REGULAR' },
+        { value: 2, label: 'ON ROAD REGULAR' },
+        { value: 3, label: 'OFF ROAD IRREGULAR' },
+    ];
+
     return (
         <>
             <PageMeta 
@@ -363,6 +370,23 @@ export default function EditProduct() {
                                 </div>
 
                                 <div>
+                                    <Label htmlFor="componen_type">Product Type</Label>
+                                    <CustomSelect
+                                        options={companyOptions}
+                                        value={companyOptions.find(option => option.value === formData.componen_type) || null}
+                                        onChange={(option) => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                componen_type: Number(option?.value) || 1
+                                            }));
+                                        }}
+                                        placeholder="Select Company"
+                                        isClearable={false}
+                                        isSearchable={true}
+                                    />
+                                </div>
+
+                                <div>
                                     <Label htmlFor="wheel_no">Wheel No</Label>
                                     <Input
                                         id="wheel_no"
@@ -422,10 +446,10 @@ export default function EditProduct() {
                                         type="text"
                                         value={formData.componen_product_unit_model}
                                         onChange={(e) => handleInputChange('componen_product_unit_model', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan unit model"
                                     />
                                 </div>
+
                             </div>
                         </div>
 

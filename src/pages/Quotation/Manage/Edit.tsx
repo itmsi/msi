@@ -1324,7 +1324,7 @@ export default function EditQuotation() {
                         <div className='md:grid-cols-5 grid gap-6'>
 
                             {/* Products Section */}
-                            <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5">
+                            <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5 ">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Products</h2>
                                 
                                 {/* Add Product */}
@@ -1384,6 +1384,7 @@ export default function EditQuotation() {
                                             fixedHeader={false}
                                             responsive
                                             striped={false}
+                                            persistTableHead
                                             highlightOnHover
                                             noDataComponent={
                                                 <div className="text-center py-8 text-gray-500">

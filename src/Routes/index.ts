@@ -20,7 +20,7 @@ const ManagePowerBi = lazy(() => import('@/pages/PowerBI/ManagePowerBi'));
 const CategoryPowerBi = lazy(() => import('@/pages/PowerBI/CategoryPowerBi'));
 const CreatePowerBi = lazy(() => import('@/pages/PowerBI/CreatePowerBi'));
 const EditPowerBi = lazy(() => import('@/pages/PowerBI/EditPowerBi'));
-const Trackme = lazy(() => import('@/pages/Trackme/trackme'));
+// const Trackme = lazy(() => import('@/pages/Trackme/trackme'));
 const ManageCustomers = lazy(() => import('@/pages/Administration/Customers/Manage'));
 const CreateCustomers = lazy(() => import('@/pages/Administration/Customers/Create'));
 const EditCustomers = lazy(() => import('@/pages/Administration/Customers/Edit'));
@@ -372,11 +372,11 @@ export const routes: TAppRoute[] = [
     // },
 
 
-    {
-        path: '/trackme',
-        name: 'Trackme',
-        isProtected: false,
-        roles: ['Trackme'],
-        component: Trackme,
-    },
+    // {
+    //     path: '/trackme',
+    //     name: 'Trackme',
+    //     isProtected: false,
+    //     roles: ['Trackme'],
+    //     component: Trackme,
+    // },
 ];
