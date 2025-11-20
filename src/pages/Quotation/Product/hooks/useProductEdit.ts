@@ -14,7 +14,7 @@ export interface UseProductEditReturn {
     // Actions
     loadProduct: (productId: string) => Promise<ItemProduct | null>;
     clearFieldError: (field: keyof ItemProductValidationErrors) => void;
-    updateProduct: (productId: string, productData: Partial<Omit<ItemProduct, 'componen_product_id'>>) => Promise<boolean>;
+    updateProduct: (productId: string, productData: Partial<Omit<ItemProduct, 'componen_product_id'>> | FormData) => Promise<boolean>;
 }
 
 export function useProductEdit(): UseProductEditReturn {
@@ -52,7 +52,7 @@ export function useProductEdit(): UseProductEditReturn {
         }
     };
 
-    const updateProduct = async (productId: string, productData: Partial<Omit<ItemProduct, 'componen_product_id'>>): Promise<boolean> => {
+    const updateProduct = async (productId: string, productData: Partial<Omit<ItemProduct, 'componen_product_id'>> | FormData): Promise<boolean> => {
         setIsUpdating(true);
         setValidationErrors({});
 

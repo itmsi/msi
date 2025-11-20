@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { ManageQuotationItem, QuotationPagination, QuotationRequest } from '../types/quotation';
 import { QuotationService } from '../services/quotationService';
+import { generateQuotationPDF } from '../utils/pdfGenerator';
+import { toast } from 'react-hot-toast';
 
 export const useQuotation = () => {
     const [quotations, setQuotations] = useState<ManageQuotationItem[]>([]);
@@ -90,12 +92,35 @@ export const useQuotation = () => {
         
         try {
             await QuotationService.deleteQuotation(quotation_id);
-            // Remove from local state
             setQuotations(prev => prev.filter(quotation => quotation.manage_quotation_id !== quotation_id));
             return true;
         } catch (err) {
             setError('Failed to delete quotations');
             console.error('Delete quotations error:', err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const downloadQuotation = useCallback(async (quotation_id: string) => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+            const response = await QuotationService.downloadQuotation(quotation_id); 
+            if (response.data?.status) {
+                await generateQuotationPDF(response.data.data);
+                toast.success('PDF downloaded successfully');
+                return true;
+            } else {
+                toast.error(response.message || 'Failed to fetch quotation data');
+                return false;
+            }
+        } catch (err) {
+            setError('Failed to download quotation');
+            console.error('Download quotation error:', err);
+            toast.error('Failed to download quotation');
             throw err;
         } finally {
             setLoading(false);
@@ -110,6 +135,7 @@ export const useQuotation = () => {
         error,
         filters,
         deleteQuotation,
+        downloadQuotation,
         fetchQuotations,
         handleSearchChange,
     };

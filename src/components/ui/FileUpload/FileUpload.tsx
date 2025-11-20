@@ -57,9 +57,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         url: null
     });
 
-    // Create preview URL when file changes
     useEffect(() => {
-        // Cleanup previous URL if exists
         if (previewState.url && previewState.url.startsWith('blob:')) {
             URL.revokeObjectURL(previewState.url);
         }
@@ -79,26 +77,21 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }
     }, [currentFile]);
 
-    // Check if file is an image
     const isImageFile = (file: File): boolean => {
-        // Return false if file is null/undefined or not a proper File object
         if (!file || typeof file !== 'object' || !file.name || typeof file.type !== 'string') {
             return false;
         }
         
-        // Check by MIME type
         if (file.type.startsWith('image/')) {
             return true;
         }
         
-        // Check by file extension for SVG and other image formats
         const fileName = file.name.toLowerCase();
         const imageExtensions = ['.svg', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'];
         
         return imageExtensions.some(ext => fileName.endsWith(ext));
     };
 
-    // Get preview size classes
     const getPreviewSizeClasses = () => {
         switch (previewSize) {
             case 'sm': return 'w-16 h-16';
@@ -107,7 +100,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }
     };
 
-    // Handle remove file
     const handleRemoveFile = () => {
         if (previewState.url && previewState.url.startsWith('blob:')) {
             URL.revokeObjectURL(previewState.url);
@@ -116,7 +108,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
         onFileChange(null);
     };
 
-    // Get icon component
     const getIcon = () => {
         const iconProps = { className: "mx-auto h-12 w-12 text-gray-400" };
         switch (icon) {
@@ -129,15 +120,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }
     };
 
-    // Validate file
-    const validateFile = (file: File): boolean => {
+    const validasiFile = (file: File): boolean => {
         // Check file size
         if (file.size > maxSize * 1024 * 1024) {
             toast.error(`File size must be less than ${maxSize}MB`);
             return false;
         }
 
-        // Check file type
         const fileExtension = file.name.toLowerCase().split('.').pop();
         const mimeTypeValid = acceptedFormats.some(format => 
             file.type.includes(format) || file.name.toLowerCase().endsWith(format)
@@ -157,7 +146,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
     // Handle file selection
     const handleFileChange = (file: File | null) => {
-        if (file && !validateFile(file)) {
+        if (file && !validasiFile(file)) {
             return;
         }
         
@@ -241,7 +230,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                         </div>
 
                         {/* Upload Text */}
-                        <div className="flex text-sm text-gray-600">
+                        <div className="flex text-sm text-gray-600 flex-wrap flex-col justify-center items-center">
                             <label
                                 htmlFor={id}
                                 className={`

@@ -152,7 +152,7 @@ const ManageTermCondition: React.FC = () => {
                         </div>
                         <PermissionGate permission="create">
                             <Button
-                                onClick={() => navigate('/quotation/term-condition/create')}
+                                onClick={() => navigate('/quotations/term-condition/create')}
                                 className="flex items-center gap-2"
                                 size="sm"
                             >

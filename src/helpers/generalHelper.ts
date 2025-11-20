@@ -111,6 +111,16 @@ export const hasChanged = <T extends object>(oldData: T, newData: Partial<T>, ke
     return keys.some((key) => oldData[key] !== newData[key]);
 };
 
+export const formatCurrency = (value: number | string): string => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(numValue);
+};
+
 export const tableDateFormat = {
     day: '2-digit' as const,
     month: 'short' as const,
@@ -133,7 +143,7 @@ export const formatDate = (dateString: string, includeTime: boolean = false) => 
     
     return date.toLocaleDateString('id-ID', {
         year: 'numeric',
-        month: 'long',
+        month: 'short',
         day: 'numeric'
     });
 };

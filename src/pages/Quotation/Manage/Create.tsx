@@ -210,7 +210,7 @@ export default function CreateQuotation() {
         return resetFormatNumbers(formData, quotationNumericFields);
     };
 
-    const calculateGrandTotal = useCallback((currentFormData: QuotationFormData): { ppn: string; grandTotal: string; paymentNominal: string } => {
+    const calculateGrandTotal = useCallback((currentFormData: QuotationFormData): { ppn: string; grandTotal: string; paymentNominal: string, remainingPayment: string } => {
         const itemsTotal = currentFormData.manage_quotation_items.reduce((sum, item) => 
             sum + (parseFloat(item.total) || 0), 0
         );
@@ -224,11 +224,13 @@ export default function CreateQuotation() {
         
         const paymentPercentage = parseFloat(currentFormData.manage_quotation_payment_presentase || '0') || 0;
         const paymentNominal = grandTotal * (paymentPercentage / 100);
+        const remainingPayment = grandTotal - paymentNominal;
 
         return {
             ppn: ppn.toString(),
             grandTotal: grandTotal.toString(),
-            paymentNominal: paymentNominal.toString()
+            paymentNominal: paymentNominal.toString(),
+            remainingPayment: remainingPayment.toString()
         };
     }, []);
 
@@ -264,7 +266,8 @@ export default function CreateQuotation() {
                 return {
                     ...newFormData,
                     manage_quotation_grand_total: calculations.grandTotal,
-                    manage_quotation_payment_nominal: calculations.paymentNominal
+                    manage_quotation_payment_nominal: calculations.paymentNominal,
+                    manage_quotation_remaining_payment: calculations.remainingPayment
                 };
             }
 
@@ -451,7 +454,8 @@ export default function CreateQuotation() {
                     return {
                         ...newFormData,
                         manage_quotation_grand_total: calculations.grandTotal,
-                        manage_quotation_payment_nominal: calculations.paymentNominal
+                        manage_quotation_payment_nominal: calculations.paymentNominal,
+                        manage_quotation_remaining_payment: calculations.remainingPayment
                     };
                 });
 
@@ -489,7 +493,8 @@ export default function CreateQuotation() {
             return {
                 ...updatedFormData,
                 manage_quotation_grand_total: calculations.grandTotal,
-                manage_quotation_payment_nominal: calculations.paymentNominal
+                manage_quotation_payment_nominal: calculations.paymentNominal,
+                manage_quotation_remaining_payment: calculations.remainingPayment
             };
         });
     };
@@ -508,7 +513,8 @@ export default function CreateQuotation() {
             return {
                 ...updatedFormData,
                 manage_quotation_grand_total: calculations.grandTotal,
-                manage_quotation_payment_nominal: calculations.paymentNominal
+                manage_quotation_payment_nominal: calculations.paymentNominal,
+                manage_quotation_remaining_payment: calculations.remainingPayment
             };
         });
     };
@@ -646,7 +652,8 @@ export default function CreateQuotation() {
             return {
                 ...newFormData,
                 manage_quotation_grand_total: calculations.grandTotal,
-                manage_quotation_payment_nominal: calculations.paymentNominal
+                manage_quotation_payment_nominal: calculations.paymentNominal,
+                manage_quotation_remaining_payment: calculations.remainingPayment
             };
         });
     }, [calculateGrandTotal]);
@@ -1427,7 +1434,7 @@ export default function CreateQuotation() {
 
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                                         <Label>
-                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
+                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center text-end'>
                                                 PPN
                                                 <div className="relative md:col-span-1">
                                                     <Input
@@ -1467,7 +1474,7 @@ export default function CreateQuotation() {
 
                                     {/* Delivery Fee */}
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                        <Label htmlFor="manage_quotation_delivery_fee">Delivery Fee</Label>
+                                        <Label htmlFor="manage_quotation_delivery_fee" className='text-end mb-0'>Delivery Fee</Label>
                                         <Input
                                             id="manage_quotation_delivery_fee"
                                             type="text"
@@ -1480,7 +1487,7 @@ export default function CreateQuotation() {
                                     </div>
                                     {/* Other Fee */}
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                        <Label htmlFor="manage_quotation_other">Other Fee</Label>
+                                        <Label htmlFor="manage_quotation_other" className='text-end mb-0'>Other Fee</Label>
                                         <Input
                                             id="manage_quotation_other"
                                             type="text"
@@ -1492,14 +1499,14 @@ export default function CreateQuotation() {
                                         />
                                     </div>
 
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-300 pt-4 mt-4'>
-                                        <Label className='font-bold text-lg'>Grand Total</Label>
+                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-300 pt-4 mt-4 items-center'>
+                                        <Label className='font-bold text-lg mb-0 text-end' >Grand Total</Label>
                                         <Input
                                             type="text"
                                             onKeyPress={handleKeyPress}
                                             value={(parseFloat(calculateGrandTotal(formData).grandTotal)).toLocaleString('id-ID')}
                                             readonly={true}
-                                            className="bg-gray-100 cursor-not-allowed"
+                                            className="font-bold text-lg cursor-not-allowed"
                                         />
                                         {/* <div className="text-xl font-bold text-green-600">
                                             {(parseFloat(calculateGrandTotal(formData).grandTotal)).toLocaleString('id-ID')}
@@ -1507,8 +1514,8 @@ export default function CreateQuotation() {
                                     </div>
 
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                                        <Label htmlFor="manage_quotation_payment_presentase">
-                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
+                                        <Label htmlFor="manage_quotation_payment_presentase" className='text-end mb-0'>
+                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center items-center text-end'>
                                                 Down Payment
                                                 <div className="relative md:col-span-1">
                                                     <Input
@@ -1534,20 +1541,24 @@ export default function CreateQuotation() {
                                             onKeyPress={handleKeyPress}
                                             value={(parseFloat(formData.manage_quotation_payment_nominal || '0')).toLocaleString('id-ID')}
                                             readonly={true}
-                                            className="bg-gray-100 cursor-not-allowed"
+                                            className="border-[#34c759] cursor-not-allowed"
                                         />
                                         {/* <div className="text-lg font-medium">
                                             {(parseFloat(formData.manage_quotation_payment_nominal || '0')).toLocaleString('id-ID')}
                                         </div> */}
                                     </div>
-                                    {/* <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                                        <Label>
+                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
+                                        <Label className='text-end mb-0'>
                                             Remaining Payment
                                         </Label>
-                                        <div className="text-lg font-medium">
-                                            {formData.manage_quotation_payment_nominal || '0'}
-                                        </div>
-                                    </div> */}
+                                        <Input
+                                            type="text"
+                                            onKeyPress={handleKeyPress}
+                                            value={(parseFloat(calculateGrandTotal(formData).remainingPayment)).toLocaleString('id-ID')}
+                                            readonly={true}
+                                            className="text-lg cursor-not-allowed border-red-500"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>

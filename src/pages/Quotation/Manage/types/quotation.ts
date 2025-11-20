@@ -235,7 +235,9 @@ export interface ManageQuotationItem {
     manage_quotation_id: string;
     manage_quotation_no: string;
     customer_id: string;
+    customer_name: string;
     employee_id: string;
+    employee_name: string;
     manage_quotation_date: string;
     manage_quotation_valid_date: string;
     manage_quotation_grand_total: string;
@@ -274,6 +276,10 @@ export interface ManageQuotationData {
     manage_quotation_id: string;
     manage_quotation_no: string;
     customer_id: string;
+    contact_person: string;
+    customer_phone: string;
+    customer_address: string;
+    employee_phone: string;
     employee_id: string;
     manage_quotation_date: string;
     manage_quotation_valid_date: string;
@@ -303,6 +309,8 @@ export interface ManageQuotationData {
     bank_account_name: string;
     bank_account_number: string;
     bank_account_bank_name: string;
+    customer_name: string;
+    employee_name: string;
 
     manage_quotation_items: ManageQuotationItem[];
 }
@@ -344,4 +352,99 @@ export interface ManageQuotationItem {
 
     manage_quotation_item_accessories: QuotationItemAccessory[];
     manage_quotation_item_specifications: QuotationItemSpecification[];
+}
+
+export interface ManageQuotationListResponsePDF {
+    status: boolean;
+    message: string;
+    data: {
+        items: ManageQuotationDataPDF[];
+        pagination: QuotationPagination;
+    };
+}
+export interface ManageQuotationDataPDF {
+    // manage_quotation_id: string;
+    manage_quotation_no: string;
+    customer_id: string;
+    contact_person: string;
+    customer_phone: string;
+    customer_address: string;
+    employee_phone: string;
+    employee_id: string;
+    manage_quotation_date: string;
+    manage_quotation_valid_date: string;
+    manage_quotation_grand_total: string;
+    manage_quotation_ppn: string;
+    manage_quotation_delivery_fee: string;
+    manage_quotation_other: string;
+    manage_quotation_payment_presentase: string;
+    manage_quotation_payment_nominal: string;
+    manage_quotation_description: string | null;
+    created_at: string;
+    created_by: string;
+    updated_at: string;
+    updated_by: string | null;
+    deleted_at: string | null;
+    deleted_by: string | null;
+    is_delete: boolean;
+    status: string;
+    manage_quotation_shipping_term: string;
+    manage_quotation_franco: string;
+    manage_quotation_lead_time: string;
+    term_content_directory: string;
+    term_content_payload?: string;
+    // term_content_payload: {
+    //     content: string;
+    // };
+    term_content_id: string;
+    include_aftersales_page: boolean;
+    include_msf_page: boolean;
+    bank_account_name: string;
+    bank_account_number: string;
+    bank_account_bank_name: string;
+    customer_name: string;
+    employee_name: string;
+
+    manage_quotation_items: ManageQuotationItemPDF[];
+}
+
+export interface ManageQuotationItemPDF {
+    manage_quotation_id: string;
+    manage_quotation_no: string;
+    customer_id: string;
+    customer_name: string;
+    employee_id: string;
+    employee_name: string;
+    manage_quotation_date: string;
+    manage_quotation_valid_date: string;
+    manage_quotation_grand_total: string;
+    manage_quotation_ppn: string;
+    manage_quotation_delivery_fee: string;
+    manage_quotation_other: string;
+    manage_quotation_payment_presentase: string;
+    manage_quotation_payment_nominal: string;
+    manage_quotation_description: string | null;
+    manage_quotation_shipping_term: string | null;
+    manage_quotation_franco: string | null;
+    manage_quotation_lead_time: string | null;
+    componen_product_unit_model: string;
+    componen_product_name: string;
+    quantity: number;
+    price: string;
+    total: string;
+    bank_account_name: string;
+    bank_account_number: string;
+    bank_account_bank_name: string;
+    term_content_id: string;
+    term_content_directory: string;
+    include_aftersales_page: boolean;
+    include_msf_page: boolean;
+    status: string;
+    created_by: string;
+    updated_by: string | null;
+    deleted_by: string | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    is_delete: boolean;
 }

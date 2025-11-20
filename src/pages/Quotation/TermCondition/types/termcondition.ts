@@ -55,3 +55,13 @@ export interface TermConditionValidationErrors {
     term_content_title?: string;
     term_content_directory?: string;
 }
+
+export interface TermConditionFormDataEdit {
+    term_content_title: string;
+    term_content_payload: string;
+}
+
+export interface TermConditionValidationErrorsEdit {
+    term_content_title?: string;
+    term_content_payload?: string;
+}

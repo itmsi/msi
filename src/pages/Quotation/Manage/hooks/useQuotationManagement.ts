@@ -12,7 +12,7 @@ export const useQuotationManagement = () => {
 
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; quotationId?: string; }>({ show: false });
 
-    const { quotations, pagination, loading, error, filters, fetchQuotations, handleSearchChange: quotationSearch, deleteQuotation } = useQuotation();
+    const { quotations, pagination, loading, error, filters, fetchQuotations, handleSearchChange: quotationSearch, deleteQuotation, downloadQuotation } = useQuotation();
 
     useEffect(() => {
         fetchQuotations(1, 10);
@@ -65,6 +65,10 @@ export const useQuotationManagement = () => {
         setConfirmDelete({ show: true, quotationId: quotationId });
     }, []);
 
+    const handleDownload = useCallback((quotation: any) => {
+        downloadQuotation(quotation.manage_quotation_id);
+    }, []);
+
     const confirmDeleteQuotations = useCallback(async () => {
         if (!confirmDelete.quotationId) return;
 
@@ -94,6 +98,7 @@ export const useQuotationManagement = () => {
         confirmDeleteQuotations,
         cancelDelete,
         handleDelete,
+        handleDownload,
         handlePageChange,
         handleRowsPerPageChange,
         handleSearchChange,

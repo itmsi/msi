@@ -22,13 +22,13 @@ export class TermConditionService {
         return response.data
     }
 
-    static async createTermCondition(termConditionData: TermConditionFormData): Promise<{ success: boolean; data?: any; message?: string; errors?: any }> {
+    static async createTermCondition(termConditionData: TermConditionFormData): Promise<{ status: boolean; data?: any; message?: string; errors?: any }> {
         try {
-            const response = await apiPost(`${API_BASE_URL}/quotation/term_content/create`, termConditionData as any);
-            return response.data as { success: boolean; data?: any; message?: string; errors?: any };
+            const response = await apiPost(`${API_BASE_URL}/quotation/term_content`, termConditionData as any);
+            return response.data as { status: boolean; data?: any; message?: string; errors?: any };
         } catch (error: any) {
             return {
-                success: false,
+                status: false,
                 message: error.message || 'Failed to create a term condition',
                 errors: error.errors
             };

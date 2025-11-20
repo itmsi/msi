@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiDelete, ApiResponse } from '@/helpers/apiHelper';
+import { apiGet, apiPost, apiPut, apiDelete, apiPutMultipart, ApiResponse } from '@/helpers/apiHelper';
 import { ItemProduct, ItemProductFormData, ItemProductRequest, ItemProductResponse } from '../types/product';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -48,7 +48,14 @@ export class ItemProductService {
         }
     }
 
-    static async updateItemProduct(productId: string, productData: Partial<Omit<ItemProduct, 'componen_product_id'>>): Promise<ItemProduct> {
+    static async updateItemProduct(productId: string, productData: Partial<Omit<ItemProduct, 'componen_product_id'>> | FormData): Promise<ItemProduct> {
+        // Check if productData is FormData (for multipart uploads)
+        if (productData instanceof FormData) {
+            const response = await apiPutMultipart<{ data: ItemProduct }>(`${API_BASE_URL}/quotation/componen_product/${productId}`, productData);
+            return response.data.data;
+        }
+        
+        // Regular JSON update
         const response = await apiPut<{ data: ItemProduct }>(`${API_BASE_URL}/quotation/componen_product/${productId}`, productData);
         return response.data.data;
     }

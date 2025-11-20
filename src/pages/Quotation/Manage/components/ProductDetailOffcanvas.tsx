@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
-import { MdAdd, MdDelete, MdDeleteOutline } from 'react-icons/md';
+import { MdAdd, MdDeleteOutline } from 'react-icons/md';
 import { ItemProduct } from '../../Product/types/product';
 import { QuotationAccessory } from '../types/quotation';
 import Input from '../../../../components/form/input/InputField';

@@ -1,7 +1,9 @@
 import { apiDelete, apiGet, apiPost, apiPut, ApiResponse } from '@/helpers/apiHelper';
 import { 
     ManageQuotationData,
+    ManageQuotationDataPDF,
     ManageQuotationListResponse,
+    ManageQuotationListResponsePDF,
     QuotationFormData, 
     QuotationRequest
 } from '../types/quotation';
@@ -120,5 +122,13 @@ export class QuotationService {
                 errors: error.errors || null
             };
         }
+    }
+
+    static async getQuotationDetail(quotationId: string): Promise<ApiResponse<{ status: boolean; message: string; data: ManageQuotationData }>> {
+        return await apiGet(`${API_BASE_URL}/quotation/manage-quotation/${quotationId}`);
+    }
+
+    static async downloadQuotation(quotationId: string): Promise<ApiResponse<{ status: boolean; message: string; data: ManageQuotationDataPDF }>> {
+        return await apiGet(`${API_BASE_URL}/quotation/manage-quotation/pdf/${quotationId}`);
     }
 }

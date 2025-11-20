@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { MdAdd, MdSearch, MdClear, MdDeleteOutline } from 'react-icons/md';
+import { FaRegFilePdf } from "react-icons/fa6";
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useQuotationManagement } from './hooks/useQuotationManagement';
@@ -10,8 +11,8 @@ import CustomSelect from '../../../components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
-import { createActionsColumn, createDateColumn } from '@/components/ui/table';
-import { tableDateFormat } from '@/helpers/generalHelper';
+import { createActionsColumn } from '@/components/ui/table';
+import { formatCurrency, formatDate } from '@/helpers/generalHelper';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 
 const ManageQuotations: React.FC = () => {
@@ -34,20 +35,10 @@ const ManageQuotations: React.FC = () => {
         handleEdit,
         handleView,
         handleDelete,
+        handleDownload,
         confirmDeleteQuotations,
         cancelDelete,
     } = useQuotationManagement();
-
-    // Helper function to format currency
-    const formatCurrency = (value: number | string): string => {
-        const numValue = typeof value === 'string' ? parseFloat(value) : value;
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(numValue);
-    };
 
     // Helper function to render status badge
     const getStatusBadge = (status: string) => {
@@ -75,7 +66,12 @@ const ManageQuotations: React.FC = () => {
                 name: 'Quotation No',
                 selector: (row) => row.manage_quotation_no,
                 cell: (row) => (
-                    <span className="font-medium text-[#0253a5]">{row.manage_quotation_no}</span>
+                    <div className=" items-center gap-3 py-2">
+                        <div className="font-medium text-[#0253a5]">
+                            {row.manage_quotation_no}
+                        </div>
+                        <div className="block text-sm text-gray-500">{formatDate(row.manage_quotation_date)} - {formatDate(row.manage_quotation_valid_date)}</div>
+                    </div>
                 ),
             },
             // {
@@ -85,8 +81,22 @@ const ManageQuotations: React.FC = () => {
             //         <span className="text-sm">{row.customer_id.substring(0, 20)}...</span>
             //     ),
             // },
-            createDateColumn('Quotation Date', 'manage_quotation_date', tableDateFormat),
-            createDateColumn('Valid Until', 'manage_quotation_valid_date', tableDateFormat),
+            // createDateColumn('Quotation Date', 'manage_quotation_date', tableDateFormat),
+            // createDateColumn('Valid Until', 'manage_quotation_valid_date', tableDateFormat),
+            {
+                name: 'Customer Name',
+                selector: (row) => row.customer_name,
+            },
+            // {
+            //     name: 'Sales Name',
+            //     selector: (row) => row.employee_name,
+            // },
+            {
+                name: 'Status',
+                selector: (row) => row.status,
+                cell: (row) => getStatusBadge(row.status),
+                center: true,
+            },
             {
                 name: 'Grand Total',
                 selector: (row) => row.manage_quotation_grand_total,
@@ -95,28 +105,15 @@ const ManageQuotations: React.FC = () => {
                     <span className="font-semibold">{formatCurrency(row.manage_quotation_grand_total)}</span>
                 ),
             },
-            {
-                name: 'Status',
-                selector: (row) => row.status,
-                cell: (row) => getStatusBadge(row.status),
-                center: true,
-            },
-            createDateColumn('Created At', 'created_at', tableDateFormat),
+            // createDateColumn('Created At', 'created_at', tableDateFormat),
             createActionsColumn([
-                // {
-                //     icon: MdVisibility,
-                //     onClick: handleView,
-                //     className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
-                //     tooltip: 'View',
-                //     permission: 'read',
-                // },
-                // {
-                //     icon: MdEdit,
-                //     onClick: handleEdit,
-                //     className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                //     tooltip: 'Edit',
-                //     permission: 'update',
-                // },
+                {
+                    icon: FaRegFilePdf,
+                    onClick: handleDownload,
+                    className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                    tooltip: 'Download',
+                    permission: 'read',
+                },
                 {
                     icon: MdDeleteOutline,
                     onClick: handleDelete,
@@ -229,11 +226,11 @@ const ManageQuotations: React.FC = () => {
                 </div>
 
                 {/* Error Message */}
-                {error && (
+                {/* {error && (
                     <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
                         <p className="text-red-800">{error}</p>
                     </div>
-                )}
+                )} */}
 
                 {/* Data Table */}
                 <div className="p-6 font-secondary">
