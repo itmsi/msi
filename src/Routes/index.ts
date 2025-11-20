@@ -37,6 +37,8 @@ const CreateQuotation = lazy(() => import('@/pages/Quotation/Manage/Create'));
 const EditQuotation = lazy(() => import('@/pages/Quotation/Manage/Edit'));
 // const ManageItemsProduct = lazy(() => import('@/pages/Quotation/Product/Manage'));
 const AccessoriesProduct = lazy(() => import('@/pages/Quotation/Accessories/Manage'));
+const CreateAccessories = lazy(() => import('@/pages/Quotation/Accessories/Create'));
+const EditAccessories = lazy(() => import('@/pages/Quotation/Accessories/Edit'));
 
 const CreateTNC = lazy(() => import('@/pages/Quotation/TermCondition/Create'));
 const TNCManage = lazy(() => import('@/pages/Quotation/TermCondition/Manage'));
@@ -329,6 +331,24 @@ export const routes: TAppRoute[] = [
         roles: ['Accessories Quotation'],
         requiredPermissions: ['read'],
         component: AccessoriesProduct,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations/accessories/create',
+        name: 'Accessories Quotation',
+        isProtected: true,
+        roles: ['Accessories Quotation'],
+        requiredPermissions: ['create'],
+        component: CreateAccessories,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations/accessories/edit/:id',
+        name: 'Accessories Quotation',
+        isProtected: true,
+        roles: ['Accessories Quotation'],
+        requiredPermissions: ['update'],
+        component: EditAccessories,
         layout: AppLayout,
     },
     

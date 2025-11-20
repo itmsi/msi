@@ -39,7 +39,6 @@ export default function ManageDepartment() {
         // Filter actions
         handleFilterChange,
         handleSearchChange,
-        resetFilters,
     } = useDepartment();
 
     // Company hook for dropdown options

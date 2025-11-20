@@ -81,7 +81,7 @@ export const useAccessoriesManagement = () => {
     }, []);
 
     const handleEdit = useCallback((accessory: any) => {
-        navigate(`/accessories/edit/${accessory.accessory_id}`);
+        navigate(`/quotations/accessories/edit/${accessory.accessory_id}`);
     }, [navigate]);
 
     const handleDelete = useCallback((accessory: any) => {

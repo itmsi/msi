@@ -23,7 +23,7 @@ export class AccessoriesService {
 
     static async createAccessories(accessoryData: AccessoriesFormData): Promise<{ success: boolean; data?: any; message?: string; errors?: any }> {
         try {
-            const response = await apiPost(`${API_BASE_URL}/quotation/accessory/create`, accessoryData as any);
+            const response = await apiPost(`${API_BASE_URL}/quotation/accessory`, accessoryData as any);
             return response.data as { success: boolean; data?: any; message?: string; errors?: any };
         } catch (error: any) {
             return {

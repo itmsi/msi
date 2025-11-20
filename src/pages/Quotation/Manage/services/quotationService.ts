@@ -3,7 +3,6 @@ import {
     ManageQuotationData,
     ManageQuotationDataPDF,
     ManageQuotationListResponse,
-    ManageQuotationListResponsePDF,
     QuotationFormData, 
     QuotationRequest
 } from '../types/quotation';

@@ -38,7 +38,7 @@ export class ItemProductService {
         try {
             // Check if productData is FormData (for multipart uploads)
             if (productData instanceof FormData) {
-                const response = await apiPost(`${API_BASE_URL}/quotation/componen_product/create`, productData);
+                const response = await apiPost(`${API_BASE_URL}/quotation/componen_product`, productData);
                 return response.data as { success: boolean; data?: any; message?: string; errors?: any };
             }
             

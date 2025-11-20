@@ -1,6 +1,4 @@
 import { useState, useCallback } from 'react';
-import { Employee } from '@/types/administration';
-import { employeesService } from '@/services/administrationService';
 import { CustomerService } from '@/pages/Administration/Customers/services/customerService';
 import { Customer } from '@/pages/Administration/Customers/types/customer';
 

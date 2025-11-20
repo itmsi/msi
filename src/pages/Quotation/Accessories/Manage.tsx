@@ -50,6 +50,7 @@ const ManageAccessories: React.FC = () => {
                 );
             },
             wrap: true,
+            width: '100px'
         },
         {
             name: 'Part Name',
@@ -61,16 +62,6 @@ const ManageAccessories: React.FC = () => {
                     </div>
                     <div className="block text-sm text-gray-500">{row.accessory_brand}</div>
                     <div className="block text-sm text-gray-500">{row.accessory_specification}</div>
-                </div>
-            ),
-            wrap: true,
-        },
-        {
-            name: 'Description',
-            selector: row => row.accessory_description,
-            cell: (row) => (
-                <div className="max-w-xs truncate text-sm text-gray-700" title={row.accessory_description}>
-                    {row.accessory_description}
                 </div>
             ),
             wrap: true,
@@ -175,7 +166,7 @@ const ManageAccessories: React.FC = () => {
                         </div>
                         <PermissionGate permission="create">
                             <Button
-                                onClick={() => navigate('/accessories/create')}
+                                onClick={() => navigate('/quotations/accessories/create')}
                                 className="flex items-center gap-2"
                                 size="sm"
                             >

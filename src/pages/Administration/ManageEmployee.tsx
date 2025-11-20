@@ -33,7 +33,6 @@ export default function ManageEmployee() {
         handleLimitChange,
         handleFilterChange,
         handleSearchChange,
-        clearFilters,
         setConfirmDelete,
         setConfirmResetPassword
     } = useEmployees();

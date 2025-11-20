@@ -29,5 +29,11 @@ export default defineConfig(({ mode }) => {
             host: env.VITE_HOST === 'true',
             allowedHosts: env.VITE_ALLOWED_HOSTS?.split(',') ?? [],
         },
+        build: {
+            rollupOptions: {
+                external: [
+                ]
+            }
+        },
     };
 });

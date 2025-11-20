@@ -1,86 +1,191 @@
-import { useCallback, useState } from "react";
-import { CustomerValidationErrors, CustomerFormData } from "../types/customer";
-import { CustomerService } from "../services/customerService";
+import { useState } from "react";
 import toast from "react-hot-toast";
+import { ItemProductValidationErrors } from "../types/product";
+import { useNavigate } from "react-router";
+import { formatNumberInput } from "@/helpers/generalHelper";
+import { ItemProductService } from "../services/productService";
 
-const getErrorMessage = (error: unknown): string => {
-    if (error instanceof Error) {
-        return error.message;
-    }
-    if (error && typeof error === 'object' && 'message' in error) {
-        return String(error.message);
-    }
-    return 'An unknown error occurred';
-};
+// Form data type for creating
+interface CreateProductFormData {
+    code_unique: string;
+    segment: string;
+    msi_model: string;
+    wheel_no: string;
+    engine: string;
+    product_type: string;
+    horse_power: string;
+    market_price: string;
+    selling_price_star_1: string;
+    selling_price_star_2: string;
+    selling_price_star_3: string;
+    selling_price_star_4: string;
+    selling_price_star_5: string;
+    componen_product_description: string;
+    componen_type: number;
+    volume: string;
+    componen_product_unit_model: string;
+}
 
-export const useCreateCustomer = () => {
+export const useCreateProduct = () => {
+    const navigate = useNavigate();
+    
     const [isCreating, setIsCreating] = useState(false);
-    const [validationErrors, setValidationErrors] = useState<CustomerValidationErrors>({});
+    const [validationErrors, setValidationErrors] = useState<ItemProductValidationErrors>({});
+    
+    const [formData, setFormData] = useState<CreateProductFormData>({
+        code_unique: '',
+        segment: '',
+        msi_model: '',
+        wheel_no: '',
+        engine: '',
+        product_type: '',
+        horse_power: '',
+        market_price: '',
+        selling_price_star_1: '',
+        selling_price_star_2: '',
+        selling_price_star_3: '',
+        selling_price_star_4: '',
+        selling_price_star_5: '',
+        componen_product_description: '',
+        componen_type: 1,
+        volume: '',
+        componen_product_unit_model: ''
+    });
+    
+    const [productImage, setProductImage] = useState<File | null>(null);
 
-    const createCustomer = useCallback(async (customerData: CustomerFormData): Promise<{ success: boolean; message?: string; errors?: any }> => {
+    // Handle input changes
+    const handleInputChange = (field: keyof CreateProductFormData, value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value
+        }));
+
+        if (validationErrors[field as keyof ItemProductValidationErrors]) {
+            setValidationErrors(prev => ({
+                ...prev,
+                [field]: undefined
+            }));
+        }
+    };
+
+    const handleNumberInputChange = (field: keyof CreateProductFormData, value: string) => {
+        const formattedValue = formatNumberInput(value);
+        handleInputChange(field, formattedValue);
+    };
+
+    // Handle product image change
+    const handleImageChange = (file: File | null) => {
+        setProductImage(file);
+    };
+
+    // Validate form data
+    const validateForm = (): boolean => {
+        const errors: Partial<ItemProductValidationErrors> = {};
+
+        if (!formData.code_unique.trim()) {
+            errors.code_unique = 'Kode produk wajib diisi';
+        }
+
+        if (!formData.segment.trim()) {
+            errors.segment = 'Segment wajib diisi';
+        }
+
+        if (!formData.msi_model.trim()) {
+            errors.msi_model = 'MSI Model wajib diisi';
+        }
+
+        if (!formData.market_price.trim()) {
+            errors.market_price = 'Harga pasar wajib diisi';
+        }
+
+        if (!formData.selling_price_star_1.trim()) {
+            errors.selling_price_star_1 = 'Harga Star 1 wajib diisi';
+        }
+
+        if (Object.keys(errors).length > 0) {
+            setValidationErrors(errors);
+            return false;
+        }
+
+        return true;
+    };
+
+    // Handle form submission
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (!validateForm()) {
+            return;
+        }
+
         setIsCreating(true);
-        setValidationErrors({});
 
         try {
-            const response = await CustomerService.createCustomer(customerData);
+            // Create FormData for multipart/form-data
+            const formDataToSend = new FormData();
             
-            if (response.success) {
-                toast.success('Customer created successfully!');
-                return { success: true };
-            } else {
-                // Server returned error response
-                if (response.errors) {
-                    setValidationErrors(response.errors);
-                }
-                toast.error(response.message || 'Failed to create customer');
-                return { 
-                    success: false, 
-                    message: response.message, 
-                    errors: response.errors 
-                };
+            // Append all form fields
+            formDataToSend.append('code_unique', formData.code_unique);
+            formDataToSend.append('segment', formData.segment);
+            formDataToSend.append('msi_model', formData.msi_model);
+            formDataToSend.append('wheel_no', formData.wheel_no);
+            formDataToSend.append('engine', formData.engine);
+            formDataToSend.append('product_type', formData.product_type);
+            formDataToSend.append('horse_power', formData.horse_power);
+            formDataToSend.append('market_price', formData.market_price.replace(/\./g, ''));
+            formDataToSend.append('selling_price_star_1', formData.selling_price_star_1.replace(/\./g, ''));
+            formDataToSend.append('selling_price_star_2', formData.selling_price_star_2.replace(/\./g, ''));
+            formDataToSend.append('selling_price_star_3', formData.selling_price_star_3.replace(/\./g, ''));
+            formDataToSend.append('selling_price_star_4', formData.selling_price_star_4.replace(/\./g, ''));
+            formDataToSend.append('selling_price_star_5', formData.selling_price_star_5.replace(/\./g, ''));
+            formDataToSend.append('componen_product_description', formData.componen_product_description);
+            formDataToSend.append('componen_type', formData.componen_type.toString());
+            formDataToSend.append('volume', formData.volume);
+            formDataToSend.append('componen_product_unit_model', formData.componen_product_unit_model);
+
+            // Append image file if uploaded
+            if (productImage) {
+                formDataToSend.append('image', productImage);
             }
-        } catch (err: any) {
-            const errorMessage = getErrorMessage(err);
+
+            await ItemProductService.createItemProduct(formDataToSend);
             
-            // Handle different error scenarios
-            if (err.response?.status === 422 && err.response?.data?.errors) {
-                setValidationErrors(err.response.data.errors);
-                toast.error('Please check the form for errors');
-            } else if (err.response?.status === 400 && err.response?.data?.message) {
-                toast.error(err.response.data.message);
-            } else {
-                toast.error(`Failed to create customer: ${errorMessage}`);
+            toast.success('Produk berhasil dibuat');
+            navigate('/quotations/products');
+        } catch (error: any) {
+            if (error.errors && typeof error.errors === 'object') {
+                setValidationErrors(error.errors);
             }
-            
-            return { 
-                success: false, 
-                message: errorMessage, 
-                errors: err.response?.data?.errors 
-            };
+            console.error('Error creating product:', error);
+            toast.error('Gagal membuat produk');
         } finally {
             setIsCreating(false);
         }
-    }, []);
+    };
 
-    // Clear specific validation error
-    const clearFieldError = useCallback((fieldName: keyof CustomerValidationErrors) => {
-        setValidationErrors(prev => ({
-            ...prev,
-            [fieldName]: undefined
-        }));
-    }, []);
+    // Handle back navigation
+    const handleBack = () => {
+        navigate('/quotations/products');
+    };
 
-    // Clear all validation errors
-    const clearAllErrors = useCallback(() => {
-        setValidationErrors({});
-    }, []);
+    const companyOptions = [
+        { value: 1, label: 'OFF ROAD REGULAR' },
+        { value: 2, label: 'ON ROAD REGULAR' },
+        { value: 3, label: 'OFF ROAD IRREGULAR' },
+    ];
 
     return {
         isCreating,
+        formData,
         validationErrors,
-        createCustomer,
-        clearFieldError,
-        clearAllErrors,
-        setValidationErrors
+        handleInputChange,
+        handleNumberInputChange,
+        handleImageChange,
+        productImage,
+        handleSubmit,
+        handleBack,
+        companyOptions,
+        setFormData
     };
 };

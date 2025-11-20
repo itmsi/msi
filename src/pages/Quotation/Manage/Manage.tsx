@@ -24,7 +24,6 @@ const ManageQuotations: React.FC = () => {
         quotations,
         pagination,
         loading,
-        error,
         confirmDelete,
         handlePageChange,
         handleRowsPerPageChange,

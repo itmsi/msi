@@ -43,7 +43,7 @@ export const useProduct = () => {
         }
     }, []);
 
-    const updateProduct = useCallback(async (productId: string, productData: Partial<Omit<ItemProduct, 'item_product_id'>>) => {
+    const updateProduct = useCallback(async (productId: string, productData: Partial<Omit<ItemProduct, 'componen_product_id'>>) => {
         setLoading(true);
         setError(null);
         
@@ -51,7 +51,7 @@ export const useProduct = () => {
             const updatedProduct = await ItemProductService.updateItemProduct(productId, productData);
             // Update local state
             setProduct(prev => prev.map(product => 
-                product.item_product_id === productId ? updatedProduct : product
+                product.componen_product_id === productId ? updatedProduct : product
             ));
             return updatedProduct;
         } catch (err) {
@@ -70,7 +70,7 @@ export const useProduct = () => {
         try {
             await ItemProductService.deleteItemProduct(productId);
             // Remove from local state
-            setProduct(prev => prev.filter(product => product.item_product_id !== productId));
+            setProduct(prev => prev.filter(product => product.componen_product_id !== productId));
             return true;
         } catch (err) {
             setError('Failed to delete product');
