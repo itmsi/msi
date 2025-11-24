@@ -64,7 +64,6 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
     ], []);
 
 
-
     useEffect(() => {
         if (!isOpen) {
             setError(null);
@@ -550,7 +549,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                     </div>
 
                     {/* Product Pricing Info */}
-                    <div className="border-b border-gray-200 pb-6">
+                    <div className="border-b border-gray-200 pb-6 hidden">
                         <h4 className="text-lg font-semibold text-gray-900 my-4">Informasi Harga</h4>
                         <div className="grid grid-cols-1 gap-4">
                             <div>

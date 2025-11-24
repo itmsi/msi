@@ -193,8 +193,8 @@ export default function CreateQuotation() {
     }, [showDueDatePicker]);
 
     const calculateItemTotal = (quantity: number, price: string): string => {
-        const numPrice = parseFloat(price) || '';
-        if (quantity <= 0 || numPrice === '') return '';
+        const numPrice = parseFloat(price) || 0;
+        if (quantity <= 0 || numPrice === 0) return '0';
         return (quantity * numPrice).toString();
     };
 
@@ -684,7 +684,16 @@ export default function CreateQuotation() {
                     min='0'
                     value={row.quantity}
                     onKeyPress={handleKeyPress}
-                    onChange={(e) => updateItemById(index as number, 'quantity', parseInt(e.target.value) || 0)}
+                    onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        updateItemById(index as number, 'quantity', val);
+                    }}
+                    onBlur={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        if (val === 0) {
+                            updateItemById(index as number, 'quantity', 1);
+                        }
+                    }}
                     className="border-0 border-b-1 rounded-none p-1 px-3 w-[80px] text-center"
                 />
             ),
@@ -1614,7 +1623,7 @@ export default function CreateQuotation() {
                                             label="Include Aftersales Page"
                                         />
                                     </div>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 hidden">
                                         <Checkbox
                                             checked={formData.include_msf_page ?? false}
                                             onChange={(checked) => handleInputChange('include_msf_page', checked)}

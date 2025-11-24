@@ -350,8 +350,8 @@ export default function EditQuotation() {
     }, [showDueDatePicker]);
 
     const calculateItemTotal = (quantity: number, price: string): string => {
-        const numPrice = parseFloat(price) || '';
-        if (quantity <= 0 || numPrice === '') return '';
+        const numPrice = parseFloat(price) || 0;
+        if (quantity <= 0 || numPrice === 0) return '0';
         return (quantity * numPrice).toString();
     };
 
@@ -826,12 +826,19 @@ export default function EditQuotation() {
             name: 'Product Name',
             selector: (row) => row.componen_product_name,
             cell: (row, index) => (
+                <>
+                <div className="font-medium">
+                    {row.componen_product_name}
+                </div>
                 <Input
+                    type='hidden'
                     value={row.componen_product_name}
                     onChange={(e) => updateItemById(index as number, 'componen_product_name', e.target.value)}
                     className="border-0 border-b-1 rounded-none p-1 px-3 w-full w-[480px]"
                     placeholder="Product name"
+                    readonly={true}
                 />
+                </>
             ),
             wrap: true,
             width: '500px',
@@ -843,10 +850,19 @@ export default function EditQuotation() {
                 <Input
                     type="text"
                     maxLength={3}
-                    min='0'
+                    min='1'
                     value={row.quantity}
                     onKeyPress={handleKeyPress}
-                    onChange={(e) => updateItemById(index as number, 'quantity', parseInt(e.target.value) || 0)}
+                    onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        updateItemById(index as number, 'quantity', val);
+                    }}
+                    onBlur={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        if (val === 0) {
+                            updateItemById(index as number, 'quantity', 1);
+                        }
+                    }}
                     className="border-0 border-b-1 rounded-none p-1 px-3 w-[80px] text-center"
                 />
             ),
@@ -871,7 +887,12 @@ export default function EditQuotation() {
         {
             name: 'Total',
             selector: (row) => row.total,
-            cell: (row) => (
+            cell: (row) => {
+                console.log({
+                    a: row.total
+                });
+                
+                return (
                 <div className="font-medium">
                     {parseFloat(row.total).toLocaleString('id-ID', {
                         style: 'currency',
@@ -879,7 +900,7 @@ export default function EditQuotation() {
                         minimumFractionDigits: 0
                     })}
                 </div>
-            ),
+            )},
             right: true,
             width: '250px',
         },
@@ -1801,7 +1822,7 @@ export default function EditQuotation() {
                                             label="Include Aftersales Page"
                                         />
                                     </div>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 hidden">
                                         <Checkbox
                                             checked={formData.include_msf_page ?? false}
                                             onChange={(checked) => handleInputChange('include_msf_page', checked)}
