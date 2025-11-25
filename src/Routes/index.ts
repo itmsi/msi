@@ -218,7 +218,7 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/customers',
+        path: '/quotations/administration/customers',
         name: 'Customer Quotation',
         isProtected: true,
         roles: ['Customer Quotation'],
@@ -226,7 +226,7 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/customers/create',
+        path: '/quotations/administration/customers/create',
         name: 'Customer Quotation',
         isProtected: true,
         roles: ['Customer Quotation'],
@@ -235,7 +235,7 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/customers/edit/:id',
+        path: '/quotations/administration/customers/edit/:id',
         name: 'Customer Quotation',
         isProtected: true,
         roles: ['Customer Quotation'],

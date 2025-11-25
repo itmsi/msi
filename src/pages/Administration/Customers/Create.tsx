@@ -19,6 +19,8 @@ interface CreateCustomerFormData {
     customer_state: string;
     customer_zip: string;
     customer_country: string;
+    job_title: string;
+    contact_person: string;
 }
 
 export default function CreateCustomer() {
@@ -41,7 +43,9 @@ export default function CreateCustomer() {
         customer_city: '',
         customer_state: '',
         customer_zip: '',
-        customer_country: ''
+        customer_country: '',
+        job_title: '',
+        contact_person: ''
     });
 
     // Form input handlers
@@ -118,7 +122,7 @@ export default function CreateCustomer() {
                     {/* HEADER */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
-                            <Link to="/administration/customers">
+                            <Link to="/quotation/administration/customers">
                                 <Button
                                     variant="outline"
                                     className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
@@ -151,6 +155,34 @@ export default function CreateCustomer() {
                                     />
                                     {validationErrors.customer_name && (
                                         <span className="text-sm text-red-500">{validationErrors.customer_name}</span>
+                                    )}
+                                </div>
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="contact_person">Contact Person *</Label>
+                                    <Input
+                                        id="contact_person"
+                                        type="text"
+                                        value={formData.contact_person}
+                                        onChange={(e) => handleInputChange('contact_person', e.target.value)}
+                                        placeholder="Enter contact person"
+                                        error={!!validationErrors.contact_person}
+                                    />
+                                    {validationErrors.contact_person && (
+                                        <span className="text-sm text-red-500">{validationErrors.contact_person}</span>
+                                    )}
+                                </div>
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="job_title">Job Title *</Label>
+                                    <Input
+                                        id="job_title"
+                                        type="text"
+                                        value={formData.job_title}
+                                        onChange={(e) => handleInputChange('job_title', e.target.value)}
+                                        placeholder="Enter job title"
+                                        error={!!validationErrors.job_title}
+                                    />
+                                    {validationErrors.job_title && (
+                                        <span className="text-sm text-red-500">{validationErrors.job_title}</span>
                                     )}
                                 </div>
 
@@ -258,7 +290,7 @@ export default function CreateCustomer() {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => navigate('/administration/customers')}
+                                onClick={() => navigate('/quotation/administration/customers')}
                                 className="px-6 rounded-full"
                                 disabled={isCreating}
                             >

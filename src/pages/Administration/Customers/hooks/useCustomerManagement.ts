@@ -79,7 +79,7 @@ export const useCustomerManagement = () => {
     }, []);
 
     const handleEdit = useCallback((customer: any) => {
-        navigate(`/customers/edit/${customer.customer_id}`);
+        navigate(`/quotations/administration/customers/edit/${customer.customer_id}`);
     }, [navigate]);
 
     const handleDelete = useCallback((customer: any) => {

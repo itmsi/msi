@@ -33,7 +33,9 @@ export default function EditCustomer() {
         customer_city: '',
         customer_state: '',
         customer_zip: '',
-        customer_country: ''
+        customer_country: '',
+        job_title: '',
+        contact_person: ''
     });
 
     // Load customer data when component mounts
@@ -58,16 +60,18 @@ export default function EditCustomer() {
                     customer_city: customer.customer_city || '',
                     customer_state: customer.customer_state || '',
                     customer_zip: customer.customer_zip || '',
-                    customer_country: customer.customer_country || ''
+                    customer_country: customer.customer_country || '',
+                    job_title: customer.job_title || '',
+                    contact_person: customer.contact_person || ''
                 });
             } else {
                 toast.error('Customer not found');
-                navigate('/administration/customers');
+                navigate('/quotation/administration/customers');
             }
         } catch (error: any) {
             console.error('Error loading customer:', error);
             toast.error('Failed to load customer data');
-            navigate('/administration/customers');
+            navigate('/quotation/administration/customers');
         } finally {
             setIsLoading(false);
         }
@@ -135,7 +139,7 @@ export default function EditCustomer() {
             
             if (response) {
                 toast.success('Customer updated successfully');
-                navigate('/administration/customers');
+                navigate('/quotation/administration/customers');
             }
         } catch (error: any) {
             console.error('Error updating customer:', error);
@@ -187,7 +191,7 @@ export default function EditCustomer() {
                     <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
                         <div className="md:col-span-3 p-8 relative">
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Basic Information</h2>
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-4">Basic Information</h2>
                                 
                                 {/* Customer Name */}
                                 <div className="md:col-span-4">
@@ -202,6 +206,34 @@ export default function EditCustomer() {
                                     />
                                     {validationErrors.customer_name && (
                                         <span className="text-sm text-red-500">{validationErrors.customer_name}</span>
+                                    )}
+                                </div>
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="contact_person">Contact Person *</Label>
+                                    <Input
+                                        id="contact_person"
+                                        type="text"
+                                        value={formData.contact_person}
+                                        onChange={(e) => handleInputChange('contact_person', e.target.value)}
+                                        placeholder="Enter contact person"
+                                        error={!!validationErrors.contact_person}
+                                    />
+                                    {validationErrors.contact_person && (
+                                        <span className="text-sm text-red-500">{validationErrors.contact_person}</span>
+                                    )}
+                                </div>
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="job_title">Job Title *</Label>
+                                    <Input
+                                        id="job_title"
+                                        type="text"
+                                        value={formData.job_title}
+                                        onChange={(e) => handleInputChange('job_title', e.target.value)}
+                                        placeholder="Enter job title"
+                                        error={!!validationErrors.job_title}
+                                    />
+                                    {validationErrors.job_title && (
+                                        <span className="text-sm text-red-500">{validationErrors.job_title}</span>
                                     )}
                                 </div>
 

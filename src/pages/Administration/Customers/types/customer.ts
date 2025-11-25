@@ -8,6 +8,8 @@ export interface Customer {
     customer_state?: string;
     customer_zip?: string;
     customer_country?: string;
+    contact_person?: string;
+    job_title?: string;
     created_at?: string;
     created_by?: string;
     updated_at?: string | null;
@@ -51,6 +53,8 @@ export interface CustomerFormData {
     customer_state: string;
     customer_zip: string;
     customer_country: string;
+    job_title: string;
+    contact_person: string;
 }
 
 // Customer validation errors
@@ -63,4 +67,6 @@ export interface CustomerValidationErrors {
     customer_state?: string;
     customer_zip?: string;
     customer_country?: string;
+    job_title?: string;
+    contact_person?: string;
 }

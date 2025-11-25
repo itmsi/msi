@@ -39,7 +39,7 @@ export class CustomerService {
     }
 
     static async updateCustomer(customerId: string, customerData: Partial<Omit<Customer, 'customer_id'>>): Promise<Customer> {
-        const response = await apiPut<{ data: Customer }>(`${API_BASE_URL}/${customerId}`, customerData);
+        const response = await apiPut<{ data: Customer }>(`${API_BASE_URL}/customers/${customerId}`, customerData);
         return response.data.data;
     }
 

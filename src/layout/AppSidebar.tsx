@@ -14,20 +14,22 @@ import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "@/hooks/useAuth";
 import GridShape from "@/components/common/GridShape";
 
+type SubNavItem = {
+    name: string;
+    path?: string;
+    icon?: React.ReactNode;
+    pro?: boolean;
+    new?: boolean;
+    allowedRoles?: string[];
+    subItems?: SubNavItem[];
+};
+
 type NavItem = {
     name: string;
-    icon: React.ReactNode;
+    icon?: React.ReactNode;
     path?: string;
     allowedRoles?: string[];
-    subItems?: {
-        name: string;
-        path: string;
-        icon?: React.ReactNode;
-        pro?: boolean;
-        new?: boolean;
-        allowedRoles?: string[];
-    }[];
-    
+    subItems?: SubNavItem[];
 };
 
 const navItems: NavItem[] = [
@@ -55,7 +57,23 @@ const navItems: NavItem[] = [
             { name: "Manage", path: "/quotations/manage", allowedRoles: ['Manage Quotation'], },
             { name: "Product", path: "/quotations/products", allowedRoles: ['Product Quotation'], },
             { name: "Accessories", path: "/quotations/accessories", allowedRoles: ['Accessories Quotation'], },
-            { name: "Term Condition", path: "/quotations/term-condition", allowedRoles: ['TNC Quotation'], }
+            { name: "Term Condition", path: "/quotations/term-condition", allowedRoles: ['TNC Quotation'], },
+            {
+                name: "Administration",
+                allowedRoles: ['Customer Quotation', 'Bank Quotation'],
+                subItems: [
+                    { 
+                        name: "Customers", 
+                        path: "/quotations/administration/customers", 
+                        allowedRoles: ['Customer Quotation']
+                    },
+                    { 
+                        name: "Bank Accounts", 
+                        path: "/bank-accounts", 
+                        allowedRoles: ['Bank Quotation']
+                    }
+                ],
+            },
         ],
     }
 ];
@@ -105,16 +123,6 @@ const othersItems: NavItem[] = [
                 allowedRoles: ['Roles'],
             },
             { 
-                name: "Customers", 
-                path: "/customers", 
-                allowedRoles: ['Customer Quotation']
-            },
-            { 
-                name: "Bank Accounts", 
-                path: "/bank-accounts", 
-                allowedRoles: ['Bank Quotation']
-            },
-            { 
                 name: "Menu", 
                 path: "/menu", 
                 allowedRoles: ['Menu'], 
@@ -137,6 +145,7 @@ const AppSidebar: React.FC = () => {
 
     type OpenState = { type: 'main' | 'others'; key: string } | null;
     const [openSubmenu, setOpenSubmenu] = useState<OpenState>(null);
+    const [openNestedSubmenu, setOpenNestedSubmenu] = useState<string | null>(null);
 
     const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -206,10 +215,10 @@ const AppSidebar: React.FC = () => {
 
         const checkItems = (items: NavItem[], type: 'main' | 'others') => {
             items.forEach((nav) => {
-                const matches = nav.subItems?.filter((sub) => isSubActive(sub.path)) ?? [];
+                const matches = nav.subItems?.filter((sub) => sub.path && isSubActive(sub.path)) ?? [];
                 if (matches.length) {
-                    const longest = matches.reduce((a, b) => (a.path.length >= b.path.length ? a : b));
-                    if (longest.path.length > bestLength) {
+                    const longest = matches.reduce((a, b) => ((a.path?.length || 0) >= (b.path?.length || 0) ? a : b));
+                    if (longest.path && longest.path.length > bestLength) {
                         bestLength = longest.path.length;
                         bestMatch = { type, key: buildNavKey(type, nav) };
                     }
@@ -242,6 +251,10 @@ const AppSidebar: React.FC = () => {
     const handleSubmenuToggle = (menuType: 'main' | 'others', nav: NavItem) => {
         const key = buildNavKey(menuType, nav);
         setOpenSubmenu((prev) => (prev && prev.key === key ? null : { type: menuType, key }));
+    };
+
+    const handleNestedSubmenuToggle = (subItemKey: string) => {
+        setOpenNestedSubmenu((prev) => (prev === subItemKey ? null : subItemKey));
     };
 
     const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => {
@@ -317,19 +330,61 @@ const AppSidebar: React.FC = () => {
                                 }}
                             >
                                 <ul className={`mt-2 space-y-1 ml-9 ${(isExpanded || isHovered || isMobileOpen) ? "" : "hidden"}`}>
-                                    {filteredSubItems.map((subItem) => {
+                                    {filteredSubItems.map((subItem, subIndex) => {
+                                        const subItemKey = `${navKey}:${subItem.path || subItem.name}:${subIndex}`;
+                                        const hasNestedSubItems = subItem.subItems && subItem.subItems.length > 0;
+                                        const isNestedOpen = openNestedSubmenu === subItemKey;
+                                        
                                         return (
-                                    <li key={`${navKey}:${subItem.path}`}>
-                                        <Link
-                                            to={subItem.path}
-                                            className={`menu-dropdown-item ${
-                                                isSubActive(subItem.path)
-                                                ? "menu-dropdown-item-active"
-                                                : "menu-dropdown-item-inactive"
-                                            }`}
-                                        >
-                                            {subItem.name}
-                                        </Link>
+                                    <li key={subItemKey}>
+                                        {hasNestedSubItems ? (
+                                            <>
+                                                <button
+                                                    onClick={() => handleNestedSubmenuToggle(subItemKey)}
+                                                    className={`menu-dropdown-item w-full text-left flex items-center justify-between ${
+                                                        isNestedOpen ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"
+                                                    }`}
+                                                >
+                                                    <span>{subItem.name}</span>
+                                                    <ChevronDownIcon
+                                                        className={`w-4 h-4 transition-transform duration-200 ${
+                                                            isNestedOpen ? "rotate-180" : ""
+                                                        }`}
+                                                    />
+                                                </button>
+                                                {isNestedOpen && (
+                                                    <ul className="mt-1 space-y-1 ml-4">
+                                                        {subItem.subItems?.map((nestedItem, nestedIndex) => {
+                                                            if (!nestedItem.path) return null;
+                                                            return (
+                                                            <li key={`${subItemKey}:nested:${nestedIndex}`}>
+                                                                <Link
+                                                                    to={nestedItem.path}
+                                                                    className={`menu-dropdown-item text-sm ${
+                                                                        isSubActive(nestedItem.path)
+                                                                        ? "menu-dropdown-item-active"
+                                                                        : "menu-dropdown-item-inactive"
+                                                                    }`}
+                                                                >
+                                                                    {nestedItem.name}
+                                                                </Link>
+                                                            </li>
+                                                        )})}
+                                                    </ul>
+                                                )}
+                                            </>
+                                        ) : subItem.path ? (
+                                            <Link
+                                                to={subItem.path}
+                                                className={`menu-dropdown-item ${
+                                                    isSubActive(subItem.path)
+                                                    ? "menu-dropdown-item-active"
+                                                    : "menu-dropdown-item-inactive"
+                                                }`}
+                                            >
+                                                {subItem.name}
+                                            </Link>
+                                        ) : null}
                                     </li>
                                     );})}
                                 </ul>
