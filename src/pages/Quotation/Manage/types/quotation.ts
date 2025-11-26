@@ -214,7 +214,7 @@ export interface QuotationRequest {
     page: number;
     limit: number;
     sort_order: '' | 'asc' | 'desc';
-    status: 'submit' | 'draft' | 'rejected' | '';
+    status?: 'submit' | 'draft' | 'rejected' | '';
     search: string;
 }
 export interface QuotationFilters {

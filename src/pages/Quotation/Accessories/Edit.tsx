@@ -3,7 +3,6 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import { MdEdit, MdKeyboardArrowLeft, MdSave } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
-import { handleKeyPress } from "@/helpers/generalHelper";
 import { useAccessoriesEdit } from "./hooks/useAccessoriesEdit";
 
 export default function EditAccessories() {

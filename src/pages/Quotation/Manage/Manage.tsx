@@ -32,7 +32,6 @@ const ManageQuotations: React.FC = () => {
         handleManualSearch,
         handleClearFilters,
         handleFilterChange,
-        handleStatusChange,
         handleEdit,
         handleView,
         handleDelete,
