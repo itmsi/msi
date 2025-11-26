@@ -354,22 +354,22 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                             )}
                         </div>
                         <div className='md:col-span-3 space-y-1'>
-                                <p className="text-gray-700 text-sm">
-                                    {initialData.code_unique || 'n/a'}
-                                </p>
-                                <p className="font-bold text-gray-900">
-                                    {initialData.msi_model || 'n/a'}
-                                </p>
-                                <p className="text-gray-700 text-sm">
-                                    {initialData.engine || 'n/a'} - {initialData.segment || 'n/a'}
-                                </p>
-                                
-                                <p className="text-gray-700 text-sm">
-                                    {initialData.segment || '-'}
-                                </p>
-                                {/* <p className="text-gray-700 text-sm">
-                                    {initialData.product_type || 'n/a'}
-                                </p> */}
+                            <p className="text-gray-700 text-sm">
+                                {initialData.code_unique || 'n/a'}
+                            </p>
+                            <p className="font-bold text-gray-900">
+                                {initialData.msi_model || 'n/a'} {initialData.msi_product ? ' - ' + initialData.msi_product : ''}
+                            </p>
+                            <p className="text-gray-700 text-sm">
+                                {initialData.engine || 'n/a'} - {initialData.segment || 'n/a'}
+                            </p>
+                            
+                            <p className="text-gray-700 text-sm">
+                                {initialData.segment || '-'}
+                            </p>
+                            {/* <p className="text-gray-700 text-sm">
+                                {initialData.product_type || 'n/a'}
+                            </p> */}
                         </div>
                     </div>
                     
@@ -470,6 +470,21 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     value={initialData.msi_model || ''}
                                     onChange={(e) => handleFieldUpdate('msi_model', e.target.value)}
                                     placeholder="Masukkan MSI model"
+                                    className="w-full"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    MSI Product
+                                </label>
+                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                    {initialData.msi_product || '-'}
+                                </p>
+                                <Input
+                                    type="hidden"
+                                    value={initialData.msi_product || ''}
+                                    onChange={(e) => handleFieldUpdate('msi_product', e.target.value)}
+                                    placeholder="Masukkan MSI product"
                                     className="w-full"
                                 />
                             </div>

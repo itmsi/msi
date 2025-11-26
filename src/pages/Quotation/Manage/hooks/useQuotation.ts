@@ -15,7 +15,9 @@ export const useQuotation = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [filters, setFilters] = useState({
-        search: ''
+        search: '',
+        sort_order: 'desc' as 'asc' | 'desc',
+        status: '' as 'submit' | 'draft' | 'rejected' | ''
     });
 
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
@@ -28,7 +30,9 @@ export const useQuotation = () => {
             const requestParams: Partial<QuotationRequest> = {
                 page: page !== undefined ? page : pagination.page,
                 limit: limit !== undefined ? limit : pagination.limit,
-                search: filters.search
+                search: filters.search,
+                sort_order: filters.sort_order,
+                status: filters.status
             };
             
             const response = await QuotationService.getQuotation(requestParams);
@@ -45,7 +49,7 @@ export const useQuotation = () => {
         } finally {
             setLoading(false);
         }
-    }, [pagination.page, pagination.limit, filters.search]);
+    }, [pagination.page, pagination.limit, filters.search, filters.sort_order, filters.status]);
 
     // Debounced search handler
     const handleSearchChange = useCallback((value: string) => {
@@ -61,7 +65,9 @@ export const useQuotation = () => {
             const requestParams: Partial<QuotationRequest> = {
                 page: 1,
                 limit: pagination.limit,
-                search: value
+                search: value,
+                sort_order: filters.sort_order,
+                status: filters.status
             };
             
             setLoading(true);
@@ -84,7 +90,11 @@ export const useQuotation = () => {
                     setLoading(false);
                 });
         }, 500);
-    }, [pagination.limit]);
+    }, [pagination.limit, filters.sort_order, filters.status]);
+
+    const updateFilters = useCallback((key: 'search' | 'sort_order' | 'status', value: string) => {
+        setFilters(prev => ({ ...prev, [key]: value }));
+    }, []);
 
     const deleteQuotation = useCallback(async (quotation_id: string) => {
         setLoading(true);
@@ -134,6 +144,7 @@ export const useQuotation = () => {
         loading,
         error,
         filters,
+        updateFilters,
         deleteQuotation,
         downloadQuotation,
         fetchQuotations,

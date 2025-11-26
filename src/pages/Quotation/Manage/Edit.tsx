@@ -190,6 +190,7 @@ export default function EditQuotation() {
                     code_unique: item.cp_code_unique || '',
                     segment: item.cp_segment || '',
                     msi_model: item.cp_msi_model || '',
+                    msi_product: item.cp_msi_product || '',
                     wheel_no: item.cp_wheel_no || '',
                     engine: item.cp_engine || '',
                     volume: item.cp_volume || '',
@@ -274,23 +275,16 @@ export default function EditQuotation() {
                 });
             }
             
-            if (data.term_content_id && apiData.term_content_title) {
+            if (data.term_content_id) {
                 setSelectedTermCondition({
                     value: data.term_content_id,
-                    label: apiData.term_content_title || 'Term Condition',
-                    term_content_directory: data.term_content_directory || '',
+                    label: apiData.term_content_title || apiData.term_content_name || 'Term Condition',
+                    term_content_directory: data.term_content_payload || data.term_content_directory || '',
                     data: {
                         term_content_id: data.term_content_id,
-                        term_content_title: apiData.term_content_title || '',
+                        term_content_title: apiData.term_content_title || apiData.term_content_name || '',
                         term_content_directory: data.term_content_directory || '',
                         term_content_payload: data.term_content_payload || '',
-                        created_by: '',
-                        updated_by: null,
-                        deleted_by: null,
-                        created_at: '',
-                        updated_at: '',
-                        deleted_at: null,
-                        is_delete: false
                     }
                 });
             }
@@ -575,6 +569,7 @@ export default function EditQuotation() {
                     componen_product_name: apiProductData.componen_product_name || selectedProduct.label || '',
                     code_unique: apiProductData.code_unique || '',
                     msi_model: apiProductData.msi_model || '',
+                    msi_product: apiProductData.msi_product || '',
                     segment: apiProductData.segment || '',
                     wheel_no: apiProductData.wheel_no || '',
                     engine: apiProductData.engine || '',
@@ -695,6 +690,7 @@ export default function EditQuotation() {
                     componen_product_name: existingItem.componen_product_name,
                     code_unique: existingItem.code_unique || '',
                     msi_model: existingItem.msi_model || '',
+                    msi_product: existingItem.msi_product || '',
                     segment: existingItem.segment || '',
                     wheel_no: existingItem.wheel_no || '',
                     engine: existingItem.engine || '',
@@ -785,6 +781,7 @@ export default function EditQuotation() {
                 ...currentItem,
                 componen_product_name: updatedProductData.componen_product_name || currentItem.componen_product_name,
                 msi_model: updatedProductData.msi_model || currentItem.msi_model,
+                msi_product: updatedProductData.msi_product || currentItem.msi_product,
                 segment: updatedProductData.segment || currentItem.segment,
                 wheel_no: updatedProductData.wheel_no || currentItem.wheel_no,
                 engine: updatedProductData.engine || currentItem.engine,
@@ -888,10 +885,6 @@ export default function EditQuotation() {
             name: 'Total',
             selector: (row) => row.total,
             cell: (row) => {
-                console.log({
-                    a: row.total
-                });
-                
                 return (
                 <div className="font-medium">
                     {parseFloat(row.total).toLocaleString('id-ID', {
@@ -901,7 +894,6 @@ export default function EditQuotation() {
                     })}
                 </div>
             )},
-            right: true,
             width: '250px',
         },
         // {
@@ -1464,154 +1456,151 @@ export default function EditQuotation() {
                                     />
                                 </div>
 
-                                {/* Term Content Editor */}
-                                {/* {selectedTermCondition && ( */}
-                                    <div className="md:col-span-2">
-                                        <Label>
-                                            {/* Term Content */}
-                                            {termConditionLoading && (
-                                                <span className="ml-2 text-sm text-blue-600">Loading content...</span>
-                                            )}
-                                        </Label>
-                                        <div className="w-full border border-gray-300 rounded-lg bg-gray-50">
-                                            {/* Toolbar */}
-                                            <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200">
-                                                <div className="flex flex-wrap items-center divide-gray-200 sm:divide-x rtl:divide-x-reverse">
-                                                    
-                                                    {/* Format buttons group */}
-                                                    <div className="flex items-center space-x-1 rtl:space-x-reverse sm:px-4">
-                                                        <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100" 
-                                                            onClick={() => {
-                                                                const editor = document.getElementById('wysiwyg-editor');
-                                                                if (editor) {
-                                                                    editor.focus();
-                                                                    document.execCommand('bold', false, '');
-                                                                }
-                                                            }}
-                                                            title="Bold">
-                                                            <FaBold />
-                                                        </button>
-                                                        <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                            onClick={() => {
-                                                                const editor = document.getElementById('wysiwyg-editor');
-                                                                if (editor) {
-                                                                    editor.focus();
-                                                                    document.execCommand('italic', false, '');
-                                                                }
-                                                            }}
-                                                            title="Italic">
-                                                            <FaItalic />
-                                                        </button>
-                                                        <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                            onClick={() => {
-                                                                const editor = document.getElementById('wysiwyg-editor');
-                                                                if (editor) {
-                                                                    editor.focus();
-                                                                    document.execCommand('underline', false, '');
-                                                                }
-                                                            }}
-                                                            title="Underline">
-                                                            <FaUnderline />
-                                                        </button>
-                                                        <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                            onClick={() => {
-                                                                const editor = document.getElementById('wysiwyg-editor');
-                                                                if (editor) {
-                                                                    editor.focus();
-                                                                    document.execCommand('strikeThrough', false, '');
-                                                                }
-                                                            }}
-                                                            title="Strikethrough">
-                                                            <FaStrikethrough />
-                                                        </button>
-                                                    </div>
-                                                    
-                                                    {/* List buttons group */}
-                                                    <div className="flex items-center space-x-1 rtl:space-x-reverse sm:px-4">
-                                                        <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                            onClick={() => {
-                                                                const editor = document.getElementById('wysiwyg-editor');
-                                                                if (editor) {
-                                                                    editor.focus();
-                                                                    document.execCommand('insertUnorderedList', false, '');
-                                                                }
-                                                            }}
-                                                            title="Bullet List">
-                                                            <FaListUl />
-                                                        </button>
-                                                        <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                            onClick={() => {
-                                                                const editor = document.getElementById('wysiwyg-editor');
-                                                                if (editor) {
-                                                                    editor.focus();
-                                                                    document.execCommand('insertOrderedList', false, '');
-                                                                }
-                                                            }}
-                                                            title="Numbered List">
-                                                            <FaListOl />
-                                                        </button>
-                                                    </div>
+                                <div className="md:col-span-2">
+                                    <Label>
+                                        {/* Term Content */}
+                                        {termConditionLoading && (
+                                            <span className="ml-2 text-sm text-blue-600">Loading content...</span>
+                                        )}
+                                    </Label>
+                                    <div className="w-full border border-gray-300 rounded-lg bg-gray-50">
+                                        {/* Toolbar */}
+                                        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200">
+                                            <div className="flex flex-wrap items-center divide-gray-200 sm:divide-x rtl:divide-x-reverse">
+                                                
+                                                {/* Format buttons group */}
+                                                <div className="flex items-center space-x-1 rtl:space-x-reverse sm:px-4">
+                                                    <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100" 
+                                                        onClick={() => {
+                                                            const editor = document.getElementById('wysiwyg-editor');
+                                                            if (editor) {
+                                                                editor.focus();
+                                                                document.execCommand('bold', false, '');
+                                                            }
+                                                        }}
+                                                        title="Bold">
+                                                        <FaBold />
+                                                    </button>
+                                                    <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
+                                                        onClick={() => {
+                                                            const editor = document.getElementById('wysiwyg-editor');
+                                                            if (editor) {
+                                                                editor.focus();
+                                                                document.execCommand('italic', false, '');
+                                                            }
+                                                        }}
+                                                        title="Italic">
+                                                        <FaItalic />
+                                                    </button>
+                                                    <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
+                                                        onClick={() => {
+                                                            const editor = document.getElementById('wysiwyg-editor');
+                                                            if (editor) {
+                                                                editor.focus();
+                                                                document.execCommand('underline', false, '');
+                                                            }
+                                                        }}
+                                                        title="Underline">
+                                                        <FaUnderline />
+                                                    </button>
+                                                    <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
+                                                        onClick={() => {
+                                                            const editor = document.getElementById('wysiwyg-editor');
+                                                            if (editor) {
+                                                                editor.focus();
+                                                                document.execCommand('strikeThrough', false, '');
+                                                            }
+                                                        }}
+                                                        title="Strikethrough">
+                                                        <FaStrikethrough />
+                                                    </button>
+                                                </div>
+                                                
+                                                {/* List buttons group */}
+                                                <div className="flex items-center space-x-1 rtl:space-x-reverse sm:px-4">
+                                                    <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
+                                                        onClick={() => {
+                                                            const editor = document.getElementById('wysiwyg-editor');
+                                                            if (editor) {
+                                                                editor.focus();
+                                                                document.execCommand('insertUnorderedList', false, '');
+                                                            }
+                                                        }}
+                                                        title="Bullet List">
+                                                        <FaListUl />
+                                                    </button>
+                                                    <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
+                                                        onClick={() => {
+                                                            const editor = document.getElementById('wysiwyg-editor');
+                                                            if (editor) {
+                                                                editor.focus();
+                                                                document.execCommand('insertOrderedList', false, '');
+                                                            }
+                                                        }}
+                                                        title="Numbered List">
+                                                        <FaListOl />
+                                                    </button>
+                                                </div>
 
-                                                    {/* Insert elements group */}
-                                                    <div className="flex items-center space-x-1 rtl:space-x-reverse sm:ps-4">
-                                                        <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                            onClick={() => {
-                                                                const editor = document.getElementById('wysiwyg-editor');
-                                                                if (editor) {
-                                                                    editor.focus();
-                                                                    document.execCommand('insertHorizontalRule', false, '');
-                                                                }
-                                                            }}
-                                                            title="Insert Horizontal Rule">
-                                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                                <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"></path>
-                                                            </svg>
-                                                        </button>
-                                                        <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                            onClick={() => {
-                                                                const editor = document.getElementById('wysiwyg-editor');
-                                                                if (editor) {
-                                                                    editor.focus();
-                                                                    document.execCommand('insertHTML', false, '<blockquote style="border-left: 4px solid #d1d5db; margin: 1rem 0; padding-left: 1rem; color: #6b7280; font-style: italic;">Quote text here...</blockquote>');
-                                                                }
-                                                            }}
-                                                            title="Insert Quote">
-                                                                <FaQuoteLeft />
-                                                        </button>
-                                                    </div>
+                                                {/* Insert elements group */}
+                                                <div className="flex items-center space-x-1 rtl:space-x-reverse sm:ps-4">
+                                                    <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
+                                                        onClick={() => {
+                                                            const editor = document.getElementById('wysiwyg-editor');
+                                                            if (editor) {
+                                                                editor.focus();
+                                                                document.execCommand('insertHorizontalRule', false, '');
+                                                            }
+                                                        }}
+                                                        title="Insert Horizontal Rule">
+                                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                            <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
+                                                        onClick={() => {
+                                                            const editor = document.getElementById('wysiwyg-editor');
+                                                            if (editor) {
+                                                                editor.focus();
+                                                                document.execCommand('insertHTML', false, '<blockquote style="border-left: 4px solid #d1d5db; margin: 1rem 0; padding-left: 1rem; color: #6b7280; font-style: italic;">Quote text here...</blockquote>');
+                                                            }
+                                                        }}
+                                                        title="Insert Quote">
+                                                            <FaQuoteLeft />
+                                                    </button>
                                                 </div>
                                             </div>
-                                            {/* Content editable area */}
-                                            <div className="px-4 py-2 bg-white rounded-b-lg">
-                                                <div
-                                                    id="wysiwyg-editor"
-                                                    contentEditable
-                                                    className="block w-full px-0 text-sm text-gray-800 bg-white border-0 focus:ring-0 min-h-[200px] outline-none wysiwyg-editor"
-                                                    suppressContentEditableWarning={true}
-                                                    onInput={(e) => {
-                                                        const content = e.currentTarget.innerHTML;
-                                                        setTermConditionContent(content);
-                                                        handleInputChange('term_content_directory', content);
-                                                    }}
-                                                    onPaste={(e) => {
-                                                        e.preventDefault();
-                                                        const text = e.clipboardData.getData('text/plain');
-                                                        document.execCommand('insertText', false, text);
-                                                    }}
-                                                    ref={(el) => {
-                                                        if (el && termConditionContent && el.innerHTML !== termConditionContent && !el.contains(document.activeElement)) {
-                                                            // Only update content when the editor is not focused to avoid cursor issues
-                                                            el.innerHTML = termConditionContent;
-                                                        }
-                                                    }}
-                                                />
-                                            </div>
                                         </div>
-                                        <div className="text-xs text-gray-500 mt-1">
-                                            Selected: {selectedTermCondition?.label || ''}
+                                        {/* Content editable area */}
+                                        <div className="px-4 py-2 bg-white rounded-b-lg">
+                                            <div
+                                                id="wysiwyg-editor"
+                                                contentEditable
+                                                className="block w-full px-0 text-sm text-gray-800 bg-white border-0 focus:ring-0 min-h-[200px] outline-none wysiwyg-editor"
+                                                suppressContentEditableWarning={true}
+                                                onInput={(e) => {
+                                                    const content = e.currentTarget.innerHTML;
+                                                    setTermConditionContent(content);
+                                                    handleInputChange('term_content_directory', content);
+                                                }}
+                                                onPaste={(e) => {
+                                                    e.preventDefault();
+                                                    const text = e.clipboardData.getData('text/plain');
+                                                    document.execCommand('insertText', false, text);
+                                                }}
+                                                ref={(el) => {
+                                                    if (el && termConditionContent && el.innerHTML !== termConditionContent && !el.contains(document.activeElement)) {
+                                                        // Only update content when the editor is not focused to avoid cursor issues
+                                                        el.innerHTML = termConditionContent;
+                                                    }
+                                                }}
+                                            />
                                         </div>
                                     </div>
-                                {/* )} */}
+                                    <div className="text-xs text-gray-500 mt-1">
+                                        Selected: {selectedTermCondition?.label || ''}
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Totals Summary */}
@@ -1870,6 +1859,7 @@ export default function EditQuotation() {
                                 type="button"
                                 variant="outline"
                                 onClick={() => navigate('/quotations/manage')}
+                                className="px-6 rounded-full"
                                 disabled={isUpdating}
                             >
                                 Cancel
@@ -1882,7 +1872,7 @@ export default function EditQuotation() {
                                     handleSubmit(fakeEvent, 'draft');
                                 }}
                                 disabled={isUpdating}
-                                className="flex items-center gap-2"
+                                className="px-6 flex items-center gap-2 rounded-full"
                             >
                                 <MdSave size={16} />
                                 Save as Draft
@@ -1890,7 +1880,7 @@ export default function EditQuotation() {
                             <Button
                                 type="submit"
                                 disabled={isUpdating || loading}
-                                className="flex items-center gap-2"
+                                className="px-6 flex items-center gap-2 rounded-full"
                             >
                                 <MdSave size={16} />
                                 {isUpdating ? 'Updating...' : 'Update Quotation'}

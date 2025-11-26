@@ -21,6 +21,7 @@ const ManageQuotations: React.FC = () => {
     const {
         searchTerm,
         sortOrder,
+        sortStatus,
         quotations,
         pagination,
         loading,
@@ -31,6 +32,7 @@ const ManageQuotations: React.FC = () => {
         handleManualSearch,
         handleClearFilters,
         handleFilterChange,
+        handleStatusChange,
         handleEdit,
         handleView,
         handleDelete,
@@ -43,6 +45,7 @@ const ManageQuotations: React.FC = () => {
     const getStatusBadge = (status: string) => {
         const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
             draft: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Draft' },
+            submit: { bg: 'bg-green-100', text: 'text-green-800', label: 'Submit' },
             pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending' },
             approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Approved' },
             rejected: { bg: 'bg-red-100', text: 'text-red-800', label: 'Rejected' },
@@ -99,7 +102,6 @@ const ManageQuotations: React.FC = () => {
             {
                 name: 'Grand Total',
                 selector: (row) => row.manage_quotation_grand_total,
-                right: true,
                 cell: (row) => (
                     <span className="font-semibold">{formatCurrency(row.manage_quotation_grand_total)}</span>
                 ),
@@ -164,6 +166,29 @@ const ManageQuotations: React.FC = () => {
                 </div>
             </div>
             
+            <div className="flex items-center gap-2">
+                <CustomSelect
+                    id="sort_status"
+                    name="sort_status"
+                    value={sortStatus ? { 
+                        value: sortStatus, 
+                        label: sortStatus === 'submit' ? 'Submit' : sortStatus === 'draft' ? 'Draft' : 'Rejected'
+                    } : null}
+                    onChange={(selectedOption) => 
+                        handleFilterChange('status', selectedOption?.value || '')
+                    }
+                    options={[
+                        { value: 'submit', label: 'Submit' },
+                        { value: 'draft', label: 'Draft' },
+                        { value: 'rejected', label: 'Rejected' }
+                    ]}
+                    placeholder="Status"
+                    isClearable={false}
+                    isSearchable={false}
+                    className="w-60"
+                />
+            </div>
+            
             {/* Sort Order */}
             <div className="flex items-center gap-2">
                 <CustomSelect
@@ -186,8 +211,9 @@ const ManageQuotations: React.FC = () => {
                     className="w-40"
                 />
             </div>
+            
         </div>
-    ), [searchTerm, sortOrder, loading, quotations.length, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange]);
+    ), [searchTerm, sortOrder, sortStatus, loading, quotations.length, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange]);
     
     return (
         <>

@@ -184,7 +184,7 @@ const ManageCustomers: React.FC = () => {
                         </div>
                         <PermissionGate permission="create">
                             <Button
-                                onClick={() => navigate('/customers/create')}
+                                onClick={() => navigate('/quotations/administration/customers/create')}
                                 className="flex items-center gap-2"
                                 size="sm"
                             >

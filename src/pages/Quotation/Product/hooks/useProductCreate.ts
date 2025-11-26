@@ -10,6 +10,7 @@ interface CreateProductFormData {
     code_unique: string;
     segment: string;
     msi_model: string;
+    msi_product: string;
     wheel_no: string;
     engine: string;
     product_type: string;
@@ -31,11 +32,13 @@ export const useCreateProduct = () => {
     
     const [isCreating, setIsCreating] = useState(false);
     const [validationErrors, setValidationErrors] = useState<ItemProductValidationErrors>({});
+    const [productImage, setProductImage] = useState<File | null>(null);
     
     const [formData, setFormData] = useState<CreateProductFormData>({
         code_unique: '',
         segment: '',
         msi_model: '',
+        msi_product: '',
         wheel_no: '',
         engine: '',
         product_type: '',
@@ -52,7 +55,6 @@ export const useCreateProduct = () => {
         componen_product_unit_model: ''
     });
     
-    const [productImage, setProductImage] = useState<File | null>(null);
 
     // Handle input changes
     const handleInputChange = (field: keyof CreateProductFormData, value: string) => {
@@ -95,6 +97,10 @@ export const useCreateProduct = () => {
             errors.msi_model = 'MSI Model wajib diisi';
         }
 
+        if (!formData.msi_product.trim()) {
+            errors.msi_product = 'Product wajib diisi';
+        }
+
         if (!formData.market_price.trim()) {
             errors.market_price = 'Harga pasar wajib diisi';
         }
@@ -129,6 +135,7 @@ export const useCreateProduct = () => {
             formDataToSend.append('code_unique', formData.code_unique);
             formDataToSend.append('segment', formData.segment);
             formDataToSend.append('msi_model', formData.msi_model);
+            formDataToSend.append('msi_product', formData.msi_product);
             formDataToSend.append('wheel_no', formData.wheel_no);
             formDataToSend.append('engine', formData.engine);
             formDataToSend.append('product_type', formData.product_type);
@@ -149,10 +156,17 @@ export const useCreateProduct = () => {
                 formDataToSend.append('image', productImage);
             }
 
-            await ItemProductService.createItemProduct(formDataToSend);
+            const response = await ItemProductService.createItemProduct(formDataToSend);
+            console.log({
+                productImage,
+                response,
+                status:response.status
+            });
             
-            toast.success('Produk berhasil dibuat');
-            navigate('/quotations/products');
+            if (response.status) {
+                toast.success('Produk berhasil dibuat');
+                navigate('/quotations/products');
+            }
         } catch (error: any) {
             if (error.errors && typeof error.errors === 'object') {
                 setValidationErrors(error.errors);

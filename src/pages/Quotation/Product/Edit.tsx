@@ -32,6 +32,7 @@ interface EditProductFormData {
     componen_type: number;
     volume: string;
     componen_product_unit_model: string;
+    msi_product: string;
 }
 
 export default function EditProduct() {
@@ -65,7 +66,8 @@ export default function EditProduct() {
         componen_product_description: '',
         componen_type: 1,
         volume: '',
-        componen_product_unit_model: ''
+        componen_product_unit_model: '',
+        msi_product: ''
     });
     
     const [specifications, setSpecifications] = useState<any[]>([]);
@@ -101,7 +103,8 @@ export default function EditProduct() {
                     componen_product_description: product.componen_product_description || '',
                     componen_type: product.componen_type || 1,
                     volume: product.volume || '',
-                    componen_product_unit_model: product.componen_product_unit_model || ''
+                    componen_product_unit_model: product.componen_product_unit_model || '',
+                    msi_product: product.msi_product || ''
                 });
                 
                 // Load specifications
@@ -145,7 +148,6 @@ export default function EditProduct() {
     const handleImageChange = (file: File | null) => {
         setProductImage(file);
         if (file) {
-            // Clear existing image URL when new file is uploaded
             setExistingImageUrl(null);
         }
     };
@@ -164,6 +166,10 @@ export default function EditProduct() {
 
         if (!formData.msi_model.trim()) {
             errors.msi_model = 'MSI Model wajib diisi';
+        }
+
+        if (!formData.msi_product.trim()) {
+            errors.msi_product = 'Product wajib diisi';
         }
 
         if (!formData.market_price.trim()) {
@@ -197,6 +203,7 @@ export default function EditProduct() {
             formDataToSend.append('code_unique', formData.code_unique);
             formDataToSend.append('segment', formData.segment);
             formDataToSend.append('msi_model', formData.msi_model);
+            formDataToSend.append('msi_product', formData.msi_product);
             formDataToSend.append('wheel_no', formData.wheel_no);
             formDataToSend.append('engine', formData.engine);
             formDataToSend.append('product_type', formData.product_type);
@@ -216,7 +223,10 @@ export default function EditProduct() {
             if (productImage) {
                 formDataToSend.append('image', productImage);
             }
-
+            console.log({
+                productImage
+            });
+            
             const success = await updateProduct(id, formDataToSend);
             
             if (success) {
@@ -316,7 +326,6 @@ export default function EditProduct() {
                                         type="text"
                                         value={formData.code_unique}
                                         onChange={(e) => handleInputChange('code_unique', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         error={!!validationErrors.code_unique}
                                         placeholder="Masukkan kode produk"
                                     />
@@ -337,7 +346,6 @@ export default function EditProduct() {
                                         type="text"
                                         value={formData.segment}
                                         onChange={(e) => handleInputChange('segment', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         error={!!validationErrors.segment}
                                         placeholder="Masukkan segment"
                                     />
@@ -350,7 +358,7 @@ export default function EditProduct() {
 
                                 <div>
                                     <Label htmlFor="msi_model">
-                                        MSI Model <span className="text-red-500">*</span>
+                                        Model <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
                                         id="msi_model"
@@ -358,13 +366,32 @@ export default function EditProduct() {
                                         type="text"
                                         value={formData.msi_model}
                                         onChange={(e) => handleInputChange('msi_model', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         error={!!validationErrors.msi_model}
                                         placeholder="Masukkan MSI model"
                                     />
                                     {validationErrors.msi_model && (
                                         <p className="mt-1 text-sm text-red-600">
                                             {validationErrors.msi_model}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="msi_product">
+                                        Product <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        id="msi_product"
+                                        name="msi_product"
+                                        type="text"
+                                        value={formData.msi_product}
+                                        onChange={(e) => handleInputChange('msi_product', e.target.value)}
+                                        error={!!validationErrors.msi_product}
+                                        placeholder="Masukkan MSI model"
+                                    />
+                                    {validationErrors.msi_product && (
+                                        <p className="mt-1 text-sm text-red-600">
+                                            {validationErrors.msi_product}
                                         </p>
                                     )}
                                 </div>
@@ -394,7 +421,6 @@ export default function EditProduct() {
                                         type="text"
                                         value={formData.wheel_no}
                                         onChange={(e) => handleInputChange('wheel_no', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan wheel number"
                                     />
                                 </div>
@@ -407,7 +433,6 @@ export default function EditProduct() {
                                         type="text"
                                         value={formData.engine}
                                         onChange={(e) => handleInputChange('engine', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan engine"
                                     />
                                 </div>
@@ -420,7 +445,6 @@ export default function EditProduct() {
                                         type="text"
                                         value={formData.horse_power}
                                         onChange={(e) => handleInputChange('horse_power', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan horse power"
                                     />
                                 </div>
@@ -433,7 +457,6 @@ export default function EditProduct() {
                                         type="text"
                                         value={formData.volume}
                                         onChange={(e) => handleInputChange('volume', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan volume"
                                     />
                                 </div>
@@ -632,6 +655,7 @@ export default function EditProduct() {
                                 currentFile={productImage}
                                 existingImageUrl={existingImageUrl}
                                 onFileChange={handleImageChange}
+                                onRemoveExistingImage={() => setExistingImageUrl(null)}
                                 validationError={validationErrors.image}
                                 disabled={isUpdating}
                                 description="Format: JPG, JPEG, PNG - Maksimal 5MB"

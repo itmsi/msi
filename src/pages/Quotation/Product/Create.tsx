@@ -71,7 +71,6 @@ export default function CreateProduct() {
                                         type="text"
                                         value={formData.code_unique}
                                         onChange={(e) => handleInputChange('code_unique', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         error={!!validationErrors.code_unique}
                                         placeholder="Masukkan kode produk"
                                     />
@@ -92,7 +91,6 @@ export default function CreateProduct() {
                                         type="text"
                                         value={formData.segment}
                                         onChange={(e) => handleInputChange('segment', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         error={!!validationErrors.segment}
                                         placeholder="Masukkan segment"
                                     />
@@ -113,13 +111,32 @@ export default function CreateProduct() {
                                         type="text"
                                         value={formData.msi_model}
                                         onChange={(e) => handleInputChange('msi_model', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         error={!!validationErrors.msi_model}
                                         placeholder="Masukkan MSI model"
                                     />
                                     {validationErrors.msi_model && (
                                         <p className="mt-1 text-sm text-red-600">
                                             {validationErrors.msi_model}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="msi_product">
+                                        Product <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input
+                                        id="msi_product"
+                                        name="msi_product"
+                                        type="text"
+                                        value={formData.msi_product}
+                                        onChange={(e) => handleInputChange('msi_product', e.target.value)}
+                                        error={!!validationErrors.msi_product}
+                                        placeholder="Masukkan MSI model"
+                                    />
+                                    {validationErrors.msi_product && (
+                                        <p className="mt-1 text-sm text-red-600">
+                                            {validationErrors.msi_product}
                                         </p>
                                     )}
                                 </div>
@@ -149,7 +166,6 @@ export default function CreateProduct() {
                                         type="text"
                                         value={formData.wheel_no}
                                         onChange={(e) => handleInputChange('wheel_no', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan wheel number"
                                     />
                                 </div>
@@ -162,7 +178,6 @@ export default function CreateProduct() {
                                         type="text"
                                         value={formData.engine}
                                         onChange={(e) => handleInputChange('engine', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan engine"
                                     />
                                 </div>
@@ -175,7 +190,6 @@ export default function CreateProduct() {
                                         type="text"
                                         value={formData.horse_power}
                                         onChange={(e) => handleInputChange('horse_power', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan horse power"
                                     />
                                 </div>
@@ -188,7 +202,6 @@ export default function CreateProduct() {
                                         type="text"
                                         value={formData.volume}
                                         onChange={(e) => handleInputChange('volume', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan volume"
                                     />
                                 </div>

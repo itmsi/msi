@@ -23,6 +23,7 @@ export interface QuotationItem {
     code_unique?: string;
     segment: string;
     msi_model: string;
+    msi_product: string;
     wheel_no: string;
     engine?: string;
     volume?: string;
@@ -212,8 +213,14 @@ export interface QuotationValidationErrors {
 export interface QuotationRequest {
     page: number;
     limit: number;
-    sort_order: 'asc' | 'desc';
+    sort_order: '' | 'asc' | 'desc';
+    status: 'submit' | 'draft' | 'rejected' | '';
     search: string;
+}
+export interface QuotationFilters {
+    search: string;
+    sort_order: 'asc' | 'desc' | '';
+    status: 'submit' | 'draft' | 'rejected' | '';
 }
 export interface QuotationPagination {
     page: number;

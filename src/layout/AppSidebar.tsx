@@ -90,7 +90,7 @@ const othersItems: NavItem[] = [
     },
     {
         icon: <UserIcon />,
-        name: "Administration",
+        name: "Employee",
         subItems: [
             {
                 name: "Employees",
@@ -181,12 +181,10 @@ const AppSidebar: React.FC = () => {
 
     const isActive = useCallback(
         (path: string) => {
-            // Exact match untuk root paths
             if (path === location.pathname) {
                 return true;
             }
             
-            // Check if current path starts with the path (untuk nested routes)
             const normalizedPath = path.endsWith('/') ? path : path + '/';
             const normalizedCurrentPath = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/';
             
@@ -196,13 +194,9 @@ const AppSidebar: React.FC = () => {
     );
 
     const isSubActive = useCallback((subPath: string) => {
-        // Exact match untuk root paths
         if (subPath === location.pathname) {
             return true;
         }
-        
-        // Check if current path starts with the sub path (untuk nested routes)
-        // Tambahkan trailing slash untuk menghindari partial match yang salah
         const normalizedSubPath = subPath.endsWith('/') ? subPath : subPath + '/';
         const normalizedCurrentPath = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/';
         
@@ -212,17 +206,36 @@ const AppSidebar: React.FC = () => {
     useEffect(() => {
         let bestMatch: OpenState = null;
         let bestLength = -1;
+        let bestNestedKey: string | null = null;
 
         const checkItems = (items: NavItem[], type: 'main' | 'others') => {
             items.forEach((nav) => {
+                // Check level 2 items
                 const matches = nav.subItems?.filter((sub) => sub.path && isSubActive(sub.path)) ?? [];
                 if (matches.length) {
                     const longest = matches.reduce((a, b) => ((a.path?.length || 0) >= (b.path?.length || 0) ? a : b));
                     if (longest.path && longest.path.length > bestLength) {
                         bestLength = longest.path.length;
                         bestMatch = { type, key: buildNavKey(type, nav) };
+                        bestNestedKey = null;
                     }
                 }
+
+                // Check level 3 nested items
+                nav.subItems?.forEach((subItem, subIndex) => {
+                    if (subItem.subItems && subItem.subItems.length > 0) {
+                        const nestedMatches = subItem.subItems.filter((nested) => nested.path && isSubActive(nested.path));
+                        if (nestedMatches.length) {
+                            const longestNested = nestedMatches.reduce((a, b) => ((a.path?.length || 0) >= (b.path?.length || 0) ? a : b));
+                            if (longestNested.path && longestNested.path.length > bestLength) {
+                                bestLength = longestNested.path.length;
+                                bestMatch = { type, key: buildNavKey(type, nav) };
+                                const navKey = buildNavKey(type, nav);
+                                bestNestedKey = `${navKey}:${subItem.path || subItem.name}:${subIndex}`;
+                            }
+                        }
+                    }
+                });
             });
         };
 
@@ -230,7 +243,8 @@ const AppSidebar: React.FC = () => {
         checkItems(othersFiltered, 'others');
 
         setOpenSubmenu(bestMatch);
-    }, [location.pathname, isSubActive]);
+        setOpenNestedSubmenu(bestNestedKey);
+    }, [location.pathname]);
 
     // useEffect(() => {
     //     if (openSubmenu !== null) {

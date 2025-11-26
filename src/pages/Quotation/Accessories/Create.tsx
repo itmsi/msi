@@ -45,15 +45,13 @@ export default function CreateAccessories() {
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-6">
-
-                        {/* Basic Info */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
-                                Informasi Dasar
-                            </h2>
-                            
+                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
+                        <div className="md:col-span-3 p-8 relative space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">
+                                    Informasi Dasar
+                                </h2>
+                            
                                 <div>
                                     <Label htmlFor="accessory_part_number">
                                         Part Number <span className="text-red-500">*</span>
@@ -142,10 +140,12 @@ export default function CreateAccessories() {
                                     />
                                 </div>
                             </div>
+                            
+                            <div className="absolute top-7 bottom-7 right-0 border-r border-gray-300 hidden lg:block mx-3"></div>
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex justify-end space-x-3 pt-6">
+                        <div className="flex justify-end gap-4 p-6 border-t border-gray-200 md:col-span-3">
                             <Button
                                 type="button"
                                 variant="outline"
@@ -163,12 +163,12 @@ export default function CreateAccessories() {
                                 {loading ? (
                                     <div className="flex items-center">
                                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                        Menyimpan...
+                                        Updating...
                                     </div>
                                 ) : (
                                     <div className="flex items-center">
                                         <MdSave className="mr-2" />
-                                        Simpan
+                                        Save Accessory
                                     </div>
                                 )}
                             </Button>

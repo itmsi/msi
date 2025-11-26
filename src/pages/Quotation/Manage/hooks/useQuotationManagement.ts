@@ -6,17 +6,25 @@ export const useQuotationManagement = () => {
     const navigate = useNavigate();
     
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
+    const [sortStatus, setSortStatus] = useState<'submit' | 'draft' | 'rejected' | ''>('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; quotationId?: string; }>({ show: false });
 
-    const { quotations, pagination, loading, error, filters, fetchQuotations, handleSearchChange: quotationSearch, deleteQuotation, downloadQuotation } = useQuotation();
+    const { quotations, pagination, loading, error, filters, fetchQuotations, handleSearchChange: quotationSearch, deleteQuotation, downloadQuotation, updateFilters } = useQuotation();
 
     useEffect(() => {
         fetchQuotations(1, 10);
     }, []);
+
+    // Trigger fetch when filters change
+    useEffect(() => {
+        if (filters.sort_order || filters.status) {
+            fetchQuotations(currentPage, itemsPerPage);
+        }
+    }, [filters.sort_order, filters.status]);
 
     const handlePageChange = useCallback((page: number) => {
         setCurrentPage(page);
@@ -48,8 +56,18 @@ export const useQuotationManagement = () => {
     const handleFilterChange = useCallback((filterKey: string, value: string) => {
         if (filterKey === 'sort_order') {
             setSortOrder(value as 'asc' | 'desc');
+            updateFilters('sort_order', value);
+        } else if (filterKey === 'status') {
+            setSortStatus(value as 'submit' | 'draft' | 'rejected' | '');
+            updateFilters('status', value);
         }
-    }, []);
+        setCurrentPage(1);
+        // fetchQuotations akan otomatis terpanggil karena filters berubah
+    }, [updateFilters]);
+
+    const handleStatusChange = useCallback((filterKey: string, value: string) => {
+        handleFilterChange(filterKey, value);
+    }, [handleFilterChange]);
 
     // Navigation handlers
     const handleEdit = useCallback((quotation: any) => {
@@ -89,6 +107,7 @@ export const useQuotationManagement = () => {
     return {
         searchTerm,
         sortOrder,
+        sortStatus,
         quotations,
         pagination,
         loading,
@@ -105,6 +124,7 @@ export const useQuotationManagement = () => {
         handleManualSearch,
         handleClearFilters,
         handleFilterChange,
+        handleStatusChange,
         handleEdit,
         handleView,
     };

@@ -122,7 +122,7 @@ export default function CreateCustomer() {
                     {/* HEADER */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
-                            <Link to="/quotation/administration/customers">
+                            <Link to="/quotations/administration/customers">
                                 <Button
                                     variant="outline"
                                     className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
@@ -290,7 +290,7 @@ export default function CreateCustomer() {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => navigate('/quotation/administration/customers')}
+                                onClick={() => navigate('/quotations/administration/customers')}
                                 className="px-6 rounded-full"
                                 disabled={isCreating}
                             >

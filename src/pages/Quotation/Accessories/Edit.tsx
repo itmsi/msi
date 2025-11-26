@@ -62,7 +62,6 @@ export default function EditAccessories() {
                                         type="text"
                                         value={form.accessory_part_number}
                                         onChange={(e) => handleChange('accessory_part_number', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         error={!!errors.accessory_part_number}
                                         placeholder="Masukkan part number"
                                     />
@@ -83,7 +82,6 @@ export default function EditAccessories() {
                                         type="text"
                                         value={form.accessory_part_name}
                                         onChange={(e) => handleChange('accessory_part_name', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         error={!!errors.accessory_part_name}
                                         placeholder="Masukkan part name"
                                     />
@@ -102,7 +100,6 @@ export default function EditAccessories() {
                                         type="text"
                                         value={form.accessory_brand}
                                         onChange={(e) => handleChange('accessory_brand', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan brand"
                                     />
                                 </div>
@@ -115,7 +112,6 @@ export default function EditAccessories() {
                                         type="text"
                                         value={form.accessory_specification}
                                         onChange={(e) => handleChange('accessory_specification', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan specification"
                                     />
                                 </div>
@@ -128,7 +124,6 @@ export default function EditAccessories() {
                                         type="text"
                                         value={form.accessory_region}
                                         onChange={(e) => handleChange('accessory_region', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan region"
                                     />
                                 </div>
@@ -141,7 +136,6 @@ export default function EditAccessories() {
                                         type="text"
                                         value={form.accessory_remark}
                                         onChange={(e) => handleChange('accessory_remark', e.target.value)}
-                                        onKeyPress={handleKeyPress}
                                         placeholder="Masukkan remark"
                                     />
                                 </div>

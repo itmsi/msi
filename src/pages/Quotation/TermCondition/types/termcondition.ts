@@ -13,14 +13,7 @@ export interface TermCondition {
     term_content_id: string;
     term_content_title: string;
     term_content_directory: string;
-    term_content_payload?: string; // Rich text content for the editor
-    created_by: string | null;
-    updated_by: string | null;
-    deleted_by: string | null;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-    is_delete: boolean;
+    term_content_payload?: string;
 }
 
 export interface Pagination {

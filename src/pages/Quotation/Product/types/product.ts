@@ -14,6 +14,7 @@ export interface ItemProduct {
     code_unique: string;
     segment: string;
     msi_model: string;
+    msi_product: string;
     wheel_no: string;
     engine: string;
     horse_power: string;
@@ -93,6 +94,7 @@ export interface ItemProductValidationErrors {
     code_unique?: string;
     segment?: string;
     msi_model?: string;
+    msi_product?: string;
     wheel_no?: string;
     engine?: string;
     horse_power?: string;

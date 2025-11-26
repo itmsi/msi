@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiDelete, apiPutMultipart, ApiResponse } from '@/helpers/apiHelper';
+import { apiGet, apiPost, apiPut, apiDelete, apiPutMultipart, ApiResponse, apiPostMultipart } from '@/helpers/apiHelper';
 import { ItemProduct, ItemProductFormData, ItemProductRequest, ItemProductResponse } from '../types/product';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -34,21 +34,21 @@ export class ItemProductService {
         return await apiGet<{ status: boolean; message: string; data: ItemProduct }>(`${API_BASE_URL}/quotation/componen_product/${productId}`, { componen_product_id: productId });
     }
 
-    static async createItemProduct(productData: ItemProductFormData | FormData): Promise<{ success: boolean; data?: any; message?: string; errors?: any }> {
+    static async createItemProduct(productData: ItemProductFormData | FormData): Promise<{ status: boolean; data?: any; message?: string; errors?: any }> {
         try {
             // Check if productData is FormData (for multipart uploads)
             if (productData instanceof FormData) {
-                const response = await apiPost(`${API_BASE_URL}/quotation/componen_product`, productData);
-                return response.data as { success: boolean; data?: any; message?: string; errors?: any };
+                const response = await apiPostMultipart(`${API_BASE_URL}/quotation/componen_product`, productData);
+                return response.data as { status: boolean; data?: any; message?: string; errors?: any };
             }
             
             // Regular JSON create
             const response = await apiPost(`${API_BASE_URL}/quotation/componen_product/create`, productData as unknown as Record<string, unknown>);
-            return response.data as { success: boolean; data?: any; message?: string; errors?: any };
+            return response.data as { status: boolean; data?: any; message?: string; errors?: any };
         } catch (error: any) {
             // Handle error gracefully
             return {
-                success: false,
+                status: false,
                 message: error.message || 'Failed to create component product',
                 errors: error.errors
             };

@@ -14,6 +14,7 @@ interface FileUploadProps {
     currentFile?: File | null;
     existingImageUrl?: string | null; // URL for existing image from database
     onFileChange: (file: File | null) => void;
+    onRemoveExistingImage?: () => void; // Callback to remove existing image
     validationError?: string;
     required?: boolean;
     disabled?: boolean;
@@ -43,6 +44,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     currentFile,
     existingImageUrl,
     onFileChange,
+    onRemoveExistingImage,
     validationError,
     required = false,
     disabled = false,
@@ -106,8 +108,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }
         setPreviewState({ url: null });
         onFileChange(null);
-    };
-
+        if (existingImageUrl && onRemoveExistingImage) {
+            onRemoveExistingImage();
+        }
+    };    
     const getIcon = () => {
         const iconProps = { className: "mx-auto h-12 w-12 text-gray-400" };
         switch (icon) {
