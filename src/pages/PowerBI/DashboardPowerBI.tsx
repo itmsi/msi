@@ -145,11 +145,11 @@ const DashboardPowerBI = () => {
                 </div>
                 
                 {/* Description */}
-                <p 
+                <div 
                     className=" xs:text-[10px] lg:text-xs text-gray-600 mb-4 group-hover:text-white"
+                    dangerouslySetInnerHTML={{ __html: dashboard.description }}
                 >
-                    {dashboard.description}
-                </p>
+                </div>
 
                 {/* Category Badge */}
                 <div onClick={() => handleOpenDashboard(dashboard.link)} className='cursor-pointer'                >
