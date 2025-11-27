@@ -1530,7 +1530,7 @@ export default function CreateQuotation() {
                             >
                                 Cancel
                             </Button>
-                            <Button
+                            {/* <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => {
@@ -1542,7 +1542,7 @@ export default function CreateQuotation() {
                             >
                                 <MdSave size={16} />
                                 Save as Draft
-                            </Button>
+                            </Button> */}
                             <Button
                                 type="submit"
                                 disabled={isCreating}

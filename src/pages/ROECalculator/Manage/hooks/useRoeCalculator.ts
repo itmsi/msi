@@ -1,0 +1,88 @@
+import { useState, useCallback } from 'react';
+import { Pagination, RorEntity, RorListRequest } from '../types/roecalculator';
+import { RoecalculatorService } from '../services/roecalculatorService';
+
+export const useRoeCalculator = () => {
+    const [roeCalculator, setRoeCalculator] = useState<RorEntity[]>([]);
+    const [pagination, setPagination] = useState<Pagination>({
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchRoeCalculator = useCallback(async (params: Partial<RorListRequest> = {}) => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+            const response = await RoecalculatorService.getRor(params);
+            if (response.success) {
+                setRoeCalculator(response.data.data);
+                const apiPagination = response.data.pagination;
+                setPagination({
+                    page: apiPagination.page,
+                    limit: apiPagination.limit,
+                    total: apiPagination.total,
+                    totalPages: apiPagination.totalPages,
+                });
+            } else {
+                setError(response.message || 'Failed to fetch Accessories');
+            }
+        } catch (err) {
+            setError('Something went wrong while fetching Accessories');
+            console.error('Fetch Accessories error:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const updateRorCalculator = useCallback(async (rorId: string, rorData: Partial<Omit<RorEntity, 'ror_id'>>) => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+            const updatedRor = await RoecalculatorService.updateRor(rorId, rorData);
+            // Update local state
+            setRoeCalculator(prev => prev.map(itm => 
+                itm.id === rorId ? updatedRor : itm
+            ));
+            return updatedRor;
+        } catch (err) {
+            setError('Failed to update Accessories');
+            console.error('Update Accessories error:', err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const deleteRorCalculator = useCallback(async (rorId: string) => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+            await RoecalculatorService.deleteRor(rorId);
+            setRoeCalculator(prev => prev.filter(ror => ror.id !== rorId));
+            return true;
+        } catch (err) {
+            setError('Failed to delete accessories');
+            console.error('Delete accessories error:', err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    return {
+        roeCalculator,
+        pagination,
+        loading,
+        error,
+        fetchRoeCalculator,
+        updateRorCalculator,
+        deleteRorCalculator,
+    };
+};

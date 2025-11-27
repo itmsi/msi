@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { GrDocumentVerified, GrLineChart } from "react-icons/gr";
+import { GiChart } from "react-icons/gi";
 
 // Assume these icons are imported from an icon library
 import {
@@ -74,6 +75,15 @@ const navItems: NavItem[] = [
                     }
                 ],
             },
+        ],
+    },
+    {
+        name: "Rate of Return",
+        icon: <GiChart />,
+        allowedRoles: ['Manage ROA ROE Calculate'],
+        subItems: [
+            { name: "Manage", path: "/roe-roa-calculator/manage", allowedRoles: ['Manage ROA ROE Calculate'] },
+            { name: "Settings", path: "/roe-roa-calculator/settings", allowedRoles: ['Setting ROA ROE Calculate'] },
         ],
     }
 ];

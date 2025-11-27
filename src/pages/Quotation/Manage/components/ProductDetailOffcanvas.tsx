@@ -42,8 +42,16 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         accessoryInputValue,
         accessoryPagination,
         handleAccessoryInputChange,
-        handleAccessoryMenuScrollToBottom
+        handleAccessoryMenuScrollToBottom,
+        initializeAccessoryOptions
     } = useAsyncSelect();
+
+    // Load accessories saat tab accessories dibuka
+    useEffect(() => {
+        if (activeTab === 'accessories' && isOpen) {
+            initializeAccessoryOptions();
+        }
+    }, [activeTab, isOpen, initializeAccessoryOptions]);
 
     // Default specifications template - use useMemo to prevent re-creation
     const defaultSpecifications = React.useMemo(() => [
@@ -83,7 +91,6 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 quantity: acc.quantity || 1,
                 description: acc.description || ''
             }));
-            
             setAccessories(initializedAccessories);
         }
     }, [productId, isOpen, initialData]);

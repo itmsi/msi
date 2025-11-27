@@ -43,7 +43,11 @@ const EditAccessories = lazy(() => import('@/pages/Quotation/Accessories/Edit'))
 const CreateTNC = lazy(() => import('@/pages/Quotation/TermCondition/Create'));
 const TNCManage = lazy(() => import('@/pages/Quotation/TermCondition/Manage'));
 const TNCEdit = lazy(() => import('@/pages/Quotation/TermCondition/Edit'));
-// const EditItemsProduct = lazy(() => import('@/pages/Quotation/Product/Edit'));
+
+const CreateROECalculator = lazy(() => import('@/pages/ROECalculator/Manage/Manage'));
+const ROECalculatorManage = lazy(() => import('@/pages/ROECalculator/Manage/Manage'));
+const ROECalculatorEdit = lazy(() => import('@/pages/ROECalculator/Manage/Manage'));
+const ROESettings = lazy(() => import('@/pages/ROECalculator/Settings/Settings'));
 
 export type TAppRoute = {
     path: string;
@@ -377,6 +381,43 @@ export const routes: TAppRoute[] = [
         roles: ['TNC Quotation'],
         requiredPermissions: ['update'],
         component: TNCEdit,
+        layout: AppLayout,
+    },
+    // ROE CALCULATOR ROUTES
+    {
+        path: '/roe-roa-calculator/manage/create',
+        name: 'Manage ROA ROE Calculate',
+        isProtected: true,
+        roles: ['Manage ROA ROE Calculate'],
+        requiredPermissions: ['create'],
+        component: CreateROECalculator,
+        layout: AppLayout,
+    },
+    {
+        path: '/roe-roa-calculator/manage',
+        name: 'Manage ROA ROE Calculate',
+        isProtected: false,
+        roles: ['Manage ROA ROE Calculate'],
+        requiredPermissions: ['read'],
+        component: ROECalculatorManage,
+        layout: AppLayout,
+    },
+    {
+        path: '/roe-roa-calculator/manage/:id',
+        name: 'Manage ROA ROE Calculate',
+        isProtected: true,
+        roles: ['Manage ROA ROE Calculate'],
+        requiredPermissions: ['update'],
+        component: ROECalculatorEdit,
+        layout: AppLayout,
+    },
+    {
+        path: '/roe-roa-calculator/settings',
+        name: 'Setting ROA ROE Calculate',
+        isProtected: true,
+        roles: ['Setting ROA ROE Calculate'],
+        requiredPermissions: ['update'],
+        component: ROESettings,
         layout: AppLayout,
     },
 

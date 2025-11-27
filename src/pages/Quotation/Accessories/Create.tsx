@@ -54,7 +54,7 @@ export default function CreateAccessories() {
                             
                                 <div>
                                     <Label htmlFor="accessory_part_number">
-                                        Part Number <span className="text-red-500">*</span>
+                                        MSI Code <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
                                         id="accessory_part_number"
@@ -63,7 +63,7 @@ export default function CreateAccessories() {
                                         value={form.accessory_part_number}
                                         onChange={(e) => handleChange('accessory_part_number', e.target.value)}
                                         error={!!errors.accessory_part_number}
-                                        placeholder="Masukkan part number"
+                                        placeholder="Masukkan MSI Code"
                                     />
                                     {errors.accessory_part_number && (
                                         <p className="mt-1 text-sm text-red-600">

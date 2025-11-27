@@ -151,7 +151,7 @@ export default function CreateBank() {
 
                                 {/* Account Type */}
                                 <div className="md:col-span-2">
-                                    <Label htmlFor="bank_account_type">Account Type *</Label>
+                                    <Label htmlFor="bank_account_type">Bank Accounts *</Label>
                                     <Input
                                         id="bank_account_type"
                                         type="text"

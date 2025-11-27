@@ -1,30 +1,35 @@
-import React, { useMemo } from 'react';
-import { MdAdd, MdEdit, MdSearch, MdPeople, MdClear, MdDeleteOutline } from 'react-icons/md';
-import CustomDataTable from '../../../components/ui/table/CustomDataTable';
-import Input from '../../../components/form/input/InputField';
-import CustomSelect from '../../../components/form/select/CustomSelect';
-import { TableColumn } from 'react-data-table-component';
-import PageMeta from '@/components/common/PageMeta';
-import { PermissionGate } from '@/components/common/PermissionComponents';
-import Button from '@/components/ui/button/Button';
-import { tableDateFormat } from '@/helpers/generalHelper';
-import { createActionsColumn, createDateColumn } from '@/components/ui/table';
-import { useNavigate } from 'react-router';
-import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
-import { Accessories } from './types/accessories';
-import { useAccessoriesManagement } from './hooks/useAccessoriesManagement';
+import PageMeta from "@/components/common/PageMeta";
+import { PermissionGate } from "@/components/common/PermissionComponents";
+import Button from "@/components/ui/button/Button";
+import CustomDataTable, { createDateColumn } from "@/components/ui/table";
+import { TableColumn } from "react-data-table-component";
+import { MdAdd, MdClear, MdSearch } from "react-icons/md";
+import { useNavigate } from "react-router";
+import { RorEntity } from "./types/roecalculator";
+import { tableDateFormat } from "@/helpers/generalHelper";
+import { useRoeCalculatorManagement } from "./hooks/useRoeCalculatorManagement";
+import { useMemo } from "react";
+import Input from "@/components/form/input/InputField";
+import CustomSelect from "@/components/form/select/CustomSelect";
 
-const ManageAccessories: React.FC = () => {
+export default function ManageRor() {
     const navigate = useNavigate();
-    // Custom hook untuk semua state management dan handlers
     const {
         searchTerm,
         sortOrder,
-        accessories,
+        sortCommodity,
+        currentPage,
+        itemsPerPage,
+        roeCalculator,
         pagination,
         loading,
         error,
+        
         confirmDelete,
+        setConfirmDelete,
+        deleteRorCalculator,
+        
+        // Handlers
         handlePageChange,
         handleRowsPerPageChange,
         handleSearchChange,
@@ -33,59 +38,46 @@ const ManageAccessories: React.FC = () => {
         handleFilterChange,
         handleEdit,
         handleDelete,
-        confirmDeleteAccessories,
-        cancelDelete
-    } = useAccessoriesManagement();
+        confirmdeleteRorCalculator,
+        cancelDelete } = useRoeCalculatorManagement();
 
-    // Definisi kolom untuk DataTable
-    const columns: TableColumn<Accessories>[] = [
+    const columns: TableColumn<RorEntity>[] = [
         {
-            name: 'MSI Code',
-            selector: row => row.accessory_part_number,
-            cell: (row) => {
-                return (
-                    <div className="max-w-xs truncate text-sm text-gray-700" title={row.accessory_part_number}>
-                        {row.accessory_part_number}
-                    </div>
-                );
-            },
-            wrap: true,
-            width: '130px'
-        },
-        {
-            name: 'Part Name',
-            selector: row => row.accessory_part_name,
+            name: 'Customer',
+            selector: row => row.customer_name || '-',
             cell: (row) => (
                 <div className=" items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">
-                        {row.accessory_part_name}
+                        {row.customer_name}
                     </div>
-                    <div className="block text-sm text-gray-500">{row.accessory_brand}</div>
-                    <div className="block text-sm text-gray-500">{row.accessory_specification}</div>
+                    <div className="block text-sm text-gray-500">ROE : {row.roe_individual_percentage || '-'}</div>
+                    <div className="block text-sm text-gray-500">ROA : {row.roa_individual_percentage || '-'}</div>
                 </div>
             ),
-            wrap: true,
         },
-        createDateColumn('Created At', 'created_at', tableDateFormat),
-        createActionsColumn([
-            {
-                icon: MdEdit,
-                onClick: handleEdit,
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'Edit',
-                permission: 'update'
-            },
-            {
-                icon: MdDeleteOutline,
-                onClick: handleDelete,
-                className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
-                tooltip: 'Delete',
-                permission: 'delete'
-            }
-        ])
+        {
+            name: 'Commodity',
+            selector: row => row.commodity || '-',
+        },
+        {
+            name: 'Revenue',
+            selector: row => row.roe_individual_percentage || '-',
+            cell: (row) => (
+                <div className=" items-center gap-3 py-2">
+                    <div className="font-medium text-gray-900">
+                        {row.roe_individual_percentage}
+                    </div>
+                    <div className="block text-sm text-gray-500">{row.roe_individual_percentage}</div>
+                    <div className="block text-sm text-gray-500">{row.roa_individual_percentage}</div>
+                </div>
+            ),
+        },
+        createDateColumn(
+            'Created', 
+            'created_at', 
+            tableDateFormat
+        )
     ];
-
-    // Search and filter component
     const SearchAndFilters = useMemo(() => (
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
             <div className="flex-1">
@@ -94,7 +86,7 @@ const ManageAccessories: React.FC = () => {
                         <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                         <Input
                             type="text"
-                            placeholder="Search accessories..."
+                            placeholder="Search by quotation number, customer ID..."
                             value={searchTerm}
                             onChange={(e) => handleSearchChange(e.target.value)}
                             onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -125,6 +117,28 @@ const ManageAccessories: React.FC = () => {
                 </div>
             </div>
             
+            <div className="flex items-center gap-2">
+                <CustomSelect
+                    id="sort_status"
+                    name="sort_status"
+                    value={sortCommodity ? { 
+                        value: sortCommodity, 
+                        label: sortCommodity === 'batu bara' ? 'batu bara' : sortCommodity === 'nikel' ? 'Nikel' : ''
+                    } : null}
+                    onChange={(selectedOption) => 
+                        handleFilterChange('commodity', selectedOption?.value || '')
+                    }
+                    options={[
+                        { value: 'batu bara', label: 'batu bara' },
+                        { value: 'nikel', label: 'Nikel' }
+                    ]}
+                    placeholder="Status"
+                    isClearable={false}
+                    isSearchable={false}
+                    className="w-60"
+                />
+            </div>
+            
             {/* Sort Order */}
             <div className="flex items-center gap-2">
                 <CustomSelect
@@ -147,31 +161,35 @@ const ManageAccessories: React.FC = () => {
                     className="w-40"
                 />
             </div>
+            
         </div>
-    ), [searchTerm, sortOrder, loading, accessories.length, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange]);
+    ), [searchTerm, sortOrder, sortCommodity, loading, roeCalculator.length, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange]);
+    
     return (
         <>
             <PageMeta
-                title="Manage Accessories - Motor Sights International"
-                description="Manage Accessories - Motor Sights International"
+                title="Manage ROE & ROA Calculator - Motor Sights International" 
+                description="Manage ROE & ROA Calculator - Motor Sights International"
                 image="/motor-sights-international.png"
             />
+            
             <div className="bg-white shadow rounded-lg">
+                
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-gray-200">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h3 className="text-lg leading-6 font-primary-bold text-gray-900">Manage Accessories</h3>
-                            <p className="mt-1 text-sm text-gray-500">Manage and organize your accessories database</p>
+                            <h3 className="text-lg leading-6 font-primary-bold text-gray-900">Manage ROE & ROA Calculator</h3>
+                            <p className="mt-1 text-sm text-gray-500">Manage and organize your ROE & ROA Calculator database</p>
                         </div>
                         <PermissionGate permission="create">
                             <Button
-                                onClick={() => navigate('/quotations/accessories/create')}
+                                onClick={() => navigate('/roe-roa-calculator/manage/create')}
                                 className="flex items-center gap-2"
                                 size="sm"
                             >
                                 <MdAdd className="h-4 w-4" />
-                                Create New Accessory
+                                Create ROE & ROA Calculator
                             </Button>
                         </PermissionGate>
                     </div>
@@ -182,24 +200,17 @@ const ManageAccessories: React.FC = () => {
                     {SearchAndFilters}
                 </div>
 
-                {/* Error Message */}
-                {error && (
-                    <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-red-800">{error}</p>
-                    </div>
-                )}
-
                 {/* Data Table */}
                 <div className="p-6 font-secondary">
                     <CustomDataTable
                         columns={columns}
-                        data={accessories}
+                        data={roeCalculator || []}
                         loading={loading}
                         pagination
                         paginationServer
                         paginationTotalRows={pagination?.total || 0}
-                        paginationPerPage={pagination?.per_page || 10}
-                        paginationDefaultPage={pagination?.current_page || 1}
+                        paginationPerPage={pagination?.limit || 10}
+                        paginationDefaultPage={pagination?.page || 1}
                         paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
                         onChangePage={handlePageChange}
                         onChangeRowsPerPage={handleRowsPerPageChange}
@@ -208,34 +219,12 @@ const ManageAccessories: React.FC = () => {
                         responsive
                         highlightOnHover
                         striped={false}
-                        noDataComponent={
-                            <div className="text-center py-8">
-                                <MdPeople className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                <p className="text-gray-500">No accessories found</p>
-                                <p className="text-sm text-gray-400">
-                                    {searchTerm ? 'Try adjusting your search' : 'Start by adding your first accessory'}
-                                </p>
-                            </div>
-                        }
                         persistTableHead
                         borderRadius="8px"
                         onRowClicked={handleEdit}
                     />
                 </div>
             </div>
-            
-            {/* Delete Confirmation Modal */}
-            <ConfirmationModal
-                isOpen={confirmDelete.show}
-                onClose={cancelDelete}
-                onConfirm={confirmDeleteAccessories}
-                title="Delete Accessory"
-                message="Are you sure you want to delete this accessory? This action cannot be undone."
-                confirmText="Delete"
-                cancelText="Cancel"
-            />
         </>
     );
-};
-
-export default ManageAccessories;
+}

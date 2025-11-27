@@ -1736,7 +1736,7 @@ export default function EditQuotation() {
                             >
                                 Cancel
                             </Button>
-                            <Button
+                            {/* <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => {
@@ -1748,7 +1748,7 @@ export default function EditQuotation() {
                             >
                                 <MdSave size={16} />
                                 Save as Draft
-                            </Button>
+                            </Button> */}
                             <Button
                                 type="submit"
                                 disabled={isUpdating || loading}

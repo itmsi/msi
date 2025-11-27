@@ -943,7 +943,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     item2YPos += 5;
 
                     const accData2 = item2.manage_quotation_item_accessories.map((acc: any) => [
-                        acc.accessory_part_number,
+                        // acc.accessory_part_number,
                         acc.accessory_part_name,
                         acc.accessory_brand || '-',
                         acc.quantity.toString(),
@@ -952,7 +952,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
                     autoTable(doc, {
                         startY: item2YPos,
-                        head: [['Part No', 'Name', 'Brand', 'Qty', 'Spec']],
+                        head: [['Name', 'Brand', 'Qty', 'Spec']],
                         body: accData2,
                         margin: { left: item2StartX, right: margin },
                         tableWidth: itemWidth,

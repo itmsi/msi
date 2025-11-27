@@ -62,7 +62,7 @@ const ManageBank: React.FC = () => {
             )
         },
         {
-            name: 'Account Type',
+            name: 'Bank Accounts',
             selector: row => row.bank_account_type,
             sortable: false,
             cell: (row) => (
