@@ -18,16 +18,16 @@ export default function ManageRor() {
         searchTerm,
         sortOrder,
         sortCommodity,
-        currentPage,
-        itemsPerPage,
+        // currentPage,
+        // itemsPerPage,
         roeCalculator,
         pagination,
         loading,
-        error,
+        // error,
         
-        confirmDelete,
-        setConfirmDelete,
-        deleteRorCalculator,
+        // confirmDelete,
+        // setConfirmDelete,
+        // deleteRorCalculator,
         
         // Handlers
         handlePageChange,
@@ -37,9 +37,10 @@ export default function ManageRor() {
         handleClearFilters,
         handleFilterChange,
         handleEdit,
-        handleDelete,
-        confirmdeleteRorCalculator,
-        cancelDelete } = useRoeCalculatorManagement();
+        // handleDelete,
+        // confirmdeleteRorCalculator,
+        // cancelDelete 
+    } = useRoeCalculatorManagement();
 
     const columns: TableColumn<RorEntity>[] = [
         {

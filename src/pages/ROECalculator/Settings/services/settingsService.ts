@@ -27,6 +27,3 @@ export class SettingsService {
         return response.data.data;
     }
 }
-
-'https://services.motorsights.com/api/calculations/quote-defaults/self'
-'https://services.motorsights.com/api/calculations/quote-defaults/self'
