@@ -1,5 +1,6 @@
 import { apiDelete, apiGet, apiPost, apiPut, ApiResponse } from '@/helpers/apiHelper';
 import { 
+    AccessoryByIslandCombined,
     ManageQuotationData,
     ManageQuotationDataPDF,
     ManageQuotationListResponse,
@@ -17,6 +18,7 @@ export class QuotationService {
             const payload = {
                 customer_id: quotationData.customer_id,
                 employee_id: quotationData.employee_id,
+                island_id: quotationData.island_id,
                 manage_quotation_date: quotationData.manage_quotation_date,
                 manage_quotation_valid_date: quotationData.manage_quotation_valid_date,
                 manage_quotation_grand_total: quotationData.manage_quotation_grand_total || "0",
@@ -37,7 +39,8 @@ export class QuotationService {
                 status: quotationData.status,
                 include_aftersales_page: quotationData.include_aftersales_page || false,
                 include_msf_page: quotationData.include_msf_page || false,
-                manage_quotation_items: quotationData.manage_quotation_items || []
+                manage_quotation_items: quotationData.manage_quotation_items || [],
+                manage_quotation_item_accessories: quotationData.manage_quotation_item_accessories || []
             };
 
             const response = await apiPost(`${API_BASE_URL}/quotation/manage-quotation`, payload);
@@ -83,6 +86,7 @@ export class QuotationService {
             const payload = {
                 customer_id: quotationData.customer_id,
                 employee_id: quotationData.employee_id,
+                island_id: quotationData.island_id,
                 manage_quotation_date: quotationData.manage_quotation_date,
                 manage_quotation_valid_date: quotationData.manage_quotation_valid_date,
                 manage_quotation_grand_total: quotationData.manage_quotation_grand_total || "0",
@@ -129,5 +133,9 @@ export class QuotationService {
 
     static async downloadQuotation(quotationId: string): Promise<ApiResponse<{ status: boolean; message: string; data: ManageQuotationDataPDF }>> {
         return await apiGet(`${API_BASE_URL}/quotation/manage-quotation/pdf/${quotationId}`);
+    }
+
+    static async getQuotationAccessories(islandID: string): Promise<ApiResponse<{ status: boolean; message: string; data: AccessoryByIslandCombined }>> {
+        return await apiGet(`${API_BASE_URL}/quotation/accessory/get-data-by-id-island/${islandID}`)
     }
 }

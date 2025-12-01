@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { AccessoriesValidationErrors } from '../types/accessories';
+import { AccessoriesValidationErrors, AccessoryIslandDetail } from '../types/accessories';
 import { AccessoriesService } from '../services/accessoriesService';
 import toast from 'react-hot-toast';
+import { IslandSelectOption, useIslandSelect } from '@/hooks/useIslandSelect';
 
 interface FormData {
     accessory_part_number: string;
@@ -12,6 +13,7 @@ interface FormData {
     accessory_remark: string;
     accessory_region: string;
     accessory_description: string;
+    accessories_island_detail: AccessoryIslandDetail[];
 }
 
 export const useAccessoriesEdit = () => {
@@ -22,6 +24,19 @@ export const useAccessoriesEdit = () => {
     const [fetching, setFetching] = useState(true);
     const [errors, setErrors] = useState<AccessoriesValidationErrors>({});
     
+    // Island Account states
+    const [selectedIsland, setSelectedIsland] = useState<IslandSelectOption | null>(null);
+    
+    // Use reusable island select hook
+    const {
+        islandOptions,
+        pagination: islandPagination, 
+        inputValue: islandInputValue,
+        handleInputChange: handleIslandInputChange,
+        handleMenuScrollToBottom: handleIslandMenuScrollToBottom,
+        initializeOptions: initializeIslandOptions
+    } = useIslandSelect();
+    
     const [form, setForm] = useState<FormData>({
         accessory_part_number: '',
         accessory_part_name: '',
@@ -29,7 +44,8 @@ export const useAccessoriesEdit = () => {
         accessory_brand: '',
         accessory_remark: '',
         accessory_region: '',
-        accessory_description: ''
+        accessory_description: '',
+        accessories_island_detail: []
     });
 
     // Load data saat komponen mount
@@ -38,6 +54,12 @@ export const useAccessoriesEdit = () => {
             loadData();
         }
     }, [id]);
+
+    // Initialize island options
+    useEffect(() => {
+        initializeIslandOptions();
+    }, [initializeIslandOptions]);
+
 
     const loadData = async () => {
         setFetching(true);
@@ -53,9 +75,11 @@ export const useAccessoriesEdit = () => {
                     accessory_brand: data.accessory_brand || '',
                     accessory_remark: data.accessory_remark || '',
                     accessory_region: data.accessory_region || '',
-                    accessory_description: data.accessory_description || ''
+                    accessory_description: data.accessory_description || '',
+                    accessories_island_detail: data.accessories_island_detail || []
                 });
             }
+            
         } catch (error) {
             console.error('Error loading accessory:', error);
             toast.error('Gagal memuat data accessory');
@@ -119,13 +143,84 @@ export const useAccessoriesEdit = () => {
         navigate('/quotations/accessories');
     };
 
+    // Island management functions
+    const handleAddIsland = () => {
+        if (!selectedIsland) {
+            toast.error('Pilih island terlebih dahulu');
+            return;
+        }
+
+        // Check if island already exists
+        const existingIsland = form.accessories_island_detail.find(
+            item => item.island_id === selectedIsland.value
+        );
+
+        if (existingIsland) {
+            toast.error('Island sudah ditambahkan');
+            return;
+        }
+
+        const newIslandDetail: AccessoryIslandDetail = {
+            accessories_island_detail_id: '',
+            island_id: selectedIsland.value,
+            island_name: selectedIsland.label,
+            accessories_id: id || '',
+            accessories_island_detail_quantity: 1,
+            accessories_island_detail_description: ''
+        };
+
+        setForm(prev => ({
+            ...prev,
+            accessories_island_detail: [...prev.accessories_island_detail, newIslandDetail]
+        }));
+
+        // Clear selected island after adding
+        setSelectedIsland(null);
+        toast.success('Island berhasil ditambahkan');
+    };
+
+    const handleUpdateQuantity = (islandId: string, quantity: number) => {
+        setForm(prev => ({
+            ...prev,
+            accessories_island_detail: prev.accessories_island_detail.map(item =>
+                item.island_id === islandId
+                    ? { ...item, accessories_island_detail_quantity: quantity }
+                    : item
+            )
+        }));
+    };
+
+    const handleRemoveIsland = (islandId: string) => {
+        setForm(prev => ({
+            ...prev,
+            accessories_island_detail: prev.accessories_island_detail.filter(
+                item => item.island_id !== islandId
+            )
+        }));
+        toast.success('Island berhasil dihapus');
+    };
+
+    const handleIslandChange = (selectedOption: IslandSelectOption | null) => {
+        setSelectedIsland(selectedOption);
+    };
+
     return {
         form,
         errors,
         loading,
         fetching,
+        selectedIsland,
+        islandOptions,
+        islandInputValue,
+        islandPagination,
         handleChange,
         handleSubmit,
-        handleBack
+        handleBack,
+        handleIslandChange,
+        handleAddIsland,
+        handleUpdateQuantity,
+        handleRemoveIsland,
+        handleIslandInputChange,
+        handleIslandMenuScrollToBottom
     };
 }

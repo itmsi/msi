@@ -58,6 +58,7 @@ export interface QuotationAccessory {
 export interface QuotationFormData {
     customer_id: string;
     employee_id: string;
+    island_id: string;
     bank_account_id?: string;
     bank_account_name?: string;
     bank_account_number?: string;
@@ -200,6 +201,7 @@ export interface BankResponse {
 export interface QuotationValidationErrors {
     customer_id?: string;
     employee_id?: string;
+    island_id?: string;
     bank_account_id?: string;
     manage_quotation_date?: string;
     manage_quotation_valid_date?: string;
@@ -283,6 +285,7 @@ export interface ManageQuotationData {
     manage_quotation_id: string;
     manage_quotation_no: string;
     customer_id: string;
+    island_id: string;
     contact_person: string;
     customer_phone: string;
     customer_address: string;
@@ -313,6 +316,7 @@ export interface ManageQuotationData {
     term_content_id: string;
     include_aftersales_page: boolean;
     include_msf_page: boolean;
+    bank_account_id: string;
     bank_account_name: string;
     bank_account_number: string;
     bank_account_bank_name: string;
@@ -373,6 +377,7 @@ export interface ManageQuotationDataPDF {
     // manage_quotation_id: string;
     manage_quotation_no: string;
     customer_id: string;
+    island_id: string;
     contact_person: string;
     customer_phone: string;
     customer_address: string;
@@ -419,6 +424,7 @@ export interface ManageQuotationItemPDF {
     manage_quotation_id: string;
     manage_quotation_no: string;
     customer_id: string;
+    island_id: string;
     customer_name: string;
     employee_id: string;
     employee_name: string;
@@ -456,3 +462,43 @@ export interface ManageQuotationItemPDF {
     deleted_at: string | null;
     is_delete: boolean;
 }
+
+export interface AccessoryByIslandResponse {
+  status: boolean;
+  message: string;
+  data: AccessoryByIslandCombined[];
+}
+
+export interface AccessoryItem {
+  accessory_id: string;
+  accessory_part_number: string;
+  accessory_part_name: string;
+  accessory_specification: string | null;
+  accessory_brand: string | null;
+  accessory_remark: string;
+  accessory_region: string | null;
+  accessory_description: string | null;
+
+  created_at: string;
+  created_by: string | null;
+  updated_at: string;
+  updated_by: string | null;
+  deleted_at: string | null;
+  deleted_by: string | null;
+  is_delete: boolean;
+}
+
+export interface AccessoryIslandDetail {
+  accessories_island_detail_id: string;
+  island_id: string;
+  accessories_island_detail_quantity: number;
+  accessories_island_detail_description: string | null;
+
+  island_detail_created_at: string;
+  island_detail_created_by: string | null;
+  island_detail_updated_at: string;
+  island_detail_updated_by: string | null;
+}
+export interface AccessoryByIslandCombined
+  extends AccessoryItem,
+    AccessoryIslandDetail {}

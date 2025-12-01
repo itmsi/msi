@@ -308,110 +308,103 @@ export default function PowerBiForm({ mode, dashboardId }: PowerBiFormProps) {
 
                 {/* Content */}
                 <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="bg-white rounded-2xl shadow-sm grid lg:grid-cols-3 gap-2 md:gap-2">
-                    <div className="lg:col-span-1 p-8 relative">
-                        <div className="space-y-8">
-                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Basic Information</h2>
-                            <div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Category *
-                                        </label>
-                                        <CustomSelect
-                                            value={categoryOptions.find(option => option.value === formData.category_id) || null}
-                                            onChange={(selectedOption) => {
-                                                if (selectedOption) {
-                                                    setFormData({
-                                                        ...formData, 
-                                                        category_id: selectedOption.value,
-                                                        category_name: selectedOption.label
-                                                    });
-                                                } else {
-                                                    setFormData({
-                                                        ...formData, 
-                                                        category_id: '',
-                                                        category_name: ''
-                                                    });
-                                                }
-                                            }}
-                                            options={categoryOptions.filter(option => option.value !== '')}
-                                            className="w-full"
-                                            placeholder="Select Category"
-                                            isClearable={false}
-                                        />
-                                    </div>
-
-                                    <div className="md:col-span-2">
-                                        <label className="block text-sm text-gray-700 mb-2">
-                                            Title *
-                                        </label>
-                                        <Input
-                                            value={formData.title}
-                                            onChange={(e) => setFormData({...formData, title: e.target.value})}
-                                            placeholder="Enter title"
-                                            className="w-full"
-                                        />
-                                    </div>
-
-                                    <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Description
-                                        </label>
-                                         <WysiwygEditor
-                                            id="wysiwyg-editor"
-                                            label={'Description'}
-                                            value={formData.description}
-                                            onChange={(content) => setFormData({...formData, description: content})}
-                                            placeholder="Select a term condition or start typing..."
-                                            minHeight="200px"
-                                        />
-                                    </div>
-
-                                    <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            PowerBI Dashboard URL *
-                                        </label>
-                                        <Input
-                                            value={formData.link}
-                                            onChange={(e) => setFormData({...formData, link: e.target.value})}
-                                            placeholder="https://app.powerbi.com/view?r=..."
-                                            className="w-full"
-                                        />
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Enter the public PowerBI dashboard embed URL
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm text-gray-700 mb-2">
-                                            Status *
-                                        </label>
-                                        <CustomSelect
-                                            value={{ 
-                                                value: formData.status, 
-                                                label: formData.status === 'active' ? 'Active' : 'Inactive' 
-                                            }}
-                                            onChange={(selectedOption) => {
-                                                if (selectedOption) {
-                                                    setFormData({
-                                                        ...formData, 
-                                                        status: selectedOption.value as 'active' | 'inactive'
-                                                    });
-                                                }
-                                            }}
-                                            options={[
-                                                { value: 'active', label: 'Active' },
-                                                { value: 'inactive', label: 'Inactive' }
-                                            ]}
-                                            className="w-full"
-                                            placeholder="Select Status"
-                                            isClearable={false}
-                                            isSearchable={false}
-                                        />
-                                    </div>
-                                    
-                                </div>
+                    <div className="lg:col-span-1 p-8 relative space-y-8">
+                        <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Basic Information</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Category *
+                                </label>
+                                <CustomSelect
+                                    value={categoryOptions.find(option => option.value === formData.category_id) || null}
+                                    onChange={(selectedOption) => {
+                                        if (selectedOption) {
+                                            setFormData({
+                                                ...formData, 
+                                                category_id: selectedOption.value,
+                                                category_name: selectedOption.label
+                                            });
+                                        } else {
+                                            setFormData({
+                                                ...formData, 
+                                                category_id: '',
+                                                category_name: ''
+                                            });
+                                        }
+                                    }}
+                                    options={categoryOptions.filter(option => option.value !== '')}
+                                    className="w-full"
+                                    placeholder="Select Category"
+                                    isClearable={false}
+                                />
                             </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm text-gray-700 mb-2">
+                                    Title *
+                                </label>
+                                <Input
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                    placeholder="Enter title"
+                                    className="w-full"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <WysiwygEditor
+                                    id="wysiwyg-editor"
+                                    label={'Description'}
+                                    value={formData.description}
+                                    onChange={(content) => setFormData({...formData, description: content})}
+                                    placeholder="Select a term condition or start typing..."
+                                    minHeight="200px"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    PowerBI Dashboard URL *
+                                </label>
+                                <Input
+                                    value={formData.link}
+                                    onChange={(e) => setFormData({...formData, link: e.target.value})}
+                                    placeholder="https://app.powerbi.com/view?r=..."
+                                    className="w-full"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Enter the public PowerBI dashboard embed URL
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm text-gray-700 mb-2">
+                                    Status *
+                                </label>
+                                <CustomSelect
+                                    value={{ 
+                                        value: formData.status, 
+                                        label: formData.status === 'active' ? 'Active' : 'Inactive' 
+                                    }}
+                                    onChange={(selectedOption) => {
+                                        if (selectedOption) {
+                                            setFormData({
+                                                ...formData, 
+                                                status: selectedOption.value as 'active' | 'inactive'
+                                            });
+                                        }
+                                    }}
+                                    options={[
+                                        { value: 'active', label: 'Active' },
+                                        { value: 'inactive', label: 'Inactive' }
+                                    ]}
+                                    className="w-full"
+                                    placeholder="Select Status"
+                                    isClearable={false}
+                                    isSearchable={false}
+                                />
+                            </div>
+                            
                         </div>
                         <div className="absolute top-7 bottom-7 right-0 border-r border-gray-300 mx-3 hidden lg:block"></div>
                     </div>

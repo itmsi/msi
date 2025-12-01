@@ -61,7 +61,7 @@ const navItems: NavItem[] = [
             { name: "Term Condition", path: "/quotations/term-condition", allowedRoles: ['TNC Quotation'], },
             {
                 name: "Administration",
-                allowedRoles: ['Customer Quotation', 'Bank Quotation'],
+                allowedRoles: ['Customer Quotation', 'Bank Quotation', 'Island'],
                 subItems: [
                     { 
                         name: "Customers", 
@@ -70,7 +70,12 @@ const navItems: NavItem[] = [
                     },
                     { 
                         name: "Bank Accounts", 
-                        path: "/bank-accounts", 
+                        path: "/quotations/administration/bank-accounts", 
+                        allowedRoles: ['Bank Quotation']
+                    },
+                    { 
+                        name: "Islands", 
+                        path: "/quotations/administration/islands", 
                         allowedRoles: ['Bank Quotation']
                     }
                 ],

@@ -1,9 +1,5 @@
 import { Customer } from '../types/customer';
 
-/**
- * Customer Utility Service
- * Contains helper functions for customer operations
- */
 export class CustomerUtilityService {
 
     static validateCustomer(customerData: Partial<Customer>): { isValid: boolean; errors: string[] } {

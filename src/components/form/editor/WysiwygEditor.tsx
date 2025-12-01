@@ -17,7 +17,7 @@ const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     value,
     onChange,
     placeholder = 'Start typing...',
-    minHeight = '200px',
+    minHeight = '400px',
     disabled = false,
     label,
     error,
@@ -162,7 +162,7 @@ const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
                 </div>
 
                 {/* Content editable area */}
-                <div className="px-4 py-2 bg-white rounded-b-lg">
+                <div className="px-4 py-2 bg-white rounded-b-lg overflow-auto h-[400px]">
                     <div
                         id={id}
                         ref={editorRef}

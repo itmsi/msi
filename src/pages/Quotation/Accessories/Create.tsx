@@ -1,9 +1,11 @@
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
-import { MdAdd, MdKeyboardArrowLeft, MdSave } from "react-icons/md";
+import { MdAdd, MdDelete, MdKeyboardArrowLeft, MdSave } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
 import { useCreateAccessories } from "./hooks/useAccessoriesCreate";
+import CustomAsyncSelect from "@/components/form/select/CustomAsyncSelect";
+import CustomDataTable from "@/components/ui/table";
 
 export default function CreateAccessories() {
     
@@ -11,6 +13,16 @@ export default function CreateAccessories() {
         loading,
         errors,
         form,
+        selectedIsland,
+        islandOptions,
+        islandInputValue,
+        islandPagination,
+        handleIslandChange,
+        handleAddIsland,
+        handleUpdateQuantity,
+        handleRemoveIsland,
+        handleIslandInputChange,
+        handleIslandMenuScrollToBottom,
         handleChange,
         handleSubmit,
         handleBack
@@ -19,8 +31,8 @@ export default function CreateAccessories() {
     return (
         <>
             <PageMeta 
-                title="Tambah Accessory | MSI" 
-                description="Tambah data accessory baru"
+                title="Add Accessory | MSI" 
+                description="Add new accessory data"
                 image=""
             />
 
@@ -40,19 +52,19 @@ export default function CreateAccessories() {
                             </Button>
                             <div className="border-l border-gray-300 h-6 mx-3"></div>
                             <MdAdd size={20} className="text-primary" />
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Tambah Accessory</h1>
+                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Add Accessory</h1>
                         </div>
                     </div>
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
-                        <div className="md:col-span-3 p-8 relative space-y-6">
+                        <div className="lg:col-span-1 p-8 relative space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">
-                                    Informasi Dasar
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 col-span-2">
+                                    Basic Information
                                 </h2>
                             
-                                <div>
+                                <div className="col-span-2">
                                     <Label htmlFor="accessory_part_number">
                                         MSI Code <span className="text-red-500">*</span>
                                     </Label>
@@ -72,7 +84,7 @@ export default function CreateAccessories() {
                                     )}
                                 </div>
 
-                                <div>
+                                <div className="col-span-2">
                                     <Label htmlFor="accessory_part_name">
                                         Part Name <span className="text-red-500">*</span>
                                     </Label>
@@ -92,7 +104,7 @@ export default function CreateAccessories() {
                                     )}
                                 </div>
 
-                                <div>
+                                <div className="col-span-2">
                                     <Label htmlFor="accessory_brand">Brand</Label>
                                     <Input
                                         id="accessory_brand"
@@ -104,7 +116,7 @@ export default function CreateAccessories() {
                                     />
                                 </div>
 
-                                <div>
+                                <div className="col-span-2">
                                     <Label htmlFor="accessory_specification">Specification</Label>
                                     <Input
                                         id="accessory_specification"
@@ -116,7 +128,7 @@ export default function CreateAccessories() {
                                     />
                                 </div>
 
-                                <div>
+                                <div className="col-span-2">
                                     <Label htmlFor="accessory_region">Region</Label>
                                     <Input
                                         id="accessory_region"
@@ -128,7 +140,7 @@ export default function CreateAccessories() {
                                     />
                                 </div>
 
-                                <div>
+                                <div className="col-span-2">
                                     <Label htmlFor="accessory_remark">Remark</Label>
                                     <Input
                                         id="accessory_remark"
@@ -141,7 +153,129 @@ export default function CreateAccessories() {
                                 </div>
                             </div>
                             
-                            <div className="absolute top-7 bottom-7 right-0 border-r border-gray-300 hidden lg:block mx-3"></div>
+                            <div className="absolute top-7 bottom-7 right-0 border-r border-gray-300 mx-3 hidden lg:block"></div>
+                        </div>
+                        
+                        <div className="lg:col-span-2 p-8 lg:ps-0 relative">
+                            <div className="space-y-8">
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Island Assignment</h2>
+                                
+                                {/* Island selection info */}
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex-shrink-0">
+                                            <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <span className="text-blue-600 text-sm">ℹ</span>
+                                            </div>
+                                        </div>
+                                        <div className="text-sm text-blue-800">
+                                            <p className="font-medium">Island Selection</p>
+                                            <p className="mt-1">Select which island this accessory is available on. This will determine the availability and pricing for quotations.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Add Island Section */}
+                                <div>
+                                    <Label>Add Island</Label>
+                                    <div className="flex gap-2">
+                                        <div className="flex-1">
+                                            <CustomAsyncSelect
+                                                placeholder="Select Island to add..."
+                                                value={selectedIsland}
+                                                defaultOptions={islandOptions}
+                                                loadOptions={handleIslandInputChange}
+                                                onMenuScrollToBottom={handleIslandMenuScrollToBottom}
+                                                isLoading={islandPagination.loading}
+                                                noOptionsMessage={() => "No islands found"}
+                                                loadingMessage={() => "Loading islands..."}
+                                                isSearchable={true}
+                                                inputValue={islandInputValue}
+                                                onInputChange={(inputValue) => {
+                                                    handleIslandInputChange(inputValue);
+                                                }}
+                                                onChange={(option: any) => {
+                                                    handleIslandChange(option);
+                                                }}
+                                            />
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            onClick={handleAddIsland}
+                                            disabled={!selectedIsland}
+                                            className="px-4 flex items-center gap-2 rounded-lg"
+                                        >
+                                            <MdAdd size={16} />
+                                            Add
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                {/* Islands Table */}
+                                <div>
+                                    <h3 className="text-md font-medium text-gray-900 mb-4">
+                                        Selected Islands ({form.accessories_island_detail.length})
+                                    </h3>
+                                    
+                                    {form.accessories_island_detail.length > 0 ? (
+                                        <CustomDataTable
+                                            columns={[
+                                                {
+                                                    name: 'Island Name',
+                                                    selector: (row: any) => row.island_name,
+                                                    cell: (row: any) => (
+                                                        <span className="font-medium">{row.island_name}</span>
+                                                    )
+                                                },
+                                                {
+                                                    name: 'Quantity',
+                                                    selector: (row: any) => row.accessories_island_detail_quantity,
+                                                    cell: (row: any) => (
+                                                        <Input
+                                                            type="number"
+                                                            min="1"
+                                                            value={row.accessories_island_detail_quantity}
+                                                            onChange={(e) => {
+                                                                const quantity = parseInt(e.target.value) || 1;
+                                                                handleUpdateQuantity(row.island_id, quantity);
+                                                            }}
+                                                            className="w-20"
+                                                        />
+                                                    )
+                                                },
+                                                {
+                                                    name: 'Actions',
+                                                    cell: (row: any) => (
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => handleRemoveIsland(row.island_id)}
+                                                            className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                                                        >
+                                                            <MdDelete size={16} />
+                                                        </Button>
+                                                    ),
+                                                    ignoreRowClick: true,
+                                                    allowOverflow: true,
+                                                    button: true
+                                                }
+                                            ]}
+                                            data={form.accessories_island_detail}
+                                            loading={false}
+                                            pagination={false}
+                                        />
+                                    ) : (
+                                        <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                                            <div className="text-gray-400 mb-2">
+                                                <MdAdd size={48} className="mx-auto mb-2" />
+                                            </div>
+                                            <p className="text-gray-500 font-medium">No islands added</p>
+                                            <p className="text-gray-400 text-sm">Select an island from the dropdown above to add it</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         {/* Action Buttons */}
@@ -153,7 +287,7 @@ export default function CreateAccessories() {
                                 disabled={loading}
                                 className="px-6 rounded-full"
                             >
-                                Batal
+                                Cancel
                             </Button>
                             <Button
                                 type="submit"

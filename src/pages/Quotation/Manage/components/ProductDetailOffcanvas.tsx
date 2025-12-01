@@ -91,6 +91,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 quantity: acc.quantity || 1,
                 description: acc.description || ''
             }));
+            
             setAccessories(initializedAccessories);
         }
     }, [productId, isOpen, initialData]);

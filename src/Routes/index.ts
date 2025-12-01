@@ -27,6 +27,8 @@ const EditCustomers = lazy(() => import('@/pages/Administration/Customers/Edit')
 const ManageBank = lazy(() => import('@/pages/Administration/Bank/Manage'));
 const CreateBank = lazy(() => import('@/pages/Administration/Bank/Create'));
 const EditBank = lazy(() => import('@/pages/Administration/Bank/Edit'));
+// ISLAND
+const ManageIsland = lazy(() => import('@/pages/Administration/Island/Manage'));
 
 const ManageItemsProduct = lazy(() => import('@/pages/Quotation/Product/Manage'));
 const CreateItemsProduct = lazy(() => import('@/pages/Quotation/Product/Create'));
@@ -248,7 +250,7 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/bank-accounts',
+        path: '/quotations/administration/bank-accounts',
         name: 'Bank Quotation',
         isProtected: true,
         roles: ['Bank Quotation'],
@@ -256,7 +258,7 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/bank-accounts/create',
+        path: '/quotations/administration/bank-accounts/create',
         name: 'Bank Quotation',
         isProtected: true,
         roles: ['Bank Quotation'],
@@ -265,7 +267,7 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/bank-accounts/edit/:id',
+        path: '/quotations/administration/bank-accounts/edit/:id',
         name: 'Bank Quotation',
         isProtected: true,
         roles: ['Bank Quotation'],
@@ -273,7 +275,15 @@ export const routes: TAppRoute[] = [
         component: EditBank,
         layout: AppLayout,
     },
-
+    // ISLAND ROUTES
+    {
+        path: '/quotations/administration/islands',
+        name: 'Island',
+        isProtected: true,
+        roles: ['Island'],
+        component: ManageIsland,
+        layout: AppLayout,
+    },
     
     {
         path: '/quotations/products',

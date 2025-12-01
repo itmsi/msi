@@ -1,10 +1,6 @@
 import { apiGet, apiPost, apiPut, apiDelete, ApiResponse } from '@/helpers/apiHelper';
 import { CustomerResponse, CustomerRequest, Customer, CustomerFormData } from '../types/customer';
 
-/**
- * Customer Service
- * Handles all API operations related to customers
- */
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export class CustomerService {
     static async getCustomers(params: Partial<CustomerRequest> = {}): Promise<CustomerResponse> {

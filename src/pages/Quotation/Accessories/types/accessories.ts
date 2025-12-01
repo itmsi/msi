@@ -18,6 +18,7 @@ export interface Accessories {
     accessory_remark: string;
     accessory_region: string;
     accessory_description: string;
+    accessories_island_detail: AccessoryIslandDetail[];
     created_at: string;
     created_by: string | null;
     updated_at: string;
@@ -25,6 +26,14 @@ export interface Accessories {
     deleted_at: string | null;
     deleted_by: string | null;
     is_delete: boolean;
+}
+export interface AccessoryIslandDetail {
+    accessories_island_detail_id: string;
+    island_name: string;
+    island_id: string;
+    accessories_id: string;
+    accessories_island_detail_quantity: number;
+    accessories_island_detail_description: string;
 }
 
 export interface Pagination {

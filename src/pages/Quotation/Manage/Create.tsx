@@ -30,12 +30,14 @@ import { useTermConditionSelect, TermConditionSelectOption } from '../hooks/useT
 import { handleKeyPress, formatNumberInput, resetFormatNumbers, handlePercentageInput } from '@/helpers/generalHelper';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { ItemProductService } from '../Product/services/productService';
+import { QuotationService } from './services/quotationService';
 import ProductDetailDrawer from '@/pages/Quotation/Manage/components/ProductDetailDrawer';
 import { BankSelectOption, useBankSelect } from '../hooks/useBankSelect';
 import { useEmployeeSelect } from '../hooks/useEmployeeSelect';
 import { useCustomerSelect } from '../hooks/useCustomerSelect';
 import Checkbox from '@/components/form/input/Checkbox';
 import { FaEye } from 'react-icons/fa6';
+import { IslandSelectOption, useIslandSelect } from '@/hooks/useIslandSelect';
 
 export default function CreateQuotation() {
     const navigate = useNavigate();
@@ -91,10 +93,21 @@ export default function CreateQuotation() {
         initializeOptions: initializeBankOptions
     } = useBankSelect();
 
+    // Use reusable island select hook
+    const {
+        islandOptions,
+        pagination: islandPagination, 
+        inputValue: islandInputValue,
+        handleInputChange: handleIslandInputChange,
+        handleMenuScrollToBottom: handleIslandMenuScrollToBottom,
+        initializeOptions: initializeIslandOptions
+    } = useIslandSelect();
+
     // Form state
     const [formData, setFormData] = useState<QuotationFormData>({
         customer_id: '',
         employee_id: '',
+        island_id: '',
         bank_account_id: '',
         bank_account_name: '',
         bank_account_number: '',
@@ -146,6 +159,8 @@ export default function CreateQuotation() {
     // Banks Account states
     const [selectedBank, setSelectedBank] = useState<BankSelectOption | null>(null);
 
+    // Island Account states
+    const [selectedIsland, setSelectedIsland] = useState<IslandSelectOption | null>(null);
 
     // Selected values for form
     const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
@@ -275,7 +290,7 @@ export default function CreateQuotation() {
         });
 
         const validatableFields: (keyof QuotationValidationErrors)[] = [
-            'customer_id', 'employee_id', 'manage_quotation_date', 
+            'customer_id', 'employee_id', 'island_id', 'manage_quotation_date', 
             'manage_quotation_valid_date', 'manage_quotation_delivery_fee', 
             'manage_quotation_other', 'manage_quotation_payment_presentase', 
             'manage_quotation_description', 'manage_quotation_items'
@@ -341,7 +356,10 @@ export default function CreateQuotation() {
     useEffect(() => {
         initializeTermConditionOptions();
     }, [initializeTermConditionOptions]);
-
+    
+    useEffect(() => {
+        initializeIslandOptions();
+    }, [initializeIslandOptions]);
     useEffect(() => {
         const editor = document.getElementById('wysiwyg-editor');
         if (editor && termConditionContent && editor.innerHTML !== termConditionContent) {
@@ -400,6 +418,13 @@ export default function CreateQuotation() {
     const addProductItem = async () => {
         setProductSelectError('');
 
+        if (!formData.island_id) {
+            const errorMessage = 'Please select an island first before adding products';
+            setProductSelectError(errorMessage);
+            toast.error(errorMessage);
+            return;
+        }
+
         if (!selectedProduct) {
             const errorMessage = 'Please select a product first';
             setProductSelectError(errorMessage);
@@ -412,6 +437,19 @@ export default function CreateQuotation() {
             
             if (response.data && response.data.data) {
                 const apiProductData = response.data.data;
+                
+                const islandAccessories = (formData.manage_quotation_item_accessories || []).map(accessory => ({
+                    accessory_id: accessory.accessory_id,
+                    accessory_part_number: accessory.accessory_part_number,
+                    accessory_part_name: accessory.accessory_part_name,
+                    accessory_brand: accessory.accessory_brand,
+                    accessory_specification: accessory.accessory_specification,
+                    quantity: accessory.quantity,
+                    description: accessory.description,
+                    accessory_description: accessory.description || '',
+                    accessory_remark: '',
+                    accessory_region: '' 
+                }));
                 
                 const newQuotationItem: QuotationItem = {
                     componen_product_id: apiProductData.componen_product_id,
@@ -437,7 +475,7 @@ export default function CreateQuotation() {
                     selling_price_star_4: apiProductData.selling_price_star_4 || '0',
                     selling_price_star_5: apiProductData.selling_price_star_5 || '0',
                     description: apiProductData.componen_product_description || '',
-                    manage_quotation_item_accessories: [],
+                    manage_quotation_item_accessories: islandAccessories,
                     manage_quotation_item_specifications: apiProductData.componen_product_specifications?.map((spec: any) => ({
                         manage_quotation_item_specification_label: spec.componen_product_specification_label || spec.specification_label_name || '',
                         manage_quotation_item_specification_value: spec.componen_product_specification_value || spec.specification_value_name || ''
@@ -530,52 +568,50 @@ export default function CreateQuotation() {
             return;
         }
 
-        // Initialize offcanvas data if not exists
-        if (!unsavedProductChanges[productId]) {
-            setUnsavedProductChanges(prev => ({
-                ...prev,
-                [productId]: {
-                    componen_product_id: existingItem.componen_product_id,
-                    componen_product_name: existingItem.componen_product_name,
-                    code_unique: existingItem.code_unique || '',
-                    msi_model: existingItem.msi_model || '',
-                    msi_product: existingItem.msi_product || '',
-                    segment: existingItem.segment || '',
-                    wheel_no: existingItem.wheel_no || '',
-                    engine: existingItem.engine || '',
-                    volume: existingItem.volume || '',
-                    horse_power: existingItem.horse_power || '',
-                    market_price: existingItem.market_price || '',
-                    product_type: existingItem.product_type || '',
-                    selling_price_star_1: existingItem.selling_price_star_1 || '',
-                    selling_price_star_2: existingItem.selling_price_star_2 || '',
-                    selling_price_star_3: existingItem.selling_price_star_3 || '',
-                    selling_price_star_4: existingItem.selling_price_star_4 || '',
-                    selling_price_star_5: existingItem.selling_price_star_5 || '',
-                    image: existingItem.image,
-                    componen_product_description: existingItem.description || '',
-                    is_delete: false,
-                    componen_type: 1,
-                    componen_product_unit_model: existingItem.componen_product_unit_model || '',
-                    componen_product_specifications: existingItem.manage_quotation_item_specifications?.map((spec: any) => ({
-                        componen_product_specification_label: spec.manage_quotation_item_specification_label || spec.specification_label_name || '',
-                        componen_product_specification_value: spec.manage_quotation_item_specification_value || spec.specification_value_name || '',
-                        componen_product_specification_description: spec.manage_quotation_item_specification_description || null,
-                        specification_label_name: spec.manage_quotation_item_specification_label || spec.specification_label_name || '',
-                        specification_value_name: spec.manage_quotation_item_specification_value || spec.specification_value_name || ''
-                    })) || [],
-                    manage_quotation_item_accessories: existingItem.manage_quotation_item_accessories?.map((acc: any) => ({
-                        accessory_id: acc.accessory_id,
-                        accessory_part_name: acc.accessory_part_name,
-                        accessory_part_number: acc.accessory_part_number,
-                        accessory_brand: acc.accessory_brand,
-                        accessory_specification: acc.accessory_specification,
-                        quantity: acc.quantity,
-                        description: acc.description
-                    })) || []
-                }
-            }));
-        }
+        // Always sync with current formData to ensure accessories are up to date
+        setUnsavedProductChanges(prev => ({
+            ...prev,
+            [productId]: {
+                componen_product_id: existingItem.componen_product_id,
+                componen_product_name: existingItem.componen_product_name,
+                code_unique: existingItem.code_unique || '',
+                msi_model: existingItem.msi_model || '',
+                msi_product: existingItem.msi_product || '',
+                segment: existingItem.segment || '',
+                wheel_no: existingItem.wheel_no || '',
+                engine: existingItem.engine || '',
+                volume: existingItem.volume || '',
+                horse_power: existingItem.horse_power || '',
+                market_price: existingItem.market_price || '',
+                product_type: existingItem.product_type || '',
+                selling_price_star_1: existingItem.selling_price_star_1 || '',
+                selling_price_star_2: existingItem.selling_price_star_2 || '',
+                selling_price_star_3: existingItem.selling_price_star_3 || '',
+                selling_price_star_4: existingItem.selling_price_star_4 || '',
+                selling_price_star_5: existingItem.selling_price_star_5 || '',
+                image: existingItem.image,
+                componen_product_description: existingItem.description || '',
+                is_delete: false,
+                componen_type: 1,
+                componen_product_unit_model: existingItem.componen_product_unit_model || '',
+                componen_product_specifications: existingItem.manage_quotation_item_specifications?.map((spec: any) => ({
+                    componen_product_specification_label: spec.manage_quotation_item_specification_label || spec.specification_label_name || '',
+                    componen_product_specification_value: spec.manage_quotation_item_specification_value || spec.specification_value_name || '',
+                    componen_product_specification_description: spec.manage_quotation_item_specification_description || null,
+                    specification_label_name: spec.manage_quotation_item_specification_label || spec.specification_label_name || '',
+                    specification_value_name: spec.manage_quotation_item_specification_value || spec.specification_value_name || ''
+                })) || [],
+                manage_quotation_item_accessories: existingItem.manage_quotation_item_accessories?.map((acc: any) => ({
+                    accessory_id: acc.accessory_id,
+                    accessory_part_name: acc.accessory_part_name,
+                    accessory_part_number: acc.accessory_part_number,
+                    accessory_brand: acc.accessory_brand,
+                    accessory_specification: acc.accessory_specification,
+                    quantity: acc.quantity,
+                    description: acc.description
+                })) || []
+            }
+        }));
         
         setSelectedProductId(productId);
         setShowProductDetail(true);
@@ -730,7 +766,7 @@ export default function CreateQuotation() {
                     })}
                 </div>
             ),
-            right: true,
+            // right: true,
             width: '250px',
         },
         // {
@@ -794,6 +830,10 @@ export default function CreateQuotation() {
             errors.employee_id = 'Employee is required';
         }
 
+        if (!formData.island_id) {
+            errors.island_id = 'Island is required';
+        }
+
         if (!formData.bank_account_id) {
             errors.bank_account_id = 'Bank account is required';
         }
@@ -808,6 +848,10 @@ export default function CreateQuotation() {
 
         if (formData.manage_quotation_items.length === 0) {
             errors.manage_quotation_items = 'At least one product item is required';
+        }
+
+        if (!formData.term_content_directory) {
+            errors.term_content_directory = 'Term & Condition is required';
         }
 
         if (Object.keys(errors).length > 0) {
@@ -1073,11 +1117,121 @@ export default function CreateQuotation() {
                                                 <span className="text-sm text-red-500">{validationErrors.employee_id}</span>
                                             )}
                                         </div>
+                                        
+                                        <div>
+                                            <Label>Select Island</Label>
+                                            <CustomAsyncSelect
+                                                placeholder="Select Island..."
+                                                value={selectedIsland}
+                                                error={validationErrors.island_id}
+                                                defaultOptions={islandOptions}
+                                                loadOptions={handleIslandInputChange}
+                                                onMenuScrollToBottom={handleIslandMenuScrollToBottom}
+                                                isLoading={islandPagination.loading}
+                                                noOptionsMessage={() => "No islands found"}
+                                                loadingMessage={() => "Loading islands..."}
+                                                isSearchable={true}
+                                                inputValue={islandInputValue}
+                                                onInputChange={(inputValue) => {
+                                                    handleIslandInputChange(inputValue);
+                                                }}
+                                                onChange={async (option: any) => {
+                                                    setSelectedIsland(option);
+                                                    handleInputChange('island_id', option?.value || '');
+                                                    
+                                                    if (option?.value) {
+                                                        // Fetch new accessories for the selected island
+                                                        try {
+                                                            const response = await QuotationService.getQuotationAccessories(option.value);
+                                                            
+                                                            if (response.data && response.data.status && response.data.data) {
+                                                                const accessories = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
+                                                                
+                                                                // Check if accessories array has items
+                                                                if (accessories.length > 0) {
+                                                                    // Transform accessories to QuotationItemAccessory format
+                                                                    const transformedAccessories = accessories.map(accessory => ({
+                                                                        accessory_id: accessory.accessory_id,
+                                                                        accessory_part_number: accessory.accessory_part_number,
+                                                                        accessory_part_name: accessory.accessory_part_name,
+                                                                        accessory_brand: accessory.accessory_brand || '',
+                                                                        accessory_specification: accessory.accessory_specification || '',
+                                                                        quantity: accessory.accessories_island_detail_quantity || 1,
+                                                                        description: accessory.accessory_description || '',
+                                                                        accessory_description: accessory.accessory_description || '',
+                                                                        accessory_remark: accessory.accessory_remark || '',
+                                                                        accessory_region: accessory.accessory_region || ''
+                                                                    }));
+                                                                    
+                                                                    // Update accessories in all existing quotation items AND form level
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        manage_quotation_item_accessories: transformedAccessories,
+                                                                        manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                                                            ...item,
+                                                                            manage_quotation_item_accessories: transformedAccessories
+                                                                        }))
+                                                                    }));
+                                                                    
+                                                                    toast.success(`${transformedAccessories.length} accessories loaded for selected island`);
+                                                                } else {
+                                                                    // Clear accessories if data array is empty
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        manage_quotation_item_accessories: [],
+                                                                        manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                                                            ...item,
+                                                                            manage_quotation_item_accessories: []
+                                                                        }))
+                                                                    }));
+                                                                    toast.success('No accessories found for selected island');
+                                                                }
+                                                            } else {
+                                                                // Clear accessories if no data
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    manage_quotation_item_accessories: [],
+                                                                    manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                                                        ...item,
+                                                                        manage_quotation_item_accessories: []
+                                                                    }))
+                                                                }));
+                                                                toast.success('No accessories found for selected island');
+                                                            }
+                                                        } catch (error: any) {
+                                                            console.error('Error fetching accessories by island:', error);
+                                                            toast.error('Failed to load accessories for selected island');
+                                                            // Clear accessories on error
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                manage_quotation_item_accessories: [],
+                                                                manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                                                    ...item,
+                                                                    manage_quotation_item_accessories: []
+                                                                }))
+                                                            }));
+                                                        }
+                                                    } else {
+                                                        // Clear accessories when no island selected
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            manage_quotation_item_accessories: [],
+                                                            manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                                                ...item,
+                                                                manage_quotation_item_accessories: []
+                                                            }))
+                                                        }));
+                                                    }
+                                                }}
+                                            />
+                                            {validationErrors.island_id && (
+                                                <span className="text-sm text-red-500">{validationErrors.island_id}</span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
                             </div>
-                            
                             <div className="bg-white rounded-2xl shadow-sm p-6 lg:col-span-2 space-y-3">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">Beneficiary Details</h2>
                                 {/* GET BANK */}
@@ -1151,7 +1305,13 @@ export default function CreateQuotation() {
 
                             {/* Products Section */}
                             <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5 col-span-1">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Products</h2>
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 pb-6 relative">
+                                    Products
+                                    
+                                    {!formData.island_id && (
+                                        <span className="text-sm text-orange-500 font-primary italic mt-1 block absolute bottom-0">Please select an island first to add products</span>
+                                    )}
+                                </h2>
                                 
                                 {/* Add Product */}
                                 <div className="flex gap-4 mb-6">
@@ -1193,7 +1353,7 @@ export default function CreateQuotation() {
                                         type="button" 
                                         onClick={addProductItem} 
                                         className="flex items-center gap-2"
-                                        disabled={!selectedProduct}
+                                        disabled={!selectedProduct || !formData.island_id}
                                     >
                                         <MdAdd size={16} />
                                         Add Product
@@ -1268,7 +1428,6 @@ export default function CreateQuotation() {
                                     />
                                 </div>
 
-                                {/* Term Content Editor */}
                                 <div className="md:col-span-2">
                                     <WysiwygEditor
                                         id="wysiwyg-editor"
@@ -1283,7 +1442,7 @@ export default function CreateQuotation() {
                                         disabled={termConditionLoading}
                                     />
                                     <div className="text-xs text-gray-500 mt-1">
-                                        Selected: {selectedTermCondition?.label || 'None'}
+                                        Selected: {selectedTermCondition?.label || ''}
                                     </div>
                                 </div>
                             </div>
@@ -1291,8 +1450,8 @@ export default function CreateQuotation() {
                             {/* Totals Summary */}
                             <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
                                 <div className="space-y-3">
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                                        <Label htmlFor="manage_quotation_items">Subtotal</Label>
+                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
+                                        <Label htmlFor="manage_quotation_items" className='text-end'>Subtotal</Label>
                                         <Input
                                             id="manage_quotation_items"
                                             type="text"
@@ -1370,7 +1529,7 @@ export default function CreateQuotation() {
                                     </div>
 
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-300 pt-4 mt-4 items-center'>
-                                        <Label className='font-bold text-lg mb-0 text-end' >Grand Total</Label>
+                                        <Label className='font-bold text-lg mb-0 text-end'>Grand Total</Label>
                                         <Input
                                             type="text"
                                             onKeyPress={handleKeyPress}
@@ -1382,7 +1541,7 @@ export default function CreateQuotation() {
 
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                                         <Label htmlFor="manage_quotation_payment_presentase" className='text-end mb-0'>
-                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center items-center text-end'>
+                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center text-end'>
                                                 Down Payment
                                                 <div className="relative md:col-span-1">
                                                     <Input
@@ -1488,37 +1647,6 @@ export default function CreateQuotation() {
                                 </div>
                             </div>
                         </div>
-                        
-
-                        {/* Basic Information */}
-                        {/* <div className="bg-white rounded-2xl shadow-sm p-6">
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <Label htmlFor="manage_quotation_payment_presentase">Down Payment Percentage (%)</Label>
-                                    <Input
-                                        type="text"
-                                        onKeyPress={handleKeyPress}
-                                        min="0"
-                                        max="100"
-                                        value={formData.manage_quotation_payment_presentase}
-                                        onChange={(e) => handleInputChange('manage_quotation_payment_presentase', e.target.value)}
-                                        placeholder="50"
-                                    />
-                                </div>
-                                <div className="md:col-span-2">
-                                    <Label htmlFor="manage_quotation_description">Description</Label>
-                                    <textarea
-                                        id="manage_quotation_description"
-                                        rows={3}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        value={formData.manage_quotation_description}
-                                        onChange={(e) => handleInputChange('manage_quotation_description', e.target.value)}
-                                        placeholder="Enter quotation description..."
-                                    />
-                                </div>
-                            </div>
-                        </div> */}
 
                         {/* Form Actions */}
                         <div className="flex justify-end gap-4 p-6 bg-white rounded-2xl shadow-sm">
@@ -1526,6 +1654,7 @@ export default function CreateQuotation() {
                                 type="button"
                                 variant="outline"
                                 onClick={() => navigate('/quotations/manage')}
+                                className="px-6 rounded-full"
                                 disabled={isCreating}
                             >
                                 Cancel
@@ -1546,7 +1675,7 @@ export default function CreateQuotation() {
                             <Button
                                 type="submit"
                                 disabled={isCreating}
-                                className="flex items-center gap-2"
+                                className="px-6 flex items-center gap-2 rounded-full"
                             >
                                 <MdSave size={16} />
                                 {isCreating ? 'Submitting...' : 'Submit Quotation'}

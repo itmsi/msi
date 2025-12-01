@@ -36,6 +36,8 @@ import { useEmployeeSelect } from '../hooks/useEmployeeSelect';
 import { useCustomerSelect } from '../hooks/useCustomerSelect';
 import Checkbox from '@/components/form/input/Checkbox';
 import { FaEye } from 'react-icons/fa6';
+import { IslandSelectOption, useIslandSelect } from '@/hooks/useIslandSelect';
+import { QuotationService } from './services/quotationService';
 
 export default function EditQuotation() {
     const navigate = useNavigate();
@@ -93,10 +95,21 @@ export default function EditQuotation() {
         initializeOptions: initializeBankOptions
     } = useBankSelect();
 
+    // Use reusable island select hook
+    const {
+        islandOptions,
+        pagination: islandPagination, 
+        inputValue: islandInputValue,
+        handleInputChange: handleIslandInputChange,
+        handleMenuScrollToBottom: handleIslandMenuScrollToBottom,
+        initializeOptions: initializeIslandOptions
+    } = useIslandSelect();
+
     // Form state
     const [formData, setFormData] = useState<QuotationFormData>({
         customer_id: '',
         employee_id: '',
+        island_id: '',
         bank_account_id: '',
         bank_account_name: '',
         bank_account_number: '',
@@ -148,6 +161,8 @@ export default function EditQuotation() {
     // Banks Account states
     const [selectedBank, setSelectedBank] = useState<BankSelectOption | null>(null);
 
+    // Island Account states
+    const [selectedIsland, setSelectedIsland] = useState<IslandSelectOption | null>(null);
 
     // Selected values for form
     const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
@@ -162,7 +177,8 @@ export default function EditQuotation() {
             const transformedData: QuotationFormData = {
                 customer_id: data.customer_id || '',
                 employee_id: data.employee_id || '',
-                bank_account_id: '',
+                island_id: data.island_id || '',
+                bank_account_id: data.bank_account_id || '',
                 bank_account_name: data.bank_account_name || '',
                 bank_account_number: data.bank_account_number || '',
                 bank_account_type: data.bank_account_bank_name || '',
@@ -261,18 +277,58 @@ export default function EditQuotation() {
                     data: { employee_id: data.employee_id }
                 });
             }
-            
-            if (data.bank_account_name) {
-                setSelectedBank({
-                    value: data.bank_account_name,
-                    label: `${data.bank_account_bank_name} - ${data.bank_account_number}`,
-                    data: {
-                        bank_account_id: '',
-                        bank_account_name: data.bank_account_name,
-                        bank_account_number: data.bank_account_number,
-                        bank_account_type: data.bank_account_bank_name
-                    }
+
+            if (data.island_id) {
+                setSelectedIsland({
+                    value: data.island_id,
+                    label: apiData.island_name || 'Select Island'
                 });
+            }
+            
+            // Find and set bank data from loaded bank options
+            // if (data.bank_account_bank_name) {
+            //     setSelectedBank({
+            //         value: data.bank_account_bank_name,
+            //         label: `${data.bank_account_bank_name} - ${data.bank_account_number}`,
+            //         data: {
+            //             bank_account_id: data.bank_account_id,
+            //             bank_account_name: data.bank_account_name,
+            //             bank_account_number: data.bank_account_number,
+            //             bank_account_type: data.bank_account_bank_name
+            //         }
+            //     });
+            // }
+            if (data.bank_account_name && data.bank_account_number) {
+                // Find matching bank from options
+                const matchingBank = bankOptions.find(bank => 
+                    bank.data.bank_account_name === data.bank_account_name &&
+                    bank.data.bank_account_number === data.bank_account_number
+                );
+                
+                if (matchingBank) {
+                    setSelectedBank(matchingBank);
+                    setFormData(prev => ({
+                        ...prev,
+                        bank_account_id: matchingBank.data.bank_account_id
+                    }));
+                } else {
+                    // If not found in options, create a temporary entry
+                    setSelectedBank({
+                        value: data.bank_account_name,
+                        label: `${data.bank_account_bank_name} - ${data.bank_account_number}`,
+                        data: {
+                            bank_account_id: data.bank_account_name,
+                            bank_account_name: data.bank_account_name,
+                            bank_account_number: data.bank_account_number,
+                            bank_account_type: data.bank_account_bank_name
+                        }
+                    });
+                    // Set temporary bank_account_id while preserving other fields
+                    setFormData(prev => ({
+                        ...prev,
+                        bank_account_id: data.bank_account_name
+                    }));
+                }
             }
             
             if (data.term_content_id) {
@@ -292,7 +348,7 @@ export default function EditQuotation() {
             toast.error(err.message || 'Failed to load quotation');
             navigate('/quotations/manage');
         }
-    }, [quotationId, fetchQuotation, navigate]);
+    }, [quotationId, fetchQuotation, navigate, bankOptions]);
 
     useEffect(() => {
         if (quotationId) {
@@ -303,13 +359,19 @@ export default function EditQuotation() {
     // Sync individual dates with form data (but don't override on initial load)
     useEffect(() => {
         if (formData.manage_quotation_date && !loading) {
-            setFormData(prev => ({
-                ...prev,
-                manage_quotation_date: invoiceDate.toISOString().split('T')[0],
-                manage_quotation_valid_date: dueDate.toISOString().split('T')[0]
-            }));
+            const newDateString = invoiceDate.toISOString().split('T')[0];
+            const newDueDateString = dueDate.toISOString().split('T')[0];
+            
+            // Only update if dates actually changed to prevent infinite loops
+            if (formData.manage_quotation_date !== newDateString || formData.manage_quotation_valid_date !== newDueDateString) {
+                setFormData(prev => ({
+                    ...prev,
+                    manage_quotation_date: newDateString,
+                    manage_quotation_valid_date: newDueDateString
+                }));
+            }
         }
-    }, [invoiceDate, dueDate, loading, formData.manage_quotation_date]);
+    }, [invoiceDate, dueDate, loading, formData.manage_quotation_date, formData.manage_quotation_valid_date]);
 
     // Handle click outside for invoice date picker
     useEffect(() => {
@@ -384,29 +446,6 @@ export default function EditQuotation() {
             remainingPayment: remainingPayment.toString()
         };
     }, []);
-
-    const handleBankChange = useCallback((selectedOption: BankSelectOption | null) => {
-        if (selectedOption && selectedOption.data) {
-            const bankData = selectedOption.data;
-            setFormData(prev => ({
-                ...prev,
-                bank_account_id: bankData.bank_account_id,
-                bank_account_name: bankData.bank_account_name || '',
-                bank_account_type: bankData.bank_account_type || '',
-                bank_account_number: bankData.bank_account_number || '',
-                bank_account_bank_name: bankData.bank_account_type || ''
-            }));
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                bank_account_id: '',
-                bank_account_name: '',
-                bank_account_type: '',
-                bank_account_number: '',
-                bank_account_bank_name: ''
-            }));
-        }
-    }, []);
     const handleInputChange = (field: keyof QuotationFormData, value: string | boolean) => {
         setFormData(prev => {
             const newFormData = { ...prev, [field]: value };
@@ -426,7 +465,7 @@ export default function EditQuotation() {
         });
 
         const validatableFields: (keyof QuotationValidationErrors)[] = [
-            'customer_id', 'employee_id', 'manage_quotation_date', 
+            'customer_id', 'employee_id', 'island_id', 'manage_quotation_date', 
             'manage_quotation_valid_date', 'manage_quotation_delivery_fee', 
             'manage_quotation_other', 'manage_quotation_payment_presentase', 
             'manage_quotation_description', 'manage_quotation_items'
@@ -494,6 +533,9 @@ export default function EditQuotation() {
     }, [initializeTermConditionOptions]);
 
     useEffect(() => {
+        initializeIslandOptions();
+    }, [initializeIslandOptions]);
+    useEffect(() => {
         const editor = document.getElementById('wysiwyg-editor');
         if (editor && termConditionContent && editor.innerHTML !== termConditionContent) {
             if (document.activeElement !== editor) {
@@ -551,6 +593,13 @@ export default function EditQuotation() {
     const addProductItem = async () => {
         setProductSelectError('');
 
+        if (!formData.island_id) {
+            const errorMessage = 'Please select an island first before adding products';
+            setProductSelectError(errorMessage);
+            toast.error(errorMessage);
+            return;
+        }
+
         if (!selectedProduct) {
             const errorMessage = 'Please select a product first';
             setProductSelectError(errorMessage);
@@ -563,6 +612,19 @@ export default function EditQuotation() {
             
             if (response.data && response.data.data) {
                 const apiProductData = response.data.data;
+                
+                const islandAccessories = (formData.manage_quotation_item_accessories || []).map(accessory => ({
+                    accessory_id: accessory.accessory_id,
+                    accessory_part_number: accessory.accessory_part_number,
+                    accessory_part_name: accessory.accessory_part_name,
+                    accessory_brand: accessory.accessory_brand,
+                    accessory_specification: accessory.accessory_specification,
+                    quantity: accessory.quantity,
+                    description: accessory.description,
+                    accessory_description: accessory.description || '',
+                    accessory_remark: '',
+                    accessory_region: '' 
+                }));
                 
                 const newQuotationItem: QuotationItem = {
                     componen_product_id: apiProductData.componen_product_id,
@@ -588,7 +650,7 @@ export default function EditQuotation() {
                     selling_price_star_4: apiProductData.selling_price_star_4 || '0',
                     selling_price_star_5: apiProductData.selling_price_star_5 || '0',
                     description: apiProductData.componen_product_description || '',
-                    manage_quotation_item_accessories: [],
+                    manage_quotation_item_accessories: islandAccessories,
                     manage_quotation_item_specifications: apiProductData.componen_product_specifications?.map((spec: any) => ({
                         manage_quotation_item_specification_label: spec.componen_product_specification_label || spec.specification_label_name || '',
                         manage_quotation_item_specification_value: spec.componen_product_specification_value || spec.specification_value_name || ''
@@ -957,6 +1019,14 @@ export default function EditQuotation() {
             errors.employee_id = 'Employee is required';
         }
 
+        if (!formData.island_id) {
+            errors.island_id = 'Island is required';
+        }
+
+        if (!formData.bank_account_id) {
+            errors.bank_account_id = 'Bank account is required';
+        }
+
         if (!formData.manage_quotation_date) {
             errors.manage_quotation_date = 'Invoice date is required';
         }
@@ -967,6 +1037,10 @@ export default function EditQuotation() {
 
         if (formData.manage_quotation_items.length === 0) {
             errors.manage_quotation_items = 'At least one product item is required';
+        }
+
+        if (!formData.term_content_directory) {
+            errors.term_content_directory = 'Term & Condition is required';
         }
 
         if (Object.keys(errors).length > 0) {
@@ -1260,12 +1334,108 @@ export default function EditQuotation() {
                                                 <span className="text-sm text-red-500">{validationErrors.employee_id}</span>
                                             )}
                                         </div>
+                                        
+                                        <div>
+                                            <Label>Select Island</Label>
+                                            <CustomAsyncSelect
+                                                placeholder="Select Island..."
+                                                value={selectedIsland}
+                                                error={validationErrors.island_id}
+                                                defaultOptions={islandOptions}
+                                                loadOptions={handleIslandInputChange}
+                                                onMenuScrollToBottom={handleIslandMenuScrollToBottom}
+                                                isLoading={islandPagination.loading}
+                                                noOptionsMessage={() => "No islands found"}
+                                                loadingMessage={() => "Loading islands..."}
+                                                isSearchable={true}
+                                                inputValue={islandInputValue}
+                                                onInputChange={(inputValue) => {
+                                                    handleIslandInputChange(inputValue);
+                                                }}
+                                                onChange={async (option: any) => {
+                                                    setSelectedIsland(option);
+                                                    handleInputChange('island_id', option?.value || '');
+                                                    
+                                                    if (option?.value) {
+                                                        // Fetch new accessories for the selected island
+                                                        try {
+                                                            const response = await QuotationService.getQuotationAccessories(option.value);
+                                                            
+                                                            if (response.data && response.data.status && response.data.data) {
+                                                                const accessories = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
+                                                                
+                                                                // Transform accessories to QuotationItemAccessory format
+                                                                const transformedAccessories = accessories.map(accessory => ({
+                                                                    accessory_id: accessory.accessory_id,
+                                                                    accessory_part_number: accessory.accessory_part_number,
+                                                                    accessory_part_name: accessory.accessory_part_name,
+                                                                    accessory_brand: accessory.accessory_brand || '',
+                                                                    accessory_specification: accessory.accessory_specification || '',
+                                                                    quantity: accessory.accessories_island_detail_quantity || 1,
+                                                                    description: accessory.accessory_description || '',
+                                                                    accessory_description: accessory.accessory_description || '',
+                                                                    accessory_remark: accessory.accessory_remark || '',
+                                                                    accessory_region: accessory.accessory_region || ''
+                                                                }));
+                                                                
+                                                                // Update accessories in all existing quotation items
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    manage_quotation_item_accessories: transformedAccessories,
+                                                                    manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                                                        ...item,
+                                                                        manage_quotation_item_accessories: transformedAccessories
+                                                                    }))
+                                                                }));
+                                                                
+                                                                toast.success(`Accessories updated for ${transformedAccessories.length} items based on selected island`);
+                                                            } else {
+                                                                // Clear accessories if no data
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    manage_quotation_item_accessories: [],
+                                                                    manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                                                        ...item,
+                                                                        manage_quotation_item_accessories: []
+                                                                    }))
+                                                                }));
+                                                                toast.success('No accessories found for selected island');
+                                                            }
+                                                        } catch (error: any) {
+                                                            console.error('Error fetching accessories by island:', error);
+                                                            toast.error('Failed to load accessories for selected island');
+                                                            // Clear accessories on error
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                manage_quotation_item_accessories: [],
+                                                                manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                                                    ...item,
+                                                                    manage_quotation_item_accessories: []
+                                                                }))
+                                                            }));
+                                                        }
+                                                    } else {
+                                                        // Clear accessories when no island selected
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            manage_quotation_item_accessories: [],
+                                                            manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                                                ...item,
+                                                                manage_quotation_item_accessories: []
+                                                            }))
+                                                        }));
+                                                    }
+                                                }}
+                                            />
+                                            {validationErrors.island_id && (
+                                                <span className="text-sm text-red-500">{validationErrors.island_id}</span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
                             </div>
-                            
-                            <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-2 space-y-3">
+                            <div className="bg-white rounded-2xl shadow-sm p-6 lg:col-span-2 space-y-3">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">Beneficiary Details</h2>
                                 {/* GET BANK */}
                                 <div>
@@ -1287,7 +1457,7 @@ export default function EditQuotation() {
                                         }}
                                         onChange={(option: any) => {
                                             setSelectedBank(option);
-                                            handleBankChange(option);
+                                            handleInputChange('bank_account_id', option?.value || '');
                                         }}
                                     />
                                     {validationErrors.bank_account_id && (
@@ -1337,8 +1507,14 @@ export default function EditQuotation() {
                         <div className='md:grid-cols-5 grid gap-6'>
 
                             {/* Products Section */}
-                            <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5 ">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Products</h2>
+                            <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5 col-span-1">
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 pb-6 relative">
+                                    Products
+                                    
+                                    {!formData.island_id && (
+                                        <span className="text-sm text-orange-500 font-primary italic mt-1 block absolute bottom-0">Please select an island first to add products</span>
+                                    )}
+                                </h2>
                                 
                                 {/* Add Product */}
                                 <div className="flex gap-4 mb-6">
@@ -1380,7 +1556,7 @@ export default function EditQuotation() {
                                         type="button" 
                                         onClick={addProductItem} 
                                         className="flex items-center gap-2"
-                                        disabled={!selectedProduct}
+                                        disabled={!selectedProduct || !formData.island_id}
                                     >
                                         <MdAdd size={16} />
                                         Add Product
@@ -1486,19 +1662,10 @@ export default function EditQuotation() {
                                             onKeyPress={handleKeyPress}
                                             value={(
                                                 formData.manage_quotation_items.reduce((sum: number, item) => sum + (parseFloat(item.total) || 0), 0)
-                                                // (parseFloat(formData.manage_quotation_delivery_fee || '0') || 0) +
-                                                // (parseFloat(formData.manage_quotation_other || '0') || 0)
                                             ).toLocaleString('id-ID')}
                                             readonly={true}
                                             className="bg-gray-100 cursor-not-allowed"
                                         />
-                                        {/* <div className="text-lg font-medium">
-                                            {(
-                                                formData.manage_quotation_items.reduce((sum: number, item) => sum + (parseFloat(item.total) || 0), 0) +
-                                                (parseFloat(formData.manage_quotation_delivery_fee || '0') || 0) +
-                                                (parseFloat(formData.manage_quotation_other || '0') || 0)
-                                            ).toLocaleString('id-ID')}
-                                        </div> */}
                                     </div>
 
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -1536,9 +1703,6 @@ export default function EditQuotation() {
                                             readonly={true}
                                             className="bg-gray-100 cursor-not-allowed"
                                         />
-                                        {/* <div className="text-lg font-medium">
-                                            {(parseFloat(formData.manage_quotation_ppn || '0')).toLocaleString('id-ID')}
-                                        </div> */}
                                     </div>
 
                                     {/* Delivery Fee */}
@@ -1577,9 +1741,6 @@ export default function EditQuotation() {
                                             readonly={true}
                                             className="font-bold text-lg cursor-not-allowed"
                                         />
-                                        {/* <div className="text-xl font-bold text-green-600">
-                                            {(parseFloat(calculateGrandTotal(formData).grandTotal)).toLocaleString('id-ID')}
-                                        </div> */}
                                     </div>
 
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -1612,9 +1773,6 @@ export default function EditQuotation() {
                                             readonly={true}
                                             className="border-[#34c759] cursor-not-allowed"
                                         />
-                                        {/* <div className="text-lg font-medium">
-                                            {(parseFloat(formData.manage_quotation_payment_nominal || '0')).toLocaleString('id-ID')}
-                                        </div> */}
                                     </div>
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
                                         <Label className='text-end mb-0'>
@@ -1693,37 +1851,6 @@ export default function EditQuotation() {
                                 </div>
                             </div>
                         </div>
-                        
-
-                        {/* Basic Information */}
-                        {/* <div className="bg-white rounded-2xl shadow-sm p-6">
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <Label htmlFor="manage_quotation_payment_presentase">Down Payment Percentage (%)</Label>
-                                    <Input
-                                        type="text"
-                                        onKeyPress={handleKeyPress}
-                                        min="0"
-                                        max="100"
-                                        value={formData.manage_quotation_payment_presentase}
-                                        onChange={(e) => handleInputChange('manage_quotation_payment_presentase', e.target.value)}
-                                        placeholder="50"
-                                    />
-                                </div>
-                                <div className="md:col-span-2">
-                                    <Label htmlFor="manage_quotation_description">Description</Label>
-                                    <textarea
-                                        id="manage_quotation_description"
-                                        rows={3}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        value={formData.manage_quotation_description}
-                                        onChange={(e) => handleInputChange('manage_quotation_description', e.target.value)}
-                                        placeholder="Enter quotation description..."
-                                    />
-                                </div>
-                            </div>
-                        </div> */}
 
                         {/* Form Actions */}
                         <div className="flex justify-end gap-4 p-6 bg-white rounded-2xl shadow-sm">
