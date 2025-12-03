@@ -43,7 +43,7 @@ export const useCustomerSelect = () => {
             if (response.success) {
                 const newOptions = response.data.data.map((customer: Customer) => ({
                     value: customer.customer_id,
-                    label: customer.customer_name
+                    label: customer.customer_name + ' - ' + customer.contact_person
                 }));
 
                 const updatedOptions = reset ? newOptions : [...loadedOptions, ...newOptions];

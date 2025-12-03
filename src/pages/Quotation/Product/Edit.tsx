@@ -176,10 +176,6 @@ export default function EditProduct() {
             errors.market_price = 'Harga pasar wajib diisi';
         }
 
-        if (!formData.selling_price_star_1.trim()) {
-            errors.selling_price_star_1 = 'Harga Star 1 wajib diisi';
-        }
-
         if (Object.keys(errors).length > 0) {
             return false;
         }
@@ -506,7 +502,7 @@ export default function EditProduct() {
 
                                 <div>
                                     <Label htmlFor="selling_price_star_1">
-                                        Harga Star 1 <span className="text-red-500">*</span>
+                                        Harga Star 1
                                     </Label>
                                     <Input
                                         id="selling_price_star_1"
@@ -515,14 +511,8 @@ export default function EditProduct() {
                                         value={formData.selling_price_star_1}
                                         onChange={(e) => handleNumberInputChange('selling_price_star_1', e.target.value)}
                                         onKeyPress={handleKeyPress}
-                                        error={!!validationErrors.selling_price_star_1}
                                         placeholder="0"
                                     />
-                                    {validationErrors.selling_price_star_1 && (
-                                        <p className="mt-1 text-sm text-red-600">
-                                            {validationErrors.selling_price_star_1}
-                                        </p>
-                                    )}
                                 </div>
 
                                 <div>

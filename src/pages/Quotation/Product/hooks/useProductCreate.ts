@@ -105,10 +105,6 @@ export const useCreateProduct = () => {
             errors.market_price = 'Harga pasar wajib diisi';
         }
 
-        if (!formData.selling_price_star_1.trim()) {
-            errors.selling_price_star_1 = 'Harga Star 1 wajib diisi';
-        }
-
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
             return false;

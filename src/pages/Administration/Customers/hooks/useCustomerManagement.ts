@@ -15,7 +15,7 @@ export const useCustomerManagement = () => {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     
     // Get customers hook
-    const { customers, pagination, loading, error, fetchCustomers, deleteCustomer } = useCustomers();
+    const { customers, pagination, loading, error, fetchCustomers, deleteCustomer, handleSearchChange: updateSearch, handleSortChange: updateSort } = useCustomers();
 
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; customerId?: string; }>({ show: false });
     // Debounce search term
@@ -26,20 +26,20 @@ export const useCustomerManagement = () => {
 
         return () => clearTimeout(handler);
     }, [searchTerm]);
-
-    // Load data saat component mount atau filter berubah (BUKAN pagination)
+    // Update search when debounced search changes
     useEffect(() => {
-        fetchCustomers(currentPage, itemsPerPage, false);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debouncedSearch, sortOrder]);
+        updateSearch(debouncedSearch);
+    }, [debouncedSearch, updateSearch]);
+    
+    useEffect(() => {
+        updateSort(sortOrder);
+    }, [sortOrder, updateSort]);
 
-    // Load initial data
     useEffect(() => {
         fetchCustomers(1, 10, false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Handler untuk pagination - langsung panggil fetchCustomers
     const handlePageChange = useCallback((page: number) => {
         setCurrentPage(page);
         fetchCustomers(page, itemsPerPage, false);
@@ -53,22 +53,21 @@ export const useCustomerManagement = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Handler untuk search
     const handleSearchChange = useCallback((value: string) => {
         setSearchTerm(value);
-        setCurrentPage(1); // Reset ke halaman pertama saat search
+        setCurrentPage(1);
     }, []);
 
     const handleManualSearch = useCallback(() => {
         setCurrentPage(1);
-        fetchCustomers(1, itemsPerPage, false); // Don't append data for search
-    }, [searchTerm, sortOrder, itemsPerPage, fetchCustomers]);
+        setDebouncedSearch(searchTerm);
+    }, [searchTerm]);
 
     const handleClearFilters = useCallback(() => {
         setSearchTerm('');
+        setDebouncedSearch('');
         setCurrentPage(1);
-        fetchCustomers(1, itemsPerPage, false); // Don't append data for clear filters
-    }, [sortOrder, itemsPerPage, fetchCustomers]);
+    }, []);
 
     // Handler untuk sort change
     const handleFilterChange = useCallback((key: string, value: string) => {

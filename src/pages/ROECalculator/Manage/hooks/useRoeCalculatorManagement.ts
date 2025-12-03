@@ -88,7 +88,7 @@ export const useRoeCalculatorManagement = () => {
     }, []);
 
     const handleEdit = useCallback((roeCalculator: any) => {
-        navigate(`/roe-roa-calculator/manage/${roeCalculator.id}`);
+        navigate(`/roe-roa-calculator/manage/edit/${roeCalculator.id}`);
     }, [navigate]);
 
     const handleDelete = useCallback((roeCalculator: any) => {

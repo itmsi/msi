@@ -61,7 +61,6 @@ const navItems: NavItem[] = [
             { name: "Term Condition", path: "/quotations/term-condition", allowedRoles: ['TNC Quotation'], },
             {
                 name: "Administration",
-                allowedRoles: ['Customer Quotation', 'Bank Quotation', 'Island'],
                 subItems: [
                     { 
                         name: "Customers", 
@@ -76,7 +75,7 @@ const navItems: NavItem[] = [
                     { 
                         name: "Islands", 
                         path: "/quotations/administration/islands", 
-                        allowedRoles: ['Bank Quotation']
+                        allowedRoles: ['Island']
                     }
                 ],
             },
@@ -362,6 +361,23 @@ const AppSidebar: React.FC = () => {
                                     {filteredSubItems.map((subItem, subIndex) => {
                                         const subItemKey = `${navKey}:${subItem.path || subItem.name}:${subIndex}`;
                                         const hasNestedSubItems = subItem.subItems && subItem.subItems.length > 0;
+                                        
+                                        // Filter nested items untuk mengecek apakah ada yang diizinkan
+                                        const allowedNestedItems = hasNestedSubItems ? subItem.subItems?.filter((nestedItem) => {
+                                            if (!authMenu || authMenu.length === 0) {
+                                                return true;
+                                            }
+                                            if (!nestedItem.allowedRoles || nestedItem.allowedRoles.length === 0) {
+                                                return true;
+                                            }
+                                            return nestedItem.allowedRoles.some(name => allowedMenuNames.includes(name));
+                                        }) : [];
+                                        
+                                        // Jika ada nested items tapi semua tidak diizinkan, skip item ini
+                                        if (hasNestedSubItems && (!allowedNestedItems || allowedNestedItems.length === 0)) {
+                                            return null;
+                                        }
+                                        
                                         const isNestedOpen = openNestedSubmenu === subItemKey;
                                         
                                         return (
@@ -383,7 +399,7 @@ const AppSidebar: React.FC = () => {
                                                 </button>
                                                 {isNestedOpen && (
                                                     <ul className="mt-1 space-y-1 ml-4">
-                                                        {subItem.subItems?.map((nestedItem, nestedIndex) => {
+                                                        {allowedNestedItems?.map((nestedItem, nestedIndex) => {
                                                             if (!nestedItem.path) return null;
                                                             return (
                                                             <li key={`${subItemKey}:nested:${nestedIndex}`}>

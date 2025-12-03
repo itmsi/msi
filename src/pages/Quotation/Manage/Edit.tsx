@@ -1388,6 +1388,9 @@ export default function EditQuotation() {
                                                                     }))
                                                                 }));
                                                                 
+                                                                // Clear unsaved product changes to force refresh of ProductDetailDrawer with new accessories
+                                                                setUnsavedProductChanges({});
+                                                                
                                                                 toast.success(`Accessories updated for ${transformedAccessories.length} items based on selected island`);
                                                             } else {
                                                                 // Clear accessories if no data
@@ -1399,6 +1402,10 @@ export default function EditQuotation() {
                                                                         manage_quotation_item_accessories: []
                                                                     }))
                                                                 }));
+                                                                
+                                                                // Clear unsaved product changes to force refresh
+                                                                setUnsavedProductChanges({});
+                                                                
                                                                 toast.success('No accessories found for selected island');
                                                             }
                                                         } catch (error: any) {
@@ -1413,6 +1420,9 @@ export default function EditQuotation() {
                                                                     manage_quotation_item_accessories: []
                                                                 }))
                                                             }));
+                                                            
+                                                            // Clear unsaved product changes to force refresh
+                                                            setUnsavedProductChanges({});
                                                         }
                                                     } else {
                                                         // Clear accessories when no island selected
@@ -1424,6 +1434,9 @@ export default function EditQuotation() {
                                                                 manage_quotation_item_accessories: []
                                                             }))
                                                         }));
+                                                        
+                                                        // Clear unsaved product changes to force refresh
+                                                        setUnsavedProductChanges({});
                                                     }
                                                 }}
                                             />

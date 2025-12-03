@@ -1,12 +1,11 @@
 import PageMeta from "@/components/common/PageMeta";
 import { PermissionGate } from "@/components/common/PermissionComponents";
 import Button from "@/components/ui/button/Button";
-import CustomDataTable, { createDateColumn } from "@/components/ui/table";
+import CustomDataTable, { createActionsColumn } from "@/components/ui/table";
 import { TableColumn } from "react-data-table-component";
-import { MdAdd, MdClear, MdSearch } from "react-icons/md";
+import { MdAdd, MdClear, MdDeleteOutline, MdEdit, MdSearch } from "react-icons/md";
 import { useNavigate } from "react-router";
 import { RorEntity } from "./types/roecalculator";
-import { tableDateFormat } from "@/helpers/generalHelper";
 import { useRoeCalculatorManagement } from "./hooks/useRoeCalculatorManagement";
 import { useMemo } from "react";
 import Input from "@/components/form/input/InputField";
@@ -37,7 +36,7 @@ export default function ManageRor() {
         handleClearFilters,
         handleFilterChange,
         handleEdit,
-        // handleDelete,
+        handleDelete,
         // confirmdeleteRorCalculator,
         // cancelDelete 
     } = useRoeCalculatorManagement();
@@ -71,13 +70,24 @@ export default function ManageRor() {
                     <div className="block text-sm text-gray-500">{row.roe_individual_percentage}</div>
                     <div className="block text-sm text-gray-500">{row.roa_individual_percentage}</div>
                 </div>
-            ),
+            )
         },
-        createDateColumn(
-            'Created', 
-            'created_at', 
-            tableDateFormat
-        )
+        createActionsColumn([
+            {
+                icon: MdEdit,
+                onClick: handleEdit,
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                tooltip: 'Edit',
+                permission: 'update'
+            },
+            {
+                icon: MdDeleteOutline,
+                onClick: handleDelete,
+                className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                tooltip: 'Delete',
+                permission: 'delete'
+            }
+        ])
     ];
     const SearchAndFilters = useMemo(() => (
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">

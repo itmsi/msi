@@ -57,7 +57,7 @@ const ManageProduct: React.FC = () => {
             cell: (row) => (
                 <div className=" items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">
-                        {row.msi_model} - {row.segment}
+                        {row.msi_product} - {row.msi_model} - {row.segment}
                     </div>
                     <div className="block text-sm text-gray-500">{`${row.engine} - ${row.wheel_no}`}</div>
                     <div className="block text-sm text-gray-500">{`${row.horse_power}`}</div>

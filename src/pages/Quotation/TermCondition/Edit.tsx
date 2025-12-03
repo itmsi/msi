@@ -7,7 +7,8 @@ import PageMeta from "@/components/common/PageMeta";
 import { PermissionGate } from "@/components/common/PermissionComponents";
 import { TermConditionService } from "./services/termconditionService";
 import { TermConditionFormDataEdit } from "./types/termcondition";
-import { FaBold, FaItalic, FaListOl, FaListUl, FaQuoteLeft, FaStrikethrough, FaUnderline } from "react-icons/fa6";
+// import { FaBold, FaItalic, FaListOl, FaListUl, FaQuoteLeft, FaStrikethrough, FaUnderline } from "react-icons/fa6";
+import WysiwygEditor from "@/components/form/editor";
 
 const EditTermCondition: React.FC = () => {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ const EditTermCondition: React.FC = () => {
     // State for form data
     const [formData, setFormData] = useState<TermConditionFormDataEdit>({
         term_content_title: '',
-        term_content_payload: ''
+        term_content_directory: ''
     });
 
     // Load term condition data when component mounts
@@ -42,7 +43,7 @@ const EditTermCondition: React.FC = () => {
                 const termCondition = response.data;
                 setFormData({
                     term_content_title: termCondition.term_content_title || '',
-                    term_content_payload: termCondition.term_content_payload || ''
+                    term_content_directory: termCondition.term_content_payload || ''
                 });
             } else {
                 setError('Term condition not found');
@@ -65,7 +66,7 @@ const EditTermCondition: React.FC = () => {
     };
 
     const updateEditorContent = (content: string) => {
-        setFormData(prev => ({ ...prev, term_content_payload: content }));
+        setFormData(prev => ({ ...prev, term_content_directory: content }));
         setError(null);
     };
 
@@ -78,7 +79,7 @@ const EditTermCondition: React.FC = () => {
             return;
         }
 
-        if (!formData.term_content_payload.trim()) {
+        if (!formData.term_content_directory.trim()) {
             setError('Content is required');
             return;
         }
@@ -111,9 +112,6 @@ const EditTermCondition: React.FC = () => {
             </div>
         );
     }
-console.log({
-    error
-});
 
     return (
         <>
@@ -170,134 +168,14 @@ console.log({
                                 </div>
 
                                 {/* Content */}
-                                <div className="border border-gray-300 rounded-lg bg-gray-50">
-                                    {/* Toolbar */}
-                                    <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200">
-                                        <div className="flex flex-wrap items-center divide-gray-200 sm:divide-x rtl:divide-x-reverse">
-                                            
-                                            {/* Format buttons group */}
-                                            <div className="flex items-center space-x-1 rtl:space-x-reverse sm:px-4">
-                                                <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100" 
-                                                    onClick={() => {
-                                                        const editor = document.getElementById('wysiwyg-editor');
-                                                        if (editor) {
-                                                            editor.focus();
-                                                            document.execCommand('bold', false, '');
-                                                        }
-                                                    }}
-                                                    title="Bold">
-                                                    <FaBold />
-                                                </button>
-                                                <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                    onClick={() => {
-                                                        const editor = document.getElementById('wysiwyg-editor');
-                                                        if (editor) {
-                                                            editor.focus();
-                                                            document.execCommand('italic', false, '');
-                                                        }
-                                                    }}
-                                                    title="Italic">
-                                                    <FaItalic />
-                                                </button>
-                                                <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                    onClick={() => {
-                                                        const editor = document.getElementById('wysiwyg-editor');
-                                                        if (editor) {
-                                                            editor.focus();
-                                                            document.execCommand('underline', false, '');
-                                                        }
-                                                    }}
-                                                    title="Underline">
-                                                    <FaUnderline />
-                                                </button>
-                                                <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                    onClick={() => {
-                                                        const editor = document.getElementById('wysiwyg-editor');
-                                                        if (editor) {
-                                                            editor.focus();
-                                                            document.execCommand('strikeThrough', false, '');
-                                                        }
-                                                    }}
-                                                    title="Strikethrough">
-                                                    <FaStrikethrough />
-                                                </button>
-                                            </div>
-                                            
-                                            {/* List buttons group */}
-                                            <div className="flex items-center space-x-1 rtl:space-x-reverse sm:px-4">
-                                                <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                    onClick={() => {
-                                                        const editor = document.getElementById('wysiwyg-editor');
-                                                        if (editor) {
-                                                            editor.focus();
-                                                            document.execCommand('insertUnorderedList', false, '');
-                                                        }
-                                                    }}
-                                                    title="Bullet List">
-                                                    <FaListUl />
-                                                </button>
-                                                <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                    onClick={() => {
-                                                        const editor = document.getElementById('wysiwyg-editor');
-                                                        if (editor) {
-                                                            editor.focus();
-                                                            document.execCommand('insertOrderedList', false, '');
-                                                        }
-                                                    }}
-                                                    title="Numbered List">
-                                                    <FaListOl />
-                                                </button>
-                                            </div>
-
-                                            {/* Insert elements group */}
-                                            <div className="flex items-center space-x-1 rtl:space-x-reverse sm:ps-4">
-                                                <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                    onClick={() => {
-                                                        const editor = document.getElementById('wysiwyg-editor');
-                                                        if (editor) {
-                                                            editor.focus();
-                                                            document.execCommand('insertHorizontalRule', false, '');
-                                                        }
-                                                    }}
-                                                    title="Insert Horizontal Rule">
-                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                        <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"></path>
-                                                    </svg>
-                                                </button>
-                                                <button type="button" className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100"
-                                                    onClick={() => {
-                                                        const editor = document.getElementById('wysiwyg-editor');
-                                                        if (editor) {
-                                                            editor.focus();
-                                                            document.execCommand('insertHTML', false, '<blockquote style="border-left: 4px solid #d1d5db; margin: 1rem 0; padding-left: 1rem; color: #6b7280; font-style: italic;">Quote text here...</blockquote>');
-                                                        }
-                                                    }}
-                                                    title="Insert Quote">
-                                                        <FaQuoteLeft />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {/* Content editable area */}
-                                    <div className="px-4 py-2 bg-white rounded-b-lg">
-                                        <div
-                                            id="wysiwyg-editor"
-                                            contentEditable
-                                            className="block w-full px-0 text-sm text-gray-800 bg-white border-0 focus:ring-0 min-h-[200px] outline-none wysiwyg-editor"
-                                            suppressContentEditableWarning={true}
-                                            dangerouslySetInnerHTML={{ __html: formData.term_content_payload }}
-                                            onInput={(e) => {
-                                                const content = e.currentTarget.innerHTML;
-                                                updateEditorContent(content);
-                                            }}
-                                            onPaste={(e) => {
-                                                e.preventDefault();
-                                                const text = e.clipboardData.getData('text/plain');
-                                                document.execCommand('insertText', false, text);
-                                            }}
-                                        />
-                                    </div>
-                                </div>
+                                <WysiwygEditor
+                                    value={formData.term_content_directory}
+                                    onChange={updateEditorContent}
+                                    placeholder="Enter terms and conditions content..."
+                                    minHeight="200px"
+                                    disabled={saving}
+                                    error={error && !formData.term_content_directory.trim() ? 'Content is required' : undefined}
+                                />
                             </div>
                         </div>
 

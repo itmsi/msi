@@ -51,10 +51,10 @@ export interface TermConditionValidationErrors {
 
 export interface TermConditionFormDataEdit {
     term_content_title: string;
-    term_content_payload: string;
+    term_content_directory: string;
 }
 
 export interface TermConditionValidationErrorsEdit {
     term_content_title?: string;
-    term_content_payload?: string;
+    term_content_directory?: string;
 }

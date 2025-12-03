@@ -100,7 +100,7 @@ export default function CreateCustomer() {
             
             if (response.success) {
                 toast.success('Customer created successfully');
-                navigate('/customers');
+                navigate('/quotations/administration/customers');
             }
         } catch (error: any) {
             console.error('Error creating customer:', error);

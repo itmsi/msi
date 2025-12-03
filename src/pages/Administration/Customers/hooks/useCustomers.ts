@@ -13,7 +13,8 @@ export const useCustomers = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [filters, setFilters] = useState({ 
-        search: '' 
+        search: '',
+        sort_order: 'desc' as 'asc' | 'desc'
     });
 
     // Debounce timer ref
@@ -27,7 +28,8 @@ export const useCustomers = () => {
             const requestParams: Partial<CustomerRequest> = {
                 page: page || pagination.page,
                 limit: limit || pagination.limit,
-                search: filters.search
+                search: filters.search,
+                sort_order: filters.sort_order
             };
             
             const response = await CustomerService.getCustomers(requestParams);
@@ -88,25 +90,19 @@ export const useCustomers = () => {
         }
     }, []);
 
-    // Debounced filter change handler
     const handleFilterChangeDebounced = useCallback((filterKey: string, value: string) => {
-        // Clear existing timer
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
 
-        // Set new timer
         debounceTimer.current = setTimeout(() => {
             setFilters(prev => ({ ...prev, [filterKey]: value }));
-            
-            // Reset pagination to first page when filtering
             setPagination(prev => ({ ...prev, page: 1 }));
-            
-            // Call API directly with new search value to avoid stale state
             const requestParams: Partial<CustomerRequest> = {
                 page: 1,
                 limit: pagination.limit,
-                search: filterKey === 'search' ? value : filters.search
+                search: filterKey === 'search' ? value : filters.search,
+                sort_order: filterKey === 'sort_order' ? value as 'asc' | 'desc' : filters.sort_order
             };
             
             setLoading(true);
@@ -131,9 +127,42 @@ export const useCustomers = () => {
         }, 500);
     }, [pagination.limit, filters.search]);
 
-    // Handle search change
     const handleSearchChange = useCallback((search: string) => {
-        handleFilterChangeDebounced('search', search);
+        setFilters(prev => ({ ...prev, search }));
+        
+        setPagination(prev => ({ ...prev, page: 1 }));
+        
+        const requestParams: Partial<CustomerRequest> = {
+            page: 1,
+            limit: pagination.limit,
+            search: search,
+            sort_order: filters.sort_order
+        };
+        
+        setLoading(true);
+        setError(null);
+        
+        CustomerService.getCustomers(requestParams)
+            .then(response => {
+                if (response.success) {
+                    setCustomers(response.data.data);
+                    setPagination(response.data.pagination);
+                } else {
+                    setError(response.message || 'Failed to fetch customers');
+                }
+            })
+            .catch(err => {
+                setError('Something went wrong while fetching customers');
+                console.error('Fetch customers error:', err);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }, [pagination.limit, filters.sort_order]);
+
+    // Handle sort change
+    const handleSortChange = useCallback((sort_order: 'asc' | 'desc') => {
+        handleFilterChangeDebounced('sort_order', sort_order);
     }, [handleFilterChangeDebounced]);
 
     return {
@@ -145,5 +174,6 @@ export const useCustomers = () => {
         updateCustomer,
         deleteCustomer,
         handleSearchChange,
+        handleSortChange,
     };
 };

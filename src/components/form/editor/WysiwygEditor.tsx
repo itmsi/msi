@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { FaBold, FaItalic, FaUnderline, FaStrikethrough, FaListOl, FaListUl, FaQuoteLeft } from "react-icons/fa";
+import { FaListOl, FaListUl, FaQuoteLeft } from "react-icons/fa";
+// import { FaBold, FaItalic, FaUnderline, FaStrikethrough, FaListOl, FaListUl, FaQuoteLeft } from "react-icons/fa";
 
 interface WysiwygEditorProps {
     value: string;
@@ -74,7 +75,7 @@ const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
                     <div className="flex flex-wrap items-center divide-gray-200 sm:divide-x rtl:divide-x-reverse">
                         
                         {/* Format buttons group */}
-                        <div className="flex items-center space-x-1 rtl:space-x-reverse sm:px-4">
+                        {/* <div className="flex items-center space-x-1 rtl:space-x-reverse sm:px-4">
                             <button
                                 type="button"
                                 className="p-2 text-gray-500 rounded cursor-pointer hover:text-gray-900 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -111,7 +112,7 @@ const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
                             >
                                 <FaStrikethrough />
                             </button>
-                        </div>
+                        </div> */}
                         
                         {/* List buttons group */}
                         <div className="flex items-center space-x-1 rtl:space-x-reverse sm:px-4">

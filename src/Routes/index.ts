@@ -46,9 +46,9 @@ const CreateTNC = lazy(() => import('@/pages/Quotation/TermCondition/Create'));
 const TNCManage = lazy(() => import('@/pages/Quotation/TermCondition/Manage'));
 const TNCEdit = lazy(() => import('@/pages/Quotation/TermCondition/Edit'));
 
-const CreateROECalculator = lazy(() => import('@/pages/ROECalculator/Manage/Manage'));
+const CreateROECalculator = lazy(() => import('@/pages/ROECalculator/Create'));
 const ROECalculatorManage = lazy(() => import('@/pages/ROECalculator/Manage/Manage'));
-const ROECalculatorEdit = lazy(() => import('@/pages/ROECalculator/Manage/Manage'));
+const ROECalculatorEdit = lazy(() => import('@/pages/ROECalculator/Edit'));
 const ROESettings = lazy(() => import('@/pages/ROECalculator/Settings/Settings'));
 
 export type TAppRoute = {
@@ -282,6 +282,7 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Island'],
         component: ManageIsland,
+        requiredPermissions: ['read'],
         layout: AppLayout,
     },
     
@@ -413,11 +414,20 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/roe-roa-calculator/manage/:id',
+        path: '/roe-roa-calculator/manage/edit/:calculatorId',
         name: 'Manage ROA ROE Calculate',
         isProtected: true,
         roles: ['Manage ROA ROE Calculate'],
         requiredPermissions: ['update'],
+        component: ROECalculatorEdit,
+        layout: AppLayout,
+    },
+    {
+        path: '/roe-roa-calculator/manage/view/:id',
+        name: 'Manage ROA ROE Calculate',
+        isProtected: true,
+        roles: ['Manage ROA ROE Calculate'],
+        requiredPermissions: ['read'],
         component: ROECalculatorEdit,
         layout: AppLayout,
     },

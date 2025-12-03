@@ -136,7 +136,7 @@ export default function EditAccessories() {
                                     />
                                 </div>
 
-                                <div className="col-span-2">
+                                {/* <div className="col-span-2">
                                     <Label htmlFor="accessory_region">Region</Label>
                                     <Input
                                         id="accessory_region"
@@ -146,7 +146,7 @@ export default function EditAccessories() {
                                         onChange={(e) => handleChange('accessory_region', e.target.value)}
                                         placeholder="Masukkan region"
                                     />
-                                </div>
+                                </div> */}
 
                                 <div className="col-span-2">
                                     <Label htmlFor="accessory_remark">Remark</Label>

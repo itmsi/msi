@@ -918,7 +918,9 @@ export default function CreateQuotation() {
             toast.error(error.message || 'Failed to save quotation');
         }
     };
+    const romanMonths = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
 
+    const monthRoman = romanMonths[new Date().getMonth()];
     return (
         <>
             <PageMeta
@@ -957,7 +959,7 @@ export default function CreateQuotation() {
                                             <Input
                                                 id="quotation_number"
                                                 type="text"
-                                                value={`###/IEC-MSI/${new Date().getFullYear()}`}
+                                                value={`###/IEC-MSI/${monthRoman}/${new Date().getFullYear()}`}
                                                 disabled={true}
                                             />
                                         </div>

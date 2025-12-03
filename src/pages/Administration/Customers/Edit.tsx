@@ -66,12 +66,12 @@ export default function EditCustomer() {
                 });
             } else {
                 toast.error('Customer not found');
-                navigate('/quotation/administration/customers');
+                navigate('/quotations/administration/customers');
             }
         } catch (error: any) {
             console.error('Error loading customer:', error);
             toast.error('Failed to load customer data');
-            navigate('/quotation/administration/customers');
+            navigate('/quotations/administration/customers');
         } finally {
             setIsLoading(false);
         }
@@ -139,7 +139,7 @@ export default function EditCustomer() {
             
             if (response) {
                 toast.success('Customer updated successfully');
-                navigate('/quotation/administration/customers');
+                navigate('/quotations/administration/customers');
             }
         } catch (error: any) {
             console.error('Error updating customer:', error);

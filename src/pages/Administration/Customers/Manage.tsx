@@ -59,7 +59,7 @@ const ManageCustomers: React.FC = () => {
                             <div className="font-medium text-gray-900">
                                 {CustomerUtilityService.formatCustomerName(row.customer_name)}
                             </div>
-                            <div className="text-sm text-gray-500">{row.customer_email}</div>
+                            <div className="text-sm text-gray-500">{row?.contact_person ?? '-'}</div>
                         </div>
                     </div>
                 );

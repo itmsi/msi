@@ -323,36 +323,14 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         const parser = new DOMParser();
         const htmlDoc = parser.parseFromString(data.term_content_payload, 'text/html');
         
-        doc.setFontSize(9);
-        setFontSafe(doc, 'Futura', 'normal');
-        doc.setTextColor(0, 0, 0);
+        const maxTermWidth = termWidth;
 
-        const maxTermWidth = termWidth ;
-
-        const olItems = htmlDoc.querySelectorAll('ol li');
-        let itemNum = 1;
-        olItems.forEach((li) => {
-            const text = li.textContent?.trim() || '';
-            if (text) {
-                // Check if need new page before rendering item
-                if (termYPos + 10 > pageHeight - footerHeight - margin) {
-                    doc.addPage();
-                    addHeader();
-                    addFooter();
-                    termYPos = margin + headerHeight + 5;
-                    termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
-                }
-                
-                // Baris pertama dengan nomor
-                const numberPrefix = `${itemNum}. `;
-                const indentWidth = doc.getTextWidth(numberPrefix);
-                const wrappedText = doc.splitTextToSize(text, maxTermWidth - indentWidth);
-                doc.setTextColor(0, 0, 0);
-                doc.text(numberPrefix + wrappedText[0], margin, termYPos);
-                termYPos += 5;
-                
-                for (let i = 1; i < wrappedText.length; i++) {
-                    // Check if need new page for continuation lines
+        // Process all child nodes in order
+        const processNode = (node: Node): void => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.textContent?.trim();
+                if (text && text.length > 0) {
+                    // Check if need new page before rendering text
                     if (termYPos + 5 > pageHeight - footerHeight - margin) {
                         doc.addPage();
                         addHeader();
@@ -360,37 +338,161 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         termYPos = margin + headerHeight + 5;
                         termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
                     }
+                    
+                    doc.setFontSize(9);
                     doc.setTextColor(0, 0, 0);
-                    doc.text(wrappedText[i], margin + indentWidth, termYPos);
-                    termYPos += 5;
+                    setFontSafe(doc, 'Futura', 'normal');
+                    
+                    const wrappedText = doc.splitTextToSize(text, maxTermWidth);
+                    wrappedText.forEach((line: string) => {
+                        if (termYPos + 5 > pageHeight - footerHeight - margin) {
+                            doc.addPage();
+                            addHeader();
+                            addFooter();
+                            termYPos = margin + headerHeight + 5;
+                            termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
+                        }
+                        doc.text(line, margin, termYPos);
+                        termYPos += 5;
+                    });
                 }
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                const element = node as Element;
                 
-                itemNum++;
-            }
-        });
-
-        // Process div elements (paragraf penutup)
-        const divs = htmlDoc.querySelectorAll('div');
-        divs.forEach((div) => {
-            const text = div.textContent?.trim() || '';
-            if (text && text !== '' && !div.querySelector('br')) {
-                termYPos += 3;
-                const wrappedText = doc.splitTextToSize(text, maxTermWidth);
-                wrappedText.forEach((line: string) => {
-                    // Check if need new page for each line
-                    if (termYPos + 5 > pageHeight - footerHeight - margin) {
-                        doc.addPage();
-                        addHeader();
-                        addFooter();
-                        termYPos = margin + headerHeight + 5;
-                        termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
+                // Handle different HTML elements
+                if (element.tagName.toLowerCase() === 'b' || 
+                    element.tagName.toLowerCase() === 'u' || 
+                    element.tagName.toLowerCase() === 'i') {
+                    // Process bold/underline/italic headers
+                    const text = element.textContent?.trim();
+                    if (text) {
+                        // Check if need new page before rendering header
+                        if (termYPos + 8 > pageHeight - footerHeight - margin) {
+                            doc.addPage();
+                            addHeader();
+                            addFooter();
+                            termYPos = margin + headerHeight + 5;
+                            termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
+                        }
+                        
+                        doc.setFontSize(10);
+                        doc.setTextColor(0, 48, 97);
+                        setFontSafe(doc, 'Futura', 'bold');
+                        
+                        const wrappedText = doc.splitTextToSize(text, maxTermWidth);
+                        wrappedText.forEach((line: string) => {
+                            if (termYPos + 5 > pageHeight - footerHeight - margin) {
+                                doc.addPage();
+                                addHeader();
+                                addFooter();
+                                termYPos = margin + headerHeight + 5;
+                                termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
+                            }
+                            doc.text(line, margin, termYPos);
+                            termYPos += 5;
+                        });
+                        termYPos += 3; // Extra spacing after headers
                     }
-                    doc.setTextColor(0, 0, 0);
-                    doc.text(line, margin, termYPos);
-                    termYPos += 5;
-                });
+                } else if (element.tagName.toLowerCase() === 'ol') {
+                    // Process ordered lists
+                    const listItems = element.querySelectorAll('li');
+                    listItems.forEach((li, index) => {
+                        const text = li.textContent?.trim();
+                        if (text) {
+                            // Check if need new page before rendering item
+                            if (termYPos + 10 > pageHeight - footerHeight - margin) {
+                                doc.addPage();
+                                addHeader();
+                                addFooter();
+                                termYPos = margin + headerHeight + 5;
+                                termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
+                            }
+                            
+                            doc.setFontSize(9);
+                            doc.setTextColor(0, 0, 0);
+                            setFontSafe(doc, 'Futura', 'normal');
+                            
+                            // Numbered list item
+                            const numberPrefix = `${index + 1}. `;
+                            const indentWidth = doc.getTextWidth(numberPrefix);
+                            const wrappedText = doc.splitTextToSize(text, maxTermWidth - indentWidth);
+                            
+                            // First line with number
+                            doc.text(numberPrefix + wrappedText[0], margin, termYPos);
+                            termYPos += 5;
+                            
+                            // Continuation lines with indentation
+                            for (let i = 1; i < wrappedText.length; i++) {
+                                if (termYPos + 5 > pageHeight - footerHeight - margin) {
+                                    doc.addPage();
+                                    addHeader();
+                                    addFooter();
+                                    termYPos = margin + headerHeight + 5;
+                                    termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
+                                }
+                                doc.text(wrappedText[i], margin + indentWidth, termYPos);
+                                termYPos += 5;
+                            }
+                        }
+                    });
+                } else if (element.tagName.toLowerCase() === 'div') {
+                    // Process div content (but skip if it only contains lists or other processed elements)
+                    const hasOnlyProcessableChildren = Array.from(element.children).every(child => 
+                        ['ol', 'ul', 'b', 'u', 'i', 'br'].includes(child.tagName.toLowerCase())
+                    );
+                    
+                    if (!hasOnlyProcessableChildren) {
+                        const text = element.textContent?.trim();
+                        if (text && text.length > 0) {
+                            // Check for line breaks and treat as paragraphs
+                            const parts = text.split(/\s*-\s*/); // Split on dash for bullet points
+                            
+                            parts.forEach((part, index) => {
+                                const trimmedPart = part.trim();
+                                if (trimmedPart) {
+                                    // Check if need new page
+                                    if (termYPos + 5 > pageHeight - footerHeight - margin) {
+                                        doc.addPage();
+                                        addHeader();
+                                        addFooter();
+                                        termYPos = margin + headerHeight + 5;
+                                        termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
+                                    }
+                                    
+                                    doc.setFontSize(9);
+                                    doc.setTextColor(0, 0, 0);
+                                    setFontSafe(doc, 'Futura', 'normal');
+                                    
+                                    // If it's a bullet point (not the first part), add bullet
+                                    const textToRender = index > 0 && parts.length > 1 ? `• ${trimmedPart}` : trimmedPart;
+                                    const wrappedText = doc.splitTextToSize(textToRender, maxTermWidth - (index > 0 ? 10 : 0));
+                                    
+                                    wrappedText.forEach((line: string) => {
+                                        if (termYPos + 5 > pageHeight - footerHeight - margin) {
+                                            doc.addPage();
+                                            addHeader();
+                                            addFooter();
+                                            termYPos = margin + headerHeight + 5;
+                                            termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
+                                        }
+                                        doc.text(line, margin + (index > 0 ? 10 : 0), termYPos);
+                                        termYPos += 5;
+                                    });
+                                }
+                            });
+                        }
+                    } else {
+                        // Process children elements
+                        Array.from(element.childNodes).forEach(child => processNode(child));
+                    }
+                } else if (element.tagName.toLowerCase() === 'br') {
+                    termYPos += 3; // Add line break spacing
+                }
             }
-        });
+        };
+
+        // Process all body content
+        Array.from(htmlDoc.body.childNodes).forEach(node => processNode(node));
     }
     
     // Kembali ke halaman awal untuk render Financial Summary
@@ -407,8 +509,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     const financialData = [
         ['Subtotal:', formatCurrency(subtotal.toString())],
         [`PPN (${data.manage_quotation_ppn}%):`, formatCurrency(ppnAmount.toString())],
-        ['Biaya Pengiriman:', formatCurrency(data.manage_quotation_delivery_fee)],
-        ['Lain-lain:', formatCurrency(data.manage_quotation_other)],
+        // ['Biaya Pengiriman:', formatCurrency(data.manage_quotation_delivery_fee)],
+        // ['Lain-lain:', formatCurrency(data.manage_quotation_other)],
     ];
     autoTable(doc, {
         startY: financialYPos,
@@ -511,60 +613,60 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     const sectionStartY = yPos - 7;
     const shippingBoxWidth = (pageWidth - 2 * margin) * 0.5 - 2.5;
     const paymentBoxWidth = (pageWidth - 2 * margin) * 0.5 - 2.5;
-    const paymentBoxStartX = margin + shippingBoxWidth + 5;
+    const paymentBoxStartX = margin + shippingBoxWidth + 3;
     const infoBoxRadius = 1;
 
     // Left side - Shipping Information (50%)
-    if (data.manage_quotation_shipping_term || data.manage_quotation_franco || data.manage_quotation_lead_time) {
+    // if (data.manage_quotation_shipping_term || data.manage_quotation_franco || data.manage_quotation_lead_time) {
         const shippingBoxStartY = sectionStartY;
         let shippingYPos = shippingBoxStartY + 5;
         
         doc.setFontSize(12);
         doc.setTextColor(0, 48, 97);
         setFontSafe(doc, 'Futura', 'bold');
-        doc.text('Shipping Information', margin + 5, shippingYPos);
+        doc.text('Shipping Information', margin + 3, shippingYPos);
         shippingYPos += 7;
 
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
         setFontSafe(doc, 'Futura', 'normal');
         
-        if (data.manage_quotation_shipping_term) {
-            doc.text(`Shipping Term: ${data.manage_quotation_shipping_term}`, margin + 5, shippingYPos);
+        // if (data.manage_quotation_shipping_term) {
+            doc.text(`Shipping Term: ${data?.manage_quotation_shipping_term || '-'}`, margin + 4, shippingYPos);
             shippingYPos += 5;
-        }
-        if (data.manage_quotation_franco) {
-            doc.text(`Franco: ${data.manage_quotation_franco}`, margin + 5, shippingYPos);
+        // }
+        // if (data.manage_quotation_franco) {
+            doc.text(`Franco: ${data?.manage_quotation_franco || '-'}`, margin + 4, shippingYPos);
             shippingYPos += 5;
-        }
-        if (data.manage_quotation_lead_time) {
-            doc.text(`Lead Time: ${data.manage_quotation_lead_time}`, margin + 5, shippingYPos);
+        // }
+        // if (data.manage_quotation_lead_time) {
+            doc.text(`Lead Time: ${data?.manage_quotation_lead_time || '-'}`, margin + 4, shippingYPos);
             shippingYPos += 5;
-        }
+        // }
         
         // Draw rounded border for shipping box
         const shippingBoxHeight = shippingYPos - shippingBoxStartY + 3;
         doc.setDrawColor(200, 200, 200);
         doc.setLineWidth(0.3);
         doc.roundedRect(margin, shippingBoxStartY - 2, shippingBoxWidth, shippingBoxHeight, infoBoxRadius, infoBoxRadius);
-    }
+    // }
 
     // Right side - Payment Information (50%)
-    if (data.bank_account_name && data.bank_account_number && data.bank_account_bank_name) {
+    // if (data.bank_account_name && data.bank_account_number && data.bank_account_bank_name) {
         const paymentBoxStartY = sectionStartY;
         let paymentYPos = paymentBoxStartY + 5;
         
         doc.setFontSize(12);
         doc.setTextColor(0, 48, 97);
         setFontSafe(doc, 'Futura', 'bold');
-        doc.text('Payment Information', paymentBoxStartX + 5, paymentYPos);
+        doc.text('Payment Information', paymentBoxStartX + 3, paymentYPos);
         paymentYPos += 7;
 
         // Data untuk payment table
         const paymentData = [
-            ['Nama Penerima', data.bank_account_name],
-            ['Bank', data.bank_account_bank_name],
-            ['No. Rekening', data.bank_account_number]
+            ['Nama Penerima', data?.bank_account_name || '-'],
+            ['Bank', data?.bank_account_bank_name || '-'],
+            ['No. Rekening', data?.bank_account_number || '-']
         ];
 
         doc.setFontSize(9);
@@ -574,13 +676,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         paymentData.forEach(([label, value]) => {
             doc.setTextColor(0, 0, 0);
             setFontSafe(doc, 'Futura', 'normal');
-            doc.text(`${label}:`, paymentBoxStartX + 5, paymentYPos);
+            doc.text(`${label}:`, paymentBoxStartX + 3, paymentYPos);
             
             doc.setTextColor(0, 0, 0);
             setFontSafe(doc, 'OpenSans', 'semibold');
-            const maxValueWidth = paymentBoxWidth - 42;
+            const maxValueWidth = paymentBoxWidth - 40;
             const splitValue = doc.splitTextToSize(value, maxValueWidth);
-            doc.text(splitValue, paymentBoxStartX + 37, paymentYPos);
+            doc.text(splitValue, paymentBoxStartX + 35, paymentYPos);
             paymentYPos += splitValue.length * 5;
         });
         
@@ -589,7 +691,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         doc.setDrawColor(200, 200, 200);
         doc.setLineWidth(0.3);
         doc.roundedRect(paymentBoxStartX, paymentBoxStartY - 2, paymentBoxWidth, paymentBoxHeight, infoBoxRadius, infoBoxRadius);
-    }
+    // }
         
         yPos = sectionStartY + Math.max(40, 50); // set minimum height untuk section ini
         yPos += 5;
@@ -608,7 +710,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     // Signature boxes - 2 columns
     const signatureBoxWidth = (pageWidth - 2 * margin) * 0.3;
     const signatureBox1StartX = margin;
-    const signatureBox2StartX = margin + signatureBoxWidth + 20;
+    // const signatureBox2StartX = margin + signatureBoxWidth + 20;
     
     // Signature Box 1
     doc.setFontSize(9);
@@ -622,7 +724,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     setFontSafe(doc, 'OpenSans', 'semibold');
-    doc.text('(Nama)', signatureBox1StartX + signatureBoxWidth / 2, yPos + 22, { align: 'center' });
+    doc.text('Oscar Feriady Hadi Saputra', signatureBox1StartX + signatureBoxWidth / 2, yPos + 22, { align: 'center' });
     
     yPos += 25;
     doc.setDrawColor(0, 0, 0);
@@ -632,51 +734,55 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     yPos += 5;
     doc.setFontSize(8);
     setFontSafe(doc, 'Futura', 'normal');
-    doc.text('Jabatan', signatureBox1StartX + signatureBoxWidth / 2, yPos, { align: 'center' });
+    doc.text('Commercial Control Manager', signatureBox1StartX + signatureBoxWidth / 2, yPos, { align: 'center' });
     
     // Signature Box 2
     yPos -= 35;
     
     
-    // Nama dan Jabatan - Box 2
-    yPos += 5;
-    doc.setFontSize(9);
-    doc.setTextColor(0, 0, 0);
-    setFontSafe(doc, 'OpenSans', 'semibold');
-    doc.text('(Nama)', signatureBox2StartX + signatureBoxWidth / 2, yPos + 22, { align: 'center' });
+    // // Nama dan Jabatan - Box 2
+    // yPos += 5;
+    // doc.setFontSize(9);
+    // doc.setTextColor(0, 0, 0);
+    // setFontSafe(doc, 'OpenSans', 'semibold');
+    // doc.text('(Nama)', signatureBox2StartX + signatureBoxWidth / 2, yPos + 22, { align: 'center' });
 
-    // Area untuk tanda tangan (garis)
-    yPos += 25;
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.3);
-    doc.line(signatureBox2StartX, yPos, signatureBox2StartX + signatureBoxWidth, yPos);
+    // // Area untuk tanda tangan (garis)
+    // yPos += 25;
+    // doc.setDrawColor(0, 0, 0);
+    // doc.setLineWidth(0.3);
+    // doc.line(signatureBox2StartX, yPos, signatureBox2StartX + signatureBoxWidth, yPos);
 
 
-    yPos += 5;
-    doc.setFontSize(8);
-    setFontSafe(doc, 'Futura', 'normal');
-    doc.text('Jabatan', signatureBox2StartX + signatureBoxWidth / 2, yPos, { align: 'center' });
+    // yPos += 5;
+    // doc.setFontSize(8);
+    // setFontSafe(doc, 'Futura', 'normal');
+    // doc.text('Jabatan', signatureBox2StartX + signatureBoxWidth / 2, yPos, { align: 'center' });
     
     yPos += 15;
 
     // SPECIFICATIONS & ACCESSORIES (After Signature - New Pages)
     // Define specification order once (outside loop to avoid duplication)
     const specOrder = [
-        "Model",
-        "Drive Type",
+        "Unit Model",
         "GVW",
         "Wheelbase",
-        "Engine Brand / Model",
-        "Power",
         "Max Torque",
         "Displacement",
         "Emission Standard",
         "Engine Guard",
-        "Gearbox / Transmission",
         "Fuel Tank",
-        "Tires",
-        "Cargobox / Vessel"
+        "Tyre",
+        "Gearbox Transmission",
+        "Engine Brand Model",
+        "Cargobox/Vessel",
+        "Horse Power"
     ];
+    
+    // Define specifications that need special line height handling
+    // const multiLineSpecs = {
+    //     "Gearbox Transmission": 3  // 3 lines for better alignment
+    // };
     
     // Group items into pages (max 2 items per page)
     const itemsWithContent = data.manage_quotation_items
@@ -714,7 +820,6 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 // Add product image if available
                 if (item1.cp_image) {
                     try {
-                        // Detect image format from file extension or data URL
                         let imageFormat = 'JPEG'; // default
                         const imageSrc = item1.cp_image.toLowerCase();
                         if (imageSrc.includes('.png') || imageSrc.includes('image/png')) {
@@ -733,10 +838,12 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 doc.setTextColor(0, 0, 0);
                 setFontSafe(doc, 'Futura', 'normal');
                 const productName1 = doc.splitTextToSize(item1.componen_product_name, itemWidth - 10);
-                productName1.forEach((line: string) => {
+                const limitedProductName1 = productName1.slice(0, 2);
+                for (let i = 0; i < 2; i++) {
+                    const line = limitedProductName1[i] || '';
                     doc.text(line, item1StartX + itemWidth / 2, item1YPos, { align: 'center' });
                     item1YPos += 4;
-                });
+                }
                 item1YPos += 3;
 
                 
@@ -751,20 +858,19 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         label: spec.manage_quotation_item_specification_label,
                         value: spec.manage_quotation_item_specification_value || '-'
                     }))
-                    // Remove duplicate rows based on label+value combination
                     .filter((spec: any, index: number, self: any[]) => 
                         index === self.findIndex((s) => s.label === spec.label && s.value === spec.value)
                     )
                     .sort((a: any, b: any) => {
                         const indexA = specOrder.indexOf(a.label);
                         const indexB = specOrder.indexOf(b.label);
-                        // If not in order list, put at the end
                         const orderA = indexA === -1 ? 999 : indexA;
                         const orderB = indexB === -1 ? 999 : indexB;
                         return orderA - orderB;
                     })
                     .map((spec: any) => [spec.label, spec.value]);
 
+                const specTableStartY = item1YPos;
                 autoTable(doc, {
                     startY: item1YPos,
                     body: specData1,
@@ -786,22 +892,35 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     columnStyles: {
                         0: { cellWidth: itemWidth * 0.4, fontStyle: 'bold' },
                         1: { cellWidth: itemWidth * 0.6 }
+                    },
+                    didParseCell: (data) => {
+                        // Set minimum height for Gearbox Transmission rows
+                        if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
+                            data.cell.styles.minCellHeight = 12; // 3 lines * 4mm spacing
+                        }
                     }
                 });
 
                 item1YPos = doc.lastAutoTable?.finalY || item1YPos;
+                
+                // Add rounded border for specifications table
+                const specTableHeight = item1YPos - specTableStartY + 10;
+                doc.setDrawColor(228, 231, 236);
+                doc.setLineWidth(0.1);
+                doc.roundedRect(item1StartX, specTableStartY - 10, itemWidth, specTableHeight, 2, 2);
+                
                 item1YPos += 7;
             }
 
             // Accessories for item 1
             if (item1.manage_quotation_item_accessories && item1.manage_quotation_item_accessories.length > 0) {
                 // Draw separator line
-                if (item1.manage_quotation_item_specifications && item1.manage_quotation_item_specifications.length > 0) {
-                    doc.setDrawColor(200, 200, 200);
-                    doc.setLineWidth(0.3);
-                    doc.line(item1StartX, item1YPos - 3, item1StartX + itemWidth, item1YPos - 3);
-                    item1YPos += 2;
-                }
+                // if (item1.manage_quotation_item_specifications && item1.manage_quotation_item_specifications.length > 0) {
+                //     doc.setDrawColor(200, 200, 200);
+                //     doc.setLineWidth(0.3);
+                //     doc.line(item1StartX, item1YPos - 3, item1StartX + itemWidth, item1YPos - 3);
+                //     item1YPos += 2;
+                // }
                 setFontSafe(doc, 'Futura', 'bold');
                 doc.setFontSize(10);
                 doc.setTextColor(0, 48, 97);
@@ -810,9 +929,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
                 const accData1 = item1.manage_quotation_item_accessories.map((acc: any, index: number) => [
                     (index + 1).toString() + '.',
-                    acc.accessory_part_number + ' - ' + acc.accessory_part_name,
+                    acc.accessory_part_name,
                 ]);
 
+                const accTableStartY = item1YPos;
                 autoTable(doc, {
                     startY: item1YPos,
                     body: accData1,
@@ -821,7 +941,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     styles: { 
                         fontSize: 9, 
                         cellPadding: [.5, 0],
-                        textColor: [0, 0, 0],
+                        textColor: [0, 48, 97],
                         valign: 'middle',
                         font: 'OpenSans',
                         fontStyle: 'normal'
@@ -834,6 +954,12 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 });
 
                 item1YPos = doc.lastAutoTable?.finalY || item1YPos;
+                
+                // Add rounded border for accessories table
+                const accTableHeight = item1YPos - accTableStartY + 10;
+                doc.setDrawColor(228, 231, 236);
+                doc.setLineWidth(0.1);
+                doc.roundedRect(item1StartX, accTableStartY - 10, itemWidth, accTableHeight, 2, 2);
             }
 
             // Render second item (if exists)
@@ -867,10 +993,14 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     doc.setTextColor(0, 0, 0);
                     setFontSafe(doc, 'Futura', 'normal');
                     const productName2 = doc.splitTextToSize(item2.componen_product_name, itemWidth - 10);
-                    productName2.forEach((line: string) => {
+                    // Limit to maximum 2 lines
+                    const limitedProductName2 = productName2.slice(0, 2);
+                    // Always render exactly 2 lines for consistent height
+                    for (let i = 0; i < 2; i++) {
+                        const line = limitedProductName2[i] || ''; // Use empty string if no line available
                         doc.text(line, item2StartX + itemWidth / 2, item2YPos, { align: 'center' });
                         item2YPos += 4;
-                    });
+                    }
                     item2YPos += 3;
 
                     
@@ -899,6 +1029,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         })
                         .map((spec: any) => [spec.label, spec.value]);
 
+                    const specTableStartY2 = item2YPos;
                     autoTable(doc, {
                         startY: item2YPos,
                         body: specData2,
@@ -920,66 +1051,74 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         columnStyles: {
                             0: { cellWidth: itemWidth * 0.4, fontStyle: 'bold' },
                             1: { cellWidth: itemWidth * 0.6 }
+                        },
+                        didParseCell: (data) => {
+                            // Set minimum height for Gearbox Transmission rows
+                            if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
+                                data.cell.styles.minCellHeight = 12; // 3 lines * 4mm spacing
+                            }
                         }
                     });
 
                     item2YPos = doc.lastAutoTable?.finalY || item2YPos;
+                    
+                    // Add rounded border for specifications table
+                    const specTableHeight2 = item2YPos - specTableStartY2 + 10;
+                    doc.setDrawColor(228, 231, 236);
+                    doc.setLineWidth(0.1);
+                    doc.roundedRect(item2StartX, specTableStartY2 - 10, itemWidth, specTableHeight2, 2, 2);
+                    
                     item2YPos += 7;
                 }
 
                 // Accessories for item 2
                 if (item2.manage_quotation_item_accessories && item2.manage_quotation_item_accessories.length > 0) {
                     // Draw separator line
-                    if (item2.manage_quotation_item_specifications && item2.manage_quotation_item_specifications.length > 0) {
-                        doc.setDrawColor(200, 200, 200);
-                        doc.setLineWidth(0.3);
-                        doc.line(item2StartX, item2YPos - 3, item2StartX + itemWidth, item2YPos - 3);
-                        item2YPos += 2;
-                    }
+                    // if (item2.manage_quotation_item_specifications && item2.manage_quotation_item_specifications.length > 0) {
+                    //     doc.setDrawColor(200, 200, 200);
+                    //     doc.setLineWidth(0.3);
+                    //     doc.line(item2StartX, item2YPos - 3, item2StartX + itemWidth, item2YPos - 3);
+                    //     item2YPos += 2;
+                    // }
                     setFontSafe(doc, 'Futura', 'bold');
                     doc.setFontSize(10);
                     doc.setTextColor(0, 48, 97);
                     doc.text(`Accessories`, item2StartX + margin, item2YPos, { align: 'center' });
                     item2YPos += 5;
 
-                    const accData2 = item2.manage_quotation_item_accessories.map((acc: any) => [
-                        // acc.accessory_part_number,
-                        acc.accessory_part_name,
-                        acc.accessory_brand || '-',
-                        acc.quantity.toString(),
-                        acc.accessory_specification || '-'
+                    const accData2 = item2.manage_quotation_item_accessories.map((acc: any, index: number) => [
+                        (index + 1).toString() + '.',
+                        acc.accessory_part_name || '-',
                     ]);
 
+                    const accTableStartY2 = item2YPos;
                     autoTable(doc, {
                         startY: item2YPos,
-                        head: [['Name', 'Brand', 'Qty', 'Spec']],
                         body: accData2,
                         margin: { left: item2StartX, right: margin },
                         tableWidth: itemWidth,
                         styles: { 
-                            fontSize: 7, 
-                            cellPadding: 1.5,
-                            font: 'Futura',
+                            fontSize: 9, 
+                            cellPadding: [.5, 0],
+                            textColor: [0, 48, 97],
+                            valign: 'middle',
+                            font: 'OpenSans',
                             fontStyle: 'normal'
-                        },
-                        headStyles: { 
-                            fillColor: [52, 152, 219], 
-                            textColor: 255,
-                            font: 'Futura',
-                            fontStyle: 'bold',
-                            fontSize: 7
                         },
                         alternateRowStyles: { fillColor: [255, 255, 255] },
                         columnStyles: {
-                            0: { cellWidth: 'auto' },
-                            1: { cellWidth: 'auto' },
-                            2: { cellWidth: 'auto' },
-                            3: { cellWidth: 'auto', halign: 'center' },
-                            4: { cellWidth: 'auto' }
+                            0: { cellWidth: 5, halign: "center", valign: 'top' },
+                            1: { textColor: [23, 26, 31], fontStyle: 'semibold' },
                         }
                     });
 
                     item2YPos = doc.lastAutoTable?.finalY || item2YPos;
+                    
+                    // Add rounded border for accessories table
+                    const accTableHeight2 = item2YPos - accTableStartY2 + 10;
+                    doc.setDrawColor(228, 231, 236);
+                    doc.setLineWidth(0.1);
+                    doc.roundedRect(item2StartX, accTableStartY2 - 10, itemWidth, accTableHeight2, 2, 2);
                 }
             }
         }
@@ -1057,7 +1196,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             doc.setFontSize(10);
             doc.setTextColor(0, 48, 97);
             setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Gratis Pengiriman Spare Parts', box2StartX + boxPadding, box2YPos);
+            doc.text('Pengiriman Spare Parts', box2StartX + boxPadding, box2YPos);
             box2YPos += 7;
 
             doc.setFontSize(8);
@@ -1262,6 +1401,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             const rightColStartX = box2StartX;
             const rightColBoxWidth = boxWidth * 2 + 5;
             let rightColYPos = secondRowYPos;
+            const rightColStartY = secondRowYPos - boxPadding; // Store start Y position for border
             
             doc.setFontSize(10);
             doc.setTextColor(0, 48, 97);
@@ -1344,6 +1484,16 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 rightColYPos += 3.5;
             });
 
+            // Calculate correct height for right column based on actual content
+            const rightColHeight = rightColYPos - rightColStartY + boxPadding;
+
+            // Draw borders for all boxes in second row
+            doc.setDrawColor(228, 231, 236);
+            doc.setLineWidth(0.1);
+            doc.roundedRect(leftColStartX, leftBox1StartY, colBoxWidth, leftBox1Height + leftBox2Height , 2, 2);
+            doc.roundedRect(leftColStartX, rightBox1StartY, colBoxWidth, rightBox1Height + rightBox2Height, 2, 2);
+            // Draw border for right column box
+            doc.roundedRect(rightColStartX, rightColStartY, rightColBoxWidth, rightColHeight, 2, 2);
             // =================================
             // END OF ON ROAD AFTERSALES PAGE
             // =================================
@@ -1411,7 +1561,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             doc.setFontSize(10);
             doc.setTextColor(0, 48, 97);
             setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Gratis Pengiriman Spare Parts', box2StartX + boxPadding, box2YPos);
+            doc.text('Pengiriman Spare Parts', box2StartX + boxPadding, box2YPos);
             box2YPos += 7;
 
             doc.setFontSize(8);
@@ -1616,6 +1766,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             const rightColStartX = box2StartX;
             const rightColBoxWidth = boxWidth * 2 + 5;
             let rightColYPos = secondRowYPos;
+            const rightColStartY = secondRowYPos - boxPadding; // Store start Y position for border
             
             doc.setFontSize(10);
             doc.setTextColor(0, 48, 97);
@@ -1687,12 +1838,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 rightColYPos += 3.5;
             });
             
-            // const rightColHeight = rightColYPos - rightColStartY + boxPadding;
+            // Calculate correct height based on actual content
+            const rightColHeight = rightColYPos - rightColStartY + boxPadding;
             
             // Draw border for right column box
-            // doc.setDrawColor(0, 48, 97);
-            // doc.setLineWidth(0.1);
-            // doc.roundedRect(rightColStartX, rightColStartY, rightColBoxWidth, rightColHeight, 2, 2);
+            doc.setDrawColor(228, 231, 236);
+            doc.setLineWidth(0.1);
+            doc.roundedRect(rightColStartX, rightColStartY, rightColBoxWidth, rightColHeight, 2, 2);
         }
     }
 

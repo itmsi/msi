@@ -148,7 +148,7 @@ const ManageBank: React.FC = () => {
                         </div>
                         <PermissionGate permission="create">
                             <Button
-                                onClick={() => navigate('/bank-accounts/create')}
+                                onClick={() => navigate('/quotations/administration/bank-accounts/create')}
                                 className="flex items-center gap-2"
                                 size="sm"
                             >
