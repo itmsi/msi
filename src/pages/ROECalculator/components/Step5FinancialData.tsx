@@ -2,17 +2,26 @@ import Label from '@/components/form/Label';
 import { ROECalculatorFormData, CalculationResponse } from '../types/roeCalculator';
 import Input from '@/components/form/input/InputField';
 import { formatNumberInput } from '@/helpers/generalHelper';
+import { useEffect } from 'react';
 
 interface Step5Props {
     formData: ROECalculatorFormData;
     calculationResults: CalculationResponse | null;
+    calculatorId?: string;
 }
 
 export default function Step5FinancialData({ 
     formData, 
+    calculatorId
     // calculationResults 
 }: Step5Props) {
-
+    
+    // Validasi step: hanya bisa akses step 5 jika sudah menyelesaikan step 4
+    useEffect(() => {
+        if (calculatorId && formData.step && formData.step < 5) {
+            window.location.href = `/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`;
+        }
+    }, [formData.step, calculatorId]);
   // const formatCurrency = (value: number) => {
   //   return new Intl.NumberFormat('id-ID', {
   //     style: 'currency',

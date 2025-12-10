@@ -10,10 +10,10 @@ export interface ROECalculatorFormData {
     // Step 2 - Unit Purchase Data  
     harga_per_unit: string;
     jumlah_unit: string;
-    down_payment_pct: number;
-    tenor_pembiayaan: number;
+    down_payment_pct: number | string;
+    tenor_pembiayaan: number | string;
     interest_rate: string;
-    periode_depresiasi: number;
+    periode_depresiasi: number | string;
     
     // Step 3 - Operational
     ritase_per_shift: string;
@@ -37,6 +37,8 @@ export interface ROECalculatorFormData {
     // Step 5 - Financial Data (readonly)
     equity_modal: string;
     liability_hutang: string;
+
+    step: number;
 
     financial_structure?: FinancialStructure;
     monthly_summary?: MonthlySummary;
@@ -175,6 +177,7 @@ export interface ApiQuoteResponse {
     roa_aggregate_nominal: string | null;
     roe_aggregate_nominal: string | null;
     customer_name?: string;
+    step?: number;
     unit_purchases?: {
         id: string;
         quote_id: string;
@@ -321,7 +324,7 @@ export interface DetailResponse {
     utilization_percent: string;
     downtime_percent: string;
 
-    fuel_consumption_type: "L/km" | "Km/L" | string;
+    fuel_consumption_type: string;
     fuel_consumption: string;
     fuel_price: string;
 

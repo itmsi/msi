@@ -121,6 +121,29 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         doc.line(0, headerHeight, pageWidth, headerHeight);
     };
 
+    const addHeaderMSF = () => {
+        doc.setFillColor(255, 255, 255);
+        doc.rect(0, 0, pageWidth, headerHeight, 'F');
+        try {
+            const iecLogo = '/inline-technology.png';
+            doc.addImage(iecLogo, 'PNG', margin - 5, 4.5, 33, 14);
+        } catch (error) {
+            console.warn('IEC logo not found');
+        }
+        
+        try {
+            const msLogo = '/motor-sights-international-logo.png';
+            doc.addImage(msLogo, 'PNG', pageWidth - margin - 20, 3, 24, 15);
+        } catch (error) {
+            console.warn('Motor Sights logo not found');
+        }
+        
+        // Line separator
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.2);
+        doc.line(0, headerHeight, pageWidth, headerHeight);
+    };
+
     const checkNewPage = (spaceNeeded: number = 20) => {
         if (yPos + spaceNeeded > pageHeight - footerHeight - margin) {
             doc.addPage();
@@ -445,7 +468,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         const text = element.textContent?.trim();
                         if (text && text.length > 0) {
                             // Check for line breaks and treat as paragraphs
-                            const parts = text.split(/\s*-\s*/); // Split on dash for bullet points
+                            const parts = text.split(/\s*-\s*/);
                             
                             parts.forEach((part, index) => {
                                 const trimmedPart = part.trim();
@@ -486,7 +509,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         Array.from(element.childNodes).forEach(child => processNode(child));
                     }
                 } else if (element.tagName.toLowerCase() === 'br') {
-                    termYPos += 3; // Add line break spacing
+                    termYPos += 3;
                 }
             }
         };
@@ -613,37 +636,42 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     const sectionStartY = yPos - 7;
     const shippingBoxWidth = (pageWidth - 2 * margin) * 0.5 - 2.5;
     const paymentBoxWidth = (pageWidth - 2 * margin) * 0.5 - 2.5;
-    const paymentBoxStartX = margin + shippingBoxWidth + 3;
+    // const paymentBoxStartX = margin + shippingBoxWidth + 3;
+    const paymentBoxStartX = margin;
     const infoBoxRadius = 1;
 
-    // Left side - Shipping Information (50%)
-    // if (data.manage_quotation_shipping_term || data.manage_quotation_franco || data.manage_quotation_lead_time) {
-        const shippingBoxStartY = sectionStartY;
-        let shippingYPos = shippingBoxStartY + 5;
+    const shippingBoxStartY = sectionStartY;
+    let shippingYPos = shippingBoxStartY + 5;
         
-        doc.setFontSize(12);
-        doc.setTextColor(0, 48, 97);
-        setFontSafe(doc, 'Futura', 'bold');
-        doc.text('Shipping Information', margin + 3, shippingYPos);
-        shippingYPos += 7;
+    doc.setFontSize(12);
+    doc.setTextColor(0, 48, 97);
+    setFontSafe(doc, 'Futura', 'bold');
+    doc.text('Shipping Information', margin + 3, shippingYPos);
+    shippingYPos += 7;
 
-        doc.setFontSize(9);
+    const shippingData = [
+        ['Shipping Term', data?.manage_quotation_shipping_term || '-'],
+        ['Franco', data?.manage_quotation_franco || '-'],
+        ['Lead Time', data?.manage_quotation_lead_time || '-']
+    ];
+        
+    doc.setFontSize(9);
+    doc.setTextColor(0, 0, 0);
+    setFontSafe(doc, 'Futura', 'normal');
+
+    shippingData.forEach(([label, value]) => {
         doc.setTextColor(0, 0, 0);
         setFontSafe(doc, 'Futura', 'normal');
+        doc.text(`${label}:`, margin + 3, shippingYPos);
         
-        // if (data.manage_quotation_shipping_term) {
-            doc.text(`Shipping Term: ${data?.manage_quotation_shipping_term || '-'}`, margin + 4, shippingYPos);
-            shippingYPos += 5;
-        // }
-        // if (data.manage_quotation_franco) {
-            doc.text(`Franco: ${data?.manage_quotation_franco || '-'}`, margin + 4, shippingYPos);
-            shippingYPos += 5;
-        // }
-        // if (data.manage_quotation_lead_time) {
-            doc.text(`Lead Time: ${data?.manage_quotation_lead_time || '-'}`, margin + 4, shippingYPos);
-            shippingYPos += 5;
-        // }
-        
+        doc.setTextColor(0, 0, 0);
+        setFontSafe(doc, 'OpenSans', 'semibold');
+        const maxValueWidth = shippingBoxWidth - 40;
+        const splitValue = doc.splitTextToSize(value, maxValueWidth);
+        doc.text(splitValue, margin + 35, shippingYPos);
+        shippingYPos += splitValue.length * 5;
+    });
+
         // Draw rounded border for shipping box
         const shippingBoxHeight = shippingYPos - shippingBoxStartY + 3;
         doc.setDrawColor(200, 200, 200);
@@ -653,7 +681,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
     // Right side - Payment Information (50%)
     // if (data.bank_account_name && data.bank_account_number && data.bank_account_bank_name) {
-        const paymentBoxStartY = sectionStartY;
+        const paymentBoxStartY = shippingYPos + 7;
         let paymentYPos = paymentBoxStartY + 5;
         
         doc.setFontSize(12);
@@ -693,76 +721,50 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         doc.roundedRect(paymentBoxStartX, paymentBoxStartY - 2, paymentBoxWidth, paymentBoxHeight, infoBoxRadius, infoBoxRadius);
     // }
         
-        yPos = sectionStartY + Math.max(40, 50); // set minimum height untuk section ini
-        yPos += 5;
-
-    // SIGNATURE SECTION
-    checkNewPage(60);
+    // SIGNATURE SECTION - Sejajar dengan shippingData di sebelah kanan
+    const signatureStartX = margin + shippingBoxWidth + 32;
+    let signatureYPos = sectionStartY + 5;
     
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     setFontSafe(doc, 'Futura', 'normal');
-    doc.text('Hormat Kami,', margin, yPos);
-    yPos += 5;
-    doc.text('PT. Indonesia Equipment Centre', margin, yPos);
-    yPos += 15;
+    doc.text('Hormat Kami,', signatureStartX, signatureYPos);
+    signatureYPos += 5;
+    doc.text('PT. Indonesia Equipment Centre', signatureStartX, signatureYPos);
+    signatureYPos += 15;
     
-    // Signature boxes - 2 columns
+    // Signature box
     const signatureBoxWidth = (pageWidth - 2 * margin) * 0.3;
-    const signatureBox1StartX = margin;
-    // const signatureBox2StartX = margin + signatureBoxWidth + 20;
     
-    // Signature Box 1
+    // Signature Box
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     setFontSafe(doc, 'OpenSans', 'semibold');
     
-    // Area untuk tanda tangan (garis)
-    
-    // Nama dan Jabatan - Box 1
-    yPos += 5;
+    // Nama dan Jabatan
+    signatureYPos += 5;
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     setFontSafe(doc, 'OpenSans', 'semibold');
-    doc.text('Oscar Feriady Hadi Saputra', signatureBox1StartX + signatureBoxWidth / 2, yPos + 22, { align: 'center' });
+    doc.text('Oscar Feriady Hadi Saputra', signatureStartX + signatureBoxWidth / 2, signatureYPos + 22, { align: 'center' });
     
-    yPos += 25;
+    signatureYPos += 25;
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.3);
-    doc.line(signatureBox1StartX, yPos, signatureBox1StartX + signatureBoxWidth, yPos);
+    doc.line(signatureStartX, signatureYPos, signatureStartX + signatureBoxWidth, signatureYPos);
 
-    yPos += 5;
+    signatureYPos += 5;
     doc.setFontSize(8);
     setFontSafe(doc, 'Futura', 'normal');
-    doc.text('Commercial Control Manager', signatureBox1StartX + signatureBoxWidth / 2, yPos, { align: 'center' });
+    doc.text('Commercial Control Manager', signatureStartX + signatureBoxWidth / 2, signatureYPos, { align: 'center' });
     
-    // Signature Box 2
-    yPos -= 35;
+    // Update yPos berdasarkan yang paling bawah (payment atau signature)
+    yPos = Math.max(paymentYPos + 10, signatureYPos + 10);
     
-    
-    // // Nama dan Jabatan - Box 2
-    // yPos += 5;
-    // doc.setFontSize(9);
-    // doc.setTextColor(0, 0, 0);
-    // setFontSafe(doc, 'OpenSans', 'semibold');
-    // doc.text('(Nama)', signatureBox2StartX + signatureBoxWidth / 2, yPos + 22, { align: 'center' });
-
-    // // Area untuk tanda tangan (garis)
-    // yPos += 25;
-    // doc.setDrawColor(0, 0, 0);
-    // doc.setLineWidth(0.3);
-    // doc.line(signatureBox2StartX, yPos, signatureBox2StartX + signatureBoxWidth, yPos);
-
-
-    // yPos += 5;
-    // doc.setFontSize(8);
-    // setFontSafe(doc, 'Futura', 'normal');
-    // doc.text('Jabatan', signatureBox2StartX + signatureBoxWidth / 2, yPos, { align: 'center' });
+    // checkNewPage(60);
     
     yPos += 15;
 
-    // SPECIFICATIONS & ACCESSORIES (After Signature - New Pages)
-    // Define specification order once (outside loop to avoid duplication)
     const specOrder = [
         "Unit Model",
         "GVW",
@@ -779,10 +781,6 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         "Horse Power"
     ];
     
-    // Define specifications that need special line height handling
-    // const multiLineSpecs = {
-    //     "Gearbox Transmission": 3  // 3 lines for better alignment
-    // };
     
     // Group items into pages (max 2 items per page)
     const itemsWithContent = data.manage_quotation_items
@@ -820,7 +818,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 // Add product image if available
                 if (item1.cp_image) {
                     try {
-                        let imageFormat = 'JPEG'; // default
+                        let imageFormat = 'JPEG';
                         const imageSrc = item1.cp_image.toLowerCase();
                         if (imageSrc.includes('.png') || imageSrc.includes('image/png')) {
                             imageFormat = 'PNG';
@@ -849,7 +847,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 
                 setFontSafe(doc, 'Futura', 'bold');
                 doc.setFontSize(10);
-                doc.setTextColor(0, 48, 97);
+                doc.setTextColor(23, 26, 31);
                 doc.text(`Specifications`, item1StartX + margin + 2, item1YPos, { align: 'center' });
                 item1YPos += 5;
 
@@ -896,7 +894,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     didParseCell: (data) => {
                         // Set minimum height for Gearbox Transmission rows
                         if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
-                            data.cell.styles.minCellHeight = 12; // 3 lines * 4mm spacing
+                            data.cell.styles.minCellHeight = 12;
                         }
                     }
                 });
@@ -914,16 +912,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
             // Accessories for item 1
             if (item1.manage_quotation_item_accessories && item1.manage_quotation_item_accessories.length > 0) {
-                // Draw separator line
-                // if (item1.manage_quotation_item_specifications && item1.manage_quotation_item_specifications.length > 0) {
-                //     doc.setDrawColor(200, 200, 200);
-                //     doc.setLineWidth(0.3);
-                //     doc.line(item1StartX, item1YPos - 3, item1StartX + itemWidth, item1YPos - 3);
-                //     item1YPos += 2;
-                // }
                 setFontSafe(doc, 'Futura', 'bold');
                 doc.setFontSize(10);
-                doc.setTextColor(0, 48, 97);
+                doc.setTextColor(23, 26, 31);
                 doc.text(`Accessories`, item1StartX + margin, item1YPos, { align: 'center' });
                 item1YPos += 5;
 
@@ -941,7 +932,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     styles: { 
                         fontSize: 9, 
                         cellPadding: [.5, 0],
-                        textColor: [0, 48, 97],
+                        textColor: [0, 0, 0],
                         valign: 'middle',
                         font: 'OpenSans',
                         fontStyle: 'normal'
@@ -975,7 +966,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     // Add product image if available
                     if (item2.cp_image) {
                         try {
-                            let imageFormat = 'JPEG'; // default
+                            let imageFormat = 'JPEG';
                             const imageSrc = item2.cp_image.toLowerCase();
                             if (imageSrc.includes('.png') || imageSrc.includes('image/png')) {
                                 imageFormat = 'PNG';
@@ -997,7 +988,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     const limitedProductName2 = productName2.slice(0, 2);
                     // Always render exactly 2 lines for consistent height
                     for (let i = 0; i < 2; i++) {
-                        const line = limitedProductName2[i] || ''; // Use empty string if no line available
+                        const line = limitedProductName2[i] || '';
                         doc.text(line, item2StartX + itemWidth / 2, item2YPos, { align: 'center' });
                         item2YPos += 4;
                     }
@@ -1006,7 +997,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     
                     setFontSafe(doc, 'Futura', 'bold');
                     doc.setFontSize(10);
-                    doc.setTextColor(0, 48, 97);
+                    doc.setTextColor(23, 26, 31);
                     doc.text(`Specifications`, item2StartX + margin + 2, item2YPos, { align: 'center' });
                     item2YPos += 5;
 
@@ -1055,7 +1046,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         didParseCell: (data) => {
                             // Set minimum height for Gearbox Transmission rows
                             if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
-                                data.cell.styles.minCellHeight = 12; // 3 lines * 4mm spacing
+                                data.cell.styles.minCellHeight = 12;
                             }
                         }
                     });
@@ -1082,7 +1073,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     // }
                     setFontSafe(doc, 'Futura', 'bold');
                     doc.setFontSize(10);
-                    doc.setTextColor(0, 48, 97);
+                    doc.setTextColor(23, 26, 31);
                     doc.text(`Accessories`, item2StartX + margin, item2YPos, { align: 'center' });
                     item2YPos += 5;
 
@@ -1125,727 +1116,894 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     }
 
     if(data.include_aftersales_page) {
-        // Check if any product has "off road" in product_type
         const hasOffRoadProduct = data.manage_quotation_items.some((item: any) => 
             item.product_type && item.product_type.toLowerCase().includes('off road')
         );
         
-        // Check if any product has "on road" in product_type
         const hasOnRoadProduct = data.manage_quotation_items.some((item: any) => 
             item.product_type && item.product_type.toLowerCase().includes('on road')
         );
         
-        // Render ON ROAD aftersales page if there's an on road product
-        if (hasOnRoadProduct) {
-            
-            doc.addPage();
-            addHeaderIEL();
-            addFooter();
-            yPos = margin + headerHeight;
-
+        const headerProduct = (varYPos: number): number => {
             // Title
-            doc.setFontSize(14);
+            doc.setFontSize(12);
             doc.setTextColor(0, 48, 97);
             setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Dukungan Produk Motor Sights', pageWidth / 2, yPos, { align: 'center' });
-            yPos += 10;
+            doc.text('Dukungan Produk Motor Sights', margin, varYPos);
+            varYPos += 7;
 
-            // Description text (70% width)
-            const descWidth = (pageWidth - 2 * margin) * 0.7;
+            const descWidth = (pageWidth - 2 * margin) * 0.6;
             doc.setFontSize(9);
             doc.setTextColor(0, 0, 0);
             setFontSafe(doc, 'Futura', 'normal');
             const descText = 'Motor Sights memberikan dukungan lengkap mulai dari pelatihan, garansi, servis, dan suku cadang untuk menjaga kelancaran operasional Anda setiap hari.';
             const splitDescText = doc.splitTextToSize(descText, descWidth);
+            const lineHeight = 4.2;
             splitDescText.forEach((line: string) => {
-                doc.text(line, pageWidth / 2, yPos, { align: 'center' });
-                yPos += 5;
+                doc.text(line, margin, varYPos, { lineHeightFactor: 1.3 });
+                varYPos += lineHeight;
             });
-            yPos += 5;
-
-            // Box settings
-            const boxWidth = (pageWidth - 2 * margin - 10) / 3; // 3 boxes with 5mm gap each
-            const box1StartX = margin;
-            const box2StartX = margin + boxWidth + 5;
-            const box3StartX = margin + 2 * (boxWidth + 5);
-            const boxStartY = yPos;
-            const boxPadding = 5;
-
-            // BOX 1 - Paket Perawatan Gratis
-            let box1YPos = boxStartY + boxPadding + 3;
-            doc.setFontSize(10);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Paket Perawatan Gratis', box1StartX + boxPadding, box1YPos);
-            box1YPos += 7;
-
-            doc.setFontSize(8);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
-            const box1Content = '(TERMASUK SPARE PART DAN OLI MESIN)\nServis untuk PM 1 - PM 3 (5.000KM, 10.000KM, dan 20.000KM)';
-            const splitBox1 = doc.splitTextToSize(box1Content, boxWidth - 2 * boxPadding);
-            splitBox1.forEach((line: string) => {
-                doc.text(line, box1StartX + boxPadding, box1YPos);
-                box1YPos += 4;
-            });
-
-            const box1Height = box1YPos - boxStartY + boxPadding;
-
-            // BOX 2 - Gratis Pengiriman Spare
-            let box2YPos = boxStartY + boxPadding + 3;
-            doc.setFontSize(10);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Pengiriman Spare Parts', box2StartX + boxPadding, box2YPos);
-            box2YPos += 7;
-
-            doc.setFontSize(8);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
             
-            // List items for Box 2
-            const box2Items = [
-                '1x24 Jam (Pulau Jawa)',
-                '3x24 Jam (Luar Pulau Jawa)'
-            ];
+            return varYPos;
+        }
+
+        const bagianGratis = (varYPos: number, data: any[], jml: number): number => {
+            // =================================
+            // BAGIAN 1 - HEADER "GRATIS"
+            // =================================
             
-            box2Items.forEach((item, index) => {
-                const numberPrefix = `${index + 1}. `;
-                doc.text(numberPrefix, box2StartX + boxPadding, box2YPos);
-                const itemText = doc.splitTextToSize(item, boxWidth - 2 * boxPadding - 5);
-                itemText.forEach((line: string, lineIndex: number) => {
-                    if (lineIndex === 0) {
-                        doc.text(line, box2StartX + boxPadding + 5, box2YPos);
+            const gratisWidth = (pageWidth - 2 * margin) * 0.7;
+            doc.setFillColor(228, 231, 236);
+            doc.roundedRect(margin, varYPos, gratisWidth, 9, 1, 1, 'F');
+            
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            setFontSafe(doc, 'Futura', 'bold');
+            doc.text('GRATIS', (margin + gratisWidth * 0.5), varYPos + 7 / 2 + 3, { align: 'center' });
+            
+            varYPos += 5;
+
+            // =================================
+            // BAGIAN 2 - 5 KOLOM GRATIS (CARD)
+            // =================================
+            const cardGap = 3;
+            const cardHeight = 62;
+            
+            for (let i = 0; i < data.length; i++) {
+                const cardWidth = (gratisWidth - ((jml - 1) * cardGap)) / jml;
+                const cardX = margin + (i * (cardWidth + cardGap));
+                const cardY = varYPos + 5;
+                const card = data[i];
+                
+                doc.setDrawColor(228, 231, 236);
+                doc.setLineWidth(0.3);
+                doc.roundedRect(cardX, cardY, cardWidth, cardHeight, 1, 1);
+                
+                const iconSize = 8;
+                const iconX = cardX + (cardWidth / 2) - (iconSize / 2);
+                const iconY = cardY + 3;
+                
+                try {
+                    if (card.icon) {
+                        doc.addImage(card.icon, 'PNG', iconX, iconY, iconSize, iconSize);
                     } else {
-                        doc.text(line, box2StartX + boxPadding + 5, box2YPos);
+                        doc.setFillColor(220, 220, 220);
+                        doc.circle(iconX + iconSize/2, iconY + iconSize/2, iconSize/2, 'F');
                     }
-                    box2YPos += 4;
+                } catch (error) {
+                    doc.setFillColor(220, 220, 220);
+                    doc.circle(iconX + iconSize/2, iconY + iconSize/2, iconSize/2, 'F');
+                }
+                
+                let textY = iconY + iconSize + 5;
+                doc.setFontSize(8);
+                doc.setTextColor(23, 26, 31);
+                setFontSafe(doc, 'Futura', 'bold');
+                const titleLines = doc.splitTextToSize(card.title, cardWidth - 4);
+                titleLines.forEach((line: string) => {
+                    doc.text(line, cardX + cardWidth/2, textY, { align: 'center' });
+                    textY += 4;
+                });
+                
+                textY += 2;
+                
+                doc.setFontSize(6);
+                doc.setTextColor(0, 0, 0);
+                setFontSafe(doc, 'Futura', 'normal');
+                card.items.forEach((item: string) => {
+                    doc.text('•', cardX + 2, textY);
+                    const itemLines = doc.splitTextToSize(item, cardWidth - 8);
+                    itemLines.forEach((line: string) => {
+                        doc.text(line, cardX + 5, textY);
+                        textY += 3;
+                    });
+                });
+                
+                if (card.notes && card.notes.length > 0) {
+                    textY += 1;
+                    doc.setFontSize(5);
+                    doc.setTextColor(100, 100, 100);
+                    setFontSafe(doc, 'Futura', 'normal');
+                    card.notes.forEach((note: string) => {
+                        const noteLines = doc.splitTextToSize(note, cardWidth - 4);
+                        noteLines.forEach((line: string) => {
+                            doc.text(line, cardX + 2, textY);
+                            textY += 2.5;
+                        });
+                    });
+                }
+            }
+            
+            return varYPos + cardHeight;
+        }
+
+        const bagianWarranty = (varYPos: number): number => {         
+            // =================================
+            // BAGIAN 3 - BOX KANAN "HIGH LEVEL WARRANTY COMPONENT"
+            // =================================
+            const gratisWidth = (pageWidth - 2 * margin) * 0.7;
+            const cardHeight = 62;
+            const warrantyWidth = (pageWidth - 2 * margin) * 0.3;
+            const warrantyBoxHeightPt = cardHeight + 10;
+            const warrantyBoxX = gratisWidth + margin + 5;
+            const warrantyBoxY = varYPos - cardHeight - 10;
+            
+            doc.setFillColor(243, 244, 246);
+            doc.roundedRect(warrantyBoxX, warrantyBoxY, warrantyWidth, warrantyBoxHeightPt, 2, 2, 'F');
+            
+            let warrantyY = warrantyBoxY + 6;
+            doc.setFontSize(9);
+            doc.setTextColor(23, 26, 31);
+            setFontSafe(doc, 'Futura', 'bold');
+            const warrantyTitle = doc.splitTextToSize('HIGH LEVEL WARRANTY COMPONENT', warrantyWidth - 8);
+            warrantyTitle.forEach((line: string) => {
+                doc.text(line, warrantyBoxX + warrantyWidth/2, warrantyY, { align: 'center' });
+                warrantyY += 4;
+            });
+            
+            const warrantyItems = [
+                {
+                    title: 'Engine',
+                    icon: '/pdf/icon-engine.png'
+                },
+                {
+                    title: 'Transmission',
+                    icon: '/pdf/icon-transmission.png'
+                },
+                {
+                    title: 'Chassis',
+                    icon: '/pdf/icon-truck.png'
+                },
+                {
+                    title: 'Electrical',
+                    icon: '/pdf/icon-electric.png'
+                },
+            ];
+            doc.setFontSize(8);
+            doc.setTextColor(23, 26, 31);
+            setFontSafe(doc, 'Futura', 'normal');
+            
+            warrantyItems.forEach(item => {
+                const iconSize = 6;
+                const iconX = warrantyBoxX + (warrantyWidth / 2) - (iconSize / 2);
+                
+                try {
+                    if (item.icon) {
+                        doc.addImage(item.icon, 'PNG', iconX, warrantyY, iconSize, iconSize);
+                    } else {
+                        doc.setFillColor(220, 220, 220);
+                        doc.circle(iconX + iconSize/2, warrantyY + iconSize/2, iconSize/2, 'F');
+                    }
+                } catch (error) {
+                    doc.setFillColor(220, 220, 220);
+                    doc.circle(iconX + iconSize/2, warrantyY + iconSize/2, iconSize/2, 'F');
+                }
+                
+                // Title below icon
+                doc.setFontSize(9);
+                doc.text(item.title, warrantyBoxX + warrantyWidth/2, warrantyY + iconSize + 3, { align: 'center' });
+                warrantyY += 13;
+            });
+            
+            doc.setFontSize(7);
+            doc.setTextColor(100, 100, 100);
+            setFontSafe(doc, 'Futura', 'normal');
+            const notesWaranty = doc.splitTextToSize('*Sampai dengan 2 tahun. Syarat dan ketentuan berlaku.', warrantyWidth - 8);
+            notesWaranty.forEach((line: string) => {
+                doc.text(line, warrantyBoxX + warrantyWidth/2, warrantyY, { align: 'center' });
+                warrantyY += 4;
+            });
+            return varYPos;
+        }
+        const investWidth = (pageWidth - 2 * margin) * 0.5;
+        const twoColCardHeightMM = 60;
+        const twoColCardWidthPt = (investWidth * 0.5) - 2;
+        const twoColCardHeightPt = twoColCardHeightMM;
+        const bagianInvestasi = (varYPos: number, data: any[]): number => {
+            // =================================
+            // BAGIAN 4 - HEADER "DENGAN INVESTASI"
+            // =================================
+            
+            let investY = varYPos;
+            doc.setFillColor(228, 231, 236);
+            doc.roundedRect(margin, investY, investWidth, 9, 1, 1, 'F');
+            
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            setFontSafe(doc, 'Futura', 'bold');
+            doc.text('DENGAN INVESTASI', (margin + investWidth * 0.5), investY + 6.2, { align: 'center' });
+            
+            investY += 10;
+
+            // =================================
+            // BAGIAN 5 - DUA KOLOM (50% : 50%)
+            // =================================
+            
+            const leftCardX = margin;
+            const rightCardX = margin + (investWidth * 0.5) + 1;
+
+            for (let i = 0; i < 2; i++) {
+                const cardX = i === 0 ? leftCardX : rightCardX;
+                const item = data[i];
+                
+                // Card border
+                doc.setDrawColor(228, 231, 236);
+                doc.setLineWidth(0.3);
+                doc.roundedRect(cardX, investY, twoColCardWidthPt, twoColCardHeightPt, 1, 1);
+                
+                let cardY = investY;
+                
+                // Icon - positioned at consistent height
+                const iconSize = 8;
+                const iconX = cardX + (twoColCardWidthPt / 2) - (iconSize / 2);
+                const iconY = cardY + 3;
+                
+                try {
+                    if (item.icon) {
+                        doc.addImage(item.icon, 'PNG', iconX, iconY, iconSize, iconSize);
+                    } else {
+                        doc.setFillColor(220, 220, 220);
+                        doc.circle(iconX + iconSize/2, iconY + iconSize/2, iconSize/2, 'F');
+                    }
+                } catch (error) {
+                    doc.setFillColor(220, 220, 220);
+                    doc.circle(iconX + iconSize/2, iconY + iconSize/2, iconSize/2, 'F');
+                }
+                
+                // Title - positioned at consistent height after icon
+                cardY = iconY + iconSize + 5;
+                
+                doc.setFontSize(9);
+                doc.setTextColor(23, 26, 31);
+                setFontSafe(doc, 'Futura', 'bold');
+                const titleLines = doc.splitTextToSize(item.title, twoColCardWidthPt - 10);
+                titleLines.forEach((line: string) => {
+                    doc.text(line, cardX + twoColCardWidthPt/2, cardY, { align: 'center' });
+                    cardY += 4;
+                });
+                
+                // Reserve consistent space for title (max 2 lines)
+                cardY = iconY + iconSize + 5 + (2 * 4) + 2;
+                
+                // Notes below title - regular weight
+                if (item.notes && item.notes.length > 0) {
+                    doc.setFontSize(7);
+                    doc.setTextColor(23, 26, 31);
+                    setFontSafe(doc, 'Futura', 'normal');
+                    
+                    item.notes.forEach((note: any) => {
+                        const noteLines = doc.splitTextToSize(note, twoColCardWidthPt - 10);
+                        noteLines.forEach((line: string) => {
+                            doc.text(line, cardX + 5, cardY);
+                            cardY += 3;
+                        });
+                    });
+                }
+                
+                // Bold notes below regular notes - bold weight
+                if (item.notesBold && item.notesBold.length > 0) {
+                    doc.setFontSize(7);
+                    doc.setTextColor(23, 26, 31);
+                    setFontSafe(doc, 'Futura', 'bold');
+                    
+                    item.notesBold.forEach((boldNote: any) => {
+                        const boldNoteLines = doc.splitTextToSize(boldNote, twoColCardWidthPt - 10);
+                        boldNoteLines.forEach((line: string) => {
+                            doc.text(line, cardX + 5, cardY);
+                            cardY += 3;
+                        });
+                    });
+                }
+            }
+
+            return investY;
+        }
+        const bagianDeskripsi = (varYpos: number, manfaat: any[], syarat: any[], offroad: boolean): number => {
+            
+            // =================================
+            // BAGIAN 6 - IN-HOUSE WORKSHOP & SPARE PARTS
+            // =================================
+            const workshopBoxWidthPt = investWidth;
+            const workshopBoxHeightPt = twoColCardHeightPt + 10;
+            const workshopBoxX = investWidth + margin + 5;
+            const workshopBoxY = varYpos;
+            
+            // Box border
+            doc.setDrawColor(228, 231, 236);
+            doc.setLineWidth(0.3);
+            doc.roundedRect(workshopBoxX, workshopBoxY, workshopBoxWidthPt, workshopBoxHeightPt, 1, 1);
+            
+            let workshopY = workshopBoxY + 8;
+            
+            // Title
+            doc.setFontSize(10);
+            doc.setTextColor(23, 26, 31);
+            setFontSafe(doc, 'Futura', 'bold');
+            if(!offroad) {
+                doc.text('VENDOR HELD STOCK', workshopBoxX + 5, workshopY);
+                
+                workshopY += 5;
+                doc.setFontSize(7);
+                doc.setTextColor(23, 26, 31);
+                setFontSafe(doc, 'Futura', 'normal');
+                const titleLines = doc.splitTextToSize('adalah sistem yang ditawarkan Motor Sights untuk memenuhi kebutuhan stok secara berkelanjutan sesuai dengan kesepakatan.*', workshopBoxWidthPt - 10);
+                titleLines.forEach((line: string) => {
+                    doc.text(line, workshopBoxX + 5, workshopY);
+                    workshopY += 4;
+                });
+            } else {
+                doc.text('IN-HOUSE WORKSHOP &', workshopBoxX + 5, workshopY);
+                workshopY += 5;
+                doc.text('SPARE PARTS OFF-ROAD', workshopBoxX + 5, workshopY);
+
+                workshopY += 5;
+                doc.setFontSize(7);
+                doc.setTextColor(23, 26, 31);
+                setFontSafe(doc, 'Futura', 'normal');
+                const titleLines = doc.splitTextToSize('Program inovatif untuk menghadirkan pelayanan yang paripurna demi kelancaran operasi unit customer dengan banyak manfaat*', workshopBoxWidthPt - 10);
+                titleLines.forEach((line: string) => {
+                    doc.text(line, workshopBoxX + 5, workshopY);
+                    workshopY += 4;
+                });
+            }
+            workshopY += 2;
+            
+            // Manfaat subtitle
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            setFontSafe(doc, 'Futura', 'bold');
+            doc.text('Manfaat:', workshopBoxX + 5, workshopY);
+            workshopY += 6;
+            
+            // Manfaat items
+            doc.setFontSize(8);
+            setFontSafe(doc, 'Futura', 'normal');
+            
+            manfaat.forEach(item => {
+                doc.text('•', workshopBoxX + 5, workshopY);
+                const itemLines = doc.splitTextToSize(item, workshopBoxWidthPt - 15);
+                itemLines.forEach((line: string) => {
+                    doc.text(line, workshopBoxX + 10, workshopY);
+                    workshopY += 3;
                 });
             });
-
-            const box2Height = box2YPos - boxStartY + boxPadding;
-
-            // BOX 3 - Garansi Unit
-            let box3YPos = boxStartY + boxPadding + 3;
-            doc.setFontSize(10);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Garansi Unit', box3StartX + boxPadding, box3YPos);
-            box3YPos += 5;
-
+            
+            workshopY += 3;
+            
+            // Syarat subtitle
             doc.setFontSize(8);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
-            const box3Content = 'Garansi 2 tahun atau 60.000 KM operasi**\nDilengkapi garansi hingga 1 tahun sejak tanggal BAST\n\n';
-            const splitBox3 = doc.splitTextToSize(box3Content, boxWidth - 2 * boxPadding);
-            splitBox3.forEach((line: string) => {
-                doc.text(line, box3StartX + boxPadding, box3YPos);
-                box3YPos += 4;
-            });
-
+            setFontSafe(doc, 'Futura', 'bold');
+            doc.text('Syarat:', workshopBoxX + 5, workshopY);
+            workshopY += 4;
+            
+            // Syarat items
             doc.setFontSize(7);
             setFontSafe(doc, 'Futura', 'normal');
-            const Box3Note = '**Mana yang tercapai terlebih dahulu, syarat & ketentuan berlaku';
-            const splitBox3Note = doc.splitTextToSize(Box3Note, boxWidth - 2 * boxPadding);
-            splitBox3Note.forEach((line: string) => {
-                doc.text(line, box3StartX + boxPadding, box3YPos - 4);
-                box3YPos += 3.5;
-            });
-
-            const box3Height = box3YPos - boxStartY - 3;
-
-            // Draw rounded borders for all boxes (use max height for uniform appearance)
-            const maxBoxHeight = Math.max(box1Height, box2Height, box3Height);
             
-            doc.setDrawColor(228, 231, 236);
-            doc.setLineWidth(0.1);
-            doc.roundedRect(box1StartX, boxStartY, boxWidth, maxBoxHeight, 2, 2);
-            doc.roundedRect(box2StartX, boxStartY, boxWidth, maxBoxHeight, 2, 2);
-            doc.roundedRect(box3StartX, boxStartY, boxWidth, maxBoxHeight, 2, 2);
-
-            // SECOND ROW - 2 columns with 2 boxes each
-            let secondRowYPos = boxStartY + maxBoxHeight + 10;
-            const leftColStartX = box1StartX;
-            const colBoxWidth = boxWidth;
-
-            // LEFT COLUMN - GRATIS
-            // Box 1: Pelatihan Pengemudi
-            let leftBox1YPos = secondRowYPos;
-            const leftBox1StartY = secondRowYPos - boxPadding;
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('GRATIS', leftColStartX + boxPadding, leftBox1YPos);
-            leftBox1YPos += 6;
-            
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Pelatihan Pengemudi', leftColStartX + boxPadding, leftBox1YPos);
-            leftBox1YPos += 6;
-            
-            doc.setFontSize(8);
-            setFontSafe(doc, 'Futura', 'normal');
-            const driverTrainingItems = [
-                'Pelatihan 2 pengemudi/unit',
-                '5 hari pelatihan',
-                'Pra-Tes, Belajar di Kelas, & Praktik Langsung'
-            ];
-            
-            driverTrainingItems.forEach(item => {
-                doc.text('•', leftColStartX + boxPadding, leftBox1YPos);
-                const itemText = doc.splitTextToSize(item, colBoxWidth - 2 * boxPadding - 5);
-                itemText.forEach((line: string) => {
-                    doc.text(line, leftColStartX + boxPadding + 5, leftBox1YPos);
-                    leftBox1YPos += 4;
+            syarat.forEach(item => {
+                doc.text('•', workshopBoxX + 5, workshopY);
+                const itemLines = doc.splitTextToSize(item, workshopBoxWidthPt - 15);
+                itemLines.forEach((line: string) => {
+                    doc.text(line, workshopBoxX + 10, workshopY);
+                    workshopY += 3;
                 });
             });
             
-            const leftBox1Height = leftBox1YPos - leftBox1StartY ;
+            workshopY += 3;
             
-            // Box 2: Pelatihan Mekanik
-            const leftBox2StartY = leftBox1StartY + leftBox1Height;
-            let leftBox2YPos = leftBox2StartY + boxPadding;
-            
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Pelatihan Mekanik', leftColStartX + boxPadding, leftBox2YPos);
-            leftBox2YPos += 6;
-            
-            doc.setFontSize(8);
+            // Footer note
+            doc.setFontSize(6);
             setFontSafe(doc, 'Futura', 'normal');
-            const mechanicTrainingItems = [
-                'Pelatihan mekanik',
-                '5 hari pelatihan',
-                'Pra-Tes, Belajar di Kelas, & Praktik Langsung'
-            ];
-            
-            mechanicTrainingItems.forEach(item => {
-                doc.text('•', leftColStartX + boxPadding, leftBox2YPos);
-                const itemText = doc.splitTextToSize(item, colBoxWidth - 2 * boxPadding - 5);
-                itemText.forEach((line: string) => {
-                    doc.text(line, leftColStartX + boxPadding + 5, leftBox2YPos);
-                    leftBox2YPos += 4;
-                });
+            const footerNote = '*Deposit sesuai stock spare part. Detail diskusi dengan team Spare Part.';
+            const noteLines = doc.splitTextToSize(footerNote, workshopBoxWidthPt - 10);
+            noteLines.forEach((line: string) => {
+                doc.text(line, workshopBoxX + 5, workshopY);
+                workshopY += 2.5;
             });
             
-            const leftBox2Height = leftBox2YPos - leftBox2StartY + boxPadding;
-
-            // LEFT COLUMN - DENGAN INVESTASI
-            // Box 1: Kontrak Servis
-            let rightBox1YPos = leftBox2YPos + boxPadding + 10;
-            const rightBox1StartY = leftBox2StartY + leftBox2Height + 5;
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('DENGAN INVESTASI', leftColStartX + boxPadding, rightBox1YPos);
-            rightBox1YPos += 6;
-            
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Kontrak Servis', leftColStartX + boxPadding, rightBox1YPos);
-            rightBox1YPos += 6;
-            
-            doc.setFontSize(8);
-            setFontSafe(doc, 'Futura', 'normal');
-            const contractText1 = 'Stand-by mekanik gratis selama 3 bulan dengan minimal pembelian 10 unit. Setelah 3 bulan dapat melanjutkan dengan Kontrak Servis. Memiliki 3 pilihan paket: ';
-            const splitContract1 = doc.splitTextToSize(contractText1, colBoxWidth - 2 * boxPadding);
-            splitContract1.forEach((line: string) => {
-                doc.text(line, leftColStartX + boxPadding, rightBox1YPos);
-                rightBox1YPos += 4;
-            });
-            
-            // Bold text for packages
-            setFontSafe(doc, 'Futura', 'bold');
-            const packagesText = 'Spare Part / Service / Service & Spare Part.';
-            const splitPackages = doc.splitTextToSize(packagesText, colBoxWidth - 2 * boxPadding);
-            splitPackages.forEach((line: string) => {
-                doc.text(line, leftColStartX + boxPadding, rightBox1YPos);
-                rightBox1YPos += 4;
-            });
-            
-            const rightBox1Height = rightBox1YPos - rightBox1StartY;
-            
-            // Box 2: Stand By Mechanic
-            const rightBox2StartY = rightBox1StartY + rightBox1Height + 5;
-            let rightBox2YPos = rightBox2StartY - 3;
-            
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Mobile Service & Spare Part', leftColStartX + boxPadding, rightBox2YPos + 2);
-            rightBox2YPos += 6;
-            
-            doc.setFontSize(8);
-            setFontSafe(doc, 'Futura', 'normal');
-            const standbyText = 'Memastikan operasional tetap berjalan tanpa perlu kembali ke bengkel. Mencakup perawatan berkala, general repair, tyre service, hingga emergency roadside assistance (ERA).';
-            const splitStandby = doc.splitTextToSize(standbyText, colBoxWidth - 2 * boxPadding);
-            splitStandby.forEach((line: string) => {
-                doc.text(line, leftColStartX + boxPadding, rightBox2YPos);
-                rightBox2YPos += 4;
-            });
-            
-            const rightBox2Height = rightBox2YPos - rightBox2StartY + boxPadding;
-
-            // Draw borders for all boxes in second row
-            doc.setDrawColor(228, 231, 236);
-            doc.setLineWidth(0.1);
-            doc.roundedRect(leftColStartX, leftBox1StartY, colBoxWidth, leftBox1Height + leftBox2Height , 2, 2);
-            doc.roundedRect(leftColStartX, rightBox1StartY, colBoxWidth, rightBox1Height + rightBox2Height, 2, 2);
-            
-            // RIGHT COLUMN - VENDOR HELD STOCK
-            const rightColStartX = box2StartX;
-            const rightColBoxWidth = boxWidth * 2 + 5;
-            let rightColYPos = secondRowYPos;
-            const rightColStartY = secondRowYPos - boxPadding; // Store start Y position for border
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('IN-HOUSE WORKSHOP & SPARE PARTS', rightColStartX + boxPadding, rightColYPos);
-            rightColYPos += 8;
-            
-            // Manfaat Section
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
-            const programNote = 'Program inovatif untuk menghadirkan pelayanan yang paripurna demi kelancaran operasi unit customer dengan banyak manfaat';
-            const programDesc = doc.splitTextToSize(programNote, rightColBoxWidth - 2 * boxPadding);
-            programDesc.forEach((line: string) => {
-                doc.text(line, rightColStartX + boxPadding, rightColYPos);
-                rightColYPos += 3.5;
-            });
-            rightColYPos += 5;
-
-
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Manfaat:', rightColStartX + boxPadding, rightColYPos);
-            rightColYPos += 5;
-            
-            doc.setFontSize(8);
-            setFontSafe(doc, 'Futura', 'normal');
-            const manfaatItems = [
-                'Ketersediaan Teknisi(stand by mekanik)',
-                'Jaminan ketersediaan suku cadang fast moving',
-                'Efisiensi logistik',
-                'Unit selalu siap bertugas',
-                'Tanpa khawatir harus membeli stock sisa setelah masa kontrak berakhir',
-            ];
-            
-            manfaatItems.forEach(item => {
-                doc.text('•', rightColStartX + boxPadding, rightColYPos);
-                const itemText = doc.splitTextToSize(item, rightColBoxWidth - 2 * boxPadding - 5);
-                itemText.forEach((line: string) => {
-                    doc.text(line, rightColStartX + boxPadding + 5, rightColYPos);
-                    rightColYPos += 4;
-                });
-            });
-            
-            rightColYPos += 3;
-            
-            // Syarat Section
-            doc.setFontSize(9);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Syarat:', rightColStartX + boxPadding, rightColYPos);
-            rightColYPos += 5;
-            
-            doc.setFontSize(8);
-            setFontSafe(doc, 'Futura', 'normal');
-            const syaratItems = [
-                'Tanpa deposit untuk pembelian mulai dari 30 unit atau lebih.',
-                'Pembelian 5-29 unit VHS berlaku dengan deposit/Bank Guarantee sebesar stock yang disediakan.*',
-                'Pelanggan menyediakan tempat penyimpanan barang & infrastruktur penunjang (listrik, internet rak, dll.),serta akomodasi manpower (mobilitas mess, & konsumsi).'
-            ];
-            
-            syaratItems.forEach(item => {
-                doc.text('•', rightColStartX + boxPadding, rightColYPos);
-                const itemText = doc.splitTextToSize(item, rightColBoxWidth - 2 * boxPadding - 5);
-                itemText.forEach((line: string) => {
-                    doc.text(line, rightColStartX + boxPadding + 5, rightColYPos);
-                    rightColYPos += 4;
-                });
-            });
-            
-            rightColYPos += 3;
-            
-            // Footer note dengan font size 7
-            doc.setFontSize(7);
-            setFontSafe(doc, 'Futura', 'normal');
-            const footerNote = '*Deposit menyesuaikan stock spare part yang disediakan. Detail akan didiskusikan bersama team Spare Part kami';
-            const splitFooterNote = doc.splitTextToSize(footerNote, rightColBoxWidth - 2 * boxPadding);
-            splitFooterNote.forEach((line: string) => {
-                doc.text(line, rightColStartX + boxPadding, rightColYPos);
-                rightColYPos += 3.5;
-            });
-
-            // Calculate correct height for right column based on actual content
-            const rightColHeight = rightColYPos - rightColStartY + boxPadding;
-
-            // Draw borders for all boxes in second row
-            doc.setDrawColor(228, 231, 236);
-            doc.setLineWidth(0.1);
-            doc.roundedRect(leftColStartX, leftBox1StartY, colBoxWidth, leftBox1Height + leftBox2Height , 2, 2);
-            doc.roundedRect(leftColStartX, rightBox1StartY, colBoxWidth, rightBox1Height + rightBox2Height, 2, 2);
-            // Draw border for right column box
-            doc.roundedRect(rightColStartX, rightColStartY, rightColBoxWidth, rightColHeight, 2, 2);
             // =================================
             // END OF ON ROAD AFTERSALES PAGE
             // =================================
+            return workshopY 
+        }
+        if (hasOnRoadProduct) {      
+            doc.addPage();
+            addHeaderIEL();
+            addFooter();
+            yPos = margin + headerHeight;
+
+            yPos = headerProduct(yPos);
+            yPos += 2;
+            
+            const gratisCards = [
+                {
+                    title: 'Paket Perawatan',
+                    icon: '/pdf/maintenance-service.png',
+                    items: [
+                        'Termasuk Spare Part & Oli Mesin',
+                        'Servis untuk PM 1 - PM 3 (5.000KM, 10.000KM, dan 20.000KM)'
+                    ]
+                },
+                {
+                    title: 'Pengiriman Spare Parts',
+                    icon: '/pdf/pre-delivery-inspection.png',
+                    items: [
+                        '1x24 Jam (Pulau Jawa)',
+                        '3x24 Jam (Luar Pulau Jawa)'
+                    ]
+                },
+                {
+                    title: 'Garansi Unit',
+                    icon: '/pdf/warranty-service.png',
+                    items: [
+                        'Garansi 2 tahun atau 60.000 KM operasi**'
+                    ],
+                    notes: [
+                        'Dilengkapi garansi hingga 1 tahun sejak tanggal BAST',
+                        '**Mana yang tercapai terlebih dahulu, syarat & ketentuan berlaku'
+                    ]
+                },
+                {
+                    title: 'Pelatihan Pengemudi',
+                    icon: '/pdf/training.png',
+                    items: [
+                        'Pelatihan 2 pengemudi/unit',
+                        '5 hari pelatihan',
+                        'Pra-Tes, Belajar di Kelas, & Praktik Langsung'
+                    ]
+                },
+                {
+                    title: 'Pelatihan Mekanik',
+                    icon: '/pdf/training-mechanic.png',
+                    items: [
+                        'Pelatihan mekanik',
+                        '5 hari pelatihan',
+                        'Pra-Tes, Belajar di Kelas, & Praktik Langsung'
+                    ]
+                }
+            ];
+            yPos = bagianGratis(yPos, gratisCards, 5);
+            yPos = bagianWarranty(yPos + 5);
+            yPos += 3;
+            const kontrakItems = [
+                {
+                    title: 'Kontrak Servis',
+                    icon: '/pdf/on-call-service.png',
+                    notes: [
+                        'Stand-by mekanik gratis selama 3 bulan dengan minimal pembelian 10 unit. Setelah 3 bulan dapat melanjutkan dengan Kontrak Servis. Memiliki 3 pilihan paket:'
+                    ],
+                    notesBold : [
+                        'Spare Part/Service/Service & Spare Part.'
+                    ]
+                },
+                {
+                    title: 'Mobile Service & Spare Part',
+                    icon: '/pdf/icontruck.png',
+                    notes: [
+                        'Memastikan operasional tetap berjalan tanpa perlu kembali ke bengkel. Mencakup perawatan berkala, general repair, tyre service, hingga emergency roadside assistance (ERA).'
+                    ]
+                }
+            ];
+            yPos = bagianInvestasi(yPos, kontrakItems);
+            
+            const manfaatItems = [
+                'Ketersediaan teknisi stand by',
+                'Suku cadang fast moving tersedia',
+                'Efisiensi logistik',
+                'Unit selalu siap bertugas',
+                'Tanpa investasi stok besar'
+            ];
+            const syaratItems = [
+                'Tanpa deposit untuk 30+ unit',
+                '5-29 unit dengan deposit/BG',
+                'Customer sediakan tempat & infrastruktur'
+            ];
+            yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, false);
+            yPos += 5;
         }
         
         // Render OFF ROAD aftersales page if there's an off road product
         if (hasOffRoadProduct) {
-
-            // ADD OFF ROAD AFTERSALES PAGE
             doc.addPage();
             addHeaderIEL();
             addFooter();
             yPos = margin + headerHeight;
 
+            yPos = headerProduct(yPos);
+            yPos += 2;
+            const gratisCards = [
+                {
+                    title: 'Paket Perawatan',
+                    icon: '/pdf/maintenance-service.png',
+                    items: [
+                        'Termasuk Spare Part & Oli Mesin',
+                        'Servis untuk PM 1 - PM 3 (5.000KM, 10.000KM, dan 20.000KM)'
+                    ]
+                },
+                {
+                    title: 'Garansi Unit',
+                    icon: '/pdf/warranty-service.png',
+                    items: [
+                        'Garansi 2 tahun atau 60.000 KM operasi**'
+                    ],
+                    notes: [
+                        'Dilengkapi garansi hingga 1 tahun sejak tanggal BAST',
+                        '**Mana yang tercapai terlebih dahulu, syarat & ketentuan berlaku'
+                    ]
+                },
+                {
+                    title: 'Pelatihan Pengemudi',
+                    icon: '/pdf/training.png',
+                    items: [
+                        'Pelatihan 2 pengemudi/unit',
+                        '5 hari pelatihan',
+                        'Pra-Tes, Belajar di Kelas, & Praktik Langsung'
+                    ]
+                },
+                {
+                    title: 'Pelatihan Mekanik',
+                    icon: '/pdf/training-mechanic.png',
+                    items: [
+                        'Pelatihan mekanik',
+                        '5 hari pelatihan',
+                        'Pra-Tes, Belajar di Kelas, & Praktik Langsung'
+                    ]
+                }
+            ];
+            yPos = bagianGratis(yPos, gratisCards, 4);
+            yPos = bagianWarranty(yPos + 5);
+            yPos += 3;
+            
+            const kontrakItems = [
+                {
+                    title: 'Stand By Mechanic',
+                    icon: '/pdf/training-mechanic.png',
+                    notes: [
+                        'Gratis stand by mechanic selama 3 bulan dengan pembelian minimal 10 unit. Support garansi dan OJT Mekanik.'
+                    ]
+                },
+                {
+                    title: 'KONSER (Kontrak Servis)',
+                    icon: '/pdf/icontruck.png',
+                    notes: [
+                        'Setelah 3 bulan dapat melanjutkan dengan Kontrak Servis. Memiliki 3 pilihan paket:'
+                    ],
+                    notesBold : [
+                        'Spare Part / Service / Service & Spare Part'
+                    ]
+                }
+            ];
+            yPos = bagianInvestasi(yPos, kontrakItems);
+            
+            const manfaatItems = [
+                'Ketersediaan teknisi stand by',
+                'Suku cadang fast moving tersedia',
+                'Efisiensi logistik',
+                'Unit selalu siap bertugas',
+                'Tanpa investasi stok besar'
+            ];
+            const syaratItems = [
+                'Tanpa deposit untuk 30+ unit',
+                '5-29 unit dengan deposit/BG',
+                'Customer sediakan tempat & infrastruktur'
+            ];
+            yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, true);
+            yPos += 5;
+        }
+            
+    }
+
+    if(data.include_msf_page) {
+        doc.addPage();
+        addHeaderMSF();
+        addFooter();
+        
+        yPos = margin + headerHeight;
+
+        const headerProduct = (varYPos: number): number => {
             // Title
             doc.setFontSize(14);
             doc.setTextColor(0, 48, 97);
             setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Dukungan Produk Motor Sights', pageWidth / 2, yPos, { align: 'center' });
-            yPos += 10;
+            doc.text('Motor Sights Fleet', margin, varYPos);
+            varYPos += 7;
 
-            // Description text (70% width)
-            const descWidth = (pageWidth - 2 * margin) * 0.7;
+            const descWidth = (pageWidth - 2 * margin) * 0.6;
             doc.setFontSize(9);
             doc.setTextColor(0, 0, 0);
             setFontSafe(doc, 'Futura', 'normal');
-            const descText = 'Motor Sights memberikan dukungan lengkap mulai dari pelatihan, garansi, servis, dan suku cadang untuk menjaga kelancaran operasional Anda setiap hari.';
+            const descText = 'Motor Sights Fleet delivers complete visibility into vehicle movement and fuel consumption. With fully integrated telematics technology, companies can manage fleet operations with higher accuracy, efficiency, and data-driven decision-making.';
             const splitDescText = doc.splitTextToSize(descText, descWidth);
+            const lineHeight = 4.2;
             splitDescText.forEach((line: string) => {
-                doc.text(line, pageWidth / 2, yPos, { align: 'center' });
-                yPos += 5;
-            });
-            yPos += 5;
-
-            // Box settings
-            const boxWidth = (pageWidth - 2 * margin - 10) / 3; // 3 boxes with 5mm gap each
-            const box1StartX = margin;
-            const box2StartX = margin + boxWidth + 5;
-            const box3StartX = margin + 2 * (boxWidth + 5);
-            const boxStartY = yPos;
-            const boxPadding = 5;
-
-            // BOX 1 - Paket Perawatan Gratis
-            let box1YPos = boxStartY + boxPadding + 3;
-            doc.setFontSize(10);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Paket Perawatan Gratis', box1StartX + boxPadding, box1YPos);
-            box1YPos += 7;
-
-            doc.setFontSize(8);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
-            const box1Content = '(TERMASUK SPARE PART DAN OLI MESIN)\nServis untuk PM 1 - PM 3 (5.000KM, 10.000KM, dan 20.000KM)';
-            const splitBox1 = doc.splitTextToSize(box1Content, boxWidth - 2 * boxPadding);
-            splitBox1.forEach((line: string) => {
-                doc.text(line, box1StartX + boxPadding, box1YPos);
-                box1YPos += 4;
-            });
-
-            const box1Height = box1YPos - boxStartY + boxPadding;
-
-            // BOX 2 - Gratis Pengiriman Spare
-            let box2YPos = boxStartY + boxPadding + 3;
-            doc.setFontSize(10);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Pengiriman Spare Parts', box2StartX + boxPadding, box2YPos);
-            box2YPos += 7;
-
-            doc.setFontSize(8);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
-            
-            // List items for Box 2
-            const box2Items = [
-                '1x24 Jam (Pulau Jawa)',
-                '3x24 Jam (Luar Pulau Jawa)'
-            ];
-            
-            box2Items.forEach((item, index) => {
-                const numberPrefix = `${index + 1}. `;
-                doc.text(numberPrefix, box2StartX + boxPadding, box2YPos);
-                const itemText = doc.splitTextToSize(item, boxWidth - 2 * boxPadding - 5);
-                itemText.forEach((line: string, lineIndex: number) => {
-                    if (lineIndex === 0) {
-                        doc.text(line, box2StartX + boxPadding + 5, box2YPos);
-                    } else {
-                        doc.text(line, box2StartX + boxPadding + 5, box2YPos);
-                    }
-                    box2YPos += 4;
-                });
-            });
-
-            const box2Height = box2YPos - boxStartY + boxPadding;
-
-            // BOX 3 - Garansi Unit
-            let box3YPos = boxStartY + boxPadding + 3;
-            doc.setFontSize(10);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Garansi Unit', box3StartX + boxPadding, box3YPos);
-            box3YPos += 5;
-
-            doc.setFontSize(8);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
-            const box3Content = 'Garansi 1 tahun atau 6.000 jam operasi**\nDilengkapi garansi hingga 1 tahun sejak tanggal BAST\n\n';
-            const splitBox3 = doc.splitTextToSize(box3Content, boxWidth - 2 * boxPadding);
-            splitBox3.forEach((line: string) => {
-                doc.text(line, box3StartX + boxPadding, box3YPos);
-                box3YPos += 4;
-            });
-
-            doc.setFontSize(7);
-            setFontSafe(doc, 'Futura', 'normal');
-            const Box3Note = '**Mana yang tercapai terlebih dahulu, syarat & ketentuan berlaku';
-            const splitBox3Note = doc.splitTextToSize(Box3Note, boxWidth - 2 * boxPadding);
-            splitBox3Note.forEach((line: string) => {
-                doc.text(line, box3StartX + boxPadding, box3YPos - 4);
-                box3YPos += 3.5;
-            });
-
-            const box3Height = box3YPos - boxStartY - 3;
-
-            // Draw rounded borders for all boxes (use max height for uniform appearance)
-            const maxBoxHeight = Math.max(box1Height, box2Height, box3Height);
-            
-            doc.setDrawColor(228, 231, 236);
-            doc.setLineWidth(0.1);
-            doc.roundedRect(box1StartX, boxStartY, boxWidth, maxBoxHeight, 2, 2);
-            doc.roundedRect(box2StartX, boxStartY, boxWidth, maxBoxHeight, 2, 2);
-            doc.roundedRect(box3StartX, boxStartY, boxWidth, maxBoxHeight, 2, 2);
-
-            // SECOND ROW - 2 columns with 2 boxes each
-            let secondRowYPos = boxStartY + maxBoxHeight + 10;
-            const leftColStartX = box1StartX;
-            const colBoxWidth = boxWidth;
-
-            // LEFT COLUMN - GRATIS
-            // Box 1: Pelatihan Pengemudi
-            let leftBox1YPos = secondRowYPos;
-            const leftBox1StartY = secondRowYPos - boxPadding;
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('GRATIS', leftColStartX + boxPadding, leftBox1YPos);
-            leftBox1YPos += 6;
-            
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Pelatihan Pengemudi', leftColStartX + boxPadding, leftBox1YPos);
-            leftBox1YPos += 6;
-            
-            doc.setFontSize(8);
-            setFontSafe(doc, 'Futura', 'normal');
-            const driverTrainingItems = [
-                'Pelatihan 2 pengemudi/unit',
-                '5 hari pelatihan',
-                'Pra-Tes, Belajar di Kelas, & Praktik Langsung'
-            ];
-            
-            driverTrainingItems.forEach(item => {
-                doc.text('•', leftColStartX + boxPadding, leftBox1YPos);
-                const itemText = doc.splitTextToSize(item, colBoxWidth - 2 * boxPadding - 5);
-                itemText.forEach((line: string) => {
-                    doc.text(line, leftColStartX + boxPadding + 5, leftBox1YPos);
-                    leftBox1YPos += 4;
-                });
+                doc.text(line, margin, varYPos, { lineHeightFactor: 1.3 });
+                varYPos += lineHeight;
             });
             
-            const leftBox1Height = leftBox1YPos - leftBox1StartY ;
-            
-            // Box 2: Pelatihan Mekanik
-            const leftBox2StartY = leftBox1StartY + leftBox1Height;
-            let leftBox2YPos = leftBox2StartY + boxPadding;
-            
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Pelatihan Mekanik', leftColStartX + boxPadding, leftBox2YPos);
-            leftBox2YPos += 6;
-            
-            doc.setFontSize(8);
-            setFontSafe(doc, 'Futura', 'normal');
-            const mechanicTrainingItems = [
-                'Pelatihan mekanik',
-                '5 hari pelatihan',
-                'Pra-Tes, Belajar di Kelas, & Praktik Langsung'
-            ];
-            
-            mechanicTrainingItems.forEach(item => {
-                doc.text('•', leftColStartX + boxPadding, leftBox2YPos);
-                const itemText = doc.splitTextToSize(item, colBoxWidth - 2 * boxPadding - 5);
-                itemText.forEach((line: string) => {
-                    doc.text(line, leftColStartX + boxPadding + 5, leftBox2YPos);
-                    leftBox2YPos += 4;
-                });
-            });
-            
-            const leftBox2Height = leftBox2YPos - leftBox2StartY + boxPadding;
-
-            // LEFT COLUMN - DENGAN INVESTASI
-            // Box 1: Kontrak Servis
-            let rightBox1YPos = leftBox2YPos + boxPadding + 10;
-            const rightBox1StartY = leftBox2StartY + leftBox2Height + 5;
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('DENGAN INVESTASI', leftColStartX + boxPadding, rightBox1YPos);
-            rightBox1YPos += 6;
-            
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Kontrak Servis', leftColStartX + boxPadding, rightBox1YPos);
-            rightBox1YPos += 6;
-            
-            doc.setFontSize(8);
-            setFontSafe(doc, 'Futura', 'normal');
-            const contractText1 = 'Stand-by mekanik gratis selama 3 bulan dengan minimal pembelian 10 unit. Setelah 3 bulan dapat melanjutkan dengan Kontrak Servis. Memiliki 3 pilihan paket: ';
-            const splitContract1 = doc.splitTextToSize(contractText1, colBoxWidth - 2 * boxPadding);
-            splitContract1.forEach((line: string) => {
-                doc.text(line, leftColStartX + boxPadding, rightBox1YPos);
-                rightBox1YPos += 4;
-            });
-            
-            // Bold text for packages
-            setFontSafe(doc, 'Futura', 'bold');
-            const packagesText = 'Spare Part / Service / Service & Spare Part.';
-            const splitPackages = doc.splitTextToSize(packagesText, colBoxWidth - 2 * boxPadding);
-            splitPackages.forEach((line: string) => {
-                doc.text(line, leftColStartX + boxPadding, rightBox1YPos);
-                rightBox1YPos += 4;
-            });
-            
-            const rightBox1Height = rightBox1YPos - rightBox1StartY;
-            
-            // Box 2: Stand By Mechanic
-            const rightBox2StartY = rightBox1StartY + rightBox1Height + 5;
-            let rightBox2YPos = rightBox2StartY - 3;
-            
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Stand By Mechanic', leftColStartX + boxPadding, rightBox2YPos + 2);
-            rightBox2YPos += 6;
-            
-            doc.setFontSize(8);
-            setFontSafe(doc, 'Futura', 'normal');
-            const standbyText = 'Gratis stand by mechanic selama 3 bulan dengan pembelian minimal 10 unit. Support garansi dan OJT Mekanik';
-            const splitStandby = doc.splitTextToSize(standbyText, colBoxWidth - 2 * boxPadding);
-            splitStandby.forEach((line: string) => {
-                doc.text(line, leftColStartX + boxPadding, rightBox2YPos);
-                rightBox2YPos += 4;
-            });
-            
-            const rightBox2Height = rightBox2YPos - rightBox2StartY + boxPadding;
-
-            // Draw borders for all boxes in second row
-            doc.setDrawColor(228, 231, 236);
-            doc.setLineWidth(0.1);
-            doc.roundedRect(leftColStartX, leftBox1StartY, colBoxWidth, leftBox1Height + leftBox2Height , 2, 2);
-            doc.roundedRect(leftColStartX, rightBox1StartY, colBoxWidth, rightBox1Height + rightBox2Height, 2, 2);
-            
-            // RIGHT COLUMN - VENDOR HELD STOCK
-            const rightColStartX = box2StartX;
-            const rightColBoxWidth = boxWidth * 2 + 5;
-            let rightColYPos = secondRowYPos;
-            const rightColStartY = secondRowYPos - boxPadding; // Store start Y position for border
-            
-            doc.setFontSize(10);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('VENDOR HELD STOCK', rightColStartX + boxPadding, rightColYPos);
-            rightColYPos += 8;
-            
-            // Manfaat Section
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Manfaat:', rightColStartX + boxPadding, rightColYPos);
-            rightColYPos += 5;
-            
-            doc.setFontSize(8);
-            setFontSafe(doc, 'Futura', 'normal');
-            const manfaatItems = [
-                'Ketersediaan Teknisi (stand by mekanik)',
-                'Suku cadang fast moving selalu tersedia',
-                'Efisiensi logistik',
-                'Tanpa investasi besar stok suku cadang',
-                'Fokus pada target produksi',
-                'Tanpa kewajiban membeli stok sisa setelah kontrak berakhir'
-            ];
-            
-            manfaatItems.forEach(item => {
-                doc.text('•', rightColStartX + boxPadding, rightColYPos);
-                const itemText = doc.splitTextToSize(item, rightColBoxWidth - 2 * boxPadding - 5);
-                itemText.forEach((line: string) => {
-                    doc.text(line, rightColStartX + boxPadding + 5, rightColYPos);
-                    rightColYPos += 4;
-                });
-            });
-            
-            rightColYPos += 3;
-            
-            // Syarat Section
-            doc.setFontSize(9);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Syarat:', rightColStartX + boxPadding, rightColYPos);
-            rightColYPos += 5;
-            
-            doc.setFontSize(8);
-            setFontSafe(doc, 'Futura', 'normal');
-            const syaratItems = [
-                'Tanpa deposit untuk pembelian mulai dari 30 unit atau lebih',
-                'Pembelian 5-29 unit VHS berlaku dengan deposit/Bank Guarantee sebesar stock yang disediakan.*',
-                'Pelanggan menyediakan tempat penyimpanan barang & infrastruktur penunjang (listrik, internet, rak, dll.), serta akomodasi manpower (mobilitas, mess, & konsumsi)'
-            ];
-            
-            syaratItems.forEach(item => {
-                doc.text('•', rightColStartX + boxPadding, rightColYPos);
-                const itemText = doc.splitTextToSize(item, rightColBoxWidth - 2 * boxPadding - 5);
-                itemText.forEach((line: string) => {
-                    doc.text(line, rightColStartX + boxPadding + 5, rightColYPos);
-                    rightColYPos += 4;
-                });
-            });
-            
-            rightColYPos += 3;
-            
-            // Footer note dengan font size 7
-            doc.setFontSize(7);
-            setFontSafe(doc, 'Futura', 'normal');
-            const footerNote = '*Deposit menyesuaikan stock spare part yang disediakan. Detail akan didiskusikan bersama team Spare Part kami';
-            const splitFooterNote = doc.splitTextToSize(footerNote, rightColBoxWidth - 2 * boxPadding);
-            splitFooterNote.forEach((line: string) => {
-                doc.text(line, rightColStartX + boxPadding, rightColYPos);
-                rightColYPos += 3.5;
-            });
-            
-            // Calculate correct height based on actual content
-            const rightColHeight = rightColYPos - rightColStartY + boxPadding;
-            
-            // Draw border for right column box
-            doc.setDrawColor(228, 231, 236);
-            doc.setLineWidth(0.1);
-            doc.roundedRect(rightColStartX, rightColStartY, rightColBoxWidth, rightColHeight, 2, 2);
+            return varYPos;
         }
+
+        const subscriptionTable = (varYPos: number): number => {
+            // Add title above the border
+            doc.setFontSize(10);
+            doc.setTextColor(23, 26, 31);
+            setFontSafe(doc, 'Futura', 'bold');
+            doc.text('MSF 1.0 Software Monthly Subscription (per Unit)', margin, varYPos);
+            varYPos += 3;
+
+            const subscriptionData = [
+                {title:'GPS Tracking'},
+                {title:'Energy Consumption'}
+            ];
+            
+            // Calculate table dimensions
+            const tableWidth = pageWidth - 2 * margin;
+            const tableStartY = varYPos;
+            const rowHeight = 7;
+            const titleHeight = 12; // Height for title
+            const totalTableHeight = titleHeight + subscriptionData.length * rowHeight; // 6 for padding
+            
+            // Draw table border
+            doc.setDrawColor(228, 231, 236);
+            doc.setLineWidth(0.3);
+            doc.roundedRect(margin, tableStartY, tableWidth, totalTableHeight, 1, 1);
+            
+            varYPos += 6; // Top padding
+            
+            // Add title inside the border
+            doc.setFontSize(10);
+            doc.setTextColor(23, 26, 31);
+            setFontSafe(doc, 'Futura', 'bold');
+            doc.text('Basic Subscription', pageWidth / 2, varYPos + 1, { align: 'center' });
+            varYPos += titleHeight - 4;
+            
+            // Render each subscription item with check icon
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            setFontSafe(doc, 'Futura', 'normal');
+            
+            subscriptionData.forEach((item) => {
+                const iconSize = 4;
+                const iconX = pageWidth / 2 - 16; // Position icon to the left of centered text
+                const iconY = varYPos - 3;
+                
+                try {
+                    const checkIcon = '/pdf/check.png';
+                    doc.addImage(checkIcon, 'PNG', iconX, iconY, iconSize, iconSize);
+                } catch (error) {
+                    doc.setDrawColor(0, 128, 0);
+                    doc.setLineWidth(0.5);
+                    doc.line(iconX, iconY + 2, iconX + 1.5, iconY + 3);
+                    doc.line(iconX + 1.5, iconY + 3, iconX + 4, iconY);
+                }
+                
+                // Center the text
+                doc.text(item.title, iconX + 6, varYPos);
+                varYPos += rowHeight - 2;
+            });
+
+            return varYPos + 3; // Bottom padding
+        }
+        const dataTouch = (varYPos: number): number => {
+            const dataTouchWidth = (pageWidth - 2 * margin) * 0.317;
+            const gap = 5; // Gap between columns
+            
+            const dataFleet = {
+                headertitle: 'MOTOR SIGHTS FLEET 1.0 SUBSCRIPTION',
+                icon: '/pdf/asset-tracking.png',
+                title: 'Fleet & Asset Tracking',
+                items: [
+                    {
+                        subtitle: 'Real-time GPS Tracking',
+                        content: 'Monitor vehicle positions in real time (live map view).'
+                    },
+                    {
+                        subtitle: 'Route History & Replay',
+                        content: 'Display travel history, including routes, speed, and stops.'
+                    },
+                    {
+                        subtitle: 'Geofencing & Alerts',
+                        content: 'Send notifications when vehicles enter or exit designated areas (e.g., pool, port, site).'
+                    },
+                    {
+                        subtitle: 'Vehicle Status',
+                        content: 'Online/offline, engine on/off, ignition.'
+                    },
+                    {
+                        subtitle: 'Fuel Consumption Monitoring',
+                        content: 'Calculate average liters per km or liters per hour.'
+                    },
+                    {
+                        subtitle: 'Fuel Tank Sensor & Refill/Drain Alerts',
+                        content: 'Detect refueling or draining activities.'
+                    },
+                    {
+                        subtitle: 'Cost per KM',
+                        content: 'Monitor expense costs per kilometer to improve efficiency.'
+                    },
+                    {
+                        subtitle: 'Cost per Liter',
+                        content: 'See fuel consumption not only per KM/Liter, but also when units are idle, running, or in operation.'
+                    }
+                ]
+            };
+            
+            const dataService = {
+                headertitle: 'IMPLEMENTATION SERVICES',
+                icon: '/pdf/installation.png',
+                title: 'Telematics Installation',
+                items: [
+                    {
+                        subtitle: 'CAN line tracing',
+                    },
+                    {
+                        subtitle: 'Telematics installation',
+                    },
+                    {
+                        subtitle: 'Software integration',
+                    }
+                ]
+            };
+            
+            const dataProduct = {
+                headertitle: 'PRODUCT & DELIVERABLES DETAILS',
+                icon: null,
+                title: null,
+                items: [
+                    {
+                        icon: '/pdf/telematic.png',
+                        title: 'Telematics',
+                        content: 'Motor Sights Fleet 150.'
+                    },
+                    {
+                        icon: '/pdf/module.png',
+                        title: 'eCAN Module',
+                        content: 'Harness for gathering data.'
+                    },
+                ]
+            };
+
+            const allData = [dataFleet, dataService, dataProduct];
+            
+            // Render each column
+            allData.forEach((data, index) => {
+                const columnX = margin + (index * (dataTouchWidth + gap));
+                let columnY = varYPos;
+                const columnStartY = columnY; // Save starting Y position for border
+                
+                // Header with background
+                doc.setFillColor(228, 231, 236);
+                doc.roundedRect(columnX, columnY, dataTouchWidth, 12, 2, 2, 'F');
+                
+                // Header text
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                setFontSafe(doc, 'Futura', 'bold');
+                const headerLines = doc.splitTextToSize(data.headertitle, dataTouchWidth - 8);
+                headerLines.forEach((line: string, lineIndex: number) => {
+                    doc.text(line, columnX + dataTouchWidth/2, columnY + 6 + (lineIndex * 3), { align: 'center' });
+                });
+                
+                columnY += 18;
+                
+                // Icon and Title (if exists) - for dataFleet and dataService only
+                
+                const iconSize = 6;
+                const iconX = columnX + 3;
+                const iconY = columnY;
+                if (data.icon && data.title) {
+                    
+                    try {
+                        doc.addImage(data.icon, 'PNG', iconX, iconY, iconSize, iconSize);
+                    } catch (error) {
+                        doc.setFillColor(220, 220, 220);
+                        doc.circle(iconX + iconSize/2, iconY + iconSize/2, iconSize/2, 'F');
+                    }
+                    
+                    // Title next to icon
+                    doc.setFontSize(10);
+                    doc.setTextColor(23, 26, 31);
+                    setFontSafe(doc, 'Futura', 'bold');
+                    doc.text(data.title, iconX + iconSize + 3, columnY + 4);
+                    
+                    columnY += 10;
+                }
+                
+                // Items content
+                if (data.items) {
+                    doc.setFontSize(8);
+                    doc.setTextColor(0, 0, 0);
+                    setFontSafe(doc, 'Futura', 'normal');
+                    
+                    data.items.forEach((item: any) => {
+                        if (item.subtitle) {
+                            // For dataFleet and dataService items
+                            doc.setTextColor(23, 26, 31);
+                            setFontSafe(doc, 'Futura', 'bold');
+                            const subtitleLines = doc.splitTextToSize(item.subtitle, dataTouchWidth - 15);
+                            subtitleLines.forEach((line: string) => {
+                                doc.text(line, iconX + iconSize + 3, columnY);
+                                columnY += 3;
+                            });
+                            
+                            if (item.content) {
+                                doc.setTextColor(0, 0, 0);
+                                setFontSafe(doc, 'Futura', 'normal');
+                                const contentLines = doc.splitTextToSize(item.content, dataTouchWidth - 15);
+                                contentLines.forEach((line: string) => {
+                                    doc.text(line, iconX + iconSize + 3, columnY);
+                                    columnY += 3;
+                                });
+                            }
+                            columnY += 2;
+                        } else if (item.title) {
+                            const iconSize = 5;
+                            const iconY = columnY - 2;
+                            
+                            if (item.icon) {
+                                try {
+                                    doc.addImage(item.icon, 'PNG', iconX, iconY, iconSize, iconSize);
+                                } catch (error) {
+                                    doc.setFillColor(220, 220, 220);
+                                    doc.circle(iconX + iconSize/2, iconY + iconSize/2, iconSize/2, 'F');
+                                }
+                            }
+                            
+                            doc.setTextColor(23, 26, 31);
+                            setFontSafe(doc, 'Futura', 'bold');
+                            doc.text(item.title, iconX + iconSize + 3, columnY);
+                            columnY += 4;
+                            
+                            if (item.content) {
+                                doc.setTextColor(0, 0, 0);
+                                setFontSafe(doc, 'Futura', 'normal');
+                                const contentLines = doc.splitTextToSize(item.content, dataTouchWidth - 15);
+                                contentLines.forEach((line: string) => {
+                                    doc.text(line, iconX + iconSize + 3, columnY);
+                                    columnY += 3;
+                                });
+                            }
+                            columnY += 3;
+                        }
+                    });
+                }
+                
+                // Draw border around entire column
+                const columnHeight = columnY - columnStartY + 5;
+                doc.setDrawColor(228, 231, 236);
+                doc.setLineWidth(0.3);
+                doc.roundedRect(columnX, columnStartY, dataTouchWidth, columnHeight, 2, 2);
+            });
+
+            return varYPos + 120; // Adjust based on content height
+        }
+        
+        yPos = headerProduct(yPos);
+        yPos += 5;
+        yPos = subscriptionTable(yPos);
+        yPos += 2;
+        yPos = dataTouch(yPos);
+        yPos += 2;
     }
 
     const totalPages = (doc as any).internal.getNumberOfPages();

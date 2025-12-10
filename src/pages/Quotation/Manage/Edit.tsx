@@ -1854,7 +1854,7 @@ export default function EditQuotation() {
                                             label="Include Aftersales Page"
                                         />
                                     </div>
-                                    <div className="flex items-center gap-3 hidden">
+                                    <div className="flex items-center gap-3">
                                         <Checkbox
                                             checked={formData.include_msf_page ?? false}
                                             onChange={(checked) => handleInputChange('include_msf_page', checked)}

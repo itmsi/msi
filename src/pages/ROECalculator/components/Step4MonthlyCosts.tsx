@@ -2,23 +2,29 @@ import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { ROECalculatorFormData, ROECalculatorValidationErrors } from '../types/roeCalculator';
 import { formatCurrency, formatNumberInput, handleKeyPress } from '@/helpers/generalHelper';
+import LoadingSpinner from '@/components/common/Loading';
+import { useEffect } from 'react';
 
 interface Step4Props {
     formData: ROECalculatorFormData;
     validationErrors: ROECalculatorValidationErrors;
     handleInputChange: (field: keyof ROECalculatorFormData, value: any) => void;
+    loading: boolean;
+    calculatorId?: string;
 }
 
 export default function Step4MonthlyCosts({ 
     formData, 
     validationErrors, 
-    handleInputChange 
+    handleInputChange,
+    loading,
+    calculatorId
 }: Step4Props) {
-    console.log({
-        formData
-    });
-
-
+    useEffect(() => {
+        if (calculatorId && formData.step && formData.step < 4) {
+            window.location.href = `/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`;
+        }
+    }, [formData.step, calculatorId]);
     const calculateTotalExpense = () => {
         const expenses = [
             parseFloat(formData.tyre_expense_monthly) || 0,
@@ -31,7 +37,16 @@ export default function Step4MonthlyCosts({
         return expenses.reduce((sum, expense) => sum + expense, 0);
     };
 
-
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <LoadingSpinner />
+                    <p className="text-gray-600">Please wait while we fetch your purchase data...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -160,7 +175,7 @@ export default function Step4MonthlyCosts({
             </div>
 
             {/* Total Expense Summary */}
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="border border-red-200 rounded-lg p-4">
                 <h4 className="font-medium text-red-900 mb-4">Total Monthly Expense</h4>
                 
                 {/* Expense Breakdown */}
@@ -238,6 +253,23 @@ export default function Step4MonthlyCosts({
                     </div>
                 </div>
                 )} */}
+
+                <div className="mt-4 pt-4 border-t border-red-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div className="text-center">
+                            <p className="text-gray-600">Equity / Modal Sendiri (Rp)</p>
+                            <p className="font-bold text-gray-700">
+                                {formatNumberInput(formData.equity_modal || formData?.financial_data?.equity || '')}
+                            </p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-gray-600">Liability / Hutang (Rp)</p>
+                            <p className="font-bold text-gray-700">
+                            {formatNumberInput(formData.liability_hutang || formData?.financial_data?.liability || '')}
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Expense Categories Breakdown Chart */}

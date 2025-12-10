@@ -1,29 +1,49 @@
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, QuoteDefaults } from '../types/roeCalculator';
-import { handleKeyPress } from '@/helpers/generalHelper';
+import { allowOnlyNumeric, formatNumberInput, handleKeyPress } from '@/helpers/generalHelper';
+import CustomSelect from '@/components/form/select/CustomSelect';
+import LoadingSpinner from '@/components/common/Loading';
+import { useNavigate } from 'react-router';
 
 interface Step3Props {
     formData: ROECalculatorFormData;
     validationErrors: ROECalculatorValidationErrors;
     handleInputChange: (field: keyof ROECalculatorFormData, value: any) => void;
     quoteDefaults: QuoteDefaults | null;
+    loading: boolean,
     onLoadDefaults: () => Promise<void>;
+    calculatorId?: string;
 }
 
 export default function Step3Operational({ 
     formData, 
     validationErrors, 
-    handleInputChange
+    handleInputChange,
+    loading,
+    calculatorId
 }: Step3Props) {
-    console.log({
-        formData
-    });
     
+    const navigate = useNavigate();
+    
+    if(formData.step < 3 && calculatorId) {
+        navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=3`, { replace: true });
+    }
     const STATUS_OPTIONS = [
         { value: 'L/km', label: 'L/km (per kilometer)' },
         { value: 'L/km/ton', label: 'L/km/ton (per km per ton)' }
     ];
+    
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <LoadingSpinner />
+                    <p className="text-gray-600">Please wait while we fetch your purchase data...</p>
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="space-y-6">
             <div>
@@ -102,9 +122,6 @@ export default function Step3Operational({
                             <span>100%</span>
                         </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                        Tingkat utilisasi unit dalam operasional
-                    </p>
                 </div>
             </div>
 
@@ -151,25 +168,23 @@ export default function Step3Operational({
                     {/* Working Days */}
                     <div>
                         <Label htmlFor="fuel_consumption_type">Tipe Konsumsi BBM</Label>
-                        <select
+                        <CustomSelect
                             id="fuel_consumption_type"
-                            value={formData.fuel_consumption_type}
-                            onChange={(e) => handleInputChange('fuel_consumption_type', e.target.value)}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                        >
-                            {STATUS_OPTIONS.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
+                            value={STATUS_OPTIONS.find(option => option.value === formData.fuel_consumption_type) || null}
+                            onChange={(option) => handleInputChange('fuel_consumption_type', option?.value || '')}
+                            options={STATUS_OPTIONS}
+                            className="w-full"
+                            placeholder="Select Tipe Konsumsi BBM"
+                            isClearable={false}
+                            isSearchable={false}
+                            error={validationErrors.fuel_consumption_type}
+                        />
                     </div>
                     <div>
                         <Label htmlFor="fuel_consumption">Konsumsi BBM (L/km)</Label>
                         <Input
                             id="fuel_consumption"
-                            type="number"
-                            min="0"
+                            onKeyPress={allowOnlyNumeric}
                             value={formData?.fuel_consumption || ''}
                             onChange={(e) => handleInputChange('fuel_consumption', e.target.value)}
                             placeholder="0.5"
@@ -180,9 +195,8 @@ export default function Step3Operational({
                         <Label htmlFor="fuel_price">Harga BBM (Rp/L)</Label>
                         <Input
                             id="fuel_price"
-                            type="number"
-                            min="0"
-                            value={formData?.fuel_price || ''}
+                            onKeyPress={handleKeyPress}
+                            value={formatNumberInput(formData?.fuel_price)}
                             onChange={(e) => handleInputChange('fuel_price', e.target.value)}
                             placeholder="6800"
                         />
@@ -198,14 +212,14 @@ export default function Step3Operational({
                             <input
                                 id="downtime_percent"
                                 type="range"
-                                min={50}
+                                min={0}
                                 max={100}
                                 value={formData.downtime_percent}
                                 onChange={(e) => handleInputChange('downtime_percent', parseInt(e.target.value))}
                                 className="w-full h-2 bg-gray-200 rounded-lg cursor-pointer"
                             />
                             <div className="flex justify-between text-sm text-gray-600">
-                                <span>50%</span>
+                                <span>0%</span>
                                 <span className="font-medium">{formData.downtime_percent}%</span>
                                 <span>100%</span>
                             </div>

@@ -10,6 +10,8 @@ import { useRoeCalculatorManagement } from "./hooks/useRoeCalculatorManagement";
 import { useMemo } from "react";
 import Input from "@/components/form/input/InputField";
 import CustomSelect from "@/components/form/select/CustomSelect";
+import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
+import { formatCurrency } from "@/helpers/generalHelper";
 
 export default function ManageRor() {
     const navigate = useNavigate();
@@ -24,9 +26,7 @@ export default function ManageRor() {
         loading,
         // error,
         
-        // confirmDelete,
-        // setConfirmDelete,
-        // deleteRorCalculator,
+        confirmDelete,
         
         // Handlers
         handlePageChange,
@@ -37,8 +37,8 @@ export default function ManageRor() {
         handleFilterChange,
         handleEdit,
         handleDelete,
-        // confirmdeleteRorCalculator,
-        // cancelDelete 
+        confirmdeleteRorCalculator,
+        cancelDelete 
     } = useRoeCalculatorManagement();
 
     const columns: TableColumn<RorEntity>[] = [
@@ -50,8 +50,8 @@ export default function ManageRor() {
                     <div className="font-medium text-gray-900">
                         {row.customer_name}
                     </div>
-                    <div className="block text-sm text-gray-500">ROE : {row.roe_individual_percentage || '-'}</div>
-                    <div className="block text-sm text-gray-500">ROA : {row.roa_individual_percentage || '-'}</div>
+                    <div className={`block text-sm text-gray-500 ${parseFloat(String(row?.roe_individual_percentage || '0')) < 0 ? 'text-red-500' : 'text-green-600'}`}>ROE : {row.roe_individual_percentage || '0'}%</div>
+                    <div className={`block text-sm text-gray-500 ${parseFloat(String(row?.roa_individual_percentage || '0')) < 0 ? 'text-red-500' : 'text-green-600'}`}>ROA : {row.roa_individual_percentage || '0'}%</div>
                 </div>
             ),
         },
@@ -61,14 +61,13 @@ export default function ManageRor() {
         },
         {
             name: 'Revenue',
-            selector: row => row.roe_individual_percentage || '-',
+            selector: row => row.revenue_monthly || '-',
             cell: (row) => (
                 <div className=" items-center gap-3 py-2">
-                    <div className="font-medium text-gray-900">
-                        {row.roe_individual_percentage}
+                    <div 
+                        className={`block text-sm text-gray-500 ${parseFloat(String(row?.revenue_monthly || '0')) < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                        {formatCurrency(String(row?.revenue_monthly)) || '0'}
                     </div>
-                    <div className="block text-sm text-gray-500">{row.roe_individual_percentage}</div>
-                    <div className="block text-sm text-gray-500">{row.roa_individual_percentage}</div>
                 </div>
             )
         },
@@ -236,6 +235,19 @@ export default function ManageRor() {
                     />
                 </div>
             </div>
+            
+            {/* Delete Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={confirmDelete.show}
+                onClose={cancelDelete}
+                onConfirm={confirmdeleteRorCalculator}
+                title="Delete ROE & ROA Calculator"
+                message="Are you sure you want to delete this ROE & ROA Calculator? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                type="danger"
+                loading={loading}
+            />
         </>
     );
 }

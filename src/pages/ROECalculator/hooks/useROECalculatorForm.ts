@@ -18,13 +18,13 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         tonase_per_ritase: '',
         jarak_haul: '',
         harga_jual_per_ton: '',
-        status: 'draft',
+        status: '',
         
         // Step 2
         harga_per_unit: '',
         jumlah_unit: '',
         down_payment_pct: 30,
-        tenor_pembiayaan: 36,
+        tenor_pembiayaan: 12,
         interest_rate: '',
         periode_depresiasi: 60,
         
@@ -49,12 +49,13 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         
         // Step 5
         equity_modal: '',
-        liability_hutang: ''
+        liability_hutang: '',
+
+        step: 1
     });
 
     const [validationErrors, setValidationErrors] = useState<ROECalculatorValidationErrors>({});
 
-    // Load existing data for edit mode
     const loadCalculatorData = useCallback(async () => {
         if (!calculatorId) return;
         
@@ -76,7 +77,6 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         }
     }, [calculatorId, navigate]);
 
-    // Load quote defaults
     const loadQuoteDefaults = useCallback(async () => {
         try {
             const response = await ROECalculatorService.getQuoteDefaults();
@@ -88,14 +88,12 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         }
     }, []);
 
-    // Handle input changes
     const handleInputChange = useCallback((field: keyof ROECalculatorFormData, value: any) => {
         setFormData(prev => ({
             ...prev,
             [field]: value
         }));
         
-        // Clear validation error when user starts typing
         if (validationErrors[field as keyof ROECalculatorValidationErrors]) {
             setValidationErrors(prev => ({
                 ...prev,
@@ -104,12 +102,10 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         }
     }, [validationErrors]);
 
-    // Helper function to get effective field value (with operation_data fallback)
     const getEffectiveValue = useCallback((directField: any, operationDataField: any) => {
         return directField || operationDataField || '';
     }, []);
 
-    // Validate step data
     const validateStep = useCallback((step: number): boolean => {
         const errors: ROECalculatorValidationErrors = {};
         
@@ -117,6 +113,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
             case 1:
                 if (!formData.customer_id) errors.customer_id = 'Customer is required';
                 if (!formData.komoditas) errors.komoditas = 'Komoditas is required';
+                if (!formData.status) errors.status = 'Status is required';
                 if (!formData.tonase_per_ritase) errors.tonase_per_ritase = 'Tonase per ritase is required';
                 if (!formData.jarak_haul) errors.jarak_haul = 'Jarak haul is required';
                 if (!formData.harga_jual_per_ton) errors.harga_jual_per_ton = 'Harga jual per ton is required';
@@ -146,14 +143,12 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         return Object.keys(errors).length === 0;
     }, [formData, getEffectiveValue]);
 
-    // Save step data
     const saveStep = useCallback(async (step: number, goNext: boolean = false): Promise<boolean> => {
         if (!validateStep(step)) {
             toast.error('Please fix validation errors');
             return false;
         }
 
-        // Prepare data for API - copy operation_data to direct fields for Step 3 if needed
         let dataToSave = { ...formData };
         if (step === 3) {
             if (!dataToSave.ritase_per_shift && dataToSave.operation_data?.ritase_per_shift) {
@@ -167,7 +162,6 @@ export const useROECalculatorForm = (calculatorId?: string) => {
             }
         }
         
-        // Copy cost_data to direct fields for Step 4 if needed (only for truly empty fields)
         if (step === 4) {
             if ((!dataToSave.tyre_expense_monthly || dataToSave.tyre_expense_monthly === "") && dataToSave.cost_data?.tyre_expense_monthly) {
                 dataToSave.tyre_expense_monthly = dataToSave.cost_data.tyre_expense_monthly;
@@ -194,18 +188,16 @@ export const useROECalculatorForm = (calculatorId?: string) => {
             let response;
         
             if (!calculatorId) {
-                // Create new calculator
                 response = await ROECalculatorService.createCalculator(dataToSave);
                 
                 if (response.success && response.data) {
                 const newId = response.data.roe_calculator_id;
-                const nextStep = goNext && step < 5 ? step + 1 : step;
+                const nextStep = goNext && step < 4 ? step + 1 : step;
                 navigate(`/roe-roa-calculator/manage/edit/${newId}?step=${nextStep}`, { replace: true });
                 toast.success('Calculator created successfully');
                     return true;
                 }
             } else {
-                // Update existing calculator
                 response = await ROECalculatorService.updateCalculatorStep(calculatorId, step, dataToSave);
                 
                 if (response.success) {
@@ -214,19 +206,17 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                     }
                     
                     toast.success('Step saved successfully');
-                    console.log({
-                        calculationResults
-                    });
                     
-                    // Navigate to next step if goNext is true
-                    if (goNext && step < 5) {
+                    if (goNext && step < 4) {
                         const nextStep = step + 1;
                         setCurrentStep(nextStep);
                         
-                        // For step 2, use quote_id from response, for others use calculatorId
-                        const idToUse = step === 2 ? response.data.data.quote_id : calculatorId;
+                        const idToUse = step === 2 && response.data?.data?.quote_id ? response.data.data.quote_id : calculatorId;
                         console.log(`Navigating from step ${step} to step ${nextStep} with ID: ${idToUse}`);
                         navigate(`/roe-roa-calculator/manage/edit/${idToUse}?step=${nextStep}`, { replace: true });
+                    }
+                    if (step === 4) {
+                    navigate(`/roe-roa-calculator/manage`);
                     }
                     return true;
                 }
@@ -242,14 +232,12 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         }
     }, [calculatorId, formData, validateStep, navigate]);
 
-    // Calculate Step 2 financials
     const calculateStep2 = useCallback(async (): Promise<boolean> => {
         if (!calculatorId) {
             toast.error('Please save the calculator first');
             return false;
         }
 
-        setLoading(true);
         try {
             const response = await ROECalculatorService.calculateStep2(calculatorId, formData);
             
@@ -265,24 +253,19 @@ export const useROECalculatorForm = (calculatorId?: string) => {
             toast.error('Failed to calculate unit purchase');
             return false;
         } finally {
-            setLoading(false);
         }
     }, [calculatorId, formData]);
 
-    // Calculate financials (other steps)
     const calculateFinancials = useCallback(async (): Promise<void> => {
-        if (!calculatorId) {
-            toast.error('Please save the calculator first');
+        setLoading(true);
+        if (!calculatorId || calculatorId === 'undefined') {
             return;
         }
-
-        setLoading(true);
         try {
-            const response = await ROECalculatorService.calculateFinancials(calculatorId);
+            const response = await ROECalculatorService.calculateFinancials(calculatorId as string, formData);
             
             if (response.success && response.data) {
                 setCalculationResults(response.data);
-                toast.success('Financial calculations completed');
             } else {
                 toast.error(response.message || 'Failed to calculate financials');
             }
@@ -293,17 +276,13 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         }
     }, [calculatorId, formData]);
 
-    // Navigate between steps
     const goToStep = useCallback((step: number) => {
-        if (step >= 1 && step <= 5) {
+        if (step >= 1 && step <= 4) {
             setCurrentStep(step);
             
-            // Update URL with step parameter
             if (calculatorId) {
-                console.log(`Navigating to step ${step} with calculatorId: ${calculatorId}`);
                 navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${step}`, { replace: true });
             } else {
-                // For new calculators without ID, just update the step parameter
                 navigate(`/roe-roa-calculator/manage/create?step=${step}`, { replace: true });
             }
         }
@@ -332,6 +311,6 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         parseFloat(formData.harga_per_unit || '0') * parseFloat(formData.jumlah_unit || '0') : 0,
         
         debtToEquityRatio: calculationResults?.debt_to_equity_ratio || 0,
-        tenorInYears: Math.round((formData.tenor_pembiayaan / 12) * 10) / 10
+        tenorInYears: Math.round((parseFloat(String(formData.tenor_pembiayaan || '0')) / 12) * 10) / 10
     };
 };

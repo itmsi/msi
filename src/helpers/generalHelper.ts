@@ -49,6 +49,38 @@ export const parseNumberInput = (value: string | undefined | null, isZero?: bool
     return value;
 };
 
+// Parse decimal input - handles both comma and dot as decimal separator
+// Examples: "12.5" -> 12.5, "20,1" -> 20.1, "100" -> 100
+export const parseDecimalInput = (value: string | number | undefined | null, defaultVal: number = 0): number => {
+    if (!value && value !== 0) return defaultVal;
+    
+    if (typeof value === 'number') {
+        return isNaN(value) ? defaultVal : value;
+    }
+
+    const str = value.toString().trim();
+    if (!str) return defaultVal;
+
+    // Keep only digits, dots, and commas
+    const cleaned = str.replace(/[^\d,.]/g, '');
+    if (!cleaned) return defaultVal;
+
+    // Replace comma with dot for JS parsing
+    let normalized = cleaned.replace(',', '.');
+    
+    // Handle multiple dots (e.g., "1.000.5" -> "1000.5")
+    const dots = (normalized.match(/\./g) || []).length;
+    if (dots > 1) {
+        const lastDotIdx = normalized.lastIndexOf('.');
+        const beforeLastDot = normalized.substring(0, lastDotIdx).replace(/\./g, '');
+        const afterLastDot = normalized.substring(lastDotIdx);
+        normalized = beforeLastDot + afterLastDot;
+    }
+    
+    const result = parseFloat(normalized);
+    return isNaN(result) ? defaultVal : result;
+};
+
 export const formatNumberInput = (value: string | number | undefined | null): string => {
     if (!value && value !== 0) return '';
     const cleanFormatValue = value.toString().replace(/[^\d]/g, '');
@@ -113,11 +145,13 @@ export const hasChanged = <T extends object>(oldData: T, newData: Partial<T>, ke
 
 export const formatCurrency = (value: number | string): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numValue)) return 'Rp 0';
+    
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
     }).format(numValue);
 };
 

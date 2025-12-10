@@ -4,15 +4,19 @@ import Input from '@/components/form/input/InputField';
 import Button from '@/components/ui/button/Button';
 import { MdCalculate } from 'react-icons/md';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, CalculationResponse } from '../types/roeCalculator';
-import { formatCurrency, formatNumberInput } from '@/helpers/generalHelper';
+import { formatCurrency, formatNumberInput, handleKeyPress, allowOnlyNumeric } from '@/helpers/generalHelper';
+import LoadingSpinner from '@/components/common/Loading';
+import { useNavigate } from 'react-router';
+import { useEffect } from 'react';
 
 interface Step2Props {
     formData: ROECalculatorFormData;
     validationErrors: ROECalculatorValidationErrors;
     handleInputChange: (field: keyof ROECalculatorFormData, value: any) => void;
     calculationResults: CalculationResponse | null;
-    totalAsset: number;
     calculateStep2: () => Promise<boolean>;
+    loading?: boolean;
+    calculatorId?: string;
 }
 
 export default function Step2UnitPurchase({ 
@@ -20,10 +24,19 @@ export default function Step2UnitPurchase({
     validationErrors, 
     handleInputChange, 
     calculationResults,
-    totalAsset,
-    calculateStep2 
+    calculateStep2,
+    loading,
+    calculatorId
 }: Step2Props) {
+    const navigate = useNavigate();
     const [calculating, setCalculating] = useState(false);
+    
+    // Validasi step: hanya bisa akses step 2 jika sudah menyelesaikan step 1
+    useEffect(() => {
+        if (calculatorId && formData.step && formData.step < 2) {
+            navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`, { replace: true });
+        }
+    }, [formData.step, calculatorId, navigate]);
 
     const handleCalculate = async () => {
         setCalculating(true);
@@ -34,11 +47,18 @@ export default function Step2UnitPurchase({
         }
     };
 
-console.log({
-    formData
-});
-
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <LoadingSpinner />
+                    <p className="text-gray-600">Please wait while we fetch your purchase data...</p>
+                </div>
+            </div>
+        );
+    }
     return (
+        
         <div className="space-y-6">
             <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Data Pembelian Unit</h3>
@@ -59,7 +79,6 @@ console.log({
                             const value = e.target.value.replace(/[^\d]/g, '');
                             handleInputChange('harga_per_unit', value);
                         }}
-                        placeholder="0"
                         error={!!validationErrors.harga_per_unit}
                     />
                     {validationErrors.harga_per_unit && (
@@ -72,11 +91,9 @@ console.log({
                     <Label htmlFor="jumlah_unit">Jumlah Unit (Qty)</Label>
                     <Input
                         id="jumlah_unit"
-                        type="number"
-                        min="1"
                         value={formData.jumlah_unit}
                         onChange={(e) => handleInputChange('jumlah_unit', e.target.value)}
-                        placeholder="1"
+                        onKeyPress={handleKeyPress}
                         error={!!validationErrors.jumlah_unit}
                     />
                     {validationErrors.jumlah_unit && (
@@ -85,11 +102,11 @@ console.log({
                 </div>
 
                 {/* Total Asset Display */}
-                {((formData.financial_structure?.asset ?? 0) > 0 || totalAsset) && (
+                {(formData.financial_structure?.asset || (calculationResults?.financial_structure?.asset != null && calculationResults.financial_structure.asset !== 0)) && (
                     <div className="md:col-span-6 p-4 bg-blue-50 rounded-lg">
                         <Label>Total Asset</Label>
                         <p className="text-xl font-bold text-blue-900">
-                            {formatCurrency(formData.financial_structure?.asset ?? 0)}
+                            {formatCurrency(formData.financial_structure?.asset ?? calculationResults?.financial_structure?.asset ?? 0)}
                         </p>
                     </div>
                 )}
@@ -120,15 +137,13 @@ console.log({
                     <Label htmlFor="tenor_pembiayaan">Tenor Pembiayaan (Bulan)</Label>
                     <Input
                         id="tenor_pembiayaan"
-                        type="number"
-                        min="1"
-                        max="120"
                         value={formData.tenor_pembiayaan}
-                        onChange={(e) => handleInputChange('tenor_pembiayaan', parseInt(e.target.value))}
-                        placeholder="36"
+                        maxLength={3}
+                        onKeyPress={handleKeyPress}
+                        onChange={(e) => handleInputChange('tenor_pembiayaan', e.target.value)}
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                        {Math.round((formData.tenor_pembiayaan / 12) * 10) / 10} tahun
+                        {Math.round((parseFloat(String(formData.tenor_pembiayaan || '0')) / 12) * 10) / 10} tahun
                     </p>
                 </div>
 
@@ -137,13 +152,12 @@ console.log({
                     <Label htmlFor="interest_rate">Interest Rate Flat per Tahun (%)</Label>
                     <Input
                         id="interest_rate"
-                        type="number"
-                        step={0.1}
-                        min="0"
-                        max="100"
+                        onKeyPress={allowOnlyNumeric}
                         value={formData.interest_rate}
-                        onChange={(e) => handleInputChange('interest_rate', e.target.value)}
-                        placeholder="12.5"
+                        maxLength={5}
+                        onChange={(e) => {
+                            handleInputChange('interest_rate', e.target.value);
+                        }}
                         error={!!validationErrors.interest_rate}
                     />
                     {validationErrors.interest_rate && (
@@ -156,12 +170,9 @@ console.log({
                     <Label htmlFor="periode_depresiasi">Periode Depresiasi (Bulan)</Label>
                     <Input
                         id="periode_depresiasi"
-                        type="number"
-                        min="12"
-                        max="120"
+                        onKeyPress={allowOnlyNumeric}
                         value={formData.periode_depresiasi}
-                        onChange={(e) => handleInputChange('periode_depresiasi', parseInt(e.target.value))}
-                        placeholder="60"
+                        onChange={(e) => handleInputChange('periode_depresiasi', e.target.value)}
                     />
                 </div>
             </div>
@@ -178,9 +189,8 @@ console.log({
                     {calculating ? 'Calculating...' : 'Simpan & Hitung'}
                 </Button>
             </div>
-
-            {/* Calculation Results */}
-            {((formData.financial_structure?.asset ?? 0) > 0 || calculationResults) && (
+                
+                {/* Calculation Results */}
                 <div className="mt-8 space-y-6">
                     {/* Financial Structure */}
                     <div>
@@ -189,19 +199,19 @@ console.log({
                             <div className="bg-green-50 p-4 rounded-lg">
                                 <Label>ASSET</Label>
                                 <p className="text-lg font-bold text-green-900">
-                                    {formatCurrency(calculationResults?.financial_structure?.asset ?? formData.financial_structure?.asset ?? 0)}
+                                    {formatCurrency(formData.financial_structure?.asset ?? calculationResults?.financial_structure?.asset ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-blue-50 p-4 rounded-lg">
                                 <Label>EQUITY</Label>
                                 <p className="text-lg font-bold text-blue-900">
-                                    {formatCurrency(calculationResults?.financial_structure?.equity ?? formData.financial_structure?.equity ?? 0)}
+                                    {formatCurrency(formData.financial_structure?.equity ?? calculationResults?.financial_structure?.equity ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-orange-50 p-4 rounded-lg">
                                 <Label>LIABILITY</Label>
                                 <p className="text-lg font-bold text-orange-900">
-                                    {formatCurrency(calculationResults?.financial_structure?.liability ?? formData.financial_structure?.liability ?? 0)}
+                                    {formatCurrency(formData.financial_structure?.liability ?? calculationResults?.financial_structure?.liability ?? 0)}
                                 </p>
                             </div>
                         </div>
@@ -217,19 +227,19 @@ console.log({
                             <div className="bg-gray-50 p-4 rounded-lg">
                                 <Label>Cicilan Pokok</Label>
                                 <p className="text-lg font-bold text-gray-900">
-                                    {formatCurrency(calculationResults?.monthly_summary?.cicilan_pokok ?? formData.monthly_summary?.cicilan_pokok ?? 0)}
+                                    {formatCurrency(formData.monthly_summary?.cicilan_pokok ?? calculationResults?.monthly_summary?.cicilan_pokok ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-gray-50 p-4 rounded-lg">
                                 <Label>Bunga per Bulan</Label>
                                 <p className="text-lg font-bold text-gray-900">
-                                    {formatCurrency(calculationResults?.monthly_summary?.bunga_per_bulan ?? formData.monthly_summary?.bunga_per_bulan ?? 0)}
+                                    {formatCurrency(formData.monthly_summary?.bunga_per_bulan ?? calculationResults?.monthly_summary?.bunga_per_bulan ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-gray-50 p-4 rounded-lg">
                                 <Label>Total Cicilan/Bulan</Label>
                                 <p className="text-lg font-bold text-gray-900">
-                                    {formatCurrency(calculationResults?.monthly_summary?.total_cicilan_bulan ?? formData.monthly_summary?.total_cicilan_bulan ?? 0)}
+                                    {formatCurrency(formData.monthly_summary?.total_cicilan_bulan ?? calculationResults?.monthly_summary?.total_cicilan_bulan ?? 0)}
                                 </p>
                             </div>
                         </div>
@@ -242,13 +252,13 @@ console.log({
                             <div className="bg-red-50 p-4 rounded-lg">
                                 <Label>Depreciation/Bulan</Label>
                                 <p className="text-lg font-bold text-red-900">
-                                    {formatCurrency(calculationResults?.expense_impact?.depreciation_bulan ?? formData.expense_impact?.depreciation_bulan ?? 0)}
+                                    {formatCurrency(formData.expense_impact?.depreciation_bulan ?? calculationResults?.expense_impact?.depreciation_bulan ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-red-50 p-4 rounded-lg">
                                 <Label>Interest Expense/Bulan</Label>
                                 <p className="text-lg font-bold text-red-900">
-                                    {formatCurrency(calculationResults?.expense_impact?.interest_expense_bulan ?? formData.expense_impact?.interest_expense_bulan ?? 0)}
+                                    {formatCurrency(formData.expense_impact?.interest_expense_bulan ?? calculationResults?.expense_impact?.interest_expense_bulan ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-red-50 p-4 rounded-lg">
@@ -263,7 +273,6 @@ console.log({
                         </p>
                     </div>
                 </div>
-            )}
         </div>
     );
 }

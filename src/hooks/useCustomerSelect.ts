@@ -36,7 +36,7 @@ export const useCustomerSelect = () => {
             const response = await CustomerService.getCustomers({
                 search: inputValue,
                 page: page,
-                limit: 5,
+                limit: 30,
                 sort_order: 'desc'
             });
 

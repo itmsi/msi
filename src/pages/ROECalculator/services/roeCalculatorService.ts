@@ -24,19 +24,19 @@ export class ROECalculatorService {
                 current_step: 1, // Will be determined by data completeness
 
                 // Step 2 - Unit Purchase Data
-                harga_per_unit: apiData.unit_purchases?.price_per_unit || '',
+                harga_per_unit: apiData.unit_purchases?.price_per_unit || '10',
                 jumlah_unit: apiData.unit_purchases?.quantity?.toString() || '',
                 down_payment_pct: parseFloat(apiData.unit_purchases?.down_payment_percent || '30') || 30,
-                tenor_pembiayaan: apiData.unit_purchases?.financing_tenor_months || 36,
+                tenor_pembiayaan: apiData.unit_purchases?.financing_tenor_months || '',
                 interest_rate: apiData.unit_purchases?.interest_rate_flat_per_year || '',
-                periode_depresiasi: apiData.unit_purchases?.depreciation_period_months || 60,
+                periode_depresiasi: apiData.unit_purchases?.depreciation_period_months || '',
 
                 // Step 3 - Operational
                 ritase_per_shift: '',
                 shift_per_hari: '',
                 hari_kerja_per_bulan: 0,
                 utilization_percent: parseFloat(apiData.utilization_percent || '') || 0,
-                downtime_percent: parseInt(apiData.downtime_percent || '') || 50,
+                downtime_percent: parseInt(apiData.downtime_percent || '') || 0,
                 fuel_consumption_type: apiData.fuel_consumption_type || '',
                 fuel_consumption: parseFloat(apiData.fuel_consumption || '') || 0,
                 fuel_price: parseFloat(apiData.fuel_price || '') || 0,
@@ -53,6 +53,7 @@ export class ROECalculatorService {
                 // Step 5 - Financial Data (readonly)
                 equity_modal: apiData.equity || '',
                 liability_hutang: apiData.liability || '',
+                step: apiData.step || 1,
 
                 // Initialize other fields with API data or unit_purchases data if available
                 // trip_per_bulan: parseInt(apiData.ritase_per_bulan || '20') || 20,
@@ -80,7 +81,7 @@ export class ROECalculatorService {
                     shift_per_hari: apiData?.operational?.shift_per_hari || '',
                     hari_kerja_per_bulan: apiData?.operational?.hari_kerja_per_bulan || '',
                     utilization_percent: apiData?.operational?.utilization_percent || '',
-                    downtime_percent: apiData?.operational?.downtime_percent || '50',
+                    downtime_percent: apiData?.operational?.downtime_percent || '0',
                     fuel_consumption_type: apiData?.operational?.fuel_consumption_type || '',
                     fuel_consumption: apiData?.operational?.fuel_consumption || '',
                     fuel_price: apiData?.operational?.fuel_price || '',
@@ -140,17 +141,18 @@ export class ROECalculatorService {
                 down_payment_pct: 30,
                 tenor_pembiayaan: 36,
                 interest_rate: '',
-                periode_depresiasi: 60,
+                periode_depresiasi: '',
                 
                 ritase_per_shift: '',
                 shift_per_hari: '',
                 hari_kerja_per_bulan: 0,
                 utilization_percent: 0,
-                downtime_percent: 50,
+                downtime_percent: 0,
                 fuel_consumption_type: '',
                 fuel_consumption: 0,
                 fuel_price: 0,
 
+                step: 1,
                 tyre_expense_monthly: '',
                 sparepart_expense_monthly: '',
                 salary_operator_monthly: '',
@@ -178,7 +180,6 @@ export class ROECalculatorService {
     // Update calculator step
     static async updateCalculatorStep(id: string, step: number, data: Partial<ROECalculatorFormData>): Promise<{ success: boolean; data?: any; message?: string }> {
         try {
-            // Map frontend data to API format based on step
             let apiData: any = {};
             
             switch (step) {
@@ -191,7 +192,7 @@ export class ROECalculatorService {
                         haul_distance: data.jarak_haul,
                         status: data.status
                     };
-                    break;
+                    break
                 case 2:
                     // Step 2 only saves data, calculation is handled separately
                     apiData = {
@@ -334,42 +335,59 @@ export class ROECalculatorService {
     }
 
     // Calculate financial data (other steps)
-    static async calculateFinancials( data: any): Promise<{ success: boolean; data?: CalculationResponse; message?: string }> {
+    static async calculateFinancials(id: string, payload: Partial<ROECalculatorFormData>): Promise<{ success: boolean; data?: CalculationResponse; message?: string }> {
         try {
-        const response = await apiClient.post(`${API_BASE_URL}/calculations/quotes/create`, data);
-        
-        // Map API response to CalculationResponse format
-        const calcData = response.data as ApiCalculationResponse;
-        const mappedResponse: CalculationResponse = {
-            financial_structure: {
-                asset: parseFloat(calcData.assets) || 0,
-                equity: parseFloat(calcData.equity) || 0,
-                liability: parseFloat(calcData.liability) || 0,
-                roe_percentage: parseFloat(calcData.roe_aggregate_percentage) || 0,
-                roa_percentage: parseFloat(calcData.roa_aggregate_percentage) || 0
-            },
-            monthly_summary: {
-                cicilan_pokok: parseFloat(calcData.depreciation_monthly) || 0,
-                bunga_per_bulan: parseFloat(calcData.interest_monthly) || 0,
-                total_cicilan_bulan: (parseFloat(calcData.depreciation_monthly) || 0) + (parseFloat(calcData.interest_monthly) || 0)
-            },
-            expense_impact: {
-                depreciation_bulan: parseFloat(calcData.depreciation_monthly) || 0,
-                interest_expense_bulan: parseFloat(calcData.interest_monthly) || 0,
-                total_fixed_cost_unit: parseFloat(calcData.total_expense_monthly) || 0
-            },
-            total_asset: parseFloat(calcData.assets) || 0,
-            debt_to_equity_ratio: (parseFloat(calcData.liability) || 0) / (parseFloat(calcData.equity) || 1)
-        };
+            // Skip if no valid ID (during create process)
+            if (!id || id === 'undefined') {
+                return {
+                    success: false,
+                    message: 'Calculator ID is required for financial calculations'
+                };
+            }
 
-        return {
-            success: true,
-            data: mappedResponse
-        };
+            const apiData = {
+                customer_id: payload.customer_id,
+                commodity: payload.komoditas === 'batu_bara' ? 'Batu Bara' : payload.komoditas === 'nikel' ? 'Nikel' : payload.komoditas,
+                tonnage_per_ritase: payload.tonase_per_ritase,
+                selling_price_per_ton: payload.harga_jual_per_ton,
+                haul_distance: payload.jarak_haul,
+                status: payload.status
+            };
+
+            const response = await apiPut(`${API_BASE_URL}/calculations/quotes/${id}`, apiData);
+        
+            // Map API response to CalculationResponse format
+            const calcData = response.data as ApiCalculationResponse;
+            const mappedResponse: CalculationResponse = {
+                financial_structure: {
+                    asset: parseFloat(calcData.assets) || 0,
+                    equity: parseFloat(calcData.equity) || 0,
+                    liability: parseFloat(calcData.liability) || 0,
+                    roe_percentage: parseFloat(calcData.roe_aggregate_percentage) || 0,
+                    roa_percentage: parseFloat(calcData.roa_aggregate_percentage) || 0
+                },
+                monthly_summary: {
+                    cicilan_pokok: parseFloat(calcData.depreciation_monthly) || 0,
+                    bunga_per_bulan: parseFloat(calcData.interest_monthly) || 0,
+                    total_cicilan_bulan: (parseFloat(calcData.depreciation_monthly) || 0) + (parseFloat(calcData.interest_monthly) || 0)
+                },
+                expense_impact: {
+                    depreciation_bulan: parseFloat(calcData.depreciation_monthly) || 0,
+                    interest_expense_bulan: parseFloat(calcData.interest_monthly) || 0,
+                    total_fixed_cost_unit: parseFloat(calcData.total_expense_monthly) || 0
+                },
+                total_asset: parseFloat(calcData.assets) || 0,
+                debt_to_equity_ratio: (parseFloat(calcData.liability) || 0) / (parseFloat(calcData.equity) || 1)
+            };
+
+            return {
+                success: true,
+                data: mappedResponse
+            };
         } catch (error: any) {
             return {
                 success: false,
-                message: error.response?.data?.message || 'Failed to calculate financials'
+                message: error.response?.data?.message || 'Failed to calculate financials 1'
             };
         }
     }
@@ -423,19 +441,20 @@ export class ROECalculatorService {
                 harga_per_unit: '',
                 jumlah_unit: '1',
                 down_payment_pct: 30,
-                tenor_pembiayaan: 36,
+                tenor_pembiayaan: '',
                 interest_rate: '',
-                periode_depresiasi: 60,
+                periode_depresiasi: '',
 
                 ritase_per_shift: '',
                 shift_per_hari: '',
                 hari_kerja_per_bulan: 0,
                 utilization_percent: 0,
-                downtime_percent: 50,
+                downtime_percent: 0,
                 fuel_consumption_type: '',
                 fuel_consumption: 0,
                 fuel_price: 0,
                 
+                step: item.step || 1,
                 tyre_expense_monthly: '',
                 sparepart_expense_monthly: '',
                 salary_operator_monthly: '',
