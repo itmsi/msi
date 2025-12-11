@@ -31,7 +31,6 @@ export default function Step2UnitPurchase({
     const navigate = useNavigate();
     const [calculating, setCalculating] = useState(false);
     
-    // Validasi step: hanya bisa akses step 2 jika sudah menyelesaikan step 1
     useEffect(() => {
         if (calculatorId && formData.step && formData.step < 2) {
             navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`, { replace: true });
@@ -46,6 +45,20 @@ export default function Step2UnitPurchase({
             setCalculating(false);
         }
     };
+
+    useEffect(() => {
+        if (calculationResults) {
+            if (calculationResults.financial_structure) {
+                handleInputChange('financial_structure', calculationResults.financial_structure);
+            }
+            if (calculationResults.monthly_summary) {
+                handleInputChange('monthly_summary', calculationResults.monthly_summary);
+            }
+            if (calculationResults.expense_impact) {
+                handleInputChange('expense_impact', calculationResults.expense_impact);
+            }
+        }
+    }, [calculationResults, handleInputChange]);
 
     if (loading) {
         return (

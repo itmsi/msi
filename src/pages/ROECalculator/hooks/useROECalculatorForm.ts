@@ -212,7 +212,6 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                         setCurrentStep(nextStep);
                         
                         const idToUse = step === 2 && response.data?.data?.quote_id ? response.data.data.quote_id : calculatorId;
-                        console.log(`Navigating from step ${step} to step ${nextStep} with ID: ${idToUse}`);
                         navigate(`/roe-roa-calculator/manage/edit/${idToUse}?step=${nextStep}`, { replace: true });
                     }
                     if (step === 4) {

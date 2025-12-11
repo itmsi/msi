@@ -40,7 +40,6 @@ export default function Step1BasicInfo({
         initializeOptions: initializeCustomerOptions
     } = useCustomerSelect();
 
-    // const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
     const selectedCustomer = customerOptions.find(c => c.value === formData.customer_id) || null;
 
     useEffect(() => {
@@ -87,7 +86,6 @@ export default function Step1BasicInfo({
                             handleCustomerInputChange(inputValue);
                         }}
                         onChange={(option: any) => {
-                            // setSelectedCustomer(option);
                             handleInputChange('customer_id', option?.value || '');
                         }}
                     />

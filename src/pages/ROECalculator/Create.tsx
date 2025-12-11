@@ -43,7 +43,6 @@ export default function CreateROECalculator() {
         loadQuoteDefaults,
     } = useROECalculatorForm(calculatorId);
 
-    // Load data on mount
     useEffect(() => {
         const initializeData = async () => {
             try {

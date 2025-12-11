@@ -24,7 +24,7 @@ export class ROECalculatorService {
                 current_step: 1, // Will be determined by data completeness
 
                 // Step 2 - Unit Purchase Data
-                harga_per_unit: apiData.unit_purchases?.price_per_unit || '10',
+                harga_per_unit: apiData.unit_purchases?.price_per_unit || '',
                 jumlah_unit: apiData.unit_purchases?.quantity?.toString() || '',
                 down_payment_pct: parseFloat(apiData.unit_purchases?.down_payment_percent || '30') || 30,
                 tenor_pembiayaan: apiData.unit_purchases?.financing_tenor_months || '',
@@ -287,11 +287,6 @@ export class ROECalculatorService {
             // Map response to CalculationResponse format for display
             if (response.data) {
                 const unitData = (response.data as { data: ApiUnitPurchaseResponse }).data;
-                
-                console.log({
-                    unitData,
-                    fullResponse: response.data
-                });
         
                 const calculationResult: CalculationResponse = {
                     financial_structure: {

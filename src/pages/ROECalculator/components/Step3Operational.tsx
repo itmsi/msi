@@ -5,6 +5,7 @@ import { allowOnlyNumeric, formatNumberInput, handleKeyPress } from '@/helpers/g
 import CustomSelect from '@/components/form/select/CustomSelect';
 import LoadingSpinner from '@/components/common/Loading';
 import { useNavigate } from 'react-router';
+import { useEffect } from 'react';
 
 interface Step3Props {
     formData: ROECalculatorFormData;
@@ -26,9 +27,11 @@ export default function Step3Operational({
     
     const navigate = useNavigate();
     
-    if(formData.step < 3 && calculatorId) {
-        navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=3`, { replace: true });
-    }
+    useEffect(() => {
+        if (calculatorId && formData.step && formData.step < 3) {
+            navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`, { replace: true });
+        }
+    }, [formData.step, calculatorId, navigate]);
     const STATUS_OPTIONS = [
         { value: 'L/km', label: 'L/km (per kilometer)' },
         { value: 'L/km/ton', label: 'L/km/ton (per km per ton)' }

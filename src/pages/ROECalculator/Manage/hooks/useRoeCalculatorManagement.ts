@@ -5,7 +5,6 @@ import { useRoeCalculator } from './useRoeCalculator';
 export const useRoeCalculatorManagement = () => {
     const navigate = useNavigate();
     
-    // Local state untuk form inputs
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [sortCommodity, setSortCommodity] = useState<'batu bara' | 'nikel' | ''>('');
@@ -17,7 +16,6 @@ export const useRoeCalculatorManagement = () => {
     const { roeCalculator, pagination, loading, error, fetchRoeCalculator, deleteRorCalculator } = useRoeCalculator();
 
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; roeCalculatorId?: string; }>({ show: false });
-    // Debounce search term
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedSearch(searchTerm);
@@ -26,7 +24,6 @@ export const useRoeCalculatorManagement = () => {
         return () => clearTimeout(handler);
     }, [searchTerm]);
 
-    // Load data saat component mount atau filter berubah
     useEffect(() => {
         fetchRoeCalculator({
             page: currentPage,
@@ -37,7 +34,6 @@ export const useRoeCalculatorManagement = () => {
         });
     }, [debouncedSearch, sortOrder, currentPage, itemsPerPage, sortCommodity, fetchRoeCalculator]);
 
-    // Handler untuk pagination
     const handlePageChange = useCallback((page: number) => {
         setCurrentPage(page);
     }, []);
@@ -47,10 +43,9 @@ export const useRoeCalculatorManagement = () => {
         setItemsPerPage(newPerPage);
     }, []);
 
-    // Handler untuk search
     const handleSearchChange = useCallback((value: string) => {
         setSearchTerm(value);
-        setCurrentPage(1); // Reset ke halaman pertama saat search
+        setCurrentPage(1);
     }, []);
 
     const handleManualSearch = useCallback(() => {
@@ -75,7 +70,6 @@ export const useRoeCalculatorManagement = () => {
         });
     }, [sortOrder, itemsPerPage, fetchRoeCalculator]);
 
-    // Handler untuk sort change
     const handleFilterChange = useCallback((key: string, value: string) => {
         if (key === 'sort_order') {
             setSortOrder(value as 'asc' | 'desc');
@@ -92,7 +86,6 @@ export const useRoeCalculatorManagement = () => {
     }, [navigate]);
 
     const handleDelete = useCallback((roeCalculator: any) => {
-        // Support both roeCalculator object and roeCalculator ID
         const roeCalculatorId = typeof roeCalculator === 'string' ? roeCalculator : roeCalculator.id;
         setConfirmDelete({ show: true, roeCalculatorId: roeCalculatorId });
     }, []);
@@ -102,7 +95,6 @@ export const useRoeCalculatorManagement = () => {
         try {
             await deleteRorCalculator(confirmDelete.roeCalculatorId);
             setConfirmDelete({ show: false });
-            // Refresh data setelah delete
             fetchRoeCalculator({
                 page: currentPage,
                 limit: itemsPerPage,
@@ -120,7 +112,6 @@ export const useRoeCalculatorManagement = () => {
     }, []);
 
     return {
-        // State
         searchTerm,
         sortOrder,
         sortCommodity,
@@ -135,7 +126,6 @@ export const useRoeCalculatorManagement = () => {
         setConfirmDelete,
         deleteRorCalculator,
         
-        // Handlers
         handlePageChange,
         handleRowsPerPageChange,
         handleSearchChange,

@@ -4,6 +4,7 @@ import { ROECalculatorFormData, ROECalculatorValidationErrors } from '../types/r
 import { formatCurrency, formatNumberInput, handleKeyPress } from '@/helpers/generalHelper';
 import LoadingSpinner from '@/components/common/Loading';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 
 interface Step4Props {
     formData: ROECalculatorFormData;
@@ -20,11 +21,12 @@ export default function Step4MonthlyCosts({
     loading,
     calculatorId
 }: Step4Props) {
+    const navigate = useNavigate();
     useEffect(() => {
         if (calculatorId && formData.step && formData.step < 4) {
-            window.location.href = `/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`;
+            navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`, { replace: true });
         }
-    }, [formData.step, calculatorId]);
+    }, [formData.step, calculatorId, navigate]);
     const calculateTotalExpense = () => {
         const expenses = [
             parseFloat(formData.tyre_expense_monthly) || 0,
