@@ -83,19 +83,11 @@ export const useRoeCalculator = () => {
         setError(null);
         
         try {
-            const response = await RoecalculatorService.downloadRoe(roeCalculatorId); 
-            console.log('Full download response:', response);
-            console.log('Response data:', response.data);
-            console.log('Response success:', response.data?.success);
-            console.log('Response data content:', response.data?.data);
+            const response = await RoecalculatorService.downloadRoe(roeCalculatorId);
             
             if (response.data?.success && response.data?.data) {
-                console.log('Starting PDF generation...');
-                console.log('PDF data to generate:', response.data.data);
-                
                 try {
                     await generateROEPDF(response.data.data);
-                    console.log('PDF generation completed successfully');
                     toast.success('PDF downloaded successfully');
                     return true;
                 } catch (pdfError) {

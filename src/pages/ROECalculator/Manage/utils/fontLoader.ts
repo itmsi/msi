@@ -46,8 +46,6 @@ export const loadCustomFonts = async (doc: jsPDF): Promise<void> => {
         
         // Set default font to Futura
         doc.setFont('Futura', 'normal');
-        
-        console.log('Custom fonts loaded successfully');
     } catch (error) {
         console.error('Error loading custom fonts:', error);
         // Fallback to default font

@@ -28,20 +28,20 @@ const formatCurrency = (value: string | number): string => {
 };
 
 export const generateROEPDF = async (data: ManageROEDataPDF) => {
-        const doc = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: 'a4'
-        });
-        
-        // Load custom Futura fonts
-        await loadCustomFonts(doc);
-        const pageWidth = doc.internal.pageSize.getWidth(); // 297mm for A4 landscape
-        const pageHeight = doc.internal.pageSize.getHeight(); // 210mm for A4 landscape
-        const margin = 15;
-        const headerHeight = 20;
-        const footerHeight = 20;
-        let yPos = margin + headerHeight - 5;
+    const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+    });
+    
+    // Load custom Futura fonts
+    await loadCustomFonts(doc);
+    const pageWidth = doc.internal.pageSize.getWidth(); // 297mm for A4 landscape
+    const pageHeight = doc.internal.pageSize.getHeight(); // 210mm for A4 landscape
+    const margin = 10;
+    const headerHeight = 20;
+    const footerHeight = 20;
+    let yPos = margin + headerHeight;
 
 
     // Function to add header to each page
@@ -60,8 +60,11 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
             // doc.addImage(msLogo, 'PNG', pageWidth - margin - 20, 3, 24, 15);
             doc.setFontSize(12);
             doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('ROE & ROA CALCULATOR REPORT', pageWidth - margin - 50, 12, { align: 'center' });
+            setFontSafe(doc, 'OpenSans', 'bold');
+            doc.text('R-1 - Quote Report', pageWidth - margin, 10, { align: 'right' });
+            setFontSafe(doc, 'OpenSans', 'normal');
+            doc.setFontSize(10);
+            doc.text(`${data.customer_name} | ${data.commodity}`, pageWidth - margin, 15 , { align: 'right' });
         } catch (error) {
             console.warn('Motor Sights logo not found');
         }
@@ -101,364 +104,479 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.text('(+62) 21-4585-9155', pageWidth - margin - 20, footerY + 10);
     };
 
-    const checkNewPage = (spaceNeeded: number = 20) => {
-        if (yPos + spaceNeeded > pageHeight - footerHeight - margin) {
-            doc.addPage();
-            addHeader();
-            addFooter();
-            yPos = margin + headerHeight + 5;
-            return true;
-        }
-        return false;
-    };
-
     addHeader();
     addFooter();
 
-    // // Title Section
-    // doc.setFontSize(18);
-    // doc.setTextColor(0, 48, 97);
-    // setFontSafe(doc, 'Futura', 'bold');
     
-    // doc.text('ROE & ROA CALCULATOR REPORT', pageWidth / 2, yPos, { align: 'center' });
-    // yPos += 10;
-
-    // Customer Information Section
-    // checkNewPage(30);
-    
-    // doc.setFontSize(14);
-    // doc.setTextColor(0, 48, 97);
-    // setFontSafe(doc, 'Futura', 'bold');
-    
-    // doc.text('Customer Information', margin, yPos);
-    // yPos += 8;
-
-    // const customerInfo = [
-    //     ['Customer Name', data.customer_name || 'N/A'],
-    //     ['Commodity', data.commodity || 'N/A'],
-    //     ['Status', (data.status || 'draft').toUpperCase()],
-    //     ['Created Date', data.created_at ? formatDate(data.created_at) : 'N/A']
-    // ];
-
-    // doc.setFontSize(10);
-    // doc.setTextColor(0, 0, 0);
-    // setFontSafe(doc, 'Futura', 'normal');
-
-    // customerInfo.forEach(([label, value]) => {
-    //     doc.setTextColor(0, 48, 97);
-    //     setFontSafe(doc, 'Futura', 'bold');
-    //     doc.text(`${label}:`, margin, yPos);
+    // KEY FINANCIAL METRICS
+    const keyFinancialData = (varYPos: number): number => {
+        const fullTableWidth = (pageWidth - 2 * margin) / 2;
+        const colWidth = fullTableWidth / 2;
+        const col1X = (margin + colWidth * 0.55);
+        const col2X = margin + colWidth * 1.45;
         
-    //     doc.setTextColor(0, 0, 0);
-    //     setFontSafe(doc, 'Futura', 'normal');
-    //     doc.text(value, margin + 50, yPos);
-    //     yPos += 6;
-    // });
+        // Create rounded border background
+        const borderHeight = 80;
+        doc.setDrawColor(228, 231, 236);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(margin, varYPos - 5, fullTableWidth, borderHeight, 2, 2, 'S');
+        
+        // Add section title
+        doc.setFontSize(14);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text('Key Financial Metrics', margin + 5, varYPos + 3);
+        
+        // Add border line below title
+        doc.setDrawColor(0, 48, 97);
+        doc.setLineWidth(0.5);
+        doc.line(margin + 5, varYPos + 6, margin + fullTableWidth - 5, varYPos + 6);
+        
+        varYPos += 15;
 
-    yPos += 5;
+        // ROE - Add rounded border
+        const roeBoxWidth = colWidth * 0.85;
+        const roeBoxHeight = 20;
+        const roeBoxX = col1X - roeBoxWidth / 2;
+        doc.setFillColor(242, 242, 253);
+        doc.roundedRect(roeBoxX - 4, varYPos - 4.5, roeBoxWidth + 4, roeBoxHeight, 1, 1, 'F');
+        doc.setDrawColor(242, 242, 253);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(roeBoxX - 4, varYPos - 4.5, roeBoxWidth + 4, roeBoxHeight, 1, 1, 'S');
+        
+        doc.setFontSize(11);
+        doc.setTextColor(86, 93, 109);
+        setFontSafe(doc, 'Futura', 'normal');
+        doc.text('Return on Equity (ROE)', col1X - 2, varYPos, { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setTextColor(99, 106, 232);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text(`${data.pdf_data.key_financial_metrics.roe_percentage}%`, col1X - 2, varYPos + 8, { align: 'center' });
+        
+        doc.setFontSize(9);
+        doc.setTextColor(86, 93, 109);
+        setFontSafe(doc, 'Futura', 'normal');
+        doc.text('Net Profit / Equity', col1X - 2, varYPos + 13, { align: 'center' });
 
-    // Operational Parameters & Unit Purchase Section (Side by Side)
-    checkNewPage(50);
-    
-    doc.setFontSize(14);
-    doc.setTextColor(0, 48, 97);
-    setFontSafe(doc, 'Futura', 'bold');
-    doc.text('Operational Parameters', margin, yPos);
-    
-    // Show Unit Purchase title if data exists
-    if (data.unit_purchases) {
-        doc.text('Unit Purchase Information', margin + (pageWidth / 2), yPos);
+        // ROA - Add rounded border
+        const roaBoxWidth = colWidth * 0.85;
+        const roaBoxHeight = 20;
+        const roaBoxX = col2X - roaBoxWidth / 2;
+        doc.setDrawColor(245, 245, 245);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(roaBoxX, varYPos - 4.5, roaBoxWidth + 4, roaBoxHeight, 1, 1, 'S');
+        
+        doc.setFontSize(11);
+        doc.setTextColor(86, 93, 109);
+        doc.text('Return on Assets (ROA)', col2X + 2, varYPos, { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text(`${data.pdf_data.key_financial_metrics.roa_percentage}%`, col2X + 2, varYPos + 8, { align: 'center' });
+        
+        doc.setFontSize(9);
+        doc.setTextColor(86, 93, 109);
+        setFontSafe(doc, 'Futura', 'normal');
+        doc.text('Net Profit / Total Assets', col2X + 2, varYPos + 13, { align: 'center' });
+
+        varYPos += 23;
+   
+        // Revenue per Bulan - Add rounded border
+        const revenueBoxWidth = colWidth * 0.85;
+        const revenueBoxHeight = 17;
+        const revenueBoxX = col1X - revenueBoxWidth / 2;
+        // doc.setFillColor(245, 245, 245);
+        // doc.roundedRect(revenueBoxX, varYPos- 5, revenueBoxWidth, revenueBoxHeight, 1, 1, 'F');
+        doc.setDrawColor(245, 245, 245);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(revenueBoxX - 4, varYPos- 5, revenueBoxWidth + 4, revenueBoxHeight, 1, 1, 'S');
+        
+        doc.setFontSize(11);
+        doc.setTextColor(86, 93, 109);
+        setFontSafe(doc, 'Futura', 'normal');
+        doc.text('Revenue per Month', col1X - 2, varYPos, { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text(formatCurrency(data.pdf_data.key_financial_metrics.revenue_per_bulan), col1X - 2, varYPos + 8, { align: 'center' });
+
+        // Expenses per Bulan - Add rounded border
+        const expensesBoxWidth = colWidth * 0.85;
+        const expensesBoxHeight = 17;
+        const expensesBoxX = col2X - expensesBoxWidth / 2;
+        // doc.setFillColor(245, 245, 245);
+        // doc.roundedRect(expensesBoxX, varYPos- 5, expensesBoxWidth, expensesBoxHeight, 1, 1, 'F');
+        doc.setDrawColor(245, 245, 245);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(expensesBoxX, varYPos- 5, expensesBoxWidth + 4, expensesBoxHeight, 1, 1, 'S');
+        
+        doc.setFontSize(11);
+        doc.setTextColor(86, 93, 109);
+        setFontSafe(doc, 'Futura', 'normal');
+        doc.text('Expenses per Month', col2X + 2, varYPos, { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text(formatCurrency(data.pdf_data.key_financial_metrics.expenses_per_bulan), col2X + 2, varYPos + 8, { align: 'center' });
+        
+        varYPos += 20;
+        
+        // Net Profit per Bulan - Add rounded border
+        const netProfitBoxWidth = colWidth * 0.85;
+        const netProfitBoxHeight = 17;
+        const netProfitBoxX = col1X - netProfitBoxWidth / 2;
+        // doc.setFillColor(245, 245, 245);
+        // doc.roundedRect(netProfitBoxX, varYPos - 2, netProfitBoxWidth, netProfitBoxHeight, 1, 1, 'F');
+        doc.setDrawColor(245, 245, 245);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(netProfitBoxX - 4, varYPos - 5, netProfitBoxWidth + 4, netProfitBoxHeight, 1, 1, 'S');
+        
+        doc.setFontSize(11);
+        doc.setTextColor(86, 93, 109);
+        setFontSafe(doc, 'Futura', 'normal');
+        doc.text('Net Profit per Month', col1X - 2, varYPos, { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text(formatCurrency(data.pdf_data.key_financial_metrics.net_profit_per_bulan), col1X - 2, varYPos + 8, { align: 'center' });
+        
+        varYPos += 25;
+        return varYPos;
+
     }
-    yPos += 8;
 
-    const operationalData = [
-        ['Tonnage per Ritase', `${data.tonnage_per_ritase} tons`],
-        ['Selling Price per Ton', formatCurrency(data.selling_price_per_ton)],
-        ['Haul Distance', `${data.haul_distance} km`],
-        ['Ritase per Shift', data.ritase_per_shift.toString()],
-        ['Shift per Day', data.shift_per_hari.toString()],
-        ['Working Days per Month', data.hari_kerja_per_bulan.toString()],
-        ['Utilization Rate', `${data.utilization_percent}%`],
-        ['Downtime Rate', `${data.downtime_percent}%`],
-        ['Fuel Consumption Type', data.fuel_consumption_type],
-        ['Fuel Consumption', `${data.fuel_consumption} ${data.fuel_consumption_type}`],
-        ['Fuel Price', formatCurrency(data.fuel_price)]
-    ];
-
-    const leftTableWidth = (pageWidth - 3 * margin) / 2;
+    // REVENUE
+    const revenueFunction = (varYPos: number): number => {
+        const fullTableWidth = (pageWidth - 2 * margin) / 2;
+        const colWidth = fullTableWidth / 2;
         
-        // Left table - Operational Parameters
-        autoTable(doc, {
-            startY: yPos,
-            head: [['Parameter', 'Value']],
-            body: operationalData,
-            margin: { left: margin, right: margin + leftTableWidth + margin },
-            tableWidth: leftTableWidth,
-            styles: {
-                fontSize: 8,
-                cellPadding: 2,
-                font: 'Futura',
-                fontStyle: 'normal'
-            },
-            headStyles: {
-                fillColor: [0, 48, 97],
-                textColor: [255, 255, 255],
-                fontStyle: 'bold',
-                fontSize: 9
-            },
-            columnStyles: {
-                0: { cellWidth: leftTableWidth * 0.55, fontStyle: 'bold' },
-                1: { cellWidth: leftTableWidth * 0.45 }
-            }
-        });
+        // Create rounded border background
+        const borderHeight = 80;
+        let postY = varYPos - borderHeight - 3;
+        doc.setDrawColor(228, 231, 236);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(fullTableWidth + margin + 2, postY - 5, fullTableWidth, borderHeight, 2, 2, 'S');
+        
+        // Add section title
+        doc.setFontSize(14);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text('REVENUE', fullTableWidth + margin + 5, postY + 3);
+        
+        // Add border line below title
+        doc.setDrawColor(0, 48, 97);
+        doc.setLineWidth(0.5);
+        doc.line(fullTableWidth + margin + 5, postY + 6, fullTableWidth + margin + fullTableWidth - 5, postY + 6);
+        
+        postY += 10;
 
-    // Right table - Unit Purchase (if exists)
-    if (data.unit_purchases) {
-        const unitPurchaseData = [
-            ['Price per Unit', formatCurrency(data.unit_purchases.price_per_unit)],
-            ['Quantity', data.unit_purchases.quantity.toString()],
-            ['Total Asset', formatCurrency(data.unit_purchases.total_asset)],
-            ['Down Payment', `${data.unit_purchases.down_payment_percent}%`],
-            ['Down Payment Value', formatCurrency(data.unit_purchases.down_payment)],
-            ['Remaining Debt', formatCurrency(data.unit_purchases.remaining_debt)],
-            ['Financing Tenor', `${data.unit_purchases.financing_tenor_months} months`],
-            ['Interest Rate', `${data.unit_purchases.interest_rate_flat_per_year}% per year`],
-            ['Depreciation Period', `${data.unit_purchases.depreciation_period_months} months`],
-            ['Principal Installment', formatCurrency(data.unit_purchases.principal_installment)],
-            ['Interest per Month', formatCurrency(data.unit_purchases.interest_per_month)]
+        // OPERATIONAL Section with border
+        doc.setFontSize(10);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text('OPERATIONAL', fullTableWidth + margin + 5, postY + 2);
+        
+        // OPERATIONAL border
+        doc.setDrawColor(228, 231, 236);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(fullTableWidth + margin + 5, postY + 5, colWidth - 8, 40, 1, 1, 'S');
+        
+        const operationalData = [
+            ['Tonase per Ritase', data.pdf_data.revenue.data_operasional.tonnage_per_ritase+' Ton'],
+            ['Jarak Haul (PP)', data.pdf_data.revenue.data_operasional.haul_distance+' Km'],
+            ['Harga Jual per Ton', formatCurrency(data.pdf_data.revenue.data_operasional.selling_price_per_ton)],
+            ['Ritase per Shift', data.pdf_data.revenue.data_operasional.ritase_per_shift],
+            ['Shift per Hari', data.pdf_data.revenue.data_operasional.shift_per_hari],
+            ['Hari Kerja per Bulan', data.pdf_data.revenue.data_operasional.hari_kerja_per_bulan],
+            ['Utilization', data.pdf_data.revenue.data_operasional.utilization_percent+ '%'],
         ];
-
+        // Left table - Operational
         autoTable(doc, {
-            startY: yPos,
-            head: [['Item', 'Value']],
-            body: unitPurchaseData,
-            margin: { left: margin + leftTableWidth + margin, right: margin },
-            tableWidth: leftTableWidth,
+            startY: postY + 6,
+            body: operationalData,
+            margin: { left: fullTableWidth + margin + 6 },
+            tableWidth: colWidth - 20,
             styles: {
                 fontSize: 8,
-                cellPadding: 2,
+                cellPadding: 1,
+                valign: 'middle',
                 font: 'Futura',
                 fontStyle: 'normal'
             },
-            headStyles: {
-                fillColor: [0, 48, 97],
-                textColor: [255, 255, 255],
-                fontStyle: 'bold',
-                fontSize: 9
+            columnStyles: {
+                0: { cellWidth: (colWidth - 10) * 0.5, fontStyle: 'normal' },
+                1: { cellWidth: (colWidth - 10) * 0.5 }
+            },
+        });
+        // Add vertical separator line
+        doc.setDrawColor(0, 48, 97);
+        doc.setLineWidth(0.2);
+        doc.line(fullTableWidth + margin + colWidth, postY - 2, fullTableWidth + margin + colWidth, postY + 45);
+        
+        // PRODUKSI Section with border
+        doc.setFontSize(10);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text('PRODUKSI', fullTableWidth + margin + colWidth + 3, postY + 2);
+        
+        // PRODUKSI border
+        doc.setDrawColor(228, 231, 236);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(fullTableWidth + margin + colWidth + 3, postY + 5, colWidth - 5, 40, 1, 1, 'S');
+        
+        const produksiData = [
+            ['Ritase per Hari', data.pdf_data.revenue.hasil_produksi.ritase_per_hari],
+            ['Ritase per Bulan', data.pdf_data.revenue.hasil_produksi.ritase_per_bulan],
+            ['Tonase per Bulan', data.pdf_data.revenue.hasil_produksi.tonnage_per_bulan + ' ton'],
+        ];
+        // Right table - Produksi
+        autoTable(doc, {
+            startY: postY + 6,
+            body: produksiData,
+            margin: { left: fullTableWidth + margin + colWidth + 4 },
+            tableWidth: colWidth - 20,
+            styles: {
+                fontSize: 8,
+                cellPadding: 1,
+                valign: 'middle',
+                font: 'Futura',
+                fontStyle: 'normal'
             },
             columnStyles: {
-                0: { cellWidth: leftTableWidth * 0.55, fontStyle: 'bold' },
-                1: { cellWidth: leftTableWidth * 0.45 }
-            }
+                0: { cellWidth: (colWidth - 7) * 0.5, fontStyle: 'normal' },
+                1: { cellWidth: (colWidth - 7) * 0.5 }
+            },
         });
+        postY += 5;
+        
+        // TOTAL REVENUE PER BULAN
+        doc.setFontSize(11);
+        doc.setTextColor(86, 93, 109);
+        doc.text('Total Revenue per Bulan',fullTableWidth * 1.58, (postY + 45), { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setTextColor(99, 106, 232);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text(`${formatCurrency(data.pdf_data.revenue.total_revenue_per_bulan)}`,fullTableWidth * 1.58, (postY + 43) + 8, { align: 'center' });
+        
+        return varYPos;
+
     }
 
-    yPos = doc.lastAutoTable?.finalY || yPos;
-    yPos += 12;
+    // EXPENSES
+    const expenseFunction = (varYPos: number): number => {
+        const fullTableWidth = (pageWidth - 2 * margin) / 2;
+        
+        // Create rounded border background
+        const borderHeight = 80;
+        doc.setDrawColor(228, 231, 236);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(margin, varYPos - 5, fullTableWidth, borderHeight, 2, 2, 'S');
+        
+        // Add section title
+        doc.setFontSize(14);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text('EXPENSES', margin + 5, varYPos + 3);
+        
+        // Add border line below title
+        doc.setDrawColor(0, 48, 97);
+        doc.setLineWidth(0.5);
+        doc.line(margin + 5, varYPos + 6, margin + fullTableWidth - 5, varYPos + 6);
+        
+        varYPos += 5;
+        const operationalData = [
+            ['BBM', `${formatCurrency(data.pdf_data.expenses.detail.bbm.nominal)} (${data.pdf_data.expenses.detail.bbm.persentase}%)`],
+            ['Ban', `${formatCurrency(data.pdf_data.expenses.detail.ban.nominal)} (${data.pdf_data.expenses.detail.ban.persentase}%)`],
+            ['Sparepart', `${formatCurrency(data.pdf_data.expenses.detail.sparepart.nominal)} (${data.pdf_data.expenses.detail.sparepart.persentase}%)`],
+            ['Gaji Operator', `${formatCurrency(data.pdf_data.expenses.detail.gaji_operator.nominal)} (${data.pdf_data.expenses.detail.gaji_operator.persentase}%)`],
+            ['Depresiasi', `${formatCurrency(data.pdf_data.expenses.detail.depresiasi.nominal)} (${data.pdf_data.expenses.detail.depresiasi.persentase}%)`],
+            ['Bunga', `${formatCurrency(data.pdf_data.expenses.detail.bunga.nominal)} (${data.pdf_data.expenses.detail.bunga.persentase}%)`],
+            ['Overhead/G&A', `${formatCurrency(data.pdf_data.expenses.detail.overhead.nominal)} (${data.pdf_data.expenses.detail.overhead.persentase}%)`]
+        ];
+        // Left table - Operational
+        autoTable(doc, {
+            startY: varYPos + 6,
+            body: operationalData,
+            margin: { left: margin + 6 },
+            tableWidth: fullTableWidth,
+            styles: {
+                fontSize: 8,
+                cellPadding: [1, 2],
+                font: 'Futura',
+                fontStyle: 'normal'
+            },
+            columnStyles: {
+                0: { cellWidth: (fullTableWidth - 10) * 0.5, fontStyle: 'normal' },
+                1: { cellWidth: (fullTableWidth - 10) * 0.5 }
+            },
+        });
+        // Total ExpenseN
+        doc.setFontSize(11);
+        doc.setTextColor(86, 93, 109);
+        doc.text('Total Expense',margin + 70, (varYPos + 47), { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setTextColor(99, 106, 232);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text(`${formatCurrency(data.pdf_data.expenses.total_expense)}`,margin + 70, (varYPos + 45) + 8, { align: 'center' });
+        
+        doc.setFontSize(9);
+        doc.setTextColor(86, 93, 109);
+        setFontSafe(doc, 'Futura', 'normal');
+        doc.text('Tonase/Bulan x Harga/Ton x Qty Unit',margin + 70, (varYPos + 45) + 13, { align: 'center' });
+        
+        varYPos += 25;
+        return varYPos;
 
-    // Monthly Cost Breakdown & Financial Performance (Side by Side)
-    checkNewPage(60);
-    doc.setFontSize(14);
-    doc.setTextColor(0, 48, 97);
-    setFontSafe(doc, 'Futura', 'bold');
-    doc.text('Monthly Cost Breakdown', margin, yPos);
-    doc.text('Financial Structure', margin + (pageWidth / 2), yPos);
-    yPos += 8;
+    }
 
-    const monthlyCostData = [
-        ['Tyre Expense', formatCurrency(data.tyre_expense_monthly)],
-        ['Spare Parts Expense', formatCurrency(data.sparepart_expense_monthly)],
-        ['Operator Salary', formatCurrency(data.salary_operator_monthly)],
-        ['Depreciation', formatCurrency(data.depreciation_monthly)],
-        ['Interest', formatCurrency(data.interest_monthly)],
-        ['Overhead', formatCurrency(data.overhead_monthly)],
-        ['Total Monthly Expense', formatCurrency(data.total_expense_monthly)]
-    ];
+    // ASSET & LIABILITY
+    const assetliabilityFunction = (varYPos: number): number => {
+        const fullTableWidth = (pageWidth - 2 * margin) / 2;
+        const colWidth = fullTableWidth / 2;
+        
+        // Create rounded border background
+        const borderHeight = 80;
+        let postY = varYPos - borderHeight + 50;
+        doc.setDrawColor(228, 231, 236);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(fullTableWidth + margin + 2, postY - 5, fullTableWidth, borderHeight, 2, 2, 'S');
+        
+        // Add section title
+        doc.setFontSize(14);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text('ASSET & LIABILITY', fullTableWidth + margin + 5, postY + 3);
+        
+        // Add border line below title
+        doc.setDrawColor(0, 48, 97);
+        doc.setLineWidth(0.5);
+        doc.line(fullTableWidth + margin + 5, postY + 6, fullTableWidth + margin + fullTableWidth - 5, postY + 6);
+        
+        postY += 10;
 
-    // Left table - Monthly Costs
-    autoTable(doc, {
-        startY: yPos,
-        head: [['Cost Item', 'Amount (IDR)']],
-        body: monthlyCostData,
-        margin: { left: margin, right: margin + leftTableWidth + margin },
-        tableWidth: leftTableWidth,
-        styles: {
-            fontSize: 8,
-            cellPadding: 2,
-            font: 'Futura',
-            fontStyle: 'normal'
-        },
-        headStyles: {
-            fillColor: [0, 48, 97],
-            textColor: [255, 255, 255],
-            fontStyle: 'bold',
-            fontSize: 9
-        },
-        columnStyles: {
-            0: { cellWidth: leftTableWidth * 0.5, fontStyle: 'bold' },
-            1: { cellWidth: leftTableWidth * 0.5 }
-        },
-        didParseCell: (data) => {
-            if (data.row.index === monthlyCostData.length - 1) {
-                data.cell.styles.fillColor = [240, 240, 240];
-                data.cell.styles.fontStyle = 'bold';
-            }
-        }
-    });
+        // OPERATIONAL Section with border
+        doc.setFontSize(10);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text('Aset - Unit Purchase', fullTableWidth + margin + 5, postY + 2);
+        
+        const assetData = [
+            ['Harga per Unit', formatCurrency(data.pdf_data.asset_liability.unit_purchase.harga_per_unit)],
+            ['Qty Unit', data.pdf_data.asset_liability.unit_purchase.qty_unit],
+            ['Down Payment', data.pdf_data.asset_liability.unit_purchase.down_payment_percent + '%'],
+            ['Tenor Pembiayaan', data.pdf_data.asset_liability.unit_purchase.tenor_pembiayaan],
+            ['Interest Rate (Flat)', data.pdf_data.asset_liability.unit_purchase.interest_rate_flat],
+        ];
+        const totalAssetData = [
+            ['Total Aset', formatCurrency(data.pdf_data.asset_liability.unit_purchase.total_aset)]
+        ];
+        // Left table - asset
+        autoTable(doc, {
+            startY: postY + 6,
+            body: assetData,
+            margin: { left: fullTableWidth + margin + 6 },
+            tableWidth: colWidth - 20,
+            styles: {
+                fontSize: 8,
+                cellPadding: 1,
+                font: 'Futura',
+                fontStyle: 'normal'
+            },
+            columnStyles: {
+                0: { cellWidth: (colWidth - 10) * 0.4, fontStyle: 'normal' },
+                1: { cellWidth: (colWidth - 10) * 0.6 }
+            },
+        });
+        autoTable(doc, {
+            startY: postY + 40,
+            body: totalAssetData,
+            margin: { left: fullTableWidth + margin + 6 },
+            tableWidth: colWidth - 20,
+            styles: {
+                fontSize: 8,
+                cellPadding: 1,
+                font: 'Futura',
+                fontStyle: 'normal'
+            },
+            columnStyles: {
+                0: { cellWidth: (colWidth - 10) * 0.4, fontSize: 10, fontStyle: 'normal' },
+                1: { cellWidth: (colWidth - 10) * 0.6, fontSize: 10, textColor: [99, 106, 232] }
+            },
+        });
+        // Add vertical separator line
+        doc.setDrawColor(0, 48, 97);
+        doc.setLineWidth(0.2);
+        doc.line(fullTableWidth + margin + colWidth, postY - 2, fullTableWidth + margin + colWidth, postY + 55);
+        
+        // PRODUKSI Section with border
+        doc.setFontSize(10);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.text('Liability - Cicilan Bulanan', fullTableWidth + margin + colWidth + 3, postY + 2);
+        
+        const liabilityData = [
+            ['Cicilan Pokok', formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.cicilan_pokok)],
+            ['Bunga', formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.bunga)],
+            ['Total per Bulan', formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.total_per_bulan)],
+            ['Rasio Keuangan', ''],
+            ['Cicilan Pokok', data.pdf_data.asset_liability.cicilan_bulanan.rasio_keuangan.cicilan_pokok],
+            ['Bunga', data.pdf_data.asset_liability.cicilan_bulanan.rasio_keuangan.bunga],
+        ];
+        const totalEquityLiabilityData = [
+            ['Equity', formatCurrency(data.pdf_data.asset_liability.equity)],
+            ['Liability', formatCurrency(data.pdf_data.asset_liability.liability)]
+        ];
+        // Right table - liability
+        autoTable(doc, {
+            startY: postY + 6,
+            body: liabilityData,
+            margin: { left: fullTableWidth + margin + colWidth + 4 },
+            tableWidth: colWidth - 20,
+            styles: {
+                fontSize: 8,
+                cellPadding: 1,
+                font: 'Futura',
+                fontStyle: 'normal'
+            },
+            columnStyles: {
+                0: { cellWidth: (colWidth - 7) * 0.4, fontStyle: 'normal' },
+                1: { cellWidth: (colWidth - 7) * 0.6 }
+            },
+        });
+        autoTable(doc, {
+            startY: postY + 40,
+            body: totalEquityLiabilityData,
+            margin: { left: fullTableWidth + margin + colWidth + 4 },
+            tableWidth: colWidth - 20,
+            styles: {
+                fontSize: 8,
+                cellPadding: 1,
+                font: 'Futura',
+                fontStyle: 'normal'
+            },
+            columnStyles: {
+                0: { cellWidth: (colWidth - 10) * 0.4, fontSize: 10, fontStyle: 'normal' },
+                1: { cellWidth: (colWidth - 10) * 0.6, fontSize: 10, textColor: [99, 106, 232] }
+            },
+        });
+        postY += 5;
+        return varYPos;
 
-    // Right table - Financial Structure & Revenue
-    const financialData = [
-        ['Total Assets', formatCurrency(data.assets)],
-        ['Equity', formatCurrency(data.equity)],
-        ['Liability', formatCurrency(data.liability)],
-        ['', ''], // Spacer
-        ['Monthly Revenue', formatCurrency(data.revenue_monthly)],
-        ['Total Monthly Expense', formatCurrency(data.total_expense_monthly)],
-        ['Net Profit Monthly', formatCurrency(data.net_profit_monthly || 0)],
-        ['Profit Margin', data.profit_margin ? `${data.profit_margin.toFixed(2)}%` : 'N/A']
-    ];
-
-    autoTable(doc, {
-        startY: yPos,
-        head: [['Financial Item', 'Amount (IDR)']],
-        body: financialData,
-        margin: { left: margin + leftTableWidth + margin, right: margin },
-        tableWidth: leftTableWidth,
-        styles: {
-            fontSize: 8,
-            cellPadding: 2,
-            font: 'Futura',
-            fontStyle: 'normal'
-        },
-        headStyles: {
-            fillColor: [0, 48, 97],
-            textColor: [255, 255, 255],
-            fontStyle: 'bold',
-            fontSize: 9
-        },
-        columnStyles: {
-            0: { cellWidth: leftTableWidth * 0.5, fontStyle: 'bold' },
-            1: { cellWidth: leftTableWidth * 0.5 }
-        },
-        didParseCell: (cellData) => {
-            // Financial structure rows (0-2)
-            if (cellData.row.index >= 0 && cellData.row.index <= 2) {
-                cellData.cell.styles.fillColor = [245, 245, 245];
-            }
-            // Net profit row
-            if (cellData.row.index === 6) {
-                const netProfit = parseFloat(String(data.net_profit_monthly || 0));
-                if (netProfit > 0) {
-                    cellData.cell.styles.textColor = [34, 197, 94]; // Green
-                } else if (netProfit < 0) {
-                    cellData.cell.styles.textColor = [239, 68, 68]; // Red
-                }
-                cellData.cell.styles.fontStyle = 'bold';
-            }
-            // Spacer row
-            if (cellData.row.index === 3) {
-                cellData.cell.styles.fillColor = [255, 255, 255];
-                cellData.cell.text = [];
-            }
-        }
-    });
-
-    yPos = doc.lastAutoTable?.finalY || yPos;
-    yPos += 12;
-
-
-
-    // ROE & ROA Summary (Highlighted Section) - Full Width
-    checkNewPage(50);
+    }
     
-    const fullTableWidth = pageWidth - 2 * margin;
     
-    // Create highlight box
-    doc.setFillColor(0, 48, 97);
-    doc.roundedRect(margin, yPos - 5, fullTableWidth, 40, 3, 3, 'F');
-    
-    doc.setFontSize(18);
-    doc.setTextColor(255, 255, 255);
-    setFontSafe(doc, 'Futura', 'bold');
-    doc.text('ROE & ROA ANALYSIS', pageWidth / 2, yPos + 6, { align: 'center' });
-    
-    yPos += 15;
-    
-    // ROE & ROA values in 4 columns layout
-    const colWidth = fullTableWidth / 4;
-    const col1X = margin + colWidth * 0.25;
-    const col2X = margin + colWidth * 0.75;
-    const col3X = margin + colWidth * 1.5;
-    const col4X = margin + colWidth * 2.5;
-    
-    // Individual ROE
-    doc.setFontSize(10);
-    doc.setTextColor(255, 255, 255);
-    setFontSafe(doc, 'Futura', 'normal');
-    doc.text('ROE Individual', col1X, yPos, { align: 'center' });
-    
-    doc.setFontSize(16);
-    setFontSafe(doc, 'Futura', 'bold');
-    doc.text(`${data.roe_individual_percentage.toFixed(2)}%`, col1X, yPos + 8, { align: 'center' });
-    
-    doc.setFontSize(8);
-    setFontSafe(doc, 'Futura', 'normal');
-    const roeIndNominal = doc.splitTextToSize(formatCurrency(data.roe_individual_nominal), colWidth * 0.8);
-    doc.text(roeIndNominal, col1X, yPos + 15, { align: 'center' });
-    
-    // Aggregate ROE
-    doc.setFontSize(10);
-    doc.text('ROE Aggregate', col2X, yPos, { align: 'center' });
-    
-    doc.setFontSize(16);
-    setFontSafe(doc, 'Futura', 'bold');
-    doc.text(`${data.roe_aggregate_percentage.toFixed(2)}%`, col2X, yPos + 8, { align: 'center' });
-    
-    doc.setFontSize(8);
-    setFontSafe(doc, 'Futura', 'normal');
-    const roeAggNominal = doc.splitTextToSize(formatCurrency(data.roe_aggregate_nominal), colWidth * 0.8);
-    doc.text(roeAggNominal, col2X, yPos + 15, { align: 'center' });
-    
-    // Individual ROA
-    doc.setFontSize(10);
-    doc.text('ROA Individual', col3X, yPos, { align: 'center' });
-    
-    doc.setFontSize(16);
-    setFontSafe(doc, 'Futura', 'bold');
-    doc.text(`${data.roa_individual_percentage.toFixed(2)}%`, col3X, yPos + 8, { align: 'center' });
-    
-    doc.setFontSize(8);
-    setFontSafe(doc, 'Futura', 'normal');
-    const roaIndNominal = doc.splitTextToSize(formatCurrency(data.roa_individual_nominal), colWidth * 0.8);
-    doc.text(roaIndNominal, col3X, yPos + 15, { align: 'center' });
-    
-    // Aggregate ROA
-    doc.setFontSize(10);
-    doc.text('ROA Aggregate', col4X, yPos, { align: 'center' });
-    
-    doc.setFontSize(16);
-    setFontSafe(doc, 'Futura', 'bold');
-    doc.text(`${data.roa_aggregate_percentage.toFixed(2)}%`, col4X, yPos + 8, { align: 'center' });
-    
-    doc.setFontSize(8);
-    setFontSafe(doc, 'Futura', 'normal');
-    const roaAggNominal = doc.splitTextToSize(formatCurrency(data.roa_aggregate_nominal), colWidth * 0.8);
-    doc.text(roaAggNominal, col4X, yPos + 15, { align: 'center' });
-    
-    yPos += 30;
-
+    yPos = keyFinancialData(yPos);
+    yPos = revenueFunction(yPos);
+    yPos = expenseFunction(yPos);
+    yPos = assetliabilityFunction(yPos);
     yPos += 5;
-
-    // Summary Notes
-    checkNewPage(25);
-    doc.setFontSize(9);
-    doc.setTextColor(100, 100, 100);
-    setFontSafe(doc, 'Futura', 'normal');
-    
-    // const summaryText = `This report was generated on ${formatDate(new Date().toISOString())} based on the operational and financial parameters provided. ROE and ROA calculations are based on monthly performance projections and may vary with actual operational conditions.`;
-    // const wrappedText = doc.splitTextToSize(summaryText, pageWidth - 2 * margin);
-    
-    // doc.text(wrappedText, margin, yPos);
 
     const customerName = (data.customer_name || 'Unknown').replace(/\s+/g, '_');
     const fileName = `ROE_ROA_Calculator_${customerName}_${new Date().getTime()}.pdf`;
