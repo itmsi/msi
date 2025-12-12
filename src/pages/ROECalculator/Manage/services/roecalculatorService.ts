@@ -1,5 +1,6 @@
 import { apiDelete, apiGet, apiPost, apiPut, ApiResponse } from '@/helpers/apiHelper';
 import { RorEntity, RorListRequest, RorListResponse } from '../types/roecalculator';
+import { ManageROEDataPDF } from '../../types/roeCalculator';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -35,5 +36,9 @@ export class RoecalculatorService {
         
         const response = await apiPut<{ data: RorEntity }>(`${API_BASE_URL}/calculations/quotes/${rorId}`, rorData);
         return response.data.data;
+    }
+        
+    static async downloadRoe(quoteId : string): Promise<ApiResponse<{ success: number; message: string; data: ManageROEDataPDF }>> {
+        return await apiGet(`${API_BASE_URL}/calculations/quotes/pdf/${quoteId}`);
     }
 }

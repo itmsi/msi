@@ -401,3 +401,123 @@ export interface UnitPurchase {
     is_delete: boolean;
     customer_id: string;
 }
+
+// Types for PDF/Download Response
+export interface ManageROEDataPDF {
+    id: string;
+    user_id: string;
+    commodity: string;
+    tonnage_per_ritase: number;
+    selling_price_per_ton: number;
+    haul_distance: number;
+    status: string;
+    ritase_per_shift: number;
+    shift_per_hari: number;
+    hari_kerja_per_bulan: number;
+    utilization_percent: string;
+    downtime_percent: string;
+    fuel_consumption_type: string;
+    fuel_consumption: string;
+    fuel_price: number;
+    tyre_expense_monthly: string;
+    sparepart_expense_monthly: string;
+    salary_operator_monthly: string;
+    depreciation_monthly: string;
+    interest_monthly: string;
+    overhead_monthly: string;
+    equity: number;
+    liability: number;
+    assets: number;
+    revenue_monthly: number;
+    total_expense_monthly: number;
+    net_profit_monthly: number | null;
+    profit_margin: number | null;
+    roa_aggregate_percentage: number;
+    roe_aggregate_percentage: number;
+    ritase_per_hari: number | null;
+    ritase_per_bulan: number | null;
+    tonnage_per_bulan: number | null;
+    fuel_per_ritase: number | null;
+    fuel_cost_per_ritase: number | null;
+    efficiency: number | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    created_by: string;
+    updated_by: string;
+    deleted_by: string | null;
+    is_delete: boolean;
+    customer_id: string;
+    roa_individual_percentage: number;
+    roa_individual_nominal: number;
+    roe_individual_percentage: number;
+    roe_individual_nominal: number;
+    roa_aggregate_nominal: number;
+    roe_aggregate_nominal: number;
+    step: number;
+    customer_name: string;
+    roa_percentage: number | null;
+    roe_percentage: number | null;
+    fuel_cost_monthly: number | null;
+    unit_purchases: UnitPurchasePDF;
+    operational: OperationalPDF;
+    cost: CostPDF;
+    financial: FinancialPDF;
+}
+
+export interface UnitPurchasePDF {
+    id: string;
+    quote_id: string;
+    customer_id: string;
+    price_per_unit: number;
+    quantity: number;
+    total_asset: number;
+    down_payment_percent: number;
+    down_payment: number;
+    remaining_debt: number;
+    financing_tenor_months: number;
+    interest_rate_flat_per_year: number;
+    depreciation_period_months: number;
+    principal_installment: number;
+    interest_per_month: number;
+    total_installment_per_month: number;
+    depreciation_per_month: number;
+    interest_expense_per_month: number;
+    total_fixed_cost_from_unit: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+}
+
+export interface OperationalPDF {
+    ritase_per_shift: number;
+    shift_per_hari: number;
+    hari_kerja_per_bulan: number;
+    utilization_percent: number;
+    downtime_percent: number;
+    fuel_consumption_type: string;
+    fuel_consumption: number;
+    fuel_price: number;
+}
+
+export interface CostPDF {
+    tyre_expense_monthly: number;
+    sparepart_expense_monthly: number;
+    salary_operator_monthly: number;
+    depreciation_monthly: number;
+    interest_monthly: number;
+    overhead_monthly: number;
+}
+
+export interface FinancialPDF {
+    equity: number;
+    liability: number;
+    assets: number;
+}
+
+export interface ManageROEPDFResponse {
+    success: boolean;
+    message: string;
+    data: ManageROEDataPDF;
+    timestamp: string;
+}

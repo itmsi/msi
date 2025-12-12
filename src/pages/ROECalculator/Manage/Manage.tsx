@@ -12,6 +12,7 @@ import Input from "@/components/form/input/InputField";
 import CustomSelect from "@/components/form/select/CustomSelect";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 import { formatCurrency } from "@/helpers/generalHelper";
+import { FaRegFilePdf } from "react-icons/fa6";
 
 export default function ManageRor() {
     const navigate = useNavigate();
@@ -38,7 +39,8 @@ export default function ManageRor() {
         handleEdit,
         handleDelete,
         confirmdeleteRorCalculator,
-        cancelDelete 
+        cancelDelete,
+        handleDownload,
     } = useRoeCalculatorManagement();
 
     const columns: TableColumn<RorEntity>[] = [
@@ -72,6 +74,13 @@ export default function ManageRor() {
             )
         },
         createActionsColumn([
+            {
+                icon: FaRegFilePdf,
+                onClick: handleDownload,
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                tooltip: 'Download',
+                permission: 'read',
+            },
             {
                 icon: MdEdit,
                 onClick: handleEdit,

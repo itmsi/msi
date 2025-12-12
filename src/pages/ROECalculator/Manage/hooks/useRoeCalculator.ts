@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Pagination, RorEntity, RorListRequest } from '../types/roecalculator';
 import { RoecalculatorService } from '../services/roecalculatorService';
+import { generateROEPDF } from '../utils/pdfGenerator';
+import toast from 'react-hot-toast';
 
 export const useRoeCalculator = () => {
     const [roeCalculator, setRoeCalculator] = useState<RorEntity[]>([]);
@@ -76,6 +78,48 @@ export const useRoeCalculator = () => {
         }
     }, []);
 
+    const downloadRoe = useCallback(async (roeCalculatorId: string) => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+            const response = await RoecalculatorService.downloadRoe(roeCalculatorId); 
+            console.log('Full download response:', response);
+            console.log('Response data:', response.data);
+            console.log('Response success:', response.data?.success);
+            console.log('Response data content:', response.data?.data);
+            
+            if (response.data?.success && response.data?.data) {
+                console.log('Starting PDF generation...');
+                console.log('PDF data to generate:', response.data.data);
+                
+                try {
+                    await generateROEPDF(response.data.data);
+                    console.log('PDF generation completed successfully');
+                    toast.success('PDF downloaded successfully');
+                    return true;
+                } catch (pdfError) {
+                    console.error('PDF Generation Error:', pdfError);
+                    toast.error('Failed to generate PDF: ' + (pdfError as Error).message);
+                    return false;
+                }
+            } else {
+                const errorMsg = response.data?.message || 'Failed to fetch ROE calculator data';
+                toast.error(errorMsg);
+                console.error('Download failed - Response check failed:');
+                console.error('- success:', response.data?.success);
+                console.error('- data exists:', !!response.data?.data);
+                console.error('- message:', response.data?.message);
+                return false;
+            }
+        } catch (err: any) {
+            console.error('Download error details:', err);
+            setError('Failed to download quotation');
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
     return {
         roeCalculator,
         pagination,
@@ -84,5 +128,6 @@ export const useRoeCalculator = () => {
         fetchRoeCalculator,
         updateRorCalculator,
         deleteRorCalculator,
+        downloadRoe
     };
 };

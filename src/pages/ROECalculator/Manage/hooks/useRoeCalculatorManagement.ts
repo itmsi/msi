@@ -13,7 +13,7 @@ export const useRoeCalculatorManagement = () => {
     
     const [debouncedSearch, setDebouncedSearch] = useState('');
 
-    const { roeCalculator, pagination, loading, error, fetchRoeCalculator, deleteRorCalculator } = useRoeCalculator();
+    const { roeCalculator, pagination, loading, error, fetchRoeCalculator, deleteRorCalculator, downloadRoe } = useRoeCalculator();
 
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; roeCalculatorId?: string; }>({ show: false });
     useEffect(() => {
@@ -90,6 +90,15 @@ export const useRoeCalculatorManagement = () => {
         setConfirmDelete({ show: true, roeCalculatorId: roeCalculatorId });
     }, []);
 
+    const handleDownload = useCallback((roe: any) => {
+        const roeId = roe.id || roe.roeCalculatorId || roe.ror_id;
+        if (roeId) {
+            downloadRoe(roeId);
+        } else {
+            console.error('ROE Calculator ID not found for download');
+        }
+    }, [downloadRoe]);
+
     const confirmdeleteRorCalculator = useCallback(async () => {
         if (!confirmDelete.roeCalculatorId) return;
         try {
@@ -136,5 +145,6 @@ export const useRoeCalculatorManagement = () => {
         handleDelete,
         confirmdeleteRorCalculator,
         cancelDelete,
+        handleDownload,
     };
 };
