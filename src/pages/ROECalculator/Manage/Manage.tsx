@@ -3,7 +3,7 @@ import { PermissionGate } from "@/components/common/PermissionComponents";
 import Button from "@/components/ui/button/Button";
 import CustomDataTable, { createActionsColumn } from "@/components/ui/table";
 import { TableColumn } from "react-data-table-component";
-import { MdAdd, MdClear, MdDeleteOutline, MdEdit, MdSearch } from "react-icons/md";
+import { MdAdd, MdClear, MdDeleteOutline, MdEdit, MdSearch, MdOutlineAutoGraph } from "react-icons/md";
 import { useNavigate } from "react-router";
 import { RorEntity } from "./types/roecalculator";
 import { useRoeCalculatorManagement } from "./hooks/useRoeCalculatorManagement";
@@ -76,7 +76,7 @@ export default function ManageRor() {
         },
         createActionsColumn([
             {
-                icon: FaRegFilePdf,
+                icon: MdOutlineAutoGraph,
                 onClick: handleBreakdown,
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'Breakdown',
