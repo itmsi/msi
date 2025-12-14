@@ -36,6 +36,7 @@ export default function ManageRor() {
         handleManualSearch,
         handleClearFilters,
         handleFilterChange,
+        handleBreakdown,
         handleEdit,
         handleDelete,
         confirmdeleteRorCalculator,
@@ -74,6 +75,13 @@ export default function ManageRor() {
             )
         },
         createActionsColumn([
+            {
+                icon: FaRegFilePdf,
+                onClick: handleBreakdown,
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                tooltip: 'Breakdown',
+                permission: 'read',
+            },
             {
                 icon: FaRegFilePdf,
                 onClick: handleDownload,

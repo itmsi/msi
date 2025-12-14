@@ -49,6 +49,7 @@ const TNCEdit = lazy(() => import('@/pages/Quotation/TermCondition/Edit'));
 const CreateROECalculator = lazy(() => import('@/pages/ROECalculator/Create'));
 const ROECalculatorManage = lazy(() => import('@/pages/ROECalculator/Manage/Manage'));
 const ROECalculatorEdit = lazy(() => import('@/pages/ROECalculator/Edit'));
+const ROECalculatorBreakdown = lazy(() => import('@/pages/ROECalculator/Manage/BreakDown'));
 const ROESettings = lazy(() => import('@/pages/ROECalculator/Settings/Settings'));
 
 export type TAppRoute = {
@@ -411,6 +412,15 @@ export const routes: TAppRoute[] = [
         roles: ['Manage ROA ROE Calculate'],
         requiredPermissions: ['read'],
         component: ROECalculatorManage,
+        layout: AppLayout,
+    },
+    {
+        path: '/roe-roa-calculator/manage/breakdown/:calculatorId',
+        name: 'Manage ROA ROE Calculate',
+        isProtected: false,
+        roles: ['Manage ROA ROE Calculate'],
+        requiredPermissions: ['read'],
+        component: ROECalculatorBreakdown,
         layout: AppLayout,
     },
     {

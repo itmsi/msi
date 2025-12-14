@@ -85,6 +85,10 @@ export const useRoeCalculatorManagement = () => {
         navigate(`/roe-roa-calculator/manage/edit/${roeCalculator.id}?step=${roeCalculator.step || 1}`);
     }, [navigate]);
 
+    const handleBreakdown = useCallback((roeCalculator: any) => {
+        navigate(`/roe-roa-calculator/manage/breakdown/${roeCalculator.id}`);
+    }, [navigate]);
+
     const handleDelete = useCallback((roeCalculator: any) => {
         const roeCalculatorId = typeof roeCalculator === 'string' ? roeCalculator : roeCalculator.id;
         setConfirmDelete({ show: true, roeCalculatorId: roeCalculatorId });
@@ -141,6 +145,7 @@ export const useRoeCalculatorManagement = () => {
         handleManualSearch,
         handleClearFilters,
         handleFilterChange,
+        handleBreakdown,
         handleEdit,
         handleDelete,
         confirmdeleteRorCalculator,

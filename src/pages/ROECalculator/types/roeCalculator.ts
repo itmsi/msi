@@ -678,3 +678,58 @@ export interface PDFInstallment {
         bunga: number;
     };
 }
+
+
+export interface ManageROEBreakdownResponse {
+    success: boolean;
+    message: string;
+    data: ManageROEBreakdownData;
+}
+
+/* ========================= MAIN DATA ========================= */
+
+export interface ManageROEBreakdownData {
+    metrik_operasional: MetrikOperasional;
+    revenue_multiple_unit: RevenueMultipleUnit;
+    metrik_bbm: MetrikBBM;
+    detail_biaya_bulanan: DetailBiayaBulanan;
+    total_expense: number;
+}
+
+/* ========================= METRIK ========================= */
+
+export interface MetrikOperasional {
+    ritase_per_hari: number;
+    ritase_per_bulan: number;
+    tonnage_per_bulan: number;
+}
+
+export interface RevenueMultipleUnit {
+    jumlah_unit: number;
+    revenue_per_unit: number;
+    total_revenue: number;
+    formula: string;
+}
+
+export interface MetrikBBM {
+    bbm_per_ritase: number;
+    biaya_bbm_per_ritase: number;
+    efisiensi_l_km_ton: number;
+}
+
+/* ========================= BIAYA ========================= */
+
+export interface DetailBiayaBulanan {
+    bbm: BiayaItem;
+    ban: BiayaItem;
+    sparepart: BiayaItem;
+    gaji_operator: BiayaItem;
+    depresiasi: BiayaItem;
+    bunga: BiayaItem;
+    overhead: BiayaItem;
+}
+
+export interface BiayaItem {
+    nominal: number;
+    persentase: number;
+}
