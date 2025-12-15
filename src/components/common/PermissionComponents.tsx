@@ -8,10 +8,6 @@ interface PermissionGateProps {
     fallback?: React.ReactNode;
     children: React.ReactNode;
 }
-
-/**
- * Component wrapper untuk menampilkan/hide element berdasarkan permission
- */
 export const PermissionGate: React.FC<PermissionGateProps> = ({
     permission,
     routeName,
@@ -34,9 +30,6 @@ interface PermissionButtonProps {
     type?: "button" | "submit" | "reset";
 }
 
-/**
- * Button component yang otomatis disabled berdasarkan permission
- */
 export const PermissionButton: React.FC<PermissionButtonProps> = ({
     permission,
     routeName,
@@ -71,9 +64,6 @@ interface ConditionalRenderProps {
     children: React.ReactNode;
 }
 
-/**
- * Component untuk conditional rendering berdasarkan permission condition
- */
 export const ConditionalRender: React.FC<ConditionalRenderProps> = ({
     condition,
     routeName,

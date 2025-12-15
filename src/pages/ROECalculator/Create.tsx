@@ -138,7 +138,7 @@ export default function CreateROECalculator() {
         default:
             return null;
         }
-  };
+    };
 
     const renderStepIndicator = () => (
         <div className="flex items-center justify-center mb-8">
@@ -149,13 +149,15 @@ export default function CreateROECalculator() {
                         flex items-center justify-center w-10 h-10 rounded-full border-2 
                         ${currentStep === step.number 
                             ? 'bg-blue-600 border-blue-600 text-white' 
+                            : step.number === formData.step
+                            ? 'bg-orange-500 border-orange-500 text-white cursor-pointer hover:bg-orange-600 hover:border-orange-600 transition-colors'
                             : currentStep > step.number
                             ? 'bg-green-600 border-green-600 text-white cursor-pointer hover:bg-green-700 hover:border-green-700 transition-colors'
                             : 'bg-white border-gray-300 text-gray-500'
                         }
                         `}
                         onClick={() => {
-                            if (currentStep < formData.step) {
+                            if (step.number <= formData.step) {
                                 goToStep(step.number);
                             }
                         }}
@@ -163,9 +165,9 @@ export default function CreateROECalculator() {
                         {step.number}
                     </div>
                     <div 
-                        className={`ml-2 mr-4 ${currentStep < formData.step ? 'cursor-pointer' : ''}`}
+                        className={`ml-2 mr-4 ${step.number <= formData.step ? 'cursor-pointer' : ''}`}
                         onClick={() => {
-                            if (currentStep < formData.step) {
+                            if (step.number <= formData.step) {
                                 goToStep(step.number);
                             }
                         }}
@@ -178,7 +180,13 @@ export default function CreateROECalculator() {
                         </div>
                     </div>
                     {index < STEPS.length - 1 && (
-                        <div className={`w-12 h-0.5 ${currentStep > step.number ? 'bg-green-600' : 'bg-gray-300'} mr-4`} />
+                        <div className={`w-12 h-0.5 ${
+                            step.number < formData.step 
+                                ? 'bg-green-600' 
+                                : step.number === formData.step 
+                                ? 'bg-orange-500' 
+                                : 'bg-gray-300'
+                        } mr-4`} />
                     )}
                 </div>
             ))}

@@ -1,7 +1,7 @@
 import PageMeta from "@/components/common/PageMeta";
-import { PermissionGate } from "@/components/common/PermissionComponents";
+import { PermissionGate, PermissionButton } from "@/components/common/PermissionComponents";
 import Button from "@/components/ui/button/Button";
-import CustomDataTable, { createActionsColumn } from "@/components/ui/table";
+import CustomDataTable from "@/components/ui/table";
 import { TableColumn } from "react-data-table-component";
 import { MdAdd, MdClear, MdDeleteOutline, MdEdit, MdSearch, MdOutlineAutoGraph } from "react-icons/md";
 import { useNavigate } from "react-router";
@@ -44,6 +44,15 @@ export default function ManageRor() {
         handleDownload,
     } = useRoeCalculatorManagement();
 
+    // Conditional row click handler based on step
+    const handleRowClick = (row: any) => {
+        if (row.step === 4) {
+            handleBreakdown(row);
+        } else {
+            handleEdit(row);
+        }
+    };
+
     const columns: TableColumn<RorEntity>[] = [
         {
             name: 'Customer',
@@ -74,36 +83,61 @@ export default function ManageRor() {
                 </div>
             )
         },
-        createActionsColumn([
-            {
-                icon: MdOutlineAutoGraph,
-                onClick: handleBreakdown,
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'Breakdown',
-                permission: 'read',
-            },
-            {
-                icon: FaRegFilePdf,
-                onClick: handleDownload,
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'Download',
-                permission: 'read',
-            },
-            {
-                icon: MdEdit,
-                onClick: handleEdit,
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'Edit',
-                permission: 'update'
-            },
-            {
-                icon: MdDeleteOutline,
-                onClick: handleDelete,
-                className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
-                tooltip: 'Delete',
-                permission: 'delete'
-            }
-        ])
+        {
+            name: 'Actions',
+            cell: (row: any) => (
+                <div className="flex justify-end gap-1">
+                    {/* Conditional breakdown action - only show when step is 4 */}
+                    {row.step === 4 && (<>
+                        <PermissionButton 
+                            permission="read"
+                            onClick={() => {
+                                handleBreakdown(row);
+                            }}
+                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-0`}
+                            title="Breakdown"
+                        >
+                            <MdOutlineAutoGraph size={16} />
+                        </PermissionButton>
+                    
+                    
+                        <PermissionButton 
+                            permission="read"
+                            onClick={() => {
+                                handleDownload(row);
+                            }}
+                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-0`}
+                            title="Download"
+                        >
+                            <FaRegFilePdf size={16} />
+                        </PermissionButton>
+                    </>)}
+                    
+                    <PermissionButton 
+                        permission="update"
+                        onClick={() => handleEdit(row)}
+                        className={`p-2 rounded-md text-sm font-medium transition-colors relative text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-0`}
+                        title="Edit"
+                    >
+                        <MdEdit size={16} />
+                    </PermissionButton>
+                    
+                    <PermissionButton 
+                        permission="delete"
+                        onClick={() => {
+                            handleDelete(row);
+                        }}
+                        className="!p-2 !rounded-lg !text-red-600 hover:!text-red-700 hover:!bg-red-50 !transition-colors !border-0"
+                        title="Delete"
+                    >
+                        <MdDeleteOutline size={16} />
+                    </PermissionButton>
+                </div>
+            ),
+            width: '200px',
+            center: true,
+            ignoreRowClick: true,
+        }
     ];
     const SearchAndFilters = useMemo(() => (
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -248,7 +282,7 @@ export default function ManageRor() {
                         striped={false}
                         persistTableHead
                         borderRadius="8px"
-                        onRowClicked={handleEdit}
+                        onRowClicked={handleRowClick}
                     />
                 </div>
             </div>
