@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { MdKeyboardArrowLeft, MdAdd } from 'react-icons/md';
+import ReactECharts from 'echarts-for-react';
 
 import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
 import Loading from '@/components/common/Loading';
 import { RoecalculatorService } from './services/roecalculatorService';
-import { ManageROEBreakdownData } from '../types/roeCalculator';
+import { ManageROEBreakdownData, RevenueExpenseProfit, BreakdownBiayaChart } from '../types/roeCalculator';
 
 
 export default function BreakdownROECalculator() {
@@ -51,6 +52,146 @@ export default function BreakdownROECalculator() {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         }).format(value);
+    };
+
+    // Revenue Expense Profit Chart Component
+    const RevenueExpenseProfitChart = ({ data }: { data: RevenueExpenseProfit[] }) => {
+        const option = {
+            title: {
+                text: 'Revenue vs Expense vs Profit',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                },
+                formatter: function(params: any) {
+                    let result = `${params[0].axisValue}<br/>`;
+                    params.forEach((param: any) => {
+                        const value = new Intl.NumberFormat('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }).format(param.value);
+                        result += `${param.marker}${param.seriesName}: ${value}<br/>`;
+                    });
+                    return result;
+                }
+            },
+            legend: {
+                data: ['Revenue', 'Expense', 'Profit'],
+                bottom: '5%'
+            },
+            xAxis: {
+                type: 'category',
+                data: data.map(item => item.category)
+            },
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    formatter: function(value: number) {
+                        return (value / 1000000).toFixed(0) + 'M';
+                    }
+                }
+            },
+            series: [
+                {
+                    name: 'Revenue',
+                    type: 'bar',
+                    data: data.map(item => item.revenue),
+                    itemStyle: {
+                        color: '#10b981'
+                    }
+                },
+                {
+                    name: 'Expense',
+                    type: 'bar',
+                    data: data.map(item => item.expense),
+                    itemStyle: {
+                        color: '#ef4444'
+                    }
+                },
+                {
+                    name: 'Profit',
+                    type: 'bar',
+                    data: data.map(item => item.profit),
+                    itemStyle: {
+                        color: '#3b82f6'
+                    }
+                }
+            ]
+        };
+
+        return <ReactECharts option={option} style={{ height: '400px' }} />;
+    };
+
+    // Breakdown Biaya Doughnut Chart Component
+    const BreakdownBiayaChart = ({ data }: { data: BreakdownBiayaChart[] }) => {
+        const option = {
+            title: {
+                text: 'Breakdown Biaya Bulanan',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: function(params: any) {
+                    const value = new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    }).format(params.value);
+                    return `${params.name}: ${value} (${params.percent}%)`;
+                }
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: data.map(item => item.title)
+            },
+            series: [
+                {
+                    name: 'Biaya',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    center: ['60%', '50%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: false,
+                        position: 'center'
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: '20',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labelLine: {
+                        show: false
+                    },
+                    data: data.map((item, index) => ({
+                        value: item.nominal,
+                        name: item.title,
+                        itemStyle: {
+                            color: [
+                                '#ef4444', '#f97316', '#eab308', '#22c55e', 
+                                '#3b82f6', '#6366f1', '#8b5cf6'
+                            ][index % 7]
+                        }
+                    }))
+                }
+            ]
+        };
+
+        return <ReactECharts option={option} style={{ height: '400px' }} />;
     };
 
     if (loading) {
@@ -99,6 +240,78 @@ export default function BreakdownROECalculator() {
 
                     {breakdownData && (
                         <div className="space-y-6">
+                            {/* Key Financial Metrics */}
+                            <div className="bg-white rounded-xl shadow-sm p-6">
+                                <h2 className="text-xl font-semibold text-gray-900 mb-4">Key Financial Metrics</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <div className="bg-emerald-50 p-4 rounded-lg">
+                                        <p className="text-sm text-gray-600">Revenue per Bulan</p>
+                                        <p className="text-xl font-bold text-emerald-600">{formatCurrency(breakdownData.key_financial_metrics.revenue_per_bulan)}</p>
+                                    </div>
+                                    <div className="bg-red-50 p-4 rounded-lg">
+                                        <p className="text-sm text-gray-600">Total Expense per Bulan</p>
+                                        <p className="text-xl font-bold text-red-600">{formatCurrency(breakdownData.key_financial_metrics.total_expense_per_bulan)}</p>
+                                    </div>
+                                    <div className="bg-blue-50 p-4 rounded-lg">
+                                        <p className="text-sm text-gray-600">Net Profit per Bulan</p>
+                                        <p className="text-xl font-bold text-blue-600">{formatCurrency(breakdownData.key_financial_metrics.net_profit_per_bulan)}</p>
+                                    </div>
+                                    <div className="bg-purple-50 p-4 rounded-lg">
+                                        <p className="text-sm text-gray-600">Profit Margin</p>
+                                        <p className="text-xl font-bold text-purple-600">{breakdownData.key_financial_metrics.profit_margin.toFixed(2)}%</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* ROE ROA Metrics */}
+                            <div className="bg-white rounded-xl shadow-sm p-6">
+                                <h2 className="text-xl font-semibold text-gray-900 mb-4">ROE & ROA Analysis</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* ROE */}
+                                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-lg font-semibold text-green-800">Return on Equity (ROE)</h3>
+                                            <span className="text-3xl font-bold text-green-600">{breakdownData.roe_roa_metrics.roe.percentage}%</span>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-sm text-green-700">{breakdownData.roe_roa_metrics.roe.description}</p>
+                                            <div className="bg-white/50 p-3 rounded border">
+                                                <p className="text-xs text-gray-600 mb-1">Formula:</p>
+                                                <p className="text-sm font-mono text-green-800">{breakdownData.roe_roa_metrics.roe.calculation.formula}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* ROA */}
+                                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-lg font-semibold text-blue-800">Return on Assets (ROA)</h3>
+                                            <span className="text-3xl font-bold text-blue-600">{breakdownData.roe_roa_metrics.roa.percentage}%</span>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-sm text-blue-700">{breakdownData.roe_roa_metrics.roa.description}</p>
+                                            <div className="bg-white/50 p-3 rounded border">
+                                                <p className="text-xs text-gray-600 mb-1">Formula:</p>
+                                                <p className="text-sm font-mono text-blue-800">{breakdownData.roe_roa_metrics.roa.calculation.formula}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Charts Section */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Revenue Expense Profit Chart */}
+                                <div className="bg-white rounded-xl shadow-sm p-6">
+                                    <RevenueExpenseProfitChart data={breakdownData.charts_data.revenue_expense_profit} />
+                                </div>
+
+                                {/* Breakdown Biaya Doughnut Chart */}
+                                <div className="bg-white rounded-xl shadow-sm p-6">
+                                    <BreakdownBiayaChart data={breakdownData.charts_data.breakdown_biaya} />
+                                </div>
+                            </div>
+
                             {/* Operational Metrics */}
                             <div className="bg-white rounded-xl shadow-sm p-6">
                                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Metrik Operasional</h2>
@@ -164,26 +377,26 @@ export default function BreakdownROECalculator() {
                             <div className="bg-white rounded-xl shadow-sm p-6">
                                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Detail Biaya Bulanan</h2>
                                 <div className="space-y-4">
-                                    {Object.entries(breakdownData.detail_biaya_bulanan).map(([key, value]) => {
-                                        const labelMap: Record<string, string> = {
-                                            bbm: 'BBM',
-                                            ban: 'Ban',
-                                            sparepart: 'Sparepart',
-                                            gaji_operator: 'Gaji Operator',
-                                            depresiasi: 'Depresiasi',
-                                            bunga: 'Bunga',
-                                            overhead: 'Overhead'
-                                        };
+                                    {breakdownData.charts_data.breakdown_biaya.map((item, index) => {
+                                        const colors = [
+                                            'bg-red-500',      // BBM
+                                            'bg-orange-500',   // Ban
+                                            'bg-yellow-500',   // Sparepart
+                                            'bg-green-500',    // Gaji Operator
+                                            'bg-blue-500',     // Depresiasi
+                                            'bg-indigo-500',   // Bunga
+                                            'bg-purple-500'    // Overhead
+                                        ];
                                         
                                         return (
-                                            <div key={key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                            <div key={item.title} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-4 h-4 rounded-full bg-blue-500"></div>
-                                                    <span className="font-medium text-gray-900">{labelMap[key]}</span>
+                                                    <div className={`w-4 h-4 rounded-full ${colors[index % colors.length]}`}></div>
+                                                    <span className="font-medium text-gray-900">{item.title}</span>
                                                 </div>
                                                 <div className="flex items-center gap-4">
-                                                    <span className="text-sm text-gray-600">{value.persentase}%</span>
-                                                    <span className="font-bold text-gray-900">{formatCurrency(value.nominal)}</span>
+                                                    <span className="text-sm text-gray-600">{item.persentase}%</span>
+                                                    <span className="font-bold text-gray-900">{formatCurrency(item.nominal)}</span>
                                                 </div>
                                             </div>
                                         );

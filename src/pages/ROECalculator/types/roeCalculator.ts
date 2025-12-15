@@ -689,11 +689,74 @@ export interface ManageROEBreakdownResponse {
 /* ========================= MAIN DATA ========================= */
 
 export interface ManageROEBreakdownData {
+    key_financial_metrics: KeyFinancialMetrics;
+    roe_roa_metrics: ROEROAMetrics;
+    charts_data: ChartsData;
     metrik_operasional: MetrikOperasional;
     revenue_multiple_unit: RevenueMultipleUnit;
     metrik_bbm: MetrikBBM;
     detail_biaya_bulanan: DetailBiayaBulanan;
     total_expense: number;
+}
+
+/* ========================= KEY FINANCIAL METRICS ========================= */
+
+export interface KeyFinancialMetrics {
+    revenue_per_bulan: number;
+    total_expense_per_bulan: number;
+    net_profit_per_bulan: number;
+    profit_margin: number;
+}
+
+/* ========================= ROE ROA METRICS ========================= */
+
+export interface ROEROAMetrics {
+    roe: ROEMetric;
+    roa: ROAMetric;
+}
+
+export interface ROEMetric {
+    percentage: number;
+    calculation: ROECalculation;
+    description: string;
+}
+
+export interface ROAMetric {
+    percentage: number;
+    calculation: ROACalculation;
+    description: string;
+}
+
+export interface ROECalculation {
+    net_profit: number;
+    equity: number;
+    formula: string;
+}
+
+export interface ROACalculation {
+    net_profit: number;
+    total_assets: number;
+    formula: string;
+}
+
+/* ========================= CHARTS DATA ========================= */
+
+export interface ChartsData {
+    revenue_expense_profit: RevenueExpenseProfit[];
+    breakdown_biaya: BreakdownBiayaChart[];
+}
+
+export interface RevenueExpenseProfit {
+    category: string;
+    revenue: number;
+    expense: number;
+    profit: number;
+}
+
+export interface BreakdownBiayaChart {
+    title: string;
+    nominal: number;
+    persentase: number;
 }
 
 /* ========================= METRIK ========================= */
