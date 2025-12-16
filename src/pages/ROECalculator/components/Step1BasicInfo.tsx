@@ -59,7 +59,7 @@ export default function Step1BasicInfo({
         
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Informasi Dasar</h3>
                 <p className="text-sm text-gray-600 mb-6">
                     Masukkan informasi dasar untuk kalkulasi ROE/ROA
                 </p>
@@ -68,7 +68,7 @@ export default function Step1BasicInfo({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Customer Selection */}
                 <div className="md:col-span-2">
-                    <Label>Select Customer</Label>
+                    <Label>Pilih Customer</Label>
                     <CustomAsyncSelect
                         name="customer_id"
                         placeholder="Select customer..."
@@ -114,12 +114,12 @@ export default function Step1BasicInfo({
                 </div>
 
                 {/* Status */}
-                <div>
+                <div className='hidden'>
                     <Label htmlFor="status">Status</Label>
                     <CustomSelect
                         id="status"
                         value={STATUS_OPTIONS.find(option => option.value === formData.status) || null}
-                        onChange={(option) => handleInputChange('status', option?.value || '')}
+                        onChange={(option) => handleInputChange('status', option?.value || 'draft')}
                         options={STATUS_OPTIONS}
                         className="w-full"
                         placeholder="Select Status"
@@ -164,7 +164,7 @@ export default function Step1BasicInfo({
                 </div>
 
                 {/* Harga Jual per Ton */}
-                <div className="md:col-span-2">
+                <div>
                     <Label htmlFor="harga_jual_per_ton">Harga Jual per Ton (Rp)</Label>
                     <Input
                         id="harga_jual_per_ton"

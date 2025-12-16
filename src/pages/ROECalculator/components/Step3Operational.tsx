@@ -108,7 +108,7 @@ export default function Step3Operational({
 
                 {/* Utilization Rate Slider */}
                 <div>
-                    <Label htmlFor="utilization_percent">Utilization Rate (%)</Label>
+                    <Label htmlFor="utilization_percent">Physical Availability (%)</Label>
                     <div className="space-y-2">
                         <input
                             id="utilization_percent"
@@ -167,7 +167,7 @@ export default function Step3Operational({
             {/* Additional Parameters */}
             <div>
                 <h4 className="font-medium text-gray-900 mb-4">Parameter Tambahan</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Working Days */}
                     <div>
                         <Label htmlFor="fuel_consumption_type">Tipe Konsumsi BBM</Label>
@@ -203,13 +203,10 @@ export default function Step3Operational({
                             onChange={(e) => handleInputChange('fuel_price', e.target.value)}
                             placeholder="6800"
                         />
-                        <p className="text-xs text-gray-500 mt-1">
-                            Jumlah hari kerja efektif per bulan
-                        </p>
                     </div>
 
                     {/* Capacity Factor */}
-                    <div>
+                    <div className='hidden'>
                         <Label htmlFor="downtime_percent">Downtime (%)</Label>
                         <div className="space-y-2">
                             <input

@@ -210,19 +210,19 @@ export default function Step2UnitPurchase({
                         <h4 className="font-medium text-gray-900 mb-4">Struktur Financial</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="bg-green-50 p-4 rounded-lg">
-                                <Label>ASSET</Label>
+                                <Label>Aset</Label>
                                 <p className="text-lg font-bold text-green-900">
                                     {formatCurrency(formData.financial_structure?.asset ?? calculationResults?.financial_structure?.asset ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-blue-50 p-4 rounded-lg">
-                                <Label>EQUITY</Label>
+                                <Label>Ekuitas</Label>
                                 <p className="text-lg font-bold text-blue-900">
                                     {formatCurrency(formData.financial_structure?.equity ?? calculationResults?.financial_structure?.equity ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-orange-50 p-4 rounded-lg">
-                                <Label>LIABILITY</Label>
+                                <Label>Liabilitas</Label>
                                 <p className="text-lg font-bold text-orange-900">
                                     {formatCurrency(formData.financial_structure?.liability ?? calculationResults?.financial_structure?.liability ?? 0)}
                                 </p>
@@ -263,19 +263,19 @@ export default function Step2UnitPurchase({
                         <h4 className="font-medium text-gray-900 mb-4">Impact ke Total Expense</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="bg-red-50 p-4 rounded-lg">
-                                <Label>Depreciation/Bulan</Label>
+                                <Label>Penyusutan/Bulan</Label>
                                 <p className="text-lg font-bold text-red-900">
                                     {formatCurrency(formData.expense_impact?.depreciation_bulan ?? calculationResults?.expense_impact?.depreciation_bulan ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-red-50 p-4 rounded-lg">
-                                <Label>Interest Expense/Bulan</Label>
+                                <Label>Bunga/Bulan</Label>
                                 <p className="text-lg font-bold text-red-900">
                                     {formatCurrency(formData.expense_impact?.interest_expense_bulan ?? calculationResults?.expense_impact?.interest_expense_bulan ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-red-50 p-4 rounded-lg">
-                                <Label>Total Fixed Cost dari Unit</Label>
+                                <Label>Total Biaya Tetap dari Unit</Label>
                                 <p className="text-lg font-bold text-red-900">
                                     {formatCurrency(calculationResults?.expense_impact?.total_fixed_cost_unit ?? formData.expense_impact?.total_fixed_cost_unit ?? 0)}
                                 </p>

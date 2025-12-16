@@ -275,11 +275,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         }
     }, [calculatorId, formData]);
 
-    const goToStep = useCallback((step: number) => {
-        console.log({
-            step
-        });
-        
+    const goToStep = useCallback((step: number) => {        
         if (step >= 1 && step <= 4) {
             setCurrentStep(step);
             

@@ -14,7 +14,7 @@ import Step4MonthlyCosts from './components/Step4MonthlyCosts';
 import Step5FinancialData from './components/Step5FinancialData';
 
 const STEPS = [
-    { number: 1, title: 'Basic Information', component: Step1BasicInfo },
+    { number: 1, title: 'Informasi Dasar', component: Step1BasicInfo },
     { number: 2, title: 'Data Pembelian Unit', component: Step2UnitPurchase },
     { number: 3, title: 'Operasional', component: Step3Operational },
     { number: 4, title: 'Biaya Bulanan', component: Step4MonthlyCosts },

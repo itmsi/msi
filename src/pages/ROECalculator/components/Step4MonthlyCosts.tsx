@@ -62,7 +62,7 @@ export default function Step4MonthlyCosts({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Fuel Expense */}
                 <div>
-                    <Label htmlFor="fuel_expense">Tyre Expense (Rp/bulan)</Label>
+                    <Label htmlFor="fuel_expense">Biaya Ban (Rp/bulan)</Label>
                     <Input
                         id="tyre_expense_monthly"
                         value={formatNumberInput(formData.tyre_expense_monthly || formData?.cost_data?.tyre_expense_monthly || '')}
@@ -81,7 +81,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Maintenance Expense */}
                 <div>
-                    <Label htmlFor="maintenance_expense">Maintenance Expense (Rp)</Label>
+                    <Label htmlFor="maintenance_expense">Biaya Perawatan (Rp)</Label>
                     <Input
                         id="sparepart_expense_monthly"
                         value={formatNumberInput(formData.sparepart_expense_monthly || formData?.cost_data?.sparepart_expense_monthly || '')}
@@ -100,7 +100,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Operator Salary */}
                 <div>
-                    <Label htmlFor="operator_salary">Operator Salary (Rp)</Label>
+                    <Label htmlFor="operator_salary">Gaji Operator (Rp)</Label>
                     <Input
                         id="operator_salary"
                         value={formatNumberInput(formData.salary_operator_monthly || formData?.cost_data?.salary_operator_monthly || '')}
@@ -119,7 +119,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Insurance Expense */}
                 <div>
-                    <Label htmlFor="insurance_expense">Insurance Expense (Rp)</Label>
+                    <Label htmlFor="insurance_expense">Biaya Asuransi (Rp)</Label>
                     <Input
                         id="insurance_expense"
                         value={formatNumberInput(formData.depreciation_monthly || formData?.cost_data?.depreciation_monthly || '')}
@@ -139,7 +139,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Admin Expense */}
                 <div>
-                    <Label htmlFor="interest_monthly">Interest (Rp/bulan)</Label>
+                    <Label htmlFor="interest_monthly">Bunga (Rp/bulan)</Label>
                     <Input
                         id="interest_monthly"
                         value={formatNumberInput(formData.interest_monthly || formData?.cost_data?.interest_monthly || '')}
@@ -184,43 +184,43 @@ export default function Step4MonthlyCosts({
                 <div className="space-y-2 text-sm mb-4">
                     {parseFloat(formData.tyre_expense_monthly) > 0 && (
                         <div className="flex justify-between">
-                            <span>Tyre Expense</span>
+                            <span>Biaya Ban</span>
                             <span className="font-medium">{formatCurrency(parseFloat(formData.tyre_expense_monthly))}</span>
                         </div>
                     )}
                     {parseFloat(formData.sparepart_expense_monthly) > 0 && (
                         <div className="flex justify-between">
-                            <span>Maintenance Expense:</span>
+                            <span>Biaya Perawatan</span>
                             <span className="font-medium">{formatCurrency(parseFloat(formData.sparepart_expense_monthly))}</span>
                         </div>
                     )}
                     {parseFloat(formData.salary_operator_monthly) > 0 && (
                         <div className="flex justify-between">
-                            <span>Operator Salary:</span>
+                            <span>Gaji Operator:</span>
                             <span className="font-medium">{formatCurrency(parseFloat(formData.salary_operator_monthly))}</span>
                         </div>
                     )}
                     {parseFloat(formData.depreciation_monthly) > 0 && (
                         <div className="flex justify-between">
-                            <span>Insurance Expense:</span>
+                            <span>Biaya Penyusutan:</span>
                             <span className="font-medium">{formatCurrency(parseFloat(formData.depreciation_monthly))}</span>
                         </div>
                     )}
                     {parseFloat(formData.interest_monthly) > 0 && (
                         <div className="flex justify-between">
-                            <span>Interest Monthly:</span>
+                            <span>Bunga Bulanan:</span>
                             <span className="font-medium">{formatCurrency(parseFloat(formData.interest_monthly))}</span>
                         </div>
                     )}
                     {parseFloat(formData.overhead_monthly) > 0 && (
                         <div className="flex justify-between">
-                            <span>Overhead Monthly:</span>
+                            <span>Biaya Overhead:</span>
                             <span className="font-medium">{formatCurrency(parseFloat(formData.overhead_monthly))}</span>
                         </div>
                     )}
                     <hr className="my-2" />
                     <div className="flex justify-between font-bold text-base">
-                        <span>Total Variable Expense:</span>
+                        <span>Total Biaya Variabel:</span>
                         <span className="text-red-700">{formatCurrency(calculateTotalExpense())}</span>
                     </div>
                 </div>
@@ -287,7 +287,7 @@ export default function Step4MonthlyCosts({
                                 return (
                                     <div>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span>Fuel Expense</span>
+                                            <span>Biaya BBM</span>
                                             <span className="font-medium">{percentage.toFixed(1)}%</span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -310,7 +310,7 @@ export default function Step4MonthlyCosts({
                                 return (
                                     <div>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span>Maintenance Expense</span>
+                                            <span>Biaya Perawatan</span>
                                             <span className="font-medium">{percentage.toFixed(1)}%</span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -333,7 +333,7 @@ export default function Step4MonthlyCosts({
                                 return (
                                     <div>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span>Operator Salary</span>
+                                            <span>Gaji Operator</span>
                                             <span className="font-medium">{percentage.toFixed(1)}%</span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -356,7 +356,7 @@ export default function Step4MonthlyCosts({
                                 return (
                                     <div>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span>Insurance Expense</span>
+                                            <span>Biaya Asuransi</span>
                                             <span className="font-medium">{percentage.toFixed(1)}%</span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -379,7 +379,7 @@ export default function Step4MonthlyCosts({
                                 return (
                                     <div>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span>Admin Expense</span>
+                                            <span>Biaya Administrasi</span>
                                             <span className="font-medium">{percentage.toFixed(1)}%</span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -402,7 +402,7 @@ export default function Step4MonthlyCosts({
                                 return (
                                     <div>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span>Other Expense</span>
+                                            <span>Biaya Lain-lain</span>
                                             <span className="font-medium">{percentage.toFixed(1)}%</span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-2">

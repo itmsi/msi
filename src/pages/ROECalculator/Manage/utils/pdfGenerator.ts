@@ -61,7 +61,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
             doc.setFontSize(12);
             doc.setTextColor(0, 48, 97);
             setFontSafe(doc, 'OpenSans', 'bold');
-            doc.text('R-1 - Quote Report', pageWidth - margin, 10, { align: 'right' });
+            doc.text('ROE & ROA Report', pageWidth - margin, 10, { align: 'right' });
             setFontSafe(doc, 'OpenSans', 'normal');
             doc.setFontSize(10);
             doc.text(`${data.customer_name} | ${data.commodity}`, pageWidth - margin, 15 , { align: 'right' });
@@ -108,7 +108,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
     addFooter();
 
     
-    // KEY FINANCIAL METRICS
+    // Metrik Keuangan
     const keyFinancialData = (varYPos: number): number => {
         const fullTableWidth = (pageWidth - 2 * margin) / 2;
         const colWidth = fullTableWidth / 2;
@@ -125,7 +125,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
         setFontSafe(doc, 'Futura', 'bold');
-        doc.text('Key Financial Metrics', margin + 5, varYPos + 3);
+        doc.text('Metrik Keuangan', margin + 5, varYPos + 3);
         
         // Add border line below title
         doc.setDrawColor(0, 48, 97);
@@ -157,7 +157,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.setFontSize(9);
         doc.setTextColor(86, 93, 109);
         setFontSafe(doc, 'Futura', 'normal');
-        doc.text('Net Profit / Equity', col1X - 2, varYPos + 13, { align: 'center' });
+        doc.text('Laba Bersih / Ekuitas', col1X - 2, varYPos + 13, { align: 'center' });
 
         // ROA - Add rounded border
         const roaBoxWidth = colWidth * 0.85;
@@ -179,7 +179,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.setFontSize(9);
         doc.setTextColor(86, 93, 109);
         setFontSafe(doc, 'Futura', 'normal');
-        doc.text('Net Profit / Total Assets', col2X + 2, varYPos + 13, { align: 'center' });
+        doc.text('Laba Bersih / Total Aset', col2X + 2, varYPos + 13, { align: 'center' });
 
         varYPos += 23;
    
@@ -196,7 +196,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
         setFontSafe(doc, 'Futura', 'normal');
-        doc.text('Revenue per Month', col1X - 2, varYPos, { align: 'center' });
+        doc.text('Pendapatan Bulanan', col1X - 2, varYPos, { align: 'center' });
         
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
@@ -216,7 +216,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
         setFontSafe(doc, 'Futura', 'normal');
-        doc.text('Expenses per Month', col2X + 2, varYPos, { align: 'center' });
+        doc.text('Biaya Bulanan', col2X + 2, varYPos, { align: 'center' });
         
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
@@ -238,7 +238,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
         setFontSafe(doc, 'Futura', 'normal');
-        doc.text('Net Profit per Month', col1X - 2, varYPos, { align: 'center' });
+        doc.text('Laba Bersih Bulanan', col1X - 2, varYPos, { align: 'center' });
         
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
@@ -266,7 +266,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
         setFontSafe(doc, 'Futura', 'bold');
-        doc.text('REVENUE', fullTableWidth + margin + 5, postY + 3);
+        doc.text('Pendapatan', fullTableWidth + margin + 5, postY + 3);
         
         // Add border line below title
         doc.setDrawColor(0, 48, 97);
@@ -293,7 +293,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
             ['Ritase per Shift', data.pdf_data.revenue.data_operasional.ritase_per_shift],
             ['Shift per Hari', data.pdf_data.revenue.data_operasional.shift_per_hari],
             ['Hari Kerja per Bulan', data.pdf_data.revenue.data_operasional.hari_kerja_per_bulan],
-            ['Utilization', data.pdf_data.revenue.data_operasional.utilization_percent+ '%'],
+            ['Ketersediaan Fisik', data.pdf_data.revenue.data_operasional.utilization_percent+ '%'],
         ];
         // Left table - Operational
         autoTable(doc, {
@@ -357,12 +357,12 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         // TOTAL REVENUE PER BULAN
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
-        doc.text('Total Revenue per Bulan',fullTableWidth * 1.58, (postY + 45), { align: 'center' });
+        doc.text('Total Pendapatan Bulanan',fullTableWidth * 1.58, (postY + 48), { align: 'center' });
         
         doc.setFontSize(14);
         doc.setTextColor(99, 106, 232);
         setFontSafe(doc, 'Futura', 'bold');
-        doc.text(`${formatCurrency(data.pdf_data.revenue.total_revenue_per_bulan)}`,fullTableWidth * 1.58, (postY + 43) + 8, { align: 'center' });
+        doc.text(`${formatCurrency(data.pdf_data.revenue.total_revenue_per_bulan)}`,fullTableWidth * 1.58, (postY + 46) + 8, { align: 'center' });
         
         return varYPos;
 
@@ -382,7 +382,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
         setFontSafe(doc, 'Futura', 'bold');
-        doc.text('EXPENSES', margin + 5, varYPos + 3);
+        doc.text('Biaya', margin + 5, varYPos + 3);
         
         // Add border line below title
         doc.setDrawColor(0, 48, 97);
@@ -419,24 +419,24 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         // Total ExpenseN
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
-        doc.text('Total Expense',margin + 70, (varYPos + 47), { align: 'center' });
+        doc.text('Total Biaya',margin + 70, (varYPos + 52), { align: 'center' });
         
         doc.setFontSize(14);
         doc.setTextColor(99, 106, 232);
         setFontSafe(doc, 'Futura', 'bold');
-        doc.text(`${formatCurrency(data.pdf_data.expenses.total_expense)}`,margin + 70, (varYPos + 45) + 8, { align: 'center' });
+        doc.text(`${formatCurrency(data.pdf_data.expenses.total_expense)}`,margin + 70, (varYPos + 50) + 8, { align: 'center' });
         
         doc.setFontSize(9);
         doc.setTextColor(86, 93, 109);
         setFontSafe(doc, 'Futura', 'normal');
-        doc.text('Tonase/Bulan x Harga/Ton x Qty Unit',margin + 70, (varYPos + 45) + 13, { align: 'center' });
+        doc.text('Tonase/Bulan x Harga/Ton x Qty Unit',margin + 70, (varYPos + 50) + 13, { align: 'center' });
         
         varYPos += 25;
         return varYPos;
 
     }
 
-    // ASSET & LIABILITY
+    // Aset & Liabilitas
     const assetliabilityFunction = (varYPos: number): number => {
         const fullTableWidth = (pageWidth - 2 * margin) / 2;
         const colWidth = fullTableWidth / 2;
@@ -452,7 +452,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
         setFontSafe(doc, 'Futura', 'bold');
-        doc.text('ASSET & LIABILITY', fullTableWidth + margin + 5, postY + 3);
+        doc.text('Aset & Liabilitas', fullTableWidth + margin + 5, postY + 3);
         
         // Add border line below title
         doc.setDrawColor(0, 48, 97);
@@ -465,14 +465,14 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.setFontSize(10);
         doc.setTextColor(23, 26, 31);
         setFontSafe(doc, 'Futura', 'bold');
-        doc.text('Aset - Unit Purchase', fullTableWidth + margin + 5, postY + 2);
+        doc.text('Aset Tetap – Unit', fullTableWidth + margin + 5, postY + 2);
         
         const assetData = [
             ['Harga per Unit', formatCurrency(data.pdf_data.asset_liability.unit_purchase.harga_per_unit)],
             ['Qty Unit', data.pdf_data.asset_liability.unit_purchase.qty_unit],
             ['Down Payment', data.pdf_data.asset_liability.unit_purchase.down_payment_percent + '%'],
             ['Tenor Pembiayaan', data.pdf_data.asset_liability.unit_purchase.tenor_pembiayaan],
-            ['Interest Rate (Flat)', data.pdf_data.asset_liability.unit_purchase.interest_rate_flat],
+            ['Bunga (Flat)', data.pdf_data.asset_liability.unit_purchase.interest_rate_flat],
         ];
         const totalAssetData = [
             ['Total Aset', formatCurrency(data.pdf_data.asset_liability.unit_purchase.total_aset)]
@@ -519,7 +519,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.setFontSize(10);
         doc.setTextColor(23, 26, 31);
         setFontSafe(doc, 'Futura', 'bold');
-        doc.text('Liability - Cicilan Bulanan', fullTableWidth + margin + colWidth + 3, postY + 2);
+        doc.text('Liabilitas – Angsuran Bulanan', fullTableWidth + margin + colWidth + 3, postY + 2);
         
         const liabilityData = [
             ['Cicilan Pokok', formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.cicilan_pokok)],
@@ -530,8 +530,8 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
             ['Bunga', data.pdf_data.asset_liability.cicilan_bulanan.rasio_keuangan.bunga],
         ];
         const totalEquityLiabilityData = [
-            ['Equity', formatCurrency(data.pdf_data.asset_liability.equity)],
-            ['Liability', formatCurrency(data.pdf_data.asset_liability.liability)]
+            ['Ekuitas', formatCurrency(data.pdf_data.asset_liability.equity)],
+            ['Liabilitas', formatCurrency(data.pdf_data.asset_liability.liability)]
         ];
         // Right table - liability
         autoTable(doc, {

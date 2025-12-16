@@ -82,7 +82,7 @@ const navItems: NavItem[] = [
         ],
     },
     {
-        name: "Rate of Return",
+        name: "Return on Equity ",
         icon: <GiChart />,
         allowedRoles: ['Manage ROA ROE Calculate'],
         subItems: [
