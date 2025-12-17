@@ -1794,7 +1794,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
             const subscriptionData = [
                 {title:'GPS Tracking'},
-                {title:'Energy Consumption'}
+                {title:'Fuel Consumption'}
             ];
             
             // Calculate table dimensions
