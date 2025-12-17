@@ -1125,7 +1125,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     
                     // Add rounded border for accessories table
                     const accTableHeight2 = item2YPos - accTableStartY2 + 10;
-                    doc.setDrawColor(228, 231, 236);
+                    doc.setDrawColor(200, 200, 200);
                     doc.setLineWidth(0.1);
                     doc.roundedRect(item2StartX, accTableStartY2 - 10, itemWidth, accTableHeight2, 2, 2);
                 }
