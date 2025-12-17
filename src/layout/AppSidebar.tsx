@@ -73,7 +73,7 @@ const navItems: NavItem[] = [
                         allowedRoles: ['Bank Quotation']
                     },
                     { 
-                        name: "Islands", 
+                        name: "Regions", 
                         path: "/quotations/administration/islands", 
                         allowedRoles: ['Island']
                     }

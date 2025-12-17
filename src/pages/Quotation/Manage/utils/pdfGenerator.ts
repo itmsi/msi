@@ -158,8 +158,25 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     addHeader();
     addFooter();
 
+    const boxWidth = (pageWidth - 2 * margin) * 0.5;
     doc.setFontSize(9);
     setFontSafe(doc, 'Futura', 'normal');
+
+    const wilayahData = [
+        ['Region :', data.island_name]
+    ];
+
+    wilayahData.forEach(([label, value]) => {
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0);
+        setFontSafe(doc, 'Futura', 'normal');
+        doc.text(label, margin + boxWidth + 10, yPos);
+        
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0);
+        setFontSafe(doc, 'OpenSans', 'semibold');
+        doc.text(value, margin + boxWidth + 42, yPos);
+    });
     
     const infoData = [
         ['No Penawaran :', data.manage_quotation_no],
@@ -179,10 +196,11 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         doc.text(value, margin + 35, yPos);
         yPos += 5;
     });
+    
+    
 
     yPos += 2;
     const boxStartY = yPos - 2;
-    const boxWidth = (pageWidth - 2 * margin) * 0.5;
     const boxRadius = 1;
     
     doc.setFontSize(10);
@@ -1153,13 +1171,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             // =================================
             
             const gratisWidth = (pageWidth - 2 * margin) * 0.7;
-            doc.setFillColor(228, 231, 236);
+            doc.setFillColor(0, 48, 97);
             doc.roundedRect(margin, varYPos, gratisWidth, 9, 1, 1, 'F');
             
             doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
+            doc.setTextColor(255, 255, 255);
             setFontSafe(doc, 'Futura', 'bold');
-            doc.text('GRATIS', (margin + gratisWidth * 0.5), varYPos + 7 / 2 + 3, { align: 'center' });
+            doc.text('GRATIS', (margin + gratisWidth * 0.5), varYPos + 7 / 2 + 2, { align: 'center' });
             
             varYPos += 5;
 
@@ -1316,7 +1334,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             return varYPos;
         }
         const investWidth = (pageWidth - 2 * margin) * 0.5;
-        const twoColCardHeightMM = 60;
+        const twoColCardHeightMM = 75;
         const twoColCardWidthPt = (investWidth * 0.5) - 2;
         const twoColCardHeightPt = twoColCardHeightMM;
         const bagianInvestasi = (varYPos: number, data: any[]): number => {
@@ -1325,11 +1343,11 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             // =================================
             
             let investY = varYPos;
-            doc.setFillColor(228, 231, 236);
+            doc.setFillColor(228, 69, 120);
             doc.roundedRect(margin, investY, investWidth, 9, 1, 1, 'F');
             
             doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
+            doc.setTextColor(255, 255, 255);
             setFontSafe(doc, 'Futura', 'bold');
             doc.text('DENGAN INVESTASI', (margin + investWidth * 0.5), investY + 6.2, { align: 'center' });
             
@@ -1418,7 +1436,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
             return investY;
         }
-        const bagianDeskripsi = (varYpos: number, manfaat: any[], syarat: any[], offroad: boolean): number => {
+        const bagianDeskripsi = (varYpos: number, manfaat: any[], syarat: any[], notes: any[], offroad: boolean): number => {
             
             // =================================
             // BAGIAN 6 - IN-HOUSE WORKSHOP & SPARE PARTS
@@ -1439,7 +1457,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             doc.setFontSize(10);
             doc.setTextColor(23, 26, 31);
             setFontSafe(doc, 'Futura', 'bold');
-            if(!offroad) {
+            if(offroad) {
                 doc.text('VENDOR HELD STOCK', workshopBoxX + 5, workshopY);
                 
                 workshopY += 5;
@@ -1469,14 +1487,14 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             workshopY += 2;
             
             // Manfaat subtitle
-            doc.setFontSize(10);
+            doc.setFontSize(8);
             doc.setTextColor(0, 0, 0);
             setFontSafe(doc, 'Futura', 'bold');
             doc.text('Manfaat:', workshopBoxX + 5, workshopY);
             workshopY += 6;
             
             // Manfaat items
-            doc.setFontSize(8);
+            doc.setFontSize(7);
             setFontSafe(doc, 'Futura', 'normal');
             
             manfaat.forEach(item => {
@@ -1510,16 +1528,28 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             });
             
             workshopY += 3;
-            
-            // Footer note
+            // Syarat items
             doc.setFontSize(6);
             setFontSafe(doc, 'Futura', 'normal');
-            const footerNote = '*Deposit sesuai stock spare part. Detail diskusi dengan team Spare Part.';
-            const noteLines = doc.splitTextToSize(footerNote, workshopBoxWidthPt - 10);
-            noteLines.forEach((line: string) => {
-                doc.text(line, workshopBoxX + 5, workshopY);
-                workshopY += 2.5;
+            
+            notes.forEach(item => {
+                doc.text('•', workshopBoxX + 5, workshopY);
+                const itemLines = doc.splitTextToSize(item, workshopBoxWidthPt - 10);
+                itemLines.forEach((line: string) => {
+                    doc.text(line, workshopBoxX + 5, workshopY);
+                    workshopY += 2.5;
+                });
             });
+
+            // Footer note
+            // doc.setFontSize(6);
+            // setFontSafe(doc, 'Futura', 'normal');
+            // const footerNote = '*Deposit sesuai stock spare part. Detail diskusi dengan team Spare Part.';
+            // const noteLines = doc.splitTextToSize(footerNote, workshopBoxWidthPt - 10);
+            // noteLines.forEach((line: string) => {
+            //     doc.text(line, workshopBoxX + 5, workshopY);
+            //     workshopY += 2.5;
+            // });
             
             // =================================
             // END OF ON ROAD AFTERSALES PAGE
@@ -1618,7 +1648,12 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 '5-29 unit dengan deposit/BG',
                 'Customer sediakan tempat & infrastruktur'
             ];
-            yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, false);
+            const notesItems = [
+                'Tanpa deposit untuk 30+ unit',
+                '5-29 unit dengan deposit/BG',
+                'Customer sediakan tempat & infrastruktur'
+            ];
+            yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, notesItems, false);
             yPos += 5;
         }
         
@@ -1696,18 +1731,24 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             yPos = bagianInvestasi(yPos, kontrakItems);
             
             const manfaatItems = [
-                'Ketersediaan teknisi stand by',
-                'Suku cadang fast moving tersedia',
-                'Efisiensi logistik',
-                'Unit selalu siap bertugas',
-                'Tanpa investasi stok besar'
+                'Ketersediaan Teknisi (stand by mekanik).',
+                'Suku cadang fast moving selalu tersedia.',
+                'Efisiensi logistik.',
+                'Tanpa investasi besar stok suku cadang.',
+                'Fokus pada target produksi',
+                'Tanpa kewajiban membeli stok sisa setelah kontrak berakhir.'
             ];
             const syaratItems = [
-                'Tanpa deposit untuk 30+ unit',
-                '5-29 unit dengan deposit/BG',
-                'Customer sediakan tempat & infrastruktur'
+                'Tanpa deposit untuk pembelian mulai dari 30 unit atau lebih.',
+                'Pembelian 5-29 unit VHS berlaku dengan deposit/Bank Guarantee sebesar stock yang disediakan.**',
+                'Pelanggan menyediakan tempat penyimpanan barang & infrastruktur penunjang (listrik, internet rak, dll.), serta akomodasi manpower (mobilitas mess, & konsumsi).'
             ];
-            yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, true);
+            const notesItems = [
+                '*Paket VHS dan layanan terkait tidak termasuk dalam harga pembelian unit.',
+                '**Deposit menyesuaikan stock spare part yang disediakan. Detai akan didiskusikan bersama team Spare Part kami'
+            ];
+
+            yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, notesItems, true);
             yPos += 5;
         }
             

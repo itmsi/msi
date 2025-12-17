@@ -378,6 +378,7 @@ export interface ManageQuotationDataPDF {
     manage_quotation_no: string;
     customer_id: string;
     island_id: string;
+    island_name: string;
     contact_person: string;
     customer_phone: string;
     customer_address: string;
