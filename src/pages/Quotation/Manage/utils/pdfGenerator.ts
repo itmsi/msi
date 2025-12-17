@@ -1109,7 +1109,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         styles: { 
                             fontSize: 9, 
                             cellPadding: [.5, 0],
-                            textColor: [0, 48, 97],
+                            textColor: [23, 26, 31],
                             valign: 'middle',
                             font: 'OpenSans',
                             fontStyle: 'normal'
