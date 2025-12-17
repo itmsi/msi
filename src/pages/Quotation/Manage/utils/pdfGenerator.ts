@@ -843,7 +843,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
                             imageFormat = 'JPEG';
                         }
-                        doc.addImage(item1.cp_image, imageFormat, item1StartX + (itemWidth / 2) - 15, item1YPos - 10, 40, 50);
+                        doc.addImage(item1.cp_image, imageFormat, item1StartX + (itemWidth / 2) - 21, item1YPos - 10, 40, 50);
                         item1YPos += 50;
                     } catch (error) {
                         console.warn('Failed to load product image for item 1:', error);
@@ -921,7 +921,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 
                 // Add rounded border for specifications table
                 const specTableHeight = item1YPos - specTableStartY + 10;
-                doc.setDrawColor(228, 231, 236);
+                doc.setDrawColor(200, 200, 200);
                 doc.setLineWidth(0.1);
                 doc.roundedRect(item1StartX, specTableStartY - 10, itemWidth, specTableHeight, 2, 2);
                 
@@ -966,7 +966,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 
                 // Add rounded border for accessories table
                 const accTableHeight = item1YPos - accTableStartY + 10;
-                doc.setDrawColor(228, 231, 236);
+                doc.setDrawColor(200, 200, 200);
                 doc.setLineWidth(0.1);
                 doc.roundedRect(item1StartX, accTableStartY - 10, itemWidth, accTableHeight, 2, 2);
             }
@@ -991,7 +991,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                             } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
                                 imageFormat = 'JPEG';
                             }
-                            doc.addImage(item2.cp_image, imageFormat, item2StartX + (itemWidth / 2) - 15, item2YPos - 10, 40, 50);
+                            doc.addImage(item2.cp_image, imageFormat, item2StartX + (itemWidth / 2) - 21, item2YPos - 10, 40, 50);
                             item2YPos += 50;
                         } catch (error) {
                             console.warn('Failed to load product image for item 2:', error);
@@ -1073,7 +1073,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     
                     // Add rounded border for specifications table
                     const specTableHeight2 = item2YPos - specTableStartY2 + 10;
-                    doc.setDrawColor(228, 231, 236);
+                    doc.setDrawColor(200, 200, 200);
                     doc.setLineWidth(0.1);
                     doc.roundedRect(item2StartX, specTableStartY2 - 10, itemWidth, specTableHeight2, 2, 2);
                     
@@ -1334,7 +1334,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             return varYPos;
         }
         const investWidth = (pageWidth - 2 * margin) * 0.5;
-        const twoColCardHeightMM = 75;
+        const twoColCardHeightMM = 82;
         const twoColCardWidthPt = (investWidth * 0.5) - 2;
         const twoColCardHeightPt = twoColCardHeightMM;
         const bagianInvestasi = (varYPos: number, data: any[]): number => {
@@ -1529,11 +1529,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             
             workshopY += 3;
             // Syarat items
-            doc.setFontSize(6);
+            doc.setFontSize(5);
             setFontSafe(doc, 'Futura', 'normal');
             
             notes.forEach(item => {
-                doc.text('•', workshopBoxX + 5, workshopY);
                 const itemLines = doc.splitTextToSize(item, workshopBoxWidthPt - 10);
                 itemLines.forEach((line: string) => {
                     doc.text(line, workshopBoxX + 5, workshopY);
@@ -1637,21 +1636,22 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             yPos = bagianInvestasi(yPos, kontrakItems);
             
             const manfaatItems = [
-                'Ketersediaan teknisi stand by',
-                'Suku cadang fast moving tersedia',
-                'Efisiensi logistik',
+                'Ketersediaan Teknisi (stand by mekanik)',
+                'Jaminan ketersediaan suku cadang fast moving',
+                'Tanpa biaya logistik',
                 'Unit selalu siap bertugas',
-                'Tanpa investasi stok besar'
+                'Tanpa khawatir harus membeli stock sisa setelah masa kontrak berakhir'
             ];
             const syaratItems = [
-                'Tanpa deposit untuk 30+ unit',
-                '5-29 unit dengan deposit/BG',
-                'Customer sediakan tempat & infrastruktur'
+                'Tanpa deposit untuk pembelian mulai dari 30 unit atau lebih.',
+                'Pembelian 5-29 unit berlaku dengan deposit/Bank Guarantee sebesar stock yang disediakan.**',
+                'Pelanggan menyediakan tempat penyimpanan barang & infrastruktur penunjang (listrik, internet rak, dll.), serta akomodasi manpower (mobilitas mess, & konsumsi).'
             ];
             const notesItems = [
-                'Tanpa deposit untuk 30+ unit',
-                '5-29 unit dengan deposit/BG',
-                'Customer sediakan tempat & infrastruktur'
+                'Notes:',
+                'Customer bisa menentukan apa saja barang yang akan di stock, 24 jam hari kerja.',
+                '*Paket IHW dan layanan terkait tidak termasuk dalam harga pembelian unit.',
+                '**Deposit menyesuaikan stock spare part yang disediakan. Detai akan didiskusikan bersama team Spare Part kami'
             ];
             yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, notesItems, false);
             yPos += 5;
@@ -1672,14 +1672,14 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     icon: '/pdf/maintenance-service.png',
                     items: [
                         'Termasuk Spare Part & Oli Mesin',
-                        'Servis untuk PM 1 - PM 3 (5.000KM, 10.000KM, dan 20.000KM)'
+                        'Servis untuk PM 1 - PM 3 (250, 500, 750 hour meter)'
                     ]
                 },
                 {
                     title: 'Garansi Unit',
                     icon: '/pdf/warranty-service.png',
                     items: [
-                        'Garansi 2 tahun atau 60.000 KM operasi**'
+                        'Garansi 1 tahun atau 6.000 jam operasi**'
                     ],
                     notes: [
                         'Dilengkapi garansi hingga 1 tahun sejak tanggal BAST',
@@ -1732,18 +1732,18 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             
             const manfaatItems = [
                 'Ketersediaan Teknisi (stand by mekanik).',
-                'Suku cadang fast moving selalu tersedia.',
-                'Efisiensi logistik.',
-                'Tanpa investasi besar stok suku cadang.',
-                'Fokus pada target produksi',
-                'Tanpa kewajiban membeli stok sisa setelah kontrak berakhir.'
+                'Jaminan ketersediaan suku cadang fast moving',
+                'Tanpa biaya logistik',
+                'Unit selalu siap bertugas',
+                'Tanpa khawatir harus membeli stock sisa setelah masa kontrak berakhir'
             ];
             const syaratItems = [
                 'Tanpa deposit untuk pembelian mulai dari 30 unit atau lebih.',
-                'Pembelian 5-29 unit VHS berlaku dengan deposit/Bank Guarantee sebesar stock yang disediakan.**',
+                'Pembelian 5-29 unit berlaku dengan deposit/Bank Guarantee sebesar stock yang disediakan.**',
                 'Pelanggan menyediakan tempat penyimpanan barang & infrastruktur penunjang (listrik, internet rak, dll.), serta akomodasi manpower (mobilitas mess, & konsumsi).'
             ];
             const notesItems = [
+                'Notes:',
                 '*Paket VHS dan layanan terkait tidak termasuk dalam harga pembelian unit.',
                 '**Deposit menyesuaikan stock spare part yang disediakan. Detai akan didiskusikan bersama team Spare Part kami'
             ];
