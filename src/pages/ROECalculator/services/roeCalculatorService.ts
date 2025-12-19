@@ -20,7 +20,7 @@ export class ROECalculatorService {
                 tonase_per_ritase: apiData.tonnage_per_ritase || '',
                 jarak_haul: apiData.haul_distance || '',
                 harga_jual_per_ton: apiData.selling_price_per_ton || '',
-                status: (apiData.status === 'draft' || apiData.status === 'presented' || apiData.status === 'won' || apiData.status === 'lost') ? apiData.status : '',
+                status: (apiData.status === 'draft' || apiData.status === 'presented' || apiData.status === 'won' || apiData.status === 'lost') ? apiData.status : 'draft',
                 current_step: 1, // Will be determined by data completeness
 
                 // Step 2 - Unit Purchase Data

@@ -43,7 +43,7 @@ const navItems: NavItem[] = [
     {
         name: "Power BI",
         icon: <GrLineChart />,
-        allowedRoles: ['Dashboard Power BI', 'Manage Power BI'],
+        allowedRoles: ['Dashboard Power BI', 'Manage Power BI', 'Category Power BI'],
         subItems: [
             { name: "Dashboard", path: "/power-bi/dashboard", allowedRoles: ['Dashboard Power BI'], },
             { name: "Category", path: "/power-bi/category", allowedRoles: ['Category Power BI'], },
@@ -53,7 +53,7 @@ const navItems: NavItem[] = [
     {
         name: "Quotation",
         icon: <GrDocumentVerified />,
-        allowedRoles: ['Product Quotation', 'Accessories Quotation', 'Manage Quotation'],
+        allowedRoles: ['Product Quotation', 'Accessories Quotation', 'Manage Quotation', 'TNC Quotation', 'Customer Quotation', 'Bank Quotation', 'Island'],
         subItems: [
             { name: "Manage", path: "/quotations/manage", allowedRoles: ['Manage Quotation'], },
             { name: "Product", path: "/quotations/products", allowedRoles: ['Product Quotation'], },
@@ -84,7 +84,7 @@ const navItems: NavItem[] = [
     {
         name: "Return on Equity ",
         icon: <GiChart />,
-        allowedRoles: ['Manage ROA ROE Calculate'],
+        allowedRoles: ['Manage ROA ROE Calculate', 'Setting ROA ROE Calculate'],
         subItems: [
             { name: "Manage", path: "/roe-roa-calculator/manage", allowedRoles: ['Manage ROA ROE Calculate'] },
             { name: "Settings", path: "/roe-roa-calculator/settings", allowedRoles: ['Setting ROA ROE Calculate'] },

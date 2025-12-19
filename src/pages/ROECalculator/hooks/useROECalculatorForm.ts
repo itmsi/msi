@@ -18,7 +18,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         tonase_per_ritase: '',
         jarak_haul: '',
         harga_jual_per_ton: '',
-        status: '',
+        status: 'draft',
         
         // Step 2
         harga_per_unit: '',
@@ -113,7 +113,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
             case 1:
                 if (!formData.customer_id) errors.customer_id = 'Customer is required';
                 if (!formData.komoditas) errors.komoditas = 'Komoditas is required';
-                if (!formData.status) errors.status = 'Status is required';
+                // if (!formData.status) errors.status = 'Status is required';
                 if (!formData.tonase_per_ritase) errors.tonase_per_ritase = 'Tonase per ritase is required';
                 if (!formData.jarak_haul) errors.jarak_haul = 'Jarak haul is required';
                 if (!formData.harga_jual_per_ton) errors.harga_jual_per_ton = 'Harga jual per ton is required';

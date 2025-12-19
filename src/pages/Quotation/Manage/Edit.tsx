@@ -958,18 +958,6 @@ export default function EditQuotation() {
             )},
             width: '250px',
         },
-        // {
-        //     name: 'Description',
-        //     selector: (row) => row.description,
-        //     cell: (row, index) => (
-        //         <Input
-        //             value={row.description}
-        //             onChange={(e) => updateItem(index as number, 'description', e.target.value)}
-        //             className="border-0 border-b-1 rounded-none p-1 px-3 w-full"
-        //         />
-        //     ),
-        //     wrap: true,
-        // },
         {
             name: 'Detail',
             cell: (row) => (
