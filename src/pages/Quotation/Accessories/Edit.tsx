@@ -1,7 +1,7 @@
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
-import { MdEdit, MdKeyboardArrowLeft, MdSave, MdAdd, MdDelete, MdDeleteOutline } from "react-icons/md";
+import { MdEdit, MdKeyboardArrowLeft, MdSave, MdAdd, MdDeleteOutline } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
 import { useAccessoriesEdit } from "./hooks/useAccessoriesEdit";
 import CustomAsyncSelect from "@/components/form/select/CustomAsyncSelect";
