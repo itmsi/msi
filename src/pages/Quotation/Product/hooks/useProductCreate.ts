@@ -1,6 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { ItemProductValidationErrors } from "../types/product";
+import { ItemProductValidationErrors, ProductSpecification } from "../types/product";
 import { useNavigate } from "react-router";
 import { formatNumberInput } from "@/helpers/generalHelper";
 import { ItemProductService } from "../services/productService";
@@ -25,6 +25,7 @@ interface CreateProductFormData {
     componen_type: number;
     volume: string;
     componen_product_unit_model: string;
+    componen_product_specifications: ProductSpecification[];
 }
 
 export const useCreateProduct = () => {
@@ -52,7 +53,100 @@ export const useCreateProduct = () => {
         componen_product_description: '',
         componen_type: 1,
         volume: '',
-        componen_product_unit_model: ''
+        componen_product_unit_model: '',
+        componen_product_specifications: [
+            {
+                componen_product_specification_label: 'GWM',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'GWM',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Unit Model',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Unit Model',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Horse Power',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Horse Power',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Cargobox/Vessel',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Cargobox/Vessel',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Wheelbase',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Wheelbase',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Engine Brand Model',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Engine Brand Model',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Max Torque',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Max Torque',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Displacement',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Displacement',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Emission Standard',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Emission Standard',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Engine Guard',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Engine Guard',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Gearbox Transmission',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Gearbox Transmission',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Fuel Tank',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Fuel Tank',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Tyre',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Tyre',
+                specification_value_name: ''
+            }
+        ],
     });
     
 
@@ -146,19 +240,13 @@ export const useCreateProduct = () => {
             formDataToSend.append('componen_type', formData.componen_type.toString());
             formDataToSend.append('volume', formData.volume);
             formDataToSend.append('componen_product_unit_model', formData.componen_product_unit_model);
+            formDataToSend.append('componen_product_specifications', JSON.stringify(formData.componen_product_specifications));
 
-            // Append image file if uploaded
             if (productImage) {
                 formDataToSend.append('image', productImage);
             }
 
             const response = await ItemProductService.createItemProduct(formDataToSend);
-            console.log({
-                productImage,
-                response,
-                status:response.status
-            });
-            
             if (response.status) {
                 toast.success('Produk berhasil dibuat');
                 navigate('/quotations/products');

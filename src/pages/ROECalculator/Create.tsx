@@ -12,6 +12,7 @@ import Step2UnitPurchase from './components/Step2UnitPurchase';
 import Step3Operational from './components/Step3Operational';
 import Step4MonthlyCosts from './components/Step4MonthlyCosts';
 import Step5FinancialData from './components/Step5FinancialData';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 
 const STEPS = [
     { number: 1, title: 'Informasi Dasar', component: Step1BasicInfo },
@@ -249,51 +250,57 @@ export default function CreateROECalculator() {
                         <div className="flex justify-between gap-4 p-6 border-t border-gray-200 md:col-span-3">
                             <div className="flex items-center gap-3">
                                 {currentStep > 1 && (
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handlePrevious}
-                                    disabled={loading}
-                                    className="px-6 rounded-full"
-                                >
-                                    <MdArrowBack size={16} />
-                                    Previous
-                                </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={handlePrevious}
+                                        disabled={loading}
+                                        className="px-6 rounded-full"
+                                    >
+                                        <MdArrowBack size={16} />
+                                        Previous
+                                    </Button>
                                 )}
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleSaveOnly}
-                                    disabled={loading}
-                                    className="px-6 rounded-full"
-                                >
-                                    <MdSave size={16} />
-                                    Save
-                                </Button>
-
-                                {currentStep < 5 ? (
+                                <PermissionGate permission={["create", "update"]}>
                                     <Button
                                         type="button"
-                                        onClick={handleSaveAndNext}
-                                        disabled={loading}
-                                    className="px-6 rounded-full"
-                                    >
-                                        {loading ? 'Saving...' : 'Save & Next'}
-                                        <MdArrowForward size={16} />
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        type="button"
+                                        variant="outline"
                                         onClick={handleSaveOnly}
                                         disabled={loading}
-                                    className="px-6 rounded-full"
+                                        className="px-6 rounded-full"
                                     >
                                         <MdSave size={16} />
-                                        {loading ? 'Saving...' : 'Complete'}
+                                        Save
                                     </Button>
+                                </PermissionGate>
+
+                                {currentStep < 5 ? (
+                                    <PermissionGate permission={["create", "update"]}>
+                                        <Button
+                                            type="button"
+                                            onClick={handleSaveAndNext}
+                                            disabled={loading}
+                                            className="px-6 rounded-full"
+                                        >
+                                            {loading ? 'Saving...' : 'Save & Next'}
+                                            <MdArrowForward size={16} />
+                                        </Button>
+                                    </PermissionGate>
+                                ) : (
+                                    <PermissionGate permission={["create", "update"]}>
+                                        <Button
+                                            type="button"
+                                            onClick={handleSaveOnly}
+                                            disabled={loading}
+                                        className="px-6 rounded-full"
+                                        >
+                                            <MdSave size={16} />
+                                            {loading ? 'Saving...' : 'Complete'}
+                                        </Button>
+                                    </PermissionGate>
                                 )}
                             </div>
                         </div>

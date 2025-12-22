@@ -9,6 +9,7 @@ import { toast } from "react-hot-toast";
 import { useBankEdit } from "./hooks/useBankEdit";
 import { BankAccountFormData } from "./types/bank";
 import { BankService } from "./services/bankService";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 export default function EditBank() {
     const navigate = useNavigate();
@@ -99,7 +100,7 @@ export default function EditBank() {
     };
 
     // Form submission
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault();
         
         if (!validateForm()) {
@@ -166,7 +167,7 @@ export default function EditBank() {
                     </div>
 
                     {/* Bank Account Information Form */}
-                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
+                    <form onSubmit={(e) => e.preventDefault()} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
                         <div className="md:col-span-3 p-8 relative">
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Basic Information</h2>
@@ -234,14 +235,20 @@ export default function EditBank() {
                             >
                                 Cancel
                             </Button>
-                            <Button
-                                type="submit"
-                                disabled={isUpdating}
-                                className="px-6 flex items-center gap-2 rounded-full"
-                            >
-                                <MdSave size={20} />
-                                {isUpdating ? 'Updating...' : 'Update Bank Account'}
-                            </Button>
+                            <PermissionGate permission={["update"]}>
+                                <Button
+                                    type="submit"
+                                    onClick={() => {
+                                        const tipu = { preventDefault: () => {} } as React.FormEvent;
+                                        handleSubmit(tipu);
+                                    }}
+                                    disabled={isUpdating}
+                                    className="px-6 flex items-center gap-2 rounded-full"
+                                >
+                                    <MdSave size={20} />
+                                    {isUpdating ? 'Updating...' : 'Update Bank Account'}
+                                </Button>
+                            </PermissionGate>
                         </div>
                     </form>
                 </div>

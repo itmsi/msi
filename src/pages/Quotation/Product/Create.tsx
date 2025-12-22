@@ -338,6 +338,46 @@ export default function CreateProduct() {
                             </div>
                         </div>
 
+                        
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
+                                    Spesifikasi Produk
+                                </h2>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {formData.componen_product_specifications.map((spec, index) => (
+                                        <div key={`${spec.specification_label_name}-${index}`}>
+                                            <Label htmlFor={`spec_${index}`}>
+                                                {spec.specification_label_name || spec.componen_product_specification_label}
+                                            </Label>
+                                            <Input
+                                                id={`spec_${index}`}
+                                                type="text"
+                                                value={spec.specification_value_name || spec.componen_product_specification_value || ''}
+                                                onChange={(e) => {
+                                                    const newSpecs = [...formData.componen_product_specifications];
+                                                    newSpecs[index] = {
+                                                        ...newSpecs[index],
+                                                        specification_value_name: e.target.value,
+                                                        componen_product_specification_value: e.target.value
+                                                    };
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        componen_product_specifications: newSpecs
+                                                    }));
+                                                }}
+                                                placeholder="Masukkan nilai spesifikasi"
+                                            />
+                                            {spec.componen_product_specification_description && (
+                                                <p className="mt-1 text-xs text-gray-500">
+                                                    {spec.componen_product_specification_description}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                         {/* Image Upload Section */}
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <FileUpload

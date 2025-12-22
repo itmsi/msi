@@ -9,6 +9,7 @@ import { toast } from "react-hot-toast";
 import { CustomerService } from "./services/customerService";
 import { useCustomerEdit } from "./hooks/useCustomerEdit";
 import { CustomerFormData } from "./types/customer";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 export default function EditCustomer() {
     const navigate = useNavigate();
@@ -121,7 +122,7 @@ export default function EditCustomer() {
     };
 
     // Form submission
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault();
         
         if (!validateForm()) {
@@ -347,14 +348,20 @@ export default function EditCustomer() {
                             >
                                 Cancel
                             </Button>
-                            <Button
-                                type="submit"
-                                disabled={isUpdating}
-                                className="px-6 flex items-center gap-2 rounded-full"
-                            >
-                                <MdSave size={20} />
-                                {isUpdating ? 'Updating...' : 'Update Customer'}
-                            </Button>
+                            <PermissionGate permission={["update"]}>
+                                <Button
+                                    type="submit"
+                                    onClick={() => {
+                                        const tipu = { preventDefault: () => {} } as React.FormEvent;
+                                        handleSubmit(tipu);
+                                    }}
+                                    disabled={isUpdating}
+                                    className="px-6 flex items-center gap-2 rounded-full"
+                                >
+                                    <MdSave size={20} />
+                                    {isUpdating ? 'Updating...' : 'Update Customer'}
+                                </Button>
+                            </PermissionGate>
                         </div>
                     </form>
                 </div>

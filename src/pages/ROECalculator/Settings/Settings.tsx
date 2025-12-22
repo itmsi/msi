@@ -9,6 +9,25 @@ import { handleKeyPress, formatNumberInput } from '@/helpers/generalHelper';
 import { SettingsService } from './services/settingsService';
 import Loading from '@/components/common/Loading';
 
+// Utility functions untuk format berbagai tipe data
+const formatDecimalValue = (value: string | number): string => {
+    if (!value) return '';
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(2);
+};
+
+const formatIntegerValue = (value: string | number): string => {
+    if (!value) return '';
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return Math.round(numValue).toString();
+};
+
+const formatPercentageValue = (value: string | number): string => {
+    if (!value) return '';
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(2);
+};
+
 interface SettingsFormData {
     // Operasional
     ritase_per_shift: string;
@@ -67,24 +86,24 @@ export default function ROESettings() {
             if (response.success && response.data.data.length > 0) {
                 const settingsData = response.data.data[0];
                 
-                // Map response ke form data
+                // Map response ke form data dengan format yang sesuai
                 setFormData({
-                    ritase_per_shift: settingsData.ritase_per_shift?.toString() || '',
-                    shift_per_hari: settingsData.shift_per_hari?.toString() || '',
-                    hari_kerja_per_bulan: settingsData.hari_kerja_per_bulan?.toString() || '',
-                    utilization_percent: settingsData.utilization_percent?.toString() || '',
+                    ritase_per_shift: formatDecimalValue(settingsData.ritase_per_shift),
+                    shift_per_hari: formatIntegerValue(settingsData.shift_per_hari),
+                    hari_kerja_per_bulan: formatIntegerValue(settingsData.hari_kerja_per_bulan),
+                    utilization_percent: formatPercentageValue(settingsData.utilization_percent),
                     
-                    konsumsi_bbm_per_km: settingsData.fuel_consumption?.toString() || '',
-                    harga_bbm: settingsData.fuel_price?.toString() || '',
-                    tyre_expense_monthly: settingsData.tyre_expense_monthly?.toString() || '',
-                    sparepart_expense_monthly: settingsData.sparepart_expense_monthly?.toString() || '',
-                    salary_operator_monthly: settingsData.salary_operator_monthly?.toString() || '',
+                    konsumsi_bbm_per_km: formatDecimalValue(settingsData.fuel_consumption),
+                    harga_bbm: formatIntegerValue(settingsData.fuel_price),
+                    tyre_expense_monthly: formatIntegerValue(settingsData.tyre_expense_monthly),
+                    sparepart_expense_monthly: formatIntegerValue(settingsData.sparepart_expense_monthly),
+                    salary_operator_monthly: formatIntegerValue(settingsData.salary_operator_monthly),
                     
-                    depreciation_monthly: settingsData.depreciation_monthly?.toString() || '',
-                    interest_monthly: settingsData.interest_monthly?.toString() || '',
-                    overhead_monthly: settingsData.overhead_monthly?.toString() || '',
-                    equity: settingsData.equity?.toString() || '',
-                    liability: settingsData.liability?.toString() || '',
+                    depreciation_monthly: formatIntegerValue(settingsData.depreciation_monthly),
+                    interest_monthly: formatIntegerValue(settingsData.interest_monthly),
+                    overhead_monthly: formatIntegerValue(settingsData.overhead_monthly),
+                    equity: formatIntegerValue(settingsData.equity),
+                    liability: formatIntegerValue(settingsData.liability),
                 });
             }
         } catch (error) {
@@ -100,10 +119,26 @@ export default function ROESettings() {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
+    // Handle input untuk field decimal (seperti konsumsi BBM)
+    const handleDecimalInput = (field: keyof SettingsFormData, value: string) => {
+        // Allow digits and one decimal point
+        const cleaned = value.replace(/[^\d.]/g, '');
+        
+        // Prevent multiple decimal points
+        const parts = cleaned.split('.');
+        if (parts.length > 2) {
+            return;
+        }
+        
+        setFormData(prev => ({ ...prev, [field]: cleaned }));
+    };
+
     // Handle input untuk field percentage
     const handlePercentInput = (field: keyof SettingsFormData, value: string) => {
-        const numeric = value.replace(/[^\d]/g, '');
-        if (numeric === '' || (parseInt(numeric) >= 0 && parseInt(numeric) <= 100)) {
+        const numeric = value.replace(/[^\d.]/g, '');
+        const numValue = parseFloat(numeric);
+        
+        if (numeric === '' || (numValue >= 0 && numValue <= 100)) {
             setFormData(prev => ({ ...prev, [field]: numeric }));
         }
     };
@@ -115,9 +150,9 @@ export default function ROESettings() {
         try {
             // Convert string to number untuk payload
             const payload = {
-                ritase_per_shift: parseFloat(formData.ritase_per_shift.replace(/\./g, '')) || 0,
-                shift_per_hari: parseFloat(formData.shift_per_hari.replace(/\./g, '')) || 0,
-                hari_kerja_per_bulan: parseFloat(formData.hari_kerja_per_bulan.replace(/\./g, '')) || 0,
+                ritase_per_shift: parseFloat(formData.ritase_per_shift) || 0,
+                shift_per_hari: parseInt(formData.shift_per_hari) || 0,
+                hari_kerja_per_bulan: parseInt(formData.hari_kerja_per_bulan) || 0,
                 utilization_percent: parseFloat(formData.utilization_percent) || 0,
                 
                 fuel_consumption: parseFloat(formData.konsumsi_bbm_per_km) || 0,
@@ -183,9 +218,8 @@ export default function ROESettings() {
                                     <Input
                                         id="ritase_per_shift"
                                         type="text"
-                                        value={formatNumberInput(formData.ritase_per_shift)}
-                                        onChange={(e) => handleNumericInput('ritase_per_shift', e.target.value)}
-                                        onKeyPress={handleKeyPress}
+                                        value={formData.ritase_per_shift}
+                                        onChange={(e) => handleDecimalInput('ritase_per_shift', e.target.value)}
                                         placeholder="2"
                                         maxLength={10}
                                     />
@@ -225,9 +259,8 @@ export default function ROESettings() {
                                             type="text"
                                             value={formData.utilization_percent}
                                             onChange={(e) => handlePercentInput('utilization_percent', e.target.value)}
-                                            onKeyPress={handleKeyPress}
                                             placeholder="85"
-                                            maxLength={3}
+                                            maxLength={6}
                                             className="pr-8"
                                         />
                                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -251,7 +284,7 @@ export default function ROESettings() {
                                         id="konsumsi_bbm_per_km"
                                         type="text"
                                         value={formData.konsumsi_bbm_per_km}
-                                        onChange={(e) => handleNumericInput('konsumsi_bbm_per_km', e.target.value)}
+                                        onChange={(e) => handleDecimalInput('konsumsi_bbm_per_km', e.target.value)}
                                         placeholder="0.25"
                                         maxLength={10}
                                     />

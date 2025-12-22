@@ -38,6 +38,7 @@ import Checkbox from '@/components/form/input/Checkbox';
 import { FaEye } from 'react-icons/fa6';
 import { IslandSelectOption, useIslandSelect } from '@/hooks/useIslandSelect';
 import { QuotationService } from './services/quotationService';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 
 export default function EditQuotation() {
     const navigate = useNavigate();
@@ -163,6 +164,7 @@ export default function EditQuotation() {
 
     // Island Account states
     const [selectedIsland, setSelectedIsland] = useState<IslandSelectOption | null>(null);
+    const [currentIslandAccessories, setCurrentIslandAccessories] = useState<any[]>([]);
 
     // Selected values for form
     const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
@@ -283,21 +285,33 @@ export default function EditQuotation() {
                     value: data.island_id,
                     label: apiData.island_name || 'Select Island'
                 });
+                
+                // Fetch accessories for the loaded island
+                try {
+                    const accessoriesResponse = await QuotationService.getQuotationAccessories(data.island_id);
+                    if (accessoriesResponse.data && accessoriesResponse.data.status && accessoriesResponse.data.data) {
+                        const accessories = Array.isArray(accessoriesResponse.data.data) ? accessoriesResponse.data.data : [accessoriesResponse.data.data];
+                        
+                        const transformedAccessories = accessories.map(accessory => ({
+                            accessory_id: accessory.accessory_id,
+                            accessory_part_number: accessory.accessory_part_number,
+                            accessory_part_name: accessory.accessory_part_name,
+                            accessory_brand: accessory.accessory_brand || '',
+                            accessory_specification: accessory.accessory_specification || '',
+                            quantity: accessory.accessories_island_detail_quantity || 1,
+                            description: accessory.accessory_description || '',
+                            accessory_description: accessory.accessory_description || '',
+                            accessory_remark: accessory.accessory_remark || '',
+                            accessory_region: accessory.accessory_region || ''
+                        }));
+                        
+                        setCurrentIslandAccessories(transformedAccessories);
+                    }
+                } catch (error) {
+                    console.error('Error loading island accessories on edit:', error);
+                }
             }
-            
-            // Find and set bank data from loaded bank options
-            // if (data.bank_account_bank_name) {
-            //     setSelectedBank({
-            //         value: data.bank_account_bank_name,
-            //         label: `${data.bank_account_bank_name} - ${data.bank_account_number}`,
-            //         data: {
-            //             bank_account_id: data.bank_account_id,
-            //             bank_account_name: data.bank_account_name,
-            //             bank_account_number: data.bank_account_number,
-            //             bank_account_type: data.bank_account_bank_name
-            //         }
-            //     });
-            // }
+
             if (data.bank_account_name && data.bank_account_number) {
                 // Find matching bank from options
                 const matchingBank = bankOptions.find(bank => 
@@ -348,7 +362,7 @@ export default function EditQuotation() {
             toast.error(err.message || 'Failed to load quotation');
             navigate('/quotations/manage');
         }
-    }, [quotationId, fetchQuotation, navigate, bankOptions]);
+    }, [quotationId, fetchQuotation, navigate, bankOptions, QuotationService]);
 
     useEffect(() => {
         if (quotationId) {
@@ -613,7 +627,8 @@ export default function EditQuotation() {
             if (response.data && response.data.data) {
                 const apiProductData = response.data.data;
                 
-                const islandAccessories = (formData.manage_quotation_item_accessories || []).map(accessory => ({
+                // Use current island accessories that were fetched when island was selected
+                const islandAccessories = currentIslandAccessories.map(accessory => ({
                     accessory_id: accessory.accessory_id,
                     accessory_part_number: accessory.accessory_part_number,
                     accessory_part_name: accessory.accessory_part_name,
@@ -621,9 +636,9 @@ export default function EditQuotation() {
                     accessory_specification: accessory.accessory_specification,
                     quantity: accessory.quantity,
                     description: accessory.description,
-                    accessory_description: accessory.description || '',
-                    accessory_remark: '',
-                    accessory_region: '' 
+                    accessory_description: accessory.accessory_description || '',
+                    accessory_remark: accessory.accessory_remark || '',
+                    accessory_region: accessory.accessory_region || '' 
                 }));
                 
                 const newQuotationItem: QuotationItem = {
@@ -685,9 +700,6 @@ export default function EditQuotation() {
         }
     };
 
-
-
-    // Update quotation item directly from table (inline editing)
     const updateItemById = (itemIndex: number, field: keyof QuotationItem, value: string | number) => {
         setFormData(prev => {
             const updatedQuotationItems = [...prev.manage_quotation_items];
@@ -713,9 +725,6 @@ export default function EditQuotation() {
         });
     };
 
-
-
-    // Remove quotation item and recalculate totals
     const removeQuotationItem = (itemIndex: number) => {
         setFormData(prev => {
             const updatedFormData = {
@@ -825,7 +834,6 @@ export default function EditQuotation() {
             const items = [...prev.manage_quotation_items];
             const currentItem = items[itemIndex];
             
-            // Map accessories dengan fallback ke berbagai format
             const mappedAccessories = (updatedProductData.accessories || (updatedProductData as any).accessories)?.map((acc: any) => ({
                 accessory_id: acc.accessory_id || acc.id || '',
                 accessory_part_number: acc.accessory_part_number || acc.code_unique || acc.part_number || '',
@@ -879,7 +887,6 @@ export default function EditQuotation() {
         });
     }, [calculateGrandTotal]);
 
-    // Define columns for product table
     const productColumns: TableColumn<QuotationItem>[] = [
         {
             name: 'Product Name',
@@ -1150,7 +1157,7 @@ export default function EditQuotation() {
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={(e) => handleSubmit(e, 'submit')} className="space-y-6">
+                    <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                         <div className='md:grid-cols-5 grid gap-6'>
                             <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-3">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">Quotation Detail</h2>
@@ -1366,6 +1373,9 @@ export default function EditQuotation() {
                                                                     accessory_region: accessory.accessory_region || ''
                                                                 }));
                                                                 
+                                                                // Store accessories in separate state for new items
+                                                                setCurrentIslandAccessories(transformedAccessories);
+                                                                
                                                                 // Update accessories in all existing quotation items
                                                                 setFormData(prev => ({
                                                                     ...prev,
@@ -1382,6 +1392,7 @@ export default function EditQuotation() {
                                                                 toast.success(`Accessories updated for ${transformedAccessories.length} items based on selected island`);
                                                             } else {
                                                                 // Clear accessories if no data
+                                                                setCurrentIslandAccessories([]);
                                                                 setFormData(prev => ({
                                                                     ...prev,
                                                                     manage_quotation_item_accessories: [],
@@ -1400,6 +1411,7 @@ export default function EditQuotation() {
                                                             console.error('Error fetching accessories by island:', error);
                                                             toast.error('Failed to load accessories for selected island');
                                                             // Clear accessories on error
+                                                            setCurrentIslandAccessories([]);
                                                             setFormData(prev => ({
                                                                 ...prev,
                                                                 manage_quotation_item_accessories: [],
@@ -1414,6 +1426,7 @@ export default function EditQuotation() {
                                                         }
                                                     } else {
                                                         // Clear accessories when no island selected
+                                                        setCurrentIslandAccessories([]);
                                                         setFormData(prev => ({
                                                             ...prev,
                                                             manage_quotation_item_accessories: [],
@@ -1877,14 +1890,21 @@ export default function EditQuotation() {
                                 <MdSave size={16} />
                                 Save as Draft
                             </Button> */}
-                            <Button
-                                type="submit"
-                                disabled={isUpdating || loading}
-                                className="px-6 flex items-center gap-2 rounded-full"
-                            >
-                                <MdSave size={16} />
-                                {isUpdating ? 'Updating...' : 'Update Quotation'}
-                            </Button>
+                            
+                            <PermissionGate permission={["create", "update"]}>
+                                <Button
+                                    type="button"
+                                    onClick={() => {
+                                        const tipu = { preventDefault: () => {} } as React.FormEvent;
+                                        handleSubmit(tipu, 'submit');
+                                    }}
+                                    disabled={isUpdating || loading}
+                                    className="px-6 flex items-center gap-2 rounded-full"
+                                >
+                                    <MdSave size={16} />
+                                    {isUpdating ? 'Updating...' : 'Update Quotation'}
+                                </Button>
+                            </PermissionGate>
                         </div>
                     </form>
                 </div>

@@ -9,9 +9,10 @@ import PageMeta from "@/components/common/PageMeta";
 import { toast } from "react-hot-toast";
 
 import { useProductEdit } from "./hooks/useProductEdit";
-import { ItemProductValidationErrors } from "./types/product";
+import { ItemProductValidationErrors, ProductSpecification } from "./types/product";
 import { handleKeyPress, formatNumberInput } from "@/helpers/generalHelper";
 import CustomSelect from "@/components/form/select/CustomSelect";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 // Form data type for editing
 interface EditProductFormData {
@@ -33,6 +34,7 @@ interface EditProductFormData {
     volume: string;
     componen_product_unit_model: string;
     msi_product: string;
+    componen_product_specifications: ProductSpecification[];
 }
 
 export default function EditProduct() {
@@ -67,7 +69,100 @@ export default function EditProduct() {
         componen_type: 1,
         volume: '',
         componen_product_unit_model: '',
-        msi_product: ''
+        msi_product: '',
+        componen_product_specifications: [
+            {
+                componen_product_specification_label: 'GWM',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'GWM',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Unit Model',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Unit Model',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Horse Power',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Horse Power',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Cargobox/Vessel',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Cargobox/Vessel',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Wheelbase',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Wheelbase',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Engine Brand Model',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Engine Brand Model',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Max Torque',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Max Torque',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Displacement',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Displacement',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Emission Standard',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Emission Standard',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Engine Guard',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Engine Guard',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Gearbox Transmission',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Gearbox Transmission',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Fuel Tank',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Fuel Tank',
+                specification_value_name: ''
+            },
+            {
+                componen_product_specification_label: 'Tyre',
+                componen_product_specification_value: '',
+                componen_product_specification_description: '',
+                specification_label_name: 'Tyre',
+                specification_value_name: ''
+            }
+        ],
     });
     
     const [specifications, setSpecifications] = useState<any[]>([]);
@@ -85,6 +180,116 @@ export default function EditProduct() {
             const product = await loadProduct(productId);
             
             if (product) {
+                // Define default specifications template
+                const defaultSpecifications = [
+                    {
+                        componen_product_specification_label: 'GWM',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'GWM',
+                        specification_value_name: ''
+                    },
+                    {
+                        componen_product_specification_label: 'Unit Model',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'Unit Model',
+                        specification_value_name: ''
+                    },
+                    {
+                        componen_product_specification_label: 'Horse Power',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'Horse Power',
+                        specification_value_name: ''
+                    },
+                    {
+                        componen_product_specification_label: 'Cargobox/Vessel',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'Cargobox/Vessel',
+                        specification_value_name: ''
+                    },
+                    {
+                        componen_product_specification_label: 'Wheelbase',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'Wheelbase',
+                        specification_value_name: ''
+                    },
+                    {
+                        componen_product_specification_label: 'Engine Brand Model',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'Engine Brand Model',
+                        specification_value_name: ''
+                    },
+                    {
+                        componen_product_specification_label: 'Max Torque',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'Max Torque',
+                        specification_value_name: ''
+                    },
+                    {
+                        componen_product_specification_label: 'Displacement',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'Displacement',
+                        specification_value_name: ''
+                    },
+                    {
+                        componen_product_specification_label: 'Emission Standard',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'Emission Standard',
+                        specification_value_name: ''
+                    },
+                    {
+                        componen_product_specification_label: 'Engine Guard',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'Engine Guard',
+                        specification_value_name: ''
+                    },
+                    {
+                        componen_product_specification_label: 'Gearbox Transmission',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'Gearbox Transmission',
+                        specification_value_name: ''
+                    },
+                    {
+                        componen_product_specification_label: 'Fuel Tank',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'Fuel Tank',
+                        specification_value_name: ''
+                    },
+                    {
+                        componen_product_specification_label: 'Tyre',
+                        componen_product_specification_value: '',
+                        componen_product_specification_description: '',
+                        specification_label_name: 'Tyre',
+                        specification_value_name: ''
+                    }
+                ];
+
+                // Merge API data with default template
+                const specificationsData = defaultSpecifications.map(defaultSpec => {
+                    // Find matching specification from API response
+                    const apiSpec = product.componen_product_specifications?.find(spec => 
+                        spec.specification_label_name === defaultSpec.specification_label_name ||
+                        spec.componen_product_specification_label === defaultSpec.componen_product_specification_label
+                    );
+
+                    // If found in API, use API data, otherwise use default template
+                    return apiSpec ? {
+                        ...defaultSpec,
+                        ...apiSpec
+                    } : defaultSpec;
+                });
+
                 // Map product data to form data
                 setFormData({
                     code_unique: product.code_unique || '',
@@ -104,13 +309,12 @@ export default function EditProduct() {
                     componen_type: product.componen_type || 1,
                     volume: product.volume || '',
                     componen_product_unit_model: product.componen_product_unit_model || '',
-                    msi_product: product.msi_product || ''
+                    msi_product: product.msi_product || '',
+                    componen_product_specifications: specificationsData,
                 });
                 
-                // Load specifications
-                if (product.componen_product_specifications) {
-                    setSpecifications(product.componen_product_specifications);
-                }
+                // Set specifications state with the merged data
+                setSpecifications(specificationsData);
                 
                 // Load existing image URL if available
                 if (product.image) {
@@ -184,7 +388,7 @@ export default function EditProduct() {
     };
 
     // Handle form submission
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault();
         
         if (!validateForm() || !id) {
@@ -214,14 +418,12 @@ export default function EditProduct() {
             formDataToSend.append('componen_type', formData.componen_type.toString());
             formDataToSend.append('volume', formData.volume);
             formDataToSend.append('componen_product_unit_model', formData.componen_product_unit_model);
+            formDataToSend.append('componen_product_specifications', JSON.stringify(specifications.length > 0 ? specifications : formData.componen_product_specifications));
 
             // Append image file if new file is uploaded
             if (productImage) {
                 formDataToSend.append('image', productImage);
             }
-            console.log({
-                productImage
-            });
             
             const success = await updateProduct(id, formDataToSend);
             
@@ -303,7 +505,7 @@ export default function EditProduct() {
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className=" space-y-6">
+                    <form onSubmit={(e) => e.preventDefault()} className=" space-y-6">
 
                         {/* Basic Information Section */}
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -665,23 +867,30 @@ export default function EditProduct() {
                             >
                                 Batal
                             </Button>
-                            <Button
-                                type="submit"
-                                disabled={isUpdating}
-                                className="px-6 flex items-center gap-2 rounded-full"
-                            >
-                                {isUpdating ? (
-                                    <div className="flex items-center">
-                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                        Menyimpan...
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center">
-                                        <MdSave className="mr-2" />
-                                        Simpan
-                                    </div>
-                                )}
-                            </Button>
+                            
+                            <PermissionGate permission={["create", "update"]}>
+                                <Button
+                                    disabled={isUpdating}
+                                    type="submit"
+                                    onClick={() => {
+                                        const tipu = { preventDefault: () => {} } as React.FormEvent;
+                                        handleSubmit(tipu);
+                                    }}
+                                    className="px-6 flex items-center gap-2 rounded-full"
+                                >
+                                    {isUpdating ? (
+                                        <div className="flex items-center">
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                            Menyimpan...
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center">
+                                            <MdSave className="mr-2" />
+                                            Simpan
+                                        </div>
+                                    )}
+                                </Button>
+                            </PermissionGate>
                         </div>
                     </form>
                 </div>

@@ -1,11 +1,13 @@
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
-import { MdEdit, MdKeyboardArrowLeft, MdSave, MdAdd, MdDelete } from "react-icons/md";
+import { MdEdit, MdKeyboardArrowLeft, MdSave, MdAdd, MdDelete, MdDeleteOutline } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
 import { useAccessoriesEdit } from "./hooks/useAccessoriesEdit";
 import CustomAsyncSelect from "@/components/form/select/CustomAsyncSelect";
 import CustomDataTable from "@/components/ui/table/CustomDataTable";
+import { PermissionGate } from "@/components/common/PermissionComponents";
+import { createActionsColumn } from "@/components/ui/table";
 
 export default function EditAccessories() {
     const { 
@@ -64,7 +66,7 @@ export default function EditAccessories() {
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
+                    <form onSubmit={(e) => e.preventDefault()} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
                         <div className="lg:col-span-1 p-8 relative space-y-8">
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -251,23 +253,32 @@ export default function EditAccessories() {
                                                         />
                                                     )
                                                 },
-                                                {
-                                                    name: 'Actions',
-                                                    cell: (row: any) => (
-                                                        <Button
-                                                            type="button"
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => handleRemoveIsland(row.island_id)}
-                                                            className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                                                        >
-                                                            <MdDelete size={16} />
-                                                        </Button>
-                                                    ),
-                                                    ignoreRowClick: true,
-                                                    allowOverflow: true,
-                                                    button: true
-                                                }
+                                                createActionsColumn([
+                                                    {
+                                                        icon: MdDeleteOutline,
+                                                        onClick: handleRemoveIsland,
+                                                        className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                                                        tooltip: 'Delete',
+                                                        permission: 'delete'
+                                                    }
+                                                ])
+                                                // {
+                                                //     name: 'Actions',
+                                                //     cell: (row: any) => (
+                                                //         <Button
+                                                //             type="button"
+                                                //             variant="outline"
+                                                //             size="sm"
+                                                //             onClick={() => handleRemoveIsland(row.island_id)}
+                                                //             className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                                                //         >
+                                                //             <MdDelete size={16} />
+                                                //         </Button>
+                                                //     ),
+                                                //     ignoreRowClick: true,
+                                                //     allowOverflow: true,
+                                                //     button: true
+                                                // }
                                             ]}
                                             data={form.accessories_island_detail}
                                             loading={false}
@@ -296,23 +307,30 @@ export default function EditAccessories() {
                             >
                                 Cancel
                             </Button>
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="px-6 flex items-center gap-2 rounded-full"
-                            >
-                                {loading ? (
-                                    <div className="flex items-center">
-                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                        Updating...
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center">
-                                        <MdSave className="mr-2" />
-                                        Update Accessory
-                                    </div>
-                                )}
-                            </Button>
+                            
+                            <PermissionGate permission={["create", "update"]}>
+                                <Button
+                                    type="submit"
+                                    onClick={() => {
+                                        const tipu = { preventDefault: () => {} } as React.FormEvent;
+                                        handleSubmit(tipu);
+                                    }}
+                                    disabled={loading}
+                                    className="px-6 flex items-center gap-2 rounded-full"
+                                >
+                                    {loading ? (
+                                        <div className="flex items-center">
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                            Updating...
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center">
+                                            <MdSave className="mr-2" />
+                                            Update Accessory
+                                        </div>
+                                    )}
+                                </Button>
+                            </PermissionGate>
                         </div>
                     </form>
                 </div>

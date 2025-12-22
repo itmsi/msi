@@ -41,11 +41,11 @@ export interface ItemProduct {
 
 export interface ProductSpecification {
     // componen_product_specification_id: string;
-    componen_product_specification_label: string;
-    componen_product_specification_value: string;
-    componen_product_specification_description: string | null;
-    specification_label_name: string;
-    specification_value_name: string;
+    componen_product_specification_label?: string;
+    componen_product_specification_value?: string;
+    componen_product_specification_description?: string | null;
+    specification_label_name?: string;
+    specification_value_name?: string;
 }
 
 export interface Pagination {

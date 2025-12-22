@@ -1588,7 +1588,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         'Garansi 2 tahun atau 60.000 KM operasi**'
                     ],
                     notes: [
-                        'Dilengkapi garansi hingga 1 tahun sejak tanggal BAST',
+                        'Dilengkapi garansi hingga 2 tahun sejak tanggal BAST',
                         '**Mana yang tercapai terlebih dahulu, syarat & ketentuan berlaku'
                     ]
                 },
@@ -1682,7 +1682,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         'Garansi 1 tahun atau 6.000 jam operasi**'
                     ],
                     notes: [
-                        'Dilengkapi garansi hingga 1 tahun sejak tanggal BAST',
+                        'Dilengkapi garansi hingga 2 tahun sejak tanggal BAST',
                         '**Mana yang tercapai terlebih dahulu, syarat & ketentuan berlaku'
                     ]
                 },

@@ -180,7 +180,7 @@ export default function ManageIsland() {
                 description={editingIsland ? 'Update island information' : 'Fill in the details to create a new island'}
             >
                 <div className="p-6">
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                         {/* Island Name */}
                         <div>
                             <Label htmlFor="island_name">Island Name *</Label>
@@ -209,16 +209,24 @@ export default function ManageIsland() {
                             >
                                 Cancel
                             </Button>
-                            <Button
-                                disabled={loading}
-                                className={`rounded-[50px] ${
-                                    Object.keys(validationErrors).length > 0 
-                                            ? 'bg-red-600 hover:bg-red-700' 
-                                            : 'bg-blue-600 hover:bg-blue-700'
-                                } text-white`}
-                            >
-                                {loading ? 'Saving...' : (editingIsland ? 'Update Island' : 'Create Island')}
-                            </Button>
+                            
+                            <PermissionGate permission={["create", "update"]}>
+                                <Button
+                                    type="submit"
+                                    onClick={() => {
+                                        const tipu = { preventDefault: () => {} } as React.FormEvent;
+                                        handleSubmit(tipu);
+                                    }}
+                                    disabled={loading}
+                                    className={`rounded-[50px] ${
+                                        Object.keys(validationErrors).length > 0 
+                                                ? 'bg-red-600 hover:bg-red-700' 
+                                                : 'bg-blue-600 hover:bg-blue-700'
+                                    } text-white`}
+                                >
+                                    {loading ? 'Saving...' : (editingIsland ? 'Update Island' : 'Create Island')}
+                                </Button>
+                            </PermissionGate>
                         </div>
                     </form>
                 </div>

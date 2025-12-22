@@ -35,9 +35,6 @@ const EditTermCondition: React.FC = () => {
         try {
             setLoading(true);
             const response = await TermConditionService.getTermConditionById(termConditionId);
-            console.log({
-                response
-            });
             
             if (response.status && response.data) {
                 const termCondition = response.data;
@@ -71,7 +68,7 @@ const EditTermCondition: React.FC = () => {
     };
 
     // Form submission
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault();
         
         if (!formData.term_content_title.trim()) {
@@ -140,7 +137,7 @@ const EditTermCondition: React.FC = () => {
                         </div>
                     </div>
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
+                    <form onSubmit={(e) => e.preventDefault()} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
                         {/* Error Message */}
                         {/* {error && (
                             <div className="p-4 bg-red-50 border border-red-200 rounded-md">
@@ -193,6 +190,10 @@ const EditTermCondition: React.FC = () => {
                             <PermissionGate permission="update">
                                 <Button
                                     type="submit"
+                                    onClick={() => {
+                                        const tipu = { preventDefault: () => {} } as React.FormEvent;
+                                        handleSubmit(tipu);
+                                    }}
                                     disabled={saving}
                                     className="px-6 flex items-center gap-2 rounded-full"
                                 >

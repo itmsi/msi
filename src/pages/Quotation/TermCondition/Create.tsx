@@ -57,10 +57,6 @@ const CreateTermCondition: React.FC = () => {
             setLoading(false);
         }
     };
-console.log({
-    error
-});
-
     return (
         <>
             <PageMeta

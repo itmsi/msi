@@ -3,7 +3,7 @@ import { useHasPermission } from '@/hooks/usePermissions';
 import Button from '../ui/button/Button';
 
 interface PermissionGateProps {
-    permission: 'create' | 'read' | 'update' | 'delete';
+    permission: 'create' | 'read' | 'update' | 'delete' | ('create' | 'read' | 'update' | 'delete')[];
     routeName?: string;
     fallback?: React.ReactNode;
     children: React.ReactNode;
@@ -14,13 +14,15 @@ export const PermissionGate: React.FC<PermissionGateProps> = ({
     fallback = null,
     children
 }) => {
-    const hasPermission = useHasPermission(permission, routeName);
+    const hasPermission = Array.isArray(permission) 
+        ? permission.some(perm => useHasPermission(perm, routeName))
+        : useHasPermission(permission, routeName);
     
     return hasPermission ? <>{children}</> : <>{fallback}</>;
 };
 
 interface PermissionButtonProps {
-    permission: 'create' | 'read' | 'update' | 'delete';
+    permission: 'create' | 'read' | 'update' | 'delete' | ('create' | 'read' | 'update' | 'delete')[];
     routeName?: string;
     children: React.ReactNode;
     className?: string;
@@ -40,7 +42,9 @@ export const PermissionButton: React.FC<PermissionButtonProps> = ({
     title,
     type = "button"
 }) => {
-    const hasPermission = useHasPermission(permission, routeName);
+    const hasPermission = Array.isArray(permission) 
+        ? permission.some(perm => useHasPermission(perm, routeName))
+        : useHasPermission(permission, routeName);
     return (
         <div title={title}>
             <Button

@@ -74,8 +74,8 @@ const Client = ({ children, isProtected, isUnProtected, roles, requiredPermissio
                 // Check permission-based access if requiredPermissions are specified
                 let hasRequiredPermissions = true;
                 if (requiredPermissions && requiredPermissions.length > 0) {
-                    // User must have ALL required permissions (not just one)
-                    hasRequiredPermissions = requiredPermissions.every(permission => 
+                    // User must have AT LEAST ONE of the required permissions (OR logic)
+                    hasRequiredPermissions = requiredPermissions.some(permission => 
                         hasPermissionAccess(routeName, permission, userMenu)
                     );
                 }
