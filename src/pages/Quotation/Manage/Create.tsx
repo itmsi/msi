@@ -708,6 +708,7 @@ export default function CreateQuotation() {
                     onChange={(e) => updateItemById(index as number, 'componen_product_name', e.target.value)}
                     className="border-0 border-b-1 rounded-none p-1 px-3 w-full w-[480px]"
                     placeholder="Product name"
+                    readonly
                 />
             ),
             wrap: true,

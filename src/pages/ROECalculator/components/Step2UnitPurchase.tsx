@@ -70,6 +70,10 @@ export default function Step2UnitPurchase({
             </div>
         );
     }
+    console.log({
+        formData
+    });
+    
     return (
         
         <div className="space-y-6">

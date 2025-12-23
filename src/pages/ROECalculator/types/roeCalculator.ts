@@ -229,6 +229,19 @@ export interface ApiCalculationResponse {
     total_expense_monthly: string;
     revenue_monthly: string;
     net_profit_monthly: string;
+    financial: {
+        assets: string;
+        equity: string;
+        liability: string;
+    };
+    unit_purchases: {
+        principal_installment: string;
+        interest_monthly: string;
+        total_installment_per_month: string;
+        depreciation_per_month: string;
+        interest_expense_per_month: string;
+        total_fixed_cost_from_unit: string;
+    };
 }
 
 export interface ApiUnitPurchaseResponse {

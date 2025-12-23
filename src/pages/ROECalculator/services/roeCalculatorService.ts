@@ -355,24 +355,24 @@ export class ROECalculatorService {
             const calcData = response.data as ApiCalculationResponse;
             const mappedResponse: CalculationResponse = {
                 financial_structure: {
-                    asset: parseFloat(calcData.assets) || 0,
-                    equity: parseFloat(calcData.equity) || 0,
-                    liability: parseFloat(calcData.liability) || 0,
+                    asset: parseFloat(calcData.financial.assets) || 0,
+                    equity: parseFloat(calcData.financial.equity) || 0,
+                    liability: parseFloat(calcData.financial.liability) || 0,
                     roe_percentage: parseFloat(calcData.roe_aggregate_percentage) || 0,
                     roa_percentage: parseFloat(calcData.roa_aggregate_percentage) || 0
                 },
                 monthly_summary: {
-                    cicilan_pokok: parseFloat(calcData.depreciation_monthly) || 0,
-                    bunga_per_bulan: parseFloat(calcData.interest_monthly) || 0,
-                    total_cicilan_bulan: (parseFloat(calcData.depreciation_monthly) || 0) + (parseFloat(calcData.interest_monthly) || 0)
+                    cicilan_pokok: parseFloat(calcData.unit_purchases.principal_installment) || 0,
+                    bunga_per_bulan: parseFloat(calcData.unit_purchases.interest_monthly) || 0,
+                    total_cicilan_bulan: parseFloat(calcData.unit_purchases.total_installment_per_month) || 0
                 },
                 expense_impact: {
-                    depreciation_bulan: parseFloat(calcData.depreciation_monthly) || 0,
-                    interest_expense_bulan: parseFloat(calcData.interest_monthly) || 0,
-                    total_fixed_cost_unit: parseFloat(calcData.total_expense_monthly) || 0
+                    depreciation_bulan: parseFloat(calcData.unit_purchases.depreciation_per_month) || 0,
+                    interest_expense_bulan: parseFloat(calcData.unit_purchases.interest_expense_per_month) || 0,
+                    total_fixed_cost_unit: parseFloat(calcData.unit_purchases.total_fixed_cost_from_unit) || 0
                 },
-                total_asset: parseFloat(calcData.assets) || 0,
-                debt_to_equity_ratio: (parseFloat(calcData.liability) || 0) / (parseFloat(calcData.equity) || 1)
+                total_asset: parseFloat(calcData.financial.assets) || 0,
+                debt_to_equity_ratio: (parseFloat(calcData.financial.liability) || 0) / (parseFloat(calcData.financial.equity) || 1)
             };
 
             return {
