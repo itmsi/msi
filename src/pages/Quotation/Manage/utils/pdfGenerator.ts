@@ -335,9 +335,11 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     yPos += 5;
     const tableHeight = yPos - tableStartY - 2.5;
     const tableWidth = pageWidth - 2 * margin;
-    doc.setDrawColor(228, 231, 236);
-    doc.setLineWidth(0.1);
-    doc.roundedRect(margin, tableStartY, tableWidth, tableHeight, boxRadius, boxRadius);
+    if(data.manage_quotation_items.length < 17) {
+        doc.setDrawColor(228, 231, 236);
+        doc.setLineWidth(0.1);
+        doc.roundedRect(margin, tableStartY, tableWidth, tableHeight, boxRadius, boxRadius);
+    }
 
     // TERM & CONDITION & FINANCIAL SUMMARY (Side by Side)
     checkNewPage(80);
@@ -1678,7 +1680,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         'Garansi 1 tahun atau 6.000 jam operasi**'
                     ],
                     notes: [
-                        'Dilengkapi garansi hingga 2 tahun sejak tanggal BAST',
+                        'Dilengkapi garansi hingga 1 tahun sejak tanggal BAST',
                         '**Mana yang tercapai terlebih dahulu, syarat & ketentuan berlaku'
                     ]
                 },
@@ -1874,14 +1876,14 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         subtitle: 'Fuel Tank Sensor & Refill/Drain Alerts',
                         content: 'Detect refueling or draining activities.'
                     },
-                    {
-                        subtitle: 'Cost per KM',
-                        content: 'Monitor expense costs per kilometer to improve efficiency.'
-                    },
-                    {
-                        subtitle: 'Cost per Liter',
-                        content: 'See fuel consumption not only per KM/Liter, but also when units are idle, running, or in operation.'
-                    }
+                    // {
+                    //     subtitle: 'Cost per KM',
+                    //     content: 'Monitor expense costs per kilometer to improve efficiency.'
+                    // },
+                    // {
+                    //     subtitle: 'Cost per Liter',
+                    //     content: 'See fuel consumption not only per KM/Liter, but also when units are idle, running, or in operation.'
+                    // }
                 ]
             };
             
@@ -1995,8 +1997,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                             columnY += 2;
                         } else if (item.title) {
                             const iconSize = 5;
-                            const iconY = columnY - 2;
+                            const iconY = columnY;
                             
+                            doc.setFontSize(10);
+                            doc.setTextColor(23, 26, 31);
                             if (item.icon) {
                                 try {
                                     doc.addImage(item.icon, 'PNG', iconX, iconY, iconSize, iconSize);
@@ -2008,19 +2012,20 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                             
                             doc.setTextColor(23, 26, 31);
                             setFontSafe(doc, 'Futura', 'bold');
-                            doc.text(item.title, iconX + iconSize + 3, columnY);
-                            columnY += 4;
+                            doc.text(item.title, iconX + iconSize + 3, columnY + 3);
+                            columnY += 4.5;
                             
                             if (item.content) {
-                                doc.setTextColor(0, 0, 0);
-                                setFontSafe(doc, 'Futura', 'normal');
+                                doc.setFontSize(8);
+                                doc.setTextColor(23, 26, 31);
+                                setFontSafe(doc, 'Futura', 'bold');
                                 const contentLines = doc.splitTextToSize(item.content, dataTouchWidth - 15);
                                 contentLines.forEach((line: string) => {
-                                    doc.text(line, iconX + iconSize + 3, columnY);
+                                    doc.text(line, iconX + iconSize + 3, columnY + 3);
                                     columnY += 3;
                                 });
                             }
-                            columnY += 3;
+                            columnY += 5;
                         }
                     });
                 }
