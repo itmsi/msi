@@ -843,7 +843,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
                             imageFormat = 'JPEG';
                         }
-                        doc.addImage(item1.cp_image, imageFormat, item1StartX + (itemWidth / 2) - 21, item1YPos - 10, 40, 50);
+                        doc.addImage(item1.cp_image, imageFormat, item1StartX + (itemWidth / 2) - 21, item1YPos - 10, 37, 50);
                         item1YPos += 50;
                     } catch (error) {
                         console.warn('Failed to load product image for item 1:', error);
@@ -894,7 +894,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     tableWidth: itemWidth,
                     styles: { 
                         fontSize: 8, 
-                        cellPadding: 2,
+                        cellPadding: [1, 2],
                         font: 'Futura',
                         fontStyle: 'normal'
                     },
@@ -912,7 +912,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     didParseCell: (data) => {
                         // Set minimum height for Gearbox Transmission rows
                         if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
-                            data.cell.styles.minCellHeight = 12;
+                            data.cell.styles.minCellHeight = 8;
                         }
                     }
                 });
@@ -948,17 +948,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     margin: { left: item1StartX + 1, right: hasOnlyOne ? margin + (pageWidth - 2 * margin) * 0.2 : item2StartX - 5 },
                     tableWidth: itemWidth,
                     styles: { 
-                        fontSize: 9, 
+                        fontSize: 8, 
                         cellPadding: [.5, 0],
-                        textColor: [0, 0, 0],
                         valign: 'middle',
-                        font: 'OpenSans',
+                        font: 'Futura',
                         fontStyle: 'normal'
                     },
                     alternateRowStyles: { fillColor: [255, 255, 255] },
                     columnStyles: {
                         0: { cellWidth: 5, halign: "center", valign: 'top' },
-                        1: { textColor: [23, 26, 31], fontStyle: 'semibold' },
                     }
                 });
 
@@ -991,7 +989,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                             } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
                                 imageFormat = 'JPEG';
                             }
-                            doc.addImage(item2.cp_image, imageFormat, item2StartX + (itemWidth / 2) - 21, item2YPos - 10, 40, 50);
+                            doc.addImage(item2.cp_image, imageFormat, item2StartX + (itemWidth / 2) - 21, item2YPos - 10, 37, 50);
                             item2YPos += 50;
                         } catch (error) {
                             console.warn('Failed to load product image for item 2:', error);
@@ -1046,7 +1044,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         tableWidth: itemWidth,
                         styles: { 
                             fontSize: 8, 
-                            cellPadding: 2,
+                            cellPadding: [1, 2],
                             font: 'Futura',
                             fontStyle: 'normal'
                         },
@@ -1064,7 +1062,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         didParseCell: (data) => {
                             // Set minimum height for Gearbox Transmission rows
                             if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
-                                data.cell.styles.minCellHeight = 12;
+                                data.cell.styles.minCellHeight = 8;
                             }
                         }
                     });
@@ -1107,17 +1105,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         margin: { left: item2StartX, right: margin },
                         tableWidth: itemWidth,
                         styles: { 
-                            fontSize: 9, 
+                            fontSize: 8, 
                             cellPadding: [.5, 0],
-                            textColor: [23, 26, 31],
                             valign: 'middle',
-                            font: 'OpenSans',
+                            font: 'Futura',
                             fontStyle: 'normal'
                         },
                         alternateRowStyles: { fillColor: [255, 255, 255] },
                         columnStyles: {
                             0: { cellWidth: 5, halign: "center", valign: 'top' },
-                            1: { textColor: [23, 26, 31], fontStyle: 'semibold' },
                         }
                     });
 

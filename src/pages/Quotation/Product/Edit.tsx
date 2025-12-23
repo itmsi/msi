@@ -72,10 +72,10 @@ export default function EditProduct() {
         msi_product: '',
         componen_product_specifications: [
             {
-                componen_product_specification_label: 'GWM',
+                componen_product_specification_label: 'GVW',
                 componen_product_specification_value: '',
                 componen_product_specification_description: '',
-                specification_label_name: 'GWM',
+                specification_label_name: 'GVW',
                 specification_value_name: ''
             },
             {
@@ -183,10 +183,10 @@ export default function EditProduct() {
                 // Define default specifications template
                 const defaultSpecifications = [
                     {
-                        componen_product_specification_label: 'GWM',
+                        componen_product_specification_label: 'GVW',
                         componen_product_specification_value: '',
                         componen_product_specification_description: '',
-                        specification_label_name: 'GWM',
+                        specification_label_name: 'GVW',
                         specification_value_name: ''
                     },
                     {

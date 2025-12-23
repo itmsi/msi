@@ -56,10 +56,10 @@ export const useCreateProduct = () => {
         componen_product_unit_model: '',
         componen_product_specifications: [
             {
-                componen_product_specification_label: 'GWM',
+                componen_product_specification_label: 'GVW',
                 componen_product_specification_value: '',
                 componen_product_specification_description: '',
-                specification_label_name: 'GWM',
+                specification_label_name: 'GVW',
                 specification_value_name: ''
             },
             {
