@@ -65,7 +65,7 @@ export default function CreateROECalculator() {
         };
         
         initializeData();
-    }, [isEditMode, calculatorId]); // Removed dependencies that cause re-runs
+    }, [isEditMode, calculatorId]);
 
     const handleSaveAndNext = async () => {
 

@@ -5,28 +5,11 @@ import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { handleKeyPress, formatNumberInput } from '@/helpers/generalHelper';
+import { handleKeyPress, formatNumberInput, formatDecimalValue, formatIntegerValue, formatPercentageValue } from '@/helpers/generalHelper';
 import { SettingsService } from './services/settingsService';
 import Loading from '@/components/common/Loading';
 
-// Utility functions untuk format berbagai tipe data
-const formatDecimalValue = (value: string | number): string => {
-    if (!value) return '';
-    const numValue = typeof value === 'string' ? parseFloat(value) : value;
-    return numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(2);
-};
 
-const formatIntegerValue = (value: string | number): string => {
-    if (!value) return '';
-    const numValue = typeof value === 'string' ? parseFloat(value) : value;
-    return Math.round(numValue).toString();
-};
-
-const formatPercentageValue = (value: string | number): string => {
-    if (!value) return '';
-    const numValue = typeof value === 'string' ? parseFloat(value) : value;
-    return numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(2);
-};
 
 interface SettingsFormData {
     // Operasional
@@ -114,17 +97,12 @@ export default function ROESettings() {
         }
     };
 
-    // Handle input untuk field numeric
     const handleNumericInput = (field: keyof SettingsFormData, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    // Handle input untuk field decimal (seperti konsumsi BBM)
     const handleDecimalInput = (field: keyof SettingsFormData, value: string) => {
-        // Allow digits and one decimal point
         const cleaned = value.replace(/[^\d.]/g, '');
-        
-        // Prevent multiple decimal points
         const parts = cleaned.split('.');
         if (parts.length > 2) {
             return;
@@ -133,7 +111,6 @@ export default function ROESettings() {
         setFormData(prev => ({ ...prev, [field]: cleaned }));
     };
 
-    // Handle input untuk field percentage
     const handlePercentInput = (field: keyof SettingsFormData, value: string) => {
         const numeric = value.replace(/[^\d.]/g, '');
         const numValue = parseFloat(numeric);
@@ -148,7 +125,6 @@ export default function ROESettings() {
         setIsSaving(true);
         
         try {
-            // Convert string to number untuk payload
             const payload = {
                 ritase_per_shift: parseFloat(formData.ritase_per_shift) || 0,
                 shift_per_hari: parseInt(formData.shift_per_hari) || 0,

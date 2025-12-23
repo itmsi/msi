@@ -38,7 +38,6 @@ export default function SignInForm() {
             [field]: e.target.value
         }));
         
-        // Clear errors when user starts typing
         if (formErrors[field] || formErrors.general || authState.error) {
             setFormErrors({});
             clearError();
@@ -60,14 +59,12 @@ export default function SignInForm() {
         await handleButtonClick();
     };
 
-    // Use error from authState or local formErrors
     const displayError = authState.error || formErrors.general;
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#dfe8f2] py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full">
                 
-                {/* Logo and Title */}
                 <div className="text-center mb-8">
                     <img
                         src="/motor-sights-international-logo.png"
@@ -80,9 +77,7 @@ export default function SignInForm() {
                 </div>
                 <div className="bg-white rounded-lg shadow-md p-8">
 
-                    {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* General Error Message */}
                         {displayError && (
                             <div className="p-3 bg-red-50 border border-red-200 rounded-md">
                                 <p className="text-sm text-red-600">{displayError}</p>
@@ -136,15 +131,6 @@ export default function SignInForm() {
                                 )}
                             </div>
                             
-                            <div className="flex items-center justify-end">
-                                <Link
-                                    to="/reset-password"
-                                    className="text-sm text-gray-600 hover:text-brand-600 hover:underline"
-                                >
-                                    Forgot password?
-                                </Link>
-                            </div>
-                            
                             <Button 
                                 className="w-full mt-6" 
                                 size="md"
@@ -156,18 +142,6 @@ export default function SignInForm() {
                         </div>
                     </form>
 
-                    {/* Sign Up Link */}
-                    <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-600">
-                            Don't have an account?{" "}
-                            <Link
-                                to="/signup"
-                                className="text-brand-500 hover:text-brand-600 font-medium hover:underline"
-                            >
-                                Sign Up
-                            </Link>
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>

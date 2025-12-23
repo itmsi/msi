@@ -202,3 +202,21 @@ export const formatTime = (dateString: string) => {
         second: '2-digit'
     });
 };
+
+export const formatDecimalValue = (value: string | number): string => {
+    if (!value) return '';
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(2);
+};
+
+export const formatIntegerValue = (value: string | number): string => {
+    if (!value) return '';
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return Math.round(numValue).toString();
+};
+
+export const formatPercentageValue = (value: string | number): string => {
+    if (!value) return '';
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    return numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(2);
+};
