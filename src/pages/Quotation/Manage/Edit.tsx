@@ -51,6 +51,7 @@ export default function EditQuotation() {
         employeeOptions, 
         pagination: employeePagination, 
         inputValue: employeeInputValue,
+        setActiveSales,
         handleInputChange: handleEmployeeInputChange,
         handleMenuScrollToBottom: handleEmployeeMenuScrollToBottom,
         initializeOptions: initializeEmployeeOptions
@@ -531,6 +532,7 @@ export default function EditQuotation() {
     }, [initializeCustomerOptions]);
 
     useEffect(() => {
+        setActiveSales(true);
         initializeEmployeeOptions();
     }, [initializeEmployeeOptions]);
     
