@@ -210,10 +210,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     yPos += 9;
     
     const customersData = [
-        ['Nama Perusahaan : ',data.customer_name],
-        ['Contact Person : ',data.contact_person],
-        ['Telepon : ',data.customer_phone],
-        ['Alamat : ',data.customer_address],
+        ['Nama Perusahaan : ',data?.customer_name || '-'],
+        ['Contact Person : ',data?.contact_person || '-'],
+        ['Telepon : ',data?.customer_phone || '-'],
+        ['Alamat : ',data?.customer_address || '-'],
     ];
 
     const maxValueWidth = boxWidth - 42;

@@ -10,8 +10,7 @@ import { TableColumn } from 'react-data-table-component';
 import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
-import { tableDateFormat } from '@/helpers/generalHelper';
-import { createActionsColumn, createDateColumn } from '@/components/ui/table';
+import { createActionsColumn } from '@/components/ui/table';
 import { useNavigate } from 'react-router';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 
@@ -44,7 +43,7 @@ const ManageCustomers: React.FC = () => {
             name: 'Customer Name',
             selector: row => row.customer_name,
             cell: (row) => {
-                const initials = CustomerUtilityService.getCustomerInitials(row.customer_name);
+                const initials = row?.customer_name ? CustomerUtilityService.getCustomerInitials(row.customer_name) : 'NA';
                 const avatarColor = CustomerUtilityService.getCustomerAvatarColor(row.customer_id);
                 
                 return (
@@ -57,7 +56,7 @@ const ManageCustomers: React.FC = () => {
                         </div>
                         <div>
                             <div className="font-medium text-gray-900">
-                                {CustomerUtilityService.formatCustomerName(row.customer_name)}
+                                {row?.customer_name ? CustomerUtilityService.formatCustomerName(row.customer_name) : '-'}
                             </div>
                             <div className="text-sm text-gray-500">{row?.contact_person ?? '-'}</div>
                         </div>
@@ -70,7 +69,7 @@ const ManageCustomers: React.FC = () => {
             selector: row => row.customer_phone,
             cell: (row) => (
                 <span className="text-sm text-gray-700">
-                    {CustomerUtilityService.formatPhoneNumber(row.customer_phone)}
+                    {row.customer_phone ? CustomerUtilityService.formatPhoneNumber(row.customer_phone) : '-'}
                 </span>
             )
         },
@@ -84,7 +83,7 @@ const ManageCustomers: React.FC = () => {
                 </div>
             )
         },
-        createDateColumn('Created At', 'created_at', tableDateFormat),
+        // createDateColumn('Created At', 'created_at', tableDateFormat),
         createActionsColumn([
             {
                 icon: MdEdit,

@@ -68,12 +68,11 @@ export default function CreateCustomer() {
         if (!formData.customer_name.trim()) {
             errors.customer_name = 'Customer name is required';
         }
-        
-        if (!formData.customer_email.trim()) {
-            errors.customer_email = 'Customer email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customer_email)) {
-            errors.customer_email = 'Please enter a valid email address';
+
+        if (!formData.contact_person.trim()) {
+            errors.contact_person = 'Contact person is required';
         }
+    
         
         if (!formData.customer_phone.trim()) {
             errors.customer_phone = 'Customer phone is required';
@@ -195,11 +194,7 @@ export default function CreateCustomer() {
                                         value={formData.customer_email}
                                         onChange={(e) => handleInputChange('customer_email', e.target.value)}
                                         placeholder="Enter customer email"
-                                        error={!!validationErrors.customer_email}
                                     />
-                                    {validationErrors.customer_email && (
-                                        <span className="text-sm text-red-500">{validationErrors.customer_email}</span>
-                                    )}
                                 </div>
 
                                 {/* Customer Phone */}
