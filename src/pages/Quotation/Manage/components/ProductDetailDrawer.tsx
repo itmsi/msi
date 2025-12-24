@@ -22,8 +22,7 @@ const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
     onChange,
     initialData,
     readOnly = false
-}) => {
-    
+}) => {    
     return (
         <Offcanvas
             isOpen={isOpen}

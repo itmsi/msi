@@ -55,20 +55,19 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
 
     // Default specifications template - use useMemo to prevent re-creation
     const defaultSpecifications = React.useMemo(() => [
-        { label: "Model", value: "" },
-        { label: "Drive Type", value: "" },
+        { label: "Unit Model", value: "" },
         { label: "GVW", value: "" },
         { label: "Wheelbase", value: "" },
-        { label: "Engine Brand / Model", value: "" },
-        { label: "Power", value: "" },
+        { label: "Engine Brand Model", value: "" },
+        { label: "Horse Power", value: "" },
         { label: "Max Torque", value: "" },
         { label: "Displacement", value: "" },
         { label: "Emission Standard", value: "" },
         { label: "Engine Guard", value: "" },
-        { label: "Gearbox / Transmission", value: "" },
+        { label: "Gearbox Transmission", value: "" },
         { label: "Fuel Tank", value: "" },
-        { label: "Tires", value: "" },
-        { label: "Cargobox / Vessel", value: "" }
+        { label: "Tyre", value: "" },
+        { label: "Cargobox/Vessel", value: "" }
     ], []);
 
 
@@ -139,9 +138,9 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
     const editableSpecifications = React.useMemo(() => {
         if (!initialData) return [];
 
+
         const existingSpecs = initialData.componen_product_specifications || [];
         const editableSpecs = [];
-        
         // Map by matching label names, not by index
         for (let i = 0; i < defaultSpecifications.length; i++) {
             const defaultSpec = defaultSpecifications[i];
@@ -319,6 +318,9 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 </div>
             );
         }
+console.log({
+    editableSpecifications
+});
 
         return (
             <div className="p-6 space-y-6">
