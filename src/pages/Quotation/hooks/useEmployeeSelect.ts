@@ -21,13 +21,15 @@ export const useEmployeeSelect = () => {
         hasMore: true,
         loading: false
     });
+    const [activeSales, setActiveSales] = useState(false);
     const [inputValue, setInputValue] = useState('');
 
     const loadEmployeeOptions = useCallback(async (
         inputValue: string = '', 
         loadedOptions: EmployeeSelectOption[] = [],
         page: number = 1,
-        reset: boolean = false
+        reset: boolean = false,
+        activeSales: boolean = false
     ) => {
         try {
             if (pagination.loading && !reset) return loadedOptions;
@@ -37,8 +39,9 @@ export const useEmployeeSelect = () => {
             const response = await employeesService.getEmployees({
                 search: inputValue,
                 page: page,
-                limit: 5,
-                sort_order: 'desc'
+                limit: 20,
+                sort_order: 'desc',
+                is_sales_quotation: activeSales
             });
 
             if (response.success) {
@@ -75,27 +78,28 @@ export const useEmployeeSelect = () => {
         setEmployeeOptions([]); // Clear existing options for new search
         setPagination({ page: 1, hasMore: true, loading: false });
         
-        return await loadEmployeeOptions(inputValue, [], 1, true);
-    }, [loadEmployeeOptions]);
+        return await loadEmployeeOptions(inputValue, [], 1, true, activeSales);
+    }, [loadEmployeeOptions, activeSales]);
 
     // Handle scroll to bottom - load next page
     const handleMenuScrollToBottom = useCallback(() => {
         if (pagination.hasMore && !pagination.loading) {
-            loadEmployeeOptions(inputValue, employeeOptions, pagination.page + 1, false);
+            loadEmployeeOptions(inputValue, employeeOptions, pagination.page + 1, false, activeSales);
         }
-    }, [pagination, employeeOptions, inputValue, loadEmployeeOptions]);
+    }, [pagination, employeeOptions, inputValue, loadEmployeeOptions, activeSales]);
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
         if (employeeOptions.length === 0) {
-            await loadEmployeeOptions('', [], 1, true);
+            await loadEmployeeOptions('', [], 1, true, activeSales);
         }
-    }, [employeeOptions.length, loadEmployeeOptions]);
+    }, [employeeOptions.length, loadEmployeeOptions, activeSales]);
 
     return {
         employeeOptions,
         pagination,
         inputValue,
+        setActiveSales,
         handleInputChange,
         handleMenuScrollToBottom,
         initializeOptions,

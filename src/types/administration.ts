@@ -544,6 +544,7 @@ export interface EmployeeListRequest {
     company_name?: string;
     department_name?: string;
     title_name?: string;
+    is_sales_quotation?: boolean;
 }
 
 // Employee list response

@@ -396,6 +396,10 @@ export class employeesService {
         if (params.title_name && params.title_name.trim() !== '') {
             filteredParams.title_name = params.title_name;
         }
+        
+        if (params.is_sales_quotation !== undefined) {
+            filteredParams.is_sales_quotation = params.is_sales_quotation;
+        }
 
         const response = await apiPost(`${API_BASE_URL}/employees/get`, filteredParams);
         return response.data as EmployeeListResponse;

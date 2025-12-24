@@ -48,6 +48,7 @@ export default function CreateQuotation() {
         employeeOptions, 
         pagination: employeePagination, 
         inputValue: employeeInputValue,
+        setActiveSales,
         handleInputChange: handleEmployeeInputChange,
         handleMenuScrollToBottom: handleEmployeeMenuScrollToBottom,
         initializeOptions: initializeEmployeeOptions
@@ -342,6 +343,7 @@ export default function CreateQuotation() {
     }, [initializeCustomerOptions]);
 
     useEffect(() => {
+        setActiveSales(true);
         initializeEmployeeOptions();
     }, [initializeEmployeeOptions]);
     
