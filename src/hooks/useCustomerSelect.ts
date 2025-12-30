@@ -89,6 +89,22 @@ export const useCustomerSelect = () => {
         }
     }, [customerOptions.length, loadCustomerOptions]);
 
+    // Get customer by ID
+    const getCustomerById = useCallback(async (customerId: string): Promise<CustomerSelectOption | null> => {
+        try {
+            const response = await CustomerService.getCustomerById(customerId);
+            if (response.data.success && response.data.data) {
+                return {
+                    value: response.data.data.customer_id,
+                    label: response.data.data.customer_name
+                };
+            }
+        } catch (error) {
+            console.error('Error getting customer by ID:', error);
+        }
+        return null;
+    }, []);
+
     return {
         customerOptions,
         pagination,
@@ -96,6 +112,7 @@ export const useCustomerSelect = () => {
         handleInputChange,
         handleMenuScrollToBottom,
         initializeOptions,
-        loadCustomerOptions
+        loadCustomerOptions,
+        getCustomerById
     };
 };

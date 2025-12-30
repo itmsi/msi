@@ -1,7 +1,7 @@
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, QuoteDefaults } from '../types/roeCalculator';
-import { allowOnlyNumeric, formatNumberInput, handleKeyPress } from '@/helpers/generalHelper';
+import { allowOnlyNumeric, formatNumberInput, handleKeyPress, twodigitcomma } from '@/helpers/generalHelper';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import LoadingSpinner from '@/components/common/Loading';
 import { useNavigate } from 'react-router';
@@ -65,7 +65,7 @@ export default function Step3Operational({
                         id="ritase_per_shift"
                         value={formData.ritase_per_shift || formData?.operation_data?.ritase_per_shift || ''}
                         onChange={(e) => {
-                            const value = e.target.value.replace(/[^\d]/g, '');
+                            const value = twodigitcomma(e.target.value.replace(/[^\d.]/g, ''));
                             handleInputChange('ritase_per_shift', value)
                         }}
                     />
@@ -166,7 +166,6 @@ export default function Step3Operational({
 
             {/* Additional Parameters */}
             <div>
-                <h4 className="font-medium text-gray-900 mb-4">Parameter Tambahan</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Working Days */}
                     <div>
@@ -184,7 +183,7 @@ export default function Step3Operational({
                         />
                     </div>
                     <div>
-                        <Label htmlFor="fuel_consumption">Konsumsi BBM (L/km)</Label>
+                        <Label htmlFor="fuel_consumption">Konsumsi BBM {formData?.fuel_consumption_type || 'L/km'}</Label>
                         <Input
                             id="fuel_consumption"
                             onKeyPress={allowOnlyNumeric}
@@ -215,7 +214,7 @@ export default function Step3Operational({
                                 min={0}
                                 max={100}
                                 value={formData.downtime_percent}
-                                onChange={(e) => handleInputChange('downtime_percent', parseInt(e.target.value))}
+                                onChange={(e) => handleInputChange('downtime_percent', e.target.value)}
                                 className="w-full h-2 bg-gray-200 rounded-lg cursor-pointer"
                             />
                             <div className="flex justify-between text-sm text-gray-600">

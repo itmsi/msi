@@ -3,7 +3,7 @@ import Input from '@/components/form/input/InputField';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import { useCustomerSelect } from '@/hooks/useCustomerSelect';
 import { ROECalculatorFormData, ROECalculatorValidationErrors } from '../types/roeCalculator';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { allowOnlyNumeric, formatNumberInput, handleKeyPress } from '@/helpers/generalHelper';
 import CustomSelect from '@/components/form/select/CustomSelect';
 
@@ -37,14 +37,48 @@ export default function Step1BasicInfo({
         inputValue: customerInputValue,
         handleInputChange: handleCustomerInputChange,
         handleMenuScrollToBottom: handleCustomerMenuScrollToBottom,
-        initializeOptions: initializeCustomerOptions
+        initializeOptions: initializeCustomerOptions,
+        getCustomerById
     } = useCustomerSelect();
 
-    const selectedCustomer = customerOptions.find(c => c.value === formData.customer_id) || null;
+    const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+    // const selectedCustomer = customerOptions.find(c => c.value === formData.customer_id) || null;
 
     useEffect(() => {
         initializeCustomerOptions();
     }, [initializeCustomerOptions]);
+    
+    useEffect(() => {
+        const loadSelectedCustomer = async () => {
+            if (!formData.customer_id) {
+                setSelectedCustomer(null);
+                return;
+            }
+
+            // First, try to find customer in current options
+            const foundInOptions = customerOptions.find(c => c.value === formData.customer_id);
+            
+            if (foundInOptions) {
+                setSelectedCustomer(foundInOptions);
+            } else if (formData.customer_id) {
+                // If not found in current options, fetch customer by ID
+                try {
+                    const customer = await getCustomerById(formData.customer_id);
+                    if (customer) {
+                        setSelectedCustomer(customer);
+                    } else {
+                        setSelectedCustomer(null);
+                    }
+                } catch (error) {
+                    console.error('Error loading selected customer:', error);
+                    setSelectedCustomer(null);
+                }
+            }
+        };
+
+        loadSelectedCustomer();
+    }, [formData.customer_id, customerOptions, getCustomerById]);
+    
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -70,7 +104,6 @@ export default function Step1BasicInfo({
                 <div className="md:col-span-2">
                     <Label>Pilih Customer</Label>
                     <CustomAsyncSelect
-                        name="customer_id"
                         placeholder="Select customer..."
                         value={selectedCustomer}
                         error={validationErrors.customer_id}
@@ -86,6 +119,7 @@ export default function Step1BasicInfo({
                             handleCustomerInputChange(inputValue);
                         }}
                         onChange={(option: any) => {
+                            setSelectedCustomer(option);
                             handleInputChange('customer_id', option?.value || '');
                         }}
                     />

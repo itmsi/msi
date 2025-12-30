@@ -119,7 +119,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Insurance Expense */}
                 <div>
-                    <Label htmlFor="insurance_expense">Biaya Asuransi (Rp)</Label>
+                    <Label htmlFor="insurance_expense">Depresiasi (Rp)</Label>
                     <Input
                         id="insurance_expense"
                         value={formatNumberInput(formData.depreciation_monthly || formData?.cost_data?.depreciation_monthly || '')}
@@ -161,7 +161,7 @@ export default function Step4MonthlyCosts({
                     <Label htmlFor="overhead_monthly">Overhead/G&A (Rp/bulan)</Label>
                     <Input
                         id="overhead_monthly"
-                        value={formatNumberInput(formData.overhead_monthly || formData?.cost_data?.overhead_monthly || '')}
+                        value={formatNumberInput(formData.overhead_monthly || formData?.cost_data?.overhead_monthly || '0')}
                         onChange={(e) => {
                             const value = e.target.value.replace(/[^\d]/g, '');
                             handleInputChange('overhead_monthly', value);
@@ -379,7 +379,7 @@ export default function Step4MonthlyCosts({
                                 return (
                                     <div>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span>Biaya Administrasi</span>
+                                            <span>Bunga (/bulan)</span>
                                             <span className="font-medium">{percentage.toFixed(1)}%</span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-2">

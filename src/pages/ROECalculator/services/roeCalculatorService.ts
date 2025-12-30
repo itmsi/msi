@@ -1,6 +1,7 @@
 import { apiGet, apiPost, apiPut } from '@/helpers/apiHelper';
 import apiClient from '@/helpers/apiHelper';
 import { ROECalculatorFormData, ROECalculatorData, CalculationResponse, QuoteDefaults, ApiQuoteResponse, ApiQuoteListResponse, ApiCalculationResponse, ApiUnitPurchaseResponse } from '../types/roeCalculator';
+import { parseFormatNumber } from '@/helpers/generalHelper';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export class ROECalculatorService {
@@ -219,7 +220,8 @@ export class ROECalculatorService {
                         downtime_percent: data.downtime_percent,
                         fuel_consumption_type: data.fuel_consumption_type,
                         fuel_consumption: data.fuel_consumption,
-                        fuel_price: data.fuel_price,
+                        // fuel_price: data.fuel_price,
+                        fuel_price: parseFormatNumber(data.fuel_price?.toString() || '0'),
                     };
                     const resStep3 = await apiPut(`${API_BASE_URL}/calculations/quotes/${id}/operational`, apiData);
                     return {

@@ -38,7 +38,7 @@ export default function CreateROECalculator() {
         handleInputChange,
         saveStep,
         calculateStep2,
-        calculateFinancials,
+        // calculateFinancials,
         goToStep,
         loadCalculatorData,
         loadQuoteDefaults,
@@ -71,7 +71,7 @@ export default function CreateROECalculator() {
 
         const success = await saveStep(currentStep, true);
         if (success && currentStep === 1) {
-            await calculateFinancials();
+            // await calculateFinancials();
         } else if (success && currentStep === 2) {
           await calculateStep2();
         }

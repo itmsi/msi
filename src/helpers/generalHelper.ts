@@ -220,3 +220,14 @@ export const formatPercentageValue = (value: string | number): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     return numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(2);
 };
+
+export const twodigitcomma = (value: string | number): string => {
+    const parts = value.toString().split('.');
+    if (parts.length > 2) {
+        value = parts[0] + '.' + parts[1];
+    }
+    if (parts[1] && parts[1].length > 2) {
+        value = parts[0] + '.' + parts[1].substring(0, 2);
+    }
+    return value.toString();
+}

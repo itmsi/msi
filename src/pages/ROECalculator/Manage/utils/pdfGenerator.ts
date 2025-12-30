@@ -419,17 +419,17 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         // Total ExpenseN
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
-        doc.text('Total Biaya',margin + 70, (varYPos + 52), { align: 'center' });
+        doc.text('Total Biaya',margin + 70, (varYPos + 55), { align: 'center' });
         
         doc.setFontSize(14);
         doc.setTextColor(99, 106, 232);
         setFontSafe(doc, 'Futura', 'bold');
-        doc.text(`${formatCurrency(data.pdf_data.expenses.total_expense)}`,margin + 70, (varYPos + 50) + 8, { align: 'center' });
+        doc.text(`${formatCurrency(data.pdf_data.expenses.total_expense)}`,margin + 70, (varYPos + 53) + 8, { align: 'center' });
         
-        doc.setFontSize(9);
-        doc.setTextColor(86, 93, 109);
-        setFontSafe(doc, 'Futura', 'normal');
-        doc.text('Tonase/Bulan x Harga/Ton x Qty Unit',margin + 70, (varYPos + 50) + 13, { align: 'center' });
+        // doc.setFontSize(9);
+        // doc.setTextColor(86, 93, 109);
+        // setFontSafe(doc, 'Futura', 'normal');
+        // doc.text('Tonase/Bulan x Harga/Ton x Qty Unit',margin + 70, (varYPos + 50) + 13, { align: 'center' });
         
         varYPos += 25;
         return varYPos;
@@ -472,7 +472,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
             ['Qty Unit', data.pdf_data.asset_liability.unit_purchase.qty_unit],
             ['Down Payment', data.pdf_data.asset_liability.unit_purchase.down_payment_percent + '%'],
             ['Tenor Pembiayaan', data.pdf_data.asset_liability.unit_purchase.tenor_pembiayaan],
-            ['Bunga (Flat)', data.pdf_data.asset_liability.unit_purchase.interest_rate_flat],
+            ['Bunga (Flat)', data.pdf_data.asset_liability.unit_purchase.interest_rate_flat+ '%'],
         ];
         const totalAssetData = [
             ['Total Aset', formatCurrency(data.pdf_data.asset_liability.unit_purchase.total_aset)]
@@ -523,11 +523,11 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         
         const liabilityData = [
             ['Cicilan Pokok', formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.cicilan_pokok)],
-            ['Bunga', formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.bunga)],
+            ['Bunga (Rp)', formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.bunga)],
             ['Total per Bulan', formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.total_per_bulan)],
             ['Rasio Keuangan', ''],
             ['Cicilan Pokok', data.pdf_data.asset_liability.cicilan_bulanan.rasio_keuangan.cicilan_pokok],
-            ['Bunga', data.pdf_data.asset_liability.cicilan_bulanan.rasio_keuangan.bunga],
+            ['Bunga (%)', data.pdf_data.asset_liability.cicilan_bulanan.rasio_keuangan.bunga + '%'],
         ];
         const totalEquityLiabilityData = [
             ['Ekuitas', formatCurrency(data.pdf_data.asset_liability.equity)],

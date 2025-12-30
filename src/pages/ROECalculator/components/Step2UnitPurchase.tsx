@@ -70,9 +70,6 @@ export default function Step2UnitPurchase({
             </div>
         );
     }
-    console.log({
-        formData
-    });
     
     return (
         

@@ -255,25 +255,25 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         }
     }, [calculatorId, formData]);
 
-    const calculateFinancials = useCallback(async (): Promise<void> => {
-        setLoading(true);
-        if (!calculatorId || calculatorId === 'undefined') {
-            return;
-        }
-        try {
-            const response = await ROECalculatorService.calculateFinancials(calculatorId as string, formData);
+    // const calculateFinancials = useCallback(async (): Promise<void> => {
+    //     setLoading(true);
+    //     if (!calculatorId || calculatorId === 'undefined') {
+    //         return;
+    //     }
+    //     try {
+    //         const response = await ROECalculatorService.calculateFinancials(calculatorId as string, formData);
             
-            if (response.success && response.data) {
-                setCalculationResults(response.data);
-            } else {
-                toast.error(response.message || 'Failed to calculate financials');
-            }
-        } catch (error) {
-            toast.error('Failed to calculate financials');
-        } finally {
-            setLoading(false);
-        }
-    }, [calculatorId, formData]);
+    //         if (response.success && response.data) {
+    //             setCalculationResults(response.data);
+    //         } else {
+    //             toast.error(response.message || 'Failed to calculate financials');
+    //         }
+    //     } catch (error) {
+    //         toast.error('Failed to calculate financials');
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // }, [calculatorId, formData]);
 
     const goToStep = useCallback((step: number) => {        
         if (step >= 1 && step <= 4) {
@@ -300,7 +300,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         handleInputChange,
         saveStep,
         calculateStep2,
-        calculateFinancials,
+        // calculateFinancials,
         goToStep,
         loadCalculatorData,
         loadQuoteDefaults,
