@@ -287,7 +287,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.roundedRect(fullTableWidth + margin + 5, postY + 5, colWidth - 8, 40, 1, 1, 'S');
         
         const operationalData = [
-            ['Tonase per Ritase', data.pdf_data.revenue.data_operasional.tonnage_per_ritase+' Ton'],
+            ['Tonase per Unit', data.pdf_data.revenue.data_operasional.tonnage_per_ritase+' Ton'],
             ['Jarak Haul (PP)', data.pdf_data.revenue.data_operasional.haul_distance+' Km'],
             ['Harga Jual per Ton', formatCurrency(data.pdf_data.revenue.data_operasional.selling_price_per_ton)],
             ['Ritase per Shift', data.pdf_data.revenue.data_operasional.ritase_per_shift],
@@ -330,7 +330,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.roundedRect(fullTableWidth + margin + colWidth + 3, postY + 5, colWidth - 5, 40, 1, 1, 'S');
         
         const produksiData = [
-            ['Ritase per Hari', data.pdf_data.revenue.hasil_produksi.ritase_per_hari],
+            ['Ritase per Shift', data.pdf_data.revenue.hasil_produksi.ritase_per_hari],
             ['Ritase per Bulan', data.pdf_data.revenue.hasil_produksi.ritase_per_bulan],
             ['Tonase per Bulan', data.pdf_data.revenue.hasil_produksi.tonnage_per_bulan + ' ton'],
         ];

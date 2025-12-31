@@ -4,7 +4,7 @@ import Input from '@/components/form/input/InputField';
 import Button from '@/components/ui/button/Button';
 import { MdCalculate } from 'react-icons/md';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, CalculationResponse } from '../types/roeCalculator';
-import { formatCurrency, formatNumberInput, handleKeyPress, allowOnlyNumeric } from '@/helpers/generalHelper';
+import { formatCurrency, formatNumberInput, handleKeyPress, formatNumberInputFadlan } from '@/helpers/generalHelper';
 import LoadingSpinner from '@/components/common/Loading';
 import { useNavigate } from 'react-router';
 import { useEffect } from 'react';
@@ -166,11 +166,18 @@ export default function Step2UnitPurchase({
                     <Label htmlFor="interest_rate">Interest Rate Flat per Tahun (%)</Label>
                     <Input
                         id="interest_rate"
-                        onKeyPress={allowOnlyNumeric}
-                        value={formData.interest_rate}
+                        onKeyPress={handleKeyPress}
+                        value={formatNumberInputFadlan(formData.interest_rate)}
                         maxLength={5}
+                        // onChange={(e) => {
+                        //     handleInputChange('interest_rate', e.target.value);
+                        // }}
                         onChange={(e) => {
-                            handleInputChange('interest_rate', e.target.value);
+                            let value = e.target.value.replace(/[^\d]/g, '');
+                            if (value && parseInt(value) > 100) {
+                                value = '100';
+                            }
+                            handleInputChange('interest_rate', value);
                         }}
                         error={!!validationErrors.interest_rate}
                     />
@@ -184,9 +191,13 @@ export default function Step2UnitPurchase({
                     <Label htmlFor="periode_depresiasi">Periode Depresiasi (Bulan)</Label>
                     <Input
                         id="periode_depresiasi"
-                        onKeyPress={allowOnlyNumeric}
-                        value={formData.periode_depresiasi}
-                        onChange={(e) => handleInputChange('periode_depresiasi', e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        value={formatNumberInputFadlan(formData.periode_depresiasi)}
+                        // onChange={(e) => handleInputChange('periode_depresiasi', e.target.value)}
+                        onChange={(e) => {
+                            const value = e.target.value.replace(/[^\d]/g, '');
+                            handleInputChange('periode_depresiasi', value);
+                        }}
                     />
                 </div>
             </div>

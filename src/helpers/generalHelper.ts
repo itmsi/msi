@@ -81,12 +81,52 @@ export const parseDecimalInput = (value: string | number | undefined | null, def
     return isNaN(result) ? defaultVal : result;
 };
 
+//CODE ORIGINAL
 export const formatNumberInput = (value: string | number | undefined | null): string => {
     if (!value && value !== 0) return '';
     const cleanFormatValue = value.toString().replace(/[^\d]/g, '');
     if (!cleanFormatValue) return '';
     return new Intl.NumberFormat('id-ID').format(parseInt(cleanFormatValue));
 };
+
+//CODE FADLAN
+export const formatNumberInputFadlan = (value: string | number | undefined | null): string => {
+    if (!value && value !== 0) return '';
+
+    const stringValue = value.toString();
+    const [integerPart, decimalPart] = stringValue.replace(/[^\d.]/g, '').split('.');
+    
+    const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart || '0', 10));
+    
+    if (decimalPart !== undefined) {
+        return `${formattedInteger},${decimalPart}`;
+    }
+    
+    return formattedInteger;
+};
+
+// export const formatNumberInput = (value: string | number | null | undefined): string => {
+//     if (value === null) return '';
+//     if (value === undefined || value === '') return '';
+//     if (value === 0) return '0';
+    
+//     const stringValue = value.toString();
+//     const [integerPart, decimalPart] = stringValue.replace(/[^\d.]/g, '').split('.');
+    
+//     // Format the integer part with thousand separators
+//     const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart || '0', 10));
+    
+//     // If there's a decimal part, add it back
+//     if (decimalPart !== undefined) {
+//         return `${formattedInteger},${decimalPart}`;
+//     }
+
+//     console.log(formattedInteger);
+    
+//     return formattedInteger;
+// };
+
+
 
 export const parseFormatNumber = (formatValue: string): string => {
     if (!formatValue) return '';

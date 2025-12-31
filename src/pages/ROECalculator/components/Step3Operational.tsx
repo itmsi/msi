@@ -1,7 +1,7 @@
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, QuoteDefaults } from '../types/roeCalculator';
-import { allowOnlyNumeric, formatNumberInput, handleKeyPress, twodigitcomma } from '@/helpers/generalHelper';
+import { allowOnlyNumeric, formatNumberInputFadlan, handleKeyPress, twodigitcomma } from '@/helpers/generalHelper';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import LoadingSpinner from '@/components/common/Loading';
 import { useNavigate } from 'react-router';
@@ -60,13 +60,27 @@ export default function Step3Operational({
                 {/* Ritase per Shift */}
                 <div>
                     <Label htmlFor="ritase_per_shift">Ritase per Shift</Label>
-                    <Input
+                    {/* <Input
                         name='ritase_per_shift'
                         id="ritase_per_shift"
                         value={formData.ritase_per_shift || formData?.operation_data?.ritase_per_shift || ''}
                         onChange={(e) => {
                             const value = twodigitcomma(e.target.value.replace(/[^\d.]/g, ''));
                             handleInputChange('ritase_per_shift', value)
+                        }}
+                    /> */}
+                    <Input
+                        name='ritase_per_shift'
+                        id="ritase_per_shift"
+                        value={
+                            formData.ritase_per_shift === null 
+                                ? '' 
+                                : (formData.ritase_per_shift || formData?.operation_data?.ritase_per_shift || '')
+                        }
+                        onChange={(e) => {
+                            const rawValue = e.target.value;
+                            const value = rawValue === '' ? null : twodigitcomma(rawValue.replace(/[^\d.]/g, ''));
+                            handleInputChange('ritase_per_shift', value);
                         }}
                     />
                     {validationErrors.ritase_per_shift && (
@@ -77,7 +91,7 @@ export default function Step3Operational({
                 {/* Shift per Hari */}
                 <div>
                     <Label htmlFor="shift_per_hari">Shift per Hari</Label>
-                    <Input
+                    {/* <Input
                         id="shift_per_hari"
                         onKeyPress={handleKeyPress}
                         value={formData.shift_per_hari || formData?.operation_data?.shift_per_hari || ''}
@@ -85,6 +99,20 @@ export default function Step3Operational({
                             handleInputChange('shift_per_hari', e.target.value)
                         }}
                         error={!!validationErrors.shift_per_hari}
+                    /> */}
+                    <Input
+                        name='shift_per_hari'
+                        id="shift_per_hari"
+                        value={
+                            formData.shift_per_hari === null 
+                                ? '' 
+                                : (formData.shift_per_hari || formData?.operation_data?.shift_per_hari || '')
+                        }
+                        onChange={(e) => {
+                            const rawValue = e.target.value;
+                            const value = rawValue === '' ? null : twodigitcomma(rawValue.replace(/[^\d.]/g, ''));
+                            handleInputChange('shift_per_hari', value);
+                        }}
                     />
                     {validationErrors.shift_per_hari && (
                         <span className="text-sm text-red-500">{validationErrors.shift_per_hari}</span>
@@ -94,12 +122,26 @@ export default function Step3Operational({
                 {/* Hari Kerja per Bulan */}
                 <div>
                     <Label htmlFor="hari_kerja_per_bulan">Hari Kerja per Bulan</Label>
-                    <Input
+                    {/* <Input
                         id="hari_kerja_per_bulan"
                         onKeyPress={handleKeyPress}
                         value={formData.hari_kerja_per_bulan || formData?.operation_data?.hari_kerja_per_bulan || ''}
                         onChange={(e) => handleInputChange('hari_kerja_per_bulan', parseInt(e.target.value) || 0)}
                         error={!!validationErrors.hari_kerja_per_bulan}
+                    /> */}
+                    <Input
+                        name='hari_kerja_per_bulan'
+                        id="hari_kerja_per_bulan"
+                        value={
+                            formData.hari_kerja_per_bulan === null 
+                                ? '' 
+                                : (formData.hari_kerja_per_bulan || formData?.operation_data?.hari_kerja_per_bulan || '')
+                        }
+                        onChange={(e) => {
+                            const rawValue = e.target.value;
+                            const value = rawValue === '' ? null : twodigitcomma(rawValue.replace(/[^\d.]/g, ''));
+                            handleInputChange('hari_kerja_per_bulan', value);
+                        }}
                     />
                     {validationErrors.hari_kerja_per_bulan && (
                         <span className="text-sm text-red-500">{validationErrors.hari_kerja_per_bulan}</span>
@@ -198,7 +240,7 @@ export default function Step3Operational({
                         <Input
                             id="fuel_price"
                             onKeyPress={handleKeyPress}
-                            value={formatNumberInput(formData?.fuel_price)}
+                            value={formatNumberInputFadlan(formData?.fuel_price)}
                             onChange={(e) => handleInputChange('fuel_price', e.target.value)}
                             placeholder="6800"
                         />

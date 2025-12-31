@@ -4,7 +4,7 @@ import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import { useCustomerSelect } from '@/hooks/useCustomerSelect';
 import { ROECalculatorFormData, ROECalculatorValidationErrors } from '../types/roeCalculator';
 import { useEffect, useState } from 'react';
-import { allowOnlyNumeric, formatNumberInput, handleKeyPress } from '@/helpers/generalHelper';
+import { formatNumberInputFadlan, handleKeyPress } from '@/helpers/generalHelper';
 import CustomSelect from '@/components/form/select/CustomSelect';
 
 interface Step1Props {
@@ -168,12 +168,15 @@ export default function Step1BasicInfo({
 
                 {/* Tonase per Ritase */}
                 <div>
-                    <Label htmlFor="tonase_per_ritase">Tonase per Ritase (ton)</Label>
+                    <Label htmlFor="tonase_per_ritase">Tonase per Unit (ton)</Label>
                     <Input
                         id="tonase_per_ritase"
-                        onKeyPress={allowOnlyNumeric}
-                        value={formData.tonase_per_ritase}
-                        onChange={(e) => handleInputChange('tonase_per_ritase', e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        value={formatNumberInputFadlan(formData.tonase_per_ritase)}
+                        onChange={(e) => {
+                            const value = e.target.value.replace(/[^\d]/g, '');
+                            handleInputChange('tonase_per_ritase', value);
+                        }}
                         error={!!validationErrors.tonase_per_ritase}
                     />
                     {validationErrors.tonase_per_ritase && (
@@ -186,10 +189,14 @@ export default function Step1BasicInfo({
                     <Label htmlFor="jarak_haul">Jarak Haul (km PP)</Label>
                     <Input
                         id="jarak_haul"
-                        onKeyPress={allowOnlyNumeric}
+                        onKeyPress={handleKeyPress}
                         maxLength={5}
                         value={formData.jarak_haul}
-                        onChange={(e) => handleInputChange('jarak_haul', e.target.value)}
+                        // onChange={(e) => handleInputChange('jarak_haul', e.target.value)}
+                        onChange={(e) => {
+                            const value = e.target.value.replace(/[^\d]/g, '');
+                            handleInputChange('jarak_haul', value);
+                        }}
                         error={!!validationErrors.jarak_haul}
                     />
                     {validationErrors.jarak_haul && (
@@ -203,7 +210,7 @@ export default function Step1BasicInfo({
                     <Input
                         id="harga_jual_per_ton"
                         onKeyPress={handleKeyPress}
-                        value={formatNumberInput(formData.harga_jual_per_ton)}
+                        value={formatNumberInputFadlan(formData.harga_jual_per_ton)}
                         onChange={(e) => {
                             const value = e.target.value.replace(/[^\d]/g, '');
                             handleInputChange('harga_jual_per_ton', value);

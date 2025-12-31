@@ -1,7 +1,7 @@
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { ROECalculatorFormData, ROECalculatorValidationErrors } from '../types/roeCalculator';
-import { formatCurrency, formatNumberInput, handleKeyPress } from '@/helpers/generalHelper';
+import { formatCurrency, formatNumberInputFadlan, handleKeyPress } from '@/helpers/generalHelper';
 import LoadingSpinner from '@/components/common/Loading';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
@@ -65,7 +65,7 @@ export default function Step4MonthlyCosts({
                     <Label htmlFor="fuel_expense">Biaya Ban (Rp/bulan)</Label>
                     <Input
                         id="tyre_expense_monthly"
-                        value={formatNumberInput(formData.tyre_expense_monthly || formData?.cost_data?.tyre_expense_monthly || '')}
+                        value={formatNumberInputFadlan(formData.tyre_expense_monthly || formData?.cost_data?.tyre_expense_monthly || '')}
                         onChange={(e) => {
                             const value = e.target.value.replace(/[^\d]/g, '');
                             handleInputChange('tyre_expense_monthly', value);
@@ -84,7 +84,7 @@ export default function Step4MonthlyCosts({
                     <Label htmlFor="maintenance_expense">Biaya Perawatan (Rp)</Label>
                     <Input
                         id="sparepart_expense_monthly"
-                        value={formatNumberInput(formData.sparepart_expense_monthly || formData?.cost_data?.sparepart_expense_monthly || '')}
+                        value={formatNumberInputFadlan(formData.sparepart_expense_monthly || formData?.cost_data?.sparepart_expense_monthly || '')}
                         onChange={(e) => {
                             const value = e.target.value.replace(/[^\d]/g, '');
                             handleInputChange('sparepart_expense_monthly', value);
@@ -103,7 +103,7 @@ export default function Step4MonthlyCosts({
                     <Label htmlFor="operator_salary">Gaji Operator (Rp)</Label>
                     <Input
                         id="operator_salary"
-                        value={formatNumberInput(formData.salary_operator_monthly || formData?.cost_data?.salary_operator_monthly || '')}
+                        value={formatNumberInputFadlan(formData.salary_operator_monthly || formData?.cost_data?.salary_operator_monthly || '')}
                         onChange={(e) => {
                             const value = e.target.value.replace(/[^\d]/g, '');
                             handleInputChange('salary_operator_monthly', value);
@@ -122,7 +122,7 @@ export default function Step4MonthlyCosts({
                     <Label htmlFor="insurance_expense">Depresiasi (Rp)</Label>
                     <Input
                         id="insurance_expense"
-                        value={formatNumberInput(formData.depreciation_monthly || formData?.cost_data?.depreciation_monthly || '')}
+                        value={formatNumberInputFadlan(formData.depreciation_monthly) === null ? '' : (formData.depreciation_monthly || formData?.cost_data?.depreciation_monthly)}
                         onChange={(e) => {
                             const value = e.target.value.replace(/[^\d]/g, '');
                             handleInputChange('depreciation_monthly', value);
@@ -140,17 +140,28 @@ export default function Step4MonthlyCosts({
                 {/* Admin Expense */}
                 <div>
                     <Label htmlFor="interest_monthly">Bunga (Rp/bulan)</Label>
-                    <Input
+                    {/* <Input
                         id="interest_monthly"
-                        value={formatNumberInput(formData.interest_monthly || formData?.cost_data?.interest_monthly || '')}
+                        value={formatNumberInputFadlan(formData.interest_monthly || formData?.cost_data?.interest_monthly || '')}
                         onChange={(e) => {
                             const value = e.target.value.replace(/[^\d]/g, '');
                             handleInputChange('interest_monthly', value);
                         }}
                         onKeyPress={handleKeyPress}
                         error={!!validationErrors.interest_monthly}
+                    /> */}
+                    <Input
+                        id="interest_monthly"
+                        value={formatNumberInputFadlan(formData.interest_monthly) === null ? '' : (formData.interest_monthly || formData?.cost_data?.interest_monthly)}
+                        onChange={(e) => {
+                            const rawValue = e.target.value;
+                            const value = rawValue === '' ? null : rawValue.replace(/[^\d.]/g, '');
+                            handleInputChange('interest_monthly', value);
+                        }}
+                        onKeyPress={handleKeyPress}
+                        error={!!validationErrors.interest_monthly}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Biaya administrasi dan operasional lainnya</p>
+                    <p className="text-xs text-gray-500 mt-1">Bunga per bulan</p>
                     {validationErrors.interest_monthly && (
                         <span className="text-sm text-red-500">{validationErrors.interest_monthly}</span>
                     )}
@@ -161,7 +172,7 @@ export default function Step4MonthlyCosts({
                     <Label htmlFor="overhead_monthly">Overhead/G&A (Rp/bulan)</Label>
                     <Input
                         id="overhead_monthly"
-                        value={formatNumberInput(formData.overhead_monthly || formData?.cost_data?.overhead_monthly || '0')}
+                        value={formatNumberInputFadlan(formData.overhead_monthly || formData?.cost_data?.overhead_monthly || '0')}
                         onChange={(e) => {
                             const value = e.target.value.replace(/[^\d]/g, '');
                             handleInputChange('overhead_monthly', value);
@@ -206,6 +217,7 @@ export default function Step4MonthlyCosts({
                             <span className="font-medium">{formatCurrency(parseFloat(formData.depreciation_monthly))}</span>
                         </div>
                     )}
+                    
                     {parseFloat(formData.interest_monthly) > 0 && (
                         <div className="flex justify-between">
                             <span>Bunga Bulanan:</span>
@@ -256,22 +268,22 @@ export default function Step4MonthlyCosts({
                 </div>
                 )} */}
 
-                <div className="mt-4 pt-4 border-t border-red-200">
+                {/* <div className="mt-4 pt-4 border-t border-red-200">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div className="text-center">
                             <p className="text-gray-600">Equity / Modal Sendiri (Rp)</p>
                             <p className="font-bold text-gray-700">
-                                {formatNumberInput(formData.equity_modal || formData?.financial_data?.equity || '')}
+                                {formatNumberInputFadlan(formData.equity_modal || formData?.financial_data?.equity || '')}
                             </p>
                         </div>
                         <div className="text-center">
                             <p className="text-gray-600">Liability / Hutang (Rp)</p>
                             <p className="font-bold text-gray-700">
-                            {formatNumberInput(formData.liability_hutang || formData?.financial_data?.liability || '')}
+                            {formatNumberInputFadlan(formData.liability_hutang || formData?.financial_data?.liability || '')}
                             </p>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
 
             {/* Expense Categories Breakdown Chart */}
@@ -348,7 +360,7 @@ export default function Step4MonthlyCosts({
                             return null;
                         })()}
 
-                        {/* Insurance Expense Percentage */}
+                        {/* Depreciation Expense Percentage */}
                         {(() => {
                             const value = parseFloat(formData.depreciation_monthly) || 0;
                             const percentage = calculateTotalExpense() > 0 ? (value / calculateTotalExpense()) * 100 : 0;
@@ -356,7 +368,7 @@ export default function Step4MonthlyCosts({
                                 return (
                                     <div>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span>Biaya Asuransi</span>
+                                            <span>Depresiasi</span>
                                             <span className="font-medium">{percentage.toFixed(1)}%</span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -379,7 +391,7 @@ export default function Step4MonthlyCosts({
                                 return (
                                     <div>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span>Bunga (/bulan)</span>
+                                            <span>Bunga</span>
                                             <span className="font-medium">{percentage.toFixed(1)}%</span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -402,7 +414,7 @@ export default function Step4MonthlyCosts({
                                 return (
                                     <div>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span>Biaya Lain-lain</span>
+                                            <span>Overhead/G&A</span>
                                             <span className="font-medium">{percentage.toFixed(1)}%</span>
                                         </div>
                                         <div className="w-full bg-gray-200 rounded-full h-2">
