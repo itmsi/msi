@@ -192,7 +192,6 @@ export default function CreateQuotation() {
         }
     }, [showInvoiceDatePicker]);
 
-    // Handle click outside for due date picker
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dueDatePickerRef.current && !dueDatePickerRef.current.contains(event.target as Node)) {
