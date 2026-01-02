@@ -79,6 +79,7 @@ const EditContractor: React.FC = () => {
         },
         iup_customers: {
             iup_id: '',
+            iup_name: '',
             segmentation_id: '',
             rkab: '',
             achievement_production_bim: '',
@@ -137,6 +138,7 @@ const EditContractor: React.FC = () => {
                         },
                         iup_customers: {
                             iup_id: response.data.iup_customers.iup_id || '',
+                            iup_name: response.data.iup_customers.iup_name || '',
                             segmentation_id: response.data.iup_customers.segmentation_id || '',
                             rkab: response.data.iup_customers.rkab || '',
                             achievement_production_bim: response.data.iup_customers.achievement_production_bim || '',
@@ -188,7 +190,7 @@ const EditContractor: React.FC = () => {
             } catch (error) {
                 console.error('Error loading contractor:', error);
                 toast.error('Failed to load contractor data');
-                navigate('/contractors');
+                navigate('/crm/contractors');
             } finally {
                 setIsLoading(false);
             }
@@ -466,7 +468,7 @@ const EditContractor: React.FC = () => {
             const response = await ContractorServices.updateContractor(iup_customer_id, formData);
             if (response.success === true) {
                 toast.success('Contractor updated successfully');
-                navigate('/contractors');
+                navigate('/crm/contractors');
             } else {
                 if (response.message && Array.isArray(response.message)) {
                     response.message.forEach((msg:any) => toast.error(msg));
@@ -507,7 +509,7 @@ const EditContractor: React.FC = () => {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/contractors')}
+                                onClick={() => navigate('/crm/contractors')}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -569,7 +571,7 @@ const EditContractor: React.FC = () => {
                     {/* Form Actions */}
                     <FormActions
                         isSubmitting={isSubmitting}
-                        cancelRoute="/contractors"
+                        cancelRoute="/crm/contractors"
                         onSubmit={handleSubmit}
                         submitText="Update Contractor"
                     />

@@ -40,13 +40,92 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
 }) => {
     const { iup_customers } = formData;
     
-    const selectedIup = iup_customers.iup_id 
-        ? iupOptions.find(option => option.value === iup_customers.iup_id) || null
-        : null;
+    // State untuk menyimpan recently selected options dan loaded options for edit mode
+    const [recentlySelectedIup, setRecentlySelectedIup] = React.useState<any>(null);
+    const [recentlySelectedSegmentation, setRecentlySelectedSegmentation] = React.useState<any>(null);
+    const [loadedEditOptions, setLoadedEditOptions] = React.useState<{
+        iup: any | null;
+        segmentation: any | null;
+    }>({ iup: null, segmentation: null });
+    
+    // Effect to load names for IDs in edit mode
+    React.useEffect(() => {
+        const loadEditModeOptions = async () => {
+            if (iup_customers.iup_id && !iupOptions.find(opt => opt.value === iup_customers.iup_id)) {
+                const tempIupOption = {
+                    value: iup_customers.iup_id,
+                    label: iup_customers.iup_name,
+                    __isFromEdit: true
+                };
+                setLoadedEditOptions(prev => ({ ...prev, iup: tempIupOption }));
+            } else if (iup_customers.iup_id && iupOptions.find(opt => opt.value === iup_customers.iup_id)) {
+                const foundOption = iupOptions.find(opt => opt.value === iup_customers.iup_id);
+                setLoadedEditOptions(prev => ({ ...prev, iup: foundOption }));
+            }
+            
+            if (iup_customers.segmentation_id && !segementationOptions.find(opt => opt.value === iup_customers.segmentation_id)) {
+                const tempSegmentationOption = {
+                    value: iup_customers.segmentation_id,
+                    label: iup_customers.segmentation_name,
+                    __isFromEdit: true
+                };
+                setLoadedEditOptions(prev => ({ ...prev, segmentation: tempSegmentationOption }));
+            } else if (iup_customers.segmentation_id && segementationOptions.find(opt => opt.value === iup_customers.segmentation_id)) {
+                const foundOption = segementationOptions.find(opt => opt.value === iup_customers.segmentation_id);
+                setLoadedEditOptions(prev => ({ ...prev, segmentation: foundOption }));
+            }
+        };
+        
+        loadEditModeOptions();
+    }, [iup_customers.iup_id, iup_customers.segmentation_id, iupOptions, segementationOptions]);
+    
+    // Create a more robust selectedIup logic
+    const selectedIup = React.useMemo(() => {
+        if (!iup_customers.iup_id) return null;
+        
+        if (recentlySelectedIup && recentlySelectedIup.value === iup_customers.iup_id) {
+            return recentlySelectedIup;
+        }
+        
+        let found = iupOptions.find(option => option.value === iup_customers.iup_id);
+        if (found) {
+            return found;
+        }
+        
+        if (loadedEditOptions.iup && loadedEditOptions.iup.value === iup_customers.iup_id) {
+            return loadedEditOptions.iup;
+        }
+        
+        return {
+            value: iup_customers.iup_id,
+            label: iup_customers.iup_name,
+            __isPlaceholder: true
+        };
+    }, [iup_customers.iup_id, iupOptions, recentlySelectedIup, loadedEditOptions.iup]);
 
-    const selectedSegementasi = iup_customers.segmentation_id 
-        ? segementationOptions.find(option => option.value === iup_customers.segmentation_id) || null
-        : null;
+    // Create a more robust selectedSegementasi logic  
+    const selectedSegementasi = React.useMemo(() => {
+        if (!iup_customers.segmentation_id) return null;
+        
+        if (recentlySelectedSegmentation && recentlySelectedSegmentation.value === iup_customers.segmentation_id) {
+            return recentlySelectedSegmentation;
+        }
+        
+        let found = segementationOptions.find(option => option.value === iup_customers.segmentation_id);
+        if (found) {
+            return found;
+        }
+        
+        if (loadedEditOptions.segmentation && loadedEditOptions.segmentation.value === iup_customers.segmentation_id) {
+            return loadedEditOptions.segmentation;
+        }
+        
+        return {
+            value: iup_customers.segmentation_id,
+            label: iup_customers.segmentation_name,
+            __isPlaceholder: true
+        };
+    }, [iup_customers.segmentation_id, segementationOptions, recentlySelectedSegmentation, loadedEditOptions.segmentation]);
 
     const STATUS_OPTIONS = [
         { value: 'active', label: 'Active' },
@@ -103,17 +182,40 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                     </Label>
                     <CustomAsyncSelect
                         loadOptions={async (_inputValue) => {
-                            return iupOptions;
+                            // Ensure selected option is included in options
+                            let allOptions = [...iupOptions];
+                            
+                            // If we have a selected option that's not in current options, add it
+                            if (selectedIup && !allOptions.find(opt => opt.value === selectedIup.value)) {
+                                allOptions.unshift(selectedIup);
+                            }
+                            
+                            return allOptions;
                         }}
-                        defaultOptions={iupOptions?.length > 0 ? iupOptions : []}
+                        defaultOptions={(() => {
+                            let defaultOpts = iupOptions?.length > 0 ? [...iupOptions] : [];
+                            
+                            // Ensure selected option is in default options
+                            if (selectedIup && !defaultOpts.find(opt => opt.value === selectedIup.value)) {
+                                defaultOpts.unshift(selectedIup);
+                            }
+                            
+                            return defaultOpts;
+                        })()}
                         inputValue={iupInputValue}
                         value={selectedIup}
                         onInputChange={onIupInputChange}
                         onMenuScrollToBottom={onIupMenuScroll}
-                        onChange={onIupSelect}
+                        onChange={(option) => {
+                            // Save recently selected option
+                            setRecentlySelectedIup(option);
+                            onIupSelect(option);
+                        }}
                         placeholder="Select IUP..."
                         error={errors.iup_id}
                         isClearable={false}
+                        noOptionsMessage={() => "No IUP found"}
+                        loadingMessage={() => "Loading IUPs..."}
                     />
                     {errors.iup_id && (
                         <p className="text-red-500 text-sm mt-1">{errors.iup_id}</p>
@@ -125,14 +227,35 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                     </Label>
                     <CustomAsyncSelect
                         loadOptions={async (_inputValue) => {
-                            return segementationOptions;
+                            // Ensure selected option is included in options
+                            let allOptions = [...segementationOptions];
+                            
+                            // If we have a selected option that's not in current options, add it
+                            if (selectedSegementasi && !allOptions.find(opt => opt.value === selectedSegementasi.value)) {
+                                allOptions.unshift(selectedSegementasi);
+                            }
+                            
+                            return allOptions;
                         }}
-                        defaultOptions={segementationOptions?.length > 0 ? segementationOptions : []}
+                        defaultOptions={(() => {
+                            let defaultOpts = segementationOptions?.length > 0 ? [...segementationOptions] : [];
+                            
+                            // Ensure selected option is in default options
+                            if (selectedSegementasi && !defaultOpts.find(opt => opt.value === selectedSegementasi.value)) {
+                                defaultOpts.unshift(selectedSegementasi);
+                            }
+                            
+                            return defaultOpts;
+                        })()}
                         inputValue={segementationInputValue}
                         value={selectedSegementasi}
                         onInputChange={onSegementationInputChange}
                         onMenuScrollToBottom={onSegementationMenuScroll}
-                        onChange={onSegementationSelect}
+                        onChange={(option) => {
+                            // Save recently selected option
+                            setRecentlySelectedSegmentation(option);
+                            onSegementationSelect(option);
+                        }}
                         placeholder="Select Segementation..."
                         isSearchable={true}
                         noOptionsMessage={() => "No Segementation found"}

@@ -359,7 +359,7 @@ const CreateContractor: React.FC = () => {
             const response = await ContractorServices.createContractor(formData);
             if (response.success === true) {
                 toast.success('Contractor created successfully');
-                navigate('/contractors');
+                navigate('/crm/contractors');
             } else {
                 if (response.message && Array.isArray(response.message)) {
                     response.message.forEach((msg:any) => toast.error(msg));
@@ -392,7 +392,7 @@ const CreateContractor: React.FC = () => {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/contractors')}
+                                onClick={() => navigate('/crm/contractors')}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -455,7 +455,7 @@ const CreateContractor: React.FC = () => {
                     <FormActions
                         isSubmitting={isSubmitting}
                         submitText={isSubmitting ? 'Creating...' : 'Create Contractor'}
-                        cancelRoute={'/contractors'}
+                        cancelRoute={'/crm/contractors'}
                         onSubmit={handleSubmit}
                     />
                 </div>

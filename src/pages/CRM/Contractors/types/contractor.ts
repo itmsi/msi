@@ -79,6 +79,7 @@ export interface ContractorDetailResponse {
         iup_customers: {
             iup_customer_id: string;
             iup_id: string;
+            iup_name?: string;
             segmentation_id: string;
             rkab: string;
             achievement_production_bim: string | null;
@@ -129,7 +130,9 @@ export interface ContractorFormData {
     };
     iup_customers: {
         iup_id: string;
+        iup_name?: string;
         segmentation_id: string;
+        segmentation_name?: string;
         rkab: string;
         achievement_production_bim: string;
         business_project_bim: string;
