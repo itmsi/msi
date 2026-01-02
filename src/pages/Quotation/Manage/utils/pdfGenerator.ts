@@ -750,7 +750,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     setFontSafe(doc, 'Futura', 'normal');
     doc.text('Hormat Kami,', signatureStartX, signatureYPos);
     signatureYPos += 5;
-    doc.text('PT. Indonesia Equipment Centre', signatureStartX, signatureYPos);
+    doc.text('PT Indonesia Equipment Centre', signatureStartX, signatureYPos);
     signatureYPos += 15;
     
     // Signature box

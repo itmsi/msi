@@ -318,9 +318,6 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 </div>
             );
         }
-console.log({
-    editableSpecifications
-});
 
         return (
             <div className="p-6 space-y-6">
