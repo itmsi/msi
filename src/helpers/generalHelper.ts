@@ -31,6 +31,12 @@ export function formatFloatingValue(value: number | string | null | undefined, d
 
 export const allowOnlyNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'];
+    
+    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+    if (e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) {
+        return;
+    }
+    
     if (
         !/[0-9.,]/.test(e.key) && // hanya angka, koma, titik
         !allowedKeys.includes(e.key)
