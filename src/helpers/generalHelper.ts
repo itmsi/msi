@@ -277,3 +277,15 @@ export const twodigitcomma = (value: string | number): string => {
     }
     return value.toString();
 }
+
+export const formatPhoneNumber = (phone: string): string => {
+    const cleaned = phone.replace(/\D/g, '');
+
+    if (cleaned.startsWith('62')) {
+        return `+${cleaned.substring(0, 2)} ${cleaned.substring(2, 5)} ${cleaned.substring(5, 9)} ${cleaned.substring(9)}`;
+    } else if (cleaned.startsWith('08')) {
+        return `${cleaned.substring(0, 4)}-${cleaned.substring(4, 8)}-${cleaned.substring(8)}`;
+    }
+    
+    return phone;
+}

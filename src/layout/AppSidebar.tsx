@@ -14,6 +14,7 @@ import {
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "@/hooks/useAuth";
 import GridShape from "@/components/common/GridShape";
+import { TbTopologyStar3 } from "react-icons/tb";
 
 type SubNavItem = {
     name: string;
@@ -88,6 +89,22 @@ const navItems: NavItem[] = [
         subItems: [
             { name: "Manage", path: "/roe-roa-calculator/manage", allowedRoles: ['Manage ROA ROE Calculate'] },
             { name: "Settings", path: "/roe-roa-calculator/settings", allowedRoles: ['Setting ROA ROE Calculate'] },
+        ],
+    },
+    {
+        name: "CRM",
+        icon: <TbTopologyStar3 />,
+        allowedRoles: [
+            'Area Structure CRM', 
+            'IUP Management CRM', 
+            'Contractors CRM',
+            'User Management CRM'
+        ],
+        subItems: [
+            { name: "Area Structure", path: "/crm/area-structure", allowedRoles: ['Area Structure CRM'] },
+            { name: "IUP Management", path: "/crm/iup-management", allowedRoles: ['IUP Management CRM'] },
+            { name: "Contractors", path: "/crm/contractors", allowedRoles: ['Contractors CRM'] },
+            { name: "User Management", path: "/crm/user-management", allowedRoles: ['User Management CRM'] }
         ],
     }
 ];

@@ -27,7 +27,7 @@ import { ItemProduct } from '../Product/types/product';
 import { useEditQuotation } from './hooks/useEditQuotation';
 import { useAsyncSelect, SelectOption } from '../hooks/useAsyncSelect';
 import { useTermConditionSelect, TermConditionSelectOption } from '../hooks/useTermConditionSelect';
-import { handleKeyPress, formatNumberInput, resetFormatNumbers, handlePercentageInput } from '@/helpers/generalHelper';
+import { handleKeyPress, formatNumberInput, handlePercentageInput } from '@/helpers/generalHelper';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { ItemProductService } from '../Product/services/productService';
 import ProductDetailDrawer from '@/pages/Quotation/Manage/components/ProductDetailDrawer';
@@ -427,15 +427,16 @@ export default function EditQuotation() {
     };
 
     const resetQuotationFormattedNumbers = (formData: any): any => {
-        const quotationNumericFields = [
-            'manage_quotation_delivery_fee',
-            'manage_quotation_other',
-            'manage_quotation_payment_presentase',
-            'manage_quotation_ppn',
-            'manage_quotation_grand_total',
-            'manage_quotation_payment_nominal'
-        ];
-        return resetFormatNumbers(formData, quotationNumericFields);
+        // const quotationNumericFields = [
+        //     'manage_quotation_delivery_fee',
+        //     'manage_quotation_other',
+        //     'manage_quotation_payment_presentase',
+        //     'manage_quotation_ppn',
+        //     'manage_quotation_grand_total',
+        //     'manage_quotation_payment_nominal'
+        // ];
+        // return resetFormatNumbers(formData, quotationNumericFields);
+        return formData;
     };
 
     const calculateGrandTotal = useCallback((currentFormData: QuotationFormData): { ppn: string; grandTotal: string; paymentNominal: string, remainingPayment: string } => {

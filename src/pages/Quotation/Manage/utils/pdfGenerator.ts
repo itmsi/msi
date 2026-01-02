@@ -23,8 +23,8 @@ const formatCurrency = (value: string | number): string => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        // minimumFractionDigits: 0,
+        // maximumFractionDigits: 0
     }).format(numValue);
 };
 
@@ -619,19 +619,19 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         },
         didParseCell: (data) => {
             if (data.row.index === 0 && data.column.index === 1) {
-                data.cell.styles.fontSize = 11;
+                data.cell.styles.fontSize = 10;
             }
             if (data.row.index === 1 && data.column.index === 1) {
                 data.cell.styles.textColor = [34, 197, 94];
                 data.cell.styles.fontStyle = 'bold';
                 // data.cell.styles.font = 'OpenSans';
-                data.cell.styles.fontSize = 11;
+                data.cell.styles.fontSize = 10;
             }
             if (data.row.index === 2 && data.column.index === 1) {
                 data.cell.styles.textColor = [220, 38, 38];
                 data.cell.styles.fontStyle = 'bold';
                 // data.cell.styles.font = 'OpenSans';
-                data.cell.styles.fontSize = 11;
+                data.cell.styles.fontSize = 10;
             }
         }
     });

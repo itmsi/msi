@@ -190,13 +190,18 @@ export const useAccessoriesEdit = () => {
         }));
     };
 
-    const handleRemoveIsland = (islandId: string) => {
+    const handleRemoveIsland = (islandIdOrObject: string | AccessoryIslandDetail) => {
+        const islandId = typeof islandIdOrObject === 'string' 
+            ? islandIdOrObject 
+            : islandIdOrObject.island_id;
+        
         setForm(prev => ({
             ...prev,
-            accessories_island_detail: prev.accessories_island_detail.filter(
-                item => item.island_id !== islandId
+            accessories_island_detail: prev.accessories_island_detail.filter(item => 
+                item.island_id !== islandId
             )
         }));
+        
         toast.success('Island berhasil dihapus');
     };
 

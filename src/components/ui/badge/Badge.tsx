@@ -1,4 +1,4 @@
-type BadgeVariant = "light" | "solid";
+type BadgeVariant = "light" | "solid" | "outline";
 type BadgeSize = "sm" | "md";
 type BadgeColor =
   | "primary"
@@ -27,7 +27,7 @@ const Badge: React.FC<BadgeProps> = ({
   children,
 }) => {
   const baseStyles =
-    "inline-flex items-center px-2.5 py-0.5 justify-center gap-1 rounded-full font-medium";
+    "inline-flex items-center justify-center border rounded-md font-medium px-2 py-0.5 text-xs";
 
   // Define size styles
   const sizeStyles = {
@@ -58,6 +58,15 @@ const Badge: React.FC<BadgeProps> = ({
       info: "bg-blue-light-500 text-white",
       light: "bg-gray-400 text-white",
       dark: "bg-gray-700 text-white",
+    },
+    outline: {
+      primary: "border border-brand-500 text-brand-500",
+      success: "border border-success-500 text-success-500",
+      error: "border border-error-500 text-error-500",
+      warning: "border border-warning-500 text-warning-500",
+      info: "border border-blue-light-500 text-blue-light-500",
+      light: "border border-gray-400 text-gray-400",
+      dark: "border border-gray-700 text-gray-700",
     },
   };
 

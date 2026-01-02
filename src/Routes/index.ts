@@ -52,6 +52,19 @@ const ROECalculatorEdit = lazy(() => import('@/pages/ROECalculator/Edit'));
 const ROECalculatorBreakdown = lazy(() => import('@/pages/ROECalculator/Manage/BreakDown'));
 const ROESettings = lazy(() => import('@/pages/ROECalculator/Settings/Settings'));
 
+const Territory = lazy(() => import('@/pages/CRM/Territory'));
+const ManageIUPManagement = lazy(() => import('@/pages/CRM/IUPManagement/Manage'));
+const UserManagement = lazy(() => import('@/pages/CRM/UserManagement/Usermanagement'));
+const CreateUserAccess = lazy(() => import('@/pages/CRM/UserManagement/CreateUserAccess'));
+const EditUserAccess = lazy(() => import('@/pages/CRM/UserManagement/EditUserAccess'));
+
+const Contractors = lazy(() => import('@/pages/CRM/Contractors/Contractors'));
+const CreateContractors = lazy(() => import('@/pages/CRM/Contractors/CreateContractor'));
+const CreateIUPManagement = lazy(() => import('@/pages/CRM/IUPManagement/CreateIup'));
+const EditIupManagement = lazy(() => import('@/pages/CRM/IUPManagement/EditIup'));
+const Brand = lazy(() => import('@/pages/CRM/Brand/Manage'));
+const EditContractors = lazy(() => import('@/pages/CRM/Contractors/EditContractor'));
+
 export type TAppRoute = {
     path: string;
     name: string;
@@ -451,23 +464,100 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
 
+    // CRM MANAGE
+    {
+        path: '/brand',
+        name: 'Brand CRM',
+        isProtected: true,
+        roles: ['Brand CRM'],
+        component: Brand,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/area-structure',
+        name: 'Area Structure CRM',
+        isProtected: true,
+        roles: ['Area Structure CRM'],
+        component: Territory,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/iup-management',
+        name: 'IUP Management CRM',
+        isProtected: true,
+        roles: ['IUP Management CRM'],
+        component: ManageIUPManagement,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/iup-management/create',
+        name: 'IUP Management CRM',
+        isProtected: true,
+        roles: ['IUP Management CRM'],
+        component: CreateIUPManagement,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/iup-management/edit/:id',
+        name: 'IUP Management CRM',
+        isProtected: true,
+        roles: ['IUP Management CRM'],
+        component: EditIupManagement,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/user-management',
+        name: 'User Management CRM',
+        isProtected: true,
+        roles: ['User Management CRM'],
+        component: UserManagement,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/user-management/create',
+        name: 'User Management CRM',
+        isProtected: true,
+        roles: ['User Management CRM'],
+        requiredPermissions: ['create'],
+        component: CreateUserAccess,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/user-management/edit/:id',
+        name: 'User Management CRM',
+        isProtected: true,
+        roles: ['User Management CRM'],
+        requiredPermissions: ['update'],
+        component: EditUserAccess,
+        layout: AppLayout,
+    },
 
-    // {
-    //     path: '/customers/create',
-    //     name: 'Customer Quotation',
-    //     isProtected: true,
-    //     roles: ['Customer Quotation'],
-    //     requiredPermissions: ['create'],
-    //     component: CreateCustomers,
-    //     layout: AppLayout,
-    // },
+    // CRM - Contractors
+    {
+        path: '/crm/contractors',
+        name: 'Contractors CRM',
+        isProtected: true,
+        roles: ['Contractors CRM'],
+        component: Contractors,
+        layout: AppLayout,
+    },
 
-
-    // {
-    //     path: '/trackme',
-    //     name: 'Trackme',
-    //     isProtected: false,
-    //     roles: ['Trackme'],
-    //     component: Trackme,
-    // },
+    {
+        path: '/crm/contractors/create',
+        name: 'Contractors CRM',
+        isProtected: true,
+        roles: ['Contractors CRM'],
+        requiredPermissions: ['create'],
+        component: CreateContractors,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/contractors/edit/:iup_customer_id',
+        name: 'Contractors CRM',
+        isProtected: true,
+        roles: ['Contractors CRM'],
+        requiredPermissions: ['update'],
+        component: EditContractors,
+        layout: AppLayout,
+    },
 ];
