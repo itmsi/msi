@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MdDelete } from 'react-icons/md';
 import Button from '@/components/ui/button/Button';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
@@ -34,11 +34,57 @@ const UnitCard: React.FC<UnitCardProps> = ({
     onBrandInputChange,
     onBrandMenuScroll,
     onBrandSelect
-}) => {    
-    // Find selected brand based on unit.brand_id
-    const selectedBrand = unit.brand_id 
-        ? brandOptions.find(option => option.value === unit.brand_id) || null
-        : null;
+}) => {
+    // State untuk menyimpan recently selected options dan loaded options for edit mode
+    
+    const [recentlySelectedBrand, setRecentlySelectedBrand] = useState<any>(null);
+    const [loadedEditOptions, setLoadedEditOptions] = React.useState<{
+        brand: any | null;
+    }>({ brand: null });
+    
+    // Effect to load names for IDs in edit mode
+    useEffect(() => {
+        const loadEditModeOptions = async () => {
+            if (unit.brand_id && !brandOptions.find(opt => opt.value === unit.brand_id)) {
+                const tempBrandOption = {
+                    value: unit.brand_id,
+                    label: unit.brand_name,
+                    __isFromEdit: true
+                };
+                setLoadedEditOptions(prev => ({ ...prev, brand: tempBrandOption }));
+            } else if (unit.brand_id && brandOptions.find(opt => opt.value === unit.brand_id)) {
+                const foundOption = brandOptions.find(opt => opt.value === unit.brand_id);
+                setLoadedEditOptions(prev => ({ ...prev, brand: foundOption }));
+            }
+            
+        };
+        
+        loadEditModeOptions();
+    }, [unit.brand_id, brandOptions]);
+    
+    // Create a more robust selectedBrand logic
+    const selectedBrand = React.useMemo(() => {
+        if (!unit.brand_id) return null;
+        
+        if (recentlySelectedBrand && recentlySelectedBrand.value === unit.brand_id) {
+            return recentlySelectedBrand;
+        }
+        
+        let found = brandOptions.find(option => option.value === unit.brand_id);
+        if (found) {
+            return found;
+        }
+        
+        if (loadedEditOptions.brand && loadedEditOptions.brand.value === unit.brand_id) {
+            return loadedEditOptions.brand;
+        }
+        
+        return {
+            value: unit.brand_id,
+            label: unit.brand_name,
+            __isPlaceholder: true
+        };
+    }, [unit.brand_id, brandOptions, recentlySelectedBrand, loadedEditOptions.brand]);
     
     // Helper untuk render input field
     const renderInput = (
@@ -98,21 +144,41 @@ const UnitCard: React.FC<UnitCardProps> = ({
                     </Label>
                     <CustomAsyncSelect
                         loadOptions={async (_inputValue) => {
-                            return brandOptions;
+                            let allOptions = [...brandOptions];
+                            
+                            // If we have a selected option that's not in current options, add it
+                            if (selectedBrand && !allOptions.find(opt => opt.value === selectedBrand.value)) {
+                                allOptions.unshift(selectedBrand);
+                            }
+                            
+                            return allOptions;
                         }}
-                        defaultOptions={brandOptions}
+                        defaultOptions={(() => {
+                            let defaultOpts = brandOptions?.length > 0 ? [...brandOptions] : [];
+                            
+                            // Ensure selected option is in default options
+                            if (selectedBrand && !defaultOpts.find(opt => opt.value === selectedBrand.value)) {
+                                defaultOpts.unshift(selectedBrand);
+                            }
+                            
+                            return defaultOpts;
+                        })()}
                         inputValue={brandInputValue}
                         value={selectedBrand}
                         isLoading={brandPagination.loading}
                         onInputChange={onBrandInputChange}
                         onMenuScrollToBottom={onBrandMenuScroll}
-                        onChange={onBrandSelect}
+                        onChange={(option) => {
+                            // Save recently selected option
+                            setRecentlySelectedBrand(option);
+                            onBrandSelect(option);
+                        }}
                         placeholder="Type to search brand..."
                         isSearchable={true}
                         noOptionsMessage={() => "No brands found"}
                         loadingMessage={() => "Loading brands..."}
                         error={errors[`unit_${index}_brand`]}
-                        isClearable={false}
+                        isClearable={false}                    
                     />
                     {errors[`unit_${index}_brand`] && (
                         <p className="text-red-500 text-sm mt-1">{errors[`unit_${index}_brand`]}</p>

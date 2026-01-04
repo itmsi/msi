@@ -51,6 +51,7 @@ export interface ContractorUnit {
     amount?: string;
     description?: string;
     brand_id?: string | null;
+    brand_name?: string | null;
     brand?: any;
     type?: string;
     specification?: string;
@@ -103,6 +104,7 @@ export interface ContractorDetailResponse {
             status: string;
             units: Array<{
                 brand_id: string;
+                brand_name: string;
                 type: string;
                 specification: string;
                 physical_availability: string | null;
