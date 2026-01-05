@@ -86,10 +86,11 @@ const navItems: NavItem[] = [
         name: "Return on Equity ",
         icon: <GiChart />,
         allowedRoles: ['Manage ROA ROE Calculate', 'Setting ROA ROE Calculate'],
-        subItems: [
-            { name: "Manage", path: "/roe-roa-calculator/manage", allowedRoles: ['Manage ROA ROE Calculate'] },
-            { name: "Settings", path: "/roe-roa-calculator/settings", allowedRoles: ['Setting ROA ROE Calculate'] },
-        ],
+        path: "/roe-roa-calculator/manage"
+        // subItems: [
+        //     { name: "Manage", path: "/roe-roa-calculator/manage", allowedRoles: ['Manage ROA ROE Calculate'] },
+        //     // { name: "Settings", path: "/roe-roa-calculator/settings", allowedRoles: ['Setting ROA ROE Calculate'] },
+        // ],
     },
     {
         name: "CRM",

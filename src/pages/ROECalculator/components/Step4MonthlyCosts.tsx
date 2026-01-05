@@ -1,7 +1,7 @@
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { ROECalculatorFormData, ROECalculatorValidationErrors } from '../types/roeCalculator';
-import { formatCurrency, formatNumberInput, handleKeyPress } from '@/helpers/generalHelper';
+import { formatCurrency, formatNumberInput, formatNumberInputFadlan, handleKeyPress } from '@/helpers/generalHelper';
 import LoadingSpinner from '@/components/common/Loading';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -25,6 +25,7 @@ export default function Step4MonthlyCosts({
     calculatorId,
     saveStep
 }: Step4Props) {    
+    
     const navigate = useNavigate();
     
     const [calculating, setCalculating] = useState(false);
@@ -131,11 +132,17 @@ export default function Step4MonthlyCosts({
                     <Input
                         id="insurance_expense"
                         onKeyPress={handleKeyPress}
-                        value={formData.depreciation_monthly === null ? '' : formatNumberInput(formData.depreciation_monthly || formData?.cost_data?.depreciation_monthly || '0')}
+                        value={formData.depreciation_monthly === null ? '' : formatNumberInputFadlan(formData.depreciation_monthly || formData?.cost_data?.depreciation_monthly || '')}
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const value = rawValue === '' ? "0" : rawValue.replace(/[^\d.]/g, '');
-                            handleInputChange('depreciation_monthly', value);
+                            if (rawValue === '') {
+                                handleInputChange('depreciation_monthly', null);
+                                return;
+                            }
+                            const cleanValue = rawValue
+                                .replace(/\./g, '')
+                                .replace(',', '.');
+                            handleInputChange('depreciation_monthly', cleanValue);
                         }}
                         maxLength={15}
                         error={!!validationErrors.depreciation_monthly}
@@ -161,12 +168,18 @@ export default function Step4MonthlyCosts({
                     /> */}
                     <Input
                         id="interest_monthly"
-                        onKeyPress={handleKeyPress}                        
-                        value={formData.interest_monthly === null ? '' : formatNumberInput(formData.interest_monthly || formData?.cost_data?.interest_monthly || '0')}
+                        onKeyPress={handleKeyPress}
+                        value={formData.interest_monthly === null ? '' : formatNumberInputFadlan(formData.interest_monthly || formData?.cost_data?.interest_monthly || '')}
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const value = rawValue === '' ? "0" : rawValue.replace(/[^\d.]/g, '');
-                            handleInputChange('interest_monthly', value);
+                            if (rawValue === '') {
+                                handleInputChange('interest_monthly', null);
+                                return;
+                            }
+                            const cleanValue = rawValue
+                                .replace(/\./g, '')
+                                .replace(',', '.');
+                            handleInputChange('interest_monthly', cleanValue);
                         }}
                         maxLength={15}
                         error={!!validationErrors.interest_monthly}
@@ -215,7 +228,7 @@ export default function Step4MonthlyCosts({
 
             {/* Monthly Cost Breakdown */}
             <div className="border border-red-200 rounded-lg p-4">
-                <h2 className="font-medium text-red-900 mb-4">Detail Biaya Bulanan</h2>
+                <h2 className="font-medium text-red-900 mb-4">Detail Biaya Bulanan (Rp)</h2>
                 <div className="space-y-4">
                     {formData?.charts_data?.breakdown_biaya.map((item) => {
                         return (
@@ -238,7 +251,7 @@ export default function Step4MonthlyCosts({
 
             {/* Expense Categories Breakdown Chart */}
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h2 className="font-medium text-red-900 mb-4">Expense Categories (%)</h2>
+                <h2 className="font-medium text-red-900 mb-4">Detail Biaya Bulanan (%)</h2>
                 <div className="space-y-3">
                     {formData?.charts_data?.breakdown_biaya.map((item, index) => {
                         const colors = [

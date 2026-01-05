@@ -91,7 +91,7 @@ export class ROECalculatorService {
                     tyre_expense_monthly: apiData?.cost?.tyre_expense_monthly || '',
                     sparepart_expense_monthly: apiData?.cost?.sparepart_expense_monthly || '',
                     salary_operator_monthly: apiData?.cost?.salary_operator_monthly || '',
-                    depreciation_monthly: apiData?.cost?.depreciation_monthly || '',
+                    depreciation_monthly: apiData?.unit_purchases?.depreciation_per_month || '',
                     interest_monthly: apiData?.cost?.interest_monthly || '',
                     overhead_monthly: apiData?.cost?.overhead_monthly || '',
                 },
@@ -194,7 +194,12 @@ export class ROECalculatorService {
                         haul_distance: data.jarak_haul,
                         status: data.status
                     };
-                    break
+                    const resStep1 = await apiPut(`${API_BASE_URL}/calculations/quotes/${id}`, apiData);
+                    return {
+                        success: true,
+                        data: resStep1.data,
+                        message: 'Step updated successfully'
+                    };
                 case 2:
                     // Step 2 only saves data, calculation is handled separately
                     apiData = {

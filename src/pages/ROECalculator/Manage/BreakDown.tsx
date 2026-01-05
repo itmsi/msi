@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { MdKeyboardArrowLeft, MdAdd } from 'react-icons/md';
+import { MdKeyboardArrowLeft, MdAdd, MdEdit } from 'react-icons/md';
 import ReactECharts from 'echarts-for-react';
 
 import PageMeta from '@/components/common/PageMeta';
@@ -226,6 +226,15 @@ export default function BreakdownROECalculator() {
                             <div className='ms-2'>
                                 <h1 className="font-primary-bold font-normal text-xl">Breakdown ROE Calculator</h1>
                             </div>
+                        </div>
+                        
+                        <div className='flex gap-3'>
+                            <Button
+                                className="group rounded-lg w-full flex items-center justify-center gap-2 font-secondary py-2"
+                                onClick={() => navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=4}`)}
+                            >
+                                <MdEdit size={20} className="group-hover:text-white" /> Edit
+                            </Button>
                         </div>
                     </div>
 

@@ -24,6 +24,9 @@ export default function Step3Operational({
     loading,
     calculatorId
 }: Step3Props) {
+    console.log({
+        formData
+    });
     
     const navigate = useNavigate();
     
