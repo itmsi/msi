@@ -5,10 +5,12 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import { MdKeyboardArrowLeft, MdSave, MdPerson } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
-import { CustomerValidationErrors } from "./types/customer";
+import { CustomerValidationErrors, ContactPerson } from "./types/customer";
 import { toast } from "react-hot-toast";
 import { useCreateCustomer } from "./hooks/useCustomerCreate";
 import { handleKeyPress } from "@/helpers/generalHelper";
+import CustomerPersonsSection from "./components/CustomerPersonsSection";
+import { CustomerUtilityService } from "./services/customerUtilityService";
 
 interface CreateCustomerFormData {
     customer_code: string;
@@ -22,6 +24,7 @@ interface CreateCustomerFormData {
     customer_country: string;
     job_title: string;
     contact_person: string;
+    contact_persons: ContactPerson[];
 }
 
 export default function CreateCustomer() {
@@ -34,6 +37,8 @@ export default function CreateCustomer() {
         clearFieldError,
         createCustomer 
     } = useCreateCustomer();
+    
+    const [contactErrors, setContactErrors] = useState<Record<string,string>>({});
 
     // State for form data
     const [formData, setFormData] = useState<CreateCustomerFormData>({
@@ -47,7 +52,8 @@ export default function CreateCustomer() {
         customer_zip: '',
         customer_country: '',
         job_title: '',
-        contact_person: ''
+        contact_person: '',
+        contact_persons: []
     });
 
     // Form input handlers
@@ -58,9 +64,67 @@ export default function CreateCustomer() {
         }));
 
         // Clear validation error when user starts typing
-        if (validationErrors[field]) {
-            clearFieldError(field);
+        if (validationErrors[field as keyof CustomerValidationErrors]) {
+            clearFieldError(field as keyof CustomerValidationErrors);
         }
+    };
+    
+    // Contact person handlers
+    const handleAddContact = () => {
+        setFormData(prev => ({
+            ...prev,
+            contact_persons: [...prev.contact_persons, { name: '', email: '', phone: '', position: '' }]
+        }));
+    };
+
+    const handleRemoveContact = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            contact_persons: prev.contact_persons.filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleContactChange = (index: number, field: keyof ContactPerson, value: string | number) => {
+        setFormData(prev => ({
+            ...prev,
+            contact_persons: prev.contact_persons.map((contact, i) => 
+                i === index ? { ...contact, [field]: value } : contact
+            )
+        }));
+        
+        // Clear error for this specific field when user types
+        const errorKey = `contact_${index}_${field}`;
+        if (contactErrors[errorKey]) {
+            setContactErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[errorKey];
+                return newErrors;
+            });
+        }
+    };
+
+    // Validate contact persons
+    const validateContacts = (): boolean => {
+        const errors: Record<string, string> = {};
+        
+        formData.contact_persons.forEach((contact, index) => {
+            // Validate email format if provided
+            if (contact.email && contact.email.trim()) {
+                if (!CustomerUtilityService.validateEmail(contact.email)) {
+                    errors[`contact_${index}_email`] = 'Invalid email format';
+                }
+            }
+            
+            // Validate phone format if provided
+            if (contact.phone && contact.phone.trim()) {
+                if (!CustomerUtilityService.validatePhone(contact.phone)) {
+                    errors[`contact_${index}_phone`] = 'Invalid phone number format';
+                }
+            }
+        });
+        
+        setContactErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
     // Form validation
@@ -93,6 +157,12 @@ export default function CreateCustomer() {
         
         if (!validateForm()) {
             toast.error('Please fix the validation errors');
+            return;
+        }
+        
+        // Validate contact persons
+        if (!validateContacts()) {
+            toast.error('Please fix contact person errors');
             return;
         }
 
@@ -295,9 +365,20 @@ export default function CreateCustomer() {
                                 </div>
                             </div>
                         </div>
-                            
-                        {/* Form Actions */}
-                        <div className="flex justify-end gap-4 p-6 border-t border-gray-200 md:col-span-3">
+                    </form>
+
+                    {/* Contact Persons Section */}
+                    <CustomerPersonsSection
+                        contacts={formData.contact_persons}
+                        errors={contactErrors}
+                        onAddContact={handleAddContact}
+                        onRemoveContact={handleRemoveContact}
+                        onContactChange={handleContactChange}
+                    />
+
+                    {/* Form Actions */}
+                    <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                        <div className="flex justify-end gap-4">
                             <Button
                                 type="button"
                                 variant="outline"
@@ -308,7 +389,10 @@ export default function CreateCustomer() {
                                 Cancel
                             </Button>
                             <Button
-                                type="submit"
+                                onClick={() => {
+                                    const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+                                    handleSubmit(fakeEvent);
+                                }}
                                 disabled={isCreating}
                                 className="px-6 flex items-center gap-2 rounded-full"
                             >
@@ -316,7 +400,7 @@ export default function CreateCustomer() {
                                 {isCreating ? 'Creating...' : 'Create Customer'}
                             </Button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </>

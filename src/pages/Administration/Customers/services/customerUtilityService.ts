@@ -79,6 +79,15 @@ export class CustomerUtilityService {
         return 'incomplete';
     }
 
+    // Public validation methods for contact persons
+    static validateEmail(email: string): boolean {
+        return this.isValidEmail(email);
+    }
+
+    static validatePhone(phone: string): boolean {
+        return this.isValidPhone(phone);
+    }
+
     private static isValidEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);

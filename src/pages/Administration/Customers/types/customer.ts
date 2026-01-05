@@ -18,6 +18,7 @@ export interface Customer {
     deleted_at?: string | null;
     deleted_by?: string | null;
     is_delete?: boolean;
+    contact_persons?: ContactPerson[];
 }
 
 export interface CustomerPagination {
@@ -43,6 +44,12 @@ export interface CustomerRequest {
     search: string;
 }
 
+export interface ContactPerson {
+    name?: string;
+    email?: string;
+    phone?: string;
+    position?: string;
+}
 
 // Customer form data for create/update
 export interface CustomerFormData {
@@ -55,8 +62,9 @@ export interface CustomerFormData {
     customer_state: string;
     customer_zip: string;
     customer_country: string;
-    job_title: string;
-    contact_person: string;
+    job_title?: string;
+    contact_person?: string;
+    contact_persons?: ContactPerson[];
 }
 
 // Customer validation errors

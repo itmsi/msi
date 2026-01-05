@@ -8,14 +8,17 @@ import PageMeta from "@/components/common/PageMeta";
 import { toast } from "react-hot-toast";
 import { CustomerService } from "./services/customerService";
 import { useCustomerEdit } from "./hooks/useCustomerEdit";
-import { CustomerFormData } from "./types/customer";
+import { CustomerFormData, ContactPerson, CustomerValidationErrors } from "./types/customer";
 import { PermissionGate } from "@/components/common/PermissionComponents";
+import CustomerPersonsSection from "./components/CustomerPersonsSection";
+import { CustomerUtilityService } from "./services/customerUtilityService";
 
 export default function EditCustomer() {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     
     const [isLoading, setIsLoading] = useState(true);
+    const [contactErrors, setContactErrors] = useState<Record<string,string>>({});
     
     // Hook for updating customer
     const { 
@@ -37,7 +40,8 @@ export default function EditCustomer() {
         customer_zip: '',
         customer_country: '',
         job_title: '',
-        contact_person: ''
+        contact_person: '',
+        contact_persons: []
     });
 
     // Load customer data when component mounts
@@ -65,7 +69,8 @@ export default function EditCustomer() {
                     customer_zip: customer.customer_zip || '',
                     customer_country: customer.customer_country || '',
                     job_title: customer.job_title || '',
-                    contact_person: customer.contact_person || ''
+                    contact_person: customer.contact_person || '',
+                    contact_persons: customer.contact_persons || []
                 });
             } else {
                 toast.error('Customer not found');
@@ -88,9 +93,67 @@ export default function EditCustomer() {
         }));
 
         // Clear validation error when user starts typing
-        if (validationErrors[field]) {
-            clearFieldError(field);
+        if (validationErrors[field as keyof CustomerValidationErrors]) {
+            clearFieldError(field as keyof CustomerValidationErrors);
         }
+    };
+    
+    // Contact person handlers
+    const handleAddContact = () => {
+        setFormData(prev => ({
+            ...prev,
+            contact_persons: [...(prev.contact_persons || []), { name: '', email: '', phone: '', position: '' }]
+        }));
+    };
+
+    const handleRemoveContact = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            contact_persons: (prev.contact_persons || []).filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleContactChange = (index: number, field: keyof ContactPerson, value: string | number) => {
+        setFormData(prev => ({
+            ...prev,
+            contact_persons: (prev.contact_persons || []).map((contact, i) => 
+                i === index ? { ...contact, [field]: value } : contact
+            )
+        }));
+        
+        // Clear error for this specific field when user types
+        const errorKey = `contact_${index}_${field}`;
+        if (contactErrors[errorKey]) {
+            setContactErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[errorKey];
+                return newErrors;
+            });
+        }
+    };
+
+    // Validate contact persons
+    const validateContacts = (): boolean => {
+        const errors: Record<string, string> = {};
+        
+        (formData.contact_persons || []).forEach((contact, index) => {
+            // Validate email format if provided
+            if (contact.email && contact.email.trim()) {
+                if (!CustomerUtilityService.validateEmail(contact.email)) {
+                    errors[`contact_${index}_email`] = 'Invalid email format';
+                }
+            }
+            
+            // Validate phone format if provided
+            if (contact.phone && contact.phone.trim()) {
+                if (!CustomerUtilityService.validatePhone(contact.phone)) {
+                    errors[`contact_${index}_phone`] = 'Invalid phone number format';
+                }
+            }
+        });
+        
+        setContactErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
     // Form validation (client side)
@@ -129,6 +192,12 @@ export default function EditCustomer() {
         
         if (!validateForm()) {
             toast.error('Please fix the validation errors');
+            return;
+        }
+        
+        // Validate contact persons
+        if (!validateContacts()) {
+            toast.error('Please fix contact person errors');
             return;
         }
 
@@ -355,9 +424,20 @@ export default function EditCustomer() {
                             </div>
                             <div className="absolute top-7 bottom-7 right-0 border-r border-gray-300 hidden lg:block mx-3"></div>
                         </div>
+                    </form>
+
+                    {/* Contact Persons Section */}
+                    <CustomerPersonsSection
+                        contacts={formData.contact_persons || []}
+                        errors={contactErrors}
+                        onAddContact={handleAddContact}
+                        onRemoveContact={handleRemoveContact}
+                        onContactChange={handleContactChange}
+                    />
                             
-                        {/* Form Actions */}
-                        <div className="flex justify-end gap-4 p-6 border-t border-gray-200 md:col-span-3">
+                    {/* Form Actions */}
+                    <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                        <div className="flex justify-end gap-4">
                             <Button
                                 type="button"
                                 variant="outline"
@@ -369,7 +449,6 @@ export default function EditCustomer() {
                             </Button>
                             <PermissionGate permission={["update"]}>
                                 <Button
-                                    type="submit"
                                     onClick={() => {
                                         const tipu = { preventDefault: () => {} } as React.FormEvent;
                                         handleSubmit(tipu);
@@ -382,7 +461,7 @@ export default function EditCustomer() {
                                 </Button>
                             </PermissionGate>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </>
