@@ -48,6 +48,7 @@ export interface ROECalculatorFormData {
     cost_data?: RorConstStructure;
     financial_data?: FinancialStructureSetting;
     quote_defaults?: QuoteDefaults;
+    charts_data?: ChartsData;
 }
 
 export interface ROECalculatorValidationErrors {
@@ -207,6 +208,7 @@ export interface ApiQuoteResponse {
     customer?: {
         name: string;
     };
+    charts_data?: ChartsData;
 }
 
 export interface ApiQuoteListResponse {

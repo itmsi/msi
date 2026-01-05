@@ -125,6 +125,7 @@ export default function CreateROECalculator() {
                         {...commonProps} 
                         loading={loading} 
                         calculatorId={calculatorId}
+                        saveStep={saveStep}
                     />;
             
         case 5:

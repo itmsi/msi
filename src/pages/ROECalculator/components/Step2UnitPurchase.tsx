@@ -4,7 +4,7 @@ import Input from '@/components/form/input/InputField';
 import Button from '@/components/ui/button/Button';
 import { MdCalculate } from 'react-icons/md';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, CalculationResponse } from '../types/roeCalculator';
-import { formatCurrency, formatNumberInput, handleKeyPress, formatNumberInputFadlan } from '@/helpers/generalHelper';
+import { formatCurrency, formatNumberInput, handleKeyPress, formatNumberInputFadlan, twodigitcomma } from '@/helpers/generalHelper';
 import LoadingSpinner from '@/components/common/Loading';
 import { useNavigate } from 'react-router';
 import { useEffect } from 'react';
@@ -125,80 +125,76 @@ export default function Step2UnitPurchase({
                     </div>
                 )}
 
-                {/* Down Payment Slider */}
-                <div className='md:col-span-6'>
-                    <Label htmlFor="down_payment_pct">Down Payment (%)</Label>
-                    <div className="space-y-2">
-                        <input
-                            id="down_payment_pct"
-                            type="range"
-                            min={0}
-                            max={100}
-                            value={formData.down_payment_pct}
-                            onChange={(e) => handleInputChange('down_payment_pct', parseInt(e.target.value))}
-                            className="w-full h-2 bg-gray-200 rounded-lg cursor-pointer"
-                        />
-                        <div className="flex justify-between text-sm text-gray-600">
-                            <span>0%</span>
-                            <span className="font-medium">{formData.down_payment_pct}%</span>
-                            <span>100%</span>
+
+                <div className="md:col-span-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div>
+                        <Label htmlFor="down_payment_pct">Down Payment (%)</Label>
+                        <div className="space-y-2">
+                            <Input
+                                id="down_payment_pct"
+                                value={formData.down_payment_pct}
+                                onChange={(e) => {
+                                    const rawValue = e.target.value;
+                                    const value = rawValue === '' ? null : twodigitcomma(rawValue.replace(/[^\d.]/g, ''));
+                                    handleInputChange('down_payment_pct', value)
+                                }}
+                            />
                         </div>
                     </div>
-                </div>
+                    {/* Tenor Pembiayaan */}
+                    <div>
+                        <Label htmlFor="tenor_pembiayaan">Tenor Pembiayaan (Bulan)</Label>
+                        <Input
+                            id="tenor_pembiayaan"
+                            value={formData.tenor_pembiayaan}
+                            maxLength={3}
+                            onKeyPress={handleKeyPress}
+                            onChange={(e) => handleInputChange('tenor_pembiayaan', e.target.value)}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                            {Math.round((parseFloat(String(formData.tenor_pembiayaan || '0')) / 12) * 10) / 10} tahun
+                        </p>
+                    </div>
 
-                {/* Tenor Pembiayaan */}
-                <div className="md:col-span-2">
-                    <Label htmlFor="tenor_pembiayaan">Tenor Pembiayaan (Bulan)</Label>
-                    <Input
-                        id="tenor_pembiayaan"
-                        value={formData.tenor_pembiayaan}
-                        maxLength={3}
-                        onKeyPress={handleKeyPress}
-                        onChange={(e) => handleInputChange('tenor_pembiayaan', e.target.value)}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                        {Math.round((parseFloat(String(formData.tenor_pembiayaan || '0')) / 12) * 10) / 10} tahun
-                    </p>
-                </div>
+                    {/* Interest Rate */}
+                    <div>
+                        <Label htmlFor="interest_rate">Interest Rate Flat per Tahun (%)</Label>
+                        <Input
+                            id="interest_rate"
+                            onKeyPress={handleKeyPress}
+                            value={formatNumberInputFadlan(formData.interest_rate)}
+                            maxLength={5}
+                            // onChange={(e) => {
+                            //     handleInputChange('interest_rate', e.target.value);
+                            // }}
+                            onChange={(e) => {
+                                let value = e.target.value.replace(/[^\d]/g, '');
+                                if (value && parseInt(value) > 100) {
+                                    value = '100';
+                                }
+                                handleInputChange('interest_rate', value);
+                            }}
+                            error={!!validationErrors.interest_rate}
+                        />
+                        {validationErrors.interest_rate && (
+                            <span className="text-sm text-red-500">{validationErrors.interest_rate}</span>
+                        )}
+                    </div>
 
-                {/* Interest Rate */}
-                <div className="md:col-span-2">
-                    <Label htmlFor="interest_rate">Interest Rate Flat per Tahun (%)</Label>
-                    <Input
-                        id="interest_rate"
-                        onKeyPress={handleKeyPress}
-                        value={formatNumberInputFadlan(formData.interest_rate)}
-                        maxLength={5}
-                        // onChange={(e) => {
-                        //     handleInputChange('interest_rate', e.target.value);
-                        // }}
-                        onChange={(e) => {
-                            let value = e.target.value.replace(/[^\d]/g, '');
-                            if (value && parseInt(value) > 100) {
-                                value = '100';
-                            }
-                            handleInputChange('interest_rate', value);
-                        }}
-                        error={!!validationErrors.interest_rate}
-                    />
-                    {validationErrors.interest_rate && (
-                        <span className="text-sm text-red-500">{validationErrors.interest_rate}</span>
-                    )}
-                </div>
-
-                {/* Periode Depresiasi */}
-                <div className="md:col-span-2">
-                    <Label htmlFor="periode_depresiasi">Periode Depresiasi (Bulan)</Label>
-                    <Input
-                        id="periode_depresiasi"
-                        onKeyPress={handleKeyPress}
-                        value={formatNumberInputFadlan(formData.periode_depresiasi)}
-                        // onChange={(e) => handleInputChange('periode_depresiasi', e.target.value)}
-                        onChange={(e) => {
-                            const value = e.target.value.replace(/[^\d]/g, '');
-                            handleInputChange('periode_depresiasi', value);
-                        }}
-                    />
+                    {/* Periode Depresiasi */}
+                    <div>
+                        <Label htmlFor="periode_depresiasi">Periode Depresiasi (Bulan)</Label>
+                        <Input
+                            id="periode_depresiasi"
+                            onKeyPress={handleKeyPress}
+                            value={formatNumberInputFadlan(formData.periode_depresiasi)}
+                            // onChange={(e) => handleInputChange('periode_depresiasi', e.target.value)}
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/[^\d]/g, '');
+                                handleInputChange('periode_depresiasi', value);
+                            }}
+                        />
+                    </div>
                 </div>
             </div>
 
