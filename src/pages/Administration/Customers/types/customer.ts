@@ -45,10 +45,10 @@ export interface CustomerRequest {
 }
 
 export interface ContactPerson {
-    name?: string;
-    email?: string;
-    phone?: string;
-    position?: string;
+    contact_person_name?: string;
+    contact_person_email?: string;
+    contact_person_phone?: string;
+    contact_person_position?: string;
 }
 
 // Customer form data for create/update

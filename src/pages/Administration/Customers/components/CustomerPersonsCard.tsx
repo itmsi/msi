@@ -73,10 +73,10 @@ const CustomerPersonsCard: React.FC<CustomerPersonsCardProps> = ({
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                {renderInput('name', 'Name', 'text', '', false)}
-                {renderInput('email', 'Email', 'text', '', false)}
-                {renderInput('phone', 'Phone', 'text', '', false)}
-                {renderInput('position', 'Position', 'text', '', false)}
+                {renderInput('contact_person_name', 'Name', 'text', '', false)}
+                {renderInput('contact_person_email', 'Email', 'text', '', false)}
+                {renderInput('contact_person_phone', 'Phone', 'text', '', false)}
+                {renderInput('contact_person_position', 'Position', 'text', '', false)}
             </div>
         </div>
     );

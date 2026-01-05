@@ -73,7 +73,7 @@ export default function CreateCustomer() {
     const handleAddContact = () => {
         setFormData(prev => ({
             ...prev,
-            contact_persons: [...prev.contact_persons, { name: '', email: '', phone: '', position: '' }]
+            contact_persons: [...prev.contact_persons, { contact_person_name: '', contact_person_email: '', contact_person_phone: '', contact_person_position: '' }]
         }));
     };
 
@@ -109,16 +109,16 @@ export default function CreateCustomer() {
         
         formData.contact_persons.forEach((contact, index) => {
             // Validate email format if provided
-            if (contact.email && contact.email.trim()) {
-                if (!CustomerUtilityService.validateEmail(contact.email)) {
-                    errors[`contact_${index}_email`] = 'Invalid email format';
+            if (contact.contact_person_email && contact.contact_person_email.trim()) {
+                if (!CustomerUtilityService.validateEmail(contact.contact_person_email)) {
+                    errors[`contact_${index}_contact_person_email`] = 'Invalid email format';
                 }
             }
             
             // Validate phone format if provided
-            if (contact.phone && contact.phone.trim()) {
-                if (!CustomerUtilityService.validatePhone(contact.phone)) {
-                    errors[`contact_${index}_phone`] = 'Invalid phone number format';
+            if (contact.contact_person_phone && contact.contact_person_phone.trim()) {
+                if (!CustomerUtilityService.validatePhone(contact.contact_person_phone)) {
+                    errors[`contact_${index}_contact_person_phone`] = 'Invalid phone number format';
                 }
             }
         });
