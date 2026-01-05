@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { MdAdd, MdEdit, MdSearch, MdPeople, MdClear, MdDeleteOutline } from 'react-icons/md';
 import { useCustomerManagement } from './hooks/useCustomerManagement';
 import { CustomerUtilityService } from './services/customerUtilityService';
@@ -13,6 +13,33 @@ import Button from '@/components/ui/button/Button';
 import { createActionsColumn } from '@/components/ui/table';
 import { useNavigate } from 'react-router';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import { employeesService } from '@/services/administrationService';
+
+const EmployeeNameDisplay = ({ employeeId }: { employeeId: string | null | undefined }) => {
+    const [name, setName] = useState<string>('-');
+
+    useEffect(() => {
+        if (!employeeId) {
+            setName('-');
+            return;
+        }
+        
+        const fetchName = async () => {
+            try {
+                const response = await employeesService.getEmployeeById(employeeId);
+                if (response.success && response.data) {
+                    setName(response.data.employee_name);
+                }
+            } catch (error) {
+                console.error('Error fetching employee name', error);
+                setName('Unknown');
+            }
+        };
+        fetchName();
+    }, [employeeId]);
+
+    return <span className="font-medium text-gray-900">{name}</span>;
+};
 
 const ManageCustomers: React.FC = () => {
     const navigate = useNavigate();
@@ -43,23 +70,12 @@ const ManageCustomers: React.FC = () => {
             name: 'Customer Name',
             selector: row => row.customer_name,
             cell: (row) => {
-                const initials = row?.customer_name ? CustomerUtilityService.getCustomerInitials(row.customer_name) : 'NA';
-                const avatarColor = CustomerUtilityService.getCustomerAvatarColor(row.customer_id);
-                
                 return (
-                    <div className="flex items-center gap-3 py-2">
-                        <div 
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium"
-                            style={{ backgroundColor: avatarColor }}
-                        >
-                            {initials}
+                    <div className="py-2">
+                        <div className="font-medium text-gray-900">
+                            {row?.customer_name ?? '-'}
                         </div>
-                        <div>
-                            <div className="font-medium text-gray-900">
-                                {row?.customer_name ? CustomerUtilityService.formatCustomerName(row.customer_name) : '-'}
-                            </div>
-                            <div className="text-sm text-gray-500">{row?.contact_person ?? '-'}</div>
-                        </div>
+                        <div className="text-sm text-gray-500">{row?.contact_person ?? '-'}{row?.customer_code ? ` - ${row.customer_code}` : ''}</div>
                     </div>
                 );
             }
@@ -82,6 +98,26 @@ const ManageCustomers: React.FC = () => {
                     {row.customer_address}
                 </div>
             )
+        },
+        {
+            name: 'Last Modified',
+            selector: row => row.updated_at || '',
+            sortable: true,
+            cell: (row) => (
+                <div className="flex flex-col py-2">
+                    <EmployeeNameDisplay employeeId={row.updated_by} />
+                    <span className="text-xs text-gray-500">
+                        {row.updated_at ? new Date(row.updated_at).toLocaleString('id-ID', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }) : '-'}
+                    </span>
+                </div>
+            ),
+            width: '200px'
         },
         // createDateColumn('Created At', 'created_at', tableDateFormat),
         createActionsColumn([

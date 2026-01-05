@@ -27,6 +27,7 @@ export default function EditCustomer() {
     
     // State for form data
     const [formData, setFormData] = useState<CustomerFormData>({
+        customer_code: '',
         customer_name: '',
         customer_email: '',
         customer_phone: '',
@@ -54,6 +55,7 @@ export default function EditCustomer() {
             if (response.data.success && response.data.data) {
                 const customer = response.data.data;
                 setFormData({
+                    customer_code: customer.customer_code || '',
                     customer_name: customer.customer_name || '',
                     customer_email: customer.customer_email || '',
                     customer_phone: customer.customer_phone || '',
@@ -209,6 +211,23 @@ export default function EditCustomer() {
                                         <span className="text-sm text-red-500">{validationErrors.customer_name}</span>
                                     )}
                                 </div>
+                                
+                                {/* Customer Code */}
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="customer_code">Customer Code</Label>
+                                    <Input
+                                        id="customer_code"
+                                        type="text"
+                                        value={formData.customer_code}
+                                        onChange={(e) => handleInputChange('customer_code', e.target.value)}
+                                        placeholder="Enter customer code"
+                                        error={!!validationErrors.customer_code}
+                                    />
+                                    {validationErrors.customer_code && (
+                                        <span className="text-sm text-red-500">{validationErrors.customer_code}</span>
+                                    )}
+                                </div>
+
                                 <div className="md:col-span-2">
                                     <Label htmlFor="contact_person">Contact Person *</Label>
                                     <Input

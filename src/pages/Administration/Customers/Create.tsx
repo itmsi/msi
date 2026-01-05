@@ -11,6 +11,7 @@ import { useCreateCustomer } from "./hooks/useCustomerCreate";
 import { handleKeyPress } from "@/helpers/generalHelper";
 
 interface CreateCustomerFormData {
+    customer_code: string;
     customer_name: string;
     customer_email: string;
     customer_phone: string;
@@ -36,6 +37,7 @@ export default function CreateCustomer() {
 
     // State for form data
     const [formData, setFormData] = useState<CreateCustomerFormData>({
+        customer_code: '',
         customer_name: '',
         customer_email: '',
         customer_phone: '',
@@ -154,6 +156,20 @@ export default function CreateCustomer() {
                                     />
                                     {validationErrors.customer_name && (
                                         <span className="text-sm text-red-500">{validationErrors.customer_name}</span>
+                                    )}
+                                </div>
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="customer_code">Customer Code</Label>
+                                    <Input
+                                        id="customer_code"
+                                        type="text"
+                                        value={formData.customer_code}
+                                        onChange={(e) => handleInputChange('customer_code', e.target.value)}
+                                        placeholder="Enter customer code"
+                                        error={!!validationErrors.customer_code}
+                                    />
+                                    {validationErrors.customer_code && (
+                                        <span className="text-sm text-red-500">{validationErrors.customer_code}</span>
                                     )}
                                 </div>
                                 <div className="md:col-span-2">

@@ -1,5 +1,6 @@
 export interface Customer {
     customer_id: string;
+    customer_code?: string;
     customer_name: string;
     customer_email: string;
     customer_phone: string;
@@ -45,6 +46,7 @@ export interface CustomerRequest {
 
 // Customer form data for create/update
 export interface CustomerFormData {
+    customer_code?: string;
     customer_name: string;
     customer_email: string;
     customer_phone: string;
@@ -59,6 +61,7 @@ export interface CustomerFormData {
 
 // Customer validation errors
 export interface CustomerValidationErrors {
+    customer_code?: string;
     customer_name?: string;
     customer_email?: string;
     customer_phone?: string;
