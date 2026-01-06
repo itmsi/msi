@@ -1,7 +1,7 @@
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, QuoteDefaults } from '../types/roeCalculator';
-import { allowOnlyNumeric, formatNumberInput, handleKeyPress, twodigitcomma } from '@/helpers/generalHelper';
+import { formatNumberInput, handleKeyPress, twodigitcomma } from '@/helpers/generalHelper';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import LoadingSpinner from '@/components/common/Loading';
 import { useNavigate } from 'react-router';
@@ -24,9 +24,6 @@ export default function Step3Operational({
     loading,
     calculatorId
 }: Step3Props) {
-    console.log({
-        formData
-    });
     
     const navigate = useNavigate();
     
@@ -63,15 +60,6 @@ export default function Step3Operational({
                 {/* Ritase per Shift */}
                 <div>
                     <Label htmlFor="ritase_per_shift">Ritase per Shift</Label>
-                    {/* <Input
-                        name='ritase_per_shift'
-                        id="ritase_per_shift"
-                        value={formData.ritase_per_shift || formData?.operation_data?.ritase_per_shift || ''}
-                        onChange={(e) => {
-                            const value = twodigitcomma(e.target.value.replace(/[^\d.]/g, ''));
-                            handleInputChange('ritase_per_shift', value)
-                        }}
-                    /> */}
                     <Input
                         name='ritase_per_shift'
                         id="ritase_per_shift"
@@ -82,9 +70,18 @@ export default function Step3Operational({
                         }
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const value = rawValue === '' ? null : twodigitcomma(rawValue.replace(/[^\d.]/g, ''));
-                            handleInputChange('ritase_per_shift', value);
+                            const cleanValue = rawValue.replace(/[^\d.]/g, '');
+                            const numericValue = parseFloat(cleanValue) || 0;
+                            
+                            if (rawValue === '' || numericValue <= 0) {
+                                handleInputChange('ritase_per_shift', null);
+                            } else {
+                                const formattedValue = twodigitcomma(cleanValue);
+                                handleInputChange('ritase_per_shift', formattedValue);
+                            }
                         }}
+                        maxLength={15}
+                        error={!!validationErrors.ritase_per_shift}
                     />
                     {validationErrors.ritase_per_shift && (
                         <span className="text-sm text-red-500">{validationErrors.ritase_per_shift}</span>
@@ -94,28 +91,22 @@ export default function Step3Operational({
                 {/* Shift per Hari */}
                 <div>
                     <Label htmlFor="shift_per_hari">Shift per Hari</Label>
-                    {/* <Input
-                        id="shift_per_hari"
-                        onKeyPress={handleKeyPress}
-                        value={formData.shift_per_hari || formData?.operation_data?.shift_per_hari || ''}
-                        onChange={(e) => {
-                            handleInputChange('shift_per_hari', e.target.value)
-                        }}
-                        error={!!validationErrors.shift_per_hari}
-                    /> */}
                     <Input
-                        name='shift_per_hari'
                         id="shift_per_hari"
-                        value={
-                            formData.shift_per_hari === null 
-                                ? '' 
-                                : (formData.shift_per_hari || formData?.operation_data?.shift_per_hari || '')
-                        }
+                        value={formData.shift_per_hari === null ? '' : formData.shift_per_hari || formData?.operation_data?.shift_per_hari || '0'}
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const value = rawValue === '' ? null : twodigitcomma(rawValue.replace(/[^\d.]/g, ''));
-                            handleInputChange('shift_per_hari', value);
+                            const cleanValue = rawValue === '' ? "0" : rawValue.replace(/[^\d.]/g, '');
+                            const numericValue = parseFloat(cleanValue) || 0;
+                            
+                            if (rawValue === '' || numericValue <= 0) {
+                                handleInputChange('shift_per_hari', null);
+                            } else {
+                                handleInputChange('shift_per_hari', cleanValue);
+                            }
                         }}
+                        maxLength={15}
+                        error={!!validationErrors.shift_per_hari}
                     />
                     {validationErrors.shift_per_hari && (
                         <span className="text-sm text-red-500">{validationErrors.shift_per_hari}</span>
@@ -125,15 +116,7 @@ export default function Step3Operational({
                 {/* Hari Kerja per Bulan */}
                 <div>
                     <Label htmlFor="hari_kerja_per_bulan">Hari Kerja per Bulan</Label>
-                    {/* <Input
-                        id="hari_kerja_per_bulan"
-                        onKeyPress={handleKeyPress}
-                        value={formData.hari_kerja_per_bulan || formData?.operation_data?.hari_kerja_per_bulan || ''}
-                        onChange={(e) => handleInputChange('hari_kerja_per_bulan', parseInt(e.target.value) || 0)}
-                        error={!!validationErrors.hari_kerja_per_bulan}
-                    /> */}
                     <Input
-                        name='hari_kerja_per_bulan'
                         id="hari_kerja_per_bulan"
                         value={
                             formData.hari_kerja_per_bulan === null 
@@ -142,10 +125,20 @@ export default function Step3Operational({
                         }
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const value = rawValue === '' ? null : twodigitcomma(rawValue.replace(/[^\d.]/g, ''));
-                            handleInputChange('hari_kerja_per_bulan', value);
+                            const cleanValue = rawValue.replace(/[^\d.]/g, '');
+                            const numericValue = parseFloat(cleanValue) || 0;
+                            
+                            if (rawValue === '' || numericValue <= 0) {
+                                handleInputChange('hari_kerja_per_bulan', null);
+                            } else {
+                                const formattedValue = twodigitcomma(cleanValue);
+                                handleInputChange('hari_kerja_per_bulan', formattedValue);
+                            }
                         }}
+                        maxLength={15}
+                        error={!!validationErrors.hari_kerja_per_bulan}
                     />
+                    
                     {validationErrors.hari_kerja_per_bulan && (
                         <span className="text-sm text-red-500">{validationErrors.hari_kerja_per_bulan}</span>
                     )}
@@ -157,13 +150,25 @@ export default function Step3Operational({
                     <div className="space-y-2">
                         <Input
                             id="utilization_percent"
-                            value={formData.utilization_percent}
+                            value={formData.utilization_percent === null ? '0' : formData.utilization_percent || '0'}
                             onChange={(e) => {
                                 const rawValue = e.target.value;
-                                const value = rawValue === '' ? null : twodigitcomma(rawValue.replace(/[^\d.]/g, ''));
-                                handleInputChange('utilization_percent', value)
+                                const cleanValue = rawValue.replace(/[^\d.]/g, '');
+                                const numericValue = parseFloat(cleanValue) || 0;
+                                
+                                if (rawValue === '' || numericValue <= 0) {
+                                    handleInputChange('utilization_percent', null);
+                                } else {
+                                    handleInputChange('utilization_percent', cleanValue);
+                                }
                             }}
+                            maxLength={5}
+                            error={!!validationErrors.utilization_percent}
                         />
+                    
+                        {validationErrors.utilization_percent && (
+                            <span className="text-sm text-red-500">{validationErrors.utilization_percent}</span>
+                        )}
                     </div>
                 </div>
             </div>
@@ -226,11 +231,30 @@ export default function Step3Operational({
                         <Label htmlFor="fuel_consumption">Konsumsi BBM {formData?.fuel_consumption_type || 'L/km'}</Label>
                         <Input
                             id="fuel_consumption"
-                            onKeyPress={allowOnlyNumeric}
-                            value={formData?.fuel_consumption || ''}
-                            onChange={(e) => handleInputChange('fuel_consumption', e.target.value)}
                             placeholder=""
+                            value={
+                                formData.fuel_consumption === null 
+                                    ? '' 
+                                    : (formData.fuel_consumption || formData?.operation_data?.fuel_consumption || '')
+                            }
+                            onChange={(e) => {
+                                const rawValue = e.target.value;
+                                const cleanValue = rawValue.replace(/[^\d.]/g, '');
+                                const numericValue = parseFloat(cleanValue) || 0;
+                                
+                                if (rawValue === '' || numericValue <= 0) {
+                                    handleInputChange('fuel_consumption', null);
+                                } else {
+                                    const formattedValue = twodigitcomma(cleanValue);
+                                    handleInputChange('fuel_consumption', formattedValue);
+                                }
+                            }}
+                            maxLength={7}
+                            error={!!validationErrors.fuel_consumption}
                         />
+                        {validationErrors.fuel_consumption && (
+                            <span className="text-sm text-red-500">{validationErrors.fuel_consumption}</span>
+                        )}
                     </div>
 
                     <div>
