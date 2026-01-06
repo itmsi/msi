@@ -61,6 +61,8 @@ export interface ROECalculatorValidationErrors {
     harga_per_unit?: string;
     jumlah_unit?: string;
     interest_rate?: string;
+    tenor_pembiayaan?: string;
+    periode_depresiasi?: string;
     harga_per_ton?: string;
     tonnage_per_trip?: string;
     trip_per_bulan?: string;
@@ -72,8 +74,10 @@ export interface ROECalculatorValidationErrors {
     overhead_monthly?: string;
     ritase_per_shift?: string;
     shift_per_hari?: string;
+    utilization_percent?: string;
     hari_kerja_per_bulan?: string;
     fuel_consumption_type?: string;
+    fuel_consumption?: string;
     tyre_expense_monthly?: string;
     depreciation_monthly?: string;
     salary_operator_monthly?: string;

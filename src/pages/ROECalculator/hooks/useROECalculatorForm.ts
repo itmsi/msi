@@ -102,8 +102,27 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         }
     }, [validationErrors]);
 
+    // const getEffectiveValue = useCallback((directField: any, operationDataField: any) => {
+    //     return directField || operationDataField || '';
+    // }, []);
+
     const getEffectiveValue = useCallback((directField: any, operationDataField: any) => {
-        return directField || operationDataField || '';
+        // Validate directField
+        const directNumeric = parseFloat(String(directField || ''));
+        const isDirectValid = directField && directField !== '' && !isNaN(directNumeric) && directNumeric > 0;
+        
+        // Validate operationDataField
+        const operationNumeric = parseFloat(String(operationDataField || ''));
+        const isOperationValid = operationDataField && operationDataField !== '' && !isNaN(operationNumeric) && operationNumeric > 0;
+        
+        // Return the first valid value, or null if both are invalid
+        if (isDirectValid) {
+            return directField;
+        } else if (isOperationValid) {
+            return operationDataField;
+        }
+        
+        return null;
     }, []);
 
     const validateStep = useCallback((step: number): boolean => {
@@ -123,6 +142,8 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                 if (!formData.harga_per_unit) errors.harga_per_unit = 'Harga per unit is required';
                 if (!formData.jumlah_unit) errors.jumlah_unit = 'Jumlah unit is required';
                 if (!formData.interest_rate) errors.interest_rate = 'Interest rate is required';
+                if (!formData.tenor_pembiayaan) errors.tenor_pembiayaan = 'Tenor pembiayaan is required';
+                if (!formData.periode_depresiasi) errors.periode_depresiasi = 'Periode depresiasi is required';
                 break;
                 
             case 3:
@@ -130,9 +151,30 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                 const effectiveShift = getEffectiveValue(formData.shift_per_hari, formData?.operation_data?.shift_per_hari);
                 const effectiveHari = getEffectiveValue(formData.hari_kerja_per_bulan, formData?.operation_data?.hari_kerja_per_bulan);
                 
-                if (!effectiveRitase) errors.ritase_per_shift = 'Ritase per shift is required';
-                if (!effectiveShift) errors.shift_per_hari = 'Shift per hari is required';
-                if (!effectiveHari) errors.hari_kerja_per_bulan = 'Hari kerja per bulan is required';
+                // Validate ritase per shift
+                if (!effectiveRitase || effectiveRitase === '' || parseFloat(String(effectiveRitase)) <= 0) {
+                    errors.ritase_per_shift = 'Ritase per shift is required and must be greater than 0';
+                }
+                
+                // Validate shift per hari
+                if (!effectiveShift || effectiveShift === '' || parseFloat(String(effectiveShift)) <= 0) {
+                    errors.shift_per_hari = 'Shift per hari is required and must be greater than 0';
+                }
+                
+                // Validate hari kerja per bulan
+                if (!effectiveHari || effectiveHari === '' || parseFloat(String(effectiveHari)) <= 0) {
+                    errors.hari_kerja_per_bulan = 'Hari kerja per bulan is required and must be greater than 0';
+                }
+                
+                // Validate utilization percent
+                if (!formData.utilization_percent || parseFloat(String(formData.utilization_percent)) <= 0) {
+                    errors.utilization_percent = 'Physical Availability is required and must be greater than 0';
+                }
+
+                // Validate fuel consumption
+                if (!formData.fuel_consumption || parseFloat(String(formData.fuel_consumption)) <= 0) {
+                    errors.fuel_consumption = 'Fuel consumption is required and must be greater than 0';
+                }
                 break;
                 
             case 4:
@@ -190,7 +232,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
 
         setLoading(true);
         try {
-            let response;
+            let response: any;
         
             if (!calculatorId) {
                 response = await ROECalculatorService.createCalculator(dataToSave);
@@ -206,7 +248,16 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                 response = await ROECalculatorService.updateCalculatorStep(calculatorId, step, dataToSave);
                 
                 if (response.success) {
-                    if ((step === 3 || step === 4) && dataToSave !== formData) {
+                    if (step === 4 && response.data?.data) {
+                        setFormData(prev => {
+                            return {
+                                ...prev,
+                                ...response.data.data,
+                                // Force update charts_data from response
+                                charts_data: response.data.data.charts_data
+                            };
+                        });
+                    } else if ((step === 3) && dataToSave !== formData) {
                         setFormData(dataToSave);
                     }
                     

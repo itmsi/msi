@@ -116,14 +116,14 @@ export default function Step2UnitPurchase({
                 </div>
 
                 {/* Total Asset Display */}
-                {(formData.financial_structure?.asset || (calculationResults?.financial_structure?.asset != null && calculationResults.financial_structure.asset !== 0)) && (
+                {/* {(formData.financial_structure?.asset || (calculationResults?.financial_structure?.asset != null && calculationResults.financial_structure.asset !== 0)) && (
                     <div className="md:col-span-6 p-4 bg-blue-50 rounded-lg">
                         <Label>Total Asset</Label>
                         <p className="text-xl font-bold text-blue-900">
                             {formatCurrency(formData.financial_structure?.asset ?? calculationResults?.financial_structure?.asset ?? 0)}
                         </p>
                     </div>
-                )}
+                )} */}
 
 
                 <div className="md:col-span-6 grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -150,10 +150,14 @@ export default function Step2UnitPurchase({
                             maxLength={3}
                             onKeyPress={handleKeyPress}
                             onChange={(e) => handleInputChange('tenor_pembiayaan', e.target.value)}
+                            error={!!validationErrors.tenor_pembiayaan}
                         />
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 mt-1 inline-flex">
                             {Math.round((parseFloat(String(formData.tenor_pembiayaan || '0')) / 12) * 10) / 10} tahun
                         </p>
+                        {validationErrors.tenor_pembiayaan && (
+                            <span className="text-sm text-red-500 ms-1">{validationErrors.tenor_pembiayaan}</span>
+                        )}
                     </div>
 
                     {/* Interest Rate */}
@@ -193,7 +197,11 @@ export default function Step2UnitPurchase({
                                 const value = e.target.value.replace(/[^\d]/g, '');
                                 handleInputChange('periode_depresiasi', value);
                             }}
+                            error={!!validationErrors.periode_depresiasi}
                         />
+                        {validationErrors.periode_depresiasi && (
+                            <span className="text-sm text-red-500">{validationErrors.periode_depresiasi}</span>
+                        )}
                     </div>
                 </div>
             </div>

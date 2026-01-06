@@ -24,11 +24,13 @@ export default function Step4MonthlyCosts({
     loading,
     calculatorId,
     saveStep
-}: Step4Props) {    
+}: Step4Props) {
     
     const navigate = useNavigate();
     
     const [calculating, setCalculating] = useState(false);
+
+    
     useEffect(() => {
         if (calculatorId && formData.step && formData.step < 4) {
             navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`, { replace: true });
@@ -48,11 +50,14 @@ export default function Step4MonthlyCosts({
     const handleCalculate = async () => {
         setCalculating(true);
         try {
-            await saveStep(4, false);
+            const success = await saveStep(4, false);
+            if (success) {
+            }
         } finally {
             setCalculating(false);
         }
     };
+    
     return (
         <div className="space-y-6">
             <div>
@@ -170,6 +175,17 @@ export default function Step4MonthlyCosts({
                         id="interest_monthly"
                         onKeyPress={handleKeyPress}
                         value={formData.interest_monthly === null ? '' : formatNumberInputFadlan(formData.interest_monthly || formData?.cost_data?.interest_monthly || '')}
+                        // onChange={(e) => {
+                        //     const rawValue = e.target.value;
+                        //     if (rawValue === '') {
+                        //         handleInputChange('interest_monthly', null);
+                        //         return;
+                        //     }
+                        //     const cleanValue = rawValue
+                        //         .replace(/\./g, '')
+                        //         .replace(',', '.');
+                        //     handleInputChange('interest_monthly', rawValue);
+                        // }}
                         onChange={(e) => {
                             const rawValue = e.target.value;
                             if (rawValue === '') {
