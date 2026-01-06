@@ -229,6 +229,7 @@ export default function Step3Operational({
                     </div>
                     <div>
                         <Label htmlFor="fuel_consumption">Konsumsi BBM {formData?.fuel_consumption_type || 'L/km'}</Label>
+                        
                         <Input
                             id="fuel_consumption"
                             placeholder=""

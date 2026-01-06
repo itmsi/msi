@@ -167,9 +167,6 @@ export default function Step2UnitPurchase({
                             id="interest_rate"
                             value={formData.interest_rate === null ? '' : formData.interest_rate || ''}
                             maxLength={5}
-                            // onChange={(e) => {
-                            //     handleInputChange('interest_rate', e.target.value);
-                            // }}
                             onChange={(e) => {
                                 const rawValue = e.target.value;
                                 const cleanValue = rawValue.replace(/[^\d.]/g, '');
@@ -196,7 +193,6 @@ export default function Step2UnitPurchase({
                             id="periode_depresiasi"
                             onKeyPress={handleKeyPress}
                             value={formatNumberInputFadlan(formData.periode_depresiasi)}
-                            // onChange={(e) => handleInputChange('periode_depresiasi', e.target.value)}
                             onChange={(e) => {
                                 const value = e.target.value.replace(/[^\d]/g, '');
                                 handleInputChange('periode_depresiasi', value);

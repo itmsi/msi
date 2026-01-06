@@ -56,6 +56,21 @@ export const useROECalculatorForm = (calculatorId?: string) => {
 
     const [validationErrors, setValidationErrors] = useState<ROECalculatorValidationErrors>({});
 
+    // Helper function to clean trailing zeros from numeric values
+    const cleanNumericValue = useCallback((value: any): string | number => {
+        if (value === null || value === undefined || value === '') {
+            return '';
+        }
+        
+        const numValue = parseFloat(String(value));
+        if (isNaN(numValue)) {
+            return String(value);
+        }
+        
+        // Remove trailing zeros and unnecessary decimal point
+        return numValue % 1 === 0 ? numValue.toString() : numValue.toString().replace(/\.?0+$/, '');
+    }, []);
+
     const loadCalculatorData = useCallback(async () => {
         if (!calculatorId) return;
         
@@ -172,7 +187,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                 }
 
                 // Validate fuel consumption
-                if (!formData.fuel_consumption || parseFloat(String(formData.fuel_consumption)) <= 0) {
+                if (!formData.fuel_consumption || formData.fuel_consumption <= 0) {
                     errors.fuel_consumption = 'Fuel consumption is required and must be greater than 0';
                 }
                 break;
@@ -246,11 +261,25 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                 if (response.success) {
                     if (step === 4 && response.data?.data) {
                         setFormData(prev => {
+                            const responseData = response.data.data;
+                            
+                            // Clean numeric values from API response
+                            const cleanedData = {
+                                ...responseData,
+                                fuel_consumption: cleanNumericValue(responseData.fuel_consumption),
+                                shift_per_hari: cleanNumericValue(responseData.shift_per_hari),
+                                ritase_per_shift: cleanNumericValue(responseData.ritase_per_shift),
+                                hari_kerja_per_bulan: cleanNumericValue(responseData.hari_kerja_per_bulan),
+                                utilization_percent: cleanNumericValue(responseData.utilization_percent),
+                                downtime_percent: cleanNumericValue(responseData.downtime_percent),
+                                fuel_price: cleanNumericValue(responseData.fuel_price)
+                            };
+                            
                             return {
                                 ...prev,
-                                ...response.data.data,
+                                ...cleanedData,
                                 // Force update charts_data from response
-                                charts_data: response.data.data.charts_data
+                                charts_data: responseData.charts_data
                             };
                         });
                     } else if ((step === 3) && dataToSave !== formData) {
