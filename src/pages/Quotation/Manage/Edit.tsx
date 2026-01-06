@@ -27,7 +27,7 @@ import { ItemProduct } from '../Product/types/product';
 import { useEditQuotation } from './hooks/useEditQuotation';
 import { useAsyncSelect, SelectOption } from '../hooks/useAsyncSelect';
 import { useTermConditionSelect, TermConditionSelectOption } from '../hooks/useTermConditionSelect';
-import { handleKeyPress, formatNumberInput, handlePercentageInput } from '@/helpers/generalHelper';
+import { handleKeyPress, formatNumberInput, handlePercentageInput, allowOnlyNumeric, parseDecimalInput } from '@/helpers/generalHelper';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { ItemProductService } from '../Product/services/productService';
 import ProductDetailDrawer from '@/pages/Quotation/Manage/components/ProductDetailDrawer';
@@ -120,6 +120,9 @@ export default function EditQuotation() {
         manage_quotation_date: new Date().toISOString().split('T')[0],
         manage_quotation_valid_date: '',
         manage_quotation_grand_total: '',
+        manage_quotation_grand_total_before: '0',
+        manage_quotation_mutation_type: '',
+        manage_quotation_mutation_nominal: '0',
         manage_quotation_ppn: '11',
         manage_quotation_delivery_fee: '',
         manage_quotation_other: '',
@@ -189,6 +192,9 @@ export default function EditQuotation() {
                 manage_quotation_date: data.manage_quotation_date?.split('T')[0] || '',
                 manage_quotation_valid_date: data.manage_quotation_valid_date?.split('T')[0] || '',
                 manage_quotation_grand_total: data.manage_quotation_grand_total || '',
+                manage_quotation_grand_total_before: (data as any).manage_quotation_grand_total_before || '0',
+                manage_quotation_mutation_type: (data as any).manage_quotation_mutation_type || '',
+                manage_quotation_mutation_nominal: (data as any).manage_quotation_mutation_nominal || '0',
                 manage_quotation_ppn: data.manage_quotation_ppn || '',
                 manage_quotation_delivery_fee: data.manage_quotation_delivery_fee || '',
                 manage_quotation_other: data.manage_quotation_other || '',
@@ -449,7 +455,19 @@ export default function EditQuotation() {
         const ppnPercentage = parseFloat(currentFormData.manage_quotation_ppn || '11') || 11;
         
         const ppn = itemsTotal * (ppnPercentage / 100);
-        const grandTotal = itemsTotal + ppn + deliveryFee + otherFee;
+        let grandTotal = itemsTotal + ppn + deliveryFee + otherFee;
+        
+        // Apply mutation if type and nominal are set
+        const mutationType = currentFormData.manage_quotation_mutation_type;
+        const mutationNominal = parseDecimalInput(currentFormData.manage_quotation_mutation_nominal, 0);
+        
+        if (mutationType && mutationNominal > 0) {
+            if (mutationType === 'plus') {
+                grandTotal += mutationNominal;
+            } else if (mutationType === 'minus') {
+                grandTotal -= mutationNominal;
+            }
+        }
         
         const paymentPercentage = parseFloat(currentFormData.manage_quotation_payment_presentase || '0') || 0;
         const paymentNominal = grandTotal * (paymentPercentage / 100);
@@ -466,8 +484,28 @@ export default function EditQuotation() {
         setFormData(prev => {
             const newFormData = { ...prev, [field]: value };
             
+            // Reset mutation nominal to 0 when mutation type is set to "No Adjustment"
+            if (field === 'manage_quotation_mutation_type' && !value) {
+                newFormData.manage_quotation_mutation_nominal = '0';
+            }
+            
             if (field === 'manage_quotation_delivery_fee' || field === 'manage_quotation_other' || 
-                field === 'manage_quotation_payment_presentase' || field === 'manage_quotation_ppn') {
+                field === 'manage_quotation_payment_presentase' || field === 'manage_quotation_ppn' ||
+                field === 'manage_quotation_mutation_type' || field === 'manage_quotation_mutation_nominal') {
+                
+                // Calculate base grand total (without mutation)
+                const itemsTotal = newFormData.manage_quotation_items.reduce((sum, item) => 
+                    sum + (parseFloat(item.total) || 0), 0
+                );
+                const deliveryFee = parseFloat(newFormData.manage_quotation_delivery_fee || '0') || 0;
+                const otherFee = parseFloat(newFormData.manage_quotation_other || '0') || 0;
+                const ppnPercentage = parseFloat(newFormData.manage_quotation_ppn || '11') || 11;
+                const ppn = itemsTotal * (ppnPercentage / 100);
+                const baseGrandTotal = itemsTotal + ppn + deliveryFee + otherFee;
+                
+                // Store base grand total before applying mutation
+                newFormData.manage_quotation_grand_total_before = baseGrandTotal.toString();
+                
                 const calculations = calculateGrandTotal(newFormData);
                 return {
                     ...newFormData,
@@ -488,13 +526,49 @@ export default function EditQuotation() {
         ];
         
         if (validatableFields.includes(field as keyof QuotationValidationErrors)) {
-            clearFieldError(field as keyof QuotationValidationErrors);
+                clearFieldError(field as keyof QuotationValidationErrors);
         }
     };
 
     const handleNumericInputChange = (field: keyof QuotationFormData, inputValue: string) => {
         const numberic = inputValue.replace(/[^\d]/g, '');
         handleInputChange(field, numberic);
+    };
+
+    const handleDecimalInputChange = (field: keyof QuotationFormData, inputValue: string) => {
+        // Allow digits, comma, and dot
+        const cleaned = inputValue.replace(/[^\d,.]/g, '');
+        handleInputChange(field, cleaned);
+    };
+
+    // Format decimal for display - preserves decimal separator and trailing digits
+    const formatDecimalDisplayInput = (value: string | undefined | null): string => {
+        if (!value) return '';
+        
+        const str = value.toString();
+        
+        // Check if there's a decimal separator (comma or dot)
+        const hasComma = str.includes(',');
+        const hasDot = str.includes('.');
+        
+        if (!hasComma && !hasDot) {
+            // No decimal - just format as integer with thousand separators
+            const cleaned = str.replace(/[^\d]/g, '');
+            if (!cleaned) return '';
+            return new Intl.NumberFormat('id-ID').format(parseInt(cleaned));
+        }
+        
+        // Has decimal separator - preserve it
+        const separator = hasComma ? ',' : '.';
+        const parts = str.split(separator);
+        const integerPart = parts[0].replace(/[^\d]/g, '') || '0';
+        const decimalPart = parts[1] || '';
+        
+        // Format integer part with thousand separators
+        const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart));
+        
+        // Return with comma as decimal separator (Indonesian format)
+        return `${formattedInteger},${decimalPart}`;
     };
 
     const handlePercentageInputChange = (field: keyof QuotationFormData, inputValue: string) => {
@@ -1064,12 +1138,25 @@ export default function EditQuotation() {
             // Calculate final values
             const finalCalculations = calculateGrandTotal(formData);
             
+            // Validate grand total is not negative
+            const grandTotalValue = parseFloat(finalCalculations.grandTotal);
+            if (grandTotalValue < 0) {
+                toast.error('Grand total cannot be negative. Please reduce the adjustment amount.');
+                return;
+            }
+            
+            // Format numbers to max 2 decimals for backend validation
+            const formatForBackend = (value: string): string => {
+                const num = parseFloat(value);
+                return isNaN(num) ? '0' : num.toFixed(2);
+            };
+            
             const updatedFormData = {
                 ...formData,
                 status,
-                manage_quotation_grand_total: finalCalculations.grandTotal,
-                manage_quotation_payment_nominal: finalCalculations.paymentNominal,
-                manage_quotation_remaining_payment: finalCalculations.remainingPayment
+                manage_quotation_grand_total: formatForBackend(finalCalculations.grandTotal),
+                manage_quotation_payment_nominal: formatForBackend(finalCalculations.paymentNominal),
+                manage_quotation_remaining_payment: formatForBackend(finalCalculations.remainingPayment)
             };
             
             // Clean up manage_quotation_items - remove unnecessary fields for API
@@ -1091,7 +1178,15 @@ export default function EditQuotation() {
             // Prepare API payload
             const apiPayload: any = {
                 ...updatedFormData,
-                manage_quotation_items: cleanedItems
+                manage_quotation_items: cleanedItems,
+                // Ensure mutation fields are properly formatted for API (max 2 decimals)
+                manage_quotation_grand_total_before: updatedFormData.manage_quotation_grand_total_before 
+                    ? formatForBackend(updatedFormData.manage_quotation_grand_total_before)
+                    : null,
+                manage_quotation_mutation_type: updatedFormData.manage_quotation_mutation_type || null,
+                manage_quotation_mutation_nominal: updatedFormData.manage_quotation_mutation_nominal 
+                    ? parseDecimalInput(updatedFormData.manage_quotation_mutation_nominal, 0).toFixed(2)
+                    : null
             };
             
             // Clean up number formatting for API
@@ -1748,6 +1843,48 @@ export default function EditQuotation() {
                                             placeholder="0"
                                         />
                                     </div>
+
+                                    {/* Mutation Type & Nominal */}
+                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center border-t border-gray-300 pt-4 mt-4'>
+                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
+                                            <Label htmlFor="manage_quotation_mutation_type" className='text-end mb-0'>Adjustment Type</Label>
+                                            <select
+                                                id="manage_quotation_mutation_type"
+                                                value={formData.manage_quotation_mutation_type || ''}
+                                                onChange={(e) => handleInputChange('manage_quotation_mutation_type', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value="">No Adjustment</option>
+                                                <option value="plus">Plus (+)</option>
+                                                <option value="minus">Minus (-)</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <Input
+                                            id="manage_quotation_mutation_nominal"
+                                            type="text"
+                                            onKeyPress={allowOnlyNumeric}
+                                            value={formatDecimalDisplayInput(formData.manage_quotation_mutation_nominal)}
+                                            maxLength={20}
+                                            onChange={(e) => handleDecimalInputChange('manage_quotation_mutation_nominal', e.target.value)}
+                                            placeholder="0"
+                                            disabled={!formData.manage_quotation_mutation_type}
+                                        />
+                                    </div>  
+
+                                    {formData.manage_quotation_mutation_type && (
+                                        <>
+                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
+                                                <Label className='text-end mb-0 text-gray-600'>Grand Total (Before Adjustment)</Label>
+                                                <Input
+                                                    type="text"
+                                                    value={(parseFloat(formData.manage_quotation_grand_total_before || '0')).toLocaleString('id-ID')}
+                                                    readonly={true}
+                                                    className="bg-gray-50 cursor-not-allowed text-gray-600"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
 
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-300 pt-4 mt-4 items-center'>
                                         <Label className='font-bold text-lg mb-0 text-end'>Grand Total</Label>
