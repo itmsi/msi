@@ -12,6 +12,7 @@ export class ROECalculatorService {
             
             // Map API response to frontend format
             const apiData = (response.data as { data: ApiQuoteResponse }).data;
+            
             const mappedData: ROECalculatorData = {
                 roe_calculator_id: apiData.id,
 
@@ -229,7 +230,7 @@ export class ROECalculatorService {
                         // fuel_price: data.fuel_price,
                         fuel_price: parseFormatNumber(data.fuel_price?.toString() || '0'),
                     };
-                    const resStep3 = await apiPut(`${API_BASE_URL}/calculations/quotes/${id}/operational`, apiData);
+                    const resStep3 = await apiPut(`${API_BASE_URL}/calculations/quotes/${id}/operational`, apiData);                    
                     return {
                         success: true,
                         data: resStep3.data,
