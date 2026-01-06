@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { MdAdd, MdEdit, MdSearch, MdPeople, MdClear, MdDeleteOutline } from 'react-icons/md';
 import { useCustomerManagement } from './hooks/useCustomerManagement';
 import { CustomerUtilityService } from './services/customerUtilityService';
@@ -13,13 +13,9 @@ import Button from '@/components/ui/button/Button';
 import { createActionsColumn } from '@/components/ui/table';
 import { useNavigate } from 'react-router';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
-import { employeesService } from '@/services/administrationService';
 
 const ManageCustomers: React.FC = () => {
     const navigate = useNavigate();
-    
-    // Cache for employee names to avoid multiple API calls
-    const [employeeNames, setEmployeeNames] = useState<Record<string, string>>({});
     
     // Custom hook untuk semua state management dan handlers
     const {
@@ -42,46 +38,6 @@ const ManageCustomers: React.FC = () => {
         cancelDelete
     } = useCustomerManagement();
     
-    useEffect(() => {
-        if (loading) return;
-        
-        const fetchEmployeeNames = async () => {
-            const uniqueEmployeeIds = [...new Set(
-                customers
-                    .map(c => c.updated_by)
-                    .filter((id): id is string => id != null && id !== '')
-            )];
-            
-            const idsToFetch = uniqueEmployeeIds.filter(id => !employeeNames[id]);
-            
-            if (idsToFetch.length === 0) return;
-            
-            const names: Record<string, string> = { ...employeeNames };
-            
-            await Promise.all(
-                idsToFetch.map(async (id) => {
-                    try {
-                        const response = await employeesService.getEmployeeById(id);
-                        if (response.success && response.data) {
-                            names[id] = response.data.employee_name;
-                        }
-                    } catch (error) {
-                        console.error(`Error fetching employee ${id}`, error);
-                        names[id] = 'Unknown';
-                    }
-                })
-            );
-            
-            setEmployeeNames(names);
-        };
-        
-        if (customers.length > 0) {
-            fetchEmployeeNames();
-        }
-
-    }, [customers, loading]);
-
-
     // Definisi kolom untuk DataTable
     const columns: TableColumn<Customer>[] = [
         {
@@ -124,7 +80,7 @@ const ManageCustomers: React.FC = () => {
             cell: (row) => (
                 <div className="flex flex-col py-2">
                     <span className="font-medium text-gray-900">
-                        {row.updated_by ? (employeeNames[row.updated_by] || 'Loading...') : '-'}
+                        {row.updated_by_name || '-'}
                     </span>
                     <span className="text-xs text-gray-500">
                         {row.updated_at ? new Date(row.updated_at).toLocaleString('id-ID', {
