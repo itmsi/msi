@@ -165,18 +165,22 @@ export default function Step2UnitPurchase({
                         <Label htmlFor="interest_rate">Interest Rate Flat per Tahun (%)</Label>
                         <Input
                             id="interest_rate"
-                            onKeyPress={handleKeyPress}
-                            value={formatNumberInputFadlan(formData.interest_rate)}
+                            value={formData.interest_rate === null ? '' : formData.interest_rate || ''}
                             maxLength={5}
                             // onChange={(e) => {
                             //     handleInputChange('interest_rate', e.target.value);
                             // }}
                             onChange={(e) => {
-                                let value = e.target.value.replace(/[^\d]/g, '');
-                                if (value && parseInt(value) > 100) {
-                                    value = '100';
+                                const rawValue = e.target.value;
+                                const cleanValue = rawValue.replace(/[^\d.]/g, '');
+                                const numericValue = parseFloat(cleanValue) || 0;
+                                
+                                if (rawValue === '' || numericValue <= 0) {
+                                    handleInputChange('interest_rate', null);
+                                } else {
+                                    const formattedValue = twodigitcomma(cleanValue);
+                                    handleInputChange('interest_rate', formattedValue);
                                 }
-                                handleInputChange('interest_rate', value);
                             }}
                             error={!!validationErrors.interest_rate}
                         />
@@ -197,6 +201,7 @@ export default function Step2UnitPurchase({
                                 const value = e.target.value.replace(/[^\d]/g, '');
                                 handleInputChange('periode_depresiasi', value);
                             }}
+                            maxLength={7}
                             error={!!validationErrors.periode_depresiasi}
                         />
                         {validationErrors.periode_depresiasi && (

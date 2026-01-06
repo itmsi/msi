@@ -24,9 +24,6 @@ export default function Step3Operational({
     loading,
     calculatorId
 }: Step3Props) {
-    console.log({
-        formData
-    });
     
     const navigate = useNavigate();
     
@@ -68,8 +65,8 @@ export default function Step3Operational({
                         id="ritase_per_shift"
                         value={
                             formData.ritase_per_shift === null 
-                                ? '0' 
-                                : (formData.ritase_per_shift || formData?.operation_data?.ritase_per_shift || '0')
+                                ? '' 
+                                : (formData.ritase_per_shift || formData?.operation_data?.ritase_per_shift || '')
                         }
                         onChange={(e) => {
                             const rawValue = e.target.value;
@@ -83,6 +80,7 @@ export default function Step3Operational({
                                 handleInputChange('ritase_per_shift', formattedValue);
                             }
                         }}
+                        maxLength={15}
                         error={!!validationErrors.ritase_per_shift}
                     />
                     {validationErrors.ritase_per_shift && (
@@ -95,10 +93,10 @@ export default function Step3Operational({
                     <Label htmlFor="shift_per_hari">Shift per Hari</Label>
                     <Input
                         id="shift_per_hari"
-                        value={formData.shift_per_hari === null ? '0' : formData.shift_per_hari || formData?.operation_data?.shift_per_hari || '0'}
+                        value={formData.shift_per_hari === null ? '' : formData.shift_per_hari || formData?.operation_data?.shift_per_hari || '0'}
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const cleanValue = rawValue.replace(/[^\d.]/g, '');
+                            const cleanValue = rawValue === '' ? "0" : rawValue.replace(/[^\d.]/g, '');
                             const numericValue = parseFloat(cleanValue) || 0;
                             
                             if (rawValue === '' || numericValue <= 0) {
@@ -107,7 +105,7 @@ export default function Step3Operational({
                                 handleInputChange('shift_per_hari', cleanValue);
                             }
                         }}
-                        maxLength={7}
+                        maxLength={15}
                         error={!!validationErrors.shift_per_hari}
                     />
                     {validationErrors.shift_per_hari && (
@@ -120,20 +118,6 @@ export default function Step3Operational({
                     <Label htmlFor="hari_kerja_per_bulan">Hari Kerja per Bulan</Label>
                     <Input
                         id="hari_kerja_per_bulan"
-                        // onKeyPress={handleKeyPress}
-                        // value={formData.hari_kerja_per_bulan === null ? '0' : formatNumberInput(formData.hari_kerja_per_bulan || formData?.operation_data?.hari_kerja_per_bulan || '0')}
-                        // onChange={(e) => {
-                        //     const rawValue = e.target.value;
-                        //     const cleanValue = rawValue.replace(/[^\d.]/g, '');
-                        //     const numericValue = parseFloat(cleanValue) || 0;
-                            
-                        //     if (rawValue === '' || numericValue <= 0) {
-                        //         handleInputChange('hari_kerja_per_bulan', null);
-                        //     } else {
-                        //         handleInputChange('hari_kerja_per_bulan', cleanValue);
-                        //     }
-                        // }}
-
                         value={
                             formData.hari_kerja_per_bulan === null 
                                 ? '' 
@@ -151,7 +135,7 @@ export default function Step3Operational({
                                 handleInputChange('hari_kerja_per_bulan', formattedValue);
                             }
                         }}
-                        maxLength={7}
+                        maxLength={15}
                         error={!!validationErrors.hari_kerja_per_bulan}
                     />
                     

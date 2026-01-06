@@ -237,12 +237,12 @@ export class ROECalculatorService {
                     };
                 case 4:
                     apiData = {
-                        tyre_expense_monthly: parseFormatNumber(data.tyre_expense_monthly?.toString() || '0'),
-                        sparepart_expense_monthly: parseFormatNumber(data.sparepart_expense_monthly?.toString() || '0'),
-                        salary_operator_monthly: parseFormatNumber(data.salary_operator_monthly?.toString() || '0'),
-                        depreciation_monthly: parseFormatNumber(data.depreciation_monthly?.toString() || '0'),
-                        interest_monthly: parseFormatNumber(data.interest_monthly?.toString() || '0' ),
-                        overhead_monthly: parseFormatNumber(data.overhead_monthly?.toString() || '0')
+                        tyre_expense_monthly: data.tyre_expense_monthly?.toString() || '0',
+                        sparepart_expense_monthly: data.sparepart_expense_monthly?.toString() || '0',
+                        salary_operator_monthly: data.salary_operator_monthly?.toString() || '0',
+                        depreciation_monthly: data.depreciation_monthly?.toString() || '0',
+                        interest_monthly: data.interest_monthly?.toString() || '0',
+                        overhead_monthly: data.overhead_monthly?.toString() || '0'
                     };
                     const resStep4 = await apiPut(`${API_BASE_URL}/calculations/quotes/${id}/cost`, apiData);
                     return {

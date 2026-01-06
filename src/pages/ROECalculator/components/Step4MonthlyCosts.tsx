@@ -175,17 +175,6 @@ export default function Step4MonthlyCosts({
                         id="interest_monthly"
                         onKeyPress={handleKeyPress}
                         value={formData.interest_monthly === null ? '' : formatNumberInputFadlan(formData.interest_monthly || formData?.cost_data?.interest_monthly || '')}
-                        // onChange={(e) => {
-                        //     const rawValue = e.target.value;
-                        //     if (rawValue === '') {
-                        //         handleInputChange('interest_monthly', null);
-                        //         return;
-                        //     }
-                        //     const cleanValue = rawValue
-                        //         .replace(/\./g, '')
-                        //         .replace(',', '.');
-                        //     handleInputChange('interest_monthly', rawValue);
-                        // }}
                         onChange={(e) => {
                             const rawValue = e.target.value;
                             if (rawValue === '') {

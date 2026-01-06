@@ -186,10 +186,6 @@ export const useROECalculatorForm = (calculatorId?: string) => {
     }, [formData, getEffectiveValue]);
 
     const saveStep = useCallback(async (step: number, goNext: boolean = false): Promise<boolean> => {
-        console.log({
-            step,
-            goNext
-        });
         
         if (!validateStep(step)) {
             toast.error('Please fix validation errors');
@@ -238,10 +234,10 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                 response = await ROECalculatorService.createCalculator(dataToSave);
                 
                 if (response.success && response.data) {
-                const newId = response.data.roe_calculator_id;
-                const nextStep = goNext && step < 4 ? step + 1 : step;
-                navigate(`/roe-roa-calculator/manage/edit/${newId}?step=${nextStep}`, { replace: true });
-                toast.success('Calculator created successfully');
+                    const newId = response.data.roe_calculator_id;
+                    const nextStep = goNext && step < 4 ? step + 1 : step;
+                    navigate(`/roe-roa-calculator/manage/edit/${newId}?step=${nextStep}`, { replace: true });
+                    // toast.success('Calculator created successfully');
                     return true;
                 }
             } else {
@@ -298,7 +294,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
             
             if (response.success && response.data) {
                 setCalculationResults(response.data);
-                toast.success('Unit purchase calculated successfully');
+                // toast.success('Unit purchase calculated successfully');
                 return true;
             } else {
                 toast.error(response.message || 'Failed to calculate unit purchase');
