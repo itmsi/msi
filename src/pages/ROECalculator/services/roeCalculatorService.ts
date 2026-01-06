@@ -91,10 +91,11 @@ export class ROECalculatorService {
                     tyre_expense_monthly: apiData?.cost?.tyre_expense_monthly || '',
                     sparepart_expense_monthly: apiData?.cost?.sparepart_expense_monthly || '',
                     salary_operator_monthly: apiData?.cost?.salary_operator_monthly || '',
-                    depreciation_monthly: apiData?.cost?.depreciation_monthly || '',
+                    depreciation_monthly: apiData?.unit_purchases?.depreciation_per_month || '',
                     interest_monthly: apiData?.cost?.interest_monthly || '',
                     overhead_monthly: apiData?.cost?.overhead_monthly || '',
-                }
+                },
+                charts_data: apiData?.charts_data || { revenue_expense_profit: [], breakdown_biaya: [] }
 
             };
 
@@ -193,7 +194,12 @@ export class ROECalculatorService {
                         haul_distance: data.jarak_haul,
                         status: data.status
                     };
-                    break
+                    const resStep1 = await apiPut(`${API_BASE_URL}/calculations/quotes/${id}`, apiData);
+                    return {
+                        success: true,
+                        data: resStep1.data,
+                        message: 'Step updated successfully'
+                    };
                 case 2:
                     // Step 2 only saves data, calculation is handled separately
                     apiData = {
@@ -231,12 +237,12 @@ export class ROECalculatorService {
                     };
                 case 4:
                     apiData = {
-                        tyre_expense_monthly: data.tyre_expense_monthly,
-                        sparepart_expense_monthly: data.sparepart_expense_monthly,
-                        salary_operator_monthly: data.salary_operator_monthly,
-                        depreciation_monthly: data.depreciation_monthly,
-                        interest_monthly: data.interest_monthly,
-                        overhead_monthly: data.overhead_monthly
+                        tyre_expense_monthly: parseFormatNumber(data.tyre_expense_monthly?.toString() || '0'),
+                        sparepart_expense_monthly: parseFormatNumber(data.sparepart_expense_monthly?.toString() || '0'),
+                        salary_operator_monthly: parseFormatNumber(data.salary_operator_monthly?.toString() || '0'),
+                        depreciation_monthly: parseFormatNumber(data.depreciation_monthly?.toString() || '0'),
+                        interest_monthly: parseFormatNumber(data.interest_monthly?.toString() || '0' ),
+                        overhead_monthly: parseFormatNumber(data.overhead_monthly?.toString() || '0')
                     };
                     const resStep4 = await apiPut(`${API_BASE_URL}/calculations/quotes/${id}/cost`, apiData);
                     return {

@@ -144,6 +144,11 @@ export const useROECalculatorForm = (calculatorId?: string) => {
     }, [formData, getEffectiveValue]);
 
     const saveStep = useCallback(async (step: number, goNext: boolean = false): Promise<boolean> => {
+        console.log({
+            step,
+            goNext
+        });
+        
         if (!validateStep(step)) {
             toast.error('Please fix validation errors');
             return false;
@@ -214,7 +219,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                         const idToUse = step === 2 && response.data?.data?.quote_id ? response.data.data.quote_id : calculatorId;
                         navigate(`/roe-roa-calculator/manage/edit/${idToUse}?step=${nextStep}`, { replace: true });
                     }
-                    if (step === 4) {
+                    if (goNext && step === 4) {
                     navigate(`/roe-roa-calculator/manage`);
                     }
                     return true;

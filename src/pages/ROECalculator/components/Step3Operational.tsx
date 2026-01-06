@@ -1,7 +1,7 @@
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, QuoteDefaults } from '../types/roeCalculator';
-import { allowOnlyNumeric, formatNumberInputFadlan, handleKeyPress, twodigitcomma } from '@/helpers/generalHelper';
+import { allowOnlyNumeric, formatNumberInput, handleKeyPress, twodigitcomma } from '@/helpers/generalHelper';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import LoadingSpinner from '@/components/common/Loading';
 import { useNavigate } from 'react-router';
@@ -24,6 +24,9 @@ export default function Step3Operational({
     loading,
     calculatorId
 }: Step3Props) {
+    console.log({
+        formData
+    });
     
     const navigate = useNavigate();
     
@@ -152,20 +155,15 @@ export default function Step3Operational({
                 <div>
                     <Label htmlFor="utilization_percent">Physical Availability (%)</Label>
                     <div className="space-y-2">
-                        <input
+                        <Input
                             id="utilization_percent"
-                            type="range"
-                            min={0}
-                            max={100}
                             value={formData.utilization_percent}
-                            onChange={(e) => handleInputChange('utilization_percent', parseInt(e.target.value))}
-                            className="w-full h-2 bg-gray-200 rounded-lg cursor-pointer"
+                            onChange={(e) => {
+                                const rawValue = e.target.value;
+                                const value = rawValue === '' ? null : twodigitcomma(rawValue.replace(/[^\d.]/g, ''));
+                                handleInputChange('utilization_percent', value)
+                            }}
                         />
-                        <div className="flex justify-between text-sm text-gray-600">
-                            <span>0%</span>
-                            <span className="font-medium">{formData.utilization_percent}%</span>
-                            <span>100%</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -231,7 +229,7 @@ export default function Step3Operational({
                             onKeyPress={allowOnlyNumeric}
                             value={formData?.fuel_consumption || ''}
                             onChange={(e) => handleInputChange('fuel_consumption', e.target.value)}
-                            placeholder="0.5"
+                            placeholder=""
                         />
                     </div>
 
@@ -240,9 +238,9 @@ export default function Step3Operational({
                         <Input
                             id="fuel_price"
                             onKeyPress={handleKeyPress}
-                            value={formatNumberInputFadlan(formData?.fuel_price)}
+                            value={formatNumberInput(formData?.fuel_price)}
                             onChange={(e) => handleInputChange('fuel_price', e.target.value)}
-                            placeholder="6800"
+                            placeholder=""
                         />
                     </div>
 

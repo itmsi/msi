@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { MdKeyboardArrowLeft, MdAdd } from 'react-icons/md';
+import { MdKeyboardArrowLeft, MdAdd, MdEdit } from 'react-icons/md';
 import ReactECharts from 'echarts-for-react';
 
 import PageMeta from '@/components/common/PageMeta';
@@ -8,6 +8,7 @@ import Button from '@/components/ui/button/Button';
 import Loading from '@/components/common/Loading';
 import { RoecalculatorService } from './services/roecalculatorService';
 import { ManageROEBreakdownData, RevenueExpenseProfit, BreakdownBiayaChart } from '../types/roeCalculator';
+import { formatCurrency } from '@/helpers/generalHelper';
 
 
 export default function BreakdownROECalculator() {
@@ -43,16 +44,6 @@ export default function BreakdownROECalculator() {
 
         fetchBreakdownData();
     }, [calculatorId]);
-
-    // Helper function to format currency
-    const formatCurrency = (value: number): string => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(value);
-    };
 
     // Revenue Expense Profit Chart Component
     const RevenueExpenseProfitChart = ({ data }: { data: RevenueExpenseProfit[] }) => {
@@ -236,6 +227,15 @@ export default function BreakdownROECalculator() {
                                 <h1 className="font-primary-bold font-normal text-xl">Breakdown ROE Calculator</h1>
                             </div>
                         </div>
+                        
+                        <div className='flex gap-3'>
+                            <Button
+                                className="group rounded-lg w-full flex items-center justify-center gap-2 font-secondary py-2"
+                                onClick={() => navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=4}`)}
+                            >
+                                <MdEdit size={20} className="group-hover:text-white" /> Edit
+                            </Button>
+                        </div>
                     </div>
 
                     {breakdownData && (
@@ -407,7 +407,7 @@ export default function BreakdownROECalculator() {
                                 <div className="mt-6 p-4 bg-red-50 rounded-lg border-2 border-red-200">
                                     <div className="flex items-center justify-between">
                                         <span className="text-lg font-bold text-red-800">Total Expense</span>
-                                        <span className="text-2xl font-bold text-red-600">{formatCurrency(breakdownData.total_expense)}</span>
+                                        <span className="text-2xl font-bold text-red-600">{formatCurrency(breakdownData?.charts_data?.revenue_expense_profit?.[0]?.expense || '0')}</span>
                                     </div>
                                 </div>
                             </div>
