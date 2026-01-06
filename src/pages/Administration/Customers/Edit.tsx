@@ -260,7 +260,7 @@ export default function EditCustomer() {
                     </div>
 
                     {/* Customer Information Form */}
-                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
+                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3 mb-8">
                         <div className="md:col-span-3 p-8 relative">
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-4">Basic Information</h2>
