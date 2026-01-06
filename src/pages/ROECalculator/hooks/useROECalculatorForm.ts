@@ -263,7 +263,27 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                         setFormData(prev => {
                             const responseData = response.data.data;
                             
-                            // Clean numeric values from API response
+                            // Preserve user-modified step 4 values, only update charts_data and step 3 fields
+                            return {
+                                ...prev,
+                                // Only update step 3 fields from API response to get cleaned values
+                                fuel_consumption: cleanNumericValue(responseData.fuel_consumption) as number,
+                                shift_per_hari: String(cleanNumericValue(responseData.shift_per_hari)),
+                                ritase_per_shift: String(cleanNumericValue(responseData.ritase_per_shift)),
+                                hari_kerja_per_bulan: Number(cleanNumericValue(responseData.hari_kerja_per_bulan)) || 0,
+                                utilization_percent: Number(cleanNumericValue(responseData.utilization_percent)) || 0,
+                                downtime_percent: Number(cleanNumericValue(responseData.downtime_percent)) || 0,
+                                fuel_price: Number(cleanNumericValue(responseData.fuel_price)) || 0,
+                                // Force update charts_data from response
+                                charts_data: responseData.charts_data
+                            };
+                        });
+                    } else if (step === 3 && response.data?.data) {
+                        // Update formData with response from step 3 API
+                        setFormData(prev => {
+                            const responseData = response.data.data;
+                            
+                            // Clean numeric values from step 3 API response
                             const cleanedData = {
                                 ...responseData,
                                 fuel_consumption: cleanNumericValue(responseData.fuel_consumption),
@@ -277,13 +297,9 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                             
                             return {
                                 ...prev,
-                                ...cleanedData,
-                                // Force update charts_data from response
-                                charts_data: responseData.charts_data
+                                ...cleanedData
                             };
                         });
-                    } else if ((step === 3) && dataToSave !== formData) {
-                        setFormData(dataToSave);
                     }
                     
                     toast.success('Step saved successfully');

@@ -77,8 +77,14 @@ export default function Step4MonthlyCosts({
                         value={formData.tyre_expense_monthly === null ? '' : formatNumberInput(formData.tyre_expense_monthly || formData?.cost_data?.tyre_expense_monthly || '0')}
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const value = rawValue === '' ? "0" : rawValue.replace(/[^\d.]/g, '');
-                            handleInputChange('tyre_expense_monthly', value);
+                            if (rawValue === '') {
+                                handleInputChange('tyre_expense_monthly', null);
+                                return;
+                            }
+                            const cleanValue = rawValue
+                                .replace(/\./g, '')
+                                .replace(',', '.');
+                            handleInputChange('tyre_expense_monthly', cleanValue);
                         }}
                         maxLength={15}
                         error={!!validationErrors.tyre_expense_monthly}
@@ -98,8 +104,14 @@ export default function Step4MonthlyCosts({
                         value={formData.sparepart_expense_monthly === null ? '' : formatNumberInput(formData.sparepart_expense_monthly || formData?.cost_data?.sparepart_expense_monthly || '0')}
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const value = rawValue === '' ? "0" : rawValue.replace(/[^\d.]/g, '');
-                            handleInputChange('sparepart_expense_monthly', value);
+                            if (rawValue === '') {
+                                handleInputChange('sparepart_expense_monthly', null);
+                                return;
+                            }
+                            const cleanValue = rawValue
+                                .replace(/\./g, '')
+                                .replace(',', '.');
+                            handleInputChange('sparepart_expense_monthly', cleanValue);
                         }}
                         maxLength={15}
                         error={!!validationErrors.sparepart_expense_monthly}
@@ -116,11 +128,17 @@ export default function Step4MonthlyCosts({
                     <Input
                         id="operator_salary"
                         onKeyPress={handleKeyPress}
-                        value={formData.salary_operator_monthly === null ? '' : formatNumberInput(formData.salary_operator_monthly || formData?.cost_data?.salary_operator_monthly || '0')}
+                        value={formData.salary_operator_monthly === null ? '' : formatNumberInputFadlan(formData.salary_operator_monthly || formData?.cost_data?.salary_operator_monthly || '0')}
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const value = rawValue === '' ? "0" : rawValue.replace(/[^\d.]/g, '');
-                            handleInputChange('salary_operator_monthly', value);
+                            if (rawValue === '') {
+                                handleInputChange('salary_operator_monthly', null);
+                                return;
+                            }
+                            const cleanValue = rawValue
+                                .replace(/\./g, '')
+                                .replace(',', '.');
+                            handleInputChange('salary_operator_monthly', cleanValue);
                         }}
                         maxLength={15}
                         error={!!validationErrors.operator_salary}
@@ -202,10 +220,21 @@ export default function Step4MonthlyCosts({
                         id="overhead_monthly"
                         onKeyPress={handleKeyPress}
                         value={formData.overhead_monthly === null ? '' : formatNumberInput(formData.overhead_monthly || formData?.cost_data?.overhead_monthly || '0')}
+                        // onChange={(e) => {
+                        //     const rawValue = e.target.value;
+                        //     const value = rawValue === '' ? "0" : rawValue.replace(/[^\d.]/g, '');
+                        //     handleInputChange('overhead_monthly', value);
+                        // }}
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const value = rawValue === '' ? "0" : rawValue.replace(/[^\d.]/g, '');
-                            handleInputChange('overhead_monthly', value);
+                            if (rawValue === '') {
+                                handleInputChange('overhead_monthly', 0);
+                                return;
+                            }
+                            const cleanValue = rawValue
+                                .replace(/\./g, '')
+                                .replace(',', '.');
+                            handleInputChange('overhead_monthly', cleanValue);
                         }}
                         maxLength={15}
                         error={!!validationErrors.overhead_monthly}
