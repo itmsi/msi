@@ -61,6 +61,7 @@ const CreateContractor: React.FC = () => {
     // Initial form data
     const [formData, setFormData] = useState<ContractorFormData>({
         customer_data: {
+            customer_code: '',
             customer_name: '',
             customer_email: '',
             customer_phone: '',

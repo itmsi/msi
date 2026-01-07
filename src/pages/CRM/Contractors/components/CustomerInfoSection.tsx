@@ -55,6 +55,7 @@ const CustomerInfoSection: React.FC<CustomerInfoProps> = ({
             <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Customer Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {renderInput('customer_name', 'Customer Name', 'text', undefined, true)}
+                {renderInput('customer_code', 'Customer Code', 'text')}
                 {renderInput('customer_email', 'Customer Email', 'email', undefined, true)}
                 {renderInput('customer_phone', 'Customer Phone', 'tel', undefined, true)}
                 {renderInput('job_title', 'Job Title')}

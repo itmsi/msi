@@ -44,7 +44,12 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
                     <div className="font-medium text-gray-900">
                         {row?.customer_name || '-'}
                     </div>
-                    <div className="block text-sm text-gray-500">{`${row?.customer_email || '-'}`}</div>
+                    <div className="block text-sm text-gray-500">
+                        {row?.customer_code && row?.customer_email 
+                            ? `${row.customer_email} - ${row.customer_code}`
+                            : row?.customer_code || row?.customer_email || '-'
+                        }
+                    </div>
                     <div className="block text-sm text-gray-500">{`${row?.customer_phone ? formatPhoneNumber(row.customer_phone) : '-'}`}</div>
                 </div>
             ),

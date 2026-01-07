@@ -65,6 +65,7 @@ const EditContractor: React.FC = () => {
     const [formData, setFormData] = useState<ContractorFormData>({
         customer_data: {
             customer_id: '',
+            customer_code: '',
             customer_name: '',
             customer_email: '',
             customer_phone: '',
@@ -124,6 +125,7 @@ const EditContractor: React.FC = () => {
                     const transformedData: ContractorFormData = {
                         customer_data: {
                             customer_id: response.data.customer_data.customer_id || '',
+                            customer_code: response.data.customer_data.customer_code || '',
                             customer_name: response.data.customer_data.customer_name || '',
                             customer_email: response.data.customer_data.customer_email || '',
                             customer_phone: response.data.customer_data.customer_phone || '',
