@@ -8,6 +8,7 @@ export class IupService {
         const requestData: IupRequest = {
             page: 1,
             limit: 10,
+            sort_by: "updated_at",
             sort_order: 'desc',
             search: '',
             status: '',

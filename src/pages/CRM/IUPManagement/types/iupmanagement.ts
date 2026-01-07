@@ -2,7 +2,8 @@
 export interface IupRequest {
     page: number;
     limit: number;
-    sort_order: 'asc' | 'desc';
+    sort_order: 'asc' | 'desc' | '';
+    sort_by?: 'updated_at' | 'created_at' | '';
     search?: string;
     status?: string;
     is_admin?: boolean;
