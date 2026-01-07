@@ -4,6 +4,8 @@ import { IupService } from '../services/iupManagementService';
 
 export const useIupManagement = () => {
     const [searchValue, setSearchValue] = useState('');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
+    const [sortModify, setSortModify] = useState<'updated_at' | 'created_at' | ''>('updated_at');
     const [statusFilter, setStatusFilter] = useState('');
     
     const [loading, setLoading] = useState(false);
@@ -29,11 +31,12 @@ export const useIupManagement = () => {
             setError(null);
             
             const response = await IupService.getIUPManagement({
-                page: pagination.page,
-                limit: pagination.limit,
-                sort_order: 'desc',
-                search: '',
-                status: statusFilter,
+                page: params?.page || pagination.page,
+                limit: params?.limit || pagination.limit,
+                sort_by: params?.sort_by || sortModify || "updated_at",
+                sort_order: params?.sort_order || sortOrder || 'desc',
+                search: params?.search !== undefined ? params.search : searchValue,
+                status: params?.status !== undefined ? params.status : statusFilter,
                 ...params
             });
             
@@ -46,7 +49,7 @@ export const useIupManagement = () => {
         } finally {
             setLoading(false);
         }
-    }, [pagination.page, pagination.limit]);
+    }, [searchValue, sortOrder, sortModify, statusFilter]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
@@ -64,10 +67,27 @@ export const useIupManagement = () => {
         fetchIup({ search: searchQuery, page: 1 });
     }, [fetchIup]);
 
-    const handleFilterChange = useCallback((status: string) => {
-        setStatusFilter(status);
+    const handleFilterChange = useCallback((filterType: string, value: string) => {
+        if (filterType === 'status') {
+            setStatusFilter(value);
+        } else if (filterType === 'sort_by') {
+            setSortModify(value as 'updated_at' | 'created_at' | '');
+        } else if (filterType === 'sort_order') {
+            setSortOrder(value as 'asc' | 'desc' | '');
+        }
+        
         setPagination(prev => ({ ...prev, page: 1 }));
-        fetchIup({ status: status, page: 1 });
+        
+        const params: any = { page: 1 };
+        if (filterType === 'status') {
+            params.status = value;
+        } else if (filterType === 'sort_by') {
+            params.sort_by = value;
+        } else if (filterType === 'sort_order') {
+            params.sort_order = value;
+        }
+        
+        fetchIup(params);
     }, [fetchIup]);
 
     const handleFilters = useCallback((filters: { search?: string; mine_type?: string; status?: string }) => {
@@ -75,9 +95,23 @@ export const useIupManagement = () => {
         fetchIup({ ...filters, page: 1 });
     }, [fetchIup]);
 
+    // Initial load
     useEffect(() => {
         fetchIup();
     }, []);
+    
+    // Refetch when filters change  
+    // useEffect(() => {
+    //     if (searchValue || sortOrder || sortModify || statusFilter) {
+    //         fetchIup({
+    //             page: 1,
+    //             search: searchValue,
+    //             sort_order: sortOrder,
+    //             sort_by: sortModify,
+    //             status: statusFilter
+    //         });
+    //     }
+    // }, [searchValue, sortOrder, sortModify, statusFilter, fetchIup]);
 
     // Search functions
     const executeSearch = useCallback(() => {
@@ -103,6 +137,8 @@ export const useIupManagement = () => {
         pagination,
         summary,
         searchValue,
+        sortOrder,
+        sortModify,
         setSearchValue,
         statusFilter,
         setStatusFilter,

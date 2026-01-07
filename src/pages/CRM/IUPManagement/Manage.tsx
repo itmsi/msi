@@ -1,4 +1,4 @@
-import { MdAdd } from 'react-icons/md';
+import { MdAdd, MdClear, MdSearch } from 'react-icons/md';
 import CustomDataTable from '../../../components/ui/table/CustomDataTable';
 import Input from '../../../components/form/input/InputField';
 import CustomSelect from '../../../components/form/select/CustomSelect';
@@ -13,6 +13,7 @@ import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { useNavigate } from 'react-router';
 import {  formatDateTime } from '@/helpers/generalHelper';
+import { useMemo } from 'react';
 
 export default function ManageIUPManagement() {
     
@@ -25,6 +26,8 @@ export default function ManageIUPManagement() {
         pagination,
         summary,
         searchValue,
+        sortOrder,
+        sortModify,
         setSearchValue,
         statusFilter,
         // setStatusFilter,
@@ -44,14 +47,6 @@ export default function ManageIUPManagement() {
         handleKeyPress,
         handleClearSearch,
     } = useIupManagement();
-    
-    // const {
-    //     isOpen: isDeleteModalOpen,
-    //     data: deleteItemData,
-    //     openConfirmation: openDeleteConfirmation,
-    //     closeConfirmation: closeDeleteConfirmation,
-    //     confirm: confirmDelete
-    // } = useConfirmation<IupItem>();
 
     // Definisi kolom untuk DataTable
     const iupColumns: TableColumn<IupItem>[] = [
@@ -131,6 +126,79 @@ export default function ManageIUPManagement() {
         { value: 'aktif', label: 'Active' },
         { value: 'non aktif', label: 'Inactive' }
     ];
+    const MODIFY_OPTIONS = [
+        { value: '', label: 'All Modify' },
+        { value: 'updated_at', label: 'Updated' },
+        { value: 'created_at', label: 'Created' }
+    ];
+    
+    const SearchAndFilters = useMemo(() => (
+        <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-7 gap-6">
+            <div className="relative md:col-span-3">
+                <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Input
+                    type="text"
+                    placeholder="Search IUP... (Press Enter to search)"
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className={`pl-10 py-2 w-full ${searchValue ? 'pr-10' : 'pr-4'}`}
+                />
+                {searchValue && (
+                    <button
+                        onClick={handleClearSearch}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                        type="button"
+                    >
+                        <MdClear className="h-4 w-4" />
+                    </button>
+                )}
+            </div>
+            
+            <CustomSelect
+                value={STATUS_OPTIONS.find(option => option.value === statusFilter) || null}
+                onChange={(option) => handleFilterChange('status', option?.value || '')}
+                options={STATUS_OPTIONS}
+                placeholder="Filter by Status"
+                className="w-full md:col-span-2"
+                isClearable={false}
+                isSearchable={false}
+            />
+            
+            <CustomSelect
+                value={MODIFY_OPTIONS.find(option => option.value === sortModify) || null}
+                onChange={(option) => handleFilterChange('sort_by', option?.value || '')}
+                options={MODIFY_OPTIONS}
+                placeholder="Sort by Field"
+                className="w-full"
+                isClearable={false}
+                isSearchable={false}
+            />
+            
+            <div className="flex items-center gap-2">
+                <CustomSelect
+                    id="sort_order"
+                    name="sort_order"
+                    value={sortOrder ? { 
+                        value: sortOrder, 
+                        label: sortOrder === 'asc' ? 'Ascending' : 'Descending' 
+                    } : null}
+                    onChange={(selectedOption) => 
+                        handleFilterChange('sort_order', selectedOption?.value || '')
+                    }
+                    options={[
+                        { value: 'asc', label: 'Ascending' },
+                        { value: 'desc', label: 'Descending' }
+                    ]}
+                    placeholder="Order by"
+                    isClearable={false}
+                    isSearchable={false}
+                    className="w-full"
+                />
+            </div>
+        </div>
+    ), [searchValue, statusFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange]);
+    
     return (
         <>
             <PageMeta 
@@ -242,35 +310,7 @@ export default function ManageIUPManagement() {
 
                 {/* Search and Filter Section */}
                 <div className="bg-white shadow rounded-lg">
-                    <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="relative md:col-span-2">
-                            <Input
-                                type="text"
-                                placeholder="Search IUP... (Press Enter to search)"
-                                value={searchValue}
-                                onChange={(e) => setSearchValue(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
-                            />
-                            {searchValue && (
-                                <button
-                                    onClick={handleClearSearch}
-                                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
-                                >
-                                    ×
-                                </button>
-                            )}
-                        </div>
-                        <CustomSelect
-                            value={STATUS_OPTIONS.find(option => option.value === statusFilter) || null}
-                            onChange={(option) => handleFilterChange(option?.value || '')}
-                            options={STATUS_OPTIONS}
-                            placeholder="Filter by Status"
-                            className="w-full"
-                            isClearable={false}
-                            isSearchable={false}
-                        />
-                    </div>
+                    {SearchAndFilters}
                 </div>
                 
                 <div className="bg-white shadow rounded-lg">
