@@ -67,6 +67,9 @@ export interface QuotationFormData {
     manage_quotation_date: string;
     manage_quotation_valid_date: string;
     manage_quotation_grand_total?: string;
+    manage_quotation_grand_total_before?: string; // Stores grand total before mutation
+    manage_quotation_mutation_type?: 'plus' | 'minus' | ''; // Type of mutation (add or subtract)
+    manage_quotation_mutation_nominal?: string; // Amount to add/subtract
     manage_quotation_ppn?: string;
     manage_quotation_delivery_fee?: string;
     manage_quotation_other?: string;

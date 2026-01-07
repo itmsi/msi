@@ -5,12 +5,15 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import { MdKeyboardArrowLeft, MdSave, MdPerson } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
-import { CustomerValidationErrors } from "./types/customer";
+import { CustomerValidationErrors, ContactPerson } from "./types/customer";
 import { toast } from "react-hot-toast";
 import { useCreateCustomer } from "./hooks/useCustomerCreate";
 import { handleKeyPress } from "@/helpers/generalHelper";
+import CustomerPersonsSection from "./components/CustomerPersonsSection";
+import { CustomerUtilityService } from "./services/customerUtilityService";
 
 interface CreateCustomerFormData {
+    customer_code: string;
     customer_name: string;
     customer_email: string;
     customer_phone: string;
@@ -21,6 +24,7 @@ interface CreateCustomerFormData {
     customer_country: string;
     job_title: string;
     contact_person: string;
+    contact_persons: ContactPerson[];
 }
 
 export default function CreateCustomer() {
@@ -33,9 +37,12 @@ export default function CreateCustomer() {
         clearFieldError,
         createCustomer 
     } = useCreateCustomer();
+    
+    const [contactErrors, setContactErrors] = useState<Record<string,string>>({});
 
     // State for form data
     const [formData, setFormData] = useState<CreateCustomerFormData>({
+        customer_code: '',
         customer_name: '',
         customer_email: '',
         customer_phone: '',
@@ -45,7 +52,8 @@ export default function CreateCustomer() {
         customer_zip: '',
         customer_country: '',
         job_title: '',
-        contact_person: ''
+        contact_person: '',
+        contact_persons: []
     });
 
     // Form input handlers
@@ -56,9 +64,67 @@ export default function CreateCustomer() {
         }));
 
         // Clear validation error when user starts typing
-        if (validationErrors[field]) {
-            clearFieldError(field);
+        if (validationErrors[field as keyof CustomerValidationErrors]) {
+            clearFieldError(field as keyof CustomerValidationErrors);
         }
+    };
+    
+    // Contact person handlers
+    const handleAddContact = () => {
+        setFormData(prev => ({
+            ...prev,
+            contact_persons: [...prev.contact_persons, { contact_person_name: '', contact_person_email: '', contact_person_phone: '', contact_person_position: '' }]
+        }));
+    };
+
+    const handleRemoveContact = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            contact_persons: prev.contact_persons.filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleContactChange = (index: number, field: keyof ContactPerson, value: string | number) => {
+        setFormData(prev => ({
+            ...prev,
+            contact_persons: prev.contact_persons.map((contact, i) => 
+                i === index ? { ...contact, [field]: value } : contact
+            )
+        }));
+        
+        // Clear error for this specific field when user types
+        const errorKey = `contact_${index}_${field}`;
+        if (contactErrors[errorKey]) {
+            setContactErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[errorKey];
+                return newErrors;
+            });
+        }
+    };
+
+    // Validate contact persons
+    const validateContacts = (): boolean => {
+        const errors: Record<string, string> = {};
+        
+        formData.contact_persons.forEach((contact, index) => {
+            // Validate email format if provided
+            if (contact.contact_person_email && contact.contact_person_email.trim()) {
+                if (!CustomerUtilityService.validateEmail(contact.contact_person_email)) {
+                    errors[`contact_${index}_contact_person_email`] = 'Invalid email format';
+                }
+            }
+            
+            // Validate phone format if provided
+            if (contact.contact_person_phone && contact.contact_person_phone.trim()) {
+                if (!CustomerUtilityService.validatePhone(contact.contact_person_phone)) {
+                    errors[`contact_${index}_contact_person_phone`] = 'Invalid phone number format';
+                }
+            }
+        });
+        
+        setContactErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
     // Form validation
@@ -91,6 +157,12 @@ export default function CreateCustomer() {
         
         if (!validateForm()) {
             toast.error('Please fix the validation errors');
+            return;
+        }
+        
+        // Validate contact persons
+        if (!validateContacts()) {
+            toast.error('Please fix contact person errors');
             return;
         }
 
@@ -136,7 +208,7 @@ export default function CreateCustomer() {
                     </div>
 
                     {/* Customer Information Form */}
-                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
+                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3 mb-8">
                         <div className="md:col-span-3 p-8 relative">
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Basic Information</h2>
@@ -154,6 +226,20 @@ export default function CreateCustomer() {
                                     />
                                     {validationErrors.customer_name && (
                                         <span className="text-sm text-red-500">{validationErrors.customer_name}</span>
+                                    )}
+                                </div>
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="customer_code">Customer Code</Label>
+                                    <Input
+                                        id="customer_code"
+                                        type="text"
+                                        value={formData.customer_code}
+                                        onChange={(e) => handleInputChange('customer_code', e.target.value)}
+                                        placeholder="Enter customer code"
+                                        error={!!validationErrors.customer_code}
+                                    />
+                                    {validationErrors.customer_code && (
+                                        <span className="text-sm text-red-500">{validationErrors.customer_code}</span>
                                     )}
                                 </div>
                                 <div className="md:col-span-2">
@@ -279,9 +365,20 @@ export default function CreateCustomer() {
                                 </div>
                             </div>
                         </div>
-                            
-                        {/* Form Actions */}
-                        <div className="flex justify-end gap-4 p-6 border-t border-gray-200 md:col-span-3">
+                    </form>
+
+                    {/* Contact Persons Section */}
+                    <CustomerPersonsSection
+                        contacts={formData.contact_persons}
+                        errors={contactErrors}
+                        onAddContact={handleAddContact}
+                        onRemoveContact={handleRemoveContact}
+                        onContactChange={handleContactChange}
+                    />
+
+                    {/* Form Actions */}
+                    <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                        <div className="flex justify-end gap-4">
                             <Button
                                 type="button"
                                 variant="outline"
@@ -292,7 +389,10 @@ export default function CreateCustomer() {
                                 Cancel
                             </Button>
                             <Button
-                                type="submit"
+                                onClick={() => {
+                                    const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+                                    handleSubmit(fakeEvent);
+                                }}
                                 disabled={isCreating}
                                 className="px-6 flex items-center gap-2 rounded-full"
                             >
@@ -300,7 +400,7 @@ export default function CreateCustomer() {
                                 {isCreating ? 'Creating...' : 'Create Customer'}
                             </Button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </>

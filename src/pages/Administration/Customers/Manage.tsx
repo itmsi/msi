@@ -16,6 +16,7 @@ import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 
 const ManageCustomers: React.FC = () => {
     const navigate = useNavigate();
+    
     // Custom hook untuk semua state management dan handlers
     const {
         searchTerm,
@@ -36,30 +37,19 @@ const ManageCustomers: React.FC = () => {
         confirmDeleteCustomer,
         cancelDelete
     } = useCustomerManagement();
-
+    
     // Definisi kolom untuk DataTable
     const columns: TableColumn<Customer>[] = [
         {
             name: 'Customer Name',
             selector: row => row.customer_name,
             cell: (row) => {
-                const initials = row?.customer_name ? CustomerUtilityService.getCustomerInitials(row.customer_name) : 'NA';
-                const avatarColor = CustomerUtilityService.getCustomerAvatarColor(row.customer_id);
-                
                 return (
-                    <div className="flex items-center gap-3 py-2">
-                        <div 
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium"
-                            style={{ backgroundColor: avatarColor }}
-                        >
-                            {initials}
+                    <div className="py-2">
+                        <div className="font-medium text-gray-900">
+                            {row?.customer_name ?? '-'}
                         </div>
-                        <div>
-                            <div className="font-medium text-gray-900">
-                                {row?.customer_name ? CustomerUtilityService.formatCustomerName(row.customer_name) : '-'}
-                            </div>
-                            <div className="text-sm text-gray-500">{row?.contact_person ?? '-'}</div>
-                        </div>
+                        <div className="text-sm text-gray-500">{row?.contact_person ?? '-'}{row?.customer_code ? ` - ${row.customer_code}` : ''}</div>
                     </div>
                 );
             }
@@ -82,6 +72,28 @@ const ManageCustomers: React.FC = () => {
                     {row.customer_address}
                 </div>
             )
+        },
+        {
+            name: 'Last Modified',
+            selector: row => row.updated_at || '',
+            sortable: true,
+            cell: (row) => (
+                <div className="flex flex-col py-2">
+                    <span className="font-medium text-gray-900">
+                        {row.updated_by_name || '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        {row.updated_at ? new Date(row.updated_at).toLocaleString('id-ID', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }) : '-'}
+                    </span>
+                </div>
+            ),
+            width: '200px'
         },
         // createDateColumn('Created At', 'created_at', tableDateFormat),
         createActionsColumn([
