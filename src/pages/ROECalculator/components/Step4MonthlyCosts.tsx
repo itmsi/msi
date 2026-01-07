@@ -219,7 +219,7 @@ export default function Step4MonthlyCosts({
                     <Input
                         id="overhead_monthly"
                         onKeyPress={handleKeyPress}
-                        value={formData.overhead_monthly === null ? '' : formatNumberInput(formData.overhead_monthly || formData?.cost_data?.overhead_monthly || '0')}
+                        value={formData.overhead_monthly === null ? '' : formatNumberInput(formData.overhead_monthly || formData?.cost_data?.overhead_monthly || '')}
                         // onChange={(e) => {
                         //     const rawValue = e.target.value;
                         //     const value = rawValue === '' ? "0" : rawValue.replace(/[^\d.]/g, '');
@@ -228,7 +228,7 @@ export default function Step4MonthlyCosts({
                         onChange={(e) => {
                             const rawValue = e.target.value;
                             if (rawValue === '') {
-                                handleInputChange('overhead_monthly', 0);
+                                handleInputChange('overhead_monthly', null);
                                 return;
                             }
                             const cleanValue = rawValue
