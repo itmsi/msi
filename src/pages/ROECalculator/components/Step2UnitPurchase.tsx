@@ -4,7 +4,7 @@ import Input from '@/components/form/input/InputField';
 import Button from '@/components/ui/button/Button';
 import { MdCalculate } from 'react-icons/md';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, CalculationResponse } from '../types/roeCalculator';
-import { formatCurrency, formatNumberInput, handleKeyPress, formatNumberInputFadlan, twodigitcomma, handleDecimalInput } from '@/helpers/generalHelper';
+import { formatCurrency, formatNumberInput, handleKeyPress, handleDecimalInput } from '@/helpers/generalHelper';
 import LoadingSpinner from '@/components/common/Loading';
 import { useNavigate } from 'react-router';
 import { useEffect } from 'react';

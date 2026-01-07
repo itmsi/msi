@@ -1,7 +1,7 @@
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, QuoteDefaults } from '../types/roeCalculator';
-import { formatNumberInput, handleKeyPress, twodigitcomma, handleDecimalInput } from '@/helpers/generalHelper';
+import { formatNumberInput, handleKeyPress, handleDecimalInput } from '@/helpers/generalHelper';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import LoadingSpinner from '@/components/common/Loading';
 import { useNavigate } from 'react-router';
