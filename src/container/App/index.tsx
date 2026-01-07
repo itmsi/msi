@@ -1,6 +1,7 @@
 import { Toaster } from "react-hot-toast";
 import { ScrollToTop } from "../../components/common/ScrollToTop";
 import ClientRoutes from "../Client/ClientRoutes";
+import AIAssistant from "@/components/ui/AIAssistant/AIAssistant";
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
       />
       <ScrollToTop />
       <ClientRoutes />
+      <AIAssistant />
     </>
   );
 };
