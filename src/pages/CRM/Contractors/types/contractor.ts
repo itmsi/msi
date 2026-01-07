@@ -12,6 +12,7 @@ export interface Contractor {
     iup_customer_id: string;
     iup_id: string;
     customer_id: string;
+    customer_code?: string;
     rkab: string;
     armada: number;
     segmentation_name_en: string;
@@ -65,6 +66,7 @@ export interface ContractorDetailResponse {
     data: {
         customer_data: {
             customer_id: string;
+            customer_code?: string | null;
             customer_name: string;
             customer_email: string | null;
             customer_phone: string | null;
@@ -118,6 +120,7 @@ export interface ContractorDetailResponse {
 export interface ContractorFormData {
     customer_data: {
         customer_id?: string;
+        customer_code?: string;
         customer_name: string;
         customer_email: string;
         customer_phone: string;
