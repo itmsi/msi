@@ -14,6 +14,9 @@ export interface TermCondition {
     term_content_title: string;
     term_content_directory: string;
     term_content_payload?: string;
+    created_at?: string;
+    updated_at?: string;
+    updated_by_name?: string;
 }
 
 export interface Pagination {

@@ -7,7 +7,7 @@ import { TableColumn } from 'react-data-table-component';
 import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
-import { tableDateFormat } from '@/helpers/generalHelper';
+import { formatDateTime ,tableDateFormat } from '@/helpers/generalHelper';
 import { createActionsColumn, createDateColumn } from '@/components/ui/table';
 import { useNavigate } from 'react-router';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
@@ -53,6 +53,22 @@ const ManageTermCondition: React.FC = () => {
             sortable: true,
         },
         createDateColumn('Created At', 'created_at', tableDateFormat),
+        {
+            name: 'Updated By',
+            selector: row => row.updated_at || '',
+            sortable: true,
+            cell: (row) => (
+                <div className="flex flex-col py-2">
+                    <span className="font-medium text-gray-900">
+                        {row.updated_by_name || '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        {row.updated_at ? formatDateTime(row.updated_at) : '-'}
+                    </span>
+                </div>
+            ),
+            width: '200px'
+        },
         createActionsColumn([
             {
                 icon: MdEdit,

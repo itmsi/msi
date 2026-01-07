@@ -12,7 +12,7 @@ import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { createActionsColumn } from '@/components/ui/table';
-import { formatCurrency, formatDate } from '@/helpers/generalHelper';
+import { formatCurrency, formatDate, formatDateTime } from '@/helpers/generalHelper';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 
 const ManageQuotations: React.FC = () => {
@@ -104,6 +104,22 @@ const ManageQuotations: React.FC = () => {
                 cell: (row) => (
                     <span className="font-semibold">{formatCurrency(row.manage_quotation_grand_total)}</span>
                 ),
+            },
+            {
+                name: 'Updated By',
+                selector: row => row.updated_at || '',
+                sortable: true,
+                cell: (row) => (
+                    <div className="flex flex-col py-2">
+                        <span className="font-medium text-gray-900">
+                            {row.updated_by_name || '-'}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                            {row.updated_at ? formatDateTime(row.updated_at) : '-'}
+                        </span>
+                    </div>
+                ),
+                width: '200px'
             },
             // createDateColumn('Created At', 'created_at', tableDateFormat),
             createActionsColumn([
