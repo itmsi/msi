@@ -278,6 +278,60 @@ export const twodigitcomma = (value: string | number): string => {
     return value.toString();
 }
 
+export const fourdigitcomma = (value: string | number): string => {
+    const parts = value.toString().split('.');
+    if (parts.length > 2) {
+        value = parts[0] + '.' + parts[1];
+    }
+    if (parts[1] && parts[1].length > 4) {
+        value = parts[0] + '.' + parts[1].substring(0, 4);
+    }
+    return value.toString();
+}
+
+// Handle numeric input with support for decimal values starting with 0 (e.g., 0.12)
+export const handleDecimalInput = (
+    rawValue: string, 
+    onValidInput: (value: string) => void, 
+    onInvalidInput: () => void,
+    formatWithComma: boolean = true,
+    maxIntegerDigits?: number,
+    maxDecimalDigits: number = 4
+) => {
+    if (rawValue === '') {
+        onInvalidInput();
+        return;
+    }
+    
+    const cleanValue = rawValue.replace(/[^\d.]/g, '');
+    const [integerPart, decimalPart] = cleanValue.split('.');
+    
+    // Check max integer digits
+    if (maxIntegerDigits && integerPart && integerPart.length > maxIntegerDigits) {
+        return; // Don't update if exceeds max integer digits
+    }
+    
+    // Check max decimal digits
+    if (decimalPart && decimalPart.length > maxDecimalDigits) {
+        return; // Don't update if exceeds max decimal digits
+    }
+    
+    // Allow typing "0" or "0.x" patterns for decimal input
+    if (cleanValue === '0' || cleanValue.startsWith('0.')) {
+        onValidInput(cleanValue);
+        return;
+    }
+    
+    const numericValue = parseFloat(cleanValue) || 0;
+    
+    if (numericValue <= 0) {
+        onInvalidInput();
+    } else {
+        const finalValue = formatWithComma ? fourdigitcomma(cleanValue) : cleanValue;
+        onValidInput(finalValue);
+    }
+};
+
 export const formatPhoneNumber = (phone: string): string => {
     const cleaned = phone.replace(/\D/g, '');
 

@@ -4,7 +4,7 @@ import Input from '@/components/form/input/InputField';
 import Button from '@/components/ui/button/Button';
 import { MdCalculate } from 'react-icons/md';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, CalculationResponse } from '../types/roeCalculator';
-import { formatCurrency, formatNumberInput, handleKeyPress, formatNumberInputFadlan, twodigitcomma } from '@/helpers/generalHelper';
+import { formatCurrency, formatNumberInput, handleKeyPress, formatNumberInputFadlan, twodigitcomma, handleDecimalInput } from '@/helpers/generalHelper';
 import LoadingSpinner from '@/components/common/Loading';
 import { useNavigate } from 'react-router';
 import { useEffect } from 'react';
@@ -109,6 +109,7 @@ export default function Step2UnitPurchase({
                         onChange={(e) => handleInputChange('jumlah_unit', e.target.value)}
                         onKeyPress={handleKeyPress}
                         error={!!validationErrors.jumlah_unit}
+                        maxLength={10}
                     />
                     {validationErrors.jumlah_unit && (
                         <span className="text-sm text-red-500">{validationErrors.jumlah_unit}</span>
@@ -135,8 +136,15 @@ export default function Step2UnitPurchase({
                                 value={formData.down_payment_pct}
                                 onChange={(e) => {
                                     const rawValue = e.target.value;
-                                    const value = rawValue === '' ? null : twodigitcomma(rawValue.replace(/[^\d.]/g, ''));
-                                    handleInputChange('down_payment_pct', value)
+                                    
+                                    handleDecimalInput(
+                                        rawValue,
+                                        (validValue) => handleInputChange('down_payment_pct', validValue),
+                                        () => handleInputChange('down_payment_pct', null),
+                                        true,
+                                        3, // maxIntegerDigits
+                                        4 // maxDecimalDigits
+                                    );
                                 }}
                             />
                         </div>
@@ -147,9 +155,18 @@ export default function Step2UnitPurchase({
                         <Input
                             id="tenor_pembiayaan"
                             value={formData.tenor_pembiayaan}
-                            maxLength={3}
-                            onKeyPress={handleKeyPress}
-                            onChange={(e) => handleInputChange('tenor_pembiayaan', e.target.value)}
+                            onChange={(e) => {
+                                const rawValue = e.target.value;
+                                
+                                handleDecimalInput(
+                                    rawValue,
+                                    (validValue) => handleInputChange('tenor_pembiayaan', validValue),
+                                    () => handleInputChange('tenor_pembiayaan', null),
+                                    true,
+                                    3, // maxIntegerDigits
+                                    4 // maxDecimalDigits
+                                );
+                            }}
                             error={!!validationErrors.tenor_pembiayaan}
                         />
                         <p className="text-xs text-gray-500 mt-1 inline-flex">
@@ -165,19 +182,18 @@ export default function Step2UnitPurchase({
                         <Label htmlFor="interest_rate">Interest Rate Flat per Tahun (%)</Label>
                         <Input
                             id="interest_rate"
-                            value={formData.interest_rate === null ? '' : formData.interest_rate || ''}
-                            maxLength={5}
+                            value={formData.interest_rate === null ? '' : formData.interest_rate || '0'}
                             onChange={(e) => {
                                 const rawValue = e.target.value;
-                                const cleanValue = rawValue.replace(/[^\d.]/g, '');
-                                const numericValue = parseFloat(cleanValue) || 0;
                                 
-                                if (rawValue === '' || numericValue <= 0) {
-                                    handleInputChange('interest_rate', null);
-                                } else {
-                                    const formattedValue = twodigitcomma(cleanValue);
-                                    handleInputChange('interest_rate', formattedValue);
-                                }
+                                handleDecimalInput(
+                                    rawValue,
+                                    (validValue) => handleInputChange('interest_rate', validValue),
+                                    () => handleInputChange('interest_rate', null),
+                                    true,
+                                    3, // maxIntegerDigits
+                                    4 // maxDecimalDigits
+                                );
                             }}
                             error={!!validationErrors.interest_rate}
                         />
@@ -191,13 +207,19 @@ export default function Step2UnitPurchase({
                         <Label htmlFor="periode_depresiasi">Periode Depresiasi (Bulan)</Label>
                         <Input
                             id="periode_depresiasi"
-                            onKeyPress={handleKeyPress}
-                            value={formatNumberInputFadlan(formData.periode_depresiasi)}
+                            value={formData.periode_depresiasi}
                             onChange={(e) => {
-                                const value = e.target.value.replace(/[^\d]/g, '');
-                                handleInputChange('periode_depresiasi', value);
+                                const rawValue = e.target.value;
+                                
+                                handleDecimalInput(
+                                    rawValue,
+                                    (validValue) => handleInputChange('periode_depresiasi', validValue),
+                                    () => handleInputChange('periode_depresiasi', null),
+                                    true,
+                                    4, // maxIntegerDigits
+                                    4 // maxDecimalDigits
+                                );
                             }}
-                            maxLength={7}
                             error={!!validationErrors.periode_depresiasi}
                         />
                         {validationErrors.periode_depresiasi && (

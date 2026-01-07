@@ -317,7 +317,7 @@ export default function BreakdownROECalculator() {
                                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Metrik Operasional</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="bg-blue-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Ritase per Shift</p>
+                                        <p className="text-sm text-gray-600">Ritase per Hari</p>
                                         <p className="text-2xl font-bold text-blue-600">{breakdownData.metrik_operasional.ritase_per_hari}</p>
                                     </div>
                                     <div className="bg-green-50 p-4 rounded-lg">

@@ -4,7 +4,7 @@ import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import { useCustomerSelect } from '@/hooks/useCustomerSelect';
 import { ROECalculatorFormData, ROECalculatorValidationErrors } from '../types/roeCalculator';
 import { useEffect, useState } from 'react';
-import { formatNumberInputFadlan, handleKeyPress } from '@/helpers/generalHelper';
+import { formatNumberInputFadlan, handleDecimalInput, handleKeyPress } from '@/helpers/generalHelper';
 import CustomSelect from '@/components/form/select/CustomSelect';
 
 interface Step1Props {
@@ -171,11 +171,18 @@ export default function Step1BasicInfo({
                     <Label htmlFor="tonase_per_ritase">Tonase per Unit (ton)</Label>
                     <Input
                         id="tonase_per_ritase"
-                        onKeyPress={handleKeyPress}
-                        value={formatNumberInputFadlan(formData.tonase_per_ritase)}
+                        value={formData.tonase_per_ritase}
                         onChange={(e) => {
-                            const value = e.target.value.replace(/[^\d]/g, '');
-                            handleInputChange('tonase_per_ritase', value);
+                            const rawValue = e.target.value;
+                            
+                            handleDecimalInput(
+                                rawValue,
+                                (validValue) => handleInputChange('tonase_per_ritase', validValue),
+                                () => handleInputChange('tonase_per_ritase', null),
+                                true,
+                                5, // maxIntegerDigits
+                                4 // maxDecimalDigits
+                            );
                         }}
                         error={!!validationErrors.tonase_per_ritase}
                     />
@@ -189,13 +196,19 @@ export default function Step1BasicInfo({
                     <Label htmlFor="jarak_haul">Jarak Haul (km PP)</Label>
                     <Input
                         id="jarak_haul"
-                        onKeyPress={handleKeyPress}
-                        maxLength={5}
                         value={formData.jarak_haul}
                         // onChange={(e) => handleInputChange('jarak_haul', e.target.value)}
                         onChange={(e) => {
-                            const value = e.target.value.replace(/[^\d]/g, '');
-                            handleInputChange('jarak_haul', value);
+                            const rawValue = e.target.value;
+                            
+                            handleDecimalInput(
+                                rawValue,
+                                (validValue) => handleInputChange('jarak_haul', validValue),
+                                () => handleInputChange('jarak_haul', null),
+                                true,
+                                7, // maxIntegerDigits
+                                4 // maxDecimalDigits
+                            );
                         }}
                         error={!!validationErrors.jarak_haul}
                     />

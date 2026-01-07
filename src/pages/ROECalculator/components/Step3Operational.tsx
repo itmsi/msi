@@ -1,7 +1,7 @@
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, QuoteDefaults } from '../types/roeCalculator';
-import { formatNumberInput, handleKeyPress, twodigitcomma } from '@/helpers/generalHelper';
+import { formatNumberInput, handleKeyPress, twodigitcomma, handleDecimalInput } from '@/helpers/generalHelper';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import LoadingSpinner from '@/components/common/Loading';
 import { useNavigate } from 'react-router';
@@ -70,17 +70,16 @@ export default function Step3Operational({
                         }
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const cleanValue = rawValue.replace(/[^\d.]/g, '');
-                            const numericValue = parseFloat(cleanValue) || 0;
                             
-                            if (rawValue === '' || numericValue <= 0) {
-                                handleInputChange('ritase_per_shift', null);
-                            } else {
-                                const formattedValue = twodigitcomma(cleanValue);
-                                handleInputChange('ritase_per_shift', formattedValue);
-                            }
+                            handleDecimalInput(
+                                rawValue,
+                                (validValue) => handleInputChange('ritase_per_shift', validValue),
+                                () => handleInputChange('ritase_per_shift', null),
+                                true,
+                                7, // maxIntegerDigits
+                                4 // maxDecimalDigits
+                            );
                         }}
-                        maxLength={15}
                         error={!!validationErrors.ritase_per_shift}
                     />
                     {validationErrors.ritase_per_shift && (
@@ -96,16 +95,16 @@ export default function Step3Operational({
                         value={formData.shift_per_hari === null ? '' : formData.shift_per_hari || formData?.operation_data?.shift_per_hari || '0'}
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const cleanValue = rawValue === '' ? "0" : rawValue.replace(/[^\d.]/g, '');
-                            const numericValue = parseFloat(cleanValue) || 0;
                             
-                            if (rawValue === '' || numericValue <= 0) {
-                                handleInputChange('shift_per_hari', null);
-                            } else {
-                                handleInputChange('shift_per_hari', cleanValue);
-                            }
+                            handleDecimalInput(
+                                rawValue,
+                                (validValue) => handleInputChange('shift_per_hari', validValue),
+                                () => handleInputChange('shift_per_hari', null),
+                                true,
+                                7, // maxIntegerDigits
+                                4 // maxDecimalDigits
+                            );
                         }}
-                        maxLength={15}
                         error={!!validationErrors.shift_per_hari}
                     />
                     {validationErrors.shift_per_hari && (
@@ -125,17 +124,16 @@ export default function Step3Operational({
                         }
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            const cleanValue = rawValue.replace(/[^\d.]/g, '');
-                            const numericValue = parseFloat(cleanValue) || 0;
                             
-                            if (rawValue === '' || numericValue <= 0) {
-                                handleInputChange('hari_kerja_per_bulan', null);
-                            } else {
-                                const formattedValue = twodigitcomma(cleanValue);
-                                handleInputChange('hari_kerja_per_bulan', formattedValue);
-                            }
+                            handleDecimalInput(
+                                rawValue,
+                                (validValue) => handleInputChange('hari_kerja_per_bulan', validValue),
+                                () => handleInputChange('hari_kerja_per_bulan', null),
+                                true,
+                                7, // maxIntegerDigits
+                                4 // maxDecimalDigits
+                            );
                         }}
-                        maxLength={15}
                         error={!!validationErrors.hari_kerja_per_bulan}
                     />
                     
@@ -150,19 +148,18 @@ export default function Step3Operational({
                     <div className="space-y-2">
                         <Input
                             id="utilization_percent"
-                            value={formData.utilization_percent === null ? '0' : formData.utilization_percent || '0'}
+                            value={formData.utilization_percent === null ? '' : formData.utilization_percent || ''}
                             onChange={(e) => {
                                 const rawValue = e.target.value;
-                                const cleanValue = rawValue.replace(/[^\d.]/g, '');
-                                const numericValue = parseFloat(cleanValue) || 0;
                                 
-                                if (rawValue === '' || numericValue <= 0) {
-                                    handleInputChange('utilization_percent', null);
-                                } else {
-                                    handleInputChange('utilization_percent', cleanValue);
-                                }
+                                handleDecimalInput(
+                                    rawValue,
+                                    (validValue) => handleInputChange('utilization_percent', validValue),
+                                    () => handleInputChange('utilization_percent', null),
+                                    true,
+                                    7
+                                );
                             }}
-                            maxLength={5}
                             error={!!validationErrors.utilization_percent}
                         />
                     
@@ -172,42 +169,6 @@ export default function Step3Operational({
                     </div>
                 </div>
             </div>
-
-            {/* Revenue Calculation Display */}
-            {/* {formData.ritase_per_shift && formData.shift_per_hari && formData.fuel_price && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <h4 className="font-medium text-green-900 mb-3">Perhitungan Revenue</h4>
-                    <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                            <span>Ritase per Shift:</span>
-                            <span className="font-medium">{formatCurrency(parseFloat(formData.ritase_per_shift))}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span>Shift per Hari:</span>
-                            <span className="font-medium">{formData.shift_per_hari} shift</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span>Hari Kerja per Bulan:</span>
-                            <span className="font-medium">{formData.hari_kerja_per_bulan} hari</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span>Utilization Rate:</span>
-                            <span className="font-medium">{formData.utilization_percent}%</span>
-                        </div>
-                        <hr className="my-2" />
-                        <div className="flex justify-between font-bold text-base">
-                            <span>Tipe Konsumsi BBM:</span>
-                            <span className="text-green-700">{formData.fuel_price}</span>
-                        </div>
-                        {/* <div className="flex justify-between font-bold text-base">
-                            <span>Revenue Efektif ({formData.utilization_percent}%):</span>
-                            <span className="text-green-700">
-                                {formatCurrency(calculateTotalRevenue() * (formData.utilization_rate / 100))}
-                            </span>
-                        </div> 
-                    </div>
-                </div>
-            )} */}
 
             {/* Additional Parameters */}
             <div>
@@ -240,17 +201,16 @@ export default function Step3Operational({
                             }
                             onChange={(e) => {
                                 const rawValue = e.target.value;
-                                const cleanValue = rawValue.replace(/[^\d.]/g, '');
-                                const numericValue = parseFloat(cleanValue) || 0;
                                 
-                                if (rawValue === '' || numericValue <= 0) {
-                                    handleInputChange('fuel_consumption', null);
-                                } else {
-                                    const formattedValue = twodigitcomma(cleanValue);
-                                    handleInputChange('fuel_consumption', formattedValue);
-                                }
+                                handleDecimalInput(
+                                    rawValue,
+                                    (validValue) => handleInputChange('fuel_consumption', validValue),
+                                    () => handleInputChange('fuel_consumption', null),
+                                    true,
+                                    7, // maxIntegerDigits
+                                    4 // maxDecimalDigits
+                                );
                             }}
-                            maxLength={7}
                             error={!!validationErrors.fuel_consumption}
                         />
                         {validationErrors.fuel_consumption && (
