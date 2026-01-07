@@ -23,6 +23,7 @@ export interface Accessories {
     created_by: string | null;
     updated_at: string;
     updated_by: string | null;
+    updated_by_name?: string;
     deleted_at: string | null;
     deleted_by: string | null;
     is_delete: boolean;

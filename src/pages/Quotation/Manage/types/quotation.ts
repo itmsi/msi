@@ -272,6 +272,7 @@ export interface ManageQuotationItem {
     status: string;
     created_by: string;
     updated_by: string | null;
+    updated_by_name?: string;
     deleted_by: string | null;
     created_at: string;
     updated_at: string;

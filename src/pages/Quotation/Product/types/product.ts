@@ -33,6 +33,8 @@ export interface ItemProduct {
     volume: string;
     componen_product_unit_model: string;
     componen_product_specifications: ProductSpecification[];
+    updated_at?: string;
+    updated_by_name?: string;
     // Additional fields for quotation integration
     specifications?: any[]; // For form editing
     accessories?: any[]; // For form editing (create mode)

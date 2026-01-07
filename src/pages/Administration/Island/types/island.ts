@@ -1,6 +1,8 @@
 export interface Island {
     island_id: string;
     island_name: string;
+    updated_at?: string;
+    updated_by_name?: string;
 }
 
 export interface IslandRequest {

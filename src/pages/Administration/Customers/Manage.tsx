@@ -74,7 +74,7 @@ const ManageCustomers: React.FC = () => {
             )
         },
         {
-            name: 'Last Modified',
+            name: 'Updated By',
             selector: row => row.updated_at || '',
             sortable: true,
             cell: (row) => (
