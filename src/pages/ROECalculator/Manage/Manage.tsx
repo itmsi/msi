@@ -11,7 +11,7 @@ import { useMemo } from "react";
 import Input from "@/components/form/input/InputField";
 import CustomSelect from "@/components/form/select/CustomSelect";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
-import { formatCurrency } from "@/helpers/generalHelper";
+import { formatCurrency, formatDateTime } from "@/helpers/generalHelper";
 import { FaRegFilePdf } from "react-icons/fa6";
 
 export default function ManageRor() {
@@ -82,6 +82,22 @@ export default function ManageRor() {
                     </div>
                 </div>
             )
+        },
+        {
+            name: 'Updated By',
+            selector: row => row.updated_at || '',
+            sortable: true,
+            cell: (row) => (
+                <div className="flex flex-col py-2">
+                    <span className="font-medium text-gray-900">
+                        {row.updated_by_name || '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        {row.updated_at ? formatDateTime(row.updated_at) : '-'}
+                    </span>
+                </div>
+            ),
+            width: '200px'
         },
         {
             name: 'Actions',

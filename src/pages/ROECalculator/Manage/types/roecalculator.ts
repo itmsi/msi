@@ -47,6 +47,7 @@ export interface RorEntity {
    deleted_at: string | null;
    created_by: string;
    updated_by: string;
+   updated_by_name: string | null;
    deleted_by: string | null;
 
    is_delete: boolean;
