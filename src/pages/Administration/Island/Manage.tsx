@@ -54,7 +54,7 @@ export default function ManageIsland() {
         {
             name: 'Updated By',
             selector: row => row.updated_at || '',
-            sortable: true,
+            sortable: false,
             cell: (row) => (
                 <div className="flex flex-col py-2">
                     <span className="font-medium text-gray-900">
