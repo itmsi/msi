@@ -110,6 +110,30 @@ export const formatNumberInputFadlan = (value: string | number | undefined | nul
     
     return formattedInteger;
 };
+export const formatNumberInputwithComma = (value: string | number | undefined | null): string => {
+    if (!value && value !== 0) return '';
+
+    const stringValue = value.toString();
+    
+    let integerPart: string, decimalPart: string | undefined;
+    
+    if (stringValue.includes(',')) {
+        [integerPart, decimalPart] = stringValue.replace(/[^\d,]/g, '').split(',');
+    } else if (stringValue.includes('.')) {
+        [integerPart, decimalPart] = stringValue.replace(/[^\d.]/g, '').split('.');
+    } else {
+        integerPart = stringValue.replace(/[^\d]/g, '');
+        decimalPart = undefined;
+    }
+    
+    const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart || '0', 10));
+    
+    if (decimalPart !== undefined) {
+        return `${formattedInteger},${decimalPart}`;
+    }
+    
+    return formattedInteger;
+};
 
 // export const formatNumberInput = (value: string | number | null | undefined): string => {
 //     if (value === null) return '';
@@ -318,6 +342,48 @@ export const handleDecimalInput = (
     
     // Allow typing "0" or "0.x" patterns for decimal input
     if (cleanValue === '0' || cleanValue.startsWith('0.')) {
+        onValidInput(cleanValue);
+        return;
+    }
+    
+    const numericValue = parseFloat(cleanValue) || 0;
+    
+    if (numericValue <= 0) {
+        onInvalidInput();
+    } else {
+        const finalValue = formatWithComma ? fourdigitcomma(cleanValue) : cleanValue;
+        onValidInput(finalValue);
+    }
+};
+// Handle numeric input with support for decimal values starting with 0 (e.g., 0.12)
+export const handleDecimalInputComma = (
+    rawValue: string, 
+    onValidInput: (value: string) => void, 
+    onInvalidInput: () => void,
+    formatWithComma: boolean = true,
+    maxIntegerDigits?: number,
+    maxDecimalDigits: number = 4
+) => {
+    if (rawValue === '') {
+        onInvalidInput();
+        return;
+    }
+    
+    const cleanValue = rawValue.replace(/[^\d,]/g, '');
+    const [integerPart, decimalPart] = cleanValue.split(',');
+    
+    // Check max integer digits
+    if (maxIntegerDigits && integerPart && integerPart.length > maxIntegerDigits) {
+        return;
+    }
+    
+    // Check max decimal digits
+    if (decimalPart && decimalPart.length > maxDecimalDigits) {
+        return; 
+    }
+    
+    // Allow typing "0" or "0,x" patterns for decimal input
+    if (cleanValue === '0' || cleanValue.startsWith('0,')) {
         onValidInput(cleanValue);
         return;
     }

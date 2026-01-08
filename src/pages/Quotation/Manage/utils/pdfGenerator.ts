@@ -1771,7 +1771,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             doc.setFontSize(9);
             doc.setTextColor(0, 0, 0);
             setFontSafe(doc, 'Futura', 'normal');
-            const descText = 'Motor Sights Fleet delivers complete visibility into vehicle movement and fuel consumption. With fully integrated telematics technology, companies can manage fleet operations with higher accuracy, efficiency, and data-driven decision-making.';
+            const descText = 'Motor Sights Fleet memberikan visibilitas menyeluruh terhadap pergerakan kendaraan, konsumsi bahan bakar, serta pelacakan pendapatan melalui perhitungan ritase. Dengan teknologi telematika yang terintegrasi penuh, perusahaan dapat mengelola operasional armada dengan tepat, efisien, dan memudahkan pengambilan keputusan berbasis data yang lebih baik.';
             const splitDescText = doc.splitTextToSize(descText, descWidth);
             const lineHeight = 4.2;
             splitDescText.forEach((line: string) => {
@@ -1787,12 +1787,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             doc.setFontSize(10);
             doc.setTextColor(23, 26, 31);
             setFontSafe(doc, 'Futura', 'bold');
-            doc.text('MSF 1.0 Software Monthly Subscription (per Unit)', margin, varYPos);
+            doc.text('Langganan Bulanan Perangkat Lunak MSF 1.0 (per Unit)', margin, varYPos);
             varYPos += 3;
 
             const subscriptionData = [
-                {title:'GPS Tracking'},
-                {title:'Fuel Consumption'}
+                {title:'Pelacakan Unit Kendaraan'},
+                {title:'Pemantauan Konsumsi Bahan Bakar'},
+                {title:'Perhitungan Revenue per Unit'}
             ];
             
             // Calculate table dimensions
@@ -1813,7 +1814,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             doc.setFontSize(10);
             doc.setTextColor(23, 26, 31);
             setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Basic Subscription', pageWidth / 2, varYPos + 1, { align: 'center' });
+            doc.text('Paket Dasar', pageWidth / 2, varYPos + 1, { align: 'center' });
             varYPos += titleHeight - 4;
             
             // Render each subscription item with check icon
@@ -1823,7 +1824,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             
             subscriptionData.forEach((item) => {
                 const iconSize = 4;
-                const iconX = pageWidth / 2 - 16; // Position icon to the left of centered text
+                const iconX = pageWidth / 2.2 - 16; // Position icon to the left of centered text
                 const iconY = varYPos - 3;
                 
                 try {
@@ -1847,39 +1848,116 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             const dataTouchWidth = (pageWidth - 2 * margin) * 0.317;
             const gap = 5; // Gap between columns
             
+            // ENGLISH VERSION
+            // const dataFleet = {
+            //     headertitle: 'MOTOR SIGHTS FLEET 1.0 SUBSCRIPTION',
+            //     icon: '/pdf/asset-tracking.png',
+            //     title: 'Fleet & Asset Tracking',
+            //     items: [
+            //         {
+            //             subtitle: 'Real-time GPS Tracking',
+            //             content: 'Monitor vehicle positions in real time (live map view).'
+            //         },
+            //         {
+            //             subtitle: 'Route History & Replay',
+            //             content: 'Display travel history, including routes, speed, and stops.'
+            //         },
+            //         {
+            //             subtitle: 'Geofencing & Alerts',
+            //             content: 'Send notifications when vehicles enter or exit designated areas (e.g., pool, port, site).'
+            //         },
+            //         {
+            //             subtitle: 'Vehicle Status',
+            //             content: 'Online/offline, engine on/off, ignition.'
+            //         },
+            //         {
+            //             subtitle: 'Fuel Consumption Monitoring',
+            //             content: 'Calculate average liters per km or liters per hour.'
+            //         },
+            //         {
+            //             subtitle: 'Fuel Tank Sensor & Refill/Drain Alerts',
+            //             content: 'Detect refueling or draining activities.'
+            //         },
+            //         // {
+            //         //     subtitle: 'Cost per KM',
+            //         //     content: 'Monitor expense costs per kilometer to improve efficiency.'
+            //         // },
+            //         // {
+            //         //     subtitle: 'Cost per Liter',
+            //         //     content: 'See fuel consumption not only per KM/Liter, but also when units are idle, running, or in operation.'
+            //         // }
+            //     ]
+            // };
+            
+            // const dataService = {
+            //     headertitle: 'IMPLEMENTATION SERVICES',
+            //     icon: '/pdf/installation.png',
+            //     title: 'Telematics Installation',
+            //     items: [
+            //         {
+            //             subtitle: 'CAN line tracing',
+            //         },
+            //         {
+            //             subtitle: 'Telematics installation',
+            //         },
+            //         {
+            //             subtitle: 'Software integration',
+            //         }
+            //     ]
+            // };
+            // const dataProduct = {
+            //     headertitle: 'PRODUCT & DELIVERABLES DETAILS',
+            //     icon: null,
+            //     title: null,
+            //     items: [
+            //         {
+            //             icon: '/pdf/telematic.png',
+            //             title: 'Telematics',
+            //             content: 'Motor Sights Fleet 150.'
+            //         },
+            //         {
+            //             icon: '/pdf/module.png',
+            //             title: 'eCAN Module',
+            //             content: 'Harness for gathering data.'
+            //         },
+            //     ]
+            // };
+
+
+            // INDONESIAN VERSION
             const dataFleet = {
-                headertitle: 'MOTOR SIGHTS FLEET 1.0 SUBSCRIPTION',
+                headertitle: 'LANGGANAN MOTOR SIGHTS FLEET 1.0',
                 icon: '/pdf/asset-tracking.png',
-                title: 'Fleet & Asset Tracking',
+                title: 'Pelacakan Armada & Aset',
                 items: [
                     {
-                        subtitle: 'Real-time GPS Tracking',
-                        content: 'Monitor vehicle positions in real time (live map view).'
+                        subtitle: 'Pelacakan GPS Real-Time',
+                        content: 'Memantau posisi kendaraan secara real-time melalui tampilan peta.'
                     },
                     {
-                        subtitle: 'Route History & Replay',
-                        content: 'Display travel history, including routes, speed, and stops.'
+                        subtitle: 'Riwayat Perjalanan & Putar Ulang Rute',
+                        content: 'Menampilkan riwayat perjalanan kendaraan, termasuk rute yang dilalui, kecepatan, dan titik berhenti'
                     },
                     {
-                        subtitle: 'Geofencing & Alerts',
-                        content: 'Send notifications when vehicles enter or exit designated areas (e.g., pool, port, site).'
+                        subtitle: 'Pembatasan Wilayah & Notifikasi',
+                        content: 'Memberikan notifikasi otomatis saat kendaraan masuk atau keluar dari area yang telah ditentukan.'
                     },
                     {
-                        subtitle: 'Vehicle Status',
-                        content: 'Online/offline, engine on/off, ignition.'
+                        subtitle: 'Status Kendaraan',
+                        content: 'Menampilkan status kendaraan secara real-time, meliputi perangkat online/offline, mesin hidup/mati, serta kondisi unit.'
                     },
                     {
-                        subtitle: 'Fuel Consumption Monitoring',
-                        content: 'Calculate average liters per km or liters per hour.'
+                        subtitle: 'Perhitungan Revenue Unit',
+                        content: 'Menghitung jumlah ritase setiap unit kendaraan secara otomatis guna memudahkan pemantauan produktivitas dan kinerja finansial armada'
                     },
                     {
-                        subtitle: 'Fuel Tank Sensor & Refill/Drain Alerts',
-                        content: 'Detect refueling or draining activities.'
+                        subtitle: 'Pemantauan Konsumsi Bahan Bakar',
+                        content: 'Menghitung konsumsi bahan bakar rata-rata dalam satuan liter per kilometer, serta akumulasi konsumsi bahan bakar berdasarkan periode waktu harian, mingguan, atau bulanan.'
                     },
-                    // {
-                    //     subtitle: 'Cost per KM',
-                    //     content: 'Monitor expense costs per kilometer to improve efficiency.'
-                    // },
+                    {
+                        subtitle: 'Fuel/Refueling Sensor dan Aktivitas Bahan Bakar',
+                        content: 'Mendeteksi aktivitas pengisian atau pengurasan bahan bakar melalui report dan juga grafik untuk mencegah kehilangan dan penyimpangan.'
+                    },
                     // {
                     //     subtitle: 'Cost per Liter',
                     //     content: 'See fuel consumption not only per KM/Liter, but also when units are idle, running, or in operation.'
@@ -1888,36 +1966,41 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             };
             
             const dataService = {
-                headertitle: 'IMPLEMENTATION SERVICES',
+                headertitle: 'LAYANAN IMPLEMENTASI',
                 icon: '/pdf/installation.png',
-                title: 'Telematics Installation',
+                title: 'Instalasi Hardware',
                 items: [
                     {
-                        subtitle: 'CAN line tracing',
+                        subtitle: 'Penarikan jalur CAN',
                     },
                     {
-                        subtitle: 'Telematics installation',
+                        subtitle: 'Pemasangan perangkat telematika',
                     },
                     {
-                        subtitle: 'Software integration',
+                        subtitle: 'Integrasi dan konfigurasi perangkat lunak MSF 1.0',
                     }
                 ]
             };
             
             const dataProduct = {
-                headertitle: 'PRODUCT & DELIVERABLES DETAILS',
+                headertitle: 'PRODUK & DETAIL YANG DIBERIKAN',
                 icon: null,
                 title: null,
                 items: [
                     {
                         icon: '/pdf/telematic.png',
-                        title: 'Telematics',
-                        content: 'Motor Sights Fleet 150.'
+                        title: 'Perangkat Telematika MSF 150',
+                        content: 'Perangkat telematika MSF 150 yang berfungsi untuk mengirimkan data lokasi dan informasi kendaraan secara real-time.'
                     },
                     {
                         icon: '/pdf/module.png',
-                        title: 'eCAN Module',
-                        content: 'Harness for gathering data.'
+                        title: 'Modul & Kabel eCAN',
+                        content: 'Modul dan kabel harness untuk menghubungkan jalur CAN kendaraan dengan perangkat telematika, guna mengambil data kendaraan secara akurat.'
+                    },
+                    {
+                        icon: '/pdf/module.png',
+                        title: 'Software FMS 1.0',
+                        content: 'Platform perangkat lunak berbasis web yang digunakan untuk memonitor, menganalisis, dan melaporkan data armada secara komprehensif.'
                     },
                 ]
             };
@@ -1935,7 +2018,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 doc.roundedRect(columnX, columnY, dataTouchWidth, 12, 2, 2, 'F');
                 
                 // Header text
-                doc.setFontSize(10);
+                doc.setFontSize(9);
                 doc.setTextColor(0, 0, 0);
                 setFontSafe(doc, 'Futura', 'bold');
                 const headerLines = doc.splitTextToSize(data.headertitle, dataTouchWidth - 8);
@@ -1963,9 +2046,12 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     doc.setFontSize(10);
                     doc.setTextColor(23, 26, 31);
                     setFontSafe(doc, 'Futura', 'bold');
-                    doc.text(data.title, iconX + iconSize + 3, columnY + 4);
+                    const titleLines = doc.splitTextToSize(data.title, dataTouchWidth - (iconSize + 7));
+                    titleLines.forEach((line: string, lineIndex: number) => {
+                        doc.text(line, iconX + iconSize + 3, columnY + 4 + (lineIndex * 4));
+                    });
                     
-                    columnY += 10;
+                    columnY += 10 + (titleLines.length > 1 ? (titleLines.length - 1) * 4 : 0);
                 }
                 
                 // Items content
@@ -2012,8 +2098,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                             
                             doc.setTextColor(23, 26, 31);
                             setFontSafe(doc, 'Futura', 'bold');
-                            doc.text(item.title, iconX + iconSize + 3, columnY + 3);
-                            columnY += 4.5;
+                            // doc.text(item.title, iconX + iconSize + 3, columnY + 3);
+                            
+                            
+                            const titleLinesT = doc.splitTextToSize(item.title, dataTouchWidth - (iconSize + 7));
+                            titleLinesT.forEach((line: string, lineIndex: number) => {
+                                doc.text(line, iconX + iconSize + 3, columnY + 3 + (lineIndex * 4));
+                            });
+                            columnY += 4.5 + (titleLinesT.length > 1 ? (titleLinesT.length - 1) * 4 : 0)
+                            // columnY += 7.5;
                             
                             if (item.content) {
                                 doc.setFontSize(8);
