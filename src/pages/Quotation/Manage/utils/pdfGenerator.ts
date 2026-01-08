@@ -2026,7 +2026,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     doc.text(line, columnX + dataTouchWidth/2, columnY + 6 + (lineIndex * 3), { align: 'center' });
                 });
                 
-                columnY += 18;
+                columnY += 17;
                 
                 // Icon and Title (if exists) - for dataFleet and dataService only
                 
@@ -2124,7 +2124,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 }
                 
                 // Draw border around entire column
-                const columnHeight = columnY - columnStartY + 5;
+                const columnHeight = columnY - columnStartY ;
                 doc.setDrawColor(228, 231, 236);
                 doc.setLineWidth(0.3);
                 doc.roundedRect(columnX, columnStartY, dataTouchWidth, columnHeight, 2, 2);
