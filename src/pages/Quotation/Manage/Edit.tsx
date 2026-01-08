@@ -1198,10 +1198,11 @@ export default function EditQuotation() {
             
             // Submit to API
             const response = await updateQuotation(quotationId!, finalPayload);
-            
             if (response.success) {
                 toast.success(`Quotation ${status === 'submit' ? 'updated' : 'saved as draft'} successfully`);
                 navigate('/quotations/manage');
+            } else {
+                toast.error(response.message || 'Failed to update quotation');
             }
         } catch (error: any) {
             toast.error(error.message || 'Failed to update quotation');
@@ -1877,7 +1878,7 @@ export default function EditQuotation() {
                                                     () => handleNumericCleanInput('manage_quotation_mutation_nominal', ''),
                                                     true,
                                                     20,
-                                                    5
+                                                    4
                                                 );
                                             }}
                                         />

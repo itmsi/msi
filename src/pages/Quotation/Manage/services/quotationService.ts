@@ -118,12 +118,12 @@ export class QuotationService {
                 manage_quotation_items: quotationData.manage_quotation_items || []
             };
 
-            const response = await apiPut(`${API_BASE_URL}/quotation/manage-quotation/${quotationId}`, payload);
+            const response = await apiPut<{ status: boolean; message: string; data: any }>(`${API_BASE_URL}/quotation/manage-quotation/${quotationId}`, payload);
             
             return {
-                success: true,
+                success: response.data?.status || false,
                 data: response.data,
-                message: 'Quotation updated successfully'
+                message: response.data?.message
             };
         } catch (error: any) {
             console.error('Update quotation error:', error);

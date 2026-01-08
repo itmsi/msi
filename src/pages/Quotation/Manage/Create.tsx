@@ -587,8 +587,6 @@ export default function CreateQuotation() {
         }
     };
 
-
-
     // Update quotation item directly from table (inline editing)
     const updateItemById = (itemIndex: number, field: keyof QuotationItem, value: string | number) => {
         setFormData(prev => {
@@ -614,8 +612,6 @@ export default function CreateQuotation() {
             };
         });
     };
-
-
 
     // Remove quotation item and recalculate totals
     const removeQuotationItem = (itemIndex: number) => {
@@ -1013,6 +1009,8 @@ export default function CreateQuotation() {
             if (response.success) {
                 toast.success(`Quotation ${status === 'submit' ? 'submitted' : 'saved as draft'} successfully`);
                 navigate('/quotations/manage');
+            } else {
+                toast.error(response.message || 'Failed to save quotation');
             }
         } catch (error: any) {
             toast.error(error.message || 'Failed to save quotation');
