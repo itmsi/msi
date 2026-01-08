@@ -1800,15 +1800,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             const tableWidth = pageWidth - 2 * margin;
             const tableStartY = varYPos;
             const rowHeight = 7;
-            const titleHeight = 12; // Height for title
-            const totalTableHeight = titleHeight + subscriptionData.length * rowHeight; // 6 for padding
+            const titleHeight = 12;
+            const totalTableHeight = titleHeight + subscriptionData.length * rowHeight;
             
             // Draw table border
             doc.setDrawColor(228, 231, 236);
             doc.setLineWidth(0.3);
             doc.roundedRect(margin, tableStartY, tableWidth, totalTableHeight, 1, 1);
             
-            varYPos += 6; // Top padding
+            varYPos += 6;
             
             // Add title inside the border
             doc.setFontSize(10);
@@ -1824,7 +1824,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             
             subscriptionData.forEach((item) => {
                 const iconSize = 4;
-                const iconX = pageWidth / 2.2 - 16; // Position icon to the left of centered text
+                const iconX = pageWidth / 2.2 - 16;
                 const iconY = varYPos - 3;
                 
                 try {
@@ -1842,11 +1842,11 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 varYPos += rowHeight - 2;
             });
 
-            return varYPos + 3; // Bottom padding
+            return varYPos + 3;
         }
         const dataTouch = (varYPos: number): number => {
             const dataTouchWidth = (pageWidth - 2 * margin) * 0.317;
-            const gap = 5; // Gap between columns
+            const gap = 5;
             
             // ENGLISH VERSION
             // const dataFleet = {
@@ -1936,7 +1936,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     },
                     {
                         subtitle: 'Riwayat Perjalanan & Putar Ulang Rute',
-                        content: 'Menampilkan riwayat perjalanan kendaraan, termasuk rute yang dilalui, kecepatan, dan titik berhenti'
+                        content: 'Menampilkan riwayat perjalanan kendaraan, termasuk rute yang dilalui, kecepatan, dan titik berhenti.'
                     },
                     {
                         subtitle: 'Pembatasan Wilayah & Notifikasi',
@@ -1948,7 +1948,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     },
                     {
                         subtitle: 'Perhitungan Revenue Unit',
-                        content: 'Menghitung jumlah ritase setiap unit kendaraan secara otomatis guna memudahkan pemantauan produktivitas dan kinerja finansial armada'
+                        content: 'Menghitung jumlah ritase setiap unit kendaraan secara otomatis guna memudahkan pemantauan produktivitas dan kinerja finansial armada.'
                     },
                     {
                         subtitle: 'Pemantauan Konsumsi Bahan Bakar',
@@ -2027,9 +2027,6 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 });
                 
                 columnY += 17;
-                
-                // Icon and Title (if exists) - for dataFleet and dataService only
-                
                 const iconSize = 6;
                 const iconX = columnX + 3;
                 const iconY = columnY;
@@ -2111,7 +2108,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                             if (item.content) {
                                 doc.setFontSize(8);
                                 doc.setTextColor(23, 26, 31);
-                                setFontSafe(doc, 'Futura', 'bold');
+                                setFontSafe(doc, 'Futura', 'normal');
                                 const contentLines = doc.splitTextToSize(item.content, dataTouchWidth - 15);
                                 contentLines.forEach((line: string) => {
                                     doc.text(line, iconX + iconSize + 3, columnY + 3);

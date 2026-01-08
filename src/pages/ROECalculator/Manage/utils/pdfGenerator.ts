@@ -524,8 +524,9 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         const liabilityData = [
             ['Cicilan Pokok', formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.cicilan_pokok)],
             ['Bunga (Rp)', formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.bunga)],
-            ['Total per Bulan', formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.total_per_bulan)],
-            ['Rasio Keuangan', ''],
+            ['Total per Bulan', formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.total_per_bulan)]
+        ];
+        const RasioData = [
             ['Cicilan Pokok', data.pdf_data.asset_liability.cicilan_bulanan.rasio_keuangan.cicilan_pokok],
             ['Bunga (%)', data.pdf_data.asset_liability.cicilan_bulanan.rasio_keuangan.bunga + '%'],
         ];
@@ -550,11 +551,33 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
                 1: { cellWidth: (colWidth - 7) * 0.6 }
             },
         });
+        postY += 25;
+        doc.setFontSize(8);
+        doc.setTextColor(23, 26, 31);
+        setFontSafe(doc, 'OpenSans', 'bold');
+        doc.text('Rasio Keuangan', fullTableWidth + margin + colWidth + 5, postY + 2);
         autoTable(doc, {
-            startY: postY + 40,
+            startY: postY + 4,
+            body: RasioData,
+            margin: { left: fullTableWidth + margin + colWidth + 4 },
+            tableWidth: colWidth - 20,
+            styles: {
+                fontSize: 8,
+                cellPadding: 1,
+                font: 'Futura',
+                fontStyle: 'normal'
+            },
+            columnStyles: {
+                0: { cellWidth: (colWidth - 7) * 0.4, fontStyle: 'normal' },
+                1: { cellWidth: (colWidth - 7) * 0.6 }
+            },
+        });
+        autoTable(doc, {
+            startY: postY + 17,
             body: totalEquityLiabilityData,
             margin: { left: fullTableWidth + margin + colWidth + 4 },
             tableWidth: colWidth - 20,
+            alternateRowStyles: { fillColor: [255, 255, 255] },
             styles: {
                 fontSize: 8,
                 cellPadding: 1,
