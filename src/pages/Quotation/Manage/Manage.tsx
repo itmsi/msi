@@ -87,6 +87,7 @@ const ManageQuotations: React.FC = () => {
             {
                 name: 'Customer Name',
                 selector: (row) => row.customer_name,
+                wrap: true,
             },
             // {
             //     name: 'Sales Name',
