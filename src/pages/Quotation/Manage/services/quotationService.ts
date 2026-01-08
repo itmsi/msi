@@ -47,12 +47,13 @@ export class QuotationService {
                 manage_quotation_item_accessories: quotationData.manage_quotation_item_accessories || []
             };
 
-            const response = await apiPost(`${API_BASE_URL}/quotation/manage-quotation`, payload);
+            // const response = await apiPost(`${API_BASE_URL}/quotation/manage-quotation`, payload);
             
+            const response = await apiPost<{ status: boolean; message: string; data: any }>(`${API_BASE_URL}/quotation/manage-quotation`, payload);
             return {
-                success: true,
+                success: response.data?.status || false,
                 data: response.data,
-                message: 'Quotation created successfully'
+                message: response.data?.message
             };
         } catch (error: any) {
             console.error('Create quotation error:', error);
