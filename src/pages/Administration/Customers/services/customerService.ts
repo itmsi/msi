@@ -1,5 +1,5 @@
 import { apiGet, apiPost, apiPut, apiDelete, ApiResponse } from '@/helpers/apiHelper';
-import { CustomerResponse, CustomerRequest, Customer, CustomerFormData } from '../types/customer';
+import { CustomerResponse, CustomerRequest, Customer, CustomerFormData, DuplicateCustomerResponse, CheckDuplicateCustomerPayload } from '../types/customer';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export class CustomerService {
@@ -32,6 +32,11 @@ export class CustomerService {
                 errors: error.errors
             };
         }
+    }
+
+    static async validateCustomer(payload: CheckDuplicateCustomerPayload): Promise<DuplicateCustomerResponse> {
+        const response = await apiPost(`${API_BASE_URL}/mosa/customer-validation/validate-duplicate`, payload as Record<string, any>);
+        return response.data as DuplicateCustomerResponse;
     }
 
     static async updateCustomer(customerId: string, customerData: Partial<Omit<Customer, 'customer_id'>>): Promise<Customer> {
