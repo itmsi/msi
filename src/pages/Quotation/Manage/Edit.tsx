@@ -939,7 +939,7 @@ export default function EditQuotation() {
                 volume: updatedProductData.volume || currentItem.volume,
                 horse_power: updatedProductData.horse_power || currentItem.horse_power,
                 market_price: updatedProductData.market_price || currentItem.market_price,
-                price: updatedProductData.market_price || currentItem.price,
+                price: currentItem.price,
                 product_type: updatedProductData.product_type || currentItem.product_type,
                 componen_product_unit_model: updatedProductData.componen_product_unit_model || currentItem.componen_product_unit_model,
                 selling_price_star_1: updatedProductData.selling_price_star_1 || currentItem.selling_price_star_1,

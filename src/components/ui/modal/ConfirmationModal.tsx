@@ -112,7 +112,7 @@ export default function ConfirmationModal({
                     )}
 
                     {/* Text Content */}
-                    <div className={`text-center sm:ml-4 sm:mt-0 sm:text-left ${showIcon ? '' : 'sm:ml-0'}`}>
+                    <div className={`text-center sm:mt-0 sm:text-left ${showIcon ? 'sm:ml-4' : 'sm:ml-0'}`}>
                             {typeof message === 'string' ? (
                                 <p className="text-sm text-gray-500">
                                     {message}
