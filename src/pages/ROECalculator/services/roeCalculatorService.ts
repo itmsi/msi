@@ -35,7 +35,7 @@ export class ROECalculatorService {
 
                 // Step 3 - Operational
                 ritase_per_shift: '',
-                shift_per_hari: '',
+                shift_per_hari: '1',
                 hari_kerja_per_bulan: 0,
                 utilization_percent: parseFloat(apiData.utilization_percent || '') || 0,
                 downtime_percent: parseInt(apiData.downtime_percent || '') || 0,
@@ -80,7 +80,7 @@ export class ROECalculatorService {
                 },
                 operation_data: {
                     ritase_per_shift: apiData?.operational?.ritase_per_shift || '',
-                    shift_per_hari: apiData?.operational?.shift_per_hari || '',
+                    shift_per_hari: apiData?.operational?.shift_per_hari || '1',
                     hari_kerja_per_bulan: apiData?.operational?.hari_kerja_per_bulan || '',
                     utilization_percent: apiData?.operational?.utilization_percent || '',
                     downtime_percent: apiData?.operational?.downtime_percent || '0',
@@ -147,7 +147,7 @@ export class ROECalculatorService {
                 periode_depresiasi: '',
                 
                 ritase_per_shift: '',
-                shift_per_hari: '',
+                shift_per_hari: '1',
                 hari_kerja_per_bulan: 0,
                 utilization_percent: 0,
                 downtime_percent: 0,
@@ -450,7 +450,7 @@ export class ROECalculatorService {
                 periode_depresiasi: '',
 
                 ritase_per_shift: '',
-                shift_per_hari: '',
+                shift_per_hari: '1',
                 hari_kerja_per_bulan: 0,
                 utilization_percent: 0,
                 downtime_percent: 0,

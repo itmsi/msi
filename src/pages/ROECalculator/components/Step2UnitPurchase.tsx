@@ -182,7 +182,7 @@ export default function Step2UnitPurchase({
                         <Label htmlFor="interest_rate">Interest Rate Flat per Tahun (%)</Label>
                         <Input
                             id="interest_rate"
-                            value={formData.interest_rate === null ? '' : formData.interest_rate || '0'}
+                            value={formData.interest_rate === null ? '' : formData.interest_rate || '4.5'}
                             onChange={(e) => {
                                 const rawValue = e.target.value;
                                 

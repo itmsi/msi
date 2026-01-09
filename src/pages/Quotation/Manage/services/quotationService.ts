@@ -23,6 +23,9 @@ export class QuotationService {
                 manage_quotation_date: quotationData.manage_quotation_date,
                 manage_quotation_valid_date: quotationData.manage_quotation_valid_date,
                 manage_quotation_grand_total: quotationData.manage_quotation_grand_total || "0",
+                manage_quotation_grand_total_before: quotationData.manage_quotation_grand_total_before || null,
+                manage_quotation_mutation_type: quotationData.manage_quotation_mutation_type || null,
+                manage_quotation_mutation_nominal: quotationData.manage_quotation_mutation_nominal || null,
                 manage_quotation_ppn: quotationData.manage_quotation_ppn || "0",
                 manage_quotation_delivery_fee: quotationData.manage_quotation_delivery_fee || "0",
                 manage_quotation_other: quotationData.manage_quotation_other || "0",
@@ -44,12 +47,13 @@ export class QuotationService {
                 manage_quotation_item_accessories: quotationData.manage_quotation_item_accessories || []
             };
 
-            const response = await apiPost(`${API_BASE_URL}/quotation/manage-quotation`, payload);
+            // const response = await apiPost(`${API_BASE_URL}/quotation/manage-quotation`, payload);
             
+            const response = await apiPost<{ status: boolean; message: string; data: any }>(`${API_BASE_URL}/quotation/manage-quotation`, payload);
             return {
-                success: true,
+                success: response.data?.status || false,
                 data: response.data,
-                message: 'Quotation created successfully'
+                message: response.data?.message
             };
         } catch (error: any) {
             console.error('Create quotation error:', error);
@@ -115,12 +119,12 @@ export class QuotationService {
                 manage_quotation_items: quotationData.manage_quotation_items || []
             };
 
-            const response = await apiPut(`${API_BASE_URL}/quotation/manage-quotation/${quotationId}`, payload);
+            const response = await apiPut<{ status: boolean; message: string; data: any }>(`${API_BASE_URL}/quotation/manage-quotation/${quotationId}`, payload);
             
             return {
-                success: true,
+                success: response.data?.status || false,
                 data: response.data,
-                message: 'Quotation updated successfully'
+                message: response.data?.message
             };
         } catch (error: any) {
             console.error('Update quotation error:', error);

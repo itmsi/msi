@@ -27,7 +27,7 @@ import { ItemProduct } from '../Product/types/product';
 import { useEditQuotation } from './hooks/useEditQuotation';
 import { useAsyncSelect, SelectOption } from '../hooks/useAsyncSelect';
 import { useTermConditionSelect, TermConditionSelectOption } from '../hooks/useTermConditionSelect';
-import { handleKeyPress, formatNumberInput, handlePercentageInput, allowOnlyNumeric, parseDecimalInput } from '@/helpers/generalHelper';
+import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalInput, handleDecimalInputComma, formatNumberInputwithComma } from '@/helpers/generalHelper';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { ItemProductService } from '../Product/services/productService';
 import ProductDetailDrawer from '@/pages/Quotation/Manage/components/ProductDetailDrawer';
@@ -535,41 +535,45 @@ export default function EditQuotation() {
         handleInputChange(field, numberic);
     };
 
-    const handleDecimalInputChange = (field: keyof QuotationFormData, inputValue: string) => {
-        // Allow digits, comma, and dot
-        const cleaned = inputValue.replace(/[^\d,.]/g, '');
-        handleInputChange(field, cleaned);
+    // const handleDecimalInputChange = (field: keyof QuotationFormData, inputValue: string) => {
+    //     // Allow digits, comma, and dot
+    //     const cleaned = inputValue.replace(/[^\d,.]/g, '');
+    //     handleInputChange(field, cleaned);
+    // };
+
+    const handleNumericCleanInput = (field: keyof QuotationFormData, inputValue: string) => {
+        handleInputChange(field, inputValue);
     };
 
     // Format decimal for display - preserves decimal separator and trailing digits
-    const formatDecimalDisplayInput = (value: string | undefined | null): string => {
-        if (!value) return '';
+    // const formatDecimalDisplayInput = (value: string | undefined | null): string => {
+    //     if (!value) return '';
         
-        const str = value.toString();
+    //     const str = value.toString();
         
-        // Check if there's a decimal separator (comma or dot)
-        const hasComma = str.includes(',');
-        const hasDot = str.includes('.');
+    //     // Check if there's a decimal separator (comma or dot)
+    //     const hasComma = str.includes(',');
+    //     const hasDot = str.includes('.');
         
-        if (!hasComma && !hasDot) {
-            // No decimal - just format as integer with thousand separators
-            const cleaned = str.replace(/[^\d]/g, '');
-            if (!cleaned) return '';
-            return new Intl.NumberFormat('id-ID').format(parseInt(cleaned));
-        }
+    //     if (!hasComma && !hasDot) {
+    //         // No decimal - just format as integer with thousand separators
+    //         const cleaned = str.replace(/[^\d]/g, '');
+    //         if (!cleaned) return '';
+    //         return new Intl.NumberFormat('id-ID').format(parseInt(cleaned));
+    //     }
         
-        // Has decimal separator - preserve it
-        const separator = hasComma ? ',' : '.';
-        const parts = str.split(separator);
-        const integerPart = parts[0].replace(/[^\d]/g, '') || '0';
-        const decimalPart = parts[1] || '';
+    //     // Has decimal separator - preserve it
+    //     const separator = hasComma ? ',' : '.';
+    //     const parts = str.split(separator);
+    //     const integerPart = parts[0].replace(/[^\d]/g, '') || '0';
+    //     const decimalPart = parts[1] || '';
         
-        // Format integer part with thousand separators
-        const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart));
+    //     // Format integer part with thousand separators
+    //     const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart));
         
-        // Return with comma as decimal separator (Indonesian format)
-        return `${formattedInteger},${decimalPart}`;
-    };
+    //     // Return with comma as decimal separator (Indonesian format)
+    //     return `${formattedInteger},${decimalPart}`;
+    // };
 
     const handlePercentageInputChange = (field: keyof QuotationFormData, inputValue: string) => {
         handleInputChange(field, handlePercentageInput(inputValue));
@@ -1194,10 +1198,11 @@ export default function EditQuotation() {
             
             // Submit to API
             const response = await updateQuotation(quotationId!, finalPayload);
-            
             if (response.success) {
                 toast.success(`Quotation ${status === 'submit' ? 'updated' : 'saved as draft'} successfully`);
                 navigate('/quotations/manage');
+            } else {
+                toast.error(response.message || 'Failed to update quotation');
             }
         } catch (error: any) {
             toast.error(error.message || 'Failed to update quotation');
@@ -1862,13 +1867,20 @@ export default function EditQuotation() {
                                         
                                         <Input
                                             id="manage_quotation_mutation_nominal"
-                                            type="text"
-                                            onKeyPress={allowOnlyNumeric}
-                                            value={formatDecimalDisplayInput(formData.manage_quotation_mutation_nominal)}
-                                            maxLength={20}
-                                            onChange={(e) => handleDecimalInputChange('manage_quotation_mutation_nominal', e.target.value)}
-                                            placeholder="0"
+                                            value={formatNumberInputwithComma(formData.manage_quotation_mutation_nominal)}
                                             disabled={!formData.manage_quotation_mutation_type}
+                                            onChange={(e) => {
+                                                const rawValue = e.target.value;
+                                                
+                                                handleDecimalInputComma(
+                                                    rawValue,
+                                                    (validValue) => handleNumericCleanInput('manage_quotation_mutation_nominal', validValue),
+                                                    () => handleNumericCleanInput('manage_quotation_mutation_nominal', ''),
+                                                    true,
+                                                    20,
+                                                    4
+                                                );
+                                            }}
                                         />
                                     </div>  
 
