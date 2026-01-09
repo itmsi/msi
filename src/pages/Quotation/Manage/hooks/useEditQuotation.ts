@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { QuotationService } from '../services/quotationService';
 import { ManageQuotationData, QuotationValidationErrors } from '../types/quotation';
+import toast from 'react-hot-toast';
 
 export const useEditQuotation = () => {
     const [loading, setLoading] = useState(false);
@@ -45,6 +46,7 @@ export const useEditQuotation = () => {
             if (response.success) {
                 return response;
             } else {
+                toast.error(response.message || 'Failed to update quotation');
                 if (response.errors) {
                     setValidationErrors(response.errors);
                 }

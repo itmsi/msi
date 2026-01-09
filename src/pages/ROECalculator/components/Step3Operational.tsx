@@ -223,7 +223,7 @@ export default function Step3Operational({
                         <Input
                             id="fuel_price"
                             onKeyPress={handleKeyPress}
-                            value={formatNumberInput(formData?.fuel_price)}
+                            value={formatNumberInput(formData?.fuel_price || 6500)}
                             onChange={(e) => handleInputChange('fuel_price', e.target.value)}
                             placeholder=""
                         />
