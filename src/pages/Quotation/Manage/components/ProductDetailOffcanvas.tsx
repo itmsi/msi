@@ -110,25 +110,29 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         if (!initialData || !onChange) return;
         
         const updatedData = { ...initialData };
-        const updatedSpecs = [...(updatedData.componen_product_specifications || [])];
+        const existingSpecs = updatedData.componen_product_specifications || [];
+        const updatedSpecs = [];
         
-        while (updatedSpecs.length < defaultSpecifications.length) {
-            const specIndex = updatedSpecs.length;
+        for (let i = 0; i < defaultSpecifications.length; i++) {
+            const defaultSpec = defaultSpecifications[i];
+            
+            const existingSpec = existingSpecs.find(spec => 
+                spec.componen_product_specification_label === defaultSpec.label ||
+                spec.specification_label_name === defaultSpec.label
+            );
+            
+            const newValue = i === index ? value : 
+                (existingSpec?.componen_product_specification_value || 
+                 existingSpec?.specification_value_name || 
+                 defaultSpec.value || '');
+            
             updatedSpecs.push({
-                componen_product_specification_label: defaultSpecifications[specIndex].label,
-                componen_product_specification_value: defaultSpecifications[specIndex].value,
-                componen_product_specification_description: null,
-                specification_label_name: defaultSpecifications[specIndex].label,
-                specification_value_name: defaultSpecifications[specIndex].value
+                componen_product_specification_label: defaultSpec.label,
+                componen_product_specification_value: newValue,
+                componen_product_specification_description: existingSpec?.componen_product_specification_description || null,
+                specification_label_name: defaultSpec.label,
+                specification_value_name: newValue
             });
-        }
-        
-        if (updatedSpecs[index]) {
-            updatedSpecs[index] = {
-                ...updatedSpecs[index],
-                componen_product_specification_value: value,
-                specification_value_name: value
-            };
         }
         
         updatedData.componen_product_specifications = updatedSpecs;
