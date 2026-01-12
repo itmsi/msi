@@ -100,6 +100,7 @@ export interface IupManagementFormData {
     business_type: string;
     permit_type: string;
     segmentation_id: string;
+    segmentation_name_en: string;
     province_name: string;
     pic: string;
     mine_location: string;
