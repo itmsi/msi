@@ -99,7 +99,7 @@ const Contractors: React.FC = () => {
                         <div className="relative">
                             <Input 
                                 type="text"
-                                placeholder="Search contractors... (Press Enter to search)"
+                                placeholder="Search by contractor name or customer code... (Press Enter to search)"
                                 value={searchValue}
                                 onChange={(e) => setSearchValue(e.target.value)}
                                 onKeyPress={handleKeyPress}

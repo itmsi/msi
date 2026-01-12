@@ -409,9 +409,9 @@ const EditContractor: React.FC = () => {
         if (!formData.customer_data.customer_name.trim()) {
             errors.customer_name = 'Customer name is required';
         }
-        if (!formData.customer_data.customer_email.trim()) {
-            errors.customer_email = 'Customer email is required';
-        }
+        // if (!formData.customer_data.customer_email.trim()) {
+        //     errors.customer_email = 'Customer email is required';
+        // }
         if (!formData.customer_data.customer_phone.trim()) {
             errors.customer_phone = 'Customer phone is required';
         }
