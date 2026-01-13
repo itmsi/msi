@@ -273,7 +273,7 @@ export default function CreateCustomer() {
 
                                 {/* Customer Email */}
                                 <div className="md:col-span-2">
-                                    <Label htmlFor="customer_email">Email *</Label>
+                                    <Label htmlFor="customer_email">Email</Label>
                                     <Input
                                         id="customer_email"
                                         type="email"

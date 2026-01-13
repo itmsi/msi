@@ -165,13 +165,13 @@ export default function EditCustomer() {
             hasErrors = true;
         }
         
-        if (!formData.customer_email.trim()) {
-            toast.error('Customer email is required');
-            hasErrors = true;
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customer_email)) {
-            toast.error('Please enter a valid email address');
-            hasErrors = true;
-        }
+        // if (!formData.customer_email.trim()) {
+        //     toast.error('Customer email is required');
+        //     hasErrors = true;
+        // } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customer_email)) {
+        //     toast.error('Please enter a valid email address');
+        //     hasErrors = true;
+        // }
         
         if (!formData.customer_phone.trim()) {
             toast.error('Customer phone is required');
@@ -328,7 +328,7 @@ export default function EditCustomer() {
 
                                 {/* Customer Email */}
                                 <div className="md:col-span-2">
-                                    <Label htmlFor="customer_email">Email *</Label>
+                                    <Label htmlFor="customer_email">Email</Label>
                                     <Input
                                         id="customer_email"
                                         type="email"
