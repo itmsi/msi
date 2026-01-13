@@ -420,9 +420,10 @@ const EditContractor: React.FC = () => {
         if (!formData.iup_customers.iup_id) {
             errors.iup_id = 'IUP selection is required';
         }
-        if (!formData.iup_customers.rkab.trim()) {
-            errors.rkab = 'RKAB is required';
-        }
+        // RKAB validation
+        // if (!formData.iup_customers.rkab.trim()) {
+        //     errors.rkab = 'RKAB is required';
+        // }
         if (!formData.iup_customers.segmentation_id) {
             errors.segmentation_id = 'Segmentation selection is required';
         }
