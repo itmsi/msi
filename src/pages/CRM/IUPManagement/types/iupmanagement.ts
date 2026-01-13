@@ -21,6 +21,7 @@ export interface IupSummary {
 }
 
 export interface CustomerInfo {
+    customer_id: string;
     customer_name: string;
     customer_phone: string;
     contact_person: string;

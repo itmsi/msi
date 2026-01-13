@@ -222,10 +222,12 @@ export default function Step3Operational({
                         <Label htmlFor="fuel_price">Harga BBM (Rp/L)</Label>
                         <Input
                             id="fuel_price"
-                            onKeyPress={handleKeyPress}
-                            value={formatNumberInput(formData?.fuel_price || 6500)}
-                            onChange={(e) => handleInputChange('fuel_price', e.target.value)}
-                            placeholder=""
+                            type="text"
+                            value={formatNumberInput(formData.fuel_price)}
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/[^\d]/g, '');
+                                handleInputChange('fuel_price', value);
+                            }}
                         />
                     </div>
 
