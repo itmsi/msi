@@ -230,6 +230,14 @@ export const tableDateFormat = {
     month: 'short' as const,
     year: 'numeric' as const
 }
+export const tableDateFormatTime = {
+    day: '2-digit' as const,
+    month: 'short' as const,
+    year: 'numeric' as const,
+    hour: '2-digit' as const,
+    minute: '2-digit' as const,
+    second: '2-digit' as const
+}
 
 export const formatDate = (dateString: string, includeTime: boolean = false) => {
     const date = new Date(dateString);

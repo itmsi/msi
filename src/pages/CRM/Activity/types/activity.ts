@@ -13,13 +13,9 @@ export interface Activity {
     image_url: string;
     voice_record_url: string;
     segmentation_properties: SegmentationProperties;
-    created_at: string;
-    created_by: string;
     updated_at: string;
     updated_by: string;
-    deleted_at: string | null;
-    deleted_by: string | null;
-    is_delete: boolean;
+    updated_by_name: string;
 }
 
 export interface SegmentationProperties {

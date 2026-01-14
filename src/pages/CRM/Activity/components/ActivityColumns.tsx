@@ -1,5 +1,8 @@
 import { TableColumn } from 'react-data-table-component';
 import { Activity } from '../types/activity';
+import { formatDateTime } from '@/helpers/generalHelper';
+import Badge from '@/components/ui/badge/Badge';
+import { ActivityTypeBadge } from '../../Contractors/components/ContractorBadges';
 
 // Helper function to format date
 const formatDate = (dateString: string): string => {
@@ -47,26 +50,27 @@ const getTransactionSourceBadge = (source: string): string => {
 export const getActivityColumns = (): TableColumn<Activity>[] => [
     {
         name: 'Transaction Type',
-        selector: (row: Activity) => row.transaction_type || '-',
-        // width: '140px',
-        cell: (row: Activity) => (
-            <div className="py-2">
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTransactionTypeBadge(row.transaction_type)}`}>
-                    {row.transaction_type || '-'}
-                </span>
-            </div>
-        ),
+        selector: (row) => row?.transaction_type || 'find',
+        cell: (row) => <ActivityTypeBadge type={(row?.transaction_type.toLowerCase() as 'find' | 'pull' | 'survey') || 'find'} />
     },
     {
         name: 'Transaction Source',
         selector: (row: Activity) => row.transaction_source || '-',
         // width: '140px',
         cell: (row: Activity) => (
-            <div className="py-2">
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTransactionSourceBadge(row.transaction_source)}`}>
-                    {row.transaction_source || '-'}
-                </span>
+            <div className="capitalize">
+                <Badge
+                    color={row.transaction_source.toLowerCase() === 'manual' ? 'primary' :'info'}
+                    variant='light'
+                >
+                    {row.transaction_source}
+                </Badge>
             </div>
+            // <div className="py-2">
+            //     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTransactionSourceBadge(row.transaction_source)}`}>
+            //         {row.transaction_source || '-'}
+            //     </span>
+            // </div>
         ),
     },
     {
@@ -77,18 +81,6 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
             <div className="py-2">
                 <p className="text-sm font-medium text-gray-900">
                     {row.segmentation_properties?.segmentation_name_en || '-'}
-                </p>
-            </div>
-        ),
-    },
-    {
-        name: 'Summary Point',
-        selector: (row: Activity) => row.summary_point || '-',
-        wrap: true,
-        cell: (row: Activity) => (
-            <div className="py-2">
-                <p className="text-sm text-gray-700 truncate max-w-xs" title={row.summary_point}>
-                    {row.summary_point || '-'}
                 </p>
             </div>
         ),
@@ -109,16 +101,17 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
         ),
     },
     {
-        name: 'Updated At',
-        selector: (row: Activity) => row.updated_at,
-        // width: '130px',
-        cell: (row: Activity) => (
-            <div className="py-2">
-                <p className="text-sm text-gray-900">
-                    {formatDate(row.updated_at)}
-                </p>
+        name: 'Updated By',
+        selector: row => row.updated_at,
+        cell: (row) => (
+            <div className=" items-center gap-3 py-2">
+                <div className="font-medium text-gray-900">
+                    {row?.updated_by_name || '-'}
+                </div>
+                <div className="block text-sm text-gray-500">{`${formatDateTime(row.updated_at)}`}</div>
             </div>
         ),
+        width: '200px'
     },
 ];
 
