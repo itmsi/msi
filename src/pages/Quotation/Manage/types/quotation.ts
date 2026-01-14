@@ -79,6 +79,8 @@ export interface QuotationFormData {
     manage_quotation_shipping_term?: string;
     manage_quotation_franco?: string;
     manage_quotation_lead_time?: string;
+    quotation_for?: 'customer' | 'leasing';  // New field: quotation type
+    star?: string;                            // New field: star rating/input
     term_content_id?: string;
     term_content_directory?: string;
     include_aftersales_page?: boolean; // Added for API payload
@@ -297,6 +299,9 @@ export interface ManageQuotationData {
     employee_id: string;
     manage_quotation_date: string;
     manage_quotation_valid_date: string;
+    manage_quotation_grand_total_before: string;
+    manage_quotation_mutation_type: 'plus' | 'minus';
+    manage_quotation_mutation_nominal: string;
     manage_quotation_grand_total: string;
     manage_quotation_ppn: string;
     manage_quotation_delivery_fee: string;
@@ -315,6 +320,8 @@ export interface ManageQuotationData {
     manage_quotation_shipping_term: string;
     manage_quotation_franco: string;
     manage_quotation_lead_time: string;
+    quotation_for?: 'customer' | 'leasing'; 
+    star?: string; 
     term_content_directory: string;
     term_content_payload?: string;
     term_content_id: string;

@@ -132,6 +132,8 @@ export default function EditQuotation() {
         manage_quotation_shipping_term: '',
         manage_quotation_franco: '',
         manage_quotation_lead_time: '',
+        quotation_for: 'customer',  // New field with default value
+        star: '',                    // New field
         term_content_id: '',
         term_content_directory: '',
         include_aftersales_page: true,  // Added for API payload
@@ -192,9 +194,9 @@ export default function EditQuotation() {
                 manage_quotation_date: data.manage_quotation_date?.split('T')[0] || '',
                 manage_quotation_valid_date: data.manage_quotation_valid_date?.split('T')[0] || '',
                 manage_quotation_grand_total: data.manage_quotation_grand_total || '',
-                manage_quotation_grand_total_before: (data as any).manage_quotation_grand_total_before || '0',
-                manage_quotation_mutation_type: (data as any).manage_quotation_mutation_type || '',
-                manage_quotation_mutation_nominal: (data as any).manage_quotation_mutation_nominal || '0',
+                manage_quotation_grand_total_before: data.manage_quotation_grand_total_before || '0',
+                manage_quotation_mutation_type: data.manage_quotation_mutation_type || '',
+                manage_quotation_mutation_nominal: data.manage_quotation_mutation_nominal || '0',
                 manage_quotation_ppn: data.manage_quotation_ppn || '',
                 manage_quotation_delivery_fee: data.manage_quotation_delivery_fee || '',
                 manage_quotation_other: data.manage_quotation_other || '',
@@ -204,6 +206,8 @@ export default function EditQuotation() {
                 manage_quotation_shipping_term: data.manage_quotation_shipping_term || '',
                 manage_quotation_franco: data.manage_quotation_franco || '',
                 manage_quotation_lead_time: data.manage_quotation_lead_time || '',
+                quotation_for: data.quotation_for || 'customer',  
+                star: data.star || '',                              
                 term_content_id: data.term_content_id || '',
                 term_content_directory: data.term_content_payload || '',
                 include_aftersales_page: data.include_aftersales_page || false,
@@ -1629,6 +1633,38 @@ export default function EditQuotation() {
                                         readonly={true}
                                         placeholder="Auto filled when bank selected"
                                         className="bg-gray-100 cursor-not-allowed"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Additional Quotation Info - New Section */}
+                        <div className="bg-white rounded-2xl shadow-sm p-6 lg:col-span-3">
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">Additional Information</h2>
+                            <div className='md:grid-cols-2 grid gap-x-5 gap-y-3'>
+                                {/* Quotation For */}
+                                <div>
+                                    <Label htmlFor="quotation_for">Quotation For</Label>
+                                    <select
+                                        id="quotation_for"
+                                        value={formData.quotation_for || 'customer'}
+                                        onChange={(e) => handleInputChange('quotation_for', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                    >
+                                        <option value="customer">Customer</option>
+                                        <option value="leasing">Leasing</option>
+                                    </select>
+                                </div>
+                                
+                                {/* Star */}
+                                <div>
+                                    <Label htmlFor="star">Star</Label>
+                                    <Input
+                                        id="star"
+                                        type="text"
+                                        value={formData.star || ''}
+                                        onChange={(e) => handleInputChange('star', e.target.value)}
+                                        placeholder="Enter star value"
                                     />
                                 </div>
                             </div>
