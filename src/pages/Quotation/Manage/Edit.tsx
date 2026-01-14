@@ -322,39 +322,6 @@ export default function EditQuotation() {
                     console.error('Error loading island accessories on edit:', error);
                 }
             }
-
-            if (data.bank_account_name && data.bank_account_number) {
-                // Find matching bank from options
-                const matchingBank = bankOptions.find(bank => 
-                    bank.data.bank_account_name === data.bank_account_name &&
-                    bank.data.bank_account_number === data.bank_account_number
-                );
-                
-                if (matchingBank) {
-                    setSelectedBank(matchingBank);
-                    setFormData(prev => ({
-                        ...prev,
-                        bank_account_id: matchingBank.data.bank_account_id
-                    }));
-                } else {
-                    // If not found in options, create a temporary entry
-                    setSelectedBank({
-                        value: data.bank_account_name,
-                        label: `${data.bank_account_bank_name} - ${data.bank_account_number}`,
-                        data: {
-                            bank_account_id: data.bank_account_name,
-                            bank_account_name: data.bank_account_name,
-                            bank_account_number: data.bank_account_number,
-                            bank_account_type: data.bank_account_bank_name
-                        }
-                    });
-                    // Set temporary bank_account_id while preserving other fields
-                    setFormData(prev => ({
-                        ...prev,
-                        bank_account_id: data.bank_account_name
-                    }));
-                }
-            }
             
             if (data.term_content_id) {
                 setSelectedTermCondition({
@@ -373,13 +340,59 @@ export default function EditQuotation() {
             toast.error(err.message || 'Failed to load quotation');
             navigate('/quotations/manage');
         }
-    }, [quotationId, fetchQuotation, navigate, bankOptions, QuotationService]);
+    }, [quotationId, fetchQuotation, navigate, QuotationService]);
 
     useEffect(() => {
         if (quotationId) {
             loadQuotationData();
         }
     }, [quotationId, loadQuotationData]);
+
+    // Load bank selection after bank options are loaded
+    useEffect(() => {
+        if (quotationData && bankOptions.length > 0) {
+            const data = quotationData;
+            if (data.bank_account_name && data.bank_account_number) {
+                // Find matching bank from options
+                const matchingBank = bankOptions.find(bank => 
+                    bank.data.bank_account_name === data.bank_account_name &&
+                    bank.data.bank_account_number === data.bank_account_number
+                );
+                
+                if (matchingBank) {
+                    setSelectedBank(matchingBank);
+                    setFormData(prev => ({
+                        ...prev,
+                        bank_account_id: matchingBank.data.bank_account_id,
+                        bank_account_name: matchingBank.data.bank_account_name,
+                        bank_account_number: matchingBank.data.bank_account_number,
+                        bank_account_type: matchingBank.data.bank_account_type,
+                        bank_account_bank_name: matchingBank.data.bank_account_type
+                    }));
+                } else {
+                    // If not found in options, create a temporary entry
+                    setSelectedBank({
+                        value: data.bank_account_name,
+                        label: `${data.bank_account_bank_name} - ${data.bank_account_number}`,
+                        data: {
+                            bank_account_id: data.bank_account_name,
+                            bank_account_name: data.bank_account_name,
+                            bank_account_number: data.bank_account_number,
+                            bank_account_type: data.bank_account_bank_name
+                        }
+                    });
+                    setFormData(prev => ({
+                        ...prev,
+                        bank_account_id: data.bank_account_name,
+                        bank_account_name: data.bank_account_name,
+                        bank_account_number: data.bank_account_number,
+                        bank_account_type: data.bank_account_bank_name,
+                        bank_account_bank_name: data.bank_account_bank_name
+                    }));
+                }
+            }
+        }
+    }, [quotationData, bankOptions]);
 
     // Sync individual dates with form data (but don't override on initial load)
     useEffect(() => {
