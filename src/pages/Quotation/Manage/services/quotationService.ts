@@ -35,6 +35,8 @@ export class QuotationService {
                 manage_quotation_shipping_term: quotationData.manage_quotation_shipping_term || "",
                 manage_quotation_franco: quotationData.manage_quotation_franco || "",
                 manage_quotation_lead_time: quotationData.manage_quotation_lead_time || "",
+                quotation_for: quotationData.quotation_for || "customer",  // New field
+                star: quotationData.star || "",  // New field
                 bank_account_name: quotationData.bank_account_name || "",
                 bank_account_number: quotationData.bank_account_number || "",
                 bank_account_bank_name: quotationData.bank_account_bank_name || "",
@@ -108,6 +110,8 @@ export class QuotationService {
                 manage_quotation_shipping_term: quotationData.manage_quotation_shipping_term || "",
                 manage_quotation_franco: quotationData.manage_quotation_franco || "",
                 manage_quotation_lead_time: quotationData.manage_quotation_lead_time || "",
+                quotation_for: quotationData.quotation_for || "customer",  // New field
+                star: quotationData.star || "",  // New field
                 bank_account_name: quotationData.bank_account_name || "",
                 bank_account_number: quotationData.bank_account_number || "",
                 bank_account_bank_name: quotationData.bank_account_bank_name || "",
