@@ -6,10 +6,12 @@ export interface ContractorListRequest {
     mine_type?: 'batu bara' | 'nikel' | 'lainnya' | '';
     status?: 'active' | 'inactive' | '';
     is_admin?: boolean;
+    employee_id?: string;
 }
 
 export interface Contractor {
     iup_customer_id: string;
+    customer_iup_name: string;
     iup_id: string;
     customer_id: string;
     customer_code?: string;

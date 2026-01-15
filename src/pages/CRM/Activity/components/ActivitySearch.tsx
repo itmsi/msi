@@ -1,7 +1,6 @@
 import React from 'react';
 import Input from '@/components/form/input/InputField';
 import { MdSearch, MdClear } from 'react-icons/md';
-import Button from '@/components/ui/button/Button';
 
 interface ActivitySearchProps {
     searchValue: string;

@@ -24,21 +24,37 @@ export default function DatePicker({
   placeholder,
 }: PropsType) {
   useEffect(() => {
-    const flatPickr = flatpickr(`#${id}`, {
+    const config: any = {
       mode: mode || "single",
-      static: true,
-      monthSelectorType: "static",
+      static: false,
       dateFormat: "Y-m-d",
       defaultDate,
       onChange,
-    });
+    };
+
+    // Time-specific configuration
+    if (mode === "time") {
+      config.enableTime = true;
+      config.noCalendar = true;
+      config.dateFormat = "H:i";
+      config.time_24hr = true;
+      config.minuteIncrement = 1;
+      config.defaultHour = 12;
+      config.defaultMinute = 0;
+    } else {
+      config.monthSelectorType = "static";
+    }
+
+    const flatPickr = flatpickr(`#${id}`, config);
 
     return () => {
-      if (!Array.isArray(flatPickr)) {
-        flatPickr.destroy();
-      }
+      setTimeout(() => {
+        if (!Array.isArray(flatPickr)) {
+          flatPickr.destroy();
+        }
+      }, 100);
     };
-  }, [mode, onChange, id, defaultDate]);
+  }, [mode, id]);
 
   return (
     <div>

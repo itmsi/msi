@@ -1,51 +1,8 @@
 import { TableColumn } from 'react-data-table-component';
 import { Activity } from '../types/activity';
-import { formatDateTime } from '@/helpers/generalHelper';
+import { formatDate, formatDateTime } from '@/helpers/generalHelper';
 import Badge from '@/components/ui/badge/Badge';
 import { ActivityTypeBadge } from '../../Contractors/components/ContractorBadges';
-
-// Helper function to format date
-const formatDate = (dateString: string): string => {
-    try {
-        return new Date(dateString).toLocaleDateString('id-ID', {
-            day: '2-digit',
-            month: '2-digit', 
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    } catch {
-        return dateString;
-    }
-};
-
-// Helper function to get transaction type badge color
-const getTransactionTypeBadge = (type: string): string => {
-    switch (type?.toLowerCase()) {
-        case 'find':
-            return 'bg-green-100 text-green-800';
-        case 'visit':
-            return 'bg-blue-100 text-blue-800';
-        case 'call':
-            return 'bg-yellow-100 text-yellow-800';
-        default:
-            return 'bg-gray-100 text-gray-800';
-    }
-};
-
-// Helper function to get transaction source badge color
-const getTransactionSourceBadge = (source: string): string => {
-    switch (source?.toLowerCase()) {
-        case 'manual':
-            return 'bg-purple-100 text-purple-800';
-        case 'automatic':
-            return 'bg-blue-100 text-blue-800';
-        case 'system':
-            return 'bg-gray-100 text-gray-800';
-        default:
-            return 'bg-gray-100 text-gray-800';
-    }
-};
 
 export const getActivityColumns = (): TableColumn<Activity>[] => [
     {
@@ -66,11 +23,6 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
                     {row.transaction_source}
                 </Badge>
             </div>
-            // <div className="py-2">
-            //     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTransactionSourceBadge(row.transaction_source)}`}>
-            //         {row.transaction_source || '-'}
-            //     </span>
-            // </div>
         ),
     },
     {
@@ -84,6 +36,21 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
                 </p>
             </div>
         ),
+    },
+    {
+        name: 'Date',
+        selector: (row: Activity) => row.transaction_date || '-',
+        cell: (row: Activity) => (
+            <div className=" items-center gap-3 py-2">
+                <div className="font-medium text-gray-900">
+                    {row.transaction_date ? formatDate(row.transaction_date) : '-'}
+                </div>
+                <div className="block text-sm text-gray-500">
+                    {row.transaction_time || '-'}
+                </div>
+            </div>
+        ),
+        width: '160px'
     },
     {
         name: 'Location',
@@ -101,10 +68,10 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
         ),
     },
     {
-        name: 'Updated By',
+        name: 'Updated At',
         selector: row => row.updated_at,
         cell: (row) => (
-            <div className=" items-center gap-3 py-2">
+            <div className="items-center gap-3 py-2">
                 <div className="font-medium text-gray-900">
                     {row?.updated_by_name || '-'}
                 </div>
@@ -112,7 +79,7 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
             </div>
         ),
         width: '200px'
-    },
+    }
 ];
 
 // No data component

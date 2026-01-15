@@ -84,9 +84,6 @@ export const ActivityTypeBadge: React.FC<ActivityTypeBadgeProps> = ({ type }) =>
 
 
     const config = typeConfig[type];
-console.log({
-    type
-});
     return (
         <Badge variant={config.variant} color={config.color}>
             {config.label}

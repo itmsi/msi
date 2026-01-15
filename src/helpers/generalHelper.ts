@@ -281,6 +281,13 @@ export const formatTime = (dateString: string) => {
     });
 };
 
+export const formatDateToYMD = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 export const formatDecimalValue = (value: string | number): string => {
     if (!value) return '';
     const numValue = typeof value === 'string' ? parseFloat(value) : value;

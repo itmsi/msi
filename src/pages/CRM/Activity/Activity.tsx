@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageMeta from '@/components/common/PageMeta';
-import PageBreadcrumb from '@/components/common/PageBreadCrumb';
 import Button from '@/components/ui/button/Button';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
@@ -30,7 +29,6 @@ const Activity: React.FC = () => {
         handlePageChange,
         handleRowsPerPageChange,
         handleFilters,
-        refetch,
         
         // Search functions
         handleKeyPress,
@@ -46,8 +44,7 @@ const Activity: React.FC = () => {
     };
     // Handle row click - navigate to detail page
     const handleRowClick = (row: any) => {
-        console.log('Activity clicked:', row);
-        // navigate(`/crm/activity/${row.transactions_id}`);
+        navigate(`/crm/activity/edit/${row.transactions_id}`);
     };
 
     // Show error toast if error exists

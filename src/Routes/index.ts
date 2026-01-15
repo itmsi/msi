@@ -64,7 +64,10 @@ const CreateIUPManagement = lazy(() => import('@/pages/CRM/IUPManagement/CreateI
 const EditIupManagement = lazy(() => import('@/pages/CRM/IUPManagement/EditIup'));
 const Brand = lazy(() => import('@/pages/CRM/Brand/Manage'));
 const EditContractors = lazy(() => import('@/pages/CRM/Contractors/EditContractor'));
+
 const Activities = lazy(() => import('@/pages/CRM/Activity/Activity'));
+const CreateActivities = lazy(() => import('@/pages/CRM/Activity/CreateActivity'));
+const EditActivities = lazy(() => import('@/pages/CRM/Activity/EditActivity'));
 
 export type TAppRoute = {
     path: string;
@@ -567,6 +570,25 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Activities CRM'],
         component: Activities,
+        layout: AppLayout,
+    },
+
+    {
+        path: '/crm/activity/create',
+        name: 'Activities CRM',
+        isProtected: true,
+        roles: ['Activities CRM'],
+        requiredPermissions: ['create'],
+        component: CreateActivities,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/activity/edit/:transactions_id',
+        name: 'Activities CRM',
+        isProtected: true,
+        roles: ['Activities CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: EditActivities,
         layout: AppLayout,
     },
 ];

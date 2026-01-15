@@ -124,3 +124,7 @@ export interface IupManagementFormData {
     area_name?: string;
     iup_zone_name?: string;
 }
+export interface Contractor {
+    iup_customer_id: string;
+    customer_iup_name: string;
+}
