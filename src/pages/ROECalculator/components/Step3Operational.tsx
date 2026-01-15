@@ -219,7 +219,7 @@ export default function Step3Operational({
                     </div>
 
                     <div>
-                        <Label htmlFor="fuel_price">Harga BBM (Rp/L)</Label>
+                        <Label htmlFor="fuel_price">Harga BBM (Rp/L)</Label>                        
                         <Input
                             id="fuel_price"
                             type="text"

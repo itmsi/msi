@@ -18,9 +18,9 @@ import CustomDataTable from "@/components/ui/table/CustomDataTable";
 import WysiwygEditor from '@/components/form/editor/WysiwygEditor';
 
 // Types and hooks
-import { 
-    QuotationFormData, 
-    QuotationItem, 
+import {
+    QuotationFormData,
+    QuotationItem,
     QuotationValidationErrors
 } from './types/quotation';
 import { ItemProduct } from '../Product/types/product';
@@ -42,22 +42,22 @@ import { IslandSelectOption, useIslandSelect } from '@/hooks/useIslandSelect';
 export default function CreateQuotation() {
     const navigate = useNavigate();
     const { isCreating, validationErrors, clearFieldError, createQuotation } = useCreateQuotation();
-    
+
     // Use useEmployees hook
-    const { 
-        employeeOptions, 
-        pagination: employeePagination, 
+    const {
+        employeeOptions,
+        pagination: employeePagination,
         inputValue: employeeInputValue,
         setActiveSales,
         handleInputChange: handleEmployeeInputChange,
         handleMenuScrollToBottom: handleEmployeeMenuScrollToBottom,
         initializeOptions: initializeEmployeeOptions
-    } = useEmployeeSelect(); 
+    } = useEmployeeSelect();
 
     // Use useCustomers hook
     const {
-        customerOptions, 
-        pagination: customerPagination, 
+        customerOptions,
+        pagination: customerPagination,
         inputValue: customerInputValue,
         handleInputChange: handleCustomerInputChange,
         handleMenuScrollToBottom: handleCustomerMenuScrollToBottom,
@@ -87,7 +87,7 @@ export default function CreateQuotation() {
     // Use bank hook
     const {
         bankOptions,
-        pagination: bankPagination, 
+        pagination: bankPagination,
         inputValue: bankInputValue,
         handleInputChange: handleBankInputChange,
         handleMenuScrollToBottom: handleBankMenuScrollToBottom,
@@ -97,7 +97,7 @@ export default function CreateQuotation() {
     // Use reusable island select hook
     const {
         islandOptions,
-        pagination: islandPagination, 
+        pagination: islandPagination,
         inputValue: islandInputValue,
         handleInputChange: handleIslandInputChange,
         handleMenuScrollToBottom: handleIslandMenuScrollToBottom,
@@ -129,6 +129,8 @@ export default function CreateQuotation() {
         manage_quotation_shipping_term: '',
         manage_quotation_franco: '',
         manage_quotation_lead_time: '',
+        quotation_for: 'customer',  // New field with default value
+        star: '',                    // New field
         term_content_id: '',
         term_content_directory: '',
         include_aftersales_page: true,  // Added for API payload
@@ -148,18 +150,18 @@ export default function CreateQuotation() {
 
     // Temporary states for adding items
     const [selectedProduct, setSelectedProduct] = useState<SelectOption | null>(null);
-    
+
     // Product detail offcanvas state
     const [showProductDetail, setShowProductDetail] = useState(false);
     const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
     const [unsavedProductChanges, setUnsavedProductChanges] = useState<Record<string, ItemProduct>>({});
     const [productSelectError, setProductSelectError] = useState<string>('');
-    
+
     // Term condition states
     const [selectedTermCondition, setSelectedTermCondition] = useState<TermConditionSelectOption | null>(null);
     const [termConditionContent, setTermConditionContent] = useState<string>('');
     const [termConditionLoading, setTermConditionLoading] = useState<boolean>(false);
-    
+
     // Banks Account states
     const [selectedBank, setSelectedBank] = useState<BankSelectOption | null>(null);
 
@@ -230,21 +232,21 @@ export default function CreateQuotation() {
     };
 
     const calculateGrandTotal = useCallback((currentFormData: QuotationFormData): { ppn: string; grandTotal: string; paymentNominal: string, remainingPayment: string } => {
-        const itemsTotal = currentFormData.manage_quotation_items.reduce((sum, item) => 
+        const itemsTotal = currentFormData.manage_quotation_items.reduce((sum, item) =>
             sum + (parseFloat(item.total) || 0), 0
         );
 
         const deliveryFee = parseFloat(currentFormData.manage_quotation_delivery_fee || '0') || 0;
         const otherFee = parseFloat(currentFormData.manage_quotation_other || '0') || 0;
         const ppnPercentage = parseFloat(currentFormData.manage_quotation_ppn || '11') || 11;
-        
+
         const ppn = itemsTotal * (ppnPercentage / 100);
         let grandTotal = itemsTotal + ppn + deliveryFee + otherFee;
-        
+
         // Apply mutation if type and nominal are set
         const mutationType = currentFormData.manage_quotation_mutation_type;
         const mutationNominal = parseDecimalInput(currentFormData.manage_quotation_mutation_nominal, 0);
-        
+
         if (mutationType && mutationNominal > 0) {
             if (mutationType === 'plus') {
                 grandTotal += mutationNominal;
@@ -252,7 +254,7 @@ export default function CreateQuotation() {
                 grandTotal -= mutationNominal;
             }
         }
-        
+
         const paymentPercentage = parseFloat(currentFormData.manage_quotation_payment_presentase || '0') || 0;
         const paymentNominal = grandTotal * (paymentPercentage / 100);
         const remainingPayment = grandTotal - paymentNominal;
@@ -290,18 +292,18 @@ export default function CreateQuotation() {
     const handleInputChange = (field: keyof QuotationFormData, value: string | boolean) => {
         setFormData(prev => {
             const newFormData = { ...prev, [field]: value };
-            
+
             // Reset mutation nominal to 0 when mutation type is set to "No Adjustment"
             if (field === 'manage_quotation_mutation_type' && !value) {
                 newFormData.manage_quotation_mutation_nominal = '0';
             }
-            
-            if (field === 'manage_quotation_delivery_fee' || field === 'manage_quotation_other' || 
+
+            if (field === 'manage_quotation_delivery_fee' || field === 'manage_quotation_other' ||
                 field === 'manage_quotation_payment_presentase' || field === 'manage_quotation_ppn' ||
                 field === 'manage_quotation_mutation_type' || field === 'manage_quotation_mutation_nominal') {
-                
+
                 // Calculate base grand total (without mutation)
-                const itemsTotal = newFormData.manage_quotation_items.reduce((sum, item) => 
+                const itemsTotal = newFormData.manage_quotation_items.reduce((sum, item) =>
                     sum + (parseFloat(item.total) || 0), 0
                 );
                 const deliveryFee = parseFloat(newFormData.manage_quotation_delivery_fee || '0') || 0;
@@ -309,10 +311,10 @@ export default function CreateQuotation() {
                 const ppnPercentage = parseFloat(newFormData.manage_quotation_ppn || '11') || 11;
                 const ppn = itemsTotal * (ppnPercentage / 100);
                 const baseGrandTotal = itemsTotal + ppn + deliveryFee + otherFee;
-                
+
                 // Store base grand total before applying mutation
                 newFormData.manage_quotation_grand_total_before = baseGrandTotal.toString();
-                
+
                 const calculations = calculateGrandTotal(newFormData);
                 return {
                     ...newFormData,
@@ -326,12 +328,12 @@ export default function CreateQuotation() {
         });
 
         const validatableFields: (keyof QuotationValidationErrors)[] = [
-            'customer_id', 'employee_id', 'island_id', 'manage_quotation_date', 
-            'manage_quotation_valid_date', 'manage_quotation_delivery_fee', 
-            'manage_quotation_other', 'manage_quotation_payment_presentase', 
+            'customer_id', 'employee_id', 'island_id', 'manage_quotation_date',
+            'manage_quotation_valid_date', 'manage_quotation_delivery_fee',
+            'manage_quotation_other', 'manage_quotation_payment_presentase',
             'manage_quotation_description', 'manage_quotation_items'
         ];
-        
+
         if (validatableFields.includes(field as keyof QuotationValidationErrors)) {
             clearFieldError(field as keyof QuotationValidationErrors);
         }
@@ -355,29 +357,29 @@ export default function CreateQuotation() {
     // Format decimal for display - preserves decimal separator and trailing digits
     // const formatDecimalDisplayInput = (value: string | undefined | null): string => {
     //     if (!value) return '';
-        
+
     //     const str = value.toString();
-        
+
     //     // Check if there's a decimal separator (comma or dot)
     //     const hasComma = str.includes(',');
     //     const hasDot = str.includes('.');
-        
+
     //     if (!hasComma && !hasDot) {
     //         // No decimal - just format as integer with thousand separators
     //         const cleaned = str.replace(/[^\d]/g, '');
     //         if (!cleaned) return '';
     //         return new Intl.NumberFormat('id-ID').format(parseInt(cleaned));
     //     }
-        
+
     //     // Has decimal separator - preserve it
     //     const separator = hasComma ? ',' : '.';
     //     const parts = str.split(separator);
     //     const integerPart = parts[0].replace(/[^\d]/g, '') || '0';
     //     const decimalPart = parts[1] || '';
-        
+
     //     // Format integer part with thousand separators
     //     const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart));
-        
+
     //     // Return with comma as decimal separator (Indonesian format)
     //     return `${formattedInteger},${decimalPart}`;
     // };
@@ -421,7 +423,7 @@ export default function CreateQuotation() {
         setActiveSales(true);
         initializeEmployeeOptions();
     }, [initializeEmployeeOptions]);
-    
+
     useEffect(() => {
         initializeBankOptions();
     }, [initializeBankOptions]);
@@ -433,7 +435,7 @@ export default function CreateQuotation() {
     useEffect(() => {
         initializeTermConditionOptions();
     }, [initializeTermConditionOptions]);
-    
+
     useEffect(() => {
         initializeIslandOptions();
     }, [initializeIslandOptions]);
@@ -470,8 +472,8 @@ export default function CreateQuotation() {
             const response = await TermConditionService.getTermConditionById(termConditionId);
             if (response && response.data) {
                 const apiResponse = response;
-                
-                
+
+
                 if (apiResponse.status && apiResponse.data && apiResponse.data.term_content_payload) {
                     // Successfully loaded term condition content
                     const detailedContent = apiResponse.data.term_content_payload;
@@ -511,10 +513,10 @@ export default function CreateQuotation() {
 
         try {
             const response = await ItemProductService.getItemProductById(selectedProduct.value);
-            
+
             if (response.data && response.data.data) {
                 const apiProductData = response.data.data;
-                
+
                 const islandAccessories = (formData.manage_quotation_item_accessories || []).map(accessory => ({
                     accessory_id: accessory.accessory_id,
                     accessory_part_number: accessory.accessory_part_number,
@@ -525,9 +527,9 @@ export default function CreateQuotation() {
                     description: accessory.description,
                     accessory_description: accessory.description || '',
                     accessory_remark: '',
-                    accessory_region: '' 
+                    accessory_region: ''
                 }));
-                
+
                 const newQuotationItem: QuotationItem = {
                     componen_product_id: apiProductData.componen_product_id,
                     componen_product_name: apiProductData.componen_product_name || selectedProduct.label || '',
@@ -565,7 +567,7 @@ export default function CreateQuotation() {
                         ...prev,
                         manage_quotation_items: [...prev.manage_quotation_items, newQuotationItem]
                     };
-                    
+
                     const calculations = calculateGrandTotal(newFormData);
                     return {
                         ...newFormData,
@@ -603,7 +605,7 @@ export default function CreateQuotation() {
 
             const updatedFormData = { ...prev, manage_quotation_items: updatedQuotationItems };
             const calculations = calculateGrandTotal(updatedFormData);
-            
+
             return {
                 ...updatedFormData,
                 manage_quotation_grand_total: calculations.grandTotal,
@@ -620,7 +622,7 @@ export default function CreateQuotation() {
                 ...prev,
                 manage_quotation_items: prev.manage_quotation_items.filter((_, i) => i !== itemIndex)
             };
-            
+
             const calculations = calculateGrandTotal(updatedFormData);
             return {
                 ...updatedFormData,
@@ -635,7 +637,7 @@ export default function CreateQuotation() {
         const existingItem = formData.manage_quotation_items.find(
             item => item.componen_product_id === productId
         );
-        
+
         if (!existingItem) {
             toast.error('Product not found in quotation');
             return;
@@ -685,7 +687,7 @@ export default function CreateQuotation() {
                 })) || []
             }
         }));
-        
+
         setSelectedProductId(productId);
         setShowProductDetail(true);
     }, [formData.manage_quotation_items, unsavedProductChanges]);
@@ -697,25 +699,25 @@ export default function CreateQuotation() {
     // Auto-save product changes to formData
     const handleProductDataChange = useCallback((updatedProductData: ItemProduct) => {
         if (!updatedProductData.componen_product_id) return;
-        
+
         const productId = updatedProductData.componen_product_id;
-        
+
         // Update UI state
-        setUnsavedProductChanges(prev => 
+        setUnsavedProductChanges(prev =>
             prev[productId] === updatedProductData ? prev : { ...prev, [productId]: updatedProductData }
         );
-        
+
         // Save to formData
         setFormData(prev => {
             const itemIndex = prev.manage_quotation_items.findIndex(
                 item => item.componen_product_id === productId
             );
-            
+
             if (itemIndex === -1) return prev;
-            
+
             const items = [...prev.manage_quotation_items];
             const currentItem = items[itemIndex];
-            
+
             // Map accessories dengan fallback ke berbagai format
             const mappedAccessories = (updatedProductData.accessories || (updatedProductData as any).accessories)?.map((acc: any) => ({
                 accessory_id: acc.accessory_id || acc.id || '',
@@ -729,7 +731,7 @@ export default function CreateQuotation() {
                 accessory_remark: acc.remark || '',
                 accessory_region: acc.region || ''
             })) || currentItem.manage_quotation_item_accessories;
-            
+
             items[itemIndex] = {
                 ...currentItem,
                 componen_product_name: updatedProductData.componen_product_name || currentItem.componen_product_name,
@@ -761,7 +763,7 @@ export default function CreateQuotation() {
 
             const newFormData = { ...prev, manage_quotation_items: items };
             const calculations = calculateGrandTotal(newFormData);
-            
+
             return {
                 ...newFormData,
                 manage_quotation_grand_total: calculations.grandTotal,
@@ -949,20 +951,20 @@ export default function CreateQuotation() {
         try {
             // Calculate final values
             const finalCalculations = calculateGrandTotal(formData);
-            
+
             // Validate grand total is not negative
             const grandTotalValue = parseFloat(finalCalculations.grandTotal);
             if (grandTotalValue < 0) {
                 toast.error('Grand total cannot be negative. Please reduce the adjustment amount.');
                 return;
             }
-            
+
             // Format numbers to max 2 decimals for backend validation
             const formatForBackend = (value: string): string => {
                 const num = parseFloat(value);
                 return isNaN(num) ? '0' : num.toFixed(2);
             };
-            
+
             const updatedFormData = {
                 ...formData,
                 status,
@@ -970,43 +972,43 @@ export default function CreateQuotation() {
                 manage_quotation_payment_nominal: formatForBackend(finalCalculations.paymentNominal),
                 manage_quotation_remaining_payment: formatForBackend(finalCalculations.remainingPayment)
             };
-            
+
             // Clean up manage_quotation_items - remove unnecessary fields for API
             const cleanedItems = updatedFormData.manage_quotation_items.map(item => {
-                const { 
-                    product_type, 
-                    image, 
-                    componen_product_unit_model, 
-                    selling_price_star_1, 
-                    selling_price_star_2, 
-                    selling_price_star_3, 
-                    selling_price_star_4, 
+                const {
+                    product_type,
+                    image,
+                    componen_product_unit_model,
+                    selling_price_star_1,
+                    selling_price_star_2,
+                    selling_price_star_3,
+                    selling_price_star_4,
                     selling_price_star_5,
-                    ...cleanedItem 
+                    ...cleanedItem
                 } = item;
                 return cleanedItem;
             });
-            
+
             // Prepare API payload
             const apiPayload: any = {
                 ...updatedFormData,
                 manage_quotation_items: cleanedItems,
                 // Ensure mutation fields are properly formatted for API (max 2 decimals)
-                manage_quotation_grand_total_before: updatedFormData.manage_quotation_grand_total_before 
+                manage_quotation_grand_total_before: updatedFormData.manage_quotation_grand_total_before
                     ? formatForBackend(updatedFormData.manage_quotation_grand_total_before)
                     : null,
                 manage_quotation_mutation_type: updatedFormData.manage_quotation_mutation_type || null,
-                manage_quotation_mutation_nominal: updatedFormData.manage_quotation_mutation_nominal 
+                manage_quotation_mutation_nominal: updatedFormData.manage_quotation_mutation_nominal
                     ? parseDecimalInput(updatedFormData.manage_quotation_mutation_nominal, 0).toFixed(2)
                     : null
             };
-            
+
             // Clean up number formatting for API
             const finalPayload = resetQuotationFormattedNumbers(apiPayload);
-            
+
             // Submit to API
             const response = await createQuotation(finalPayload);
-            
+
             if (response.success) {
                 toast.success(`Quotation ${status === 'submit' ? 'submitted' : 'saved as draft'} successfully`);
                 navigate('/quotations/manage');
@@ -1017,7 +1019,7 @@ export default function CreateQuotation() {
             toast.error(error.message || 'Failed to save quotation');
         }
     };
-    const romanMonths = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+    const romanMonths = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
     const monthRoman = romanMonths[new Date().getMonth()];
     return (
@@ -1066,7 +1068,7 @@ export default function CreateQuotation() {
                                         <div>
                                             <Label>Quotation Date</Label>
                                             <div className="relative" ref={invoiceDatePickerRef}>
-                                                <div 
+                                                <div
                                                     className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500"
                                                     onClick={() => setShowInvoiceDatePicker(!showInvoiceDatePicker)}
                                                 >
@@ -1077,7 +1079,7 @@ export default function CreateQuotation() {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
                                                 </div>
-                                                
+
                                                 {showInvoiceDatePicker && (
                                                     <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
                                                         <Calendar
@@ -1099,7 +1101,7 @@ export default function CreateQuotation() {
                                         <div>
                                             <Label>Quotation Valid Until</Label>
                                             <div className="relative" ref={dueDatePickerRef}>
-                                                <div 
+                                                <div
                                                     className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500"
                                                     onClick={() => setShowDueDatePicker(!showDueDatePicker)}
                                                 >
@@ -1110,7 +1112,7 @@ export default function CreateQuotation() {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
                                                 </div>
-                                                
+
                                                 {showDueDatePicker && (
                                                     <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
                                                         <div className="p-3 border-b border-gray-200">
@@ -1160,6 +1162,20 @@ export default function CreateQuotation() {
                                                     {validationErrors.manage_quotation_valid_date}
                                                 </span>
                                             )}
+                                        </div>
+
+                                        {/* Quotation For */}
+                                        <div>
+                                            <Label htmlFor="quotation_for">Quotation For</Label>
+                                            <select
+                                                id="quotation_for"
+                                                value={formData.quotation_for || 'customer'}
+                                                onChange={(e) => handleInputChange('quotation_for', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
+                                            >
+                                                <option value="customer">Customer</option>
+                                                <option value="leasing">Leasing</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <div className="md:col-span-1 space-y-3">
@@ -1218,7 +1234,7 @@ export default function CreateQuotation() {
                                                 <span className="text-sm text-red-500">{validationErrors.employee_id}</span>
                                             )}
                                         </div>
-                                        
+
                                         <div>
                                             <Label>Select Island</Label>
                                             <CustomAsyncSelect
@@ -1239,15 +1255,15 @@ export default function CreateQuotation() {
                                                 onChange={async (option: any) => {
                                                     setSelectedIsland(option);
                                                     handleInputChange('island_id', option?.value || '');
-                                                    
+
                                                     if (option?.value) {
                                                         // Fetch new accessories for the selected island
                                                         try {
                                                             const response = await QuotationService.getQuotationAccessories(option.value);
-                                                            
+
                                                             if (response.data && response.data.status && response.data.data) {
                                                                 const accessories = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
-                                                                
+
                                                                 // Check if accessories array has items
                                                                 if (accessories.length > 0) {
                                                                     // Transform accessories to QuotationItemAccessory format
@@ -1263,7 +1279,7 @@ export default function CreateQuotation() {
                                                                         accessory_remark: accessory.accessory_remark || '',
                                                                         accessory_region: accessory.accessory_region || ''
                                                                     }));
-                                                                    
+
                                                                     // Update accessories in all existing quotation items AND form level
                                                                     setFormData(prev => ({
                                                                         ...prev,
@@ -1273,7 +1289,7 @@ export default function CreateQuotation() {
                                                                             manage_quotation_item_accessories: transformedAccessories
                                                                         }))
                                                                     }));
-                                                                    
+
                                                                     toast.success(`${transformedAccessories.length} accessories loaded for selected island`);
                                                                 } else {
                                                                     // Clear accessories if data array is empty
@@ -1329,6 +1345,18 @@ export default function CreateQuotation() {
                                                 <span className="text-sm text-red-500">{validationErrors.island_id}</span>
                                             )}
                                         </div>
+
+                                        {/* Star */}
+                                        <div>
+                                            <Label htmlFor="star">Star</Label>
+                                            <Input
+                                                id="star"
+                                                type="text"
+                                                value={formData.star || ''}
+                                                onChange={(e) => handleInputChange('star', e.target.value)}
+                                                placeholder="Enter star value example 0"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
@@ -1362,7 +1390,7 @@ export default function CreateQuotation() {
                                         <span className="text-sm text-red-500">{validationErrors.bank_account_id}</span>
                                     )}
                                 </div>
-                                
+
                                 {/* Beneficiary Name */}
                                 <div>
                                     <Label htmlFor="bank_account_name">Beneficiary Name</Label>
@@ -1402,18 +1430,19 @@ export default function CreateQuotation() {
                             </div>
                         </div>
 
+
                         <div className='md:grid-cols-5 grid gap-6'>
 
                             {/* Products Section */}
                             <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5 col-span-1">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 pb-6 relative">
                                     Products
-                                    
+
                                     {!formData.island_id && (
                                         <span className="text-sm text-orange-500 font-primary italic mt-1 block absolute bottom-0">Please select an island first to add products</span>
                                     )}
                                 </h2>
-                                
+
                                 {/* Add Product */}
                                 <div className="flex gap-4 mb-6">
                                     <div className="flex-1">
@@ -1450,9 +1479,9 @@ export default function CreateQuotation() {
                                             <span className="text-sm text-red-500 mt-1 block">{productSelectError}</span>
                                         )}
                                     </div>
-                                    <Button 
-                                        type="button" 
-                                        onClick={addProductItem} 
+                                    <Button
+                                        type="button"
+                                        onClick={addProductItem}
                                         className="flex items-center gap-2"
                                         disabled={!selectedProduct || !formData.island_id}
                                     >
@@ -1488,10 +1517,10 @@ export default function CreateQuotation() {
                         </div>
 
                         <div className='md:grid-cols-5 grid gap-6'>
-                            
+
                             <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-3 space-y-6">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Terms & Conditions</h2>
-                                
+
                                 {/* Term Condition */}
                                 <div className="md:col-span-2">
                                     <Label>Term Condition</Label>
@@ -1514,7 +1543,7 @@ export default function CreateQuotation() {
                                             if (option) {
                                                 const completeOption = termConditionOptions.find(t => t.value === option.value);
                                                 setSelectedTermCondition(completeOption || option);
-                                                
+
                                                 if (completeOption) {
                                                     handleInputChange('term_content_id', completeOption.value);
                                                     fetchTermConditionContent(completeOption.value);
@@ -1650,7 +1679,7 @@ export default function CreateQuotation() {
                                             disabled={!formData.manage_quotation_mutation_type}
                                             onChange={(e) => {
                                                 const rawValue = e.target.value;
-                                                
+
                                                 handleDecimalInputComma(
                                                     rawValue,
                                                     (validValue) => handleNumericCleanInput('manage_quotation_mutation_nominal', validValue),

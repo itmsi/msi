@@ -79,6 +79,8 @@ export interface QuotationFormData {
     manage_quotation_shipping_term?: string;
     manage_quotation_franco?: string;
     manage_quotation_lead_time?: string;
+    quotation_for?: 'customer' | 'leasing';  // New field: quotation type
+    star?: string;                            // New field: star rating/input
     term_content_id?: string;
     term_content_directory?: string;
     include_aftersales_page?: boolean; // Added for API payload
@@ -219,13 +221,13 @@ export interface QuotationRequest {
     page: number;
     limit: number;
     sort_order: '' | 'asc' | 'desc';
-    status?: 'submit' | 'draft' | 'rejected' | '';
+    quotation_for?: 'customer' | 'leasing' | '';
     search: string;
 }
 export interface QuotationFilters {
     search: string;
     sort_order: 'asc' | 'desc' | '';
-    status: 'submit' | 'draft' | 'rejected' | '';
+    quotation_for: 'customer' | 'leasing' | '';
 }
 export interface QuotationPagination {
     page: number;
@@ -262,6 +264,8 @@ export interface ManageQuotationItem {
     manage_quotation_shipping_term: string | null;
     manage_quotation_franco: string | null;
     manage_quotation_lead_time: string | null;
+    quotation_for?: 'customer' | 'leasing';  // New field: quotation type
+    star?: string;                             // New field: star rating/input
     bank_account_name: string;
     bank_account_number: string;
     bank_account_bank_name: string;
@@ -297,6 +301,9 @@ export interface ManageQuotationData {
     employee_id: string;
     manage_quotation_date: string;
     manage_quotation_valid_date: string;
+    manage_quotation_grand_total_before: string;
+    manage_quotation_mutation_type: 'plus' | 'minus';
+    manage_quotation_mutation_nominal: string;
     manage_quotation_grand_total: string;
     manage_quotation_ppn: string;
     manage_quotation_delivery_fee: string;
@@ -315,6 +322,8 @@ export interface ManageQuotationData {
     manage_quotation_shipping_term: string;
     manage_quotation_franco: string;
     manage_quotation_lead_time: string;
+    quotation_for?: 'customer' | 'leasing';
+    star?: string;
     term_content_directory: string;
     term_content_payload?: string;
     term_content_id: string;
@@ -469,41 +478,41 @@ export interface ManageQuotationItemPDF {
 }
 
 export interface AccessoryByIslandResponse {
-  status: boolean;
-  message: string;
-  data: AccessoryByIslandCombined[];
+    status: boolean;
+    message: string;
+    data: AccessoryByIslandCombined[];
 }
 
 export interface AccessoryItem {
-  accessory_id: string;
-  accessory_part_number: string;
-  accessory_part_name: string;
-  accessory_specification: string | null;
-  accessory_brand: string | null;
-  accessory_remark: string;
-  accessory_region: string | null;
-  accessory_description: string | null;
+    accessory_id: string;
+    accessory_part_number: string;
+    accessory_part_name: string;
+    accessory_specification: string | null;
+    accessory_brand: string | null;
+    accessory_remark: string;
+    accessory_region: string | null;
+    accessory_description: string | null;
 
-  created_at: string;
-  created_by: string | null;
-  updated_at: string;
-  updated_by: string | null;
-  deleted_at: string | null;
-  deleted_by: string | null;
-  is_delete: boolean;
+    created_at: string;
+    created_by: string | null;
+    updated_at: string;
+    updated_by: string | null;
+    deleted_at: string | null;
+    deleted_by: string | null;
+    is_delete: boolean;
 }
 
 export interface AccessoryIslandDetail {
-  accessories_island_detail_id: string;
-  island_id: string;
-  accessories_island_detail_quantity: number;
-  accessories_island_detail_description: string | null;
+    accessories_island_detail_id: string;
+    island_id: string;
+    accessories_island_detail_quantity: number;
+    accessories_island_detail_description: string | null;
 
-  island_detail_created_at: string;
-  island_detail_created_by: string | null;
-  island_detail_updated_at: string;
-  island_detail_updated_by: string | null;
+    island_detail_created_at: string;
+    island_detail_created_by: string | null;
+    island_detail_updated_at: string;
+    island_detail_updated_by: string | null;
 }
 export interface AccessoryByIslandCombined
-  extends AccessoryItem,
-    AccessoryIslandDetail {}
+    extends AccessoryItem,
+    AccessoryIslandDetail { }
