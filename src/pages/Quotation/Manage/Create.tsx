@@ -1070,7 +1070,7 @@ export default function CreateQuotation() {
                                             <Label>Quotation Date</Label>
                                             <div className="relative" ref={invoiceDatePickerRef}>
                                                 <div
-                                                    className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500"
+                                                    className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 h-11"
                                                     onClick={() => setShowInvoiceDatePicker(!showInvoiceDatePicker)}
                                                 >
                                                     <span className="text-gray-700">
@@ -1103,7 +1103,7 @@ export default function CreateQuotation() {
                                             <Label>Quotation Valid Until</Label>
                                             <div className="relative" ref={dueDatePickerRef}>
                                                 <div
-                                                    className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500"
+                                                    className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 h-11"
                                                     onClick={() => setShowDueDatePicker(!showDueDatePicker)}
                                                 >
                                                     <span className="text-gray-700">
