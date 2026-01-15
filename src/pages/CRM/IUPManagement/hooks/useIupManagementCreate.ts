@@ -194,16 +194,16 @@ export const useIupManagementCreate = () => {
             newErrors.company_name = 'IUP Name is required';
         }
         
-        if (!formData.mine_location) {
-            newErrors.mine_location = 'Mine Location is required';
-        }
+        // if (!formData.mine_location) {
+        //     newErrors.mine_location = 'Mine Location is required';
+        // }
 
-        if (!formData.area_size_ha) {
-            newErrors.area_size_ha = 'Area Size (Ha) is required';
-        }
-        if (!formData.regency_name) {
-            newErrors.regency_name = 'Regency Name is required';
-        }
+        // if (!formData.area_size_ha) {
+        //     newErrors.area_size_ha = 'Area Size (Ha) is required';
+        // }
+        // if (!formData.regency_name) {
+        //     newErrors.regency_name = 'Regency Name is required';
+        // }
         
         // Territory validation
         if (!selectedIsland) {
@@ -254,10 +254,10 @@ export const useIupManagementCreate = () => {
                 sk_end_date: formData.sk_end_date || '',
                 sk_number: formData.sk_number || '',
                 pic: formData.pic || 'pic - kosong',
-                regency_name: formData.regency_name || selectedArea.name || '',
-                company_full_name: formData.company_full_name || formData.company_name,
-                segmentation_id: formData.segmentation_id || selectedIupZone.id || '',
-                area_size_ha: formData.area_size_ha || '',
+                regency_name: formData.regency_name || '',
+                company_full_name: formData.company_name,
+                segmentation_id: formData.segmentation_id || '',
+                area_size_ha: formData.area_size_ha || 0,
                 rkab: formData.rkab || ''
             };
 

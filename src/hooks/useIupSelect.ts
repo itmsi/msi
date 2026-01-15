@@ -13,7 +13,10 @@ export interface IupPaginationState {
     loading: boolean;
 }
 
-export const useIupSelect = () => {
+interface UseIUPFormProps {
+    employee_id?: string;
+}
+export const useIupSelect = ({ employee_id }: UseIUPFormProps = {}) => {
     const [iupOptions, setIupOptions] = useState<IupSelectOption[]>([]);
     const [pagination, setPagination] = useState<IupPaginationState>({
         page: 1,
@@ -33,12 +36,19 @@ export const useIupSelect = () => {
 
             setPagination(prev => ({ ...prev, loading: true }));
 
-            const response = await IupService.getIUPManagement({
+            const params: any = {
                 search: inputValue,
                 page: page,
                 limit: 20,
                 sort_order: 'desc'
-            });
+            };
+
+            // Only add employee_id if it exists and is not empty
+            if (employee_id && employee_id.trim() !== '') {
+                params.employee_id = employee_id;
+            }
+
+            const response = await IupService.getIUPManagement(params);
 
             if (response.success) {
                 const newOptions = response.data.map((iup: IupItem) => ({

@@ -164,6 +164,18 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
         { value: 'aktif', label: 'Active' },
         { value: 'non aktif', label: 'Inactive' }
     ]
+    const handleSegmentationChange = (selectedOption: any) => {
+        if (selectedOption) {
+            onSelectChange('segmentation_id', selectedOption.value);
+            // Update customer name if available in the option
+            if (selectedOption.segmentation_name_en || selectedOption.label) {
+                onSelectChange('segmentation_name_en', selectedOption.segmentation_name_en || selectedOption.label);
+            }
+        } else {
+            onSelectChange('segmentation_id', '');
+            onSelectChange('segmentation_name_en', '');
+        }
+    };
     return (<>
         <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
             <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">IUP Information</h3>
@@ -184,12 +196,16 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
                             loadingMessage={() => "Loading segments..."}
                             isSearchable={true}
                             inputValue={segmentationInputValue}
+                            className={`w-full md:col-span-2 ${
+                                errors.segmentation_id ? 'border rounded-[0.5rem] border-red-500' : ''
+                            }`}
                             onInputChange={(inputValue) => {
                                 handleSegmentationInputChange(inputValue);
                             }}
                             onChange={(option: any) => {
                                 setSelectedSegment(option);
-                                onSelectChange('segmentation_id', option?.value || '');
+                                handleSegmentationChange(option);
+                                // onSelectChange('segmentation_id', option?.value || '');
                             }}
                         />
                     </div>

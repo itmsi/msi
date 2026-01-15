@@ -29,7 +29,7 @@ export const useIupManagement = () => {
         try {
             setLoading(true);
             setError(null);
-            
+        
             const response = await IupService.getIUPManagement({
                 page: params?.page || pagination.page,
                 limit: params?.limit || pagination.limit,
@@ -53,14 +53,13 @@ export const useIupManagement = () => {
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
-        fetchIup({ page });
-    }, [fetchIup]);
+        fetchIup({ page, limit: pagination.limit });
+    }, [fetchIup, pagination.limit]);
 
     const handleRowsPerPageChange = useCallback((limit: number, page: number) => {
         setPagination(prev => ({ ...prev, limit, page }));
         fetchIup({ limit, page });
     }, [fetchIup]);
-    
 
     const handleSearch = useCallback((searchQuery: string) => {
         setPagination(prev => ({ ...prev, page: 1 }));

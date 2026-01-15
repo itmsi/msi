@@ -294,9 +294,9 @@ export const useIupManagementEdit = () => {
             newErrors.company_name = 'IUP Name is required';
         }
         
-        if (!formData.rkab.trim()) {
-            newErrors.rkab = 'RKAB is required';
-        }
+        // if (!formData.rkab.trim()) {
+        //     newErrors.rkab = 'RKAB is required';
+        // }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);

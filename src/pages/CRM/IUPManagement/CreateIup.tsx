@@ -4,7 +4,6 @@ import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
 import { useIupManagementCreate } from './hooks/useIupManagementCreate';
-import TerritoryInfoDisplay from './components/TerritoryInfoDisplay';
 import TerritorySelector from './components/TerritorySelector';
 import FormActions from '../../../components/form/FormActions';
 import IupInformtionsFormFields from './components/IupInformtionsFormFields';
@@ -41,13 +40,7 @@ const CreateIup: React.FC = () => {
         area: selectedArea,
         iupZone: selectedIupZone
     };
-
-    const selectedTerritoryInfo = {
-        island: selectedIsland,
-        group: selectedGroup,
-        area: selectedArea,
-        iupZone: selectedIupZone
-    };
+    
     return (
         <>
             <PageMeta 
@@ -75,7 +68,7 @@ const CreateIup: React.FC = () => {
                     </div>
 
                     {/* Form */}
-                    <TerritoryInfoDisplay selectedTerritory={selectedTerritoryInfo} />
+                    {/* <TerritoryInfoDisplay selectedTerritory={selectedTerritoryInfo} /> */}
                     
                     <TerritorySelector
                         formData={formData}

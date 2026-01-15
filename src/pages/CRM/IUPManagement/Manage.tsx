@@ -229,7 +229,7 @@ export default function ManageIUPManagement() {
                                         className="flex items-center"
                                     >
                                         <MdAdd className="mr-2" />
-                                        Add IUP
+                                        Create IUP
                                     </Button>
                                 </PermissionGate>
                             </div>

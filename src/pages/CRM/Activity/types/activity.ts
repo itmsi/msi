@@ -39,6 +39,8 @@ export interface ActivityPagination {
 export interface ActivityFormData {
     transaction_type: string;
     transaction_source: string;
+    iup_id?: string;
+    iup_name?: string;
     iup_customer_id: string;
     customer_iup_name: string;
     transaction_date: string | Date;
@@ -104,6 +106,8 @@ export interface ActivityValidationErrors {
     transaction_type?: string;
     transaction_source?: string;
     iup_customer_id?: string;
+    iup_id?: string;
+    iup_name?: string;
     transaction_date?: string;
     transaction_time?: string;
     latitude?: string;

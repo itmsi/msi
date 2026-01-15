@@ -13,6 +13,8 @@ import { allowOnlyNumeric, formatDate } from '@/helpers/generalHelper';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import { SegmentSelectOption } from '../../IUPManagement/components/IupInformtionsFormFields';
 import { useContractorSelect } from '@/hooks/useContractorSelect';
+import { useIupSelect } from '@/hooks/useIupSelect';
+import { isUser } from '@/helpers/fileTypeHelper__belumterpakai';
 
 interface ActivityFormProps {
     formData: ActivityFormData;
@@ -24,12 +26,17 @@ interface ContractorSelectOption {
     value: string;
     label: string;
 }
+interface IUPSelectOption {
+    value: string;
+    label: string;
+}
 const ActivityForm: React.FC<ActivityFormProps> = ({ 
     formData, 
     errors, 
     onChange,
     isSubmitting 
 }) => {
+    const getUser = isUser(); 
     const {
         segementationOptions,
         inputValue: segmentationInputValue,
@@ -46,17 +53,43 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
     const [selectedSegment, setSelectedSegment] = useState<SegmentSelectOption | null>(null);
 
     const {
+        iupOptions,
+        inputValue: iupInputValue,
+        handleInputChange: handleIupInputChange,
+        pagination: iupPagination,
+        handleMenuScrollToBottom: handleIupMenuScrollToBottom,
+        initializeOptions: initializeIupOptions
+    } = useIupSelect({
+        employee_id: getUser || undefined
+    });
+
+    useEffect(() => {
+        initializeIupOptions();
+    }, [initializeIupOptions]);
+
+    const [selectedIUP, setSelectedIUP] = useState<IUPSelectOption | null>(null);
+
+    const {
         contractorOptions,
         inputValue: contractorInputValue,
         handleInputChange: handleContractorInputChange,
         pagination: contractorPagination,
         handleMenuScrollToBottom: handleContractorMenuScrollToBottom,
-        initializeOptions: initializeContractorOptions
-    } = useContractorSelect();
+        initializeOptions: initializeContractorOptions,
+        resetOptions: resetContractorOptions
+    } = useContractorSelect({
+        iup_id: formData.iup_id && formData.iup_id.trim() !== '' ? formData.iup_id : undefined
+    });
 
     useEffect(() => {
-        initializeContractorOptions();
-    }, [initializeContractorOptions]);
+        setSelectedContractor(null);
+        
+        if (formData.iup_id && formData.iup_id.trim() !== '') {
+            resetContractorOptions();
+        } else {
+            resetContractorOptions();
+        }
+    }, [formData.iup_id]);
 
     const [selectedContractor, setSelectedContractor] = useState<ContractorSelectOption | null>(null);
 
@@ -71,7 +104,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
         return (
             <div>
                 <Label>
-                    {label} {required && <span className="text-red-500">*</span>}
+                    {label} {required && <span>*</span>}
                 </Label>
                 <Input
                     type={type}
@@ -116,16 +149,28 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
             });
         }
     }, [formData?.segmentation_properties?.segmentation_id]);
+
     useEffect(() => {
-        if (formData.iup_customer_id) {
+        if (formData.iup_customer_id && selectedContractor?.value !== formData.iup_customer_id) {
             setSelectedContractor({
                 value: formData.iup_customer_id,
                 label: formData.customer_iup_name || 'Selected Customer'
             });
-        } else {
+        } else if (!formData.iup_customer_id && selectedContractor !== null) {
             setSelectedContractor(null);
         }
     }, [formData.iup_customer_id, formData.customer_iup_name]);
+
+    useEffect(() => {
+        if (formData.iup_id && selectedIUP?.value !== formData.iup_id) {
+            setSelectedIUP({
+                value: formData.iup_id,
+                label: formData.iup_name || 'Selected IUP'
+            });
+        } else if (!formData.iup_id && selectedIUP !== null) {
+            setSelectedIUP(null);
+        }
+    }, [formData.iup_id, formData.iup_name]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -176,6 +221,24 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
         } else {
             onChange('iup_customer_id', '');
             onChange('customer_iup_name', '');
+        }
+    };
+
+    const handleIUPChange = (selectedOption: any) => {
+        // Always reset contractor first
+        setSelectedContractor(null);
+        onChange('iup_customer_id', '');
+        onChange('customer_iup_name', '');
+        
+        if (selectedOption) {
+            onChange('iup_id', selectedOption.value);
+            // Update IUP name if available in the option
+            if (selectedOption.iup_name || selectedOption.label) {
+                onChange('iup_name', selectedOption.iup_name || selectedOption.label);
+            }
+        } else {
+            onChange('iup_id', '');
+            onChange('iup_name', '');
         }
     };
 
@@ -276,10 +339,42 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:col-span-2">
+                        {/* IUP Selection */}
+                        <div>
+                            <Label>
+                                IUP Selection <span>*</span>
+                            </Label>
+                            
+                            <CustomAsyncSelect
+                                placeholder="Selected IUP..."
+                                value={selectedIUP}
+                                defaultOptions={iupOptions}
+                                loadOptions={handleIupInputChange}
+                                onMenuScrollToBottom={handleIupMenuScrollToBottom}
+                                isLoading={iupPagination.loading}
+                                noOptionsMessage={() => "No IUPs found"}
+                                loadingMessage={() => "Loading IUPs..."}
+                                isSearchable={true}
+                                inputValue={iupInputValue}
+                                className={`w-full md:col-span-2 ${
+                                    errors.iup_id ? 'border rounded-[0.5rem] border-red-500' : ''
+                                }`}
+                                onInputChange={(inputValue) => {
+                                    handleIupInputChange(inputValue);
+                                }}
+                                onChange={(option: any) => {
+                                    setSelectedIUP(option);
+                                    handleIUPChange(option);
+                                }}
+                            />
+                            {errors.iup_id && (
+                                <p className="text-red-500 text-sm mt-1">{errors.iup_customer_id}</p>
+                            )}
+                        </div>
                         {/* Customer Selection */}
                         <div>
                             <Label>
-                                Customer <span className="text-red-500">*</span>
+                                Customer <span>*</span>
                             </Label>
                             
                             <CustomAsyncSelect
@@ -289,10 +384,11 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                                 loadOptions={handleContractorInputChange}
                                 onMenuScrollToBottom={handleContractorMenuScrollToBottom}
                                 isLoading={contractorPagination.loading}
-                                noOptionsMessage={() => "No customers found"}
+                                noOptionsMessage={() => selectedIUP ? "No customers found" : "Please select IUP first"}
                                 loadingMessage={() => "Loading customers..."}
                                 isSearchable={true}
                                 inputValue={contractorInputValue}
+                                disabled={!selectedIUP}
                                 className={`w-full md:col-span-2 ${
                                     errors.iup_customer_id ? 'border rounded-[0.5rem] border-red-500' : ''
                                 }`}
@@ -354,7 +450,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                     {/* Transcription */}
                     <div>
                         <Label>
-                            Transcription <span className="text-red-500">*</span>
+                            Transcription <span>*</span>
                         </Label>
                         <TextArea
                             value={formData.transcription}
@@ -373,7 +469,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                     {/* Summary Point */}
                     <div>
                         <Label>
-                            Summary Point <span className="text-red-500">*</span>
+                            Summary Point <span>*</span>
                         </Label>
                         <TextArea
                             value={formData.summary_point}
@@ -392,7 +488,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                     {/* Summary BIM */}
                     <div>
                         <Label>
-                            Summary BIM <span className="text-red-500">*</span>
+                            Summary BIM <span>*</span>
                         </Label>
                         <TextArea
                             value={formData.summary_bim}

@@ -13,8 +13,10 @@ export interface ContractorPaginationState {
     hasMore: boolean;
     loading: boolean;
 }
-
-export const useContractorSelect = () => {
+interface UseContractorFormProps {
+    iup_id?: string;
+}
+export const useContractorSelect = ({ iup_id }: UseContractorFormProps = {}) => {
     const [contractorOptions, setContractorOptions] = useState<ContractorSelectOption[]>([]);
     const [pagination, setPagination] = useState<ContractorPaginationState>({
         page: 1,
@@ -33,15 +35,20 @@ export const useContractorSelect = () => {
             if (pagination.loading && !reset) return loadedOptions;
 
             setPagination(prev => ({ ...prev, loading: true }));
-            const getUser = isUser();
             
-            const response = await ContractorServices.getContractors({
+            const params: any = {
                 search: inputValue,
                 page: page,
                 limit: 20,
-                sort_order: 'desc',
-                employee_id: getUser || undefined
-            });
+                sort_order: 'desc'
+            };
+
+            // Only add iup_id if it exists and is not empty
+            if (iup_id && iup_id.trim() !== '') {
+                params.iup_id = iup_id;
+            }
+
+            const response = await ContractorServices.getContractors(params);
             if (response.success) {
                 
                 const newOptions = response.data.map((contractor: Contractor) => ({
@@ -68,7 +75,7 @@ export const useContractorSelect = () => {
         }
 
         return loadedOptions;
-    }, [pagination.loading]);
+    }, [pagination.loading, iup_id]);
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -91,6 +98,14 @@ export const useContractorSelect = () => {
         }
     }, [contractorOptions.length, loadContractorOptions]);
 
+    const resetOptions = useCallback(async () => {
+        // Force clear options and reload
+        setContractorOptions([]);
+        setPagination({ page: 1, hasMore: true, loading: false });
+        setInputValue('');
+        await loadContractorOptions('', [], 1, true);
+    }, [loadContractorOptions]);
+
     return {
         contractorOptions,
         pagination,
@@ -98,6 +113,7 @@ export const useContractorSelect = () => {
         handleInputChange,
         handleMenuScrollToBottom,
         initializeOptions,
+        resetOptions,
         loadContractorOptions
     };
 };

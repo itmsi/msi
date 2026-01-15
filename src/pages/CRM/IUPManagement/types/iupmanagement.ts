@@ -7,6 +7,7 @@ export interface IupRequest {
     search?: string;
     status?: string;
     is_admin?: boolean;
+    employee_id?: string;
 }
 export interface IupFilters {
     search: string;

@@ -21,6 +21,8 @@ export const useActivityForm = ({ mode, transactions_id, initialData }: UseActiv
         transaction_type: '',
         transaction_source: 'manual',
         iup_customer_id: '',
+        iup_id: '',
+        iup_name: '',
         customer_iup_name: '',
         transaction_date: formatDateToYMD(new Date()),
         transaction_time: new Date().toTimeString().slice(0, 5), // Current time in HH:MM format
@@ -67,6 +69,10 @@ export const useActivityForm = ({ mode, transactions_id, initialData }: UseActiv
             errors.transaction_source = 'Transaction source is required';
         }
 
+        if (!formData.iup_id) {
+            errors.iup_id = 'IUP selection is required';
+        }
+
         if (!formData.iup_customer_id) {
             errors.iup_customer_id = 'Customer selection is required';
         }
@@ -111,9 +117,6 @@ export const useActivityForm = ({ mode, transactions_id, initialData }: UseActiv
         if (formData.voice_record_url && !isValidUrl(formData.voice_record_url)) {
             errors.voice_record_url = 'Please enter a valid voice record URL';
         }
-        console.log({
-            errors
-        });
         
         setValidationErrors(errors);
         return Object.keys(errors).length === 0;
@@ -161,9 +164,6 @@ export const useActivityForm = ({ mode, transactions_id, initialData }: UseActiv
                 navigate('/crm/activity');
             } else {
                 const errorMessage = `${response.message}`;
-                // const errorMessage = mode === 'create'
-                //     ? 'Failed to create activity'
-                //     : `Failed to update activity ${response.message}`;
                     
                 toast.error(errorMessage);
             }
