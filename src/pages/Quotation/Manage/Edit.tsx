@@ -174,6 +174,9 @@ export default function EditQuotation() {
     const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
     const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
 
+    // Flag to prevent bank selection reset
+    const [bankInitialized, setBankInitialized] = useState(false);
+
     // Load quotation data on mount
     const loadQuotationData = useCallback(async () => {
         if (!quotationId) return;
@@ -346,7 +349,7 @@ export default function EditQuotation() {
 
     // Load bank selection after bank options are loaded
     useEffect(() => {
-        if (quotationData && bankOptions.length > 0) {
+        if (quotationData && bankOptions.length > 0 && !bankInitialized) {
             const data = quotationData;
             if (data.bank_account_name && data.bank_account_number) {
                 // Find matching bank from options
@@ -354,6 +357,9 @@ export default function EditQuotation() {
                     bank.data.bank_account_name === data.bank_account_name &&
                     bank.data.bank_account_number === data.bank_account_number
                 );
+                console.log({
+                    matchingBank
+                });
                 
                 if (matchingBank) {
                     setSelectedBank(matchingBank);
@@ -386,9 +392,12 @@ export default function EditQuotation() {
                         bank_account_bank_name: data.bank_account_bank_name
                     }));
                 }
+                
+                // Set flag to prevent future resets
+                setBankInitialized(true);
             }
         }
-    }, [quotationData, bankOptions]);
+    }, [quotationData, bankOptions, bankInitialized]);
 
     // Sync individual dates with form data (but don't override on initial load)
     useEffect(() => {
@@ -1587,7 +1596,27 @@ export default function EditQuotation() {
                                         }}
                                         onChange={(option: any) => {
                                             setSelectedBank(option);
-                                            handleInputChange('bank_account_id', option?.value || '');
+                                            if (option) {
+                                                // Update all bank-related fields when bank is selected
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    bank_account_id: option.value || '',
+                                                    bank_account_name: option.data?.bank_account_name || '',
+                                                    bank_account_number: option.data?.bank_account_number || '',
+                                                    bank_account_type: option.data?.bank_account_type || '',
+                                                    bank_account_bank_name: option.data?.bank_account_type || ''
+                                                }));
+                                            } else {
+                                                // Clear all bank-related fields when no bank selected
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    bank_account_id: '',
+                                                    bank_account_name: '',
+                                                    bank_account_number: '',
+                                                    bank_account_type: '',
+                                                    bank_account_bank_name: ''
+                                                }));
+                                            }
                                         }}
                                     />
                                     {validationErrors.bank_account_id && (
