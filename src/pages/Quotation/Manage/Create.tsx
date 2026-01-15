@@ -14,6 +14,7 @@ import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
+import CustomSelect from '@/components/form/select/CustomSelect';
 import CustomDataTable from "@/components/ui/table/CustomDataTable";
 import WysiwygEditor from '@/components/form/editor/WysiwygEditor';
 
@@ -1167,15 +1168,23 @@ export default function CreateQuotation() {
                                         {/* Quotation For */}
                                         <div>
                                             <Label htmlFor="quotation_for">Quotation For</Label>
-                                            <select
+                                            <CustomSelect
                                                 id="quotation_for"
-                                                value={formData.quotation_for || 'customer'}
-                                                onChange={(e) => handleInputChange('quotation_for', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
-                                            >
-                                                <option value="customer">Customer</option>
-                                                <option value="leasing">Leasing</option>
-                                            </select>
+                                                value={
+                                                    formData.quotation_for === 'leasing'
+                                                        ? { value: 'leasing', label: 'Leasing' }
+                                                        : { value: 'customer', label: 'Customer' }
+                                                }
+                                                onChange={(selectedOption) => handleInputChange('quotation_for', selectedOption?.value || 'customer')}
+                                                options={[
+                                                    { value: 'customer', label: 'Customer' },
+                                                    { value: 'leasing', label: 'Leasing' }
+                                                ]}
+                                                placeholder="Select quotation for"
+                                                isClearable={false}
+                                                isSearchable={false}
+                                                className="w-full"
+                                            />
                                         </div>
                                     </div>
                                     <div className="md:col-span-1 space-y-3">
