@@ -354,6 +354,9 @@ export default function EditQuotation() {
                     bank.data.bank_account_name === data.bank_account_name &&
                     bank.data.bank_account_number === data.bank_account_number
                 );
+                console.log({
+                    matchingBank
+                });
                 
                 if (matchingBank) {
                     setSelectedBank(matchingBank);
@@ -388,7 +391,7 @@ export default function EditQuotation() {
                 }
             }
         }
-    }, [quotationData, bankOptions]);
+    }, [quotationData]);
 
     // Sync individual dates with form data (but don't override on initial load)
     useEffect(() => {
