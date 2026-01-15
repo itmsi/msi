@@ -60,22 +60,24 @@ export default function ManageIUPManagement() {
             name: 'Island',
             selector: row => row.island_name,
             wrap: true,
-            // minWidth: '120px',
+            width: '150px',
         },
         {
             name: 'Group',
             selector: row => row.group_name,
             wrap: true,
+            center: true,
         },
         {
             name: 'Area',
             selector: row => row.area_name,
+            center: true,
             wrap: true,
         },
         {
             name: 'IUP Zone',
             selector: row => row.iup_zone_name,
-            width: '300px',
+            width: '200px',
             wrap: true,
         },
         {
@@ -138,7 +140,7 @@ export default function ManageIUPManagement() {
                 <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <Input
                     type="text"
-                    placeholder="Search IUP... (Press Enter to search)"
+                    placeholder="Search IUP Name... (Press Enter to search)"
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
                     onKeyPress={handleKeyPress}

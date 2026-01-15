@@ -3,6 +3,7 @@ import { RorEntity, RorListRequest, RorListResponse } from '../types/roecalculat
 import { ManageROEBreakdownData, ManageROEDataPDF } from '../../types/roeCalculator';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_IS_ADMIN = import.meta.env.VITE_PARAM_IS_ADMIN;
 
 export class RoecalculatorService {
 
@@ -12,6 +13,7 @@ export class RoecalculatorService {
             limit: 10,
             sort_order: 'desc',
             search: '',
+            is_admin: API_IS_ADMIN,
             ...params
         };
         

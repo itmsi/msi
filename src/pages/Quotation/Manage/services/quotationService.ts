@@ -35,6 +35,8 @@ export class QuotationService {
                 manage_quotation_shipping_term: quotationData.manage_quotation_shipping_term || "",
                 manage_quotation_franco: quotationData.manage_quotation_franco || "",
                 manage_quotation_lead_time: quotationData.manage_quotation_lead_time || "",
+                quotation_for: quotationData.quotation_for || "customer",  // New field
+                star: quotationData.star || "",  // New field
                 bank_account_name: quotationData.bank_account_name || "",
                 bank_account_number: quotationData.bank_account_number || "",
                 bank_account_bank_name: quotationData.bank_account_bank_name || "",
@@ -47,12 +49,13 @@ export class QuotationService {
                 manage_quotation_item_accessories: quotationData.manage_quotation_item_accessories || []
             };
 
-            const response = await apiPost(`${API_BASE_URL}/quotation/manage-quotation`, payload);
+            // const response = await apiPost(`${API_BASE_URL}/quotation/manage-quotation`, payload);
             
+            const response = await apiPost<{ status: boolean; message: string; data: any }>(`${API_BASE_URL}/quotation/manage-quotation`, payload);
             return {
-                success: true,
+                success: response.data?.status || false,
                 data: response.data,
-                message: 'Quotation created successfully'
+                message: response.data?.message
             };
         } catch (error: any) {
             console.error('Create quotation error:', error);
@@ -107,6 +110,8 @@ export class QuotationService {
                 manage_quotation_shipping_term: quotationData.manage_quotation_shipping_term || "",
                 manage_quotation_franco: quotationData.manage_quotation_franco || "",
                 manage_quotation_lead_time: quotationData.manage_quotation_lead_time || "",
+                quotation_for: quotationData.quotation_for || "customer",  // New field
+                star: quotationData.star || "",  // New field
                 bank_account_name: quotationData.bank_account_name || "",
                 bank_account_number: quotationData.bank_account_number || "",
                 bank_account_bank_name: quotationData.bank_account_bank_name || "",
@@ -118,12 +123,12 @@ export class QuotationService {
                 manage_quotation_items: quotationData.manage_quotation_items || []
             };
 
-            const response = await apiPut(`${API_BASE_URL}/quotation/manage-quotation/${quotationId}`, payload);
+            const response = await apiPut<{ status: boolean; message: string; data: any }>(`${API_BASE_URL}/quotation/manage-quotation/${quotationId}`, payload);
             
             return {
-                success: true,
+                success: response.data?.status || false,
                 data: response.data,
-                message: 'Quotation updated successfully'
+                message: response.data?.message
             };
         } catch (error: any) {
             console.error('Update quotation error:', error);

@@ -53,7 +53,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
                     <div className="block text-sm text-gray-500">{`${row?.customer_phone ? formatPhoneNumber(row.customer_phone) : '-'}`}</div>
                 </div>
             ),
-            sortable: true,
+            sortable: false,
             wrap: true,
             width: '350px',
         },
@@ -73,7 +73,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
                     </div>
                 </div>
             ),
-            sortable: true,
+            sortable: false,
             wrap: true,
             width: '350px',
         },
@@ -97,7 +97,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
         {
             name: 'Project',
             selector: (row) => row.business_project_bim,
-            sortable: true,
+            sortable: false,
             wrap: true,
             width: '120px',
         },
@@ -105,7 +105,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             name: 'Activity',
             selector: (row) => row?.activity_status || 'find',
             cell: (row) => <ActivityTypeBadge type={(row?.activity_status as 'find' | 'pull' | 'survey') || 'find'} />,
-            sortable: true,
+            sortable: false,
             wrap: true,
             width: '120px',
         },

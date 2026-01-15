@@ -268,7 +268,7 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                     )}
                 </div>
 
-                {renderInput('rkab', 'RKAB', undefined, true)}
+                {renderInput('rkab', 'RKAB', undefined, false)}
                 {renderInput('ritase', 'Ritase')}
                 {renderInput('hauling_distance', 'Hauling Distance')}
                 {renderInput('barging_distance', 'Barging Distance')}

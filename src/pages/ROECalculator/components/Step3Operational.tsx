@@ -1,7 +1,7 @@
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, QuoteDefaults } from '../types/roeCalculator';
-import { formatNumberInput, handleKeyPress, handleDecimalInput } from '@/helpers/generalHelper';
+import { formatNumberInput, handleDecimalInput } from '@/helpers/generalHelper';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import LoadingSpinner from '@/components/common/Loading';
 import { useNavigate } from 'react-router';
@@ -219,13 +219,15 @@ export default function Step3Operational({
                     </div>
 
                     <div>
-                        <Label htmlFor="fuel_price">Harga BBM (Rp/L)</Label>
+                        <Label htmlFor="fuel_price">Harga BBM (Rp/L)</Label>                        
                         <Input
                             id="fuel_price"
-                            onKeyPress={handleKeyPress}
-                            value={formatNumberInput(formData?.fuel_price)}
-                            onChange={(e) => handleInputChange('fuel_price', e.target.value)}
-                            placeholder=""
+                            type="text"
+                            value={formatNumberInput(formData.fuel_price)}
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/[^\d]/g, '');
+                                handleInputChange('fuel_price', value);
+                            }}
                         />
                     </div>
 
