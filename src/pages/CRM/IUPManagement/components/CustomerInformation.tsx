@@ -134,7 +134,7 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
                     persistTableHead
                     headerBackground="rgba(2, 83, 165, 0.1)"
                     hoverBackground="rgba(223, 232, 242, 0.3)"
-                    onRowClicked={(row) => navigate(`/crm/iup-management/edit/${row.customer_name}`)}
+                    onRowClicked={(row) => navigate(`/crm/contractors/edit/${row.customer_id}`)}
                 />
             </div>
         </div>

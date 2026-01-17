@@ -17,7 +17,7 @@ export const useQuotation = () => {
     const [filters, setFilters] = useState({
         search: '',
         sort_order: 'desc' as 'asc' | 'desc',
-        status: '' as 'submit' | 'draft' | 'rejected' | ''
+        quotation_for: '' as 'customer' | 'leasing' | ''
     });
 
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
@@ -25,18 +25,18 @@ export const useQuotation = () => {
     const fetchQuotations = useCallback(async (page?: number, limit?: number) => {
         setLoading(true);
         setError(null);
-        
+
         try {
             const requestParams: Partial<QuotationRequest> = {
                 page: page !== undefined ? page : pagination.page,
                 limit: limit !== undefined ? limit : pagination.limit,
                 search: filters.search,
                 sort_order: filters.sort_order,
-                status: filters.status
+                quotation_for: filters.quotation_for
             };
-            
+
             const response = await QuotationService.getQuotation(requestParams);
-            
+
             if (response.status) {
                 setQuotations(response.data.items);
                 setPagination(response.data.pagination);
@@ -49,7 +49,7 @@ export const useQuotation = () => {
         } finally {
             setLoading(false);
         }
-    }, [pagination.page, pagination.limit, filters.search, filters.sort_order, filters.status]);
+    }, [pagination.page, pagination.limit, filters.search, filters.sort_order, filters.quotation_for]);
 
     // Debounced search handler
     const handleSearchChange = useCallback((value: string) => {
@@ -58,21 +58,21 @@ export const useQuotation = () => {
         }
 
         setFilters(prev => ({ ...prev, search: value }));
-        
+
         debounceTimer.current = setTimeout(() => {
             setPagination(prev => ({ ...prev, page: 1 }));
-            
+
             const requestParams: Partial<QuotationRequest> = {
                 page: 1,
                 limit: pagination.limit,
                 search: value,
                 sort_order: filters.sort_order,
-                status: filters.status
+                quotation_for: filters.quotation_for
             };
-            
+
             setLoading(true);
             setError(null);
-            
+
             QuotationService.getQuotation(requestParams)
                 .then(response => {
                     if (response.status) {
@@ -90,16 +90,16 @@ export const useQuotation = () => {
                     setLoading(false);
                 });
         }, 500);
-    }, [pagination.limit, filters.sort_order, filters.status]);
+    }, [pagination.limit, filters.sort_order, filters.quotation_for]);
 
-    const updateFilters = useCallback((key: 'search' | 'sort_order' | 'status', value: string) => {
+    const updateFilters = useCallback((key: 'search' | 'sort_order' | 'quotation_for', value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
 
     const deleteQuotation = useCallback(async (quotation_id: string) => {
         setLoading(true);
         setError(null);
-        
+
         try {
             await QuotationService.deleteQuotation(quotation_id);
             setQuotations(prev => prev.filter(quotation => quotation.manage_quotation_id !== quotation_id));
@@ -116,9 +116,9 @@ export const useQuotation = () => {
     const downloadQuotation = useCallback(async (quotation_id: string) => {
         setLoading(true);
         setError(null);
-        
+
         try {
-            const response = await QuotationService.downloadQuotation(quotation_id); 
+            const response = await QuotationService.downloadQuotation(quotation_id);
             if (response.data?.status) {
                 await generateQuotationPDF(response.data.data);
                 toast.success('PDF downloaded successfully');

@@ -91,12 +91,12 @@ export const createDateColumn = (
     format: (row: any) => {
         const date = new Date(row[dateField]);
         return formatOptions 
-            ? date.toLocaleDateString(undefined, formatOptions)
+            ? date.toLocaleDateString('id-ID', formatOptions)
             : date.toLocaleDateString();
     },
     center: true,
     wrap: true,
-    width: '150px',
+    width: formatOptions ? '180px' : '150px',
 });
 
 export const createActionsColumn = (actions: Array<{

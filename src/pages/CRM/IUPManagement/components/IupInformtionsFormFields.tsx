@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Label from '@/components/form/Label';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import Input from '@/components/form/input/InputField';
-import { STATUS_OPTIONS } from '../constants/iupConstants';
 import { allowOnlyNumeric } from '@/helpers/generalHelper';
 import { IupManagementFormData } from '../types/iupmanagement';
 import { Calendar } from 'react-date-range';
@@ -51,7 +50,7 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
     const skDueDatePickerRef = useRef<HTMLDivElement>(null);
     // Helper function untuk render input field dengan consistent styling
     
-    // Banks Account states
+    // Segmentation states
     const [selectedSegment, setSelectedSegment] = useState<SegmentSelectOption | null>(null);
 
     const formatDate = (date: Date) => {
@@ -161,6 +160,10 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
         }
     }, [showDueDatePicker]);
 
+    const STATUS_OPTIONS = [
+        { value: 'aktif', label: 'Active' },
+        { value: 'non aktif', label: 'Inactive' }
+    ]
     return (<>
         <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
             <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">IUP Information</h3>

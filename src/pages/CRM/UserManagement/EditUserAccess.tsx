@@ -401,7 +401,7 @@ const EditUserAccess: React.FC = () => {
                     data_territory: dataTerritory
                 });
             }
-            navigate('/user-management');
+            navigate('/crm/user-management');
         } catch (error: any) {
             console.error('Error updating user access:', error);
             console.error(error?.message || 'Failed to update user access');
@@ -433,7 +433,7 @@ const EditUserAccess: React.FC = () => {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/user-management')}
+                                onClick={() => navigate('/crm/user-management')}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -493,7 +493,7 @@ const EditUserAccess: React.FC = () => {
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => navigate('/user-management')}
+                            onClick={() => navigate('/crm/user-management')}
                             className="px-6 rounded-full"
                             disabled={isSubmitting}
                         >

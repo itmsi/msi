@@ -21,6 +21,7 @@ export interface IupSummary {
 }
 
 export interface CustomerInfo {
+    customer_id: string;
     customer_name: string;
     customer_phone: string;
     contact_person: string;
@@ -122,4 +123,8 @@ export interface IupManagementFormData {
     area_id?: string;
     area_name?: string;
     iup_zone_name?: string;
+}
+export interface Contractor {
+    iup_customer_id: string;
+    customer_iup_name: string;
 }
