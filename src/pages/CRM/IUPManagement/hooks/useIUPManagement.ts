@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { IupItem, IupRequest, IupSummary, Pagination, SegmentationOption } from '../types/iupmanagement';
+import { IupItem, IupRequest, IupSummary, Pagination } from '../types/iupmanagement';
 import { IupService } from '../services/iupManagementService';
-import { SegmentationService } from '../services/segmentationService';
 
 export const useIupManagement = () => {
     const [searchValue, setSearchValue] = useState('');
@@ -9,7 +8,7 @@ export const useIupManagement = () => {
     const [sortModify, setSortModify] = useState<'updated_at' | 'created_at' | ''>('updated_at');
     const [statusFilter, setStatusFilter] = useState('');
     const [segmentationFilter, setSegmentationFilter] = useState('');
-    const [segmentationOptions, setSegmentationOptions] = useState<SegmentationOption[]>([]);
+    // const [selectedSegment, setSelectedSegment] = useState<SegmentSelectOption | null>(null);
     
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -53,7 +52,7 @@ export const useIupManagement = () => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, sortModify, statusFilter, segmentationFilter]);
+    }, [searchValue, sortOrder, sortModify, statusFilter]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
@@ -103,20 +102,9 @@ export const useIupManagement = () => {
         fetchIup({ ...filters, page: 1 });
     }, [fetchIup]);
 
-    // Fetch segmentation options
-    const fetchSegmentations = useCallback(async () => {
-        try {
-            const segmentations = await SegmentationService.getSegmentations();
-            setSegmentationOptions(segmentations);
-        } catch (err) {
-            console.error('Error fetching segmentations:', err);
-        }
-    }, []);
-
     // Initial load
     useEffect(() => {
         fetchIup();
-        fetchSegmentations();
     }, []);
     
     // Refetch when filters change  
@@ -162,8 +150,8 @@ export const useIupManagement = () => {
         statusFilter,
         setStatusFilter,
         segmentationFilter,
-        setSegmentationFilter,
-        segmentationOptions,
+        // setSegmentationFilter,
+        // segmentationOptions,
         fetchIup,
 
         // Actions

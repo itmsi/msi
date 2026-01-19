@@ -13,7 +13,10 @@ import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { useNavigate } from 'react-router';
 import {  formatDateTime } from '@/helpers/generalHelper';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
+import { useSegementationSelect } from '@/hooks/useSegmentSelect';
+import { SegmentSelectOption } from './components/IupInformtionsFormFields';
 
 export default function ManageIUPManagement() {
     
@@ -31,7 +34,7 @@ export default function ManageIUPManagement() {
         setSearchValue,
         statusFilter,
         segmentationFilter,
-        segmentationOptions,
+        // segmentationOptions,
         // setStatusFilter,
         // fetchIup,
 
@@ -50,6 +53,38 @@ export default function ManageIUPManagement() {
         handleClearSearch,
     } = useIupManagement();
 
+    const {
+        segementationOptions,
+        inputValue: segmentationInputValue,
+        handleInputChange: handleSegmentationInputChange,
+        pagination: segmentationPagination,
+        handleMenuScrollToBottom: handleSegmentationMenuScrollToBottom,
+        initializeOptions: initializeSegementationOptions
+    } = useSegementationSelect();
+
+    useEffect(() => {
+        initializeSegementationOptions();
+    }, [initializeSegementationOptions]);
+
+    // Debug segmentation data
+    // console.log('Segmentation Options:', segementationOptions);
+    // console.log('Options length:', segementationOptions.length);
+    // console.log('First option:', segementationOptions[0]);
+
+    // Segmentation states
+    const [selectedSegment, setSelectedSegment] = useState<SegmentSelectOption | null>(null);
+    
+    // Sync selectedSegment with segmentationFilter
+    useEffect(() => {
+        if (segmentationFilter && segmentationFilter.trim() !== '') {
+            const matchingSegment = segementationOptions.find(option => option.value === segmentationFilter);
+            if (matchingSegment && selectedSegment?.value !== segmentationFilter) {
+                setSelectedSegment(matchingSegment);
+            }
+        } else if (!segmentationFilter && selectedSegment !== null) {
+            setSelectedSegment(null);
+        }
+    }, [segmentationFilter, segementationOptions, selectedSegment]);
     // Definisi kolom untuk DataTable
     const iupColumns: TableColumn<IupItem>[] = [
         {
@@ -144,14 +179,6 @@ export default function ManageIUPManagement() {
     ];
     
     const SearchAndFilters = useMemo(() => {
-        // Dynamic segmentation options from API
-        const SEGMENTATION_OPTIONS = [
-            { value: '', label: 'All Segmentation' },
-            ...segmentationOptions.map(seg => ({
-                value: seg.segmentation_id,
-                label: seg.segmentation_name_en
-            }))
-        ];
         
         return (
         <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-8 gap-6">
@@ -176,21 +203,37 @@ export default function ManageIUPManagement() {
                 )}
             </div>
             
+            <CustomAsyncSelect
+                placeholder="Select Segmentation..."
+                value={selectedSegment}
+                defaultOptions={segementationOptions}
+                loadOptions={handleSegmentationInputChange}
+                onMenuScrollToBottom={() => {
+                    // console.log('Scrolling to bottom');
+                    handleSegmentationMenuScrollToBottom();
+                }}
+                isLoading={segmentationPagination.loading}
+                noOptionsMessage={() => "No segments found"}
+                loadingMessage={() => segementationOptions.length > 0 ? "Loading segments..." : ""}
+                isSearchable={true}
+                isClearable={true}
+                inputValue={segmentationInputValue}
+                className="w-full md:col-span-2"
+                onInputChange={(inputValue) => {
+                    handleSegmentationInputChange(inputValue);
+                }}
+                onChange={(option: any) => {
+                    console.log('segmentation_id', option?.value || '');
+                    setSelectedSegment(option);
+                    handleFilterChange('segmentation', option?.value || '');
+                }}
+            />
+            
             <CustomSelect
                 value={STATUS_OPTIONS.find(option => option.value === statusFilter) || null}
                 onChange={(option) => handleFilterChange('status', option?.value || '')}
                 options={STATUS_OPTIONS}
                 placeholder="Filter by Status"
-                className="w-full md:col-span-2"
-                isClearable={false}
-                isSearchable={false}
-            />
-            
-            <CustomSelect
-                value={SEGMENTATION_OPTIONS.find(option => option.value === segmentationFilter) || null}
-                onChange={(option) => handleFilterChange('segmentation', option?.value || '')}
-                options={SEGMENTATION_OPTIONS}
-                placeholder="Filter by Segmentation"
                 className="w-full"
                 isClearable={false}
                 isSearchable={false}
@@ -229,7 +272,7 @@ export default function ManageIUPManagement() {
             </div>
         </div>
     );
-    }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, segmentationOptions, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange]);
+    }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, segementationOptions]);
     
     return (
         <>
