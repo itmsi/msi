@@ -66,11 +66,6 @@ export default function ManageIUPManagement() {
         initializeSegementationOptions();
     }, [initializeSegementationOptions]);
 
-    // Debug segmentation data
-    // console.log('Segmentation Options:', segementationOptions);
-    // console.log('Options length:', segementationOptions.length);
-    // console.log('First option:', segementationOptions[0]);
-
     // Segmentation states
     const [selectedSegment, setSelectedSegment] = useState<SegmentSelectOption | null>(null);
     
@@ -209,7 +204,6 @@ export default function ManageIUPManagement() {
                 defaultOptions={segementationOptions}
                 loadOptions={handleSegmentationInputChange}
                 onMenuScrollToBottom={() => {
-                    // console.log('Scrolling to bottom');
                     handleSegmentationMenuScrollToBottom();
                 }}
                 isLoading={segmentationPagination.loading}
@@ -223,7 +217,6 @@ export default function ManageIUPManagement() {
                     handleSegmentationInputChange(inputValue);
                 }}
                 onChange={(option: any) => {
-                    console.log('segmentation_id', option?.value || '');
                     setSelectedSegment(option);
                     handleFilterChange('segmentation', option?.value || '');
                 }}
