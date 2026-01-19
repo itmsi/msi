@@ -70,7 +70,7 @@ export default function Step4MonthlyCosts({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Fuel Expense */}
                 <div>
-                    <Label htmlFor="fuel_expense">Biaya Ban (Rp/bulan)</Label>
+                    <Label htmlFor="fuel_expense">Biaya Ban per Unit (Rp/bulan)</Label>
                     <Input
                         id="tyre_expense_monthly"
                         onKeyPress={handleKeyPress}
@@ -97,7 +97,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Maintenance Expense */}
                 <div>
-                    <Label htmlFor="maintenance_expense">Biaya Perawatan (Rp)</Label>
+                    <Label htmlFor="maintenance_expense">Biaya Perawatan per Unit (Rp)</Label>
                     <Input
                         id="sparepart_expense_monthly"
                         onKeyPress={handleKeyPress}
@@ -124,7 +124,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Operator Salary */}
                 <div>
-                    <Label htmlFor="operator_salary">Gaji Operator (Rp)</Label>
+                    <Label htmlFor="operator_salary">Gaji Operator per Unit (Rp)</Label>
                     <Input
                         id="operator_salary"
                         onKeyPress={handleKeyPress}
@@ -151,7 +151,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Insurance Expense */}
                 <div>
-                    <Label htmlFor="insurance_expense">Depresiasi (Rp)</Label>
+                    <Label htmlFor="insurance_expense">Depresiasi semua Unit (Rp)</Label>
                     <Input
                         id="insurance_expense"
                         onKeyPress={handleKeyPress}
@@ -178,7 +178,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Admin Expense */}
                 <div>
-                    <Label htmlFor="interest_monthly">Bunga (Rp/bulan)</Label>
+                    <Label htmlFor="interest_monthly">Bunga semua Unit (Rp/bulan)</Label>
                     {/* <Input
                         id="interest_monthly"
                         value={formatNumberInputFadlan(formData.interest_monthly || formData?.cost_data?.interest_monthly || '')}
