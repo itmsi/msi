@@ -51,10 +51,10 @@ export const useIupManagement = () => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, sortModify, statusFilter]);
+    }, [searchValue, sortOrder, sortModify, statusFilter, pagination.page, pagination.limit]);
 
     const handlePageChange = useCallback((page: number) => {
-        setPagination(prev => ({ ...prev, page }));
+        setPagination(prev => ({ ...prev, page }));        
         fetchIup({ page });
     }, [fetchIup]);
 
