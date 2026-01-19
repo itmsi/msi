@@ -30,6 +30,8 @@ export default function ManageIUPManagement() {
         sortModify,
         setSearchValue,
         statusFilter,
+        segmentationFilter,
+        segmentationOptions,
         // setStatusFilter,
         // fetchIup,
 
@@ -81,6 +83,12 @@ export default function ManageIUPManagement() {
             wrap: true,
         },
         {
+            name: 'Segmentation',
+            selector: row => row.segmentation_name,
+            width: '150px',
+            wrap: true,
+        },
+        {
             name: 'Contractors',
             selector: row => row.contractor_count,
             center: true,
@@ -128,14 +136,25 @@ export default function ManageIUPManagement() {
         { value: 'aktif', label: 'Active' },
         { value: 'non aktif', label: 'Inactive' }
     ];
+    
     const MODIFY_OPTIONS = [
         { value: '', label: 'All Modify' },
         { value: 'updated_at', label: 'Updated' },
         { value: 'created_at', label: 'Created' }
     ];
     
-    const SearchAndFilters = useMemo(() => (
-        <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-7 gap-6">
+    const SearchAndFilters = useMemo(() => {
+        // Dynamic segmentation options from API
+        const SEGMENTATION_OPTIONS = [
+            { value: '', label: 'All Segmentation' },
+            ...segmentationOptions.map(seg => ({
+                value: seg.segmentation_id,
+                label: seg.segmentation_name_en
+            }))
+        ];
+        
+        return (
+        <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-8 gap-6">
             <div className="relative md:col-span-3">
                 <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <Input
@@ -163,6 +182,16 @@ export default function ManageIUPManagement() {
                 options={STATUS_OPTIONS}
                 placeholder="Filter by Status"
                 className="w-full md:col-span-2"
+                isClearable={false}
+                isSearchable={false}
+            />
+            
+            <CustomSelect
+                value={SEGMENTATION_OPTIONS.find(option => option.value === segmentationFilter) || null}
+                onChange={(option) => handleFilterChange('segmentation', option?.value || '')}
+                options={SEGMENTATION_OPTIONS}
+                placeholder="Filter by Segmentation"
+                className="w-full"
                 isClearable={false}
                 isSearchable={false}
             />
@@ -199,7 +228,8 @@ export default function ManageIUPManagement() {
                 />
             </div>
         </div>
-    ), [searchValue, statusFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange]);
+    );
+    }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, segmentationOptions, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange]);
     
     return (
         <>

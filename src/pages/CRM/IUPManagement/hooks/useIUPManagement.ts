@@ -1,12 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
-import { IupItem, IupRequest, IupSummary, Pagination } from '../types/iupmanagement';
+import { IupItem, IupRequest, IupSummary, Pagination, SegmentationOption } from '../types/iupmanagement';
 import { IupService } from '../services/iupManagementService';
+import { SegmentationService } from '../services/segmentationService';
 
 export const useIupManagement = () => {
     const [searchValue, setSearchValue] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
     const [sortModify, setSortModify] = useState<'updated_at' | 'created_at' | ''>('updated_at');
     const [statusFilter, setStatusFilter] = useState('');
+    const [segmentationFilter, setSegmentationFilter] = useState('');
+    const [segmentationOptions, setSegmentationOptions] = useState<SegmentationOption[]>([]);
     
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -37,6 +40,7 @@ export const useIupManagement = () => {
                 sort_order: params?.sort_order || sortOrder || 'desc',
                 search: params?.search !== undefined ? params.search : searchValue,
                 status: params?.status !== undefined ? params.status : statusFilter,
+                segmentation_id: params?.segmentation_id !== undefined ? params.segmentation_id : segmentationFilter,
                 ...params
             });
             
@@ -49,7 +53,7 @@ export const useIupManagement = () => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, sortModify, statusFilter]);
+    }, [searchValue, sortOrder, sortModify, statusFilter, segmentationFilter]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
@@ -69,6 +73,8 @@ export const useIupManagement = () => {
     const handleFilterChange = useCallback((filterType: string, value: string) => {
         if (filterType === 'status') {
             setStatusFilter(value);
+        } else if (filterType === 'segmentation') {
+            setSegmentationFilter(value);
         } else if (filterType === 'sort_by') {
             setSortModify(value as 'updated_at' | 'created_at' | '');
         } else if (filterType === 'sort_order') {
@@ -80,6 +86,8 @@ export const useIupManagement = () => {
         const params: any = { page: 1 };
         if (filterType === 'status') {
             params.status = value;
+        } else if (filterType === 'segmentation') {
+            params.segmentation_id = value;
         } else if (filterType === 'sort_by') {
             params.sort_by = value;
         } else if (filterType === 'sort_order') {
@@ -94,9 +102,20 @@ export const useIupManagement = () => {
         fetchIup({ ...filters, page: 1 });
     }, [fetchIup]);
 
+    // Fetch segmentation options
+    const fetchSegmentations = useCallback(async () => {
+        try {
+            const segmentations = await SegmentationService.getSegmentations();
+            setSegmentationOptions(segmentations);
+        } catch (err) {
+            console.error('Error fetching segmentations:', err);
+        }
+    }, []);
+
     // Initial load
     useEffect(() => {
         fetchIup();
+        fetchSegmentations();
     }, []);
     
     // Refetch when filters change  
@@ -141,6 +160,9 @@ export const useIupManagement = () => {
         setSearchValue,
         statusFilter,
         setStatusFilter,
+        segmentationFilter,
+        setSegmentationFilter,
+        segmentationOptions,
         fetchIup,
 
         // Actions

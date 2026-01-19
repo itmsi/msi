@@ -6,9 +6,27 @@ export interface IupRequest {
     sort_by?: 'updated_at' | 'created_at' | '';
     search?: string;
     status?: string;
+    segmentation_id?: string;
     is_admin?: boolean;
     employee_id?: string;
 }
+
+export interface SegmentationOption {
+    segmentation_id: string;
+    segmentation_name_en: string;
+}
+
+export interface SegmentationResponse {
+    success: boolean;
+    data: SegmentationOption[];
+    pagination?: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+}
+
 export interface IupFilters {
     search: string;
     sort_order: 'asc' | 'desc' | '';
@@ -68,6 +86,7 @@ export interface IupItem {
     iup_name: string;
     iup_status: string;
     iup_zone_name: string;
+    segmentation_name: string;
     area_name: string;
     group_name: string;
     island_name: string;
