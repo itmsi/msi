@@ -8,7 +8,6 @@ export const useIupManagement = () => {
     const [sortModify, setSortModify] = useState<'updated_at' | 'created_at' | ''>('updated_at');
     const [statusFilter, setStatusFilter] = useState('');
     const [segmentationFilter, setSegmentationFilter] = useState('');
-    // const [selectedSegment, setSelectedSegment] = useState<SegmentSelectOption | null>(null);
     
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -150,8 +149,6 @@ export const useIupManagement = () => {
         statusFilter,
         setStatusFilter,
         segmentationFilter,
-        // setSegmentationFilter,
-        // segmentationOptions,
         fetchIup,
 
         // Actions
