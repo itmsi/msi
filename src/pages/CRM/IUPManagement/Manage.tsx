@@ -85,32 +85,48 @@ export default function ManageIUPManagement() {
             name: 'IUP Name',
             selector: row => row.iup_name,
             wrap: true,
-            width: '300px',
-        },
-        {
-            name: 'Island',
-            selector: row => row.island_name,
+            // width: '300px',
+        },{
+            name: 'Territory',
+            selector: (row) => row?.island_name || '-',
+            cell: (row) => (
+                <div className=" items-center gap-3 py-2">
+                    <div className="flex flex-wrap gap-1 mt-1 gap">
+                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-blue-100 text-blue-800 border border-blue-200">{`${row.island_name}`}</span>
+                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-green-100 text-green-800 border border-green-200">{`${row.group_name}`}</span>
+                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-orange-100 text-orange-800 border border-orange-200">{`${row.area_name}`}</span>
+                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-purple-100 text-purple-800 border border-purple-200">{`${row.iup_zone_name}`}</span>
+                    </div>
+                </div>
+            ),
+            sortable: false,
             wrap: true,
-            width: '150px',
+            // width: '350px',
         },
-        {
-            name: 'Group',
-            selector: row => row.group_name,
-            wrap: true,
-            center: true,
-        },
-        {
-            name: 'Area',
-            selector: row => row.area_name,
-            center: true,
-            wrap: true,
-        },
-        {
-            name: 'IUP Zone',
-            selector: row => row.iup_zone_name,
-            width: '200px',
-            wrap: true,
-        },
+        // {
+        //     name: 'Island',
+        //     selector: row => row.island_name,
+        //     wrap: true,
+        //     width: '150px',
+        // },
+        // {
+        //     name: 'Group',
+        //     selector: row => row.group_name,
+        //     wrap: true,
+        //     center: true,
+        // },
+        // {
+        //     name: 'Area',
+        //     selector: row => row.area_name,
+        //     center: true,
+        //     wrap: true,
+        // },
+        // {
+        //     name: 'IUP Zone',
+        //     selector: row => row.iup_zone_name,
+        //     width: '200px',
+        //     wrap: true,
+        // },
         {
             name: 'Segmentation',
             selector: row => row.segmentation_name,
