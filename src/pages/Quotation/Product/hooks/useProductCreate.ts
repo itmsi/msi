@@ -171,7 +171,9 @@ export const useCreateProduct = () => {
     };
 
     // Handle product image change
-    const handleImageChange = (file: File | null) => {
+    const handleImageChange = (files: File | File[] | null) => {
+        // Since we're using single file mode, extract the first file
+        const file = Array.isArray(files) ? files[0] : files;
         setProductImage(file);
     };
 

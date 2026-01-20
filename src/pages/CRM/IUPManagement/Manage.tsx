@@ -34,7 +34,6 @@ export default function ManageIUPManagement() {
         setSearchValue,
         statusFilter,
         segmentationFilter,
-        // segmentationOptions,
         // setStatusFilter,
         // fetchIup,
 
