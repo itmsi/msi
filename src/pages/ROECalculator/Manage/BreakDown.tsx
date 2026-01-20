@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { MdKeyboardArrowLeft, MdAdd, MdEdit, MdClose } from 'react-icons/md';
+import { MdKeyboardArrowLeft, MdAdd, MdEdit } from 'react-icons/md';
 import ReactECharts from 'echarts-for-react';
 import { TableColumn } from 'react-data-table-component';
 import { toast } from 'react-hot-toast';
