@@ -410,7 +410,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                 <div className={`grid grid-cols-${length} gap-4`}>
                                     {imageFiles.map((file, index) => {
                                         const url = previewUrls[index];
-                                        const isSvg = file.name.toLowerCase().endsWith('.svg');
+                                        // const isSvg = file.name.toLowerCase().endsWith('.svg');
                                         
                                         return (
                                             <div key={index} className="space-y-2">
@@ -478,9 +478,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
                             if (imageUrl) {
                                 const file = imageFiles[0];
-                                const isSvg = hasNewFile 
-                                    ? file.name.toLowerCase().endsWith('.svg')
-                                    : existingImageUrl!.toLowerCase().includes('.svg');
+                                // const isSvg = hasNewFile 
+                                //     ? file.name.toLowerCase().endsWith('.svg')
+                                //     : existingImageUrl!.toLowerCase().includes('.svg');
 
                                 return (
                                     <div className="space-y-2">
