@@ -166,7 +166,7 @@ export default function EditProduct() {
     });
     
     const [specifications, setSpecifications] = useState<any[]>([]);
-    const [productImage, setProductImage] = useState<File | null>(null);
+    const [productImage, setProductImage] = useState<File[]>([]);
     const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
 
     useEffect(() => {
@@ -349,9 +349,18 @@ export default function EditProduct() {
     };
 
     // Handle product image change
-    const handleImageChange = (file: File | null) => {
-        setProductImage(file);
-        if (file) {
+    const handleImageChange = (files: File | File[] | null) => {
+        if (files === null) {
+            setProductImage([]);
+            return;
+        }
+        
+        // Handle both single file and multiple files
+        const fileArray = Array.isArray(files) ? files : [files];
+        setProductImage(fileArray);
+        
+        // Remove existing image URL when new files are uploaded
+        if (fileArray.length > 0) {
             setExistingImageUrl(null);
         }
     };
@@ -420,9 +429,16 @@ export default function EditProduct() {
             formDataToSend.append('componen_product_unit_model', formData.componen_product_unit_model);
             formDataToSend.append('componen_product_specifications', JSON.stringify(specifications.length > 0 ? specifications : formData.componen_product_specifications));
 
-            // Append image file if new file is uploaded
-            if (productImage) {
-                formDataToSend.append('image', productImage);
+            // Append image files if new files are uploaded
+            if (productImage && productImage.length > 0) {
+                if (productImage.length === 1) {
+                    formDataToSend.append('image', productImage[0]);
+                } else {
+                    productImage.forEach((file, index) => {
+                        formDataToSend.append(`images[${index}]`, file);
+                    });
+                    formDataToSend.append('image_count', productImage.length.toString());
+                }
             }
             
             const success = await updateProduct(id, formDataToSend);
@@ -844,7 +860,9 @@ export default function EditProduct() {
                                 icon="image"
                                 acceptedFormats={['jpg', 'jpeg', 'png']}
                                 maxSize={5}
-                                currentFile={productImage}
+                                multiple={true}
+                                length={4}
+                                currentFiles={productImage}
                                 existingImageUrl={existingImageUrl}
                                 onFileChange={handleImageChange}
                                 onRemoveExistingImage={() => setExistingImageUrl(null)}

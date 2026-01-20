@@ -56,8 +56,8 @@ const CreateIup: React.FC = () => {
                 image="/motor-sights-international.png"
             />
             
-            <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-4 sm:px-3">
+            <div className="bg-gray-50">
+                <div className="mx-auto">
 
                     {/* Header */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
