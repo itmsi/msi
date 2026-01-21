@@ -278,12 +278,19 @@ export default function BreakdownROECalculator() {
             cell: (row) => (
                 <div className="py-2 text-center">
                     {/* <div className="font-semibold text-green-600 text-sm">{row.roe_nominal}</div> */}
-                    <div className="flex justify-between items-center w-[140px]">
-                        <Tooltip content={`by Percentage`} position="top">
+                    <div className="flex justify-around items-center w-[200px]">
+                        <Tooltip content={`ROE Percentage`} position="top">
                             <span className="text-purple-600 font-medium">{row.roe_percentage}%</span>
                         </Tooltip>
-                        <Tooltip content={`by Difference`} position="top">
-                            <span className="text-gray-900 font-medium">{row.roe_percentage_diff}</span>
+                        <Tooltip content={`ROE Difference`} position="top">
+                            <span className={"font-medium "+clsx(
+                                twMerge(
+                                "text-gray-900 ",
+                                `${row.roe_percentage_diff > 0 ? 'text-red-600' : row.roe_percentage_diff < 0 && 'text-green-600'}`,
+                                ),
+                            )}>
+                                {row.roe_percentage_diff}%
+                            </span>
                         </Tooltip>
                     </div>
                 </div>
@@ -295,16 +302,21 @@ export default function BreakdownROECalculator() {
             cell: (row) => (
                 <div className="py-2 text-center">
                     {/* <div className="font-semibold text-blue-600 text-sm">{row.roa_nominal}</div> */}
-                    <div className="flex justify-between items-center w-[140px]">
-                        <span className="text-blue-600 font-medium">{row.roa_percentage}%</span>
-                        <span className={"font-medium "+clsx(
-                            twMerge(
-                            "text-gray-900 ",
-                            `${row.roa_percentage_diff > 0 ? 'text-red-600' : row.roa_percentage_diff < 0 && 'text-green-600'}`,
-                            ),
-                        )}>
-                            {row.roa_percentage_diff}
-                        </span>
+                    <div className="flex justify-around items-center w-[200px]">
+                        
+                        <Tooltip content={`ROA Percentage`} position="top">
+                            <span className="text-blue-600 font-medium">{row.roa_percentage}%</span>
+                        </Tooltip>
+                        <Tooltip content={`ROA Difference`} position="top">
+                            <span className={"font-medium "+clsx(
+                                twMerge(
+                                "text-gray-900 ",
+                                `${row.roa_percentage_diff > 0 ? 'text-red-600' : row.roa_percentage_diff < 0 && 'text-green-600'}`,
+                                ),
+                            )}>
+                                {row.roa_percentage_diff}%
+                            </span>
+                        </Tooltip>
                     </div>
                 </div>
             ),
