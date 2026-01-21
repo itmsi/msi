@@ -29,7 +29,7 @@ export default function AIAssistant() {
             {!isOpen && (
                 <button
                     onClick={handleToggle}
-                    className="fixed bottom-6 right-6 z-[999999] flex items-center justify-center w-14 h-14 bg-[#0253a5] hover:bg-[#003061] text-white rounded-full shadow-theme-lg transition-all duration-300 hover:scale-110"
+                    className="fixed bottom-6 left-6 z-[999999] flex items-center justify-center w-14 h-14 bg-[#0253a5] hover:bg-[#003061] text-white rounded-full shadow-theme-lg transition-all duration-300 hover:scale-110"
                     title="Open AI Assistant"
                 >
                     <MdSmartToy className="w-7 h-7" />
@@ -38,7 +38,7 @@ export default function AIAssistant() {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="fixed bottom-6 right-6 z-[999999] w-[400px] h-[600px] bg-white rounded-lg shadow-theme-xl border border-gray-200 flex flex-col overflow-hidden">
+                <div className="fixed bottom-6 left-6 z-[999999] w-[400px] h-[600px] bg-white rounded-lg shadow-theme-xl border border-gray-200 flex flex-col overflow-hidden">
                     {/* Header */}
                     <div className="bg-[#0253a5] text-white px-4 py-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">

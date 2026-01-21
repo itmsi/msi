@@ -6,7 +6,7 @@ export interface ChatMessage {
 
 export interface ChatRequest {
     message: string;
-    sessionId: string;
+    sessionId?: string;  // Optional - backend will auto-create if not provided
 }
 
 export interface ChatResponseData {
@@ -21,7 +21,31 @@ export interface ChatResponse {
     data: ChatResponseData;
 }
 
-export interface ChatError {
+// History Response
+export interface AiHistoryResponseData {
+    sessionId: string;
+    conversationHistory: ChatMessage[];
+}
+
+export interface AiHistoryResponse {
+    success: boolean;
+    message: string;
+    data: AiHistoryResponseData;
+}
+
+// Clear History Response
+export interface AiClearHistoryResponseData {
+    sessionId: string;
+}
+
+export interface AiClearHistoryResponse {
+    success: boolean;
+    message: string;
+    data: AiClearHistoryResponseData;
+}
+
+// Error Response
+export interface AiErrorResponse {
     success: false;
     message: string;
 }

@@ -6,7 +6,7 @@ export const useAIAssistant = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [sessionId] = useState(() => AIAssistantService.getOrCreateSessionId());
+    const [sessionId, setSessionId] = useState<string | undefined>(undefined);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Auto-scroll to bottom when messages change
@@ -33,10 +33,16 @@ export const useAIAssistant = () => {
         setError(null);
 
         try {
+            // Send message without sessionId on first request, or with sessionId for subsequent requests
             const response = await AIAssistantService.sendMessage({
                 message: messageText,
-                sessionId
+                sessionId: sessionId  // undefined on first request, backend will create
             });
+
+            // Save sessionId from backend response for future requests
+            if (response.data.sessionId && !sessionId) {
+                setSessionId(response.data.sessionId);
+            }
 
             // Add assistant response
             const assistantMessage: ChatMessage = {
@@ -46,11 +52,6 @@ export const useAIAssistant = () => {
             };
 
             setMessages(prev => [...prev, assistantMessage]);
-
-            // Optionally merge conversation history from API
-            // if (response.data.conversationHistory?.length > 0) {
-            //     setMessages(response.data.conversationHistory);
-            // }
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to send message';
             setError(errorMessage);
@@ -67,11 +68,22 @@ export const useAIAssistant = () => {
         }
     }, [sessionId]);
 
-    const clearMessages = useCallback(() => {
+    const clearMessages = useCallback(async () => {
+        try {
+            // Only call API if we have a sessionId
+            if (sessionId) {
+                await AIAssistantService.clearHistory(sessionId);
+            }
+        } catch (err) {
+            console.error('Failed to clear history on backend:', err);
+            // Continue anyway to clear local state
+        }
+        
+        // Clear local state
         setMessages([]);
         setError(null);
-        AIAssistantService.clearSession();
-    }, []);
+        setSessionId(undefined);  // Reset sessionId, next message will create new session
+    }, [sessionId]);
 
     return {
         messages,
