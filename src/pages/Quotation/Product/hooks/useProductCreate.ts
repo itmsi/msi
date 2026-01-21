@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import toast from "react-hot-toast";
 import { ItemProductValidationErrors, ProductSpecification } from "../types/product";
 import { useNavigate } from "react-router";
 import { formatNumberInput } from "@/helpers/generalHelper";
 import { ItemProductService } from "../services/productService";
+import { AuthService } from "@/services/authService";
 
 // Form data type for creating
 interface CreateProductFormData {
@@ -25,15 +26,22 @@ interface CreateProductFormData {
     componen_type: number;
     volume: string;
     componen_product_unit_model: string;
+    company_name: string;
     componen_product_specifications: ProductSpecification[];
 }
 
 export const useCreateProduct = () => {
     const navigate = useNavigate();
     
+    // Get company_name from logged in user
+    const companyName = useMemo(() => {
+        const user = AuthService.getCurrentUser();
+        return (user as any)?.company_name || '';
+    }, []);
+    
     const [isCreating, setIsCreating] = useState(false);
     const [validationErrors, setValidationErrors] = useState<ItemProductValidationErrors>({});
-    const [productImage, setProductImage] = useState<File | null>(null);
+    const [productImage, setProductImage] = useState<File[]>([]);
     
     const [formData, setFormData] = useState<CreateProductFormData>({
         code_unique: '',
@@ -54,6 +62,7 @@ export const useCreateProduct = () => {
         componen_type: 1,
         volume: '',
         componen_product_unit_model: '',
+        company_name: companyName,
         componen_product_specifications: [
             {
                 componen_product_specification_label: 'GVW',
@@ -172,9 +181,14 @@ export const useCreateProduct = () => {
 
     // Handle product image change
     const handleImageChange = (files: File | File[] | null) => {
-        // Since we're using single file mode, extract the first file
-        const file = Array.isArray(files) ? files[0] : files;
-        setProductImage(file);
+        if (files === null) {
+            setProductImage([]);
+            return;
+        }
+        
+        // Handle both single file and multiple files
+        const fileArray = Array.isArray(files) ? files : [files];
+        setProductImage(fileArray);
     };
 
     // Validate form data
@@ -242,10 +256,19 @@ export const useCreateProduct = () => {
             formDataToSend.append('componen_type', formData.componen_type.toString());
             formDataToSend.append('volume', formData.volume);
             formDataToSend.append('componen_product_unit_model', formData.componen_product_unit_model);
+            formDataToSend.append('company_name', formData.company_name);
             formDataToSend.append('componen_product_specifications', JSON.stringify(formData.componen_product_specifications));
 
-            if (productImage) {
-                formDataToSend.append('image', productImage);
+            // Append image files if uploaded
+            if (productImage && productImage.length > 0) {
+                if (productImage.length === 1) {
+                    formDataToSend.append('image', productImage[0]);
+                } else {
+                    productImage.forEach((file, index) => {
+                        formDataToSend.append(`images[${index}]`, file);
+                    });
+                    formDataToSend.append('image_count', productImage.length.toString());
+                }
             }
 
             const response = await ItemProductService.createItemProduct(formDataToSend);
