@@ -54,7 +54,6 @@ export class RoecalculatorService {
             limit: 10,
             sort_order: 'desc',
             search: '',
-            is_admin: API_IS_ADMIN,
             ...params
         };
         

@@ -37,9 +37,9 @@ export interface ItemProduct {
     updated_at?: string;
     updated_by_name?: string;
     // Additional fields for quotation integration
-    specifications?: any[]; // For form editing
-    accessories?: any[]; // For form editing (create mode)
-    manage_quotation_item_accessories?: any[]; // For form editing (edit mode)
+    specifications?: any[];
+    accessories?: any[];
+    manage_quotation_item_accessories?: any[];
 }
 
 export interface ProductSpecification {

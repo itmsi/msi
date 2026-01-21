@@ -14,8 +14,9 @@ import Label from '@/components/form/Label';
 import { Modal } from '@/components/ui/modal';
 import { RoecalculatorService } from './services/roecalculatorService';
 import { ManageROEBreakdownData, RevenueExpenseProfit, BreakdownBiayaChart, CompareListRequest, Pagination, ManageROECompareData } from '../types/roeCalculator';
-import { formatCurrency } from '@/helpers/generalHelper';
+import { formatCurrency, formatNumberInput, handleDecimalInput, handleKeyPress } from '@/helpers/generalHelper';
 import Tooltip from '@/components/ui/tooltip/Tooltip';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 
 
 export default function BreakdownROECalculator() {
@@ -41,6 +42,9 @@ export default function BreakdownROECalculator() {
         ritase: '',
         qty: '',
         price: ''
+    });
+    const [compareFormErrors, setCompareFormErrors] = useState({
+        brand: ''
     });
 
     // Shared fetchCompareData function
@@ -104,12 +108,41 @@ export default function BreakdownROECalculator() {
             ...prev,
             [field]: value
         }));
+        
+        // Clear error when user starts typing
+        if (compareFormErrors[field as keyof typeof compareFormErrors]) {
+            setCompareFormErrors(prev => ({
+                ...prev,
+                [field]: ''
+            }));
+        }
+    };
+
+    // Validation function
+    const validateCompareForm = () => {
+        const errors = {
+            brand: ''
+        };
+        let isValid = true;
+
+        // Brand validation
+        if (!compareFormData.brand.trim()) {
+            errors.brand = 'Brand is required';
+            isValid = false;
+        } else if (compareFormData.brand.trim().length < 2) {
+            errors.brand = 'Brand must be at least 2 characters';
+            isValid = false;
+        }
+
+        setCompareFormErrors(errors);
+        return isValid;
     };
 
     // Handle add new comparison
     const handleAddComparison = async () => {
-        if (!compareFormData.brand || !compareFormData.tonase || !compareFormData.ritase || !compareFormData.qty || !compareFormData.price) {
-            toast.error('Please fill all required fields');
+        // Validate form before submission
+        if (!validateCompareForm()) {
+            toast.error('Please correct the validation errors');
             return;
         }
 
@@ -122,11 +155,11 @@ export default function BreakdownROECalculator() {
         try {
             const payload = {
                 quote_id: calculatorId,
-                brand: compareFormData.brand,
-                tonase: parseInt(compareFormData.tonase),
-                ritase: parseInt(compareFormData.ritase),
+                brand: compareFormData.brand.trim(),
+                tonase: parseFloat(compareFormData.tonase),
+                ritase: parseFloat(compareFormData.ritase),
                 qty: parseInt(compareFormData.qty),
-                price: parseInt(compareFormData.price)
+                price: parseInt(compareFormData.price.replace(/[^\d]/g, ''))
             };
 
             // Call API to add comparison
@@ -141,6 +174,9 @@ export default function BreakdownROECalculator() {
                     ritase: '',
                     qty: '',
                     price: ''
+                });
+                setCompareFormErrors({
+                    brand: ''
                 });
                 // Refresh comparison data
                 fetchCompareData({
@@ -168,44 +204,34 @@ export default function BreakdownROECalculator() {
                 <div className="py-2">
                     <div className="font-medium text-gray-900 text-sm">{row.brand}</div>
                     <div className="text-xs text-gray-500 mt-1">
-                        Qty: {row.qty} | Tonase: {row.tonase}
+                        Tonase: {row.tonase}
                     </div>
                 </div>
             ),
             wrap: true
         },
         {
-            name: 'Operational',
+            name: 'Qty',
+            selector: (row) => row.qty || 0,
             cell: (row) => (
-                <div className="py-2 text-start">
-                    <div className="text-xs text-gray-900 font-medium"><span className="w-[60px] inline-block font-normal text-gray-500">Ritase:</span> {row.ritase}</div>
-                    <div className="text-xs text-gray-900 font-medium"><span className="w-[60px] inline-block font-normal text-gray-500">Fuel:</span> {formatCurrency(row.fuel || 0)}</div>
+                <div className="py-2 text-right">
+                    <div className="font-medium text-gray-800 text-sm">
+                        {row.qty || 0}
+                    </div>
                 </div>
             ),
-            center: true,
-        },
-        {
-            name: 'Financial',
-            cell: (row) => (
-                <div className="py-2 text-start">
-                    <div className="text-xs text-gray-900 font-medium"><span className="w-[60px] inline-block font-normal text-gray-500">Asset:</span> {formatCurrency(row.asset || 0)}</div>
-                    <div className="text-xs text-gray-900 font-medium"><span className="w-[60px] inline-block font-normal text-gray-500">Equity:</span> {formatCurrency(row.equity || 0)}</div>
-                    <div className="text-xs text-gray-900 font-medium"><span className="w-[60px] inline-block font-normal text-gray-500">Price:</span> {formatCurrency(row.price || 0)}</div>
-                </div>
-            ),
-            center: true,
         },
         {
             name: 'ROE',
             cell: (row) => (
                 <div className="py-2 text-center">
-                    <div className="font-semibold text-green-600 text-sm">{row.roe_nominal}</div>
-                    <div className="flex justify-between items-center mt-1 w-[120px]">
+                    {/* <div className="font-semibold text-green-600 text-sm">{row.roe_nominal}</div> */}
+                    <div className="flex justify-between items-center w-[140px]">
                         <Tooltip content={`by Percentage`} position="top">
-                            <span className="text-xs text-gray-500">{row.roe_percentage}%</span>
+                            <span className="text-gray-900 font-medium">{row.roe_percentage}%</span>
                         </Tooltip>
                         <Tooltip content={`by Difference`} position="top">
-                            <span className="text-xs text-gray-400">{row.roe_percentage_diff}</span>
+                            <span className="text-gray-900 font-medium">{row.roe_percentage_diff}</span>
                         </Tooltip>
                     </div>
                 </div>
@@ -216,10 +242,10 @@ export default function BreakdownROECalculator() {
             name: 'ROA',
             cell: (row) => (
                 <div className="py-2 text-center">
-                    <div className="font-semibold text-blue-600 text-sm">{row.roa_nominal}</div>
-                    <div className="flex justify-between items-center mt-1 w-[120px]">
-                        <span className="text-xs text-gray-500">{row.roa_percentage}%</span>
-                        <span className="text-xs text-gray-400">{row.roa_percentage_diff}</span>
+                    {/* <div className="font-semibold text-blue-600 text-sm">{row.roa_nominal}</div> */}
+                    <div className="flex justify-between items-center w-[140px]">
+                        <span className="text-gray-900 font-medium">{row.roa_percentage}%</span>
+                        <span className="text-gray-900 font-medium">{row.roa_percentage_diff}</span>
                     </div>
                 </div>
             ),
@@ -235,17 +261,6 @@ export default function BreakdownROECalculator() {
                     </div>
                 </div>
             ),
-        },
-        {
-            name: 'Expenses',
-            selector: (row) => row.expenses || 0,
-            cell: (row) => (
-                <div className="py-2 text-right">
-                    <div className="font-medium text-red-600 text-sm">
-                        {formatCurrency(row.expenses || 0)}
-                    </div>
-                </div>
-            ),
         }
     ];
 
@@ -255,12 +270,15 @@ export default function BreakdownROECalculator() {
             <div className="bg-white rounded-xl shadow-sm p-6 mt-8">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-semibold text-gray-900">Bandingkan dengan Perhitungan Lain</h2>
-                    <Button
-                        onClick={() => setIsAddModalOpen(true)}
-                        className="flex items-center gap-2 font-secondary"
-                    >
-                        <MdAdd size={16} /> Tambah Perbandingan
-                    </Button>
+                    
+                    <PermissionGate permission="create">
+                        <Button
+                            onClick={() => setIsAddModalOpen(true)}
+                            className="flex items-center gap-2 font-secondary"
+                        >
+                            <MdAdd size={16} /> Tambah Perbandingan
+                        </Button>
+                    </PermissionGate>
                 </div>
                 
                 {/* Add horizontal scroll container */}
@@ -667,62 +685,80 @@ export default function BreakdownROECalculator() {
                                         placeholder="Enter brand name"
                                         value={compareFormData.brand}
                                         onChange={(e) => handleCompareFormChange('brand', e.target.value)}
-                                        className="mt-1"
+                                        className={`mt-1 ${compareFormErrors.brand ? 'border-red-500 focus:border-red-500' : ''}`}
+                                        maxLength={50}
                                     />
+                                    {compareFormErrors.brand && (
+                                        <p className="text-red-500 text-xs mt-1">{compareFormErrors.brand}</p>
+                                    )}
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <Label htmlFor="tonase">Tonase *</Label>
+                                        <Label htmlFor="tonase">Tonase per Unit (ton)</Label>
                                         <Input
                                             id="tonase"
-                                            name="tonase"
-                                            type="number"
-                                            placeholder="Enter tonase"
                                             value={compareFormData.tonase}
-                                            onChange={(e) => handleCompareFormChange('tonase', e.target.value)}
-                                            className="mt-1"
+                                            placeholder="0.00"
+                                            onChange={(e) => {
+                                                const rawValue = e.target.value;                                                
+                                                handleDecimalInput(
+                                                    rawValue,
+                                                    (validValue) => handleCompareFormChange('tonase', validValue),
+                                                    () => handleCompareFormChange('tonase', ''),
+                                                    true,
+                                                    7,
+                                                    4
+                                                );
+                                            }}
                                         />
                                     </div>
 
                                     <div>
-                                        <Label htmlFor="ritase">Ritase *</Label>
+                                        <Label htmlFor="ritase">Ritase per Shift</Label>
                                         <Input
                                             id="ritase"
-                                            name="ritase"
-                                            type="number"
-                                            placeholder="Enter ritase"
                                             value={compareFormData.ritase}
-                                            onChange={(e) => handleCompareFormChange('ritase', e.target.value)}
-                                            className="mt-1"
+                                            placeholder="0.00"
+                                            onChange={(e) => {
+                                                const rawValue = e.target.value;                                                
+                                                handleDecimalInput(
+                                                    rawValue,
+                                                    (validValue) => handleCompareFormChange('ritase', validValue),
+                                                    () => handleCompareFormChange('ritase', ''),
+                                                    true,
+                                                    7,
+                                                    4
+                                                );
+                                            }}
                                         />
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <Label htmlFor="qty">Quantity *</Label>
+                                        <Label htmlFor="qty">Jumlah Unit (Qty)</Label>
                                         <Input
                                             id="qty"
-                                            name="qty"
-                                            type="number"
-                                            placeholder="Enter quantity"
                                             value={compareFormData.qty}
+                                            placeholder="0"
                                             onChange={(e) => handleCompareFormChange('qty', e.target.value)}
-                                            className="mt-1"
+                                            onKeyPress={handleKeyPress}
+                                            maxLength={4}
                                         />
                                     </div>
 
                                     <div>
-                                        <Label htmlFor="price">Price *</Label>
+                                        <Label htmlFor="price">Harga Per Unit (Rp)</Label>
                                         <Input
                                             id="price"
-                                            name="price"
-                                            type="number"
-                                            placeholder="Enter price"
-                                            value={compareFormData.price}
-                                            onChange={(e) => handleCompareFormChange('price', e.target.value)}
-                                            className="mt-1"
+                                            type="text"
+                                            placeholder="0"
+                                            value={formatNumberInput(compareFormData.price)}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/[^\d]/g, '');
+                                                handleCompareFormChange('price', value);
+                                            }}
                                         />
                                     </div>
                                 </div>
