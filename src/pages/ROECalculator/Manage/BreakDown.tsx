@@ -20,6 +20,7 @@ import { PermissionButton, PermissionGate } from '@/components/common/Permission
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import Alert from '@/components/ui/alert/Alert';
 
 
 export default function BreakdownROECalculator() {
@@ -160,10 +161,10 @@ export default function BreakdownROECalculator() {
             const payload = {
                 quote_id: calculatorId,
                 brand: compareFormData.brand.trim(),
-                tonase: parseFloat(compareFormData.tonase),
-                ritase: parseFloat(compareFormData.ritase),
-                qty: parseInt(compareFormData.qty),
-                price: parseInt(compareFormData.price.replace(/[^\d]/g, ''))
+                tonase: compareFormData.tonase !=='' ? parseFloat(compareFormData.tonase) : 1,
+                ritase: compareFormData.ritase !=='' ? parseFloat(compareFormData.ritase) : 1,
+                qty: compareFormData.qty !=='' ? parseInt(compareFormData.qty) : 1,
+                price: compareFormData.price !=='' ? parseInt(compareFormData.price.replace(/[^\d]/g, '')) : 1
             };
 
             const response = await RoecalculatorService.addCompare(payload);
@@ -565,7 +566,7 @@ export default function BreakdownROECalculator() {
             <div className="bg-gray-50 min-h-screen">
                 <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {/* HEADER */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-6">
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
@@ -591,8 +592,14 @@ export default function BreakdownROECalculator() {
                         </div>
                     </div>
 
+                    <Alert
+                        variant='warning'
+                        title='Attention'
+                        message='The ROE (Return on Equity) and ROA (Return on Assets) shown in this application are calculated using unit-level data only (revenue, expenses, and assets). Company-wide items such as overhead, other liabilities, and additional operating expenses are excluded. As a result, these figures are indicative and intended solely for unit performance analysis, not for assessing overall company performance.'
+                    />
+
                     {breakdownData && (
-                        <div className="space-y-6">
+                        <div className="space-y-6 mt-6">
                             {/* Key Financial Metrics */}
                             <div className="bg-white rounded-xl shadow-sm p-6">
                                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Key Financial Metrics</h2>
