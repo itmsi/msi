@@ -15,7 +15,7 @@ interface FileUploadProps {
     length?: number;
     currentFile?: File | null;
     currentFiles?: File[];
-    existingImageUrl?: string | null;
+    existingImageUrl?: any[] | string |null;
     onFileChange: (files: File | File[] | null) => void;
     onRemoveExistingImage?: () => void;
     validationError?: string;
@@ -60,11 +60,21 @@ const FileUpload: React.FC<FileUploadProps> = ({
     previewSize = 'md',
     viewMode = false
 }) => {
+    
     const [dragState, setDragState] = useState<DragState>({ isDragging: false });
     const [previewState, setPreviewState] = useState<PreviewState>({ 
         url: null
     });
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+    const [preservedExistingImages, setPreservedExistingImages] = useState<any[] | string | null>(null);
+
+    // Preserve existing images when component first loads
+    useEffect(() => {
+        if (existingImageUrl && !preservedExistingImages) {
+            setPreservedExistingImages(existingImageUrl);
+            console.log('Preserving existing images:', existingImageUrl);
+        }
+    }, [existingImageUrl, preservedExistingImages]);
 
     // Helper function to get current files based on mode
     const getCurrentFiles = (): File[] => {
@@ -216,9 +226,21 @@ const FileUpload: React.FC<FileUploadProps> = ({
         
         if (multiple) {
             const currentFiles = getCurrentFiles();
+            // Use preserved existing images for calculation
+            const currentExistingImages = existingImageUrl || preservedExistingImages;
+            console.log('Current files before merge:', currentFiles.length);
+            console.log('Existing images:', Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0));
+            console.log('New valid files:', validFiles.length);
+            
             const allFiles = [...currentFiles, ...validFiles];
+            const totalExisting = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
+            const totalImages = allFiles.length + totalExisting;
+            
+            console.log('Total files after merge:', allFiles.length);
+            console.log('Total images (including existing):', totalImages);
+            
             onFileChange(allFiles);
-            toast.success(`${validFiles.length} file(s) uploaded successfully!`);
+            toast.success(`${validFiles.length} file(s) added successfully! Total: ${totalImages} images`);
         } else {
             onFileChange(validFiles[0]);
             toast.success('File uploaded successfully!');
@@ -231,6 +253,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
         if (files && files.length > 0) {
             const fileArray = Array.from(files);
             handleFileChange(fileArray);
+            
+            // Reset input untuk mencegah masalah caching
+            e.target.value = '';
         }
     };
 
@@ -313,7 +338,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                 `}
                             >
                                 <span>
-                                    {getCurrentFiles().length > 0 
+                                    {(getCurrentFiles().length > 0 || existingImageUrl) 
                                         ? (multiple ? 'Add more files' : 'Change file') 
                                         : `Upload ${getAcceptedFormatsText()} ${multiple ? 'files' : 'file'}`
                                     }
@@ -404,21 +429,78 @@ const FileUpload: React.FC<FileUploadProps> = ({
                     {(() => {
                         const files = getCurrentFiles();
                         const imageFiles = files.filter(isImageFile);
+                        // Use preserved existing images if current existingImageUrl is null/empty
+                        const currentExistingImages = existingImageUrl || preservedExistingImages;
+                        const existingImagesCount = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
+                        const totalImages = imageFiles.length + existingImagesCount;
+                        const getImageLength = totalImages > 3 ? 3 : (totalImages > 0 ? totalImages : 1);
+                        
+                        console.log('=== Preview Debug ===');
+                        console.log('imageFiles length:', imageFiles.length);
+                        console.log('existingImageUrl:', existingImageUrl);
+                        console.log('preservedExistingImages:', preservedExistingImages);
+                        console.log('currentExistingImages:', currentExistingImages);
+                        console.log('existingImagesCount:', existingImagesCount);
+                        console.log('totalImages:', totalImages);
+                        console.log('getImageLength:', getImageLength);
+                        console.log('previewUrls:', previewUrls);
                         
                         if (multiple) {
                             return (
-                                <div className={`grid grid-cols-${length} gap-4`}>
+                                <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(${getImageLength}, 1fr)` }}>
+                                    {/* Show existing images first */}
+                                    {currentExistingImages && (
+                                        Array.isArray(currentExistingImages) ? (
+                                            currentExistingImages.map((imageUrl, index) => {
+                                                console.log(`Rendering existing image ${index}:`, imageUrl);
+                                                return (
+                                                    <div key={`existing-${index}`} className="space-y-2">
+                                                        <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm`}>
+                                                            <img
+                                                                src={imageUrl}
+                                                                alt={`Existing ${index + 1}`}
+                                                                className="w-full h-full object-contain"
+                                                            />
+                                                        </div>
+                                                        <p className="text-xs font-medium text-gray-900">
+                                                            Existing Image {currentExistingImages.length > 1 ? `${index + 1}` : ''}
+                                                        </p>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="space-y-2">
+                                                <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm`}>
+                                                    <img
+                                                        src={currentExistingImages}
+                                                        alt="Existing"
+                                                        className="w-full h-full object-contain"
+                                                    />
+                                                </div>
+                                                <p className="text-xs font-medium text-gray-900">
+                                                    Existing Image
+                                                </p>
+                                            </div>
+                                        )
+                                    )}
+                                    
+                                    {/* Then show new files */}
                                     {imageFiles.map((file, index) => {
                                         const url = previewUrls[index];
-                                        // const isSvg = file.name.toLowerCase().endsWith('.svg');
+                                        console.log(`Rendering new file ${index}:`, file.name, 'URL:', url);
+                                        
+                                        if (!url) {
+                                            console.log(`No URL for file ${index}, skipping render`);
+                                            return null;
+                                        }
                                         
                                         return (
-                                            <div key={index} className="space-y-2">
+                                            <div key={`new-${index}`} className="space-y-2">
                                                 {/* Image Preview */}
                                                 <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
                                                     <img
                                                         src={url}
-                                                        alt={`Preview ${index + 1}`}
+                                                        alt={`New ${index + 1}`}
                                                         className="w-full h-full object-contain"
                                                     />
                                                     {!viewMode && (
@@ -443,28 +525,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                             </div>
                                         );
                                     })}
-                                    
-                                    {/* Show existing image if present */}
-                                    {existingImageUrl && (
-                                        <div className="space-y-2">
-                                            <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm`}>
-                                                <img
-                                                    src={existingImageUrl}
-                                                    alt="Existing"
-                                                    className="w-full h-full object-contain"
-                                                />
-                                            </div>
-                                            <p className="text-xs font-medium text-gray-900">
-                                                Existing Image
-                                            </p>
-                                        </div>
-                                    )}
                                 </div>
                             );
                         } else {
                             // Single file preview (existing logic)
                             const hasNewFile = imageFiles.length > 0;
-                            const imageUrl = hasNewFile ? previewState.url : existingImageUrl;
+                            const imageUrl = hasNewFile ? previewState.url : (Array.isArray(existingImageUrl) ? existingImageUrl[0] : existingImageUrl);
                             const isLoading = hasNewFile && !previewState.url;
 
                             if (isLoading) {

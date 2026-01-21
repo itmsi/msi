@@ -167,7 +167,7 @@ export default function EditProduct() {
     
     const [specifications, setSpecifications] = useState<any[]>([]);
     const [productImage, setProductImage] = useState<File[]>([]);
-    const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+    const [existingImageUrl, setExistingImageUrl] = useState<any[] | null>(null);
 
     useEffect(() => {
         if (id) {
@@ -317,8 +317,8 @@ export default function EditProduct() {
                 setSpecifications(specificationsData);
                 
                 // Load existing image URL if available
-                if (product.image) {
-                    setExistingImageUrl(product.image);
+                if (product.images) {
+                    setExistingImageUrl(product.images);
                 }
             } else {
                 toast.error('Gagal memuat data produk');
@@ -432,7 +432,7 @@ export default function EditProduct() {
             // Append image files if new files are uploaded
             if (productImage && productImage.length > 0) {
                 if (productImage.length === 1) {
-                    formDataToSend.append('image', productImage[0]);
+                    formDataToSend.append('images[0]', productImage[0]);
                 } else {
                     productImage.forEach((file, index) => {
                         formDataToSend.append(`images[${index}]`, file);
