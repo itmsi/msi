@@ -17,11 +17,11 @@ import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 
 const ManageQuotations: React.FC = () => {
     const navigate = useNavigate();
-    
+
     const {
         searchTerm,
         sortOrder,
-        sortStatus,
+        quotationFor,
         quotations,
         pagination,
         loading,
@@ -52,7 +52,7 @@ const ManageQuotations: React.FC = () => {
         };
 
         const config = statusConfig[status.toLowerCase()] || statusConfig.draft;
-        
+
         return (
             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${config.bg} ${config.text}`}>
                 {config.label}
@@ -88,6 +88,17 @@ const ManageQuotations: React.FC = () => {
                 name: 'Customer Name',
                 selector: (row) => row.customer_name,
                 wrap: true,
+            },
+            {
+                name: 'Quotation For',
+                selector: (row) => row.quotation_for || 'customer',
+                cell: (row) => (
+                    <span className="capitalize text-sm">
+                        {row.quotation_for === 'leasing' ? 'Leasing' : 'Customer'}
+                    </span>
+                ),
+                center: true,
+                width: '140px',
             },
             // {
             //     name: 'Sales Name',
@@ -181,40 +192,38 @@ const ManageQuotations: React.FC = () => {
                     </Button>
                 </div>
             </div>
-            
+
             <div className="flex items-center gap-2">
                 <CustomSelect
-                    id="sort_status"
-                    name="sort_status"
-                    value={sortStatus ? { 
-                        value: sortStatus, 
-                        label: sortStatus === 'submit' ? 'Submit' : sortStatus === 'draft' ? 'Draft' : 'Rejected'
+                    id="quotation_for"
+                    name="quotation_for"
+                    value={quotationFor ? {
+                        value: quotationFor,
+                        label: quotationFor === 'customer' ? 'Customer' : 'Leasing'
                     } : null}
-                    onChange={(selectedOption) => 
-                        handleFilterChange('status', selectedOption?.value || '')
+                    onChange={(selectedOption) =>
+                        handleFilterChange('quotation_for', selectedOption?.value || '')
                     }
                     options={[
-                        { value: 'submit', label: 'Submit' },
-                        { value: 'draft', label: 'Draft' },
-                        { value: 'rejected', label: 'Rejected' }
+                        { value: 'customer', label: 'Customer' },
+                        { value: 'leasing', label: 'Leasing' }
                     ]}
-                    placeholder="Status"
+                    placeholder="Quotation For"
                     isClearable={false}
                     isSearchable={false}
                     className="w-60"
                 />
             </div>
-            
             {/* Sort Order */}
             <div className="flex items-center gap-2">
                 <CustomSelect
                     id="sort_order"
                     name="sort_order"
-                    value={sortOrder ? { 
-                        value: sortOrder, 
-                        label: sortOrder === 'asc' ? 'Ascending' : 'Descending' 
+                    value={sortOrder ? {
+                        value: sortOrder,
+                        label: sortOrder === 'asc' ? 'Ascending' : 'Descending'
                     } : null}
-                    onChange={(selectedOption) => 
+                    onChange={(selectedOption) =>
                         handleFilterChange('sort_order', selectedOption?.value || '')
                     }
                     options={[
@@ -227,20 +236,20 @@ const ManageQuotations: React.FC = () => {
                     className="w-40"
                 />
             </div>
-            
+
         </div>
-    ), [searchTerm, sortOrder, sortStatus, loading, quotations.length, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange]);
-    
+    ), [searchTerm, sortOrder, quotationFor, loading, quotations.length, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange]);
+
     return (
         <>
-            <PageMeta 
-                title="Manage Quotations - Motor Sights International" 
+            <PageMeta
+                title="Manage Quotations - Motor Sights International"
                 description="Manage Quotations - Motor Sights International"
                 image="/motor-sights-international.png"
             />
-            
+
             <div className="bg-white shadow rounded-lg">
-                
+
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-gray-200">
                     <div className="flex justify-between items-center">
@@ -284,7 +293,7 @@ const ManageQuotations: React.FC = () => {
                         paginationTotalRows={pagination?.total || 0}
                         paginationPerPage={pagination?.limit || 10}
                         paginationDefaultPage={pagination?.page || 1}
-                        paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
+                        paginationRowsPerPageOptions={[10, 25, 50, 100]}
                         onChangePage={handlePageChange}
                         onChangeRowsPerPage={handleRowsPerPageChange}
                         fixedHeader={true}
@@ -298,7 +307,7 @@ const ManageQuotations: React.FC = () => {
                     />
                 </div>
             </div>
-            
+
             {/* Delete Confirmation Modal */}
             <ConfirmationModal
                 isOpen={confirmDelete.show}

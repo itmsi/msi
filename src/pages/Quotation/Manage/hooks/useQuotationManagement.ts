@@ -4,10 +4,10 @@ import { useQuotation } from './useQuotation';
 
 export const useQuotationManagement = () => {
     const navigate = useNavigate();
-    
+
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
-    const [sortStatus, setSortStatus] = useState<'submit' | 'draft' | 'rejected' | ''>('');
+    const [quotationFor, setQuotationFor] = useState<'customer' | 'leasing' | ''>('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -21,10 +21,10 @@ export const useQuotationManagement = () => {
 
     // Trigger fetch when filters change
     useEffect(() => {
-        if (filters.sort_order || filters.status) {
+        if (filters.sort_order || filters.quotation_for) {
             fetchQuotations(currentPage, itemsPerPage);
         }
-    }, [filters.sort_order, filters.status]);
+    }, [filters.sort_order, filters.quotation_for]);
 
     const handlePageChange = useCallback((page: number) => {
         setCurrentPage(page);
@@ -57,9 +57,9 @@ export const useQuotationManagement = () => {
         if (filterKey === 'sort_order') {
             setSortOrder(value as 'asc' | 'desc');
             updateFilters('sort_order', value);
-        } else if (filterKey === 'status') {
-            setSortStatus(value as 'submit' | 'draft' | 'rejected' | '');
-            updateFilters('status', value);
+        } else if (filterKey === 'quotation_for') {
+            setQuotationFor(value as 'customer' | 'leasing' | '');
+            updateFilters('quotation_for', value);
         }
         setCurrentPage(1);
         // fetchQuotations akan otomatis terpanggil karena filters berubah
@@ -107,7 +107,7 @@ export const useQuotationManagement = () => {
     return {
         searchTerm,
         sortOrder,
-        sortStatus,
+        quotationFor,
         quotations,
         pagination,
         loading,

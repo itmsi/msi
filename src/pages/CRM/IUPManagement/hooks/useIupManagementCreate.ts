@@ -27,7 +27,8 @@ export const useIupManagementCreate = () => {
         iup_zone_id: '',
         business_type: '',
         permit_type: '',
-        segmentation_id: 'kosong',
+        segmentation_id: '',
+        segmentation_name_en: '',
         province_name: '',
         pic: '',
         mine_location: '',
@@ -193,14 +194,6 @@ export const useIupManagementCreate = () => {
             newErrors.company_name = 'IUP Name is required';
         }
         
-        if (!formData.rkab.trim()) {
-            newErrors.rkab = 'RKAB is required';
-        }
-
-        if (!formData.sk_number) {
-            newErrors.sk_number = 'SK Number is required';
-        }
-
         if (!formData.mine_location) {
             newErrors.mine_location = 'Mine Location is required';
         }
@@ -250,7 +243,7 @@ export const useIupManagementCreate = () => {
                 // Ensure iup_zone_id is set from selected IUP Zone
                 iup_zone_id: selectedIupZone.id,
                 // Auto-fill some fields based on selections if needed
-                province_name: formData.province_name || 'province name - kosong',
+                province_name: formData.province_name || '',
                 mine_location: formData.mine_location || '',
                 // Set default values for hidden required fields
                 business_type: formData.business_type || '',
@@ -263,7 +256,7 @@ export const useIupManagementCreate = () => {
                 pic: formData.pic || 'pic - kosong',
                 regency_name: formData.regency_name || selectedArea.name || '',
                 company_full_name: formData.company_full_name || formData.company_name,
-                segmentation_id: formData.segmentation_id || selectedIupZone.id || 'segmentasi kosong',
+                segmentation_id: formData.segmentation_id || selectedIupZone.id || '',
                 area_size_ha: formData.area_size_ha || '',
                 rkab: formData.rkab || ''
             };

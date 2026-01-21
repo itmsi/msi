@@ -815,3 +815,56 @@ export interface BiayaItem {
     nominal: number;
     persentase: number;
 }
+
+export interface Pagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+export interface ManageROECompareResponse {
+    success: boolean;
+    message: string;
+    data: {
+        data: ManageROECompareData[];
+        pagination: Pagination;
+    };
+}
+export interface ManageROECompareData {
+  brand: string;
+  tonase: number;
+  ritase: number;
+  qty: number;
+  price: number;
+  fuel: number;
+  revenue: number;
+  expenses: number;
+  asset: number;
+  equity: number;
+  liability: number;
+  roe_percentage: number;
+  roe_nominal: number;
+  roa_percentage: number;
+  roa_nominal: number;
+  roe_percentage_diff: number;
+  roe_nominal_diff: number;
+  roa_percentage_diff: number;
+  roa_nominal_diff: number;
+}
+
+export interface CompareListRequest {
+    quote_id: string;
+    page: number;
+    limit: number;
+    search?: string;
+    sort_order?: "asc" | "desc";
+}
+export interface ComparePayload {
+    quote_id: string;
+    brand: string;
+    tonase: number;
+    ritase: number;
+    qty: number;
+    price: number;
+}

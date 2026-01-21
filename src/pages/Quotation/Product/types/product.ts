@@ -29,6 +29,7 @@ export interface ItemProduct {
     is_delete: boolean;
     componen_type: number;
     product_type: string;
+    company_name?: string | null;
     componen_product_name: string;
     volume: string;
     componen_product_unit_model: string;
@@ -71,6 +72,7 @@ export interface ItemProductRequest {
     limit: number;
     sort_order: 'asc' | 'desc';
     search: string;
+    company_name?: string;
 }
 
 export interface ItemProductFormData {
