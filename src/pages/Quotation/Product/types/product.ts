@@ -112,6 +112,7 @@ export interface ItemProductValidationErrors {
     image?: string;
     componen_type?: string;
     product_dimensi_id?: string;
+    company_name?: string;
 }
 
 export interface EditProductFormData {
