@@ -10,22 +10,6 @@ export interface IupRequest {
     is_admin?: boolean;
 }
 
-export interface SegmentationOption {
-    segmentation_id: string;
-    segmentation_name_en: string;
-}
-
-export interface SegmentationResponse {
-    success: boolean;
-    data: SegmentationOption[];
-    pagination?: {
-        page: number;
-        limit: number;
-        total: number;
-        totalPages: number;
-    };
-}
-
 export interface IupFilters {
     search: string;
     sort_order: 'asc' | 'desc' | '';
