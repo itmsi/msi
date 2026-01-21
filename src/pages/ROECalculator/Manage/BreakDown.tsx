@@ -272,6 +272,7 @@ export default function BreakdownROECalculator() {
                     </div>
                 </div>
             ),
+            width: '80px',
         },
         {
             name: 'ROE',
@@ -279,10 +280,10 @@ export default function BreakdownROECalculator() {
                 <div className="py-2 text-center">
                     {/* <div className="font-semibold text-green-600 text-sm">{row.roe_nominal}</div> */}
                     <div className="flex justify-around items-center w-[200px]">
-                        <Tooltip content={`ROE Percentage`} position="top">
+                        <Tooltip content={`${row.brand} - ROE Percentage`} position="top">
                             <span className="text-purple-600 font-medium">{row.roe_percentage}%</span>
                         </Tooltip>
-                        <Tooltip content={`ROE Difference`} position="top">
+                        <Tooltip content={`${row.brand} - ROE Difference`} position="top">
                             <span className={"font-medium "+clsx(
                                 twMerge(
                                 "text-gray-900 ",
@@ -296,6 +297,8 @@ export default function BreakdownROECalculator() {
                 </div>
             ),
             center: true,
+            width: '250px',
+            wrap: true
         },
         {
             name: 'ROA',
@@ -304,10 +307,10 @@ export default function BreakdownROECalculator() {
                     {/* <div className="font-semibold text-blue-600 text-sm">{row.roa_nominal}</div> */}
                     <div className="flex justify-around items-center w-[200px]">
                         
-                        <Tooltip content={`ROA Percentage`} position="top">
+                        <Tooltip content={`${row.brand} - ROA Percentage`} position="top">
                             <span className="text-blue-600 font-medium">{row.roa_percentage}%</span>
                         </Tooltip>
-                        <Tooltip content={`ROA Difference`} position="top">
+                        <Tooltip content={`${row.brand} - ROA Difference`} position="top">
                             <span className={"font-medium "+clsx(
                                 twMerge(
                                 "text-gray-900 ",
@@ -321,6 +324,8 @@ export default function BreakdownROECalculator() {
                 </div>
             ),
             center: true,
+            width: '250px',
+            wrap: true
         },
         {
             name: 'Revenue',
@@ -332,6 +337,8 @@ export default function BreakdownROECalculator() {
                     </div>
                 </div>
             ),
+            width: '300px',
+            wrap: true
         },
         {
             name: 'Actions',
@@ -355,7 +362,7 @@ export default function BreakdownROECalculator() {
                     )}
                 </div>
             ),
-            width: '200px',
+            width: '100px',
             center: true,
         }
     ];
