@@ -1,6 +1,7 @@
 import { apiDelete, apiGet, apiPost, apiPut, ApiResponse } from '@/helpers/apiHelper';
 import { RorEntity, RorListRequest, RorListResponse } from '../types/roecalculator';
 import { ComparePayload, ManageROEBreakdownData, ManageROECompareResponse, ManageROEDataPDF } from '../../types/roeCalculator';
+import api from '@/helpers/apiHelper';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_IS_ADMIN = import.meta.env.VITE_PARAM_IS_ADMIN;
@@ -65,5 +66,17 @@ export class RoecalculatorService {
         const response = await apiPost(`${API_BASE_URL}/calculations/list_compare/create`, data as Record<string, any>);
         return response.data;
     }
-    
+
+    static async deleteCompare(competitorID: string, requestBody: { quote_id: string }): Promise<{ status: number }> {
+        try {
+            const response = await api.delete(`${API_BASE_URL}/calculations/list_compare/${competitorID}`, {
+                data: requestBody
+            });
+            return {
+                status: response.status
+            };
+        } catch (error: any) {
+            throw error;
+        }
+    }
 }

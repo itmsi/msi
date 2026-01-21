@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { MdKeyboardArrowLeft, MdAdd, MdEdit } from 'react-icons/md';
+import { MdKeyboardArrowLeft, MdAdd, MdEdit, MdDeleteOutline } from 'react-icons/md';
 import ReactECharts from 'echarts-for-react';
 import { TableColumn } from 'react-data-table-component';
 import { toast } from 'react-hot-toast';
@@ -16,7 +16,10 @@ import { RoecalculatorService } from './services/roecalculatorService';
 import { ManageROEBreakdownData, RevenueExpenseProfit, BreakdownBiayaChart, CompareListRequest, Pagination, ManageROECompareData } from '../types/roeCalculator';
 import { formatCurrency, formatNumberInput, handleDecimalInput, handleKeyPress } from '@/helpers/generalHelper';
 import Tooltip from '@/components/ui/tooltip/Tooltip';
-import { PermissionGate } from '@/components/common/PermissionComponents';
+import { PermissionButton, PermissionGate } from '@/components/common/PermissionComponents';
+import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import clsx from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 
 export default function BreakdownROECalculator() {
@@ -46,8 +49,13 @@ export default function BreakdownROECalculator() {
     const [compareFormErrors, setCompareFormErrors] = useState({
         brand: ''
     });
+    const [confirmDelete, setConfirmDelete] = useState({
+        show: false,
+        id: '',
+        name: ''
+    });
+    const [isDeletingCompare, setIsDeletingCompare] = useState(false);
 
-    // Shared fetchCompareData function
     const fetchCompareData = async (params: Partial<CompareListRequest> = {}) => {
         try {
             const response = await RoecalculatorService.getCompareRoe(params);
@@ -82,7 +90,6 @@ export default function BreakdownROECalculator() {
                 
                 if (response.data.success) {
                     setBreakdownData(response.data.data);
-                    // Load compare data after main breakdown is ready
                     const compareParams = {
                         quote_id: calculatorId,
                         page: 1,
@@ -109,7 +116,6 @@ export default function BreakdownROECalculator() {
             [field]: value
         }));
         
-        // Clear error when user starts typing
         if (compareFormErrors[field as keyof typeof compareFormErrors]) {
             setCompareFormErrors(prev => ({
                 ...prev,
@@ -125,7 +131,6 @@ export default function BreakdownROECalculator() {
         };
         let isValid = true;
 
-        // Brand validation
         if (!compareFormData.brand.trim()) {
             errors.brand = 'Brand is required';
             isValid = false;
@@ -140,7 +145,6 @@ export default function BreakdownROECalculator() {
 
     // Handle add new comparison
     const handleAddComparison = async () => {
-        // Validate form before submission
         if (!validateCompareForm()) {
             toast.error('Please correct the validation errors');
             return;
@@ -162,7 +166,6 @@ export default function BreakdownROECalculator() {
                 price: parseInt(compareFormData.price.replace(/[^\d]/g, ''))
             };
 
-            // Call API to add comparison
             const response = await RoecalculatorService.addCompare(payload);
             
             if (response.success) {
@@ -196,6 +199,55 @@ export default function BreakdownROECalculator() {
     };
 
 
+    const handleDeleteComparison = async (row: string) => {
+        if (!calculatorId) {
+            setError('Calculator ID is required');
+            return false;
+        }
+
+        setIsDeletingCompare(true);
+        setError('');
+        
+        try {
+            const requestBody = {
+                quote_id: calculatorId
+            };
+            await RoecalculatorService.deleteCompare(row, requestBody);
+            return true;
+        } catch (err) {
+            setError('Failed to delete competitor');
+            console.error('Delete competitor error:', err);
+            throw err;
+        } finally {
+            setIsDeletingCompare(false);
+        }
+    };
+
+    const cancelDelete = () => {
+        setConfirmDelete({
+            show: false,
+            id: '',
+            name: ''
+        });
+    };
+
+    const confirmdeleteCompetitor = async () => {
+        if (!confirmDelete.id) return;
+        
+        try {
+            await handleDeleteComparison(confirmDelete.id);
+            toast.success('Competitor deleted successfully');
+            const compareParams = {
+                quote_id: calculatorId,
+                page: 1,
+                limit: 10,
+            };
+            await fetchCompareData(compareParams);
+            cancelDelete();
+        } catch (err) {
+            toast.error('Failed to delete competitor');
+        }
+    };
     // Define columns for comparison table - optimized for 1440px screens
     const compareColumns: TableColumn<ManageROECompareData>[] = [
         {
@@ -228,7 +280,7 @@ export default function BreakdownROECalculator() {
                     {/* <div className="font-semibold text-green-600 text-sm">{row.roe_nominal}</div> */}
                     <div className="flex justify-between items-center w-[140px]">
                         <Tooltip content={`by Percentage`} position="top">
-                            <span className="text-gray-900 font-medium">{row.roe_percentage}%</span>
+                            <span className="text-purple-600 font-medium">{row.roe_percentage}%</span>
                         </Tooltip>
                         <Tooltip content={`by Difference`} position="top">
                             <span className="text-gray-900 font-medium">{row.roe_percentage_diff}</span>
@@ -244,8 +296,15 @@ export default function BreakdownROECalculator() {
                 <div className="py-2 text-center">
                     {/* <div className="font-semibold text-blue-600 text-sm">{row.roa_nominal}</div> */}
                     <div className="flex justify-between items-center w-[140px]">
-                        <span className="text-gray-900 font-medium">{row.roa_percentage}%</span>
-                        <span className="text-gray-900 font-medium">{row.roa_percentage_diff}</span>
+                        <span className="text-blue-600 font-medium">{row.roa_percentage}%</span>
+                        <span className={"font-medium "+clsx(
+                            twMerge(
+                            "text-gray-900 ",
+                            `${row.roa_percentage_diff > 0 ? 'text-red-600' : row.roa_percentage_diff < 0 && 'text-green-600'}`,
+                            ),
+                        )}>
+                            {row.roa_percentage_diff}
+                        </span>
                     </div>
                 </div>
             ),
@@ -261,6 +320,31 @@ export default function BreakdownROECalculator() {
                     </div>
                 </div>
             ),
+        },
+        {
+            name: 'Actions',
+            cell: (row: any) => (
+                <div className="flex justify-end gap-1">
+                    {row.properties_list_compare_id !== null && (
+                    <PermissionButton
+                        permission="delete"
+                        onClick={() => {
+                            setConfirmDelete({
+                                show: true,
+                                id: row.properties_list_compare_id,
+                                name: row.brand
+                            });
+                        }}
+                        className="!p-2 !rounded-lg !text-red-600 hover:!text-red-700 hover:!bg-red-50 !transition-colors !border-0"
+                        title="Delete"
+                    >
+                        <MdDeleteOutline size={16} />
+                    </PermissionButton>
+                    )}
+                </div>
+            ),
+            width: '200px',
+            center: true,
         }
     ];
 
@@ -286,7 +370,7 @@ export default function BreakdownROECalculator() {
                     <CustomDataTable
                         columns={compareColumns}
                         data={compareBreakDown}
-                        loading={loading}
+                        loading={isDeletingCompare}
                         pagination={false}
                         paginationServer={false}
                     />
@@ -781,6 +865,20 @@ export default function BreakdownROECalculator() {
                             </div>
                         </div>
                     </Modal>
+
+                    
+                    {/* Delete Confirmation Modal */}
+                    <ConfirmationModal
+                        isOpen={confirmDelete.show}
+                        onClose={cancelDelete}
+                        onConfirm={confirmdeleteCompetitor}
+                        title={`Delete Competitor: ${confirmDelete.name}`}
+                        message="Are you sure you want to delete this Competitor? This action cannot be undone."
+                        confirmText="Delete"
+                        cancelText="Cancel"
+                        type="danger"
+                        loading={isDeletingCompare}
+                    />
                 </div>
             </div>
         </>
