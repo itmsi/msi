@@ -24,7 +24,7 @@ export interface ItemProduct {
     selling_price_star_3: string;
     selling_price_star_4: string;
     selling_price_star_5: string;
-    image: string | null;
+    images: any[] | null;
     componen_product_description: string | null;
     is_delete: boolean;
     componen_type: number;
