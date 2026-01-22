@@ -17,7 +17,7 @@ interface FileUploadProps {
     currentFiles?: File[];
     existingImageUrl?: any[] | string |null;
     onFileChange: (files: File | File[] | null) => void;
-    onRemoveExistingImage?: () => void;
+    onRemoveExistingImage?: (index?: number) => void;
     validationError?: string;
     required?: boolean;
     disabled?: boolean;
@@ -172,6 +172,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 onRemoveExistingImage();
             }
         }
+    };
+
+    const handleRemoveExistingImage = (indexToRemove: number) => {
+        if (onRemoveExistingImage) {
+            onRemoveExistingImage(indexToRemove);
+        }
     };    
     const getIcon = () => {
         const iconProps = { className: "mx-auto h-12 w-12 text-gray-400" };
@@ -225,15 +231,27 @@ const FileUpload: React.FC<FileUploadProps> = ({
         
         if (multiple) {
             const currentFiles = getCurrentFiles();
-            // Use preserved existing images for calculation
             const currentExistingImages = existingImageUrl || preservedExistingImages;
             
-            const allFiles = [...currentFiles, ...validFiles];
+            const cekFiles = validFiles.filter(newFile => {
+                return !currentFiles.some(existingFile => 
+                    existingFile.name === newFile.name && 
+                    existingFile.size === newFile.size && 
+                    existingFile.lastModified === newFile.lastModified
+                );
+            });
+            
+            if (cekFiles.length === 0) {
+                toast.error('All selected files are already added');
+                return;
+            }
+            
+            const allFiles = [...currentFiles, ...cekFiles];
             const totalExisting = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
             const totalImages = allFiles.length + totalExisting;
             
             onFileChange(allFiles);
-            toast.success(`${validFiles.length} file(s) added successfully! Total: ${totalImages} images`);
+            toast.success(`${cekFiles.length} file(s) added successfully! Total: ${totalImages} images`);
         } else {
             onFileChange(validFiles[0]);
             toast.success('File uploaded successfully!');
@@ -437,27 +455,43 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                             currentExistingImages.map((imageUrl, index) => {
                                                 return (
                                                     <div key={`existing-${index}`} className="space-y-2">
-                                                        <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm`}>
+                                                        <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
                                                             <img
                                                                 src={imageUrl}
                                                                 alt={`Existing ${index + 1}`}
                                                                 className="w-full h-full object-contain"
                                                             />
+                                                            {!viewMode && (
+                                                                <button
+                                                                    onClick={() => handleRemoveExistingImage(index)}
+                                                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                >
+                                                                    <MdClose className="w-3 h-3" />
+                                                                </button>
+                                                            )}
                                                         </div>
-                                                        <p className="text-xs font-medium text-gray-900">
+                                                        {/* <p className="text-xs font-medium text-gray-900">
                                                             Existing Image {currentExistingImages.length > 1 ? `${index + 1}` : ''}
-                                                        </p>
+                                                        </p> */}
                                                     </div>
                                                 );
                                             })
                                         ) : (
                                             <div className="space-y-2">
-                                                <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm`}>
+                                                <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
                                                     <img
                                                         src={currentExistingImages}
                                                         alt="Existing"
                                                         className="w-full h-full object-contain"
                                                     />
+                                                    {!viewMode && (
+                                                        <button
+                                                            onClick={() => handleRemoveExistingImage(0)}
+                                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        >
+                                                            <MdClose className="w-3 h-3" />
+                                                        </button>
+                                                    )}
                                                 </div>
                                                 <p className="text-xs font-medium text-gray-900">
                                                     Existing Image
