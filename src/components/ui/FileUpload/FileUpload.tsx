@@ -72,7 +72,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
     useEffect(() => {
         if (existingImageUrl && !preservedExistingImages) {
             setPreservedExistingImages(existingImageUrl);
-            console.log('Preserving existing images:', existingImageUrl);
         }
     }, [existingImageUrl, preservedExistingImages]);
 
@@ -228,16 +227,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
             const currentFiles = getCurrentFiles();
             // Use preserved existing images for calculation
             const currentExistingImages = existingImageUrl || preservedExistingImages;
-            console.log('Current files before merge:', currentFiles.length);
-            console.log('Existing images:', Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0));
-            console.log('New valid files:', validFiles.length);
             
             const allFiles = [...currentFiles, ...validFiles];
             const totalExisting = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
             const totalImages = allFiles.length + totalExisting;
-            
-            console.log('Total files after merge:', allFiles.length);
-            console.log('Total images (including existing):', totalImages);
             
             onFileChange(allFiles);
             toast.success(`${validFiles.length} file(s) added successfully! Total: ${totalImages} images`);
@@ -435,16 +428,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
                         const totalImages = imageFiles.length + existingImagesCount;
                         const getImageLength = totalImages > 3 ? 3 : (totalImages > 0 ? totalImages : 1);
                         
-                        console.log('=== Preview Debug ===');
-                        console.log('imageFiles length:', imageFiles.length);
-                        console.log('existingImageUrl:', existingImageUrl);
-                        console.log('preservedExistingImages:', preservedExistingImages);
-                        console.log('currentExistingImages:', currentExistingImages);
-                        console.log('existingImagesCount:', existingImagesCount);
-                        console.log('totalImages:', totalImages);
-                        console.log('getImageLength:', getImageLength);
-                        console.log('previewUrls:', previewUrls);
-                        
                         if (multiple) {
                             return (
                                 <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(${getImageLength}, 1fr)` }}>
@@ -452,7 +435,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                     {currentExistingImages && (
                                         Array.isArray(currentExistingImages) ? (
                                             currentExistingImages.map((imageUrl, index) => {
-                                                console.log(`Rendering existing image ${index}:`, imageUrl);
                                                 return (
                                                     <div key={`existing-${index}`} className="space-y-2">
                                                         <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm`}>
@@ -487,10 +469,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                     {/* Then show new files */}
                                     {imageFiles.map((file, index) => {
                                         const url = previewUrls[index];
-                                        console.log(`Rendering new file ${index}:`, file.name, 'URL:', url);
                                         
                                         if (!url) {
-                                            console.log(`No URL for file ${index}, skipping render`);
                                             return null;
                                         }
                                         
