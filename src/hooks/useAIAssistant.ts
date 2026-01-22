@@ -2,12 +2,43 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { AIAssistantService } from '@/services/aiAssistantService';
 import { ChatMessage } from '@/types/aiAssistant';
 
+const STORAGE_KEY_MESSAGES = 'ai_chat_messages';
+const STORAGE_KEY_SESSION = 'ai_chat_session_id';
+
 export const useAIAssistant = () => {
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    // Load from sessionStorage on mount
+    const [messages, setMessages] = useState<ChatMessage[]>(() => {
+        try {
+            const stored = sessionStorage.getItem(STORAGE_KEY_MESSAGES);
+            return stored ? JSON.parse(stored) : [];
+        } catch (e) {
+            return [];
+        }
+    });
+    
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+    
+    const [sessionId, setSessionId] = useState<string | undefined>(() => {
+        const stored = sessionStorage.getItem(STORAGE_KEY_SESSION);
+        return stored || undefined;
+    });
+    
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Persist messages to sessionStorage whenever they change
+    useEffect(() => {
+        if (messages.length > 0) {
+            sessionStorage.setItem(STORAGE_KEY_MESSAGES, JSON.stringify(messages));
+        }
+    }, [messages]);
+
+    // Persist sessionId to sessionStorage whenever it changes
+    useEffect(() => {
+        if (sessionId) {
+            sessionStorage.setItem(STORAGE_KEY_SESSION, sessionId);
+        }
+    }, [sessionId]);
 
     // Auto-scroll to bottom when messages change
     const scrollToBottom = useCallback(() => {
@@ -79,10 +110,12 @@ export const useAIAssistant = () => {
             // Continue anyway to clear local state
         }
         
-        // Clear local state
+        // Clear local state and sessionStorage
         setMessages([]);
         setError(null);
-        setSessionId(undefined);  // Reset sessionId, next message will create new session
+        setSessionId(undefined);
+        sessionStorage.removeItem(STORAGE_KEY_MESSAGES);
+        sessionStorage.removeItem(STORAGE_KEY_SESSION);
     }, [sessionId]);
 
     return {

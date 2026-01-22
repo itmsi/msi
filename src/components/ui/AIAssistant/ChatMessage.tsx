@@ -12,8 +12,69 @@ const parseMarkdown = (text: string): React.ReactElement => {
     const lines = text.split('\n');
     
     const elements: React.ReactElement[] = [];
+    let tableLines: string[] = [];
+    let inTable = false;
+    
+    const processTable = (tableLines: string[]) => {
+        if (tableLines.length < 2) return null;
+        
+        // Parse table
+        const rows = tableLines.map(line => 
+            line.split('|').map(cell => cell.trim()).filter(cell => cell !== '')
+        );
+        
+        // Skip separator row (row with ---)
+        const headerRow = rows[0];
+        const bodyRows = rows.slice(2); // Skip header and separator
+        
+        return (
+            <div className="overflow-x-auto my-2">
+                <table className="min-w-full border border-gray-300 text-xs">
+                    <thead className="bg-gray-200">
+                        <tr>
+                            {headerRow.map((cell, idx) => (
+                                <th key={idx} className="border border-gray-300 px-2 py-1 text-left font-semibold">
+                                    <span dangerouslySetInnerHTML={{ __html: formatInlineMarkdown(cell) }} />
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {bodyRows.map((row, rowIdx) => (
+                            <tr key={rowIdx} className="hover:bg-gray-50">
+                                {row.map((cell, cellIdx) => (
+                                    <td key={cellIdx} className="border border-gray-300 px-2 py-1">
+                                        <span dangerouslySetInnerHTML={{ __html: formatInlineMarkdown(cell) }} />
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    };
     
     lines.forEach((line, lineIndex) => {
+        // Check if it's a table row (contains | characters)
+        const isTableRow = line.trim().startsWith('|') || (line.includes('|') && line.split('|').length > 2);
+        
+        if (isTableRow) {
+            inTable = true;
+            tableLines.push(line);
+            return;
+        }
+        
+        // If we were in a table and now we're not, process the table
+        if (inTable && !isTableRow) {
+            const tableElement = processTable(tableLines);
+            if (tableElement) {
+                elements.push(<div key={`table-${lineIndex}`}>{tableElement}</div>);
+            }
+            tableLines = [];
+            inTable = false;
+        }
+        
         // Check if it's a numbered list item
         const numberedListMatch = line.match(/^(\d+)\.\s+(.+)/);
         // Check if it's a bullet list item (starts with -, *, or •)
@@ -65,11 +126,26 @@ const parseMarkdown = (text: string): React.ReactElement => {
         elements.push(element);
     });
     
+    // Process any remaining table at the end
+    if (inTable && tableLines.length > 0) {
+        const tableElement = processTable(tableLines);
+        if (tableElement) {
+            elements.push(<div key="table-end">{tableElement}</div>);
+        }
+    }
+    
     return <>{elements}</>;
 };
 
-// Format inline markdown (bold, italic, code)
+// Format inline markdown (bold, italic, code, links)
 const formatInlineMarkdown = (text: string): string => {
+    // Links: [text](url) - make clickable
+    text = text.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline hover:no-underline">$1</a>');
+    
+    // Auto-detect URLs (http://, https://, www.)
+    text = text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline hover:no-underline">$1</a>');
+    text = text.replace(/(www\.[^\s<]+)/g, '<a href="http://$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline hover:no-underline">$1</a>');
+    
     // Bold: **text** or __text__
     text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     text = text.replace(/__(.+?)__/g, '<strong>$1</strong>');
@@ -79,7 +155,7 @@ const formatInlineMarkdown = (text: string): string => {
     text = text.replace(/(?<!_)_(?!_)(.+?)(?<!_)_(?!_)/g, '<em>$1</em>');
     
     // Inline code: `code`
-    text = text.replace(/`(.+?)`/g, '<code class="bg-gray-200 px-1 py-0.5 rounded text-xs">$1</code>');
+    text = text.replace(/`(.+?)`/g, '<code class="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono">$1</code>');
     
     return text;
 };
