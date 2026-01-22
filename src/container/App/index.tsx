@@ -22,7 +22,7 @@ const App = () => {
       />
       <ScrollToTop />
       <ClientRoutes />
-      {/* Only show AI Assistant when user is authenticated and not loading */}
+      {/* Only show Mosa when user is authenticated and not loading */}
       {isAuthenticated && !isLoading && <AIAssistant />}
     </>
   );
