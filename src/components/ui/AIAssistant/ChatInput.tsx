@@ -55,8 +55,14 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
     // Auto-resize textarea based on content
     useEffect(() => {
         if (textareaRef.current) {
-            textareaRef.current.style.height = 'auto';
-            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+            // Reset to minimum height first
+            textareaRef.current.style.height = '40px';
+            
+            // Only expand if content needs more space
+            const scrollHeight = textareaRef.current.scrollHeight;
+            if (scrollHeight > 40) {
+                textareaRef.current.style.height = `${Math.min(scrollHeight, 120)}px`;
+            }
         }
     }, [inputValue]);
 
@@ -65,9 +71,9 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
         onSendMessage(inputValue);
         setInputValue('');
         
-        // Reset textarea height after sending
+        // Reset to single line after sending
         if (textareaRef.current) {
-            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = '40px';
         }
     };
 
@@ -102,14 +108,18 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
                 <div className="flex-1 relative">
                     <textarea
                         ref={textareaRef}
-                        placeholder="Ketik apapun yang ingin ditanyakan..."
+                        placeholder="Tanyakan apa saja..."
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={handleKeyDown}
                         disabled={isLoading || isListening}
                         rows={1}
-                        className="w-full resize-none rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-300 disabled:opacity-50 disabled:cursor-not-allowed custom-scrollbar"
-                        style={{ minHeight: '40px', maxHeight: '120px' }}
+                        className="w-full relative top-2 resize-none rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+                        style={{ 
+                            minHeight: '40px', 
+                            maxHeight: '120px',
+                            overflowY: inputValue.includes('\n') || (textareaRef.current?.scrollHeight || 0) > 40 ? 'auto' : 'hidden'
+                        }}
                     />
                 </div>
 
