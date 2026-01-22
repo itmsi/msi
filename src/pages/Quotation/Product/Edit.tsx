@@ -421,7 +421,7 @@ export default function EditProduct() {
             const formDataToSend = new FormData();
             
             // Prepare data based on product_type
-            let specificationsData;
+            let specificationsData = specifications.length > 0 ? specifications : formData.componen_product_specifications;;
             let segmentValue = formData.segment;
             let msiModelValue = formData.msi_model;
             let msiProductValue = formData.msi_product;
@@ -432,15 +432,7 @@ export default function EditProduct() {
             let volumeValue = formData.volume;
             let unitModelValue = formData.componen_product_unit_model;
 
-            if (formData.product_type === 'unit') {
-                // For unit type, clear specifications values
-                const currentSpecs = specifications.length > 0 ? specifications : formData.componen_product_specifications;
-                specificationsData = currentSpecs.map(spec => ({
-                    ...spec,
-                    componen_product_specification_value: '',
-                    specification_value_name: ''
-                }));
-            } else {
+            if (formData.product_type !== 'unit') {
                 // For non_unit type, clear unit-specific fields
                 segmentValue = '';
                 msiModelValue = '';
@@ -451,7 +443,13 @@ export default function EditProduct() {
                 horsePowerValue = '';
                 volumeValue = '';
                 unitModelValue = '';
-                specificationsData = specifications.length > 0 ? specifications : formData.componen_product_specifications;
+                
+                const currentSpecs = specifications.length > 0 ? specifications : formData.componen_product_specifications;
+                specificationsData = currentSpecs.map(spec => ({
+                    ...spec,
+                    componen_product_specification_value: '',
+                    specification_value_name: ''
+                }));
             }
             
             // Append all form fields
@@ -744,13 +742,14 @@ export default function EditProduct() {
                         </div>
 
                         {/* Pricing Section */}
+                        
+                    {formData.product_type === 'unit' && 
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
-                                Spesifikasi {formData.product_type === 'unit' ? 'Unit' : 'Product'}
+                                Spesifikasi Produk 
                             </h2>
-                            
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {formData.product_type === 'unit' ? (<>
+                                <div className="space-y-6">
                                     <div>
                                         <Label htmlFor="segment">
                                             Segment
@@ -871,9 +870,8 @@ export default function EditProduct() {
                                             placeholder="Masukkan unit model"
                                         />
                                     </div>
-                                </>) 
-                                : 
-                                (<>
+                                </div>
+                                <div className="space-y-6">
                                     {specifications.map((spec, index) => (
                                         <div key={`${spec.specification_label_name}-${index}`}>
                                             <Label htmlFor={`spec_${index}`}>
@@ -901,11 +899,10 @@ export default function EditProduct() {
                                             )}
                                         </div>
                                     ))}
-                                </>)
-                                }
-
+                                </div>
+                                </div>
                             </div>
-                        </div>
+                        }
 
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <FileUpload

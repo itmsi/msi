@@ -236,7 +236,7 @@ export const useCreateProduct = () => {
             const formDataToSend = new FormData();
             
             // Prepare data based on product_type
-            let specificationsData;
+            let specificationsData = formData.componen_product_specifications;
             let segmentValue = formData.segment;
             let msiModelValue = formData.msi_model;
             let msiProductValue = formData.msi_product;
@@ -247,14 +247,7 @@ export const useCreateProduct = () => {
             let volumeValue = formData.volume;
             let unitModelValue = formData.componen_product_unit_model;
 
-            if (formData.product_type === 'unit') {
-                // For unit type, clear specifications values
-                specificationsData = formData.componen_product_specifications.map(spec => ({
-                    ...spec,
-                    componen_product_specification_value: '',
-                    specification_value_name: ''
-                }));
-            } else {
+            if (formData.product_type !== 'unit') {
                 // For non_unit type, clear unit-specific fields
                 segmentValue = '';
                 msiModelValue = '';
@@ -265,7 +258,11 @@ export const useCreateProduct = () => {
                 horsePowerValue = '';
                 volumeValue = '';
                 unitModelValue = '';
-                specificationsData = formData.componen_product_specifications;
+                specificationsData = formData.componen_product_specifications.map(spec => ({
+                    ...spec,
+                    componen_product_specification_value: '',
+                    specification_value_name: ''
+                }));
             }
             
             // Append all form fields

@@ -211,169 +211,168 @@ export default function CreateProduct() {
                         </div>
 
                         {/* Description Section */}
+                        
+                        {formData.product_type === 'unit' && 
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
-                                Spesifikasi {formData.product_type === 'unit' ? 'Unit' : 'Product'}
+                                Spesifikasi Produk
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {formData.product_type === 'unit' ? (
-                                    <>
-                                        <div>
-                                            <Label htmlFor="segment">
-                                                Segment 
-                                            </Label>
-                                            <Input
-                                                id="segment"
-                                                name="segment"
-                                                type="text"
-                                                value={formData.segment}
-                                                onChange={(e) => handleInputChange('segment', e.target.value)}
-                                                placeholder="Masukkan segment"
-                                            />
-                                        </div>
-                                        
-                                        <div>
-                                            <Label htmlFor="msi_model">
-                                                MSI Model 
-                                            </Label>
-                                            <Input
-                                                id="msi_model"
-                                                name="msi_model"
-                                                type="text"
-                                                value={formData.msi_model}
-                                                onChange={(e) => handleInputChange('msi_model', e.target.value)}
-                                                placeholder="Masukkan MSI model"
-                                            />
-                                        </div>
-                                        
-                                        <div>
-                                            <Label htmlFor="msi_product">
-                                                Product 
-                                            </Label>
-                                            <Input
-                                                id="msi_product"
-                                                name="msi_product"
-                                                type="text"
-                                                value={formData.msi_product}
-                                                onChange={(e) => handleInputChange('msi_product', e.target.value)}
-                                                placeholder="Masukkan MSI model"
-                                            />
-                                        </div>
+                                <div className="space-y-6">
+                                    <div>
+                                        <Label htmlFor="segment">
+                                            Segment 
+                                        </Label>
+                                        <Input
+                                            id="segment"
+                                            name="segment"
+                                            type="text"
+                                            value={formData.segment}
+                                            onChange={(e) => handleInputChange('segment', e.target.value)}
+                                            placeholder="Masukkan segment"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <Label htmlFor="msi_model">
+                                            MSI Model 
+                                        </Label>
+                                        <Input
+                                            id="msi_model"
+                                            name="msi_model"
+                                            type="text"
+                                            value={formData.msi_model}
+                                            onChange={(e) => handleInputChange('msi_model', e.target.value)}
+                                            placeholder="Masukkan MSI model"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <Label htmlFor="msi_product">
+                                            Product 
+                                        </Label>
+                                        <Input
+                                            id="msi_product"
+                                            name="msi_product"
+                                            type="text"
+                                            value={formData.msi_product}
+                                            onChange={(e) => handleInputChange('msi_product', e.target.value)}
+                                            placeholder="Masukkan MSI model"
+                                        />
+                                    </div>
 
-                                        <div>
-                                            <Label htmlFor="componen_type">Component Type</Label>
-                                            <CustomSelect
-                                                options={companyOptions}
-                                                value={companyOptions.find(option => option.value === formData.componen_type) || null}
-                                                onChange={(option) => {
+                                    <div>
+                                        <Label htmlFor="componen_type">Component Type</Label>
+                                        <CustomSelect
+                                            options={companyOptions}
+                                            value={companyOptions.find(option => option.value === formData.componen_type) || null}
+                                            onChange={(option) => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    componen_type: Number(option?.value) || 1
+                                                }));
+                                            }}
+                                            placeholder="Select Product Type"
+                                            isClearable={false}
+                                            isSearchable={true}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="wheel_no">Wheel No</Label>
+                                        <Input
+                                            id="wheel_no"
+                                            name="wheel_no"
+                                            type="text"
+                                            value={formData.wheel_no}
+                                            onChange={(e) => handleInputChange('wheel_no', e.target.value)}
+                                            placeholder="Masukkan wheel number"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="engine">Engine</Label>
+                                        <Input
+                                            id="engine"
+                                            name="engine"
+                                            type="text"
+                                            value={formData.engine}
+                                            onChange={(e) => handleInputChange('engine', e.target.value)}
+                                            placeholder="Masukkan engine"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="horse_power">Horse Power</Label>
+                                        <Input
+                                            id="horse_power"
+                                            name="horse_power"
+                                            type="text"
+                                            value={formData.horse_power}
+                                            onChange={(e) => handleInputChange('horse_power', e.target.value)}
+                                            placeholder="Masukkan horse power"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="volume">Volume</Label>
+                                        <Input
+                                            id="volume"
+                                            name="volume"
+                                            type="text"
+                                            value={formData.volume}
+                                            onChange={(e) => handleInputChange('volume', e.target.value)}
+                                            placeholder="Masukkan volume"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="componen_product_unit_model">Unit Model</Label>
+                                        <Input
+                                            id="componen_product_unit_model"
+                                            name="componen_product_unit_model"
+                                            type="text"
+                                            value={formData.componen_product_unit_model}
+                                            onChange={(e) => handleInputChange('componen_product_unit_model', e.target.value)}
+                                            placeholder="Masukkan unit model"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-6">
+                                    {formData.componen_product_specifications.map((spec, index) => (
+                                        <div key={`${spec.specification_label_name}-${index}`}>
+                                            <Label htmlFor={`spec_${index}`}>
+                                                {spec.specification_label_name || spec.componen_product_specification_label}
+                                            </Label>
+                                            <Input
+                                                id={`spec_${index}`}
+                                                type="text"
+                                                value={spec.specification_value_name || spec.componen_product_specification_value || ''}
+                                                onChange={(e) => {
+                                                    const newSpecs = [...formData.componen_product_specifications];
+                                                    newSpecs[index] = {
+                                                        ...newSpecs[index],
+                                                        specification_value_name: e.target.value,
+                                                        componen_product_specification_value: e.target.value
+                                                    };
                                                     setFormData(prev => ({
                                                         ...prev,
-                                                        componen_type: Number(option?.value) || 1
+                                                        componen_product_specifications: newSpecs
                                                     }));
                                                 }}
-                                                placeholder="Select Product Type"
-                                                isClearable={false}
-                                                isSearchable={true}
+                                                placeholder="Masukkan nilai spesifikasi"
                                             />
+                                            {spec.componen_product_specification_description && (
+                                                <p className="mt-1 text-xs text-gray-500">
+                                                    {spec.componen_product_specification_description}
+                                                </p>
+                                            )}
                                         </div>
-
-                                        <div>
-                                            <Label htmlFor="wheel_no">Wheel No</Label>
-                                            <Input
-                                                id="wheel_no"
-                                                name="wheel_no"
-                                                type="text"
-                                                value={formData.wheel_no}
-                                                onChange={(e) => handleInputChange('wheel_no', e.target.value)}
-                                                placeholder="Masukkan wheel number"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="engine">Engine</Label>
-                                            <Input
-                                                id="engine"
-                                                name="engine"
-                                                type="text"
-                                                value={formData.engine}
-                                                onChange={(e) => handleInputChange('engine', e.target.value)}
-                                                placeholder="Masukkan engine"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="horse_power">Horse Power</Label>
-                                            <Input
-                                                id="horse_power"
-                                                name="horse_power"
-                                                type="text"
-                                                value={formData.horse_power}
-                                                onChange={(e) => handleInputChange('horse_power', e.target.value)}
-                                                placeholder="Masukkan horse power"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="volume">Volume</Label>
-                                            <Input
-                                                id="volume"
-                                                name="volume"
-                                                type="text"
-                                                value={formData.volume}
-                                                onChange={(e) => handleInputChange('volume', e.target.value)}
-                                                placeholder="Masukkan volume"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="componen_product_unit_model">Unit Model</Label>
-                                            <Input
-                                                id="componen_product_unit_model"
-                                                name="componen_product_unit_model"
-                                                type="text"
-                                                value={formData.componen_product_unit_model}
-                                                onChange={(e) => handleInputChange('componen_product_unit_model', e.target.value)}
-                                                placeholder="Masukkan unit model"
-                                            />
-                                        </div>
-                                    </>
-                                ) : 
-                                    <>
-                                        {formData.componen_product_specifications.map((spec, index) => (
-                                            <div key={`${spec.specification_label_name}-${index}`}>
-                                                <Label htmlFor={`spec_${index}`}>
-                                                    {spec.specification_label_name || spec.componen_product_specification_label}
-                                                </Label>
-                                                <Input
-                                                    id={`spec_${index}`}
-                                                    type="text"
-                                                    value={spec.specification_value_name || spec.componen_product_specification_value || ''}
-                                                    onChange={(e) => {
-                                                        const newSpecs = [...formData.componen_product_specifications];
-                                                        newSpecs[index] = {
-                                                            ...newSpecs[index],
-                                                            specification_value_name: e.target.value,
-                                                            componen_product_specification_value: e.target.value
-                                                        };
-                                                        setFormData(prev => ({
-                                                            ...prev,
-                                                            componen_product_specifications: newSpecs
-                                                        }));
-                                                    }}
-                                                    placeholder="Masukkan nilai spesifikasi"
-                                                />
-                                                {spec.componen_product_specification_description && (
-                                                    <p className="mt-1 text-xs text-gray-500">
-                                                        {spec.componen_product_specification_description}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </>
-                                }
+                                    ))}
+                                </div>
                             </div>
-                            
                         </div>
+                        }
 
 
                         {/* Image Upload Section */}

@@ -1074,16 +1074,20 @@ export default function EditQuotation() {
         {
             name: 'Detail',
             cell: (row) => (
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleShowProductDetail(row.componen_product_id)}
-                    className=""
-                    disabled={showProductDetail && selectedProductId === row.componen_product_id}
-                >
-                    {showProductDetail && selectedProductId === row.componen_product_id ? <FaEye /> : <FaEye />}
-                </Button>
+                <>
+                {row.product_type !== 'non_unit' &&
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleShowProductDetail(row.componen_product_id)}
+                        className=""
+                        disabled={showProductDetail && selectedProductId === row.componen_product_id}
+                    >
+                        {showProductDetail && selectedProductId === row.componen_product_id ? <FaEye /> : <FaEye />}
+                    </Button>
+                }
+                </>
             ),
             width: '100px',
             center: true,

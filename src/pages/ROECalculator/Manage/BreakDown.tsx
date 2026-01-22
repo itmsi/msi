@@ -161,10 +161,10 @@ export default function BreakdownROECalculator() {
             const payload = {
                 quote_id: calculatorId,
                 brand: compareFormData.brand.trim(),
-                tonase: compareFormData.tonase !=='' ? parseFloat(compareFormData.tonase) : 1,
-                ritase: compareFormData.ritase !=='' ? parseFloat(compareFormData.ritase) : 1,
-                qty: compareFormData.qty !=='' ? parseInt(compareFormData.qty) : 1,
-                price_per_unit: compareFormData.price_per_unit !=='' ? parseInt(compareFormData.price_per_unit.replace(/[^\d]/g, '')) : 1
+                tonase: compareFormData.tonase !=='' ? parseFloat(compareFormData.tonase) : 0,
+                ritase: compareFormData.ritase !=='' ? parseFloat(compareFormData.ritase) : 0,
+                qty: compareFormData.qty !=='' ? parseInt(compareFormData.qty) : 0,
+                price_per_unit: compareFormData.price_per_unit !=='' ? parseInt(compareFormData.price_per_unit.replace(/[^\d]/g, '')) : 0
             };
 
             const response = await RoecalculatorService.addCompare(payload);

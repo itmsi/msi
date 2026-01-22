@@ -862,6 +862,8 @@ export default function CreateQuotation() {
         {
             name: 'Detail',
             cell: (row) => (
+                <>
+                {row.product_type !== 'non_unit' &&
                 <Button
                     type="button"
                     variant="outline"
@@ -872,6 +874,8 @@ export default function CreateQuotation() {
                 >
                     {showProductDetail && selectedProductId === row.componen_product_id ? <FaEye /> : <FaEye />}
                 </Button>
+                }
+                </>
             ),
             width: '100px',
             center: true,
