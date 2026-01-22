@@ -12,7 +12,6 @@ interface FileUploadProps {
     acceptedFormats: string[];
     maxSize?: number;
     multiple?: boolean;
-    length?: number;
     currentFile?: File | null;
     currentFiles?: File[];
     existingImageUrl?: any[] | string |null;
@@ -45,7 +44,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
     acceptedFormats,
     maxSize = 10, // 10MB default
     multiple = false,
-    length = 1,
     currentFile,
     currentFiles,
     existingImageUrl,

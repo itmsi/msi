@@ -387,7 +387,6 @@ export default function CreateProduct() {
                                 acceptedFormats={['jpg', 'jpeg', 'png']}
                                 maxSize={5}
                                 multiple={true}
-                                length={4}
                                 currentFiles={productImage}
                                 onFileChange={handleImageChange}
                                 validationError={validationErrors.image}

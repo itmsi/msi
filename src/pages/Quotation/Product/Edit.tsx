@@ -917,7 +917,6 @@ export default function EditProduct() {
                                 acceptedFormats={['jpg', 'jpeg', 'png']}
                                 maxSize={5}
                                 multiple={true}
-                                length={4}
                                 currentFiles={productImage}
                                 existingImageUrl={existingImageUrl}
                                 onFileChange={handleImageChange}

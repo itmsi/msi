@@ -45,7 +45,7 @@ export default function BreakdownROECalculator() {
         tonase: '',
         ritase: '',
         qty: '',
-        price: ''
+        price_per_unit: ''
     });
     const [compareFormErrors, setCompareFormErrors] = useState({
         brand: ''
@@ -164,7 +164,7 @@ export default function BreakdownROECalculator() {
                 tonase: compareFormData.tonase !=='' ? parseFloat(compareFormData.tonase) : 1,
                 ritase: compareFormData.ritase !=='' ? parseFloat(compareFormData.ritase) : 1,
                 qty: compareFormData.qty !=='' ? parseInt(compareFormData.qty) : 1,
-                price: compareFormData.price !=='' ? parseInt(compareFormData.price.replace(/[^\d]/g, '')) : 1
+                price_per_unit: compareFormData.price_per_unit !=='' ? parseInt(compareFormData.price_per_unit.replace(/[^\d]/g, '')) : 1
             };
 
             const response = await RoecalculatorService.addCompare(payload);
@@ -177,7 +177,7 @@ export default function BreakdownROECalculator() {
                     tonase: '',
                     ritase: '',
                     qty: '',
-                    price: ''
+                    price_per_unit: ''
                 });
                 setCompareFormErrors({
                     brand: ''
@@ -859,15 +859,15 @@ export default function BreakdownROECalculator() {
                                     </div>
 
                                     <div>
-                                        <Label htmlFor="price">Harga Per Unit (Rp)</Label>
+                                        <Label htmlFor="price_per_unit">Harga Per Unit (Rp)</Label>
                                         <Input
-                                            id="price"
+                                            id="price_per_unit"
                                             type="text"
                                             placeholder="0"
-                                            value={formatNumberInput(compareFormData.price)}
+                                            value={formatNumberInput(compareFormData.price_per_unit)}
                                             onChange={(e) => {
                                                 const value = e.target.value.replace(/[^\d]/g, '');
-                                                handleCompareFormChange('price', value);
+                                                handleCompareFormChange('price_per_unit', value);
                                             }}
                                         />
                                     </div>

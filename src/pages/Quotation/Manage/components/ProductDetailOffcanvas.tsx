@@ -330,10 +330,10 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 <div className="border-b border-gray-200 pb-6">
                     <div className='md:grid md:grid-cols-5 md:gap-4'>
                         <div className="flex md:col-span-2 justify-center">
-                            {initialData.image ? (
+                            {(initialData.images && initialData.images.length > 0) ? (
                                 <div className="relative cursor-pointer" onClick={() => setShowImageModal(true)}>
                                     <img
-                                        src={initialData.image}
+                                        src={initialData.images[0].image_url}
                                         alt={initialData.componen_product_name || 'Product Image'}
                                         className="max-w-full max-h-50 object-contain rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                                         onError={(e) => {
@@ -782,14 +782,14 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
             {renderProductInfo()}
             
             {/* Image Modal */}
-            {showImageModal && initialData?.image && (
+            {showImageModal && initialData?.images && initialData.images.length > 0 && (
                 <div 
                     className="fixed inset-0 z-[9999] flex items-center justify-center bg-black-900 backdrop-blur-sm"
                     onClick={() => setShowImageModal(false)}
                 >
                     <div className="relative max-w-4xl max-h-[90vh] p-4 overflow-hidden">
                         <img
-                            src={initialData.image}
+                            src={initialData.images[0]}
                             alt={initialData.componen_product_name || 'Product Image'}
                             className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
                             onClick={(e) => e.stopPropagation()}

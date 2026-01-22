@@ -866,5 +866,5 @@ export interface ComparePayload {
     tonase: number;
     ritase: number;
     qty: number;
-    price: number;
+    price_per_unit: number;
 }
