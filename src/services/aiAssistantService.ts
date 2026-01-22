@@ -13,7 +13,7 @@ export class AIAssistantService {
     private static readonly HISTORY_ENDPOINT = `${API_BASE_URL}/mosa/ai-assistant/history`;
 
     /**
-     * Send message to AI assistant
+     * Send message to Mosa
      */
     static async sendMessage(request: ChatRequest): Promise<ChatResponse> {
         try {

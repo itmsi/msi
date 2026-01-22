@@ -85,7 +85,7 @@ export default function AIAssistant() {
                 <button
                     onClick={handleToggle}
                     className="fixed bottom-6 left-6 z-[999999] flex items-center justify-center w-14 h-14 bg-[#0253a5] hover:bg-[#003061] text-white rounded-full shadow-theme-lg transition-all duration-300 hover:scale-110"
-                    title="Open AI Assistant"
+                    title="Open Mosa"
                 >
                     <MdSmartToy className="w-7 h-7" />
                 </button>
@@ -99,7 +99,7 @@ export default function AIAssistant() {
                         <button
                             onClick={handleMinimize}
                             className="fixed bottom-6 left-6 z-[999999] flex items-center justify-center w-14 h-14 bg-[#0253a5] hover:bg-[#003061] text-white rounded-full shadow-theme-lg transition-all duration-300 hover:scale-110"
-                            title="Expand AI Assistant"
+                            title="Expand Mosa"
                         >
                             <MdSmartToy className="w-7 h-7" />
                             {unreadCount > 0 && (
@@ -118,7 +118,7 @@ export default function AIAssistant() {
                         <div className="flex items-center gap-2">
                             <MdSmartToy className="w-6 h-6" />
                             <div>
-                                <h3 className="font-primary-bold text-sm">AI Assistant</h3>
+                                <h3 className="font-primary-bold text-sm">Mosa</h3>
                                 <p className="text-xs opacity-90">Tanyakan apapun tentang sistem</p>
                             </div>
                         </div>
@@ -156,7 +156,7 @@ export default function AIAssistant() {
                                 <div className="text-center text-gray-400 mb-6">
                                     <MdSmartToy className="w-16 h-16 mx-auto mb-3 opacity-30" />
                                     <p className="text-sm font-secondary mb-1">
-                                        Mulai percakapan dengan AI Assistant
+                                        Mulai percakapan dengan Mosa
                                     </p>
                                     <p className="text-xs text-gray-400">
                                         Atau pilih salah satu pertanyaan di bawah:
