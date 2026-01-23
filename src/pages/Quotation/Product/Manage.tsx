@@ -180,7 +180,7 @@ const ManageProduct: React.FC = () => {
                     }
                     options={[
                         { value: 'unit', label: 'Unit' },
-                        { value: 'non unit', label: 'Non Unit' }
+                        { value: 'non_unit', label: 'Non Unit' }
                     ]}
                     placeholder="Product Type"
                     isClearable={true}
