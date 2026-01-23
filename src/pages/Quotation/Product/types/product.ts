@@ -73,6 +73,7 @@ export interface ItemProductRequest {
     sort_order: 'asc' | 'desc';
     search: string;
     company_name?: string;
+    product_type?: string;
 }
 
 export interface ItemProductFormData {
