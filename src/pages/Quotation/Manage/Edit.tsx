@@ -229,7 +229,7 @@ export default function EditQuotation() {
                     volume: item.cp_volume || '',
                     horse_power: item.cp_horse_power || '',
                     market_price: item.cp_market_price || '',
-                    product_type: '',
+                    product_type: item.product_type || '',
                     image: item.cp_image || '',
                     componen_product_unit_model: '',
                     selling_price_star_1: '',

@@ -105,7 +105,8 @@ const EditContractor: React.FC = () => {
             status: 'active',
             activity_status: [],
             contact_persons: [],
-            units: []
+            units: [],
+            type: ''
         }
     });
 
@@ -167,6 +168,7 @@ const EditContractor: React.FC = () => {
                             status: response.data.iup_customers.status as 'active' | 'inactive' || 'active',
                             activity_status: response.data.iup_customers.activity_status || [],
                             contact_persons: [],
+                            type: response.data.iup_customers.type as 'contractor' | 'sub_contractor' || '',
                             units: response.data.iup_customers.units.map((unit: any, index: number) => ({
                                 id: index,
                                 volume: '',

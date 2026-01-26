@@ -100,7 +100,9 @@ const CreateContractor: React.FC = () => {
             status: 'active',
             activity_status:[],
             contact_persons:[],
-            units: []
+            units: [],
+            type: '',
+            
         }
     });
 
