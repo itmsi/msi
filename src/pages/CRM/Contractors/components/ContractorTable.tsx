@@ -99,7 +99,6 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             selector: (row) => row.business_project_bim,
             sortable: false,
             wrap: true,
-            width: '120px',
         },
         {
             name: 'Activity',
@@ -107,7 +106,6 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             cell: (row) => <ActivityTypeBadge type={(row?.activity_status as 'find' | 'pull' | 'survey') || 'find'} />,
             sortable: false,
             wrap: true,
-            width: '120px',
         },
         {
             name: 'Status',
