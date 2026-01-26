@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { ContractorServices } from '@/pages/CRM/Contractors/services/contractorServices';
 import { Contractor } from '@/pages/CRM/IUPManagement/types/iupmanagement';
 import { isUser } from '@/helpers/fileTypeHelper__belumterpakai';
@@ -22,16 +22,25 @@ export const useContractorSelect = () => {
         loading: false
     });
     const [inputValue, setInputValue] = useState('');
+    const [currentFilters, setCurrentFilters] = useState<{iupId: string, type: string}>({
+        iupId: '',
+        type: ''
+    });
+    
+    const loadingRef = useRef(false);
 
-    const loadContractorOptions = useCallback(async (
+    const loadContractorOptions = useRef(async (
         inputValue: string = '', 
         loadedOptions: ContractorSelectOption[] = [],
         page: number = 1,
+        iup_id: string = '',
+        type: string = '',
         reset: boolean = false
     ) => {
         try {
-            if (pagination.loading && !reset) return loadedOptions;
+            if (loadingRef.current && !reset) return loadedOptions;
 
+            loadingRef.current = true;
             setPagination(prev => ({ ...prev, loading: true }));
             const getUser = isUser();
             
@@ -40,7 +49,9 @@ export const useContractorSelect = () => {
                 page: page,
                 limit: 20,
                 sort_order: 'desc',
-                employee_id: getUser || undefined
+                employee_id: getUser || undefined,
+                iup_id: iup_id,
+                type: type
             });
             if (response.success) {
                 
@@ -59,37 +70,40 @@ export const useContractorSelect = () => {
                     hasMore: hasMoreData,
                     loading: false
                 });
-
+                
+                loadingRef.current = false;
                 return updatedOptions;
             }
         } catch (error) {
             console.error('Error loading term conditions:', error);
             setPagination(prev => ({ ...prev, loading: false }));
+            loadingRef.current = false;
         }
 
         return loadedOptions;
-    }, [pagination.loading]);
+    });
 
-    // Handle input change
-    const handleInputChange = useCallback(async (inputValue: string) => {
+    const handleInputChange = useCallback(async (inputValue: string, iupId: string = '', type: string = '') => {
         setInputValue(inputValue);
         setContractorOptions([]);
         setPagination({ page: 1, hasMore: true, loading: false });
         
-        return await loadContractorOptions(inputValue, [], 1, true);
-    }, [loadContractorOptions]);
+        setCurrentFilters({ iupId, type });
+        
+        return await loadContractorOptions.current(inputValue, [], 1, iupId, type, true);
+    }, []);
     const handleMenuScrollToBottom = useCallback(() => {
         if (pagination.hasMore && !pagination.loading) {
-            loadContractorOptions(inputValue, contractorOptions, pagination.page + 1, false);
+            loadContractorOptions.current(inputValue, contractorOptions, pagination.page + 1, currentFilters.iupId, currentFilters.type, false);
         }
-    }, [pagination, contractorOptions, inputValue, loadContractorOptions]);
+    }, [pagination.hasMore, pagination.loading, pagination.page, inputValue, currentFilters.iupId, currentFilters.type]);
 
 
     const initializeOptions = useCallback(async () => {
         if (contractorOptions.length === 0) {
-            await loadContractorOptions('', [], 1, true);
+            await loadContractorOptions.current('', [], 1, '', '', true);
         }
-    }, [contractorOptions.length, loadContractorOptions]);
+    }, [contractorOptions.length]);
 
     return {
         contractorOptions,
@@ -98,6 +112,6 @@ export const useContractorSelect = () => {
         handleInputChange,
         handleMenuScrollToBottom,
         initializeOptions,
-        loadContractorOptions
+        loadContractorOptions: loadContractorOptions.current
     };
 };

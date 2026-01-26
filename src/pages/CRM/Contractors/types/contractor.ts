@@ -7,6 +7,8 @@ export interface ContractorListRequest {
     status?: 'active' | 'inactive' | '';
     is_admin?: boolean;
     employee_id?: string;
+    iup_id?: string;
+    type?: string;
 }
 
 export interface Contractor {
@@ -106,6 +108,7 @@ export interface ContractorDetailResponse {
             manpower_cost: string | null;
             activity_status: string[];
             status: string;
+            type: string;
             units: Array<{
                 brand_id: string;
                 brand_name: string;
@@ -160,6 +163,7 @@ export interface ContractorFormData {
         sparepart_cost: string;
         manpower_cost: string;
         status: 'active' | 'inactive';
+        type: 'contractor' | 'sub_contractor' | '';
         activity_status: string[];
         contact_persons: contactPerson[];
         units: ContractorUnit[];

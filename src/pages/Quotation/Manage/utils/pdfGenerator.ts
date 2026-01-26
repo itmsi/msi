@@ -806,14 +806,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     const itemsWithContent = data.manage_quotation_items
         .map(item => item as any)
         .filter(item => 
-            (item.manage_quotation_item_specifications && item.manage_quotation_item_specifications.length > 0) ||
-            (item.manage_quotation_item_accessories && item.manage_quotation_item_accessories.length > 0)
+            item.product_type === 'unit' && // Filter untuk unit products saja
+            ((item.manage_quotation_item_specifications && item.manage_quotation_item_specifications.length > 0) ||
+            (item.manage_quotation_item_accessories && item.manage_quotation_item_accessories.length > 0))
         );
 
     if (itemsWithContent.length > 0) {
         for (let i = 0; i < itemsWithContent.length; i += 2) {
-            const item1 = itemsWithContent[i].product_type === 'unit' ? itemsWithContent[i] : null;
-            const item2 = itemsWithContent[i + 1].product_type === 'unit' ? itemsWithContent[i + 1] : null;
+            const item1 = itemsWithContent[i];
+            const item2 = itemsWithContent[i + 1] || null;
             const hasOnlyOne = !item2;
 
             doc.addPage();
