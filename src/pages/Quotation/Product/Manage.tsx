@@ -91,6 +91,17 @@ const ManageProduct: React.FC = () => {
             ),
             wrap: true,
         },
+        {
+            name: 'Description',
+            selector: row => row.componen_product_description || '',
+            cell: (row) => (
+                <div className="text-sm text-gray-700 max-w-xs truncate" title={row.componen_product_description || ''}>
+                    {row.componen_product_description || '-'}
+                </div>
+            ),
+            wrap: true,
+            width: '200px',
+        },
         createDateColumn('Created At', 'created_at', tableDateFormat),
         {
             name: 'Updated By',
