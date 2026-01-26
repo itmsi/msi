@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { AuthService } from '@/services/authService';
 import { ItemProductService } from '../Product/services/productService';
 import { AccessoriesService } from '../Accessories/services/accessoriesService';
 import { ItemProduct } from '../Product/types/product';
@@ -58,11 +59,16 @@ export const useAsyncSelect = () => {
 
             setProductPagination(prev => ({ ...prev, loading: true }));
 
+            // Get company_name from logged in user
+            const user = AuthService.getCurrentUser();
+            const companyName = user.company_name;
+
             const response = await ItemProductService.getItemProduct({
                 search: inputValue,
                 page: page,
                 limit: 10,
-                sort_order: 'desc'
+                sort_order: 'desc',
+                company_name: companyName
             });
 
             if (response.status) {
