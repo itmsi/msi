@@ -115,6 +115,7 @@ export interface ContractorDetailResponse {
                 quantity: number;
                 engine: string | null;
             }>;
+            properties?: any;
         };
     };
 }
@@ -140,7 +141,7 @@ export interface ContractorFormData {
         iup_name?: string;
         segmentation_id: string;
         segmentation_name?: string;
-        rkab: string;
+        properties: any; // Added dynamic entries
         achievement_production_bim: string;
         business_project_bim: string;
         unit_brand_bim: string;
@@ -164,6 +165,12 @@ export interface ContractorFormData {
         units: ContractorUnit[];
     };
 }
+export interface RkabEntry {
+    year: number;
+    current_production: number;
+    target_production: number;
+}
+
 export interface contactPerson {
     name?: string;
     email?: string;
