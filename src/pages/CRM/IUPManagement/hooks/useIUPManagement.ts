@@ -7,6 +7,7 @@ export const useIupManagement = () => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
     const [sortModify, setSortModify] = useState<'updated_at' | 'created_at' | ''>('updated_at');
     const [statusFilter, setStatusFilter] = useState('');
+    const [segmentationFilter, setSegmentationFilter] = useState('');
     
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -37,6 +38,7 @@ export const useIupManagement = () => {
                 sort_order: params?.sort_order || sortOrder || 'desc',
                 search: params?.search !== undefined ? params.search : searchValue,
                 status: params?.status !== undefined ? params.status : statusFilter,
+                segmentation_id: params?.segmentation_id !== undefined ? params.segmentation_id : segmentationFilter,
                 ...params
             });
             
@@ -49,10 +51,10 @@ export const useIupManagement = () => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, sortModify, statusFilter]);
+    }, [searchValue, sortOrder, sortModify, statusFilter, pagination.page, pagination.limit]);
 
     const handlePageChange = useCallback((page: number) => {
-        setPagination(prev => ({ ...prev, page }));
+        setPagination(prev => ({ ...prev, page }));        
         fetchIup({ page });
     }, [fetchIup]);
 
@@ -70,6 +72,8 @@ export const useIupManagement = () => {
     const handleFilterChange = useCallback((filterType: string, value: string) => {
         if (filterType === 'status') {
             setStatusFilter(value);
+        } else if (filterType === 'segmentation') {
+            setSegmentationFilter(value);
         } else if (filterType === 'sort_by') {
             setSortModify(value as 'updated_at' | 'created_at' | '');
         } else if (filterType === 'sort_order') {
@@ -81,6 +85,8 @@ export const useIupManagement = () => {
         const params: any = { page: 1 };
         if (filterType === 'status') {
             params.status = value;
+        } else if (filterType === 'segmentation') {
+            params.segmentation_id = value;
         } else if (filterType === 'sort_by') {
             params.sort_by = value;
         } else if (filterType === 'sort_order') {
@@ -142,6 +148,7 @@ export const useIupManagement = () => {
         setSearchValue,
         statusFilter,
         setStatusFilter,
+        segmentationFilter,
         fetchIup,
 
         // Actions

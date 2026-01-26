@@ -66,8 +66,8 @@ interface ActivityTypeBadgeProps {
 export const ActivityTypeBadge: React.FC<ActivityTypeBadgeProps> = ({ type }) => {
     const typeConfig = {
         'find': { 
-            variant: 'solid' as const, 
-            color: 'light' as const, 
+            variant: 'outline' as const, 
+            color: 'info' as const, 
             label: 'Find' 
         },
         'pull': { 
@@ -82,8 +82,8 @@ export const ActivityTypeBadge: React.FC<ActivityTypeBadgeProps> = ({ type }) =>
         },
     };
 
-    const config = typeConfig[type];
 
+    const config = typeConfig[type];
     return (
         <Badge variant={config.variant} color={config.color}>
             {config.label}

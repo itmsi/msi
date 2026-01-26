@@ -544,7 +544,7 @@ export default function CreateQuotation() {
                     horse_power: apiProductData.horse_power || '',
                     product_type: apiProductData.product_type || '',
                     market_price: apiProductData.market_price || '0',
-                    image: apiProductData.image || '',
+                    image: (apiProductData.images && apiProductData.images.length > 0) ? apiProductData.images[0] : '',
                     quantity: 1,
                     price: apiProductData.market_price || '0',
                     total: apiProductData.market_price || '0',
@@ -665,7 +665,7 @@ export default function CreateQuotation() {
                 selling_price_star_3: existingItem.selling_price_star_3 || '',
                 selling_price_star_4: existingItem.selling_price_star_4 || '',
                 selling_price_star_5: existingItem.selling_price_star_5 || '',
-                image: existingItem.image,
+                images: existingItem.image ? [existingItem.image] : null,
                 componen_product_description: existingItem.description || '',
                 is_delete: false,
                 componen_type: 1,
@@ -862,6 +862,8 @@ export default function CreateQuotation() {
         {
             name: 'Detail',
             cell: (row) => (
+                <>
+                {row.product_type !== 'non_unit' &&
                 <Button
                     type="button"
                     variant="outline"
@@ -872,6 +874,8 @@ export default function CreateQuotation() {
                 >
                     {showProductDetail && selectedProductId === row.componen_product_id ? <FaEye /> : <FaEye />}
                 </Button>
+                }
+                </>
             ),
             width: '100px',
             center: true,
@@ -1070,7 +1074,7 @@ export default function CreateQuotation() {
                                             <Label>Quotation Date</Label>
                                             <div className="relative" ref={invoiceDatePickerRef}>
                                                 <div
-                                                    className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500"
+                                                    className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 h-11"
                                                     onClick={() => setShowInvoiceDatePicker(!showInvoiceDatePicker)}
                                                 >
                                                     <span className="text-gray-700">
@@ -1103,7 +1107,7 @@ export default function CreateQuotation() {
                                             <Label>Quotation Valid Until</Label>
                                             <div className="relative" ref={dueDatePickerRef}>
                                                 <div
-                                                    className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500"
+                                                    className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 h-11"
                                                     onClick={() => setShowDueDatePicker(!showDueDatePicker)}
                                                 >
                                                     <span className="text-gray-700">

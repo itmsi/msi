@@ -24,11 +24,12 @@ export interface ItemProduct {
     selling_price_star_3: string;
     selling_price_star_4: string;
     selling_price_star_5: string;
-    image: string | null;
+    images: any[] | null;
     componen_product_description: string | null;
     is_delete: boolean;
     componen_type: number;
     product_type: string;
+    company_name?: string | null;
     componen_product_name: string;
     volume: string;
     componen_product_unit_model: string;
@@ -36,9 +37,9 @@ export interface ItemProduct {
     updated_at?: string;
     updated_by_name?: string;
     // Additional fields for quotation integration
-    specifications?: any[]; // For form editing
-    accessories?: any[]; // For form editing (create mode)
-    manage_quotation_item_accessories?: any[]; // For form editing (edit mode)
+    specifications?: any[];
+    accessories?: any[];
+    manage_quotation_item_accessories?: any[];
 }
 
 export interface ProductSpecification {
@@ -71,6 +72,8 @@ export interface ItemProductRequest {
     limit: number;
     sort_order: 'asc' | 'desc';
     search: string;
+    company_name?: string;
+    product_type?: string;
 }
 
 export interface ItemProductFormData {
@@ -110,6 +113,7 @@ export interface ItemProductValidationErrors {
     image?: string;
     componen_type?: string;
     product_dimensi_id?: string;
+    company_name?: string;
 }
 
 export interface EditProductFormData {

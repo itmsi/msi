@@ -1,8 +1,12 @@
 import { Toaster } from "react-hot-toast";
 import { ScrollToTop } from "../../components/common/ScrollToTop";
 import ClientRoutes from "../Client/ClientRoutes";
+import AIAssistant from "@/components/ui/AIAssistant/AIAssistant";
+import { useAuth } from "@/context/AuthContext";
 
 const App = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+
   return (
     <>
       <Toaster
@@ -18,6 +22,8 @@ const App = () => {
       />
       <ScrollToTop />
       <ClientRoutes />
+      {/* Only show Mosa when user is authenticated and not loading */}
+      {isAuthenticated && !isLoading && <AIAssistant />}
     </>
   );
 };

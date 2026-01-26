@@ -293,7 +293,7 @@ const ManageQuotations: React.FC = () => {
                         paginationTotalRows={pagination?.total || 0}
                         paginationPerPage={pagination?.limit || 10}
                         paginationDefaultPage={pagination?.page || 1}
-                        paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
+                        paginationRowsPerPageOptions={[10, 25, 50, 100]}
                         onChangePage={handlePageChange}
                         onChangeRowsPerPage={handleRowsPerPageChange}
                         fixedHeader={true}

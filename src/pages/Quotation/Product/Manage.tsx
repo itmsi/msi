@@ -20,6 +20,7 @@ const ManageProduct: React.FC = () => {
     const {
         searchTerm,
         sortOrder,
+        productTypeFilter,
         products,
         pagination,
         loading,
@@ -66,15 +67,40 @@ const ManageProduct: React.FC = () => {
             wrap: true,
         },
         {
+            name: 'Product Type',
+            selector: row => row.product_type,
+            cell: (row) => {
+                const displayType = row.product_type 
+                    ? row.product_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                    : '-';
+                return (
+                    <div className="text-sm text-gray-700">
+                        {displayType}
+                    </div>
+                );
+            },
+            width: '150px',
+        },
+        {
             name: 'Price',
             selector: row => row.market_price,
             cell: (row) => (
-                <div className="max-w-xs truncate text-sm text-gray-700" title={row.market_price}>
+                <div className="text-sm text-gray-700" title={row.market_price}>
                     {Number(row.market_price).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
                 </div>
             ),
-            center: true,
             wrap: true,
+        },
+        {
+            name: 'Description',
+            selector: row => row.componen_product_description || '',
+            cell: (row) => (
+                <div className="text-sm text-gray-700 max-w-xs truncate" title={row.componen_product_description || ''}>
+                    {row.componen_product_description || '-'}
+                </div>
+            ),
+            wrap: true,
+            width: '200px',
         },
         createDateColumn('Created At', 'created_at', tableDateFormat),
         {
@@ -151,6 +177,29 @@ const ManageProduct: React.FC = () => {
                 </div>
             </div>
             
+            {/* Product Type Filter */}
+            <div className="flex items-center gap-2">
+                <CustomSelect
+                    id="product_type"
+                    name="product_type"
+                    value={productTypeFilter ? { 
+                        value: productTypeFilter, 
+                        label: productTypeFilter === 'unit' ? 'Unit' : 'Non Unit' 
+                    } : null}
+                    onChange={(selectedOption) => 
+                        handleFilterChange('product_type', selectedOption?.value || '')
+                    }
+                    options={[
+                        { value: 'unit', label: 'Unit' },
+                        { value: 'non_unit', label: 'Non Unit' }
+                    ]}
+                    placeholder="Product Type"
+                    isClearable={true}
+                    isSearchable={false}
+                    className="w-48"
+                />
+            </div>
+            
             {/* Sort Order */}
             <div className="flex items-center gap-2">
                 <CustomSelect
@@ -174,7 +223,7 @@ const ManageProduct: React.FC = () => {
                 />
             </div>
         </div>
-    ), [searchTerm, sortOrder, loading, products.length, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange]);
+    ), [searchTerm, sortOrder, productTypeFilter, loading, products.length, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange]);
     return (
         <>
             <PageMeta

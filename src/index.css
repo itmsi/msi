@@ -448,6 +448,13 @@
 .flatpickr-months .flatpickr-next-month:hover svg {
   @apply stroke-brand-500;
 }
+.flatpickr-calendar.hasTime {
+  padding: 5px !important
+}
+.flatpickr-calendar .flatpickr-time {
+  width: 200px;
+  border: 0 !important
+}
 .flatpickr-calendar.arrowTop:before,
 .flatpickr-calendar.arrowTop:after {
   @apply hidden;

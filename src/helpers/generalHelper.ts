@@ -230,6 +230,14 @@ export const tableDateFormat = {
     month: 'short' as const,
     year: 'numeric' as const
 }
+export const tableDateFormatTime = {
+    day: '2-digit' as const,
+    month: 'short' as const,
+    year: 'numeric' as const,
+    hour: '2-digit' as const,
+    minute: '2-digit' as const,
+    second: '2-digit' as const
+}
 
 export const formatDate = (dateString: string, includeTime: boolean = false) => {
     const date = new Date(dateString);
@@ -271,6 +279,13 @@ export const formatTime = (dateString: string) => {
         minute: '2-digit',
         second: '2-digit'
     });
+};
+
+export const formatDateToYMD = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
 
 export const formatDecimalValue = (value: string | number): string => {

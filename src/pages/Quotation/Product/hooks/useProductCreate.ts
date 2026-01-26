@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import toast from "react-hot-toast";
 import { ItemProductValidationErrors, ProductSpecification } from "../types/product";
 import { useNavigate } from "react-router";
 import { formatNumberInput } from "@/helpers/generalHelper";
 import { ItemProductService } from "../services/productService";
+import { AuthService } from "@/services/authService";
 
 // Form data type for creating
 interface CreateProductFormData {
@@ -25,15 +26,22 @@ interface CreateProductFormData {
     componen_type: number;
     volume: string;
     componen_product_unit_model: string;
+    company_name: string;
     componen_product_specifications: ProductSpecification[];
 }
 
 export const useCreateProduct = () => {
     const navigate = useNavigate();
     
+    // Get company_name from logged in user
+    const companyName = useMemo(() => {
+        const user = AuthService.getCurrentUser();
+        return (user as any)?.company_name || '';
+    }, []);
+    
     const [isCreating, setIsCreating] = useState(false);
     const [validationErrors, setValidationErrors] = useState<ItemProductValidationErrors>({});
-    const [productImage, setProductImage] = useState<File | null>(null);
+    const [productImage, setProductImage] = useState<File[]>([]);
     
     const [formData, setFormData] = useState<CreateProductFormData>({
         code_unique: '',
@@ -42,7 +50,7 @@ export const useCreateProduct = () => {
         msi_product: '',
         wheel_no: '',
         engine: '',
-        product_type: '',
+        product_type: 'unit',
         horse_power: '',
         market_price: '',
         selling_price_star_1: '',
@@ -54,6 +62,7 @@ export const useCreateProduct = () => {
         componen_type: 1,
         volume: '',
         componen_product_unit_model: '',
+        company_name: companyName,
         componen_product_specifications: [
             {
                 componen_product_specification_label: 'GVW',
@@ -171,8 +180,25 @@ export const useCreateProduct = () => {
     };
 
     // Handle product image change
-    const handleImageChange = (file: File | null) => {
-        setProductImage(file);
+    const handleImageChange = (files: File | File[] | null) => {
+        if (files === null) {
+            setProductImage([]);
+            return;
+        }
+        
+        // Handle both single file and multiple files
+        const fileArray = Array.isArray(files) ? files : [files];
+        
+        // Create a new array with unique files to avoid reference issues
+        const uniqueFiles = fileArray.filter((file, index, self) => {
+            return self.findIndex(f => 
+                f.name === file.name && 
+                f.size === file.size && 
+                f.lastModified === file.lastModified
+            ) === index;
+        });
+        
+        setProductImage(uniqueFiles);
     };
 
     // Validate form data
@@ -181,18 +207,6 @@ export const useCreateProduct = () => {
 
         if (!formData.code_unique.trim()) {
             errors.code_unique = 'Kode produk wajib diisi';
-        }
-
-        if (!formData.segment.trim()) {
-            errors.segment = 'Segment wajib diisi';
-        }
-
-        if (!formData.msi_model.trim()) {
-            errors.msi_model = 'MSI Model wajib diisi';
-        }
-
-        if (!formData.msi_product.trim()) {
-            errors.msi_product = 'Product wajib diisi';
         }
 
         if (!formData.market_price.trim()) {
@@ -221,29 +235,68 @@ export const useCreateProduct = () => {
             // Create FormData for multipart/form-data
             const formDataToSend = new FormData();
             
+            // Prepare data based on product_type
+            let specificationsData = formData.componen_product_specifications;
+            let segmentValue = formData.segment;
+            let msiModelValue = formData.msi_model;
+            let msiProductValue = formData.msi_product;
+            let componentTypeValue = formData.componen_type;
+            let wheelNoValue = formData.wheel_no;
+            let engineValue = formData.engine;
+            let horsePowerValue = formData.horse_power;
+            let volumeValue = formData.volume;
+            let unitModelValue = formData.componen_product_unit_model;
+
+            if (formData.product_type !== 'unit') {
+                // For non_unit type, clear unit-specific fields
+                segmentValue = '';
+                msiModelValue = '';
+                msiProductValue = '';
+                componentTypeValue = 1;
+                wheelNoValue = '';
+                engineValue = '';
+                horsePowerValue = '';
+                volumeValue = '';
+                unitModelValue = '';
+                specificationsData = formData.componen_product_specifications.map(spec => ({
+                    ...spec,
+                    componen_product_specification_value: '',
+                    specification_value_name: ''
+                }));
+            }
+            
             // Append all form fields
             formDataToSend.append('code_unique', formData.code_unique);
-            formDataToSend.append('segment', formData.segment);
-            formDataToSend.append('msi_model', formData.msi_model);
-            formDataToSend.append('msi_product', formData.msi_product);
-            formDataToSend.append('wheel_no', formData.wheel_no);
-            formDataToSend.append('engine', formData.engine);
             formDataToSend.append('product_type', formData.product_type);
-            formDataToSend.append('horse_power', formData.horse_power);
+            formDataToSend.append('componen_product_description', formData.componen_product_description);
+            formDataToSend.append('segment', segmentValue);
+            formDataToSend.append('msi_model', msiModelValue);
+            formDataToSend.append('msi_product', msiProductValue);
+            formDataToSend.append('componen_type', componentTypeValue.toString());
+            formDataToSend.append('wheel_no', wheelNoValue);
+            formDataToSend.append('engine', engineValue);
+            formDataToSend.append('horse_power', horsePowerValue);
+            formDataToSend.append('volume', volumeValue);
             formDataToSend.append('market_price', formData.market_price.replace(/\./g, ''));
+            formDataToSend.append('componen_product_unit_model', unitModelValue);
             formDataToSend.append('selling_price_star_1', formData.selling_price_star_1.replace(/\./g, ''));
             formDataToSend.append('selling_price_star_2', formData.selling_price_star_2.replace(/\./g, ''));
             formDataToSend.append('selling_price_star_3', formData.selling_price_star_3.replace(/\./g, ''));
             formDataToSend.append('selling_price_star_4', formData.selling_price_star_4.replace(/\./g, ''));
             formDataToSend.append('selling_price_star_5', formData.selling_price_star_5.replace(/\./g, ''));
-            formDataToSend.append('componen_product_description', formData.componen_product_description);
-            formDataToSend.append('componen_type', formData.componen_type.toString());
-            formDataToSend.append('volume', formData.volume);
-            formDataToSend.append('componen_product_unit_model', formData.componen_product_unit_model);
-            formDataToSend.append('componen_product_specifications', JSON.stringify(formData.componen_product_specifications));
+            formDataToSend.append('company_name', formData.company_name);
+            formDataToSend.append('componen_product_specifications', JSON.stringify(specificationsData));
 
-            if (productImage) {
-                formDataToSend.append('image', productImage);
+            // Append image files if uploaded
+            if (productImage && productImage.length > 0) {
+                if (productImage.length === 1) {
+                    formDataToSend.append('image[0]', productImage[0]);
+                } else {
+                    productImage.forEach((file, index) => {
+                        formDataToSend.append(`images[${index}]`, file);
+                    });
+                    formDataToSend.append('image_count', productImage.length.toString());
+                }
             }
 
             const response = await ItemProductService.createItemProduct(formDataToSend);
@@ -273,6 +326,11 @@ export const useCreateProduct = () => {
         { value: 3, label: 'OFF ROAD IRREGULAR' },
     ];
 
+    const productOptions = [
+        { value: 'unit', label: 'Unit' },
+        { value: 'non_unit', label: 'Non Unit' }
+    ];
+
     return {
         isCreating,
         formData,
@@ -284,6 +342,7 @@ export const useCreateProduct = () => {
         handleSubmit,
         handleBack,
         companyOptions,
+        productOptions,
         setFormData
     };
 };
