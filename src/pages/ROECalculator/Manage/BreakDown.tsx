@@ -291,7 +291,7 @@ export default function BreakdownROECalculator() {
                                 `${row.roe_percentage_diff > 0 ? 'text-red-600' : row.roe_percentage_diff < 0 && 'text-green-600'}`,
                                 ),
                             )}>
-                                {row.roe_percentage_diff}%
+                                {Math.abs(row.roe_percentage_diff)}%
                             </span>
                         </Tooltip>
                     </div>
@@ -318,7 +318,7 @@ export default function BreakdownROECalculator() {
                                 `${row.roa_percentage_diff > 0 ? 'text-red-600' : row.roa_percentage_diff < 0 && 'text-green-600'}`,
                                 ),
                             )}>
-                                {row.roa_percentage_diff}%
+                                {Math.abs(row.roa_percentage_diff)}%
                             </span>
                         </Tooltip>
                     </div>
