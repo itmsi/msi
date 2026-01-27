@@ -53,30 +53,34 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
     // Load contractors when IUP or Type changes
     useEffect(() => {
         if (iup_customers.iup_id && iup_customers.type) {
-            // Reset selected contractor when filters change
-            setSelectedContractor(null);
-            if (onChange) {
-                onChange('parent_contractor_id' as any, '');
+            if (!iup_customers.parent_contractor_id) {
+                setSelectedContractor(null);
+                if (onChange) {
+                    onChange('parent_contractor_id' as any, '');
+                }
             }
-            
-            // Load contractors with filters
             loadContractorOptions('', [], 1, iup_customers.iup_id, 'contractor', true);
         }
     }, [iup_customers.iup_id, iup_customers.type]);
 
+    // Load contractors on initial mount for edit mode
+    useEffect(() => {
+        if (iup_customers.parent_contractor_id && iup_customers.iup_id && iup_customers.type && contractorOptions.length === 0) {
+            loadContractorOptions('', [], 1, iup_customers.iup_id, 'contractor', true);
+        }
+    }, [iup_customers.parent_contractor_id, iup_customers.iup_id, iup_customers.type, contractorOptions.length]);
+
     const [selectedContractor, setSelectedContractor] = useState<ContractorSelectOption | null>(null);
     
-    // Sync selectedContractor with existing data (for edit mode)
     useEffect(() => {
-        if (formData.iup_customers.parent_contractor_id && contractorOptions.length > 0) {
-            const existingContractor = contractorOptions.find(option => option.value === formData.iup_customers.parent_contractor_id);
+        if (iup_customers.parent_contractor_id && contractorOptions.length > 0) {
+            const existingContractor = contractorOptions.find(option => option.value === iup_customers.parent_contractor_id);
             if (existingContractor && !selectedContractor) {
                 setSelectedContractor(existingContractor);
             }
         }
-    }, [formData.iup_customers.parent_contractor_id, contractorOptions, selectedContractor]);
+    }, [iup_customers.parent_contractor_id, contractorOptions, selectedContractor]);
     
-    // Handle contractor change
     const handleContractorChange = useCallback((option: ContractorSelectOption | null) => {
         if (option) {
             if (onChange) {
@@ -150,7 +154,6 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
         };
     }, [iup_customers.iup_id, iupOptions, recentlySelectedIup, loadedEditOptions.iup]);
 
-    // Create a more robust selectedSegementasi logic  
     const selectedSegementasi = useMemo(() => {
         if (!iup_customers.segmentation_id) return null;
         
@@ -186,21 +189,14 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
             return found;
         }
         
-        // If we have formData with customer info, use that
-        if (formData.iup_customers.parent_contractor_id === iup_customers.parent_contractor_id) {
-            return {
-                value: iup_customers.parent_contractor_id,
-                label: iup_customers.parent_contractor_name || 'Unknown Customer',
-                __isPlaceholder: true
-            };
-        }
-        
         return {
             value: iup_customers.parent_contractor_id,
-            label: iup_customers.parent_contractor_name || 'Unknown Customer',
+            label: iup_customers.parent_contractor_name || 
+                  formData.customer_data?.customer_name ||
+                  'Loading Customer...',
             __isPlaceholder: true
         };
-    }, [iup_customers.parent_contractor_id, selectedContractor, contractorOptions, formData.iup_customers]);
+    }, [iup_customers.parent_contractor_id, iup_customers.parent_contractor_name, selectedContractor, contractorOptions, formData.customer_data]);
 
     const STATUS_OPTIONS = [
         { value: 'active', label: 'Active' },
@@ -369,17 +365,6 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                         Customer
                     </Label>
                     <CustomAsyncSelect
-                        placeholder={!iup_customers.iup_id || !iup_customers.type ? "Please select IUP and Type first" : "Select Customer..."}
-                        value={selectedCustomer}
-                        defaultOptions={(() => {
-                            let defaultOpts = contractorOptions?.length > 0 ? [...contractorOptions] : [];
-                            
-                            if (selectedCustomer && !defaultOpts.find(opt => opt.value === selectedCustomer.value)) {
-                                defaultOpts.unshift(selectedCustomer);
-                            }
-                            
-                            return defaultOpts;
-                        })()}
                         loadOptions={async (inputValue) => {
                             if (!iup_customers.iup_id || !iup_customers.type) {
                                 return Promise.resolve([]);
@@ -388,32 +373,42 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                             const options = await loadContractorOptions(inputValue, [], 1, iup_customers.iup_id, 'contractor', true);
                             let allOptions = [...options];
                             
+                            // Ensure selected customer is always in options for edit mode
                             if (selectedCustomer && !allOptions.find(opt => opt.value === selectedCustomer.value)) {
                                 allOptions.unshift(selectedCustomer);
                             }
                             
                             return allOptions;
                         }}
-                        onMenuScrollToBottom={handleContractorMenuScrollToBottom}
-                        isLoading={contractorPagination.loading}
-                        disabled={!iup_customers.iup_id || !iup_customers.type || iup_customers.type === 'contractor'}
-                        noOptionsMessage={() => !iup_customers.iup_id || !iup_customers.type ? "Please select IUP and Type first" : "No customers found"}
-                        loadingMessage={() => "Loading customers..."}
-                        isClearable={false}
-                        isSearchable={false}
+                        defaultOptions={(() => {
+                            let defaultOpts = contractorOptions?.length > 0 ? [...contractorOptions] : [];
+                            
+                            // Ensure selected customer is in default options for edit mode
+                            if (selectedCustomer && !defaultOpts.find(opt => opt.value === selectedCustomer.value)) {
+                                defaultOpts.unshift(selectedCustomer);
+                            }
+                            
+                            return defaultOpts;
+                        })()}
                         inputValue={contractorInputValue}
-                        className={`w-full md:col-span-2 ${
-                            errors.parent_contractor_id ? 'border rounded-[0.5rem] border-red-500' : ''
-                        }`}
+                        value={selectedCustomer}
+                        key={`customer-select-${iup_customers.parent_contractor_id || 'empty'}`} // Force re-render on value change
                         onInputChange={(inputValue) => {
                             if (iup_customers.iup_id && iup_customers.type) {
                                 handleContractorInputChange(inputValue, iup_customers.iup_id, 'contractor');
                             }
                         }}
+                        onMenuScrollToBottom={handleContractorMenuScrollToBottom}
                         onChange={(option: any) => {
                             setSelectedContractor(option);
                             handleContractorChange(option);
                         }}
+                        placeholder={!iup_customers.iup_id || !iup_customers.type ? "Please select IUP and Type first" : "Select Customer..."}
+                        isLoading={contractorPagination.loading}
+                        disabled={!iup_customers.iup_id || !iup_customers.type || iup_customers.type === 'contractor'}
+                        isClearable={false}
+                        noOptionsMessage={() => !iup_customers.iup_id || !iup_customers.type ? "Please select IUP and Type first" : "No customers found"}
+                        loadingMessage={() => "Loading customers..."}
                     />
                     {errors.parent_contractor_id && (
                         <p className="text-red-500 text-sm mt-1">{errors.parent_contractor_id}</p>
