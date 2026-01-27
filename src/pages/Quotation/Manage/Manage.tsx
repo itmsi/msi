@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { MdAdd, MdSearch, MdClear, MdDeleteOutline } from 'react-icons/md';
+import React, { useMemo, useState } from 'react';
+import { MdAdd, MdSearch, MdClear, MdDeleteOutline, MdFilterListAlt, MdExpandLess, MdExpandMore } from 'react-icons/md';
 import { FaRegFilePdf } from "react-icons/fa6";
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
@@ -14,9 +14,13 @@ import Button from '@/components/ui/button/Button';
 import { createActionsColumn } from '@/components/ui/table';
 import { formatCurrency, formatDate, formatDateTime } from '@/helpers/generalHelper';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import FilterSection from './components/FilterSection';
 
 const ManageQuotations: React.FC = () => {
     const navigate = useNavigate();
+    
+    // UI state untuk filter collapse
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
     const {
         searchTerm,
@@ -38,7 +42,13 @@ const ManageQuotations: React.FC = () => {
         handleDownload,
         confirmDeleteQuotations,
         cancelDelete,
+        applyFilters,
     } = useQuotationManagement();
+
+    // Toggle filter collapse
+    const handleToggleFilter = () => {
+        setShowAdvancedFilters(prev => !prev);
+    };
 
     // Helper function to render status badge
     const getStatusBadge = (status: string) => {
@@ -154,7 +164,15 @@ const ManageQuotations: React.FC = () => {
         [handleView, handleEdit, handleDelete]
     );
 
+    // Handler untuk apply filters
+    const handleApplyFilters = () => {
+        // Manual trigger search setelah filter berubah
+        applyFilters();
+        console.log('Filters applied');
+    };
+
     const SearchAndFilters = useMemo(() => (
+        <>
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
             <div className="flex-1">
                 <div className="relative flex">
@@ -193,7 +211,7 @@ const ManageQuotations: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
                 <CustomSelect
                     id="quotation_for"
                     name="quotation_for"
@@ -213,7 +231,7 @@ const ManageQuotations: React.FC = () => {
                     isSearchable={false}
                     className="w-60"
                 />
-            </div>
+            </div> */}
             {/* Sort Order */}
             <div className="flex items-center gap-2">
                 <CustomSelect
@@ -236,9 +254,30 @@ const ManageQuotations: React.FC = () => {
                     className="w-40"
                 />
             </div>
-
+            <div className="flex items-center gap-2">
+                <Button
+                    onClick={handleToggleFilter}
+                    className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
+                    size="sm"
+                >
+                    <MdFilterListAlt className="w-4 h-4 mr-2" />
+                    Filter
+                    {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                </Button>
+            </div>
         </div>
-    ), [searchTerm, sortOrder, quotationFor, loading, quotations.length, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange]);
+        
+            {/* Advanced Filters Collapse */}
+            {showAdvancedFilters && (
+                <FilterSection
+                    quotationFor={quotationFor}
+                    onFilterChange={handleFilterChange}
+                    onClearFilters={handleClearFilters}
+                    onApplyFilters={handleApplyFilters}
+                />
+            )}
+        </>
+    ), [searchTerm, sortOrder, quotationFor, loading, quotations.length, showAdvancedFilters, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange, handleToggleFilter, handleApplyFilters]);
 
     return (
         <>

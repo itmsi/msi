@@ -269,7 +269,7 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
                     )}
                     <Tooltip content={`Edit ${row.type.replace('_', ' ')}`} position="top">
                         <PermissionButton
-                            permission={'read'}
+                            permission={'create'}
                             onClick={() => onEdit && onEdit(row)}
                             className={`p-2 rounded-md text-sm font-medium transition-colors relative text-blue-600 hover:text-blue-700 hover:bg-blue-50`}
                         >

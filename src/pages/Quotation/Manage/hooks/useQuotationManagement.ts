@@ -13,18 +13,18 @@ export const useQuotationManagement = () => {
 
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; quotationId?: string; }>({ show: false });
 
-    const { quotations, pagination, loading, error, filters, fetchQuotations, handleSearchChange: quotationSearch, deleteQuotation, downloadQuotation, updateFilters } = useQuotation();
+    const { quotations, pagination, loading, error, filters, fetchQuotations, handleSearchChange: quotationSearch, deleteQuotation, downloadQuotation, updateFilters, applyFilters, clearAllFilters } = useQuotation();
 
     useEffect(() => {
         fetchQuotations(1, 10);
     }, []);
 
-    // Trigger fetch when filters change
+    // Trigger fetch when filters change (including new fields)
     useEffect(() => {
-        if (filters.sort_order || filters.quotation_for) {
+        if (filters.sort_order || filters.quotation_for || filters.island || filters.start_date || filters.end_date) {
             fetchQuotations(currentPage, itemsPerPage);
         }
-    }, [filters.sort_order, filters.quotation_for]);
+    }, [filters.sort_order, filters.quotation_for, filters.island, filters.start_date, filters.end_date, currentPage, itemsPerPage, fetchQuotations]);
 
     const handlePageChange = useCallback((page: number) => {
         setCurrentPage(page);
@@ -44,14 +44,16 @@ export const useQuotationManagement = () => {
 
     const handleManualSearch = useCallback(() => {
         setCurrentPage(1);
-        quotationSearch(searchTerm);
-    }, [searchTerm, quotationSearch]);
+        applyFilters();
+    }, [applyFilters]);
 
     const handleClearFilters = useCallback(() => {
         setSearchTerm('');
+        setSortOrder('');
+        setQuotationFor('');
         setCurrentPage(1);
-        quotationSearch('');
-    }, [quotationSearch]);
+        clearAllFilters();
+    }, [clearAllFilters]);
 
     const handleFilterChange = useCallback((filterKey: string, value: string) => {
         if (filterKey === 'sort_order') {
@@ -60,6 +62,12 @@ export const useQuotationManagement = () => {
         } else if (filterKey === 'quotation_for') {
             setQuotationFor(value as 'customer' | 'leasing' | '');
             updateFilters('quotation_for', value);
+        } else if (filterKey === 'island') {
+            updateFilters('island', value);
+        } else if (filterKey === 'start_date') {
+            updateFilters('start_date', value);
+        } else if (filterKey === 'end_date') {
+            updateFilters('end_date', value);
         }
         setCurrentPage(1);
         // fetchQuotations akan otomatis terpanggil karena filters berubah
@@ -127,5 +135,6 @@ export const useQuotationManagement = () => {
         handleStatusChange,
         handleEdit,
         handleView,
+        applyFilters,
     };
 };

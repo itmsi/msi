@@ -17,7 +17,10 @@ export const useQuotation = () => {
     const [filters, setFilters] = useState({
         search: '',
         sort_order: 'desc' as 'asc' | 'desc',
-        quotation_for: '' as 'customer' | 'leasing' | ''
+        quotation_for: '' as 'customer' | 'leasing' | '',
+        island: '',
+        start_date: '',
+        end_date: ''
     });
 
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
@@ -32,7 +35,10 @@ export const useQuotation = () => {
                 limit: limit !== undefined ? limit : pagination.limit,
                 search: filters.search,
                 sort_order: filters.sort_order,
-                quotation_for: filters.quotation_for
+                quotation_for: filters.quotation_for,
+                island: filters.island,
+                start_date: filters.start_date,
+                end_date: filters.end_date
             };
 
             const response = await QuotationService.getQuotation(requestParams);
@@ -49,7 +55,7 @@ export const useQuotation = () => {
         } finally {
             setLoading(false);
         }
-    }, [pagination.page, pagination.limit, filters.search, filters.sort_order, filters.quotation_for]);
+    }, [pagination.page, pagination.limit, filters.search, filters.sort_order, filters.quotation_for, filters.island, filters.start_date, filters.end_date]);
 
     // Debounced search handler
     const handleSearchChange = useCallback((value: string) => {
@@ -67,7 +73,10 @@ export const useQuotation = () => {
                 limit: pagination.limit,
                 search: value,
                 sort_order: filters.sort_order,
-                quotation_for: filters.quotation_for
+                quotation_for: filters.quotation_for,
+                island: filters.island,
+                start_date: filters.start_date,
+                end_date: filters.end_date
             };
 
             setLoading(true);
@@ -90,11 +99,62 @@ export const useQuotation = () => {
                     setLoading(false);
                 });
         }, 500);
-    }, [pagination.limit, filters.sort_order, filters.quotation_for]);
+    }, [pagination.limit, filters.sort_order, filters.quotation_for, filters.island, filters.start_date, filters.end_date]);
 
-    const updateFilters = useCallback((key: 'search' | 'sort_order' | 'quotation_for', value: string) => {
+    const updateFilters = useCallback((key: keyof typeof filters, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
+    
+    // Apply filters dengan trigger fetch data
+    const applyFilters = useCallback(() => {
+        setPagination(prev => ({ ...prev, page: 1 }));
+        fetchQuotations(1, pagination.limit);
+    }, [fetchQuotations, pagination.limit]);
+    
+    // Clear all filters
+    const clearAllFilters = useCallback(() => {
+        setFilters({
+            search: '',
+            sort_order: 'desc',
+            quotation_for: '',
+            island: '',
+            start_date: '',
+            end_date: ''
+        });
+        setPagination(prev => ({ ...prev, page: 1 }));
+        
+        // Fetch data dengan filter kosong
+        const requestParams: Partial<QuotationRequest> = {
+            page: 1,
+            limit: pagination.limit,
+            search: '',
+            sort_order: 'desc',
+            quotation_for: '',
+            island: '',
+            start_date: '',
+            end_date: ''
+        };
+        
+        setLoading(true);
+        setError(null);
+        
+        QuotationService.getQuotation(requestParams)
+            .then(response => {
+                if (response.status) {
+                    setQuotations(response.data.items);
+                    setPagination(response.data.pagination);
+                } else {
+                    setError(response.message || 'Failed to fetch quotations');
+                }
+            })
+            .catch(err => {
+                setError('Something went wrong while fetching quotations');
+                console.error('Clear filters error:', err);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }, [pagination.limit]);
 
     const deleteQuotation = useCallback(async (quotation_id: string) => {
         setLoading(true);
@@ -145,6 +205,8 @@ export const useQuotation = () => {
         error,
         filters,
         updateFilters,
+        applyFilters,
+        clearAllFilters,
         deleteQuotation,
         downloadQuotation,
         fetchQuotations,

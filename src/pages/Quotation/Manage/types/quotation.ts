@@ -223,11 +223,17 @@ export interface QuotationRequest {
     sort_order: '' | 'asc' | 'desc';
     quotation_for?: 'customer' | 'leasing' | '';
     search: string;
+    island?: string;
+    start_date?: string;
+    end_date?: string;
 }
 export interface QuotationFilters {
     search: string;
     sort_order: 'asc' | 'desc' | '';
     quotation_for: 'customer' | 'leasing' | '';
+    island: string;
+    start_date: string;
+    end_date: string;
 }
 export interface QuotationPagination {
     page: number;
