@@ -53,30 +53,41 @@ const ManageProduct: React.FC = () => {
             wrap: true,
         },
         {
-            name: 'Description',
-            selector: row => row.componen_product_description || '',
+            name: 'Component Name',
+            selector: row => row.componen_product_name,
             cell: (row) => (
-                <div className="text-sm text-gray-700 max-w-xs truncate" title={row.componen_product_description || ''}>
-                    {row.componen_product_description || '-'}
+                <div className="text-sm text-gray-700 max-w-xs" title={row.componen_product_name}>
+                    {row.componen_product_name || '-'}
                 </div>
             ),
             wrap: true,
-            width: '200px',
+            width: '370px',
         },
-        {
-            name: 'Model',
-            selector: row => row.msi_model,
-            cell: (row) => (
-                <div className=" items-center gap-3 py-2">
-                    <div className="font-medium text-gray-900">
-                        {row.msi_product} - {row.msi_model} - {row.segment}
-                    </div>
-                    <div className="block text-sm text-gray-500">{`${row.engine} - ${row.wheel_no}`}</div>
-                    <div className="block text-sm text-gray-500">{`${row.horse_power}`}</div>
-                </div>
-            ),
-            wrap: true,
-        },
+        // {
+        //     name: 'Description',
+        //     selector: row => row.componen_product_description || '',
+        //     cell: (row) => (
+        //         <div className="text-sm text-gray-700 max-w-xs truncate" title={row.componen_product_description || ''}>
+        //             {row.componen_product_description || '-'}
+        //         </div>
+        //     ),
+        //     wrap: true,
+        //     width: '200px',
+        // },
+        // {
+        //     name: 'Model',
+        //     selector: row => row.msi_model,
+        //     cell: (row) => (
+        //         <div className=" items-center gap-3 py-2">
+        //             <div className="font-medium text-gray-900">
+        //                 {row.msi_product} - {row.msi_model} - {row.segment}
+        //             </div>
+        //             <div className="block text-sm text-gray-500">{`${row.engine} - ${row.wheel_no}`}</div>
+        //             <div className="block text-sm text-gray-500">{`${row.horse_power}`}</div>
+        //         </div>
+        //     ),
+        //     wrap: true,
+        // },
         {
             name: 'Product Type',
             selector: row => row.product_type,
