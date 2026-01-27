@@ -111,10 +111,6 @@ export const useActivityForm = ({ mode, transactions_id, initialData }: UseActiv
         if (formData.voice_record_url && !isValidUrl(formData.voice_record_url)) {
             errors.voice_record_url = 'Please enter a valid voice record URL';
         }
-        console.log({
-            errors
-        });
-        
         setValidationErrors(errors);
         return Object.keys(errors).length === 0;
     };

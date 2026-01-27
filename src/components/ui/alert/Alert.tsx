@@ -31,7 +31,7 @@ const Alert: React.FC<AlertProps> = ({
     },
     warning: {
       container:
-        "border-warning-500 bg-warning-50",
+        "border-warning-200 bg-warning-50",
       icon: "text-warning-500",
     },
     info: {
@@ -121,7 +121,7 @@ const Alert: React.FC<AlertProps> = ({
         </div>
 
         <div>
-          <h4 className="mb-1 text-sm font-semibold text-gray-800">
+          <h4 className="mb-1 text-sm font-semibold text-gray-800 font-secondary">
             {title}
           </h4>
 

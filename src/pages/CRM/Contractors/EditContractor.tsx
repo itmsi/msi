@@ -5,7 +5,7 @@ import Button from '@/components/ui/button/Button';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
 import { useIupSelect } from '@/hooks/useIupSelect';
 import { useBrandSelect } from '@/hooks/useBrandSelect';
-import { ContractorFormData, ContractorUnit } from './types/contractor';
+import { ContractorFormData, ContractorUnit, RkabEntry } from './types/contractor';
 import { ContractorServices } from './services/contractorServices';
 import { toast } from 'react-hot-toast';
 import Loading from '@/components/common/Loading';
@@ -14,7 +14,8 @@ import Loading from '@/components/common/Loading';
 import {
     CustomerInfoSection,
     IupInfoSection,
-    UnitsSection
+    UnitsSection,
+    RkabSection
 } from './components';
 import { useSegementationSelect } from '@/hooks/useSegmentSelect';
 import FormActions from '@/components/form/FormActions';
@@ -82,7 +83,8 @@ const EditContractor: React.FC = () => {
             iup_id: '',
             iup_name: '',
             segmentation_id: '',
-            rkab: '',
+            // rkab: '',
+            properties: [],
             achievement_production_bim: '',
             business_project_bim: '',
             unit_brand_bim: '',
@@ -103,7 +105,8 @@ const EditContractor: React.FC = () => {
             status: 'active',
             activity_status: [],
             contact_persons: [],
-            units: []
+            units: [],
+            type: ''
         }
     });
 
@@ -141,8 +144,12 @@ const EditContractor: React.FC = () => {
                         iup_customers: {
                             iup_id: response.data.iup_customers.iup_id || '',
                             iup_name: response.data.iup_customers.iup_name || '',
+                            parent_contractor_id: response.data.iup_customers.parent_contractor_id || '',
+                            parent_contractor_name: response.data.iup_customers.parent_contractor_name || '',
                             segmentation_id: response.data.iup_customers.segmentation_id || '',
-                            rkab: response.data.iup_customers.rkab || '',
+                            // Parse RKAB from properties if available
+                            properties: (response.data.iup_customers.properties?.basicinformationmandatory?.RKAB) || [],
+                            // rkab: response.data.iup_customers.rkab || '',
                             achievement_production_bim: response.data.iup_customers.achievement_production_bim || '',
                             business_project_bim: response.data.iup_customers.business_project_bim || '',
                             unit_brand_bim: response.data.iup_customers.unit_brand_bim || '',
@@ -163,6 +170,7 @@ const EditContractor: React.FC = () => {
                             status: response.data.iup_customers.status as 'active' | 'inactive' || 'active',
                             activity_status: response.data.iup_customers.activity_status || [],
                             contact_persons: [],
+                            type: response.data.iup_customers.type as 'contractor' | 'sub_contractor' || '',
                             units: response.data.iup_customers.units.map((unit: any, index: number) => ({
                                 id: index,
                                 volume: '',
@@ -359,6 +367,42 @@ const EditContractor: React.FC = () => {
         }));
     };
 
+    // Handle RKAB operations
+    const handleAddRkab = () => {
+        setFormData(prev => ({
+            ...prev,
+            iup_customers: {
+                ...prev.iup_customers,
+                properties: [
+                    ...prev.iup_customers.properties,
+                    { year: new Date().getFullYear(), current_production: 0, target_production: 0 }
+                ]
+            }
+        }));
+    };
+
+    const handleRemoveRkab = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            iup_customers: {
+                ...prev.iup_customers,
+                properties: prev.iup_customers.properties.filter((_: any, i: number) => i !== index)
+            }
+        }));
+    };
+
+    const handleRkabChange = (index: number, field: keyof RkabEntry, value: number) => {
+        setFormData(prev => ({
+            ...prev,
+            iup_customers: {
+                ...prev.iup_customers,
+                properties: prev.iup_customers.properties.map((entry: RkabEntry, i: number) => 
+                    i === index ? { ...entry, [field]: value } : entry
+                )
+            }
+        }));
+    };
+
     // Handle brand selection untuk unit tertentu
     const handleBrandSelect = (index: number, selectedOption: any) => {
         if (selectedOption) {
@@ -427,6 +471,19 @@ const EditContractor: React.FC = () => {
         if (!formData.iup_customers.segmentation_id) {
             errors.segmentation_id = 'Segmentation selection is required';
         }
+
+        // Validate RKAB entries
+        formData.iup_customers.properties.forEach((entry: RkabEntry, index: number) => {
+            if (!entry.year) {
+                errors[`rkab_${index}_year`] = 'Year is required';
+            }
+            if (entry.current_production < 0) {
+                errors[`rkab_${index}_current_production`] = 'Must be positive';
+            }
+            if (entry.target_production < 0) {
+                errors[`rkab_${index}_target_production`] = 'Must be positive';
+            }
+        });
         
         // Validate activity status
         // if (!formData.iup_customers.activity_status.includes('find')) {
@@ -470,7 +527,22 @@ const EditContractor: React.FC = () => {
 
         setIsSubmitting(true);
         try {
-            const response = await ContractorServices.updateContractor(iup_customer_id, formData);
+            // Transform RKAB entries to properties JSON
+            const submissionData = { 
+                ...formData,
+                iup_customers: {
+                    ...formData.iup_customers
+                }
+            };
+            if (formData.iup_customers.properties.length > 0) {
+                submissionData.iup_customers.properties = {
+                    basicinformationmandatory: {
+                        RKAB: formData.iup_customers.properties
+                    }
+                };
+            }
+
+            const response = await ContractorServices.updateContractor(iup_customer_id, submissionData);
             if (response.success === true) {
                 toast.success('Contractor updated successfully');
                 navigate('/crm/contractors');
@@ -551,6 +623,15 @@ const EditContractor: React.FC = () => {
                         onSegementationInputChange={handleSegementationInputChange}
                         onSegementationMenuScroll={handleSegementationMenuScrollToBottom}
                         onSegementationSelect={handleSegementationSelect}
+                    />
+
+                    {/* RKAB Management */}
+                    <RkabSection
+                        rkabEntries={formData.iup_customers.properties}
+                        errors={validationErrors}
+                        onAddRkab={handleAddRkab}
+                        onRemoveRkab={handleRemoveRkab}
+                        onRkabChange={handleRkabChange}
                     />
 
                     {/* Units Management */}

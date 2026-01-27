@@ -9,11 +9,9 @@ const LayoutContent: React.FC<{ children: ReactNode }> = ({ children }) => {
 
     return (
         <div className="min-h-screen xl:flex">
-            <div>
                 <AppSidebar />
                 {/* <NavBar /> */}
                 <Backdrop />
-            </div>
             <div
                 className={
                     `flex-1 transition-all duration-300 ease-in-out overflow-x-hidden
@@ -22,7 +20,7 @@ const LayoutContent: React.FC<{ children: ReactNode }> = ({ children }) => {
                 }
             >
                 <AppHeader />
-                <div className="p-4 mx-auto md:p-6 overflow-x-hidden">{children}</div>
+                <div className="p-4 mx-auto md:p-6">{children}</div>
             </div>
         </div>
     );

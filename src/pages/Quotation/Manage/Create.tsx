@@ -544,7 +544,7 @@ export default function CreateQuotation() {
                     horse_power: apiProductData.horse_power || '',
                     product_type: apiProductData.product_type || '',
                     market_price: apiProductData.market_price || '0',
-                    image: apiProductData.image || '',
+                    image: (apiProductData.images && apiProductData.images.length > 0) ? apiProductData.images[0] : '',
                     quantity: 1,
                     price: apiProductData.market_price || '0',
                     total: apiProductData.market_price || '0',
@@ -665,7 +665,7 @@ export default function CreateQuotation() {
                 selling_price_star_3: existingItem.selling_price_star_3 || '',
                 selling_price_star_4: existingItem.selling_price_star_4 || '',
                 selling_price_star_5: existingItem.selling_price_star_5 || '',
-                image: existingItem.image,
+                images: existingItem.image ? [existingItem.image] : null,
                 componen_product_description: existingItem.description || '',
                 is_delete: false,
                 componen_type: 1,
@@ -862,6 +862,8 @@ export default function CreateQuotation() {
         {
             name: 'Detail',
             cell: (row) => (
+                <>
+                {row.product_type !== 'non_unit' &&
                 <Button
                     type="button"
                     variant="outline"
@@ -872,6 +874,8 @@ export default function CreateQuotation() {
                 >
                     {showProductDetail && selectedProductId === row.componen_product_id ? <FaEye /> : <FaEye />}
                 </Button>
+                }
+                </>
             ),
             width: '100px',
             center: true,

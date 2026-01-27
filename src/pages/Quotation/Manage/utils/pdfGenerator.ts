@@ -806,14 +806,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     const itemsWithContent = data.manage_quotation_items
         .map(item => item as any)
         .filter(item => 
-            (item.manage_quotation_item_specifications && item.manage_quotation_item_specifications.length > 0) ||
-            (item.manage_quotation_item_accessories && item.manage_quotation_item_accessories.length > 0)
+            item.product_type === 'unit' && // Filter untuk unit products saja
+            ((item.manage_quotation_item_specifications && item.manage_quotation_item_specifications.length > 0) ||
+            (item.manage_quotation_item_accessories && item.manage_quotation_item_accessories.length > 0))
         );
 
     if (itemsWithContent.length > 0) {
         for (let i = 0; i < itemsWithContent.length; i += 2) {
             const item1 = itemsWithContent[i];
-            const item2 = itemsWithContent[i + 1];
+            const item2 = itemsWithContent[i + 1] || null;
             const hasOnlyOne = !item2;
 
             doc.addPage();
@@ -929,7 +930,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 
                 item1YPos += 7;
             }
-
+            
             // Accessories for item 1
             if (item1.manage_quotation_item_accessories && item1.manage_quotation_item_accessories.length > 0) {
                 setFontSafe(doc, 'Futura', 'bold');
@@ -973,9 +974,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
             // Render second item (if exists)
             if (!hasOnlyOne && item2) {
-                let item2YPos = yPos;
-                
-                // Specifications for item 2
+            let item2YPos = yPos;
+            
+            // Specifications for item 2
                 if (item2.manage_quotation_item_specifications && item2.manage_quotation_item_specifications.length > 0) {
                     setFontSafe(doc, 'Futura', 'bold');
                     doc.setFontSize(10);
@@ -1128,16 +1129,17 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     doc.roundedRect(item2StartX, accTableStartY2 - 10, itemWidth, accTableHeight2, 2, 2);
                 }
             }
+            
         }
     }
 
     if(data.include_aftersales_page) {
         const hasOffRoadProduct = data.manage_quotation_items.some((item: any) => 
-            item.product_type && item.product_type.toLowerCase().includes('off road')
+            item.componen_type && item.componen_type.toLowerCase().includes('off road')
         );
         
         const hasOnRoadProduct = data.manage_quotation_items.some((item: any) => 
-            item.product_type && item.product_type.toLowerCase().includes('on road')
+            item.componen_type && item.componen_type.toLowerCase().includes('on road')
         );
         
         const headerProduct = (varYPos: number): number => {

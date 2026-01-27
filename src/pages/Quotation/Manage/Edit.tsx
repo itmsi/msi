@@ -229,7 +229,7 @@ export default function EditQuotation() {
                     volume: item.cp_volume || '',
                     horse_power: item.cp_horse_power || '',
                     market_price: item.cp_market_price || '',
-                    product_type: '',
+                    product_type: item.product_type || '',
                     image: item.cp_image || '',
                     componen_product_unit_model: '',
                     selling_price_star_1: '',
@@ -759,7 +759,7 @@ export default function EditQuotation() {
                     horse_power: apiProductData.horse_power || '',
                     product_type: apiProductData.product_type || '',
                     market_price: apiProductData.market_price || '0',
-                    image: apiProductData.image || '',
+                    image: (apiProductData.images && apiProductData.images.length > 0) ? apiProductData.images[0] : '',
                     quantity: 1,
                     price: apiProductData.market_price || '0',
                     total: apiProductData.market_price || '0',
@@ -879,7 +879,7 @@ export default function EditQuotation() {
                     selling_price_star_3: existingItem.selling_price_star_3 || '',
                     selling_price_star_4: existingItem.selling_price_star_4 || '',
                     selling_price_star_5: existingItem.selling_price_star_5 || '',
-                    image: existingItem.image,
+                    images: existingItem.image ? [existingItem.image] : null,
                     componen_product_description: existingItem.description || '',
                     is_delete: false,
                     componen_type: 1,
@@ -1074,16 +1074,20 @@ export default function EditQuotation() {
         {
             name: 'Detail',
             cell: (row) => (
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleShowProductDetail(row.componen_product_id)}
-                    className=""
-                    disabled={showProductDetail && selectedProductId === row.componen_product_id}
-                >
-                    {showProductDetail && selectedProductId === row.componen_product_id ? <FaEye /> : <FaEye />}
-                </Button>
+                <>
+                {row.product_type !== 'non_unit' &&
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleShowProductDetail(row.componen_product_id)}
+                        className=""
+                        disabled={showProductDetail && selectedProductId === row.componen_product_id}
+                    >
+                        {showProductDetail && selectedProductId === row.componen_product_id ? <FaEye /> : <FaEye />}
+                    </Button>
+                }
+                </>
             ),
             width: '100px',
             center: true,

@@ -1,14 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { MdKeyboardArrowLeft, MdAdd, MdEdit } from 'react-icons/md';
+import { MdKeyboardArrowLeft, MdAdd, MdEdit, MdDeleteOutline } from 'react-icons/md';
 import ReactECharts from 'echarts-for-react';
+import { TableColumn } from 'react-data-table-component';
+import { toast } from 'react-hot-toast';
 
 import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
 import Loading from '@/components/common/Loading';
+import CustomDataTable from '@/components/ui/table/CustomDataTable';
+import Input from '@/components/form/input/InputField';
+import Label from '@/components/form/Label';
+import { Modal } from '@/components/ui/modal';
 import { RoecalculatorService } from './services/roecalculatorService';
-import { ManageROEBreakdownData, RevenueExpenseProfit, BreakdownBiayaChart } from '../types/roeCalculator';
-import { formatCurrency } from '@/helpers/generalHelper';
+import { ManageROEBreakdownData, RevenueExpenseProfit, BreakdownBiayaChart, CompareListRequest, Pagination, ManageROECompareData } from '../types/roeCalculator';
+import { formatCurrency, formatNumberInput, handleDecimalInput, handleKeyPress } from '@/helpers/generalHelper';
+import Tooltip from '@/components/ui/tooltip/Tooltip';
+import { PermissionButton, PermissionGate } from '@/components/common/PermissionComponents';
+import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import clsx from 'clsx';
+import { twMerge } from 'tailwind-merge';
+import Alert from '@/components/ui/alert/Alert';
 
 
 export default function BreakdownROECalculator() {
@@ -17,6 +29,53 @@ export default function BreakdownROECalculator() {
     const [breakdownData, setBreakdownData] = useState<ManageROEBreakdownData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
+
+    
+    const [compareBreakDown, setCompareBreakDown] = useState<ManageROECompareData[]>([]);
+    const [pagination, setPagination] = useState<Pagination>({
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+    });
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isAddingCompare, setIsAddingCompare] = useState(false);
+    const [compareFormData, setCompareFormData] = useState({
+        brand: '',
+        tonase: '',
+        ritase: '',
+        qty: '',
+        price_per_unit: ''
+    });
+    const [compareFormErrors, setCompareFormErrors] = useState({
+        brand: ''
+    });
+    const [confirmDelete, setConfirmDelete] = useState({
+        show: false,
+        id: '',
+        name: ''
+    });
+    const [isDeletingCompare, setIsDeletingCompare] = useState(false);
+
+    const fetchCompareData = async (params: Partial<CompareListRequest> = {}) => {
+        try {
+            const response = await RoecalculatorService.getCompareRoe(params);
+            if (response.success) {
+                setCompareBreakDown(response.data.data);
+                const apiPagination = response.data.pagination;
+                setPagination({
+                    page: apiPagination.page,
+                    limit: apiPagination.limit,
+                    total: apiPagination.total,
+                    totalPages: apiPagination.totalPages,
+                });
+            } else {
+                setError(response.message || 'Failed to fetch comparison data');
+            }
+        } catch (err) {
+            console.error('Fetch comparison data error:', err);
+        }
+    };
 
     useEffect(() => {
         const fetchBreakdownData = async () => {
@@ -32,6 +91,12 @@ export default function BreakdownROECalculator() {
                 
                 if (response.data.success) {
                     setBreakdownData(response.data.data);
+                    const compareParams = {
+                        quote_id: calculatorId,
+                        page: 1,
+                        limit: 10,
+                    };
+                    fetchCompareData(compareParams);
                 } else {
                     setError(response.data.message || 'Failed to fetch breakdown data');
                 }
@@ -44,6 +109,295 @@ export default function BreakdownROECalculator() {
 
         fetchBreakdownData();
     }, [calculatorId]);
+
+    // Handle form input changes
+    const handleCompareFormChange = (field: string, value: string) => {
+        setCompareFormData(prev => ({
+            ...prev,
+            [field]: value
+        }));
+        
+        if (compareFormErrors[field as keyof typeof compareFormErrors]) {
+            setCompareFormErrors(prev => ({
+                ...prev,
+                [field]: ''
+            }));
+        }
+    };
+
+    // Validation function
+    const validateCompareForm = () => {
+        const errors = {
+            brand: ''
+        };
+        let isValid = true;
+
+        if (!compareFormData.brand.trim()) {
+            errors.brand = 'Brand is required';
+            isValid = false;
+        } else if (compareFormData.brand.trim().length < 2) {
+            errors.brand = 'Brand must be at least 2 characters';
+            isValid = false;
+        }
+
+        setCompareFormErrors(errors);
+        return isValid;
+    };
+
+    // Handle add new comparison
+    const handleAddComparison = async () => {
+        if (!validateCompareForm()) {
+            toast.error('Please correct the validation errors');
+            return;
+        }
+
+        if (!calculatorId) {
+            toast.error('Calculator ID is required');
+            return;
+        }
+
+        setIsAddingCompare(true);
+        try {
+            const payload = {
+                quote_id: calculatorId,
+                brand: compareFormData.brand.trim(),
+                tonase: compareFormData.tonase !=='' ? parseFloat(compareFormData.tonase) : 0,
+                ritase: compareFormData.ritase !=='' ? parseFloat(compareFormData.ritase) : 0,
+                qty: compareFormData.qty !=='' ? parseInt(compareFormData.qty) : 0,
+                price_per_unit: compareFormData.price_per_unit !=='' ? parseInt(compareFormData.price_per_unit.replace(/[^\d]/g, '')) : 0
+            };
+
+            const response = await RoecalculatorService.addCompare(payload);
+            
+            if (response.success) {
+                toast.success('Comparison added successfully');
+                setIsAddModalOpen(false);
+                setCompareFormData({
+                    brand: '',
+                    tonase: '',
+                    ritase: '',
+                    qty: '',
+                    price_per_unit: ''
+                });
+                setCompareFormErrors({
+                    brand: ''
+                });
+                // Refresh comparison data
+                fetchCompareData({
+                    quote_id: calculatorId,
+                    page: pagination.page,
+                    limit: pagination.limit
+                });
+            } else {
+                toast.error(response.message || 'Failed to add comparison');
+            }
+        } catch (error) {
+            console.error('Add comparison error:', error);
+            toast.error('An error occurred while adding comparison');
+        } finally {
+            setIsAddingCompare(false);
+        }
+    };
+
+
+    const handleDeleteComparison = async (row: string) => {
+        if (!calculatorId) {
+            setError('Calculator ID is required');
+            return false;
+        }
+
+        setIsDeletingCompare(true);
+        setError('');
+        
+        try {
+            const requestBody = {
+                quote_id: calculatorId
+            };
+            await RoecalculatorService.deleteCompare(row, requestBody);
+            return true;
+        } catch (err) {
+            setError('Failed to delete competitor');
+            console.error('Delete competitor error:', err);
+            throw err;
+        } finally {
+            setIsDeletingCompare(false);
+        }
+    };
+
+    const cancelDelete = () => {
+        setConfirmDelete({
+            show: false,
+            id: '',
+            name: ''
+        });
+    };
+
+    const confirmdeleteCompetitor = async () => {
+        if (!confirmDelete.id) return;
+        
+        try {
+            await handleDeleteComparison(confirmDelete.id);
+            toast.success('Competitor deleted successfully');
+            const compareParams = {
+                quote_id: calculatorId,
+                page: 1,
+                limit: 10,
+            };
+            await fetchCompareData(compareParams);
+            cancelDelete();
+        } catch (err) {
+            toast.error('Failed to delete competitor');
+        }
+    };
+    // Define columns for comparison table - optimized for 1440px screens
+    const compareColumns: TableColumn<ManageROECompareData>[] = [
+        {
+            name: 'Calculator Info',
+            cell: (row) => (
+                <div className="py-2">
+                    <div className="font-medium text-gray-900 text-sm">{row.brand}</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                        Tonase: {row.tonase}
+                    </div>
+                </div>
+            ),
+            wrap: true
+        },
+        {
+            name: 'Qty',
+            selector: (row) => row.qty || 0,
+            cell: (row) => (
+                <div className="py-2 text-right">
+                    <div className="font-medium text-gray-800 text-sm">
+                        {row.qty || 0}
+                    </div>
+                </div>
+            ),
+            width: '80px',
+        },
+        {
+            name: 'ROE',
+            cell: (row) => (
+                <div className="py-2 text-center">
+                    {/* <div className="font-semibold text-green-600 text-sm">{row.roe_nominal}</div> */}
+                    <div className="flex justify-around items-center w-[200px]">
+                        <Tooltip content={`${row.brand} - ROE Percentage`} position="top">
+                            <span className="text-purple-600 font-medium">{row.roe_percentage}%</span>
+                        </Tooltip>
+                        <Tooltip content={`${row.brand} - ROE Difference`} position="top">
+                            <span className={"font-medium "+clsx(
+                                twMerge(
+                                "text-gray-900 ",
+                                `${row.roe_percentage_diff > 0 ? 'text-red-600' : row.roe_percentage_diff < 0 && 'text-green-600'}`,
+                                ),
+                            )}>
+                                {Math.abs(row.roe_percentage_diff)}%
+                            </span>
+                        </Tooltip>
+                    </div>
+                </div>
+            ),
+            center: true,
+            width: '250px',
+            wrap: true
+        },
+        {
+            name: 'ROA',
+            cell: (row) => (
+                <div className="py-2 text-center">
+                    {/* <div className="font-semibold text-blue-600 text-sm">{row.roa_nominal}</div> */}
+                    <div className="flex justify-around items-center w-[200px]">
+                        
+                        <Tooltip content={`${row.brand} - ROA Percentage`} position="top">
+                            <span className="text-blue-600 font-medium">{row.roa_percentage}%</span>
+                        </Tooltip>
+                        <Tooltip content={`${row.brand} - ROA Difference`} position="top">
+                            <span className={"font-medium "+clsx(
+                                twMerge(
+                                "text-gray-900 ",
+                                `${row.roa_percentage_diff > 0 ? 'text-red-600' : row.roa_percentage_diff < 0 && 'text-green-600'}`,
+                                ),
+                            )}>
+                                {Math.abs(row.roa_percentage_diff)}%
+                            </span>
+                        </Tooltip>
+                    </div>
+                </div>
+            ),
+            center: true,
+            width: '250px',
+            wrap: true
+        },
+        {
+            name: 'Revenue',
+            selector: (row) => row.revenue || 0,
+            cell: (row) => (
+                <div className="py-2 text-right">
+                    <div className="font-medium text-gray-800 text-sm">
+                        {formatCurrency(row.revenue || 0)}
+                    </div>
+                </div>
+            ),
+            width: '300px',
+            wrap: true
+        },
+        {
+            name: 'Actions',
+            cell: (row: any) => (
+                <div className="flex justify-end gap-1">
+                    {row.properties_list_compare_id !== null && (
+                    <PermissionButton
+                        permission="delete"
+                        onClick={() => {
+                            setConfirmDelete({
+                                show: true,
+                                id: row.properties_list_compare_id,
+                                name: row.brand
+                            });
+                        }}
+                        className="!p-2 !rounded-lg !text-red-600 hover:!text-red-700 hover:!bg-red-50 !transition-colors !border-0"
+                        title="Delete"
+                    >
+                        <MdDeleteOutline size={16} />
+                    </PermissionButton>
+                    )}
+                </div>
+            ),
+            width: '100px',
+            center: true,
+        }
+    ];
+
+    // Compare section component
+    const CompareBreakdownSection = () => {
+        return (
+            <div className="bg-white rounded-xl shadow-sm p-6 mt-8">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900">Bandingkan dengan Perhitungan Lain</h2>
+                    
+                    <PermissionGate permission="create">
+                        <Button
+                            onClick={() => setIsAddModalOpen(true)}
+                            className="flex items-center gap-2 font-secondary"
+                        >
+                            <MdAdd size={16} /> Tambah Perbandingan
+                        </Button>
+                    </PermissionGate>
+                </div>
+                
+                {/* Add horizontal scroll container */}
+                <div className="overflow-x-auto font-secondary">
+                    <CustomDataTable
+                        columns={compareColumns}
+                        data={compareBreakDown}
+                        loading={isDeletingCompare}
+                        pagination={false}
+                        paginationServer={false}
+                    />
+                </div>
+            </div>
+        );
+    };
 
     // Revenue Expense Profit Chart Component
     const RevenueExpenseProfitChart = ({ data }: { data: RevenueExpenseProfit[] }) => {
@@ -212,7 +566,7 @@ export default function BreakdownROECalculator() {
             <div className="bg-gray-50 min-h-screen">
                 <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {/* HEADER */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-6">
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
@@ -238,8 +592,14 @@ export default function BreakdownROECalculator() {
                         </div>
                     </div>
 
+                    <Alert
+                        variant='warning'
+                        title='Attention'
+                        message='The ROE (Return on Equity) and ROA (Return on Assets) shown in this application are calculated using unit-level data only (revenue, expenses, and assets). Company-wide items such as overhead, other liabilities, and additional operating expenses are excluded. As a result, these figures are indicative and intended solely for unit performance analysis, not for assessing overall company performance.'
+                    />
+
                     {breakdownData && (
-                        <div className="space-y-6">
+                        <div className="space-y-6 mt-6">
                             {/* Key Financial Metrics */}
                             <div className="bg-white rounded-xl shadow-sm p-6">
                                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Key Financial Metrics</h2>
@@ -413,6 +773,138 @@ export default function BreakdownROECalculator() {
                             </div>
                         </div>
                     )}
+
+                    {/* Compare Breakdown Section */}
+                    <CompareBreakdownSection />
+
+                    {/* Add Comparison Modal */}
+                    <Modal
+                        isOpen={isAddModalOpen}
+                        onClose={() => setIsAddModalOpen(false)}
+                        title="Add New Comparison"
+                        className="max-w-xl"
+                    >
+                        <div className="p-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <Label htmlFor="brand">Brand *</Label>
+                                    <Input
+                                        id="brand"
+                                        name="brand"
+                                        type="text"
+                                        placeholder="Enter brand name"
+                                        value={compareFormData.brand}
+                                        onChange={(e) => handleCompareFormChange('brand', e.target.value)}
+                                        className={`mt-1 ${compareFormErrors.brand ? 'border-red-500 focus:border-red-500' : ''}`}
+                                        maxLength={50}
+                                    />
+                                    {compareFormErrors.brand && (
+                                        <p className="text-red-500 text-xs mt-1">{compareFormErrors.brand}</p>
+                                    )}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label htmlFor="tonase">Tonase per Unit (ton)</Label>
+                                        <Input
+                                            id="tonase"
+                                            value={compareFormData.tonase}
+                                            placeholder="0.00"
+                                            onChange={(e) => {
+                                                const rawValue = e.target.value;                                                
+                                                handleDecimalInput(
+                                                    rawValue,
+                                                    (validValue) => handleCompareFormChange('tonase', validValue),
+                                                    () => handleCompareFormChange('tonase', ''),
+                                                    true,
+                                                    7,
+                                                    4
+                                                );
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="ritase">Ritase per Shift</Label>
+                                        <Input
+                                            id="ritase"
+                                            value={compareFormData.ritase}
+                                            placeholder="0.00"
+                                            onChange={(e) => {
+                                                const rawValue = e.target.value;                                                
+                                                handleDecimalInput(
+                                                    rawValue,
+                                                    (validValue) => handleCompareFormChange('ritase', validValue),
+                                                    () => handleCompareFormChange('ritase', ''),
+                                                    true,
+                                                    7,
+                                                    4
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label htmlFor="qty">Jumlah Unit (Qty)</Label>
+                                        <Input
+                                            id="qty"
+                                            value={compareFormData.qty}
+                                            placeholder="0"
+                                            onChange={(e) => handleCompareFormChange('qty', e.target.value)}
+                                            onKeyPress={handleKeyPress}
+                                            maxLength={4}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="price_per_unit">Harga Per Unit (Rp)</Label>
+                                        <Input
+                                            id="price_per_unit"
+                                            type="text"
+                                            placeholder="0"
+                                            value={formatNumberInput(compareFormData.price_per_unit)}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/[^\d]/g, '');
+                                                handleCompareFormChange('price_per_unit', value);
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-3 pt-4 border-t">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setIsAddModalOpen(false)}
+                                        disabled={isAddingCompare}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={handleAddComparison}
+                                        disabled={isAddingCompare}
+                                    >
+                                        {isAddingCompare ? 'Adding...' : 'Add Comparison'}
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </Modal>
+
+                    
+                    {/* Delete Confirmation Modal */}
+                    <ConfirmationModal
+                        isOpen={confirmDelete.show}
+                        onClose={cancelDelete}
+                        onConfirm={confirmdeleteCompetitor}
+                        title={`Delete Competitor: ${confirmDelete.name}`}
+                        message="Are you sure you want to delete this Competitor? This action cannot be undone."
+                        confirmText="Delete"
+                        cancelText="Cancel"
+                        type="danger"
+                        loading={isDeletingCompare}
+                    />
                 </div>
             </div>
         </>

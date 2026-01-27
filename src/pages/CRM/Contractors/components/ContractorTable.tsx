@@ -55,7 +55,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             ),
             sortable: false,
             wrap: true,
-            width: '350px',
+            width: '280px',
         },
         {
             name: 'Territory',
@@ -66,16 +66,16 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
                         <FaIndustry className="text-gray-600 text-sm mr-2" /> {row.iup_name}
                     </div>
                     <div className="flex flex-wrap gap-1 mt-1 gap">
-                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-blue-100 text-blue-800 border border-blue-200">{`${row.island_name}`}</span>
-                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-green-100 text-green-800 border border-green-200">{`${row.group_name}`}</span>
-                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-orange-100 text-orange-800 border border-orange-200">{`${row.area_name}`}</span>
-                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-purple-100 text-purple-800 border border-purple-200">{`${row.iup_zone_name}`}</span>
+                        <span className="inline-flex items-center justify-center rounded-md font-medium px-2 bg-blue-100 text-blue-800 border border-blue-200">{`${row.island_name}`}</span>
+                        <span className="inline-flex items-center justify-center rounded-md font-medium px-2 bg-green-100 text-green-800 border border-green-200">{`${row.group_name}`}</span>
+                        <span className="inline-flex items-center justify-center rounded-md font-medium px-2 bg-orange-100 text-orange-800 border border-orange-200">{`${row.area_name}`}</span>
+                        <span className="inline-flex items-center justify-center rounded-md font-medium px-2 bg-purple-100 text-purple-800 border border-purple-200">{`${row.iup_zone_name}`}</span>
                     </div>
                 </div>
             ),
             sortable: false,
             wrap: true,
-            width: '350px',
+            width: '280px',
         },
         {
             name: 'Segmentation',
@@ -83,23 +83,27 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             wrap: true,
         },
         {
+            name: 'BIM (%)',
+            selector: (row) => row?.bim_persen || '-',
+            wrap: true,
+            center: true,
+            width: '100px',
+        },
+        {
             name: 'Fleet Count',
             selector: (row) => row.armada,
             center: true,
             wrap: true,
             cell: (row) => <Badge variant='outline'>{row.armada}</Badge>,
-            // cell: (row) => (
-            //     <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-gray-800 border border-gray-200 rounded-md">
-            //         {row.armada}
-            //     </span>
-            // ),
         },
         {
-            name: 'Project',
-            selector: (row) => row.business_project_bim,
+            name: 'Contractor',
+            selector: (row) => row?.type || '-',
+            cell: (row) => <Badge variant='light' color='info'>{row?.type === 'contractor' ? 'Contractor' : row?.type === 'sub_contractor' ? 'Sub Contractor' : '-'}</Badge>,
             sortable: false,
             wrap: true,
-            width: '120px',
+            width: '150px',
+            center: true,
         },
         {
             name: 'Activity',
@@ -107,21 +111,16 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             cell: (row) => <ActivityTypeBadge type={(row?.activity_status as 'find' | 'pull' | 'survey') || 'find'} />,
             sortable: false,
             wrap: true,
-            width: '120px',
+            center: true,
         },
         {
             name: 'Status',
             selector: (row) => row?.status || 'inactive',
-            cell: (row) => <ActiveStatusBadge variant='with-icon' status={(row?.status as 'active' | 'inactive') || 'inactive'} />,
+            cell: (row) => <ActiveStatusBadge status={(row?.status as 'active' | 'inactive') || 'inactive'} />,
             width: '120px',
             center: true,
             wrap: true,
         },
-        // {
-        //     name: 'Status',
-        //     cell: (row) => <ContractorStatusBadge status={row.status} />,
-        //     width: '100px',
-        // },
         {
             name: 'Updated By',
             selector: row => row.updated_by_name,
@@ -133,16 +132,9 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
                     <div className="block text-sm text-gray-500">{`${formatDateTime(row.updated_at)}`}</div>
                 </div>
             ),
-            width: '200px'
+            width: '130px'
         },
         createActionsColumn([
-            // {
-            //     icon: MdEdit,
-            //     onClick: handleEdit,
-            //     className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-            //     tooltip: 'read',
-            //     permission: 'update'
-            // },
             {
                 icon: MdDeleteOutline,
                 onClick: onDelete || (() => {}),
@@ -168,7 +160,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             paginationTotalRows={pagination.total}
             paginationPerPage={pagination.limit}
             paginationDefaultPage={pagination.page}
-            paginationRowsPerPageOptions={[5, 10, 20, 30, 50]}
+            paginationRowsPerPageOptions={[10, 20, 30, 50]}
             onChangePage={onPageChange}
             onChangeRowsPerPage={onRowsPerPageChange}
             onRowClicked={onRowClick}

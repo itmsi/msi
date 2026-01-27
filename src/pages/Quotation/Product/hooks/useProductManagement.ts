@@ -1,13 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useProduct } from './useProduct';
+import { AuthService } from '@/services/authService';
 
 export const useProductManagement = () => {
     const navigate = useNavigate();
     
+    // Get company_name from localStorage auth_user (more efficient than fetching profile)
+    const companyName = useMemo(() => {
+        const user = AuthService.getCurrentUser();
+        return user.company_name || undefined;
+    }, []);
+    
     // Local state untuk form inputs
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc'); 
+    const [productTypeFilter, setProductTypeFilter] = useState<string>('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     
@@ -31,9 +39,11 @@ export const useProductManagement = () => {
             page: currentPage,
             limit: itemsPerPage,
             sort_order: sortOrder,
-            search: debouncedSearch
+            search: debouncedSearch,
+            company_name: companyName,
+            product_type: productTypeFilter
         });
-    }, [debouncedSearch, sortOrder, currentPage, itemsPerPage, fetchProduct]);
+    }, [debouncedSearch, sortOrder, productTypeFilter, currentPage, itemsPerPage, companyName, fetchProduct]);
 
     // Handler untuk pagination
     const handlePageChange = useCallback((page: number) => {
@@ -57,25 +67,33 @@ export const useProductManagement = () => {
             page: 1,
             limit: itemsPerPage,
             sort_order: sortOrder,
-            search: searchTerm
+            search: searchTerm,
+            company_name: companyName,
+            product_type: productTypeFilter
         });
-    }, [searchTerm, sortOrder, itemsPerPage, fetchProduct]);
+    }, [searchTerm, sortOrder, productTypeFilter, itemsPerPage, companyName, fetchProduct]);
 
     const handleClearFilters = useCallback(() => {
         setSearchTerm('');
+        setProductTypeFilter('');
         setCurrentPage(1);
         fetchProduct({
             page: 1,
             limit: itemsPerPage,
             sort_order: sortOrder,
-            search: ''
+            search: '',
+            company_name: companyName,
+            product_type: ''
         });
-    }, [sortOrder, itemsPerPage, fetchProduct]);
+    }, [sortOrder, itemsPerPage, companyName, fetchProduct]);
 
     // Handler untuk sort change
     const handleFilterChange = useCallback((key: string, value: string) => {
         if (key === 'sort_order') {
             setSortOrder(value as 'asc' | 'desc');
+            setCurrentPage(1);
+        } else if (key === 'product_type') {
+            setProductTypeFilter(value);
             setCurrentPage(1);
         }
     }, []);
@@ -101,12 +119,14 @@ export const useProductManagement = () => {
                 page: currentPage,
                 limit: itemsPerPage,
                 sort_order: sortOrder,
-                search: debouncedSearch
+                search: debouncedSearch,
+                company_name: companyName,
+                product_type: productTypeFilter
             });
         } catch (error) {
             console.error('Failed to delete product:', error);
         }
-    }, [confirmDelete.productId, deleteProduct, fetchProduct, currentPage, itemsPerPage, sortOrder, debouncedSearch]);
+    }, [confirmDelete.productId, deleteProduct, fetchProduct, currentPage, itemsPerPage, sortOrder, debouncedSearch, companyName]);
 
     const cancelDelete = useCallback(() => {
         setConfirmDelete({ show: false });
@@ -122,6 +142,7 @@ export const useProductManagement = () => {
         // State
         searchTerm,
         sortOrder,
+        productTypeFilter,
         currentPage,
         itemsPerPage,
         products,

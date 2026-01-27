@@ -116,7 +116,15 @@ const ImportDataModal: React.FC<ImportDataModalProps> = ({
                         acceptedFormats={['csv', '.csv']}
                         maxSize={5}
                         currentFile={importFile}
-                        onFileChange={setImportFile}
+                        onFileChange={(files) => {
+                            if (files === null) {
+                                setImportFile(null);
+                            } else if (Array.isArray(files)) {
+                                setImportFile(files[0] || null);
+                            } else {
+                                setImportFile(files);
+                            }
+                        }}
                         required
                         description={`CSV file containing ${entityType.toLowerCase()} data`}
                         className="mt-4"
