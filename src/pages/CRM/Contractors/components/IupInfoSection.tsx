@@ -68,13 +68,13 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
     
     // Sync selectedContractor with existing data (for edit mode)
     useEffect(() => {
-        if (formData.customer_data.customer_id && contractorOptions.length > 0) {
-            const existingContractor = contractorOptions.find(option => option.value === formData.customer_data.customer_id);
+        if (formData.iup_customers.parent_contractor_id && contractorOptions.length > 0) {
+            const existingContractor = contractorOptions.find(option => option.value === formData.iup_customers.parent_contractor_id);
             if (existingContractor && !selectedContractor) {
                 setSelectedContractor(existingContractor);
             }
         }
-    }, [formData.customer_data.customer_id, contractorOptions, selectedContractor]);
+    }, [formData.iup_customers.parent_contractor_id, contractorOptions, selectedContractor]);
     
     // Handle contractor change
     const handleContractorChange = useCallback((option: ContractorSelectOption | null) => {
@@ -200,7 +200,7 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
             label: iup_customers.parent_contractor_name || 'Unknown Customer',
             __isPlaceholder: true
         };
-    }, [iup_customers.parent_contractor_id, selectedContractor, contractorOptions, formData.customer_data]);
+    }, [iup_customers.parent_contractor_id, selectedContractor, contractorOptions, formData.iup_customers]);
 
     const STATUS_OPTIONS = [
         { value: 'active', label: 'Active' },
