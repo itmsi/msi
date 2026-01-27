@@ -19,6 +19,7 @@ export interface Contractor {
     customer_code?: string;
     rkab: string;
     armada: number;
+    type?: string;
     segmentation_name_en: string;
     business_project_bim: string;
     status: 'active' | 'inactive';

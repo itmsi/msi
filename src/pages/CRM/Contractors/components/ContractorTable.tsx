@@ -95,24 +95,23 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             center: true,
             wrap: true,
             cell: (row) => <Badge variant='outline'>{row.armada}</Badge>,
-            // cell: (row) => (
-            //     <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-gray-800 border border-gray-200 rounded-md">
-            //         {row.armada}
-            //     </span>
-            // ),
         },
-        // {
-        //     name: 'Project',
-        //     selector: (row) => row.business_project_bim,
-        //     sortable: false,
-        //     wrap: true,
-        // },
+        {
+            name: 'Contractor',
+            selector: (row) => row?.type || '-',
+            cell: (row) => <Badge variant='light' color='info'>{row?.type === 'contractor' ? 'Contractor' : row?.type === 'sub_contractor' ? 'Sub Contractor' : '-'}</Badge>,
+            sortable: false,
+            wrap: true,
+            width: '150px',
+            center: true,
+        },
         {
             name: 'Activity',
             selector: (row) => row?.activity_status || 'find',
             cell: (row) => <ActivityTypeBadge type={(row?.activity_status as 'find' | 'pull' | 'survey') || 'find'} />,
             sortable: false,
             wrap: true,
+            center: true,
         },
         {
             name: 'Status',
@@ -122,11 +121,6 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             center: true,
             wrap: true,
         },
-        // {
-        //     name: 'Status',
-        //     cell: (row) => <ContractorStatusBadge status={row.status} />,
-        //     width: '100px',
-        // },
         {
             name: 'Updated By',
             selector: row => row.updated_by_name,
@@ -141,13 +135,6 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             width: '130px'
         },
         createActionsColumn([
-            // {
-            //     icon: MdEdit,
-            //     onClick: handleEdit,
-            //     className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-            //     tooltip: 'read',
-            //     permission: 'update'
-            // },
             {
                 icon: MdDeleteOutline,
                 onClick: onDelete || (() => {}),
