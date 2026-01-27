@@ -187,7 +187,7 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
         }
         
         // If we have formData with customer info, use that
-        if (formData.customer_data.customer_id === iup_customers.parent_contractor_id) {
+        if (formData.iup_customers.parent_contractor_id === iup_customers.parent_contractor_id) {
             return {
                 value: iup_customers.parent_contractor_id,
                 label: iup_customers.parent_contractor_name || 'Unknown Customer',
