@@ -9,7 +9,6 @@ interface IupInfoProps {
     formData: ContractorFormData;
     errors: Record<string, string>;
     onChange: (field: keyof Omit<ContractorFormData['iup_customers'], 'units'>, value: string) => void;
-    onCustomerChange?: (field: keyof ContractorFormData['customer_data'], value: string) => void;
     // IUP Select props
     iupOptions: any[];
     iupInputValue: string;
@@ -29,7 +28,6 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
     formData,
     errors,
     onChange,
-    onCustomerChange,
     iupOptions,
     iupInputValue,
     onIupInputChange,
@@ -57,14 +55,12 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
         if (iup_customers.iup_id && iup_customers.type) {
             // Reset selected contractor when filters change
             setSelectedContractor(null);
-            if (onCustomerChange) {
-                onCustomerChange('customer_id', '');
-            } else {
-                onChange('customer_id' as any, '');
+            if (onChange) {
+                onChange('parent_contractor_id' as any, '');
             }
             
             // Load contractors with filters
-            loadContractorOptions('', [], 1, iup_customers.iup_id, iup_customers.type, true);
+            loadContractorOptions('', [], 1, iup_customers.iup_id, 'contractor', true);
         }
     }, [iup_customers.iup_id, iup_customers.type]);
 
@@ -83,22 +79,15 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
     // Handle contractor change
     const handleContractorChange = useCallback((option: ContractorSelectOption | null) => {
         if (option) {
-            // Use onCustomerChange if provided, otherwise use onChange with any type
-            if (onCustomerChange) {
-                onCustomerChange('customer_id', option.value);
-                // You might also want to store the customer name
-                // onCustomerChange('customer_name', option.label);
-            } else {
-                onChange('customer_id' as any, option.value);
+            if (onChange) {
+                onChange('parent_contractor_id' as any, option.value);
             }
         } else {
-            if (onCustomerChange) {
-                onCustomerChange('customer_id', '');
-            } else {
-                onChange('customer_id' as any, '');
-            }
+            if (onChange) {
+                onChange('parent_contractor_id' as any, '');
+            } 
         }
-    }, [onCustomerChange, onChange]);
+    }, [onChange]);
     
     const [recentlySelectedIup, setRecentlySelectedIup] = React.useState<any>(null);
     const [recentlySelectedSegmentation, setRecentlySelectedSegmentation] = React.useState<any>(null);
@@ -185,6 +174,34 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
         };
     }, [iup_customers.segmentation_id, segementationOptions, recentlySelectedSegmentation, loadedEditOptions.segmentation]);
 
+    const selectedCustomer = useMemo(() => {
+        if (!iup_customers.parent_contractor_id) return null;
+        
+        if (selectedContractor && selectedContractor.value === iup_customers.parent_contractor_id) {
+            return selectedContractor;
+        }
+        
+        let found = contractorOptions.find(option => option.value === iup_customers.parent_contractor_id);
+        if (found) {
+            return found;
+        }
+        
+        // If we have formData with customer info, use that
+        if (formData.customer_data.customer_id === iup_customers.parent_contractor_id) {
+            return {
+                value: iup_customers.parent_contractor_id,
+                label: iup_customers.parent_contractor_name || 'Unknown Customer',
+                __isPlaceholder: true
+            };
+        }
+        
+        return {
+            value: iup_customers.parent_contractor_id,
+            label: iup_customers.parent_contractor_name || 'Unknown Customer',
+            __isPlaceholder: true
+        };
+    }, [iup_customers.parent_contractor_id, selectedContractor, contractorOptions, formData.customer_data]);
+
     const STATUS_OPTIONS = [
         { value: 'active', label: 'Active' },
         { value: 'inactive', label: 'Inactive' }
@@ -193,7 +210,7 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
         { value: 'contractor', label: 'Contractor' },
         { value: 'sub_contractor', label: 'Sub Contractor' }
     ];
-    // Helper untuk render text input
+
     const renderInput = (
         field: keyof Omit<ContractorFormData['iup_customers'], 'units'>,
         label: string,
@@ -244,10 +261,8 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                     </Label>
                     <CustomAsyncSelect
                         loadOptions={async (_inputValue) => {
-                            // Ensure selected option is included in options
                             let allOptions = [...iupOptions];
                             
-                            // If we have a selected option that's not in current options, add it
                             if (selectedIup && !allOptions.find(opt => opt.value === selectedIup.value)) {
                                 allOptions.unshift(selectedIup);
                             }
@@ -257,7 +272,6 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                         defaultOptions={(() => {
                             let defaultOpts = iupOptions?.length > 0 ? [...iupOptions] : [];
                             
-                            // Ensure selected option is in default options
                             if (selectedIup && !defaultOpts.find(opt => opt.value === selectedIup.value)) {
                                 defaultOpts.unshift(selectedIup);
                             }
@@ -275,11 +289,7 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                             
                             // Reset customer selection when IUP changes
                             setSelectedContractor(null);
-                            if (onCustomerChange) {
-                                onCustomerChange('customer_id', '');
-                            } else {
-                                onChange('customer_id' as any, '');
-                            }
+                            onChange('parent_contractor_id' as any, '');
                         }}
                         placeholder="Select IUP..."
                         error={errors.iup_id}
@@ -297,10 +307,8 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                     </Label>
                     <CustomAsyncSelect
                         loadOptions={async (_inputValue) => {
-                            // Ensure selected option is included in options
                             let allOptions = [...segementationOptions];
                             
-                            // If we have a selected option that's not in current options, add it
                             if (selectedSegementasi && !allOptions.find(opt => opt.value === selectedSegementasi.value)) {
                                 allOptions.unshift(selectedSegementasi);
                             }
@@ -310,7 +318,6 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                         defaultOptions={(() => {
                             let defaultOpts = segementationOptions?.length > 0 ? [...segementationOptions] : [];
                             
-                            // Ensure selected option is in default options
                             if (selectedSegementasi && !defaultOpts.find(opt => opt.value === selectedSegementasi.value)) {
                                 defaultOpts.unshift(selectedSegementasi);
                             }
@@ -349,11 +356,7 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                             
                             // Reset customer selection when type changes
                             setSelectedContractor(null);
-                            if (onCustomerChange) {
-                                onCustomerChange('customer_id', '');
-                            } else {
-                                onChange('customer_id' as any, '');
-                            }
+                            onChange('parent_contractor_id' as any, '');
                         }}
                         options={TYPE_OPTIONS}
                         placeholder="Select type"
@@ -367,27 +370,44 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                     </Label>
                     <CustomAsyncSelect
                         placeholder={!iup_customers.iup_id || !iup_customers.type ? "Please select IUP and Type first" : "Select Customer..."}
-                        value={selectedContractor}
-                        defaultOptions={contractorOptions}
-                        loadOptions={(inputValue) => {
+                        value={selectedCustomer}
+                        defaultOptions={(() => {
+                            let defaultOpts = contractorOptions?.length > 0 ? [...contractorOptions] : [];
+                            
+                            if (selectedCustomer && !defaultOpts.find(opt => opt.value === selectedCustomer.value)) {
+                                defaultOpts.unshift(selectedCustomer);
+                            }
+                            
+                            return defaultOpts;
+                        })()}
+                        loadOptions={async (inputValue) => {
                             if (!iup_customers.iup_id || !iup_customers.type) {
                                 return Promise.resolve([]);
                             }
-                            return loadContractorOptions(inputValue, [], 1, iup_customers.iup_id, iup_customers.type, true);
+                            
+                            const options = await loadContractorOptions(inputValue, [], 1, iup_customers.iup_id, 'contractor', true);
+                            let allOptions = [...options];
+                            
+                            if (selectedCustomer && !allOptions.find(opt => opt.value === selectedCustomer.value)) {
+                                allOptions.unshift(selectedCustomer);
+                            }
+                            
+                            return allOptions;
                         }}
                         onMenuScrollToBottom={handleContractorMenuScrollToBottom}
                         isLoading={contractorPagination.loading}
-                        disabled={!iup_customers.iup_id || !iup_customers.type}
+                        disabled={!iup_customers.iup_id || !iup_customers.type || iup_customers.type === 'contractor'}
                         noOptionsMessage={() => !iup_customers.iup_id || !iup_customers.type ? "Please select IUP and Type first" : "No customers found"}
                         loadingMessage={() => "Loading customers..."}
-                        isSearchable={true}
+                        isClearable={false}
+                        isSearchable={false}
                         inputValue={contractorInputValue}
                         className={`w-full md:col-span-2 ${
-                            errors.customer_id ? 'border rounded-[0.5rem] border-red-500' : ''
+                            errors.parent_contractor_id ? 'border rounded-[0.5rem] border-red-500' : ''
                         }`}
                         onInputChange={(inputValue) => {
                             if (iup_customers.iup_id && iup_customers.type) {
-                                handleContractorInputChange(inputValue, iup_customers.iup_id, iup_customers.type);
+                                handleContractorInputChange(inputValue, iup_customers.iup_id, 'contractor');
                             }
                         }}
                         onChange={(option: any) => {
@@ -395,8 +415,8 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                             handleContractorChange(option);
                         }}
                     />
-                    {errors.customer_id && (
-                        <p className="text-red-500 text-sm mt-1">{errors.customer_id}</p>
+                    {errors.parent_contractor_id && (
+                        <p className="text-red-500 text-sm mt-1">{errors.parent_contractor_id}</p>
                     )}
                 </div>
 

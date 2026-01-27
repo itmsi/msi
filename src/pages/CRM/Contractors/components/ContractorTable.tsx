@@ -55,7 +55,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             ),
             sortable: false,
             wrap: true,
-            width: '350px',
+            width: '280px',
         },
         {
             name: 'Territory',
@@ -75,7 +75,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             ),
             sortable: false,
             wrap: true,
-            width: '350px',
+            width: '280px',
         },
         {
             name: 'Segmentation',
@@ -83,7 +83,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             wrap: true,
         },
         {
-            name: 'Fleet Count',
+            name: 'Fleet',
             selector: (row) => row.armada,
             center: true,
             wrap: true,
@@ -94,12 +94,12 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             //     </span>
             // ),
         },
-        {
-            name: 'Project',
-            selector: (row) => row.business_project_bim,
-            sortable: false,
-            wrap: true,
-        },
+        // {
+        //     name: 'Project',
+        //     selector: (row) => row.business_project_bim,
+        //     sortable: false,
+        //     wrap: true,
+        // },
         {
             name: 'Activity',
             selector: (row) => row?.activity_status || 'find',
@@ -110,7 +110,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
         {
             name: 'Status',
             selector: (row) => row?.status || 'inactive',
-            cell: (row) => <ActiveStatusBadge variant='with-icon' status={(row?.status as 'active' | 'inactive') || 'inactive'} />,
+            cell: (row) => <ActiveStatusBadge status={(row?.status as 'active' | 'inactive') || 'inactive'} />,
             width: '120px',
             center: true,
             wrap: true,
@@ -131,7 +131,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
                     <div className="block text-sm text-gray-500">{`${formatDateTime(row.updated_at)}`}</div>
                 </div>
             ),
-            width: '200px'
+            width: '130px'
         },
         createActionsColumn([
             // {

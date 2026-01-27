@@ -144,6 +144,8 @@ const EditContractor: React.FC = () => {
                         iup_customers: {
                             iup_id: response.data.iup_customers.iup_id || '',
                             iup_name: response.data.iup_customers.iup_name || '',
+                            parent_contractor_id: response.data.iup_customers.parent_contractor_id || '',
+                            parent_contractor_name: response.data.iup_customers.parent_contractor_name || '',
                             segmentation_id: response.data.iup_customers.segmentation_id || '',
                             // Parse RKAB from properties if available
                             properties: (response.data.iup_customers.properties?.basicinformationmandatory?.RKAB) || [],

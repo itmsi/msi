@@ -102,6 +102,7 @@ const CreateContractor: React.FC = () => {
             contact_persons:[],
             units: [],
             type: '',
+            parent_contractor_id: ''
             
         }
     });
