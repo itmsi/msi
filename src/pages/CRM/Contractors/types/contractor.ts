@@ -33,6 +33,7 @@ export interface Contractor {
     updated_by_name: string;
     updated_at: string;
     activity_status: string;
+    bim_persen?: string | number;
 }
 
 export interface Pagination {

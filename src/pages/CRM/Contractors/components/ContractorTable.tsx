@@ -83,6 +83,13 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             wrap: true,
         },
         {
+            name: 'BIM (%)',
+            selector: (row) => row?.bim_persen || '-',
+            wrap: true,
+            center: true,
+            width: '100px',
+        },
+        {
             name: 'Fleet Count',
             selector: (row) => row.armada,
             center: true,
