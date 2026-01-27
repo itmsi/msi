@@ -88,6 +88,8 @@ export interface ContractorDetailResponse {
             iup_customer_id: string;
             iup_id: string;
             iup_name?: string;
+            parent_contractor_id?: string;
+            parent_contractor_name?: string;
             segmentation_id: string;
             rkab: string;
             achievement_production_bim: string | null;
@@ -168,6 +170,8 @@ export interface ContractorFormData {
         activity_status: string[];
         contact_persons: contactPerson[];
         units: ContractorUnit[];
+        parent_contractor_id?: string;
+        parent_contractor_name?: string;
     };
 }
 export interface RkabEntry {
