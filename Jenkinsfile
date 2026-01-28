@@ -8,7 +8,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo '📥 Checkout repository'
-                checkout scm
+                sh 'git pull'
             }
         }
 
