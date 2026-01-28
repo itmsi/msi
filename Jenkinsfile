@@ -26,17 +26,6 @@ pipeline {
             }
         }
 
-        stage('Deploy to Nginx') {
-            steps {
-                echo '🚀 Deploying to Nginx'
-                sh '''
-                  sudo rm -rf /var/www/msione/dist/*
-                  sudo cp -r dist/* /var/www/msione/dist/
-                  sudo nginx -t
-                  sudo systemctl reload nginx
-                '''
-            }
-        }
     }
 
     post {
