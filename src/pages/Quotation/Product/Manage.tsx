@@ -53,7 +53,7 @@ const ManageProduct: React.FC = () => {
             wrap: true,
         },
         {
-            name: 'Component Name',
+            name: 'Product Name',
             selector: row => row.componen_product_name,
             cell: (row) => (
                 <div className="text-sm text-gray-700 max-w-xs" title={row.componen_product_name}>

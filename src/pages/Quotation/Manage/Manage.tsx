@@ -75,15 +75,6 @@ const ManageQuotations: React.FC = () => {
                     </div>
                 ),
             },
-            // {
-            //     name: 'Customer',
-            //     selector: (row) => row.customer_id,
-            //     cell: (row) => (
-            //         <span className="text-sm">{row.customer_id.substring(0, 20)}...</span>
-            //     ),
-            // },
-            // createDateColumn('Quotation Date', 'manage_quotation_date', tableDateFormat),
-            // createDateColumn('Valid Until', 'manage_quotation_valid_date', tableDateFormat),
             {
                 name: 'Customer Name',
                 selector: (row) => row.customer_name,
@@ -100,10 +91,6 @@ const ManageQuotations: React.FC = () => {
                 center: true,
                 width: '140px',
             },
-            // {
-            //     name: 'Sales Name',
-            //     selector: (row) => row.employee_name,
-            // },
             {
                 name: 'Status',
                 selector: (row) => row.status,
@@ -133,7 +120,6 @@ const ManageQuotations: React.FC = () => {
                 ),
                 width: '200px'
             },
-            // createDateColumn('Created At', 'created_at', tableDateFormat),
             createActionsColumn([
                 {
                     icon: FaRegFilePdf,
@@ -274,13 +260,6 @@ const ManageQuotations: React.FC = () => {
                 <div className="px-6 py-4 border-b border-gray-200">
                     {SearchAndFilters}
                 </div>
-
-                {/* Error Message */}
-                {/* {error && (
-                    <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-red-800">{error}</p>
-                    </div>
-                )} */}
 
                 {/* Data Table */}
                 <div className="p-6 font-secondary">

@@ -35,6 +35,36 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         format: [210, 297]
     });
     
+    // Helper function untuk safely get image URL
+    const getImageUrl = (imageData: any): string => {
+        try {
+            if (!imageData) return '';
+            
+            // If it's already a direct URL
+            if (typeof imageData === 'string' && (imageData.startsWith('http') || imageData.startsWith('/'))) {
+                return imageData;
+            }
+            
+            // If it's an object with image_url property
+            if (typeof imageData === 'object' && imageData.image_url) {
+                return imageData.image_url;
+            }
+            
+            // If it's a JSON string that needs parsing
+            if (typeof imageData === 'string') {
+                const parsedImages = JSON.parse(imageData);
+                if (Array.isArray(parsedImages) && parsedImages.length > 0 && parsedImages[0]?.image_url) {
+                    return parsedImages[0].image_url;
+                }
+            }
+            
+            return '';
+        } catch (error) {
+            console.error('Error parsing image data:', error);
+            return '';
+        }
+    };
+    
     // Load custom Futura fonts
     await loadCustomFonts(doc);
     
@@ -837,19 +867,22 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 doc.setTextColor(52, 64, 84);
                 
                 // Add product image if available
-                if (item1.cp_image) {
-                    try {
-                        let imageFormat = 'JPEG';
-                        const imageSrc = item1.cp_image.toLowerCase();
-                        if (imageSrc.includes('.png') || imageSrc.includes('image/png')) {
-                            imageFormat = 'PNG';
-                        } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
-                            imageFormat = 'JPEG';
+                if (item1.images && item1.images.length > 0) {
+                    const imageUrl = getImageUrl(item1.images[0]);
+                    if (imageUrl) {
+                        try {
+                            let imageFormat = 'JPEG';
+                            const imageSrc = imageUrl.toLowerCase();
+                            if (imageSrc.includes('.png') || imageSrc.includes('image/png')) {
+                                imageFormat = 'PNG';
+                            } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
+                                imageFormat = 'JPEG';
+                            }
+                            doc.addImage(imageUrl, imageFormat, item1StartX + (itemWidth / 2) - 21, item1YPos - 10, 37, 50);
+                            item1YPos += 50;
+                        } catch (error) {
+                            console.warn('Failed to load product image for item 1:', error);
                         }
-                        doc.addImage(item1.cp_image, imageFormat, item1StartX + (itemWidth / 2) - 21, item1YPos - 10, 37, 50);
-                        item1YPos += 50;
-                    } catch (error) {
-                        console.warn('Failed to load product image for item 1:', error);
                     }
                 }
                 
@@ -983,19 +1016,22 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     doc.setTextColor(52, 64, 84);
                     
                     // Add product image if available
-                    if (item2.cp_image) {
-                        try {
-                            let imageFormat = 'JPEG';
-                            const imageSrc = item2.cp_image.toLowerCase();
-                            if (imageSrc.includes('.png') || imageSrc.includes('image/png')) {
-                                imageFormat = 'PNG';
-                            } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
-                                imageFormat = 'JPEG';
+                    if (item2.images && item2.images.length > 0) {
+                        const imageUrl = getImageUrl(item2.images[0]);
+                        if (imageUrl) {
+                            try {
+                                let imageFormat = 'JPEG';
+                                const imageSrc = imageUrl.toLowerCase();
+                                if (imageSrc.includes('.png') || imageSrc.includes('image/png')) {
+                                    imageFormat = 'PNG';
+                                } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
+                                    imageFormat = 'JPEG';
+                                }
+                                doc.addImage(imageUrl, imageFormat, item2StartX + (itemWidth / 2) - 21, item2YPos - 10, 37, 50);
+                                item2YPos += 50;
+                            } catch (error) {
+                                console.warn('Failed to load product image for item 2:', error);
                             }
-                            doc.addImage(item2.cp_image, imageFormat, item2StartX + (itemWidth / 2) - 21, item2YPos - 10, 37, 50);
-                            item2YPos += 50;
-                        } catch (error) {
-                            console.warn('Failed to load product image for item 2:', error);
                         }
                     }
                     

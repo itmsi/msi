@@ -32,6 +32,41 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [showImageModal, setShowImageModal] = useState(false);
 
+    const getImageUrl = useCallback((imageData: string | object | undefined): string => {
+        if (!imageData) return '';
+        
+        try {
+            if (typeof imageData === 'string' && (imageData.startsWith('http') || imageData.startsWith('/') || imageData.startsWith('data:'))) {
+                return imageData;
+            }
+            
+            if (typeof imageData === 'object' && imageData !== null) {
+                const imgObj = imageData as any;
+                if (imgObj.image_url) {
+                    return imgObj.image_url;
+                }
+                if (Array.isArray(imgObj) && imgObj.length > 0 && imgObj[0]?.image_url) {
+                    return imgObj[0].image_url;
+                }
+                return '';
+            }
+            if (typeof imageData === 'string' && (imageData.startsWith('[') || imageData.startsWith('{'))) {
+                const parsedImages = JSON.parse(imageData);
+                if (Array.isArray(parsedImages) && parsedImages.length > 0 && parsedImages[0]?.image_url) {
+                    return parsedImages[0].image_url;
+                }
+                if (parsedImages?.image_url) {
+                    return parsedImages.image_url;
+                }
+            }
+            
+            return '';
+        } catch (error) {
+            console.error('Error parsing image data:', error, 'Data:', imageData);
+            return '';
+        }
+    }, []);
+
     const [activeTab, setActiveTab] = useState<'specifications' | 'accessories'>('specifications');
     const [accessories, setAccessories] = useState<QuotationAccessory[]>([]);
     const [selectedAccessory, setSelectedAccessory] = useState<SelectOption | null>(null);
@@ -322,7 +357,6 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 </div>
             );
         }
-
         return (
             <div className="p-6 space-y-6">
 
@@ -330,10 +364,10 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 <div className="border-b border-gray-200 pb-6">
                     <div className='md:grid md:grid-cols-5 md:gap-4'>
                         <div className="flex md:col-span-2 justify-center">
-                            {(initialData.images && initialData.images.length > 0) ? (
+                            {(initialData.images && initialData.images.length > 0 && getImageUrl(initialData.images[0])) ? (
                                 <div className="relative cursor-pointer" onClick={() => setShowImageModal(true)}>
                                     <img
-                                        src={initialData.images[0].image_url}
+                                        src={getImageUrl(initialData.images[0])}
                                         alt={initialData.componen_product_name || 'Product Image'}
                                         className="max-w-full max-h-50 object-contain rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                                         onError={(e) => {
@@ -352,6 +386,15 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                             </div>
                                         </div>
                                     )}
+                                    {/* Hidden placeholder for error handling */}
+                                    <div className="image-placeholder hidden flex items-center justify-center w-50 h-50 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
+                                        <div className="text-center">
+                                            <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <p className="text-gray-500 text-sm">Gambar tidak valid</p>
+                                        </div>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="flex items-center justify-center w-50 h-50 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
@@ -782,14 +825,14 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
             {renderProductInfo()}
             
             {/* Image Modal */}
-            {showImageModal && initialData?.images && initialData.images.length > 0 && (
+            {showImageModal && initialData?.images && getImageUrl(initialData.images[0]) && (
                 <div 
                     className="fixed inset-0 z-[9999] flex items-center justify-center bg-black-900 backdrop-blur-sm"
                     onClick={() => setShowImageModal(false)}
                 >
                     <div className="relative max-w-4xl max-h-[90vh] p-4 overflow-hidden">
                         <img
-                            src={initialData.images[0]}
+                            src={getImageUrl(initialData.images[0])}
                             alt={initialData.componen_product_name || 'Product Image'}
                             className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
                             onClick={(e) => e.stopPropagation()}
