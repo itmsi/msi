@@ -1,4 +1,4 @@
-import { MdAdd, MdClear, MdSearch } from 'react-icons/md';
+import { MdAdd, MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch } from 'react-icons/md';
 import CustomDataTable from '../../../components/ui/table/CustomDataTable';
 import Input from '../../../components/form/input/InputField';
 import CustomSelect from '../../../components/form/select/CustomSelect';
@@ -12,15 +12,14 @@ import Badge from '@/components/ui/badge/Badge';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { useNavigate } from 'react-router';
-import {  formatDateTime } from '@/helpers/generalHelper';
-import { useEffect, useMemo, useState } from 'react';
-import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
-import { useSegementationSelect } from '@/hooks/useSegmentSelect';
-import { SegmentSelectOption } from './components/IupInformtionsFormFields';
+import { formatDateTime } from '@/helpers/generalHelper';
+import { useMemo, useState } from 'react';
+import FilterSection from './components/FilterSection';
 
 export default function ManageIUPManagement() {
     
     const navigate = useNavigate();
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const {
         // State
         iup,
@@ -34,51 +33,32 @@ export default function ManageIUPManagement() {
         setSearchValue,
         statusFilter,
         segmentationFilter,
-        // setStatusFilter,
-        // fetchIup,
 
         // Actions
         handlePageChange,
         handleRowsPerPageChange,
-        // handleFilters,
         
         // Filter actions
         handleFilterChange,
-        // handleSearch,
         
         // Search functions
-        // executeSearch,
         handleKeyPress,
         handleClearSearch,
     } = useIupManagement();
 
-    const {
-        segementationOptions,
-        inputValue: segmentationInputValue,
-        handleInputChange: handleSegmentationInputChange,
-        pagination: segmentationPagination,
-        handleMenuScrollToBottom: handleSegmentationMenuScrollToBottom,
-        initializeOptions: initializeSegementationOptions
-    } = useSegementationSelect();
+    const handleToggleFilter = () => {
+        setShowAdvancedFilters(prev => !prev);
+    };
 
-    useEffect(() => {
-        initializeSegementationOptions();
-    }, [initializeSegementationOptions]);
+    // Clear filters handler
+    const handleClearFilters = () => {
+        // Call the clear filter function from the hook if it exists
+        // For now, we'll manually reset known filters
+        handleFilterChange('status', '');
+        handleFilterChange('segmentation', '');
+        handleFilterChange('sort_by', '');
+    };
 
-    // Segmentation states
-    const [selectedSegment, setSelectedSegment] = useState<SegmentSelectOption | null>(null);
-    
-    // Sync selectedSegment with segmentationFilter
-    useEffect(() => {
-        if (segmentationFilter && segmentationFilter.trim() !== '') {
-            const matchingSegment = segementationOptions.find(option => option.value === segmentationFilter);
-            if (matchingSegment && selectedSegment?.value !== segmentationFilter) {
-                setSelectedSegment(matchingSegment);
-            }
-        } else if (!segmentationFilter && selectedSegment !== null) {
-            setSelectedSegment(null);
-        }
-    }, [segmentationFilter, segementationOptions, selectedSegment]);
     // Definisi kolom untuk DataTable
     const iupColumns: TableColumn<IupItem>[] = [
         {
@@ -175,88 +155,34 @@ export default function ManageIUPManagement() {
             width: '200px'
         },
     ];
-
-    const STATUS_OPTIONS = [
-        { value: '', label: 'All Status' },
-        { value: 'aktif', label: 'Active' },
-        { value: 'non aktif', label: 'Inactive' }
-    ];
     
-    const MODIFY_OPTIONS = [
-        { value: '', label: 'All Modify' },
-        { value: 'updated_at', label: 'Updated' },
-        { value: 'created_at', label: 'Created' }
-    ];
-    
-    const SearchAndFilters = useMemo(() => {
-        
-        return (
-        <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-8 gap-6">
-            <div className="relative md:col-span-3">
-                <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <Input
-                    type="text"
-                    placeholder="Search IUP Name... (Press Enter to search)"
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className={`pl-10 py-2 w-full ${searchValue ? 'pr-10' : 'pr-4'}`}
-                />
-                {searchValue && (
-                    <button
-                        onClick={handleClearSearch}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                        type="button"
-                    >
-                        <MdClear className="h-4 w-4" />
-                    </button>
-                )}
+    const SearchAndFilters = useMemo(() => { 
+        return (<>
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+            <div className="flex-1">
+                <div className="relative flex">
+                    <div className="relative flex-1">
+                        <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <Input
+                            type="text"
+                            placeholder="Search IUP Name... (Press Enter to search)"
+                            value={searchValue}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            className={`pl-10 py-2 w-full ${searchValue ? 'pr-10' : 'pr-4'}`}
+                        />
+                        {searchValue && (
+                            <button
+                                onClick={handleClearSearch}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                type="button"
+                            >
+                                <MdClear className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
-            
-            <CustomAsyncSelect
-                placeholder="Select Segmentation..."
-                value={selectedSegment}
-                defaultOptions={segementationOptions}
-                loadOptions={handleSegmentationInputChange}
-                onMenuScrollToBottom={() => {
-                    handleSegmentationMenuScrollToBottom();
-                }}
-                isLoading={segmentationPagination.loading}
-                noOptionsMessage={() => "No segments found"}
-                loadingMessage={() => segementationOptions.length > 0 ? "Loading segments..." : ""}
-                isSearchable={true}
-                isClearable={true}
-                inputValue={segmentationInputValue}
-                className="w-full md:col-span-2"
-                onInputChange={(inputValue) => {
-                    handleSegmentationInputChange(inputValue);
-                }}
-                onChange={(option: any) => {
-                    setSelectedSegment(option);
-                    handleFilterChange('segmentation', option?.value || '');
-                }}
-            />
-            
-            <CustomSelect
-                value={STATUS_OPTIONS.find(option => option.value === statusFilter) || null}
-                onChange={(option) => handleFilterChange('status', option?.value || '')}
-                options={STATUS_OPTIONS}
-                placeholder="Filter by Status"
-                className="w-full"
-                isClearable={false}
-                isSearchable={false}
-            />
-            
-            <CustomSelect
-                value={MODIFY_OPTIONS.find(option => option.value === sortModify) || null}
-                onChange={(option) => handleFilterChange('sort_by', option?.value || '')}
-                options={MODIFY_OPTIONS}
-                placeholder="Sort by Field"
-                className="w-full"
-                isClearable={false}
-                isSearchable={false}
-            />
-            
             <div className="flex items-center gap-2">
                 <CustomSelect
                     id="sort_order"
@@ -278,9 +204,28 @@ export default function ManageIUPManagement() {
                     className="w-full"
                 />
             </div>
+            
+            <div className="flex items-center gap-2">
+                <Button
+                    onClick={handleToggleFilter}
+                    className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
+                    size="sm"
+                >
+                    <MdFilterListAlt className="w-4 h-4 mr-2" />
+                    Filter
+                    {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                </Button>
+            </div>
         </div>
-    );
-    }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, segementationOptions]);
+        
+        {showAdvancedFilters && (
+            <FilterSection
+                onFilterChange={handleFilterChange}
+                onClearFilters={handleClearFilters}
+            />
+        )}
+    </>);
+    }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleClearFilters]);
     
     return (
         <>
@@ -392,7 +337,7 @@ export default function ManageIUPManagement() {
                 </div>
 
                 {/* Search and Filter Section */}
-                <div className="bg-white shadow rounded-lg">
+                <div className="bg-white shadow rounded-lg px-6 py-4">
                     {SearchAndFilters}
                 </div>
                 

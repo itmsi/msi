@@ -157,9 +157,9 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             loading={loading}
             pagination
             paginationServer
-            paginationTotalRows={pagination.total}
-            paginationPerPage={pagination.limit}
-            paginationDefaultPage={pagination.page}
+            paginationTotalRows={pagination?.total || 0}
+            paginationPerPage={pagination?.limit || 10}
+            paginationDefaultPage={pagination?.page || 1}
             paginationRowsPerPageOptions={[10, 20, 30, 50]}
             onChangePage={onPageChange}
             onChangeRowsPerPage={onRowsPerPageChange}

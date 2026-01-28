@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { MdAdd, MdSearch, MdClear, MdDeleteOutline } from 'react-icons/md';
+import React, { useMemo, useState } from 'react';
+import { MdAdd, MdSearch, MdClear, MdDeleteOutline, MdFilterListAlt, MdExpandLess, MdExpandMore } from 'react-icons/md';
 import { FaRegFilePdf } from "react-icons/fa6";
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
@@ -14,9 +14,11 @@ import Button from '@/components/ui/button/Button';
 import { createActionsColumn } from '@/components/ui/table';
 import { formatCurrency, formatDate, formatDateTime } from '@/helpers/generalHelper';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import FilterSection from './components/FilterSection';
 
 const ManageQuotations: React.FC = () => {
     const navigate = useNavigate();
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
     const {
         searchTerm,
@@ -29,7 +31,6 @@ const ManageQuotations: React.FC = () => {
         handlePageChange,
         handleRowsPerPageChange,
         handleSearchChange,
-        handleManualSearch,
         handleClearFilters,
         handleFilterChange,
         handleEdit,
@@ -38,7 +39,14 @@ const ManageQuotations: React.FC = () => {
         handleDownload,
         confirmDeleteQuotations,
         cancelDelete,
+        setSearchTerm,
+        handleKeyPress,
     } = useQuotationManagement();
+
+    // Toggle filter collapse
+    const handleToggleFilter = () => {
+        setShowAdvancedFilters(prev => !prev);
+    };
 
     // Helper function to render status badge
     const getStatusBadge = (status: string) => {
@@ -74,6 +82,7 @@ const ManageQuotations: React.FC = () => {
                         <div className="block text-sm text-gray-500">{formatDate(row.manage_quotation_date)} - {formatDate(row.manage_quotation_valid_date)}</div>
                     </div>
                 ),
+                width: '220px',
             },
             {
                 name: 'Customer Name',
@@ -90,6 +99,10 @@ const ManageQuotations: React.FC = () => {
                 ),
                 center: true,
                 width: '140px',
+            },
+            {
+                name: 'Island',
+                selector: (row) => row.island_name,
             },
             {
                 name: 'Status',
@@ -141,6 +154,7 @@ const ManageQuotations: React.FC = () => {
     );
 
     const SearchAndFilters = useMemo(() => (
+        <>
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
             <div className="flex-1">
                 <div className="relative flex">
@@ -150,14 +164,9 @@ const ManageQuotations: React.FC = () => {
                             type="text"
                             placeholder="Search by quotation number, customer ID..."
                             value={searchTerm}
-                            onChange={(e) => handleSearchChange(e.target.value)}
-                            onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    handleManualSearch();
-                                }
-                            }}
-                            className={`pl-10 py-2 w-full rounded-r-none ${searchTerm ? 'pr-10' : 'pr-4'}`}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            className={`pl-10 py-2 w-full ${searchTerm ? 'pr-10' : 'pr-4'}`}
                         />
                         {searchTerm && (
                             <button
@@ -169,36 +178,7 @@ const ManageQuotations: React.FC = () => {
                             </button>
                         )}
                     </div>
-                    <Button
-                        onClick={handleManualSearch}
-                        className="rounded-l-none px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 border-l-0"
-                        size="sm"
-                    >
-                        <MdSearch className="w-4 h-4" />
-                    </Button>
                 </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-                <CustomSelect
-                    id="quotation_for"
-                    name="quotation_for"
-                    value={quotationFor ? {
-                        value: quotationFor,
-                        label: quotationFor === 'customer' ? 'Customer' : 'Leasing'
-                    } : null}
-                    onChange={(selectedOption) =>
-                        handleFilterChange('quotation_for', selectedOption?.value || '')
-                    }
-                    options={[
-                        { value: 'customer', label: 'Customer' },
-                        { value: 'leasing', label: 'Leasing' }
-                    ]}
-                    placeholder="Quotation For"
-                    isClearable={false}
-                    isSearchable={false}
-                    className="w-60"
-                />
             </div>
             {/* Sort Order */}
             <div className="flex items-center gap-2">
@@ -222,9 +202,29 @@ const ManageQuotations: React.FC = () => {
                     className="w-40"
                 />
             </div>
-
+            <div className="flex items-center gap-2">
+                <Button
+                    onClick={handleToggleFilter}
+                    className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
+                    size="sm"
+                >
+                    <MdFilterListAlt className="w-4 h-4 mr-2" />
+                    Filter
+                    {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                </Button>
+            </div>
         </div>
-    ), [searchTerm, sortOrder, quotationFor, loading, quotations.length, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange]);
+        
+        {/* Advanced Filters Collapse */}
+        {showAdvancedFilters && (
+            <FilterSection
+                quotationFor={quotationFor}
+                onFilterChange={handleFilterChange}
+                onClearFilters={handleClearFilters}
+            />
+        )}
+        </>
+    ), [searchTerm, sortOrder, quotationFor, loading, quotations.length, showAdvancedFilters, handleSearchChange, handleClearFilters, handleFilterChange, handleToggleFilter]);
 
     return (
         <>

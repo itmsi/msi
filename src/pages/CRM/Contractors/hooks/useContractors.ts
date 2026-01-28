@@ -4,13 +4,15 @@ import { Contractor, ContractorListRequest, Pagination } from '../types/contract
 
 export const useContractors = () => {
     const [contractors, setContractors] = useState<Contractor[]>([]);
+    const [searchValue, setSearchValue] = useState('');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
+    const [sortModify, setSortModify] = useState<'updated_at' | 'created_at' | ''>('updated_at');
+    const [statusFilter, setStatusFilter] = useState<'' | 'active' | 'inactive'>('');
+    const [segmentationFilter, setSegmentationFilter] = useState('');
+    const [mineTypeFilter, setMineTypeFilter] = useState<'batu bara' | 'nikel' | 'lainnya' | ''>('');
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [searchValue, setSearchValue] = useState('');
-    const [filters, setFilters] = useState({
-        mine_type: '' as 'batu bara' | 'nikel' | 'lainnya' | '',
-        status: '' as 'active' | 'inactive' | ''
-    });
     const [pagination, setPagination] = useState<Pagination>({
         page: 1,
         limit: 10,
@@ -24,12 +26,13 @@ export const useContractors = () => {
             setError(null);
             
             const requestParams: ContractorListRequest = {
-                page: pagination.page,
-                limit: pagination.limit,
-                sort_order: 'desc',
-                search: searchValue,
-                mine_type: filters.mine_type,
-                status: filters.status,
+                page: params?.page || pagination?.page || 1,
+                limit: params?.limit || pagination?.limit || 10,
+                sort_order: params?.sort_order || sortOrder || 'desc',
+                search: params?.search ?? searchValue,
+                mine_type: params?.mine_type ?? mineTypeFilter,
+                status: params?.status ?? statusFilter,
+                segmentation_id: params?.segmentation_id ?? segmentationFilter,
                 ...params
             };
             
@@ -43,7 +46,7 @@ export const useContractors = () => {
         } finally {
             setLoading(false);
         }
-    }, [pagination.page, pagination.limit, searchValue, filters.mine_type, filters.status]);
+    }, [sortOrder, mineTypeFilter, statusFilter, segmentationFilter, searchValue]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
@@ -62,35 +65,79 @@ export const useContractors = () => {
     }, [fetchContractors]);
 
     const handleMineTypeFilter = useCallback((mineType: 'batu bara' | 'nikel' | 'lainnya' | '') => {
-        setFilters(prev => ({ ...prev, mine_type: mineType }));
+        setMineTypeFilter(mineType);
         setPagination(prev => ({ ...prev, page: 1 }));
         fetchContractors({ 
-            ...filters,
             mine_type: mineType,
             page: 1 
         });
-    }, [fetchContractors, filters]);
+    }, [fetchContractors]);
 
     const handleStatusFilter = useCallback((status: 'active' | 'inactive' | '') => {
-        setFilters(prev => ({ ...prev, status: status }));
+        setStatusFilter(status);
         setPagination(prev => ({ ...prev, page: 1 }));
         fetchContractors({ 
-            ...filters, 
             status: status,
             page: 1 
         });
-    }, [fetchContractors, filters]);
+    }, [fetchContractors]);
 
-    const handleFilters = useCallback((newFilters: { search?: string; mine_type?: 'batu bara' | 'nikel' | 'lainnya' | ''; status?: 'active' | 'inactive' | ''  }) => {
+    const handleFilters = useCallback((newFilters: { search?: string; mine_type?: 'batu bara' | 'nikel' | 'lainnya' | ''; status?: 'active' | 'inactive' | ''; sort_order?: 'asc' | 'desc' | ''; segmentation_id?: string }) => {
         if (newFilters.search !== undefined) {
             setSearchValue(newFilters.search);
         }
-        if (newFilters.mine_type !== undefined || newFilters.status !== undefined) {
-            setFilters(prev => ({ ...prev, ...newFilters }));
+        if (newFilters.mine_type !== undefined) {
+            setMineTypeFilter(newFilters.mine_type);
+        }
+        if (newFilters.status !== undefined) {
+            setStatusFilter(newFilters.status);
+        }
+        if (newFilters.sort_order !== undefined) {
+            setSortOrder(newFilters.sort_order);
+        }
+        if (newFilters.segmentation_id !== undefined) {
+            setSegmentationFilter(newFilters.segmentation_id);
         }
         setPagination(prev => ({ ...prev, page: 1 }));
         fetchContractors({ ...newFilters, page: 1 });
     }, [fetchContractors]);
+
+    // Generic filter change handler
+    const handleFilterChange = useCallback((field: string, value: string) => {
+        // Update individual state based on field
+        switch (field) {
+            case 'search':
+                setSearchValue(value);
+                break;
+            case 'mine_type':
+                setMineTypeFilter(value as 'batu bara' | 'nikel' | 'lainnya' | '');
+                break;
+            case 'status':
+                setStatusFilter(value as 'active' | 'inactive' | '');
+                break;
+            case 'sort_order':
+                setSortOrder(value as 'asc' | 'desc' | '');
+                break;
+            case 'segmentation_id':
+                setSegmentationFilter(value);
+                break;
+        }
+        
+        // Reset pagination and fetch with new filters
+        setPagination(prevPag => ({ ...prevPag, page: 1 }));
+        
+        // Use setTimeout to ensure state updates are applied
+        setTimeout(() => {
+            fetchContractors({ 
+                page: 1,
+                search: field === 'search' ? value : searchValue,
+                mine_type: field === 'mine_type' ? value as 'batu bara' | 'nikel' | 'lainnya' | '' : mineTypeFilter,
+                status: field === 'status' ? value as 'active' | 'inactive' | '' : statusFilter,
+                sort_order: field === 'sort_order' ? value as 'asc' | 'desc' | '' : sortOrder,
+                segmentation_id: field === 'segmentation_id' ? value : segmentationFilter
+            });
+        }, 0);
+    }, [fetchContractors, searchValue, mineTypeFilter, statusFilter, sortOrder, segmentationFilter]);
 
     // Search functions
     const executeSearch = useCallback(() => {
@@ -108,9 +155,10 @@ export const useContractors = () => {
         handleSearch('');
     }, [handleSearch]);
 
+    // Initial load only
     useEffect(() => {
         fetchContractors();
-    }, []);
+    }, []); // Empty dependency array for initial load only
 
     return {
         // State
@@ -120,8 +168,16 @@ export const useContractors = () => {
         pagination,
         searchValue,
         setSearchValue,
-        filters,
-        setFilters,
+        sortOrder,
+        setSortOrder,
+        sortModify,
+        setSortModify,
+        statusFilter,
+        setStatusFilter,
+        segmentationFilter,
+        setSegmentationFilter,
+        mineTypeFilter,
+        setMineTypeFilter,
         
         // Actions
         fetchContractors,
@@ -131,6 +187,7 @@ export const useContractors = () => {
         handleMineTypeFilter,
         handleStatusFilter,
         handleFilters,
+        handleFilterChange,
         
         // Search functions
         executeSearch,
