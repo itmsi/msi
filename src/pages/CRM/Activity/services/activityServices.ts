@@ -18,6 +18,7 @@ export class ActivityServices {
             sort_order: params.sort_order || 'desc',
             sort_by: params.sort_by || "updated_at",
             search: params.search || '',
+            transaction_type: params.transaction_type || '',
         };
         
         const response = await apiPost(`${API_BASE_URL}/crm//transactions/get`, requestData as Record<string, any>);

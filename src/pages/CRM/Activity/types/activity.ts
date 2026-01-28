@@ -59,6 +59,8 @@ export interface ActivityListRequest {
     page: number;
     limit: number;
     search?: string;
+    transaction_type?: string;
+    transaction_source?: string;
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
 }
