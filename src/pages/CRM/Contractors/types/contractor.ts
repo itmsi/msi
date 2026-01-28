@@ -1,7 +1,7 @@
 export interface ContractorListRequest {
     page: number;
     limit: number;
-    sort_order: 'asc' | 'desc';
+    sort_order: 'asc' | 'desc' | '';
     search: string;
     mine_type?: 'batu bara' | 'nikel' | 'lainnya' | '';
     status?: 'active' | 'inactive' | '';
@@ -9,6 +9,7 @@ export interface ContractorListRequest {
     employee_id?: string;
     iup_id?: string;
     type?: string;
+    segmentation_id?: string;
 }
 
 export interface Contractor {

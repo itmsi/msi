@@ -223,7 +223,7 @@ export interface QuotationRequest {
     sort_order: '' | 'asc' | 'desc';
     quotation_for?: 'customer' | 'leasing' | '';
     search: string;
-    island?: string;
+    island_id?: string;
     start_date?: string;
     end_date?: string;
 }
@@ -231,7 +231,7 @@ export interface QuotationFilters {
     search: string;
     sort_order: 'asc' | 'desc' | '';
     quotation_for: 'customer' | 'leasing' | '';
-    island: string;
+    island_id: string;
     start_date: string;
     end_date: string;
 }
@@ -270,8 +270,9 @@ export interface ManageQuotationItem {
     manage_quotation_shipping_term: string | null;
     manage_quotation_franco: string | null;
     manage_quotation_lead_time: string | null;
-    quotation_for?: 'customer' | 'leasing';  // New field: quotation type
-    star?: string;                             // New field: star rating/input
+    quotation_for?: 'customer' | 'leasing';
+    star?: string;
+    island_name: string;
     bank_account_name: string;
     bank_account_number: string;
     bank_account_bank_name: string;

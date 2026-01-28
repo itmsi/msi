@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MdAdd } from 'react-icons/md';
+import { MdAdd, MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch } from 'react-icons/md';
 import { useContractors } from './hooks/useContractors';
 import { Contractor } from './types/contractor';
 import ContractorTable from './components/ContractorTable';
@@ -11,9 +11,12 @@ import Input from '@/components/form/input/InputField';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import { useConfirmation } from '@/hooks/useConfirmation';
 import { ContractorServices } from './services/contractorServices';
+import CustomSelect from '@/components/form/select/CustomSelect';
+import FilterSection from './components/FilterSection';
 
 const Contractors: React.FC = () => {
     const navigate = useNavigate();
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const {
         // State
         contractors,
@@ -22,13 +25,19 @@ const Contractors: React.FC = () => {
         pagination,
         searchValue,
         setSearchValue,
-        // filters,
-        // setFilters,
+        sortOrder,
+        setSortOrder,
+        statusFilter,
+        setStatusFilter,
+        segmentationFilter,
+        setSegmentationFilter,
+        // mineTypeFilter,
+        setMineTypeFilter,
         
         // Actions
         handlePageChange,
         handleRowsPerPageChange,
-        // handleFilters,
+        handleFilterChange,
         refetch,
         
         // Search functions
@@ -38,8 +47,15 @@ const Contractors: React.FC = () => {
 
     const { showConfirmation, modalProps } = useConfirmation();
 
+    const handleToggleFilter = () => {
+        setShowAdvancedFilters(prev => !prev);
+    };
 
-    const handleClearSearchLocal = () => {
+    const handleClearFilters = () => {
+        setSortOrder('');
+        setStatusFilter('');
+        setSegmentationFilter('');
+        setMineTypeFilter('');
         setSearchValue('');
         handleClearSearch();
     };
@@ -59,6 +75,84 @@ const Contractors: React.FC = () => {
             refetch();
         }
     };
+
+    const SearchAndFilters = useMemo(() => { 
+        return (
+        <>
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+            <div className="flex-1">
+                <div className="relative flex">
+                    <div className="relative flex-1">
+                        <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <Input
+                            type="text"
+                            placeholder="Search by customer name, contractor... (Press Enter to search)"
+                            value={searchValue}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            className={`pl-10 py-2 w-full ${searchValue ? 'pr-10' : 'pr-4'}`}
+                        />
+                        {searchValue && (
+                            <button
+                                onClick={() => {
+                                    setSearchValue('');
+                                    handleClearSearch();
+                                }}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                type="button"
+                            >
+                                <MdClear className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+                <CustomSelect
+                    id="sort_order"
+                    name="sort_order"
+                    value={sortOrder ? {
+                        value: sortOrder,
+                        label: sortOrder === 'asc' ? 'Ascending' : 'Descending'
+                    } : null}
+                    onChange={(selectedOption) =>
+                        handleFilterChange('sort_order', selectedOption?.value || '')
+                    }
+                    options={[
+                        { value: 'asc', label: 'Ascending' },
+                        { value: 'desc', label: 'Descending' }
+                    ]}
+                    placeholder="Order by"
+                    isClearable={false}
+                    isSearchable={false}
+                    className="w-full"
+                />
+            </div>
+            
+            <div className="flex items-center gap-2">
+                <Button
+                    onClick={handleToggleFilter}
+                    className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
+                    size="sm"
+                >
+                    <MdFilterListAlt className="w-4 h-4 mr-2" />
+                    Filter
+                    {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                </Button>
+            </div>
+        </div>
+        
+        {showAdvancedFilters && (
+            <FilterSection
+                onFilterChange={handleFilterChange}
+                onClearFilters={handleClearFilters}
+            />
+        )}
+        </>
+    
+    )}, [searchValue, statusFilter, segmentationFilter, sortOrder, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleClearFilters]);
+    
     return (
         <>
             <PageMeta 
@@ -94,28 +188,8 @@ const Contractors: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white shadow rounded-lg">
-                    <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="relative">
-                            <Input 
-                                type="text"
-                                placeholder="Search by contractor name or customer code... (Press Enter to search)"
-                                value={searchValue}
-                                onChange={(e) => setSearchValue(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
-                            />
-                            {searchValue && (
-                                <button
-                                    onClick={handleClearSearchLocal}
-                                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
-                                >
-                                    ×
-                                </button>
-                            )}
-                        </div>
-
-                    </div>
+                <div className="bg-white shadow rounded-lg px-6 py-4">
+                    {SearchAndFilters}
                 </div>
 
                 {/* Table Section */}

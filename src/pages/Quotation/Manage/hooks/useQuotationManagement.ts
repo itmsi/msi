@@ -13,7 +13,20 @@ export const useQuotationManagement = () => {
 
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; quotationId?: string; }>({ show: false });
 
-    const { quotations, pagination, loading, error, filters, fetchQuotations, handleSearchChange: quotationSearch, deleteQuotation, downloadQuotation, updateFilters, applyFilters, clearAllFilters } = useQuotation();
+    const { 
+        quotations,
+        pagination,
+        loading,
+        error,
+        filters,
+        fetchQuotations,
+        handleSearchChange: quotationSearch,
+        deleteQuotation,
+        downloadQuotation,
+        updateFilters,
+        applyFilters,
+        clearAllFilters 
+    } = useQuotation();
 
     useEffect(() => {
         fetchQuotations(1, 10);
@@ -21,10 +34,10 @@ export const useQuotationManagement = () => {
 
     // Trigger fetch when filters change (including new fields)
     useEffect(() => {
-        if (filters.sort_order || filters.quotation_for || filters.island || filters.start_date || filters.end_date) {
+        if (filters.search || filters.sort_order || filters.quotation_for || filters.island_id || filters.start_date || filters.end_date) {
             fetchQuotations(currentPage, itemsPerPage);
         }
-    }, [filters.sort_order, filters.quotation_for, filters.island, filters.start_date, filters.end_date, currentPage, itemsPerPage, fetchQuotations]);
+    }, [filters.search, filters.sort_order, filters.quotation_for, filters.island_id, filters.start_date, filters.end_date, currentPage, itemsPerPage, fetchQuotations]);
 
     const handlePageChange = useCallback((page: number) => {
         setCurrentPage(page);
@@ -42,11 +55,6 @@ export const useQuotationManagement = () => {
         quotationSearch(value);
     }, [quotationSearch]);
 
-    const handleManualSearch = useCallback(() => {
-        setCurrentPage(1);
-        applyFilters();
-    }, [applyFilters]);
-
     const handleClearFilters = useCallback(() => {
         setSearchTerm('');
         setSortOrder('');
@@ -62,16 +70,23 @@ export const useQuotationManagement = () => {
         } else if (filterKey === 'quotation_for') {
             setQuotationFor(value as 'customer' | 'leasing' | '');
             updateFilters('quotation_for', value);
-        } else if (filterKey === 'island') {
-            updateFilters('island', value);
+        } else if (filterKey === 'island_id') {
+            updateFilters('island_id', value);
         } else if (filterKey === 'start_date') {
             updateFilters('start_date', value);
         } else if (filterKey === 'end_date') {
             updateFilters('end_date', value);
         }
         setCurrentPage(1);
-        // fetchQuotations akan otomatis terpanggil karena filters berubah
     }, [updateFilters]);
+
+    // Handle Enter key press untuk search
+    const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSearchChange(searchTerm);
+        }
+    }, [searchTerm, handleSearchChange]);
 
     const handleStatusChange = useCallback((filterKey: string, value: string) => {
         handleFilterChange(filterKey, value);
@@ -114,6 +129,7 @@ export const useQuotationManagement = () => {
 
     return {
         searchTerm,
+        setSearchTerm,
         sortOrder,
         quotationFor,
         quotations,
@@ -129,12 +145,12 @@ export const useQuotationManagement = () => {
         handlePageChange,
         handleRowsPerPageChange,
         handleSearchChange,
-        handleManualSearch,
         handleClearFilters,
         handleFilterChange,
         handleStatusChange,
         handleEdit,
         handleView,
         applyFilters,
+        handleKeyPress
     };
 };

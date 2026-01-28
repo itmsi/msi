@@ -7,6 +7,7 @@ import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { MdDateRange, MdClear } from 'react-icons/md';
+import { formatDateToYMD } from '@/helpers/generalHelper';
 
 interface FilterSectionProps {
     quotationFor?: string;
@@ -36,10 +37,8 @@ const filterConfigs = [
 const FilterSection: React.FC<FilterSectionProps> = ({
     quotationFor,
     onFilterChange,
-    onClearFilters,
-    onApplyFilters
+    onClearFilters
 }) => {
-    // Use reusable island select hook
     const {
         islandOptions,
         pagination: islandPagination,
@@ -48,7 +47,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         handleMenuScrollToBottom: handleIslandMenuScrollToBottom,
         initializeOptions: initializeIslandOptions
     } = useIslandSelect();
-    // Island Account states
     const [selectedIsland, setSelectedIsland] = useState<IslandSelectOption | null>(null);
     
     // Date Range states
@@ -59,12 +57,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     });
     const datePickerRef = useRef<HTMLDivElement>(null);
 
-    // Initialize island options
     useEffect(() => {
         initializeIslandOptions();
     }, [initializeIslandOptions]);
     
-    // Close date picker when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
@@ -89,43 +85,37 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
     const handleFilterChange = (filterId: string, selectedOption: FilterOption | null) => {
         if (filterId === 'status' || filterId === 'date_range') {
-            // TODO: implement other filters
             console.log(`${filterId} filter:`, selectedOption?.value);
             return;
         }
         
+        if (filterId === 'island') {
+            const island = islandOptions.find(opt => opt.value === selectedOption?.value) || null;
+            setSelectedIsland(island);
+        }
+        
         onFilterChange(filterId, selectedOption?.value || '');
     };
-    // Date range state for react-date-range
+
     const [dateRangeState, setDateRangeState] = useState([{
         startDate: new Date(),
         endDate: new Date(),
         key: 'selection'
     }]);
     
-    // Format date untuk display (YYYY-MM-DD)
-    const formatDateDisplay = (date: Date): string => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-    
-    // Handle date range change
     const handleDateRangeChange = (item: any) => {
         const selection = item.selection;
         setDateRangeState([selection]);
         
         if (selection.startDate && selection.endDate) {
-            const formattedStartDate = formatDateDisplay(selection.startDate);
-            const formattedEndDate = formatDateDisplay(selection.endDate);
+            const formattedStartDate = formatDateToYMD(selection.startDate);
+            const formattedEndDate = formatDateToYMD(selection.endDate);
             
             setSelectedDateRange({
                 startDate: formattedStartDate,
                 endDate: formattedEndDate
             });
             
-            // Pass to parent component
             onFilterChange('start_date', formattedStartDate);
             onFilterChange('end_date', formattedEndDate);
         }
@@ -144,6 +134,19 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         setShowDatePicker(false);
     };
     
+    // Clear all filters handler
+    const handleClearAllFilters = () => {
+        setSelectedIsland(null);
+        setSelectedDateRange({ startDate: '', endDate: '' });
+        setDateRangeState([{
+            startDate: new Date(),
+            endDate: new Date(),
+            key: 'selection'
+        }]);
+        setShowDatePicker(false);
+        onClearFilters();
+    };
+    
     // Get display text for date range
     const getDateRangeDisplayText = (): string => {
         if (selectedDateRange.startDate && selectedDateRange.endDate) {
@@ -155,21 +158,23 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         <div className="mt-4 pt-4 border-t border-gray-200 flex-1">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <CustomAsyncSelect
-                    placeholder="Select Island to add..."
+                    placeholder="Select Island..."
                     value={selectedIsland}
                     defaultOptions={islandOptions}
                     loadOptions={handleIslandInputChange}
                     onMenuScrollToBottom={handleIslandMenuScrollToBottom}
                     isLoading={islandPagination.loading}
                     noOptionsMessage={() => "No islands found"}
-                    loadingMessage={() => "Loading islands..."}
+                    loadingMessage={() => "Loading islands"}
                     isSearchable={true}
+                    isClearable={true}
                     inputValue={islandInputValue}
                     onInputChange={(inputValue) => {
                         handleIslandInputChange(inputValue);
                     }}
-                    onChange={(option: any) => {
-                        handleFilterChange('island', option?.value || '');
+                    onChange={(option: IslandSelectOption | null) => {
+                        setSelectedIsland(option);
+                        onFilterChange('island_id', option?.value || '');
                     }}
                 />
                 {filterConfigs.map((config) => (
@@ -186,12 +191,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                             className="w-full"
                         />
                     </div>
-))}
+                ))}
                 
                 {/* DATE RANGE PICKER */}
                 <div className="relative" ref={datePickerRef}>
                     <div 
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-h-[42px] flex items-center justify-between"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-h-[43px] flex items-center justify-between"
                         onClick={() => setShowDatePicker(!showDatePicker)}
                     >
                         <div className="flex items-center gap-2">
@@ -233,15 +238,15 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             </div>
 
             {/* Filter actions */}
-            {/* <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
+            <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
                 <Button
-                    onClick={onClearFilters}
+                    onClick={handleClearAllFilters}
                     className="px-4 py-2 bg-transparent hover:bg-gray-100 text-gray-600 border border-gray-300"
                     size="sm"
                 >
                     Clear All
                 </Button>
-                {onApplyFilters && (
+                {/* {onApplyFilters && (
                     <Button
                         onClick={onApplyFilters}
                         className="px-4 py-2"
@@ -249,8 +254,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     >
                         Apply Filters
                     </Button>
-                )}
-            </div> */}
+                )} */}
+            </div>
         </div>
     );
 };

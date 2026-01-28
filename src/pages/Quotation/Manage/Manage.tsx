@@ -18,8 +18,6 @@ import FilterSection from './components/FilterSection';
 
 const ManageQuotations: React.FC = () => {
     const navigate = useNavigate();
-    
-    // UI state untuk filter collapse
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
     const {
@@ -33,7 +31,6 @@ const ManageQuotations: React.FC = () => {
         handlePageChange,
         handleRowsPerPageChange,
         handleSearchChange,
-        handleManualSearch,
         handleClearFilters,
         handleFilterChange,
         handleEdit,
@@ -42,7 +39,8 @@ const ManageQuotations: React.FC = () => {
         handleDownload,
         confirmDeleteQuotations,
         cancelDelete,
-        applyFilters,
+        setSearchTerm,
+        handleKeyPress,
     } = useQuotationManagement();
 
     // Toggle filter collapse
@@ -84,16 +82,8 @@ const ManageQuotations: React.FC = () => {
                         <div className="block text-sm text-gray-500">{formatDate(row.manage_quotation_date)} - {formatDate(row.manage_quotation_valid_date)}</div>
                     </div>
                 ),
+                width: '220px',
             },
-            // {
-            //     name: 'Customer',
-            //     selector: (row) => row.customer_id,
-            //     cell: (row) => (
-            //         <span className="text-sm">{row.customer_id.substring(0, 20)}...</span>
-            //     ),
-            // },
-            // createDateColumn('Quotation Date', 'manage_quotation_date', tableDateFormat),
-            // createDateColumn('Valid Until', 'manage_quotation_valid_date', tableDateFormat),
             {
                 name: 'Customer Name',
                 selector: (row) => row.customer_name,
@@ -110,10 +100,10 @@ const ManageQuotations: React.FC = () => {
                 center: true,
                 width: '140px',
             },
-            // {
-            //     name: 'Sales Name',
-            //     selector: (row) => row.employee_name,
-            // },
+            {
+                name: 'Island',
+                selector: (row) => row.island_name,
+            },
             {
                 name: 'Status',
                 selector: (row) => row.status,
@@ -143,7 +133,6 @@ const ManageQuotations: React.FC = () => {
                 ),
                 width: '200px'
             },
-            // createDateColumn('Created At', 'created_at', tableDateFormat),
             createActionsColumn([
                 {
                     icon: FaRegFilePdf,
@@ -164,13 +153,6 @@ const ManageQuotations: React.FC = () => {
         [handleView, handleEdit, handleDelete]
     );
 
-    // Handler untuk apply filters
-    const handleApplyFilters = () => {
-        // Manual trigger search setelah filter berubah
-        applyFilters();
-        console.log('Filters applied');
-    };
-
     const SearchAndFilters = useMemo(() => (
         <>
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -182,14 +164,9 @@ const ManageQuotations: React.FC = () => {
                             type="text"
                             placeholder="Search by quotation number, customer ID..."
                             value={searchTerm}
-                            onChange={(e) => handleSearchChange(e.target.value)}
-                            onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    handleManualSearch();
-                                }
-                            }}
-                            className={`pl-10 py-2 w-full rounded-r-none ${searchTerm ? 'pr-10' : 'pr-4'}`}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            className={`pl-10 py-2 w-full ${searchTerm ? 'pr-10' : 'pr-4'}`}
                         />
                         {searchTerm && (
                             <button
@@ -201,37 +178,8 @@ const ManageQuotations: React.FC = () => {
                             </button>
                         )}
                     </div>
-                    <Button
-                        onClick={handleManualSearch}
-                        className="rounded-l-none px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 border-l-0"
-                        size="sm"
-                    >
-                        <MdSearch className="w-4 h-4" />
-                    </Button>
                 </div>
             </div>
-
-            {/* <div className="flex items-center gap-2">
-                <CustomSelect
-                    id="quotation_for"
-                    name="quotation_for"
-                    value={quotationFor ? {
-                        value: quotationFor,
-                        label: quotationFor === 'customer' ? 'Customer' : 'Leasing'
-                    } : null}
-                    onChange={(selectedOption) =>
-                        handleFilterChange('quotation_for', selectedOption?.value || '')
-                    }
-                    options={[
-                        { value: 'customer', label: 'Customer' },
-                        { value: 'leasing', label: 'Leasing' }
-                    ]}
-                    placeholder="Quotation For"
-                    isClearable={false}
-                    isSearchable={false}
-                    className="w-60"
-                />
-            </div> */}
             {/* Sort Order */}
             <div className="flex items-center gap-2">
                 <CustomSelect
@@ -267,17 +215,16 @@ const ManageQuotations: React.FC = () => {
             </div>
         </div>
         
-            {/* Advanced Filters Collapse */}
-            {showAdvancedFilters && (
-                <FilterSection
-                    quotationFor={quotationFor}
-                    onFilterChange={handleFilterChange}
-                    onClearFilters={handleClearFilters}
-                    onApplyFilters={handleApplyFilters}
-                />
-            )}
+        {/* Advanced Filters Collapse */}
+        {showAdvancedFilters && (
+            <FilterSection
+                quotationFor={quotationFor}
+                onFilterChange={handleFilterChange}
+                onClearFilters={handleClearFilters}
+            />
+        )}
         </>
-    ), [searchTerm, sortOrder, quotationFor, loading, quotations.length, showAdvancedFilters, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange, handleToggleFilter, handleApplyFilters]);
+    ), [searchTerm, sortOrder, quotationFor, loading, quotations.length, showAdvancedFilters, handleSearchChange, handleClearFilters, handleFilterChange, handleToggleFilter]);
 
     return (
         <>

@@ -18,7 +18,7 @@ export const useQuotation = () => {
         search: '',
         sort_order: 'desc' as 'asc' | 'desc',
         quotation_for: '' as 'customer' | 'leasing' | '',
-        island: '',
+        island_id: '',
         start_date: '',
         end_date: ''
     });
@@ -36,7 +36,7 @@ export const useQuotation = () => {
                 search: filters.search,
                 sort_order: filters.sort_order,
                 quotation_for: filters.quotation_for,
-                island: filters.island,
+                island_id: filters.island_id,
                 start_date: filters.start_date,
                 end_date: filters.end_date
             };
@@ -55,7 +55,7 @@ export const useQuotation = () => {
         } finally {
             setLoading(false);
         }
-    }, [pagination.page, pagination.limit, filters.search, filters.sort_order, filters.quotation_for, filters.island, filters.start_date, filters.end_date]);
+    }, [pagination.page, pagination.limit, filters.search, filters.sort_order, filters.quotation_for, filters.island_id, filters.start_date, filters.end_date]);
 
     // Debounced search handler
     const handleSearchChange = useCallback((value: string) => {
@@ -74,7 +74,7 @@ export const useQuotation = () => {
                 search: value,
                 sort_order: filters.sort_order,
                 quotation_for: filters.quotation_for,
-                island: filters.island,
+                island_id: filters.island_id,
                 start_date: filters.start_date,
                 end_date: filters.end_date
             };
@@ -99,7 +99,7 @@ export const useQuotation = () => {
                     setLoading(false);
                 });
         }, 500);
-    }, [pagination.limit, filters.sort_order, filters.quotation_for, filters.island, filters.start_date, filters.end_date]);
+    }, [pagination.limit, filters.sort_order, filters.quotation_for, filters.island_id, filters.start_date, filters.end_date]);
 
     const updateFilters = useCallback((key: keyof typeof filters, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
@@ -117,7 +117,7 @@ export const useQuotation = () => {
             search: '',
             sort_order: 'desc',
             quotation_for: '',
-            island: '',
+            island_id: '',
             start_date: '',
             end_date: ''
         });
@@ -130,7 +130,7 @@ export const useQuotation = () => {
             search: '',
             sort_order: 'desc',
             quotation_for: '',
-            island: '',
+            island_id: '',
             start_date: '',
             end_date: ''
         };
