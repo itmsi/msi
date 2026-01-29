@@ -40,11 +40,14 @@ export interface QuotationItem {
     selling_price_star_5?: string;
     total: string;
     description: string;
-    image: string;
+    image: imageItems[];
     manage_quotation_item_accessories?: QuotationItemAccessory[]; // Nested accessories
     manage_quotation_item_specifications?: QuotationItemSpecification[]; // Nested specifications
 }
-
+export interface imageItems {
+    image_id: string;
+    image_url: string;
+}
 export interface QuotationAccessory {
     accessory_id: string;
     accessory_part_name: string;
@@ -223,11 +226,17 @@ export interface QuotationRequest {
     sort_order: '' | 'asc' | 'desc';
     quotation_for?: 'customer' | 'leasing' | '';
     search: string;
+    island_id?: string;
+    start_date?: string;
+    end_date?: string;
 }
 export interface QuotationFilters {
     search: string;
     sort_order: 'asc' | 'desc' | '';
     quotation_for: 'customer' | 'leasing' | '';
+    island_id: string;
+    start_date: string;
+    end_date: string;
 }
 export interface QuotationPagination {
     page: number;
@@ -264,8 +273,9 @@ export interface ManageQuotationItem {
     manage_quotation_shipping_term: string | null;
     manage_quotation_franco: string | null;
     manage_quotation_lead_time: string | null;
-    quotation_for?: 'customer' | 'leasing';  // New field: quotation type
-    star?: string;                             // New field: star rating/input
+    quotation_for?: 'customer' | 'leasing';
+    star?: string;
+    island_name: string;
     bank_account_name: string;
     bank_account_number: string;
     bank_account_bank_name: string;

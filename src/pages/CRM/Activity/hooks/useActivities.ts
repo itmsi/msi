@@ -33,6 +33,7 @@ export const useActivities = () => {
                 sort_order: filters.sort_order || 'desc',
                 sort_by: filters.sort_by || 'updated_at',
                 search: searchValue,
+                transaction_type: filters.transaction_type || '',
                 ...params
             };
             
@@ -54,7 +55,7 @@ export const useActivities = () => {
         } finally {
             setLoading(false);
         }
-    }, [pagination.page, pagination.limit, searchValue, filters.sort_by, filters.sort_order]);
+    }, [pagination.page, pagination.limit, searchValue, filters.sort_by, filters.sort_order, filters.transaction_type]);
 
     // Handle page changes
     const handlePageChange = useCallback((page: number) => {
@@ -96,6 +97,7 @@ export const useActivities = () => {
         setPagination(prev => ({ ...prev, page: 1 }));
         
         fetchActivities({
+            transaction_type: updatedFilters.transaction_type,
             sort_by: updatedFilters.sort_by,
             sort_order: updatedFilters.sort_order !== '' ? updatedFilters.sort_order : undefined,
             page: 1
