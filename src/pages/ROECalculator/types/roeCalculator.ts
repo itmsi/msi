@@ -12,7 +12,7 @@ export interface ROECalculatorFormData {
     jumlah_unit: string;
     down_payment_pct: number | string;
     tenor_pembiayaan: number | string;
-    interest_rate: string;
+    interest_rate: string | number;
     periode_depresiasi: number | string;
     
     // Step 3 - Operational
