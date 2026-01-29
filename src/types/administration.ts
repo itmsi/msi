@@ -446,7 +446,6 @@ export interface Employee {
     employee_id: string;
     employee_name: string;
     employee_email: string;
-    employee_status: string;
     title_id: string;
     created_at: string;
     created_by: string | null;
@@ -512,7 +511,6 @@ export interface EmployeeFormData {
     employee_office_number?: string | null;
     employee_address?: string | null;
     employee_phone?: string | null;
-    employee_status: string;
     gender_id?: string | null;
     island_id?: string;
     permission_detail?: EmployeeSystemPermission[]; // Updated to new structure

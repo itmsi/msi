@@ -564,17 +564,6 @@ export default function EditEmployee() {
                                             placeholder="Enter employee address"
                                         />
                                     </div>
-
-                                    {/* Employee Address */}
-                                    <div className="md:col-span-2">
-                                        {/* <Label htmlFor="employee_address">Address</Label> */}
-                                        <Switch 
-                                            label="Status Employee" 
-                                            showStatusText={true} 
-                                            position="left"
-                                            checked={formData.employee_status === 'active'}
-                                        />
-                                    </div>
                                 </div>
                                 <div className="absolute top-7 bottom-7 right-0 border-r border-gray-300 hidden lg:block mx-3"></div>
                             </div>

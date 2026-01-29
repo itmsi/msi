@@ -10,8 +10,6 @@ interface SwitchProps {
     onChange?: (checked: boolean) => void;
     className?: string;
     color?: "blue" | "gray";
-    showStatusText?: boolean;
-    position?: "left" | "right";
 }
 
 const Switch: React.FC<SwitchProps> = ({
@@ -21,9 +19,7 @@ const Switch: React.FC<SwitchProps> = ({
     disabled = false,
     onChange,
     className = "",
-    color = "blue",
-    showStatusText = false,
-    position = "right"
+    color = "blue"
 }) => {
     const [isChecked, setIsChecked] = useState(defaultChecked);
     
@@ -69,7 +65,7 @@ const Switch: React.FC<SwitchProps> = ({
         <label
             className={clsx(
                 twMerge(
-                    `inline-flex cursor-pointer select-none items-center gap-3 text-sm font-medium ${position === "left" ? "flex-row-reverse" : ""} ${
+                    `inline-flex cursor-pointer select-none items-center gap-3 text-sm font-medium ${
                     disabled ? "text-gray-400" : "text-gray-700"
                     }`,
                     className,
@@ -79,32 +75,14 @@ const Switch: React.FC<SwitchProps> = ({
         >
             <div className="relative">
                 <div
-                    className={`block transition duration-150 ease-linear ${
-                        showStatusText ? "h-8 w-22" : "h-6 w-11"
-                    } rounded-full ${
+                    className={`block transition duration-150 ease-linear h-6 w-11 rounded-full ${
                         disabled
                         ? "bg-gray-100 pointer-events-none"
                         : switchColors.background
                     }`}
-                >
-                    {showStatusText && (
-                        <div className={`flex ${checkedValue ? "justify-start ps-3" : "justify-end pe-3"} items-center h-full`}>
-                            <span className={`text-xs font-medium transition-opacity duration-150 ${
-                                checkedValue ? "text-white" : "text-gray-600"
-                            }`}>
-                                {checkedValue ? "Active" : "Inactive"}
-                            </span>
-                        </div>
-                    )}
-                </div>
+                    ></div>
                 <div
-                    className={`absolute ${showStatusText ? "left-1 top-1 h-6 w-6" : "left-0.5 top-0.5 h-5 w-5"} rounded-full shadow-theme-sm duration-150 ease-linear transform ${
-                        showStatusText 
-                            ? checkedValue 
-                                ? "translate-x-13 bg-white" 
-                                : "translate-x-0 bg-white"
-                            : switchColors.knob
-                    }`}
+                    className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full shadow-theme-sm duration-150 ease-linear transform ${switchColors.knob}`}
                 ></div>
             </div>
             {label}

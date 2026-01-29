@@ -10,7 +10,6 @@ import Input from "@/components/form/input/InputField";
 import { Employee } from "@/types/administration";
 import { createActionsColumn } from "@/components/ui/table";
 import { PermissionGate } from "@/components/common/PermissionComponents";
-import { ActiveStatusBadge } from "@/components/ui/badge";
 
 export default function ManageEmployee() {
     const navigate = useNavigate();
@@ -59,14 +58,6 @@ export default function ManageEmployee() {
         {
             name: 'Email',
             selector: row => row.employee_email || 'N/A',
-        },
-        {
-            name: 'Status',
-            selector: (row) => row?.employee_status || 'inactive',
-            cell: (row) => <ActiveStatusBadge status={(row?.employee_status as 'active' | 'inactive') || 'inactive'} />,
-            width: '120px',
-            center: true,
-            wrap: true,
         },
         createActionsColumn([
             {
