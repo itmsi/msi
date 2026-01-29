@@ -230,7 +230,7 @@ export default function EditQuotation() {
                     horse_power: item.cp_horse_power || '',
                     market_price: item.cp_market_price || '',
                     product_type: item.product_type || '',
-                    image: item.cp_image || '',
+                    image: item.images || [],
                     componen_product_unit_model: '',
                     selling_price_star_1: '',
                     selling_price_star_2: '',
@@ -759,7 +759,7 @@ export default function EditQuotation() {
                     horse_power: apiProductData.horse_power || '',
                     product_type: apiProductData.product_type || '',
                     market_price: apiProductData.market_price || '0',
-                    image: (apiProductData.images && apiProductData.images.length > 0) ? apiProductData.images[0] : '',
+                    image: apiProductData.images?.length ? apiProductData.images : [],
                     quantity: 1,
                     price: apiProductData.market_price || '0',
                     total: apiProductData.market_price || '0',
@@ -856,6 +856,9 @@ export default function EditQuotation() {
             toast.error('Product not found in quotation');
             return;
         }
+console.log({
+    existingItem: formData.manage_quotation_items
+});
 
         // Initialize offcanvas data if not exists
         if (!unsavedProductChanges[productId]) {

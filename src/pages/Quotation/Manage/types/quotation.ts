@@ -40,11 +40,14 @@ export interface QuotationItem {
     selling_price_star_5?: string;
     total: string;
     description: string;
-    image: string;
+    image: imageItems[];
     manage_quotation_item_accessories?: QuotationItemAccessory[]; // Nested accessories
     manage_quotation_item_specifications?: QuotationItemSpecification[]; // Nested specifications
 }
-
+export interface imageItems {
+    image_id: string;
+    image_url: string;
+}
 export interface QuotationAccessory {
     accessory_id: string;
     accessory_part_name: string;

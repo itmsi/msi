@@ -544,7 +544,7 @@ export default function CreateQuotation() {
                     horse_power: apiProductData.horse_power || '',
                     product_type: apiProductData.product_type || '',
                     market_price: apiProductData.market_price || '0',
-                    image: (apiProductData.images && apiProductData.images.length > 0) ? apiProductData.images[0] : '',
+                    image: apiProductData.images?.length ? apiProductData.images : [],
                     quantity: 1,
                     price: apiProductData.market_price || '0',
                     total: apiProductData.market_price || '0',
