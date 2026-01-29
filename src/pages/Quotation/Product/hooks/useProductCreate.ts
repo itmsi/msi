@@ -290,7 +290,8 @@ export const useCreateProduct = () => {
             // Append image files if uploaded
             if (productImage && productImage.length > 0) {
                 if (productImage.length === 1) {
-                    formDataToSend.append('image[0]', productImage[0]);
+                    formDataToSend.append('images[0]', productImage[0]);
+                    formDataToSend.append('image_count', productImage.length.toString());
                 } else {
                     productImage.forEach((file, index) => {
                         formDataToSend.append(`images[${index}]`, file);

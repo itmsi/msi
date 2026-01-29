@@ -25,7 +25,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         jumlah_unit: '',
         down_payment_pct: 30,
         tenor_pembiayaan: 12,
-        interest_rate: '',
+        interest_rate: 0,
         periode_depresiasi: 60,
         
         // Step 3
@@ -156,7 +156,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
             case 2:
                 if (!formData.harga_per_unit) errors.harga_per_unit = 'Harga per unit is required';
                 if (!formData.jumlah_unit) errors.jumlah_unit = 'Jumlah unit is required';
-                if (!formData.interest_rate) errors.interest_rate = 'Interest rate is required';
+                // if (!formData.interest_rate) errors.interest_rate = 'Interest rate is required';
                 if (!formData.tenor_pembiayaan) errors.tenor_pembiayaan = 'Tenor pembiayaan is required';
                 if (!formData.periode_depresiasi) errors.periode_depresiasi = 'Periode depresiasi is required';
                 break;
