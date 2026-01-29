@@ -880,9 +880,22 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                             } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
                                 imageFormat = 'JPEG';
                             }
+                            
+                            let imageFormat2 = 'JPEG';
+                            if (imageUrl2) {
+                                const imageSrc2 = imageUrl2.toLowerCase();
+                                if (imageSrc2.includes('.png') || imageSrc2.includes('image/png')) {
+                                    imageFormat2 = 'PNG';
+                                } else if (imageSrc2.includes('.jpg') || imageSrc2.includes('.jpeg') || imageSrc2.includes('image/jpeg')) {
+                                    imageFormat2 = 'JPEG';
+                                }
+                            }
+                            
                             if (panjang) {
-                                doc.addImage(imageUrl, imageFormat, item1StartX + (itemWidth / 2) - 15, item1YPos - 10, 37, 50);
-                                doc.addImage(imageUrl2, imageFormat, item1StartX + (itemWidth / 2) - 25, item1YPos - 10, 37, 50);
+                                doc.addImage(imageUrl, imageFormat, item1StartX + (itemWidth / 2) - 38, item1YPos - 10, 37, 50);
+                                if (imageUrl2) {
+                                    doc.addImage(imageUrl2, imageFormat2, item1StartX + (itemWidth / 2) + 2, item1YPos - 10, 37, 50);
+                                }
                             } else {
                                 doc.addImage(imageUrl, imageFormat, item1StartX + (itemWidth / 2) - 21, item1YPos - 10, 37, 50);
                             }
@@ -1015,9 +1028,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
             // Render second item (if exists)
             if (!hasOnlyOne && item2) {
-            let item2YPos = yPos;
-            
-            // Specifications for item 2
+                let item2YPos = yPos;
+                
+                // Specifications for item 2
                 if (item2.manage_quotation_item_specifications && item2.manage_quotation_item_specifications.length > 0) {
                     setFontSafe(doc, 'Futura', 'bold');
                     doc.setFontSize(10);
@@ -1026,6 +1039,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     // Add product image if available
                     if (item2.images && item2.images.length > 0) {
                         const imageUrl = getImageUrl(item2.images[0]);
+                        const imageUrl2 = getImageUrl(item2.images[1]);
+                        let panjang = item2.images.length > 0 && item2.images.length < 3 ? true : false;
+                        console.log({panjang});
+                        
                         if (imageUrl) {
                             try {
                                 let imageFormat = 'JPEG';
@@ -1035,7 +1052,27 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                                 } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
                                     imageFormat = 'JPEG';
                                 }
-                                doc.addImage(imageUrl, imageFormat, item2StartX + (itemWidth / 2) - 21, item2YPos - 10, 37, 50);
+
+                                let imageFormat2 = 'JPEG';
+                                if (imageUrl2) {
+                                    const imageSrc2 = imageUrl2.toLowerCase();
+                                    if (imageSrc2.includes('.png') || imageSrc2.includes('image/png')) {
+                                        imageFormat2 = 'PNG';
+                                    } else if (imageSrc2.includes('.jpg') || imageSrc2.includes('.jpeg') || imageSrc2.includes('image/jpeg')) {
+                                        imageFormat2 = 'JPEG';
+                                    }
+                                }
+                                
+                                if (panjang) {
+                                    doc.addImage(imageUrl, imageFormat, item2StartX + (itemWidth / 2) - 38, item2YPos - 10, 37, 50);
+                                    if (imageUrl2) {
+                                        doc.addImage(imageUrl2, imageFormat2, item2StartX + (itemWidth / 2) + 2, item2YPos - 10, 37, 50);
+                                    }
+                                } else {
+                                    doc.addImage(imageUrl, imageFormat, item2StartX + (itemWidth / 2) - 21, item2YPos - 10, 37, 50);
+                                }
+                                
+                                // doc.addImage(imageUrl, imageFormat, item2StartX + (itemWidth / 2) - 21, item2YPos - 10, 37, 50);
                                 item2YPos += 50;
                             } catch (error) {
                                 console.warn('Failed to load product image for item 2:', error);
