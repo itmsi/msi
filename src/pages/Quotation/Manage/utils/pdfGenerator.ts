@@ -869,6 +869,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 // Add product image if available
                 if (item1.images && item1.images.length > 0) {
                     const imageUrl = getImageUrl(item1.images[0]);
+                    const imageUrl2 = getImageUrl(item1.images[1]);
+                    let panjang = item1.images.length > 0 && item1.images.length < 2 ? true : false;
                     if (imageUrl) {
                         try {
                             let imageFormat = 'JPEG';
@@ -878,7 +880,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                             } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
                                 imageFormat = 'JPEG';
                             }
-                            doc.addImage(imageUrl, imageFormat, item1StartX + (itemWidth / 2) - 21, item1YPos - 10, 37, 50);
+                            if (panjang) {
+                                doc.addImage(imageUrl, imageFormat, item1StartX + (itemWidth / 2) - 15, item1YPos - 10, 37, 50);
+                                doc.addImage(imageUrl2, imageFormat, item1StartX + (itemWidth / 2) - 25, item1YPos - 10, 37, 50);
+                            } else {
+                                doc.addImage(imageUrl, imageFormat, item1StartX + (itemWidth / 2) - 21, item1YPos - 10, 37, 50);
+                            }
+                            
                             item1YPos += 50;
                         } catch (error) {
                             console.warn('Failed to load product image for item 1:', error);
