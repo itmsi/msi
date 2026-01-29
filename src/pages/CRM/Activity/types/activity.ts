@@ -63,6 +63,7 @@ export interface ActivityListRequest {
     transaction_source?: string;
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
+    is_admin?: boolean;
 }
 
 export interface ActivityListResponse {
