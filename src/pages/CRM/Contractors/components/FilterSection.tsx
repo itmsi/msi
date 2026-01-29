@@ -22,8 +22,8 @@ const filterConfigs = [
         label: 'Filter by Status',
         options: [
             { value: '', label: 'All Status' },
-            { value: 'aktif', label: 'Active' },
-            { value: 'non aktif', label: 'Inactive' }
+            { value: 'active', label: 'Active' },
+            { value: 'inactive', label: 'Inactive' }
         ],
         placeholder: 'Filter by Status'
     },
@@ -75,7 +75,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     };
 
     const handleFilterChangeInternal = (filterId: string, selectedOption: FilterOption | null) => {
-        if (filterId === 'segmentation') {
+        if (filterId === 'segmentation_id') {
             const segment = segementationOptions.find(opt => opt.value === selectedOption?.value) || null;
             setSelectedSegment(segment);
         } else {
@@ -120,7 +120,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     }}
                     onChange={(option: SegementationSelectOption | null) => {
                         setSelectedSegment(option);
-                        onFilterChange('segmentation', option?.value || '');
+                        onFilterChange('segmentation_id', option?.value || '');
                     }}
                 />
                 {filterConfigs.map((config) => (

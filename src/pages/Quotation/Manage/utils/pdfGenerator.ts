@@ -870,7 +870,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 if (item1.images && item1.images.length > 0) {
                     const imageUrl = getImageUrl(item1.images[0]);
                     const imageUrl2 = getImageUrl(item1.images[1]);
-                    let panjang = item1.images.length > 0 && item1.images.length < 2 ? true : false;
+                    let panjang = item1.images.length > 1 && item1.images.length < 3 ? true : false;
                     if (imageUrl) {
                         try {
                             let imageFormat = 'JPEG';
@@ -1040,8 +1040,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     if (item2.images && item2.images.length > 0) {
                         const imageUrl = getImageUrl(item2.images[0]);
                         const imageUrl2 = getImageUrl(item2.images[1]);
-                        let panjang = item2.images.length > 0 && item2.images.length < 3 ? true : false;
-                        console.log({panjang});
+                        let panjang = item2.images.length > 1 && item2.images.length < 3 ? true : false;
                         
                         if (imageUrl) {
                             try {
