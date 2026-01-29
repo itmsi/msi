@@ -5,7 +5,7 @@ import { Contractor, ContractorListRequest, Pagination } from '../types/contract
 export const useContractors = () => {
     const [contractors, setContractors] = useState<Contractor[]>([]);
     const [searchValue, setSearchValue] = useState('');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
     const [sortModify, setSortModify] = useState<'updated_at' | 'created_at' | ''>('updated_at');
     const [statusFilter, setStatusFilter] = useState<'' | 'active' | 'inactive'>('');
     const [segmentationFilter, setSegmentationFilter] = useState('');

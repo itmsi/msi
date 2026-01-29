@@ -4,7 +4,7 @@ import { IupService } from '../services/iupManagementService';
 
 export const useIupManagement = () => {
     const [searchValue, setSearchValue] = useState('');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
     const [sortModify, setSortModify] = useState<'updated_at' | 'created_at' | ''>('updated_at');
     const [statusFilter, setStatusFilter] = useState('');
     const [segmentationFilter, setSegmentationFilter] = useState('');
