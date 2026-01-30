@@ -545,6 +545,7 @@ export interface EmployeeListRequest {
     department_name?: string;
     title_name?: string;
     is_sales_quotation?: boolean;
+    employee_status?: string;
 }
 
 // Employee list response
@@ -575,6 +576,7 @@ export interface EmployeeFilters {
     title_name: string;
     sort_by: string;
     sort_order: 'asc' | 'desc' | '';
+    employee_status: string;
 }
 
 // Employee detail response
