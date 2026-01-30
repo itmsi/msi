@@ -8,7 +8,7 @@ import { CategoryBadge } from '@/components/ui/badge';
 import Button from '@/components/ui/button/Button';
 
 export interface ExpandableRowData extends BaseEntity {
-    type: 'island' | 'group' | 'area' | 'iup_zone' | 'iup';
+    type: 'island' | 'group' | 'area' | 'iup_zone' | 'iup_segmentation' | 'iup';
     level: number;
     parent_id?: string;
     children?: any[];
