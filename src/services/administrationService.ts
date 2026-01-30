@@ -366,7 +366,7 @@ export class employeesService {
         const filteredParams: Record<string, unknown> = {
             page: params.page,
             limit: params.limit,
-            employee_status: params.employee_status || "all"
+            employee_status: params.employee_status
         };
 
         // Only include non-empty optional parameters
