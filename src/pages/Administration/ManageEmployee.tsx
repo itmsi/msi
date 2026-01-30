@@ -36,7 +36,7 @@ export default function ManageEmployee() {
         handleSearchChange,
         setConfirmDelete,
         setConfirmResetPassword
-    } = useEmployees();
+    } = useEmployees(true, { employee_status: 'all' });
 
     // Data table columns dengan permission-based actions
     const columns: TableColumn<Employee>[] = [
