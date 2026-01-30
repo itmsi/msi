@@ -209,6 +209,46 @@ export const handlePercentageInput = (
     return validatedPercentage.toString();
 };
 
+export const handlePercentageInputComma = (
+    inputValue: string, 
+    min: number = 0, 
+    max: number = 100
+): string => {
+    // Return empty if empty
+    if (!inputValue) return '';
+
+    // Allow typing only numbers and comma
+    const cleanedValue = inputValue.replace(/[^\d,]/g, '');
+    
+    // Check if it's just a comma or starts with comma, prefix with 0
+    if (cleanedValue === ',') return '0,';
+    if (cleanedValue.startsWith(',')) return '0' + cleanedValue;
+
+    // Split by comma to check for multiple commas
+    const parts = cleanedValue.split(',');
+    if (parts.length > 2) return parts[0] + ',' + parts.slice(1).join('');
+    
+    // Validate range
+    // Replace comma with dot for parsing
+    const dotValue = cleanedValue.replace(',', '.');
+    // If it ends with dot (comma originally), we can't fully parse it as float yet for validation if we want to allow "50,"
+    // So we only validate if it's a complete number or doesn't end in comma
+    
+    const numericValue = parseFloat(dotValue);
+
+    if (isNaN(numericValue)) return cleanedValue; // Should be handled by regex above but safe check
+
+    if (numericValue > max) return max.toString().replace('.', ',');
+    if (numericValue < min) return min.toString().replace('.', ',');
+
+    // Limit decimal places to 2 (optional, but good for currency/percentage)
+    if (parts.length > 1 && parts[1].length > 2) {
+        return parts[0] + ',' + parts[1].substring(0, 2);
+    }
+
+    return cleanedValue;
+};
+
 export const hasChanged = <T extends object>(oldData: T, newData: Partial<T>, keys: (keyof T)[]): boolean => {
     return keys.some((key) => oldData[key] !== newData[key]);
 };

@@ -1290,7 +1290,7 @@ export const useDepartment = () => {
 };
 
 // Employee Hook
-export const useEmployees = (autoInit: boolean = true) => {
+export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<EmployeeFilters> = {}) => {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [employee, setEmployee] = useState<Employee | null>(null);
     const [pagination, setPagination] = useState<EmployeePagination>({
@@ -1316,7 +1316,9 @@ export const useEmployees = (autoInit: boolean = true) => {
         title_name: "",
         company_name: "",
         department_name: "",
-        title_id: ""
+        title_id: "",
+        employee_status: "",
+        ...initialFilters
     });
     const [validationErrors, setValidationErrors] = useState<EmployeeValidationErrors>({});
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; employeeId?: string; }>({ show: false });
@@ -1373,7 +1375,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             sort_order: filters.sort_order,
             title_id: filters.title_id,
             company_name: filters.company_name,
-            department_name: filters.department_name
+            department_name: filters.department_name,
+            employee_status: filters.employee_status
         };
 
         debouncedFetch(params, appendData);
@@ -1542,22 +1545,23 @@ export const useEmployees = (autoInit: boolean = true) => {
         }
         
         debounceTimer.current = setTimeout(() => {
-            setFilters(currentFilters => {
-                const params: EmployeeListRequest = {
-                    page: 1,
-                    limit: pagination.limit,
-                    search: filterKey === 'search' ? value : currentFilters.search,
-                    sort_by: filterKey === 'sort_by' ? value : currentFilters.sort_by,
-                    sort_order: filterKey === 'sort_order' ? value : currentFilters.sort_order,
-                    title_id: filterKey === 'title_id' ? value : currentFilters.title_id,
-                    company_name: filterKey === 'company_name' ? value : currentFilters.company_name,
-                    department_name: filterKey === 'department_name' ? value : currentFilters.department_name
-                };
-                setPagination(prev => ({ ...prev, page: 1 }));
-                
-                debouncedFetch(params, false);
-                return currentFilters;
-            });
+            // Create params with the new value instead of using stale state
+            const params: EmployeeListRequest = {
+                page: 1, // Reset to first page when filtering
+                limit: pagination.limit,
+                search: filterKey === 'search' ? value : filters.search,
+                sort_by: filterKey === 'sort_by' ? value : filters.sort_by,
+                sort_order: filterKey === 'sort_order' ? value : filters.sort_order,
+                title_id: filterKey === 'title_id' ? value : filters.title_id,
+                company_name: filterKey === 'company_name' ? value : filters.company_name,
+                department_name: filterKey === 'department_name' ? value : filters.department_name,
+                employee_status: filterKey === 'employee_status' ? value : filters.employee_status
+            };
+            
+            // Update pagination to first page if filtering
+            setPagination(prev => ({ ...prev, page: 1 }));
+            
+            debouncedFetch(params, false); // Don't append data for search
         }, 500);
     }, [pagination.limit, debouncedFetch]);
 
@@ -1587,7 +1591,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             title_name: "",
             company_name: "",
             department_name: "",
-            title_id: ""
+            title_id: "",
+            employee_status: ""
         });
         
         // Reset pagination
@@ -1602,7 +1607,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             sort_order: "",
             title_id: "",
             company_name: "",
-            department_name: ""
+            department_name: "",
+            employee_status: ""
         };
         
         debouncedFetch(clearedParams, false);
