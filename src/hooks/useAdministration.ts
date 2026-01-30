@@ -1303,6 +1303,7 @@ export const useEmployees = (autoInit: boolean = true) => {
     const [formData, setFormData] = useState<EmployeeFormData>({
         employee_name: "",
         employee_email: "",
+        employee_status: "inactive",
         title_id: "",
         company_id: "",
         department_id: ""
@@ -1402,6 +1403,7 @@ export const useEmployees = (autoInit: boolean = true) => {
             setFormData({
                 employee_name: "",
                 employee_email: "",
+                employee_status: "inactive",
                 title_id: "",
                 company_id: "",
                 department_id: ""
@@ -1429,6 +1431,7 @@ export const useEmployees = (autoInit: boolean = true) => {
             setFormData({
                 employee_name: "",
                 employee_email: "",
+                employee_status: "inactive",
                 title_id: "",
                 company_id: "",
                 department_id: ""
@@ -1481,6 +1484,7 @@ export const useEmployees = (autoInit: boolean = true) => {
             employee_name: employee.employee_name,
             title_id: employee.title_id.toString(),
             employee_email: employee.employee_email,
+            employee_status: employee.employee_status,
             company_id: employee.company_id.toString(),
             department_id: employee.department_id.toString()
         });
@@ -1522,13 +1526,6 @@ export const useEmployees = (autoInit: boolean = true) => {
         fetchEmployees(1, limit, false);
     };
 
-    const handleFilterChange = (key: keyof EmployeeFilters, value: string) => {
-        setFilters(prev => ({ ...prev, [key]: value }));
-        if (key !== 'search') {
-            setPagination(prev => ({ ...prev, page: 1 }));
-        }
-    };
-
     // Debounced filter change for search
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
     
@@ -1538,7 +1535,6 @@ export const useEmployees = (autoInit: boolean = true) => {
             [filterKey]: value
         }));
         
-        // Debounce API calls for filter changes
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
@@ -1562,10 +1558,18 @@ export const useEmployees = (autoInit: boolean = true) => {
             
             debouncedFetch(params, false); // Don't append data for search
         }, 500);
-    }, [pagination.limit, filters, debouncedFetch]);
+    }, [pagination.limit, debouncedFetch]);
 
     const handleSearchChange = useCallback((value: string) => {
         handleFilterChangeDebounced('search', value);
+    }, [handleFilterChangeDebounced]);
+
+    const handleFilterChange = useCallback((key: keyof EmployeeFilters, value: string) => {
+        if (key === 'search') {
+            handleFilterChangeDebounced(key, value);
+        } else {
+            handleFilterChangeDebounced(key, value);
+        }
     }, [handleFilterChangeDebounced]);
 
     const clearFilters = () => {
@@ -1610,6 +1614,7 @@ export const useEmployees = (autoInit: boolean = true) => {
         setEditingEmployee(null);
         setFormData({
             employee_name: "",
+            employee_status: "inactive",
             title_id: "",
             department_id: "",
             company_id: "",
@@ -1623,6 +1628,7 @@ export const useEmployees = (autoInit: boolean = true) => {
         setEditingEmployee(null);
         setFormData({
             employee_name: "",
+            employee_status: "inactive",
             title_id: "",
             department_id: "",
             company_id: "",
@@ -2553,6 +2559,7 @@ export const useEmployeeDetail = () => {
     const [formData, setFormData] = useState<EmployeeFormData>({
         employee_name: '',
         employee_email: '',
+        employee_status: 'inactive',
         title_id: '',
         company_id: '',
         department_id: '',
@@ -2587,6 +2594,7 @@ export const useEmployeeDetail = () => {
                 setFormData({
                     employee_name: response.data.employee_name,
                     employee_email: response.data.employee_email,
+                    employee_status: response.data.employee_status,
                     title_id: response.data.title_id,
                     company_id: response.data.company_id,
                     department_id: response.data.department_id,
