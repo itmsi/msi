@@ -1524,13 +1524,6 @@ export const useEmployees = (autoInit: boolean = true) => {
         fetchEmployees(1, limit, false);
     };
 
-    const handleFilterChange = (key: keyof EmployeeFilters, value: string) => {
-        setFilters(prev => ({ ...prev, [key]: value }));
-        if (key !== 'search') {
-            setPagination(prev => ({ ...prev, page: 1 }));
-        }
-    };
-
     // Debounced filter change for search
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
     
@@ -1540,33 +1533,40 @@ export const useEmployees = (autoInit: boolean = true) => {
             [filterKey]: value
         }));
         
-        // Debounce API calls for filter changes
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
         
         debounceTimer.current = setTimeout(() => {
-            // Create params with the new value instead of using stale state
-            const params: EmployeeListRequest = {
-                page: 1, // Reset to first page when filtering
-                limit: pagination.limit,
-                search: filterKey === 'search' ? value : filters.search,
-                sort_by: filterKey === 'sort_by' ? value : filters.sort_by,
-                sort_order: filterKey === 'sort_order' ? value : filters.sort_order,
-                title_id: filterKey === 'title_id' ? value : filters.title_id,
-                company_name: filterKey === 'company_name' ? value : filters.company_name,
-                department_name: filterKey === 'department_name' ? value : filters.department_name
-            };
-            
-            // Update pagination to first page if filtering
-            setPagination(prev => ({ ...prev, page: 1 }));
-            
-            debouncedFetch(params, false); // Don't append data for search
+            setFilters(currentFilters => {
+                const params: EmployeeListRequest = {
+                    page: 1,
+                    limit: pagination.limit,
+                    search: filterKey === 'search' ? value : currentFilters.search,
+                    sort_by: filterKey === 'sort_by' ? value : currentFilters.sort_by,
+                    sort_order: filterKey === 'sort_order' ? value : currentFilters.sort_order,
+                    title_id: filterKey === 'title_id' ? value : currentFilters.title_id,
+                    company_name: filterKey === 'company_name' ? value : currentFilters.company_name,
+                    department_name: filterKey === 'department_name' ? value : currentFilters.department_name
+                };
+                setPagination(prev => ({ ...prev, page: 1 }));
+                
+                debouncedFetch(params, false);
+                return currentFilters;
+            });
         }, 500);
-    }, [pagination.limit, filters, debouncedFetch]);
+    }, [pagination.limit, debouncedFetch]);
 
     const handleSearchChange = useCallback((value: string) => {
         handleFilterChangeDebounced('search', value);
+    }, [handleFilterChangeDebounced]);
+
+    const handleFilterChange = useCallback((key: keyof EmployeeFilters, value: string) => {
+        if (key === 'search') {
+            handleFilterChangeDebounced(key, value);
+        } else {
+            handleFilterChangeDebounced(key, value);
+        }
     }, [handleFilterChangeDebounced]);
 
     const clearFilters = () => {
