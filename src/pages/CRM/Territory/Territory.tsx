@@ -17,7 +17,7 @@ const Territory: React.FC = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [addModalConfig, setAddModalConfig] = useState<{
         parentRow?: ExpandableRowData;
-        childType: 'island' | 'group' | 'area' | 'iup_zone' | 'iup';
+        childType: 'island' | 'group' | 'area' | 'iup_zone' | 'iup_segmentation' | 'iup';
     }>({ childType: 'island' });
     const [editTerritoryData, setEditTerritoryData] = useState<ExpandableRowData | undefined>();
     
@@ -61,7 +61,7 @@ const Territory: React.FC = () => {
     const handleAddChild = (parentRow: ExpandableRowData, childType: string) => {
         setAddModalConfig({
             parentRow,
-            childType: childType as 'island' | 'group' | 'area' | 'iup_zone' | 'iup'
+            childType: childType as 'island' | 'group' | 'area' | 'iup_zone' | 'iup_segmentation' | 'iup'
         });
         setShowAddModal(true);
     };
