@@ -239,7 +239,8 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
                     {row.code}
                 </Badge>
             ),
-            width: '120px'
+            width: '120px',
+            center: true
         },
         {
             name: 'Type',

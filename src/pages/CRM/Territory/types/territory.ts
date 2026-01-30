@@ -32,7 +32,7 @@ export interface BaseEntity {
 }
 export interface IUP extends BaseEntity {
     type: 'iup';
-    iup_segmentation_id: string;
+    iup_segment_id: string;
     children: null;
 }
 export interface IUPSegmentation extends BaseEntity {
@@ -69,7 +69,7 @@ export interface CreateTerritoryRequest {
     group_id?: string;
     area_id?: string;
     iup_zone_id?: string;
-    iup_segmentation_id?: string;
+    iup_segment_id?: string;
 }
 
 export interface UpdateTerritoryRequest {

@@ -86,7 +86,7 @@ const AddTerritoryModal: React.FC<AddTerritoryModalProps> = ({
                 basePayload.group_id = (parentRow as any).group_id;
                 basePayload.area_id = (parentRow as any).area_id;
                 basePayload.iup_zone_id = (parentRow as any).iup_zone_id;
-                basePayload.iup_segmentation_id = parentRow.id;
+                basePayload.iup_segment_id = parentRow.id;
                 break;
         }
 
