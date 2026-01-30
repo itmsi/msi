@@ -1314,7 +1314,8 @@ export const useEmployees = (autoInit: boolean = true) => {
         title_name: "",
         company_name: "",
         department_name: "",
-        title_id: ""
+        title_id: "",
+        employee_status: ""
     });
     const [validationErrors, setValidationErrors] = useState<EmployeeValidationErrors>({});
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; employeeId?: string; }>({ show: false });
@@ -1371,7 +1372,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             sort_order: filters.sort_order,
             title_id: filters.title_id,
             company_name: filters.company_name,
-            department_name: filters.department_name
+            department_name: filters.department_name,
+            employee_status: filters.employee_status
         };
 
         debouncedFetch(params, appendData);
@@ -1551,7 +1553,8 @@ export const useEmployees = (autoInit: boolean = true) => {
                 sort_order: filterKey === 'sort_order' ? value : filters.sort_order,
                 title_id: filterKey === 'title_id' ? value : filters.title_id,
                 company_name: filterKey === 'company_name' ? value : filters.company_name,
-                department_name: filterKey === 'department_name' ? value : filters.department_name
+                department_name: filterKey === 'department_name' ? value : filters.department_name,
+                employee_status: filterKey === 'employee_status' ? value : filters.employee_status
             };
             
             // Update pagination to first page if filtering
@@ -1579,7 +1582,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             title_name: "",
             company_name: "",
             department_name: "",
-            title_id: ""
+            title_id: "",
+            employee_status: ""
         });
         
         // Reset pagination
@@ -1594,7 +1598,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             sort_order: "",
             title_id: "",
             company_name: "",
-            department_name: ""
+            department_name: "",
+            employee_status: ""
         };
         
         debouncedFetch(clearedParams, false);
