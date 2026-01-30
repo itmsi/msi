@@ -1304,6 +1304,7 @@ export const useEmployees = (autoInit: boolean = true) => {
         employee_name: "",
         employee_email: "",
         employee_status: "inactive",
+        is_sales_quotation: false,
         title_id: "",
         company_id: "",
         department_id: ""
@@ -1402,6 +1403,7 @@ export const useEmployees = (autoInit: boolean = true) => {
                 employee_name: "",
                 employee_email: "",
                 employee_status: "inactive",
+                is_sales_quotation: false,
                 title_id: "",
                 company_id: "",
                 department_id: ""
@@ -1430,6 +1432,7 @@ export const useEmployees = (autoInit: boolean = true) => {
                 employee_name: "",
                 employee_email: "",
                 employee_status: "inactive",
+                is_sales_quotation: false,
                 title_id: "",
                 company_id: "",
                 department_id: ""
@@ -1483,6 +1486,7 @@ export const useEmployees = (autoInit: boolean = true) => {
             title_id: employee.title_id.toString(),
             employee_email: employee.employee_email,
             employee_status: employee.employee_status,
+            is_sales_quotation: employee.is_sales_quotation,
             company_id: employee.company_id.toString(),
             department_id: employee.department_id.toString()
         });
@@ -1610,6 +1614,7 @@ export const useEmployees = (autoInit: boolean = true) => {
         setFormData({
             employee_name: "",
             employee_status: "inactive",
+            is_sales_quotation: false,
             title_id: "",
             department_id: "",
             company_id: "",
@@ -1624,6 +1629,7 @@ export const useEmployees = (autoInit: boolean = true) => {
         setFormData({
             employee_name: "",
             employee_status: "inactive",
+            is_sales_quotation: false,
             title_id: "",
             department_id: "",
             company_id: "",
@@ -2555,6 +2561,7 @@ export const useEmployeeDetail = () => {
         employee_name: '',
         employee_email: '',
         employee_status: 'inactive',
+        is_sales_quotation: false,
         title_id: '',
         company_id: '',
         department_id: '',
@@ -2590,6 +2597,7 @@ export const useEmployeeDetail = () => {
                     employee_name: response.data.employee_name,
                     employee_email: response.data.employee_email,
                     employee_status: response.data.employee_status,
+                    is_sales_quotation: response.data.is_sales_quotation,
                     title_id: response.data.title_id,
                     company_id: response.data.company_id,
                     department_id: response.data.department_id,

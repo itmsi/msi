@@ -23,6 +23,7 @@ interface CreateEmployeeFormData {
     employee_office_number: string;
     employee_address: string;
     employee_status: string;
+    is_sales_quotation: boolean;
     employee_foto?: File | null;
 }
 
@@ -59,7 +60,8 @@ export default function CreateEmployee() {
         employee_office_number: '',
         employee_address: '',
         employee_status: 'inactive',
-        employee_foto: null
+        is_sales_quotation: false,
+        employee_foto: null,
     });
 
     // State for validation errors
@@ -265,6 +267,7 @@ export default function CreateEmployee() {
             submitData.append('department_id', formData.department_id);
             submitData.append('title_id', formData.title_id);
             submitData.append('employee_status', formData.employee_status);
+            submitData.append('is_sales_quotation', formData.is_sales_quotation.toString());
             
             if (formData.employee_mobile) {
                 submitData.append('employee_mobile', formData.employee_mobile);
@@ -513,13 +516,24 @@ export default function CreateEmployee() {
                                 </div>
 
                                 {/* Employee Status */}
-                                <div className="md:col-span-2">
+                                <div className="md:col-span-4">
                                     <Switch 
                                         label="Status Employee" 
                                         showStatusText={true} 
                                         position="left"
                                         checked={formData.employee_status === 'active'}
                                         onChange={(checked) => handleInputChange('employee_status', checked ? 'active' : 'inactive')}
+                                    />
+                                </div>
+
+                                {/* Employee Sales */}
+                                <div className="md:col-span-4">
+                                    <Switch 
+                                        label="Status Sales" 
+                                        showStatusText={true} 
+                                        position="left"
+                                        checked={formData.is_sales_quotation}
+                                        onChange={(checked) => handleInputChange('is_sales_quotation', checked.toString())}
                                     />
                                 </div>
                             </div>
