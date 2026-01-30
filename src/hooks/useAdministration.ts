@@ -1290,7 +1290,7 @@ export const useDepartment = () => {
 };
 
 // Employee Hook
-export const useEmployees = (autoInit: boolean = true) => {
+export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<EmployeeFilters> = {}) => {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [employee, setEmployee] = useState<Employee | null>(null);
     const [pagination, setPagination] = useState<EmployeePagination>({
@@ -1316,7 +1316,8 @@ export const useEmployees = (autoInit: boolean = true) => {
         company_name: "",
         department_name: "",
         title_id: "",
-        employee_status: ""
+        employee_status: "",
+        ...initialFilters
     });
     const [validationErrors, setValidationErrors] = useState<EmployeeValidationErrors>({});
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; employeeId?: string; }>({ show: false });
