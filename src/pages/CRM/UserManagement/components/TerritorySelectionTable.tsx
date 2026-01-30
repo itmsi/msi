@@ -246,6 +246,23 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
             cell: (row) => {
                 const isDisabled = disabled || disabledTerritories.has(row.id);
                 const isSelected = selectedTerritories.has(row.id);
+                const hasChildrenRow = hasChildren(row);
+                
+                // For parent territories with children
+                if (hasChildrenRow) {
+                    if (isSelected) {
+                        return (
+                            <Button
+                                variant='transparent'
+                                disabled={true}
+                                className="p-2 rounded-md text-sm font-medium cursor-not-allowed opacity-75"
+                            >
+                                <MdCheckBox className="text-xl text-blue-600" />
+                            </Button>
+                        );
+                    }
+                    return null;
+                }
                 
                 return (
                     <Button
