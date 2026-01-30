@@ -570,7 +570,6 @@ export default function EditEmployee() {
                                         <Switch 
                                             label="Status Employee" 
                                             showStatusText={true} 
-                                            position="left"
                                             checked={formData.employee_status === 'active'}
                                             onChange={(checked) => handleInputChange('employee_status', checked ? 'active' : 'inactive')}
                                         />
@@ -579,11 +578,10 @@ export default function EditEmployee() {
                                     {/* Employee Salses */}
                                     <div className="md:col-span-4">
                                         <Switch 
-                                            label="Status Employee" 
+                                            label="Status Sales" 
                                             showStatusText={true} 
-                                            position="left"
-                                            checked={formData.is_sales_quotation}
-                                            onChange={(checked) => handleInputChange('is_sales_quotation', checked.toString())}
+                                            checked={formData.is_sales_quotation === true || formData.is_sales_quotation === 'true'}
+                                            onChange={(checked) => handleInputChange('is_sales_quotation', checked ? 'true' : 'false')}
                                         />
                                     </div>
                                 </div>

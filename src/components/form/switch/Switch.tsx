@@ -69,7 +69,7 @@ const Switch: React.FC<SwitchProps> = ({
         <label
             className={clsx(
                 twMerge(
-                    `inline-flex cursor-pointer select-none items-center gap-3 text-sm font-medium ${
+                    `inline-flex cursor-pointer select-none items-center gap-3 text-sm font-medium ${position === "left" ? "flex-row-reverse" : ""} ${
                     disabled ? "text-gray-400" : "text-gray-700"
                     }`,
                     className,

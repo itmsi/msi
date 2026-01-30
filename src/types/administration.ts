@@ -507,7 +507,7 @@ export interface EmployeeFormData {
     employee_name: string;
     employee_email?: string;
     employee_status: string;
-    is_sales_quotation: boolean;
+    is_sales_quotation: boolean | string;
     title_id: string;
     company_id: string;
     department_id: string;
