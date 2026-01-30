@@ -28,7 +28,7 @@ import { ItemProduct } from '../Product/types/product';
 import { useCreateQuotation } from './hooks/useCreateQuotation';
 import { useAsyncSelect, SelectOption } from '../hooks/useAsyncSelect';
 import { useTermConditionSelect, TermConditionSelectOption } from '../hooks/useTermConditionSelect';
-import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalInput, handleDecimalInputComma, formatNumberInputwithComma } from '@/helpers/generalHelper';
+import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalInput, handleDecimalInputComma, formatNumberInputwithComma, handlePercentageInputComma } from '@/helpers/generalHelper';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { ItemProductService } from '../Product/services/productService';
 import { QuotationService } from './services/quotationService';
@@ -256,7 +256,7 @@ export default function CreateQuotation() {
             }
         }
 
-        const paymentPercentage = parseFloat(currentFormData.manage_quotation_payment_presentase || '0') || 0;
+        const paymentPercentage = parseFloat(currentFormData.manage_quotation_payment_presentase?.replace(',', '.') || '0') || 0;
         const paymentNominal = grandTotal * (paymentPercentage / 100);
         const remainingPayment = grandTotal - paymentNominal;
 
@@ -387,6 +387,10 @@ export default function CreateQuotation() {
 
     const handlePercentageInputChange = (field: keyof QuotationFormData, inputValue: string) => {
         handleInputChange(field, handlePercentageInput(inputValue));
+    };
+
+    const handlePercentageInputChangeComma = (field: keyof QuotationFormData, inputValue: string) => {
+        handleInputChange(field, handlePercentageInputComma(inputValue));
     };
 
     const handleInvoiceDateChange = useCallback((date: Date) => {
@@ -970,6 +974,12 @@ export default function CreateQuotation() {
                 return isNaN(num) ? '0' : num.toFixed(2);
             };
 
+            const formatForBackendDownPayment = (value: string): string => {
+                if (!value) return '0';
+                const num = parseFloat(value.toString().replace(',', '.'));
+                return isNaN(num) ? '0' : num.toFixed(2);
+            };
+
             const updatedFormData = {
                 ...formData,
                 status,
@@ -1005,7 +1015,10 @@ export default function CreateQuotation() {
                 manage_quotation_mutation_type: updatedFormData.manage_quotation_mutation_type || null,
                 manage_quotation_mutation_nominal: updatedFormData.manage_quotation_mutation_nominal
                     ? parseDecimalInput(updatedFormData.manage_quotation_mutation_nominal, 0).toFixed(2)
-                    : null
+                    : null,
+                manage_quotation_payment_presentase: updatedFormData.manage_quotation_payment_presentase
+                    ? formatForBackendDownPayment(updatedFormData.manage_quotation_payment_presentase)
+                    : '0'
             };
 
             // Clean up number formatting for API
@@ -1738,12 +1751,20 @@ export default function CreateQuotation() {
                                                     <Input
                                                         id="manage_quotation_payment_presentase"
                                                         type="text"
-                                                        onKeyPress={handleKeyPress}
+                                                        onKeyPress={(e) => {
+                                                            // Custom key press handler to allow comma
+                                                            if (!/[0-9,]/.test(e.key) && 
+                                                                !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'].includes(e.key) &&
+                                                                !(e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase()))
+                                                            ) {
+                                                                e.preventDefault();
+                                                            }
+                                                        }}
                                                         min="0"
                                                         max="100"
-                                                        maxLength={3}
+                                                        maxLength={6}
                                                         value={formData.manage_quotation_payment_presentase}
-                                                        onChange={(e) => handlePercentageInputChange('manage_quotation_payment_presentase', e.target.value)}
+                                                        onChange={(e) => handlePercentageInputChangeComma('manage_quotation_payment_presentase', e.target.value)}
                                                         placeholder="50"
                                                         className="pr-8"
                                                     />
