@@ -446,6 +446,7 @@ export interface Employee {
     employee_id: string;
     employee_name: string;
     employee_email: string;
+    employee_status: string;
     title_id: string;
     created_at: string;
     created_by: string | null;
@@ -504,6 +505,7 @@ export interface EmployeeDetailData extends Employee {
 export interface EmployeeFormData {
     employee_name: string;
     employee_email?: string;
+    employee_status: string;
     title_id: string;
     company_id: string;
     department_id: string;
@@ -528,6 +530,7 @@ export interface EmployeeValidationErrors {
     employee_office_number?: string;
     employee_address?: string;
     employee_phone?: string;
+    employee_status?: string;
     gender_id?: string;
     island_id?: string;
     employee_foto?: string;

@@ -10,6 +10,7 @@ import { useCreateEmployee, useDropdownData } from "@/hooks/useAdministration";
 import { EmployeeValidationErrors } from "@/types/administration";
 import TextArea from "@/components/form/input/TextArea";
 import { toast } from "react-hot-toast";
+import Switch from "@/components/form/switch/Switch";
 
 interface CreateEmployeeFormData {
     employee_name: string;
@@ -21,6 +22,7 @@ interface CreateEmployeeFormData {
     employee_mobile: string;
     employee_office_number: string;
     employee_address: string;
+    employee_status: string;
     employee_foto?: File | null;
 }
 
@@ -56,6 +58,7 @@ export default function CreateEmployee() {
         employee_mobile: '',
         employee_office_number: '',
         employee_address: '',
+        employee_status: 'inactive',
         employee_foto: null
     });
 
@@ -261,6 +264,7 @@ export default function CreateEmployee() {
             submitData.append('company_id', formData.company_id);
             submitData.append('department_id', formData.department_id);
             submitData.append('title_id', formData.title_id);
+            submitData.append('employee_status', formData.employee_status);
             
             if (formData.employee_mobile) {
                 submitData.append('employee_mobile', formData.employee_mobile);
@@ -505,6 +509,17 @@ export default function CreateEmployee() {
                                         value={formData.employee_address}
                                         onChange={(e) => handleInputChange('employee_address', e.target.value)}
                                         placeholder="Enter employee address"
+                                    />
+                                </div>
+
+                                {/* Employee Status */}
+                                <div className="md:col-span-2">
+                                    <Switch 
+                                        label="Status Employee" 
+                                        showStatusText={true} 
+                                        position="left"
+                                        checked={formData.employee_status === 'active'}
+                                        onChange={(checked) => handleInputChange('employee_status', checked ? 'active' : 'inactive')}
                                     />
                                 </div>
                             </div>

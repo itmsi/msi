@@ -1303,6 +1303,7 @@ export const useEmployees = (autoInit: boolean = true) => {
     const [formData, setFormData] = useState<EmployeeFormData>({
         employee_name: "",
         employee_email: "",
+        employee_status: "inactive",
         title_id: "",
         company_id: "",
         department_id: ""
@@ -1400,6 +1401,7 @@ export const useEmployees = (autoInit: boolean = true) => {
             setFormData({
                 employee_name: "",
                 employee_email: "",
+                employee_status: "inactive",
                 title_id: "",
                 company_id: "",
                 department_id: ""
@@ -1427,6 +1429,7 @@ export const useEmployees = (autoInit: boolean = true) => {
             setFormData({
                 employee_name: "",
                 employee_email: "",
+                employee_status: "inactive",
                 title_id: "",
                 company_id: "",
                 department_id: ""
@@ -1479,6 +1482,7 @@ export const useEmployees = (autoInit: boolean = true) => {
             employee_name: employee.employee_name,
             title_id: employee.title_id.toString(),
             employee_email: employee.employee_email,
+            employee_status: employee.employee_status,
             company_id: employee.company_id.toString(),
             department_id: employee.department_id.toString()
         });
@@ -1605,6 +1609,7 @@ export const useEmployees = (autoInit: boolean = true) => {
         setEditingEmployee(null);
         setFormData({
             employee_name: "",
+            employee_status: "inactive",
             title_id: "",
             department_id: "",
             company_id: "",
@@ -1618,6 +1623,7 @@ export const useEmployees = (autoInit: boolean = true) => {
         setEditingEmployee(null);
         setFormData({
             employee_name: "",
+            employee_status: "inactive",
             title_id: "",
             department_id: "",
             company_id: "",
@@ -2548,6 +2554,7 @@ export const useEmployeeDetail = () => {
     const [formData, setFormData] = useState<EmployeeFormData>({
         employee_name: '',
         employee_email: '',
+        employee_status: 'inactive',
         title_id: '',
         company_id: '',
         department_id: '',
@@ -2582,6 +2589,7 @@ export const useEmployeeDetail = () => {
                 setFormData({
                     employee_name: response.data.employee_name,
                     employee_email: response.data.employee_email,
+                    employee_status: response.data.employee_status,
                     title_id: response.data.title_id,
                     company_id: response.data.company_id,
                     department_id: response.data.department_id,
