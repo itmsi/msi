@@ -22,6 +22,9 @@ interface TerritorySelectionTableProps {
     preExpandedTerritories?: Set<string>;
     onTerritoryToggle: (territoryId: string, territoryData: ExpandableRowData) => void;
     disabled?: boolean;
+    userRole?: 'master' | 'super_admin' | 'admin' | 'user';
+    userTerritories?: Set<string>;
+    allowMultipleSelection?: boolean;
 }
 
 // Flatten territory hierarchy untuk display
@@ -111,16 +114,76 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
     disabledTerritories = new Set(),
     preExpandedTerritories = new Set(),
     onTerritoryToggle,
-    disabled = false
+    disabled = false,
+    userRole = 'admin',
+    userTerritories = new Set(),
+    allowMultipleSelection = true
 }) => {
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set(preExpandedTerritories));
     
-    // Update expanded rows when preExpandedTerritories changes
     useEffect(() => {
         setExpandedRows(new Set(preExpandedTerritories));
     }, [loading]);
     
     const flatData = flattenTerritoryData(territories);
+    
+    // Helper functions untuk role-based access control
+    const canAccessTerritory = (row: ExpandableRowData): boolean => {
+        if (userRole === 'master' || userRole === 'super_admin') {
+            return true;
+        }
+        
+        if (!userTerritories || userTerritories.size === 0) {
+            return true;
+        }
+        
+        return isChildOfUserTerritories(row) || userTerritories.has(row.id);
+    };
+    
+    const isChildOfUserTerritories = (row: ExpandableRowData): boolean => {
+        if (!userTerritories || userTerritories.size === 0) return true;
+        if (userTerritories.has(row.id)) return true;
+        
+        const allAncestors = getAllAncestors(row);
+        return allAncestors.some(ancestorId => userTerritories.has(ancestorId));
+    };
+    
+    const getAllAncestors = (row: ExpandableRowData): string[] => {
+        const ancestors: string[] = [];
+        let currentRow = row;
+        
+        while (currentRow.parent_id) {
+            ancestors.push(currentRow.parent_id);
+            const parentRow = flatData.find(item => item.id === currentRow.parent_id);
+            if (!parentRow) break;
+            currentRow = parentRow;
+        }
+        
+        return ancestors;
+    };
+    
+    const hasConflictingSelection = (row: ExpandableRowData): boolean => {
+        if (allowMultipleSelection) return false;
+        
+        const currentSelections = Array.from(selectedTerritories);
+        if (currentSelections.length === 0) return false;
+        
+        for (const selectedId of currentSelections) {
+            const selectedRow = flatData.find(item => item.id === selectedId);
+            if (!selectedRow) continue;
+            
+            const selectedAncestors = getAllAncestors(selectedRow);
+            const rowAncestors = getAllAncestors(row);
+            
+            if (selectedAncestors.includes(row.id) || 
+                rowAncestors.includes(selectedId) ||
+                selectedId === row.id) {
+                return true;
+            }
+        }
+        
+        return false;
+    };
     
     // Filter data berdasarkan expanded state
     const getVisibleData = () => {
@@ -128,10 +191,8 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
         
         flatData.forEach(row => {
             if (row.level === 0) {
-                // Island selalu visible
                 visible.push(row);
             } else if (row.parent_id && expandedRows.has(row.parent_id)) {
-                // Child visible jika parent di-expand
                 visible.push(row);
             }
         });
@@ -142,7 +203,6 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
     const toggleExpanded = (rowId: string) => {
         const newExpanded = new Set(expandedRows);
         if (newExpanded.has(rowId)) {
-            // Ketika collapse, hapus item ini dan semua descendants-nya
             newExpanded.delete(rowId);
             const descendants = getAllDescendants(rowId);
             descendants.forEach(descendantId => {
@@ -171,8 +231,17 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
     };
 
     const handleTerritoryClick = (row: ExpandableRowData) => {
-        if (!disabled) {
+        if (disabled) return;
+        if (!canAccessTerritory(row)) return;
+        
+        const isCurrentlySelected = selectedTerritories.has(row.id);
+        
+        if (isCurrentlySelected) {
             onTerritoryToggle(row.id, row);
+        } else {
+            if (!hasConflictingSelection(row)) {
+                onTerritoryToggle(row.id, row);
+            }
         }
     };
     
@@ -200,22 +269,7 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
                     <span className="font-medium">{row.name}</span>
                 </div>
             ),
-            // minWidth: '200px'
         },
-        // {
-        //     name: 'Code',
-        //     selector: (row) => row.code,
-        //     cell: (row) => (
-        //         <Badge 
-        //             variant='solid'
-        //             color='info'
-        //             size='sm'
-        //         >
-        //             {row.code}
-        //         </Badge>
-        //     ),
-        //     width: '120px'
-        // },
         {
             name: 'Type',
             selector: (row) => row.type,
@@ -230,53 +284,39 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
             ),
             width: '120px'
         },
-        // {
-        //     name: 'Status',
-        //     selector: (row) => row.status,
-        //     cell: (row) => (
-        //         <ActiveStatusBadge
-        //             status={row.status === 'aktif' ? 'active' : 'inactive'} 
-        //             size="sm"
-        //         />
-        //     ),
-        //     width: '100px'
-        // },
         {
             name: 'Select',
             cell: (row) => {
                 const isDisabled = disabled || disabledTerritories.has(row.id);
                 const isSelected = selectedTerritories.has(row.id);
-                const hasChildrenRow = hasChildren(row);
+                const canAccess = canAccessTerritory(row);
+                const hasConflict = hasConflictingSelection(row);
                 
-                // For parent territories with children
-                if (hasChildrenRow) {
-                    if (isSelected) {
-                        return (
-                            <Button
-                                variant='transparent'
-                                disabled={true}
-                                className="p-2 rounded-md text-sm font-medium cursor-not-allowed opacity-75"
-                            >
-                                <MdCheckBox className="text-xl text-blue-600" />
-                            </Button>
-                        );
-                    }
-                    return null;
+                // Don't show checkbox if user doesn't have access
+                if (!canAccess) {
+                    return (
+                        <div className="p-2 text-gray-300" title="No access to this territory">
+                            <MdCheckBoxOutlineBlank className="text-xl" />
+                        </div>
+                    );
                 }
+                
+                // Disable if has conflict and not currently selected
+                const finalDisabled = isDisabled || (!isSelected && hasConflict);
                 
                 return (
                     <Button
                         onClick={() => handleTerritoryClick(row)}
                         variant='transparent'
-                        disabled={isDisabled}
+                        disabled={finalDisabled}
                         className={`p-2 rounded-md text-sm font-medium transition-colors ${
-                            isDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-100'
+                            finalDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-100'
                         }`}
                     >
                         {isSelected ? (
-                            <MdCheckBox className={`text-xl ${isDisabled ? 'text-gray-400' : 'text-blue-600'}`} />
+                            <MdCheckBox className={`text-xl ${finalDisabled ? 'text-gray-400' : 'text-blue-600'}`} />
                         ) : (
-                            <MdCheckBoxOutlineBlank className="text-gray-400 text-xl hover:text-gray-600" />
+                            <MdCheckBoxOutlineBlank className={`text-xl ${finalDisabled ? 'text-gray-400' : 'text-gray-400 hover:text-gray-600'}`} />
                         )}
                     </Button>
                 );

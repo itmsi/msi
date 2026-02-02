@@ -31,7 +31,7 @@ export interface EmployeeAccess {
   employee_id: string;
   employee_name: string | null;
   employee_title: string | null;
-  access_level: "ISLAND" | "GROUP" | "AREA" | "ZONE" | "IUP";
+  access_level: "ISLAND" | "GROUP" | "AREA" | "ZONE" | 'SEGMENT' | "IUP";
   ref_id: string;
   created_at?: string;   // ISO date string
   updated_at?: string;   // ISO date string
@@ -39,7 +39,7 @@ export interface EmployeeAccess {
 }
 
 export interface UserAccessTerritory {
-  access_level: "ISLAND" | "GROUP" | "AREA" | "ZONE" | "IUP";
+  access_level: "ISLAND" | "GROUP" | "AREA" | "ZONE" | 'SEGMENT' | "IUP";
   id_territory: string;
 }
 
@@ -48,6 +48,7 @@ export interface UserAccessData {
   employee_name: string;
   employee_title: string;
   territories: UserAccessTerritory[];
+  current_territories: UserAccessTerritory[];
 }
 
 export interface GetUserAccessByIdResponse {
