@@ -23,7 +23,6 @@ interface TerritorySelectionTableProps {
     currentTerritories?: Set<string>; // Territories that user currently has access to
     onTerritoryToggle: (territoryId: string, territoryData: ExpandableRowData) => void;
     disabled?: boolean;
-    userRole?: 'master' | 'super_admin' | 'admin' | 'user';
     userTerritories?: Set<string>;
     allowMultipleSelection?: boolean;
 }
@@ -129,7 +128,6 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
     currentTerritories = new Set(),
     onTerritoryToggle,
     disabled = false,
-    userRole = 'admin',
     userTerritories = new Set(),
     allowMultipleSelection = true
 }) => {
@@ -157,12 +155,8 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
         return false;
     };
     
-    // Helper functions untuk role-based access control
+    // Helper functions untuk territory access control
     const canAccessTerritory = (row: ExpandableRowData): boolean => {
-        if (userRole === 'master' || userRole === 'super_admin') {
-            return true;
-        }
-        
         if (!userTerritories || userTerritories.size === 0) {
             return true;
         }
