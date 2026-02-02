@@ -58,10 +58,6 @@ const EditTerritoryModal: React.FC<EditTerritoryModalProps> = ({
             newErrors.name = 'Territory name is required';
         }
 
-        if (!formData.code.trim()) {
-            newErrors.code = 'Territory code is required';
-        }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -178,7 +174,7 @@ const EditTerritoryModal: React.FC<EditTerritoryModalProps> = ({
                         {/* Code Field */}
                         <div>
                             <Label>
-                                {getTypeLabel(territoryData.type)} Code *
+                                {getTypeLabel(territoryData.type)} Code
                             </Label>
                             <Input
                                 type="text"

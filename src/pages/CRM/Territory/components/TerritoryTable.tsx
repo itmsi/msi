@@ -230,6 +230,7 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
             name: 'Code',
             selector: (row) => row.code,
             cell: (row) => (
+                row.code ? (
                 <Badge 
                     variant='solid'
                     color='info'
@@ -237,6 +238,7 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
                 >
                     {row.code}
                 </Badge>
+                ) : ('-')
             ),
             width: '120px',
             center: true
