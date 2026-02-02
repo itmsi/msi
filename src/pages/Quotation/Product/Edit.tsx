@@ -363,10 +363,6 @@ export default function EditProduct() {
         const fileArray = Array.isArray(files) ? files : [files];
         setProductImage(fileArray);
         
-        // Remove existing image URL when new files are uploaded
-        if (fileArray.length > 0) {
-            setExistingImageUrl(null);
-        }
     };
 
     // Handle removing existing image by index
