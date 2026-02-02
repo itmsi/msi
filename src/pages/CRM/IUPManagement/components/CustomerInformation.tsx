@@ -2,14 +2,12 @@ import React from 'react';
 import { TableColumn } from 'react-data-table-component';
 import CustomDataTable from '@/components/ui/table/CustomDataTable';
 import { CustomerInfo } from '../types/iupmanagement';
-import { useNavigate } from 'react-router';
 
 interface CustomerInformationProps {
     customers: CustomerInfo[];
 }
 
 const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) => {
-    const navigate = useNavigate();
     // Define columns for customer data table
     const customerColumns: TableColumn<CustomerInfo>[] = [
         {
@@ -134,7 +132,7 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
                     persistTableHead
                     headerBackground="rgba(2, 83, 165, 0.1)"
                     hoverBackground="rgba(223, 232, 242, 0.3)"
-                    onRowClicked={(row) => navigate(`/crm/contractors/edit/${row.customer_id}`)}
+                    onRowClicked={(row) => window.open(`/crm/contractors/edit/${row.iup_customer_id}`, '_blank')}
                 />
             </div>
         </div>

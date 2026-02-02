@@ -186,16 +186,18 @@ export const useCreateProduct = () => {
             return;
         }
         
-        // Handle both single file and multiple files
         const fileArray = Array.isArray(files) ? files : [files];
         
-        // Create a new array with unique files to avoid reference issues
         const uniqueFiles = fileArray.filter((file, index, self) => {
-            return self.findIndex(f => 
-                f.name === file.name && 
-                f.size === file.size && 
-                f.lastModified === file.lastModified
-            ) === index;
+            const isDuplicate = self.slice(0, index).some(existingFile => 
+                existingFile === file || // Same reference
+                (existingFile.name === file.name && 
+                 existingFile.size === file.size && 
+                 existingFile.lastModified === file.lastModified &&
+                 existingFile.type === file.type)
+            );
+            
+            return !isDuplicate;
         });
         
         setProductImage(uniqueFiles);
@@ -212,7 +214,7 @@ export const useCreateProduct = () => {
         if (!formData.market_price.trim()) {
             errors.market_price = 'Harga pasar wajib diisi';
         }
-
+        window.scrollTo(0, 0);
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
             return false;
@@ -232,10 +234,8 @@ export const useCreateProduct = () => {
         setIsCreating(true);
 
         try {
-            // Create FormData for multipart/form-data
             const formDataToSend = new FormData();
             
-            // Prepare data based on product_type
             let specificationsData = formData.componen_product_specifications;
             let segmentValue = formData.segment;
             let msiModelValue = formData.msi_model;
@@ -289,21 +289,19 @@ export const useCreateProduct = () => {
 
             // Append image files if uploaded
             if (productImage && productImage.length > 0) {
-                if (productImage.length === 1) {
-                    formDataToSend.append('images[0]', productImage[0]);
-                    formDataToSend.append('image_count', productImage.length.toString());
-                } else {
-                    productImage.forEach((file, index) => {
-                        formDataToSend.append(`images[${index}]`, file);
-                    });
-                    formDataToSend.append('image_count', productImage.length.toString());
-                }
+                productImage.forEach((file, index) => {
+                    formDataToSend.append(`images[${index}]`, file);
+                });
+                
+                formDataToSend.append('images_count', productImage.length.toString());
             }
 
             const response = await ItemProductService.createItemProduct(formDataToSend);
             if (response.status) {
                 toast.success('Produk berhasil dibuat');
                 navigate('/quotations/products');
+            } else {
+                toast.success(response.message || 'Produk tidak berhasil dibuat');
             }
         } catch (error: any) {
             if (error.errors && typeof error.errors === 'object') {
