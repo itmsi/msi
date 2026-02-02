@@ -24,6 +24,7 @@ export interface Pagination {
 export interface EmployeeTerritoryResponse {
   success: boolean;
   data: Employee[];
+  current_territories: UserAccessTerritory[];
   pagination: Pagination;
 }
 export interface EmployeeAccess {

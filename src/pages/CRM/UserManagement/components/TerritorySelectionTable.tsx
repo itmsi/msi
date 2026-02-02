@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { MdExpandMore, MdExpandLess, MdCheckBox, MdCheckBoxOutlineBlank } from 'react-icons/md';
-import { FaMapMarkerAlt, FaLayerGroup, FaMapPin, FaIndustry } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaLayerGroup, FaMapPin, FaIndustry, FaCubes } from 'react-icons/fa';
 import CustomDataTable from '@/components/ui/table/CustomDataTable';
 import { Island, BaseEntity } from '@/pages/CRM/Territory/types/territory';
 import { CategoryBadge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ interface TerritorySelectionTableProps {
     selectedTerritories: Set<string>;
     disabledTerritories?: Set<string>;
     preExpandedTerritories?: Set<string>;
+    currentTerritories?: Set<string>; // Territories that user currently has access to
     onTerritoryToggle: (territoryId: string, territoryData: ExpandableRowData) => void;
     disabled?: boolean;
     userRole?: 'master' | 'super_admin' | 'admin' | 'user';
@@ -66,14 +67,24 @@ const flattenTerritoryData = (territories: Island[]): ExpandableRowData[] => {
                                 });
                                 
                                 if (iupZone.children && iupZone.children.length > 0) {
-                                    iupZone.children.forEach(iup => {
+                                    iupZone.children.forEach(iupSegmentation => {
                                         result.push({
-                                            ...iup,
+                                            ...iupSegmentation,
                                             level: 4,
                                             parent_id: iupZone.id,
-                                            type: 'iup',
-                                            children: undefined
+                                            type: 'iup_segmentation',
                                         });
+                                        if (iupSegmentation.children && iupSegmentation.children.length > 0) {
+                                            iupSegmentation.children.forEach(iup => {
+                                                result.push({
+                                                    ...iup,
+                                                    level: 5,
+                                                    parent_id: iupSegmentation.id,
+                                                    type: 'iup',
+                                                    children: undefined
+                                                });
+                                            });
+                                        }
                                     });
                                 }
                             });
@@ -100,6 +111,8 @@ const TypeIcon: React.FC<{ type: string; level: number }> = ({ type }) => {
             return <FaMapPin {...iconProps} className="text-orange-600 text-sm mr-2" />;
         case 'iup_zone':
             return <FaIndustry {...iconProps} className="text-purple-600 text-sm mr-2" />;
+        case 'iup_segmentation':
+            return <FaCubes {...iconProps} className="text-slate-600 text-sm mr-2" />;
         case 'iup':
             return <FaIndustry {...iconProps} className="text-gray-600 text-sm mr-2" />;
         default:
@@ -113,6 +126,7 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
     selectedTerritories,
     disabledTerritories = new Set(),
     preExpandedTerritories = new Set(),
+    currentTerritories = new Set(),
     onTerritoryToggle,
     disabled = false,
     userRole = 'admin',
@@ -126,6 +140,22 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
     }, [loading]);
     
     const flatData = flattenTerritoryData(territories);
+    
+    // Helper function to check if a territory is a parent of any current territories
+    const isParentOfCurrentTerritories = (row: ExpandableRowData): boolean => {
+        if (currentTerritories.size === 0) return false;
+        
+        // Check if any current territory is a descendant of this territory
+        // If so, this territory is a parent and should be disabled
+        for (const currentTerritoryId of currentTerritories) {
+            const ancestors = getAllAncestors({ id: currentTerritoryId } as ExpandableRowData);
+            if (ancestors.includes(row.id)) {
+                return true;
+            }
+        }
+        
+        return false;
+    };
     
     // Helper functions untuk role-based access control
     const canAccessTerritory = (row: ExpandableRowData): boolean => {
@@ -282,7 +312,8 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
                     />
                 </div>
             ),
-            width: '120px'
+            width: '150px',
+            center: true
         },
         {
             name: 'Select',
@@ -291,11 +322,31 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
                 const isSelected = selectedTerritories.has(row.id);
                 const canAccess = canAccessTerritory(row);
                 const hasConflict = hasConflictingSelection(row);
+                const isParentOfCurrent = isParentOfCurrentTerritories(row);
+                const isCurrentTerritory = currentTerritories.has(row.id);
                 
                 // Don't show checkbox if user doesn't have access
                 if (!canAccess) {
                     return (
                         <div className="p-2 text-gray-300" title="No access to this territory">
+                            <MdCheckBoxOutlineBlank className="text-xl" />
+                        </div>
+                    );
+                }
+                
+                // Show special state for current territories (already has access)
+                if (isCurrentTerritory) {
+                    return (
+                        <div className="p-2 text-blue-500" title="Current territory access">
+                            <MdCheckBox className="text-xl" />
+                        </div>
+                    );
+                }
+                
+                // Disable if parent of current territories (cannot be modified)
+                if (isParentOfCurrent) {
+                    return (
+                        <div className="p-2 text-gray-400" title="Cannot modify - parent of current territory access">
                             <MdCheckBoxOutlineBlank className="text-xl" />
                         </div>
                     );

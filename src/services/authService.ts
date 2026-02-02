@@ -129,6 +129,30 @@ export class AuthService {
     }
 
     /**
+     * Save current territories to localStorage
+     */
+    static saveCurrentTerritories(territories: any[]): void {
+        try {
+            localStorage.setItem('current_territories', JSON.stringify(territories));
+        } catch (error) {
+            console.error('Failed to save current territories:', error);
+        }
+    }
+
+    /**
+     * Get current territories from localStorage
+     */
+    static getCurrentTerritories(): any[] {
+        try {
+            const territories = localStorage.getItem('current_territories');
+            return territories ? JSON.parse(territories) : [];
+        } catch (error) {
+            console.error('Failed to get current territories:', error);
+            return [];
+        }
+    }
+
+    /**
      * Clear all authentication data
      */
     static clearAuthData(): void {
@@ -138,6 +162,7 @@ export class AuthService {
         localStorage.removeItem('auth_session');
         localStorage.removeItem('auth_oauth');
         localStorage.removeItem('auth_token');
+        localStorage.removeItem('current_territories');
         localStorage.removeItem('isLoggedIn');
     }
 
