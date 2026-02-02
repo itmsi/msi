@@ -32,13 +32,18 @@ export interface BaseEntity {
 }
 export interface IUP extends BaseEntity {
     type: 'iup';
-    iup_zone_id: string;
+    iup_segment_id: string;
     children: null;
+}
+export interface IUPSegmentation extends BaseEntity {
+    type: 'iup_segmentation';
+    iup_zone_id: string;
+    children: IUP[];
 }
 export interface IUPZone extends BaseEntity {
     type: 'iup_zone';
     area_id: string;
-    children: IUP[];
+    children: IUPSegmentation[];
 }
 export interface Area extends BaseEntity {
     type: 'area';
@@ -56,7 +61,7 @@ export interface Island extends BaseEntity {
 }
 
 export interface CreateTerritoryRequest {
-    type: 'island' | 'group' | 'area' | 'iup_zone' | 'iup';
+    type: 'island' | 'group' | 'area' | 'iup_zone' | 'iup_segmentation' | 'iup';
     name: string;
     code: string;
     status: 'aktif' | 'inactive' | 'non aktif';
@@ -64,15 +69,16 @@ export interface CreateTerritoryRequest {
     group_id?: string;
     area_id?: string;
     iup_zone_id?: string;
+    iup_segment_id?: string;
 }
 
 export interface UpdateTerritoryRequest {
-    type: 'island' | 'group' | 'area' | 'iup_zone' | 'iup';
+    type: 'island' | 'group' | 'area' | 'iup_zone' | 'iup_segmentation' | 'iup';
     name: string;
     code: string;
     status: 'aktif' | 'inactive' | 'non aktif';
 }
 export interface DeleteTerritoryRequest {
     id: string;
-    type: 'island' | 'group' | 'area' | 'iup_zone' | 'iup';
+    type: 'island' | 'group' | 'area' | 'iup_zone' | 'iup_segmentation' | 'iup';
 }

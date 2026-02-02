@@ -11,7 +11,7 @@ interface AddTerritoryModalProps {
     onClose: () => void;
     onSubmit: (data: CreateTerritoryRequest) => void;
     parentRow?: ExpandableRowData;
-    childType: 'island' | 'group' | 'area' | 'iup_zone' | 'iup';
+    childType: 'island' | 'group' | 'area' | 'iup_zone' | 'iup_segmentation' | 'iup';
     loading?: boolean;
 }
 
@@ -73,12 +73,20 @@ const AddTerritoryModal: React.FC<AddTerritoryModalProps> = ({
                 basePayload.group_id = (parentRow as any).group_id;
                 basePayload.area_id = parentRow.id;
                 break;
-            case 'iup':
+            case 'iup_segmentation':
                 // Parent = iup_zone, need all parent IDs
                 basePayload.island_id = (parentRow as any).island_id;
                 basePayload.group_id = (parentRow as any).group_id;
                 basePayload.area_id = (parentRow as any).area_id;
                 basePayload.iup_zone_id = parentRow.id;
+                break;
+            case 'iup':
+                // Parent = iup_segmentation, need all parent IDs
+                basePayload.island_id = (parentRow as any).island_id;
+                basePayload.group_id = (parentRow as any).group_id;
+                basePayload.area_id = (parentRow as any).area_id;
+                basePayload.iup_zone_id = (parentRow as any).iup_zone_id;
+                basePayload.iup_segment_id = parentRow.id;
                 break;
         }
 
@@ -148,6 +156,7 @@ const AddTerritoryModal: React.FC<AddTerritoryModalProps> = ({
             case 'group': return 'Group';
             case 'area': return 'Area';
             case 'iup_zone': return 'IUP Zone';
+            case 'iup_segmentation': return 'Segmentation';
             case 'iup': return 'IUP';
             default: return type;
         }
