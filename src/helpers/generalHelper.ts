@@ -395,18 +395,23 @@ export const handleDecimalInput = (
         return; // Don't update if exceeds max decimal digits
     }
     
-    // Allow typing "0" or "0.x" patterns for decimal input
-    if (cleanValue === '0' || cleanValue.startsWith('0.')) {
-        onValidInput(cleanValue);
+    let processedValue = cleanValue;
+    if (integerPart && integerPart.length > 1 && integerPart.startsWith('0') && !cleanValue.startsWith('0.')) {
+        const trimmedInteger = integerPart.replace(/^0+/, '') || '0';
+        processedValue = decimalPart !== undefined ? `${trimmedInteger}.${decimalPart}` : trimmedInteger;
+    }
+    
+    if (processedValue === '0' || processedValue.startsWith('0.')) {
+        onValidInput(processedValue);
         return;
     }
     
-    const numericValue = parseFloat(cleanValue) || 0;
+    const numericValue = parseFloat(processedValue) || 0;
     
     if (numericValue <= 0) {
         onInvalidInput();
     } else {
-        const finalValue = formatWithComma ? fourdigitcomma(cleanValue) : cleanValue;
+        const finalValue = formatWithComma ? fourdigitcomma(processedValue) : processedValue;
         onValidInput(finalValue);
     }
 };
