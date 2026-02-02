@@ -2,14 +2,12 @@ import React from 'react';
 import { TableColumn } from 'react-data-table-component';
 import CustomDataTable from '@/components/ui/table/CustomDataTable';
 import { CustomerInfo } from '../types/iupmanagement';
-import { useNavigate } from 'react-router';
 
 interface CustomerInformationProps {
     customers: CustomerInfo[];
 }
 
 const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) => {
-    const navigate = useNavigate();
     // Define columns for customer data table
     const customerColumns: TableColumn<CustomerInfo>[] = [
         {
