@@ -225,7 +225,6 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
                     <span className="font-medium">{row.name}</span>
                 </div>
             ),
-            minWidth: '200px'
         },
         {
             name: 'Code',
@@ -306,7 +305,6 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
             ),
             ignoreRowClick: true,
             allowOverflow: true,
-            button: true,
             width: '220px'
         }
     ];
