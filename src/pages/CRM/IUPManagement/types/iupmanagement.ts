@@ -23,6 +23,7 @@ export interface IupSummary {
 }
 
 export interface CustomerInfo {
+    iup_customer_id: string;
     customer_id: string;
     customer_name: string;
     customer_phone: string;
