@@ -16,6 +16,7 @@ interface TerritorySelection {
     group: TerritoryOption | null;
     area: TerritoryOption | null;
     iupZone: TerritoryOption | null;
+    iupSegmentation: TerritoryOption | null;
 }
 interface IupFormData {
     company_name: string;
@@ -31,9 +32,11 @@ interface TerritorySelectorProps {
     onGroupChange: (option: any) => void;
     onAreaChange: (option: any) => void;
     onIupZoneChange: (option: any) => void;
+    onIupSegmentationChange: (option: any) => void;
     getAvailableGroups: () => TerritoryOption[];
     getAvailableAreas: () => TerritoryOption[];
     getAvailableIupZones: () => TerritoryOption[];
+    getAvailableIupSegmentations: () => TerritoryOption[];
 }
 
 const TerritorySelector: React.FC<TerritorySelectorProps> = ({
@@ -47,11 +50,13 @@ const TerritorySelector: React.FC<TerritorySelectorProps> = ({
     onGroupChange,
     onAreaChange,
     onIupZoneChange,
+    onIupSegmentationChange,
     getAvailableGroups,
     getAvailableAreas,
-    getAvailableIupZones
+    getAvailableIupZones,
+    getAvailableIupSegmentations
 }) => {
-    const { island, group, area, iupZone } = selection;
+    const { island, group, area, iupZone, iupSegmentation } = selection;
 
     // Helper to show warning message when no options available
     const renderNoOptionsWarning = (
@@ -151,6 +156,27 @@ const TerritorySelector: React.FC<TerritorySelectorProps> = ({
                         renderNoOptionsWarning(area.name, "area", "IUP zone")
                     }
                 </div>
+
+                {/* IUP Segmentation Selection */}
+                <div>
+                    <Label>IUP Segmentation *</Label>
+                    <CustomSelect
+                        options={getAvailableIupSegmentations().map(seg => ({
+                            value: seg.id,
+                            label: seg.name
+                        }))}
+                        value={iupSegmentation ? { value: iupSegmentation.id, label: iupSegmentation.name } : null}
+                        onChange={onIupSegmentationChange}
+                        placeholder="Select IUP Segmentation"
+                        isDisabled={!iupZone}
+                        isClearable
+                        isSearchable
+                    />
+                    {iupZone && getAvailableIupSegmentations().length === 0 && 
+                        renderNoOptionsWarning(iupZone.name, "IUP zone", "IUP segmentation")
+                    }
+                </div>
+                {/* IUP Name Field */}
                 <IupFormFields
                     formData={formData}
                     errors={errors}
