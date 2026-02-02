@@ -97,12 +97,23 @@ const FileUpload: React.FC<FileUploadProps> = ({
         
         if (multiple) {
             // Handle multiple files
-            const urls = files.filter(isImageFile).map(file => URL.createObjectURL(file));
-            setPreviewUrls(urls);
+            const imageFiles = files.filter(isImageFile);
+            const urls = imageFiles.map((file, index) => {
+                const url = URL.createObjectURL(file);
+                return {
+                    url,
+                    fileName: file.name,
+                    fileSize: file.size,
+                    lastModified: file.lastModified,
+                    index
+                };
+            });
+            
+            setPreviewUrls(urls.map(item => item.url));
             setPreviewState({ url: null });
             
             return () => {
-                urls.forEach(url => URL.revokeObjectURL(url));
+                urls.forEach(item => URL.revokeObjectURL(item.url));
             };
         } else {
             // Handle single file (existing logic)
@@ -507,12 +518,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                         }
                                         
                                         return (
-                                            <div key={`new-${index}`} className="space-y-2">
+                                            <div key={`new-${file.name}-${file.size}-${file.lastModified}-${index}`} className="space-y-2">
                                                 {/* Image Preview */}
                                                 <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
                                                     <img
                                                         src={url}
-                                                        alt={`New ${index + 1}`}
+                                                        alt={`${file.name} - Preview ${index + 1}`}
                                                         className="w-full h-full object-contain"
                                                     />
                                                     {!viewMode && (
@@ -527,7 +538,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                 
                                                 {/* File Info */}
                                                 <div className="space-y-1">
-                                                    <p className="text-xs font-medium text-gray-900 truncate">
+                                                    <p className="text-xs font-medium text-gray-900 truncate" title={file.name}>
                                                         {file.name}
                                                     </p>
                                                     <p className="text-xs text-gray-500">
