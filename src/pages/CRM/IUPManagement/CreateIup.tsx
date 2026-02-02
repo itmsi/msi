@@ -16,13 +16,16 @@ const CreateIup: React.FC = () => {
         selectedGroup,
         selectedArea,
         selectedIupZone,
+        selectedIupSegmentation,
         handleIslandChange,
         handleGroupChange,
         handleAreaChange,
         handleIupZoneChange,
+        handleIupSegmentationChange,
         getAvailableGroups,
         getAvailableAreas,
         getAvailableIupZones,
+        getAvailableIupSegmentations,
         territoriesLoading,
         territories,
         isSubmitting,
@@ -39,14 +42,16 @@ const CreateIup: React.FC = () => {
         island: selectedIsland,
         group: selectedGroup,
         area: selectedArea,
-        iupZone: selectedIupZone
+        iupZone: selectedIupZone,
+        iupSegmentation: selectedIupSegmentation
     };
 
     const selectedTerritoryInfo = {
         island: selectedIsland,
         group: selectedGroup,
         area: selectedArea,
-        iupZone: selectedIupZone
+        iupZone: selectedIupZone,
+        iupSegmentation: selectedIupSegmentation
     };
     return (
         <>
@@ -88,9 +93,11 @@ const CreateIup: React.FC = () => {
                         onGroupChange={handleGroupChange}
                         onAreaChange={handleAreaChange}
                         onIupZoneChange={handleIupZoneChange}
+                        onIupSegmentationChange={handleIupSegmentationChange}
                         getAvailableGroups={getAvailableGroups}
                         getAvailableAreas={getAvailableAreas}
                         getAvailableIupZones={getAvailableIupZones}
+                        getAvailableIupSegmentations={getAvailableIupSegmentations}
                     />
                     
                     <IupInformtionsFormFields

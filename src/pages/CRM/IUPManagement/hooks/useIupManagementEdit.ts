@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Island, Group, Area, IUPZone, useTerritory } from '../../Territory';
+import { Island, Group, Area, IUPZone, IUPSegmentation, useTerritory } from '../../Territory';
 import { IupManagementFormData, CustomerInfo } from '../types/iupmanagement';
 import { IupService } from '../services/iupManagementService';
 
@@ -27,6 +27,7 @@ export const useIupManagementEdit = () => {
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
     const [selectedArea, setSelectedArea] = useState<Area | null>(null);
     const [selectedIupZone, setSelectedIupZone] = useState<IUPZone | null>(null);
+    const [selectedIupSegmentation, setSelectedIupSegmentation] = useState<IUPSegmentation | null>(null);
     
     // Form data state
     const [formData, setFormData] = useState<IupManagementFormData>({
@@ -55,7 +56,8 @@ export const useIupManagementEdit = () => {
         group_name: '',
         area_id: '',
         area_name: '',
-        iup_zone_name: ''
+        iup_zone_name: '',
+        iup_segment_id: '',
     });
 
     // Load territories and IUP data when component mounts
@@ -87,6 +89,13 @@ export const useIupManagementEdit = () => {
                                     const iupZone = area.children?.find(z => z.id === formData.iup_zone_id);
                                     if (iupZone) {
                                         setSelectedIupZone(iupZone);
+                                        
+                                        if (formData.iup_segment_id) {
+                                            const iupSegmentation = iupZone.children?.find(s => s.id === formData.iup_segment_id);
+                                            if (iupSegmentation) {
+                                                setSelectedIupSegmentation(iupSegmentation);
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -95,7 +104,7 @@ export const useIupManagementEdit = () => {
                 }
             }
         }
-    }, [territories, formData.island_id, formData.group_id, formData.area_id, formData.iup_zone_id, selectedIsland]);
+    }, [territories, formData.island_id, formData.group_id, formData.area_id, formData.iup_zone_id, formData.iup_segment_id, selectedIsland]);
 
     // Get available groups based on selected island
     const getAvailableGroups = (): Group[] => {
@@ -115,6 +124,12 @@ export const useIupManagementEdit = () => {
         return selectedArea.children || [];
     };
 
+    // Get available IUP Segmentations based on selected IUP Zone
+    const getAvailableIupSegmentations = (): IUPSegmentation[] => {
+        if (!selectedIupZone) return [];
+        return selectedIupZone.children || [];
+    };
+
     // Territory change handlers
     const handleIslandChange = (option: { value: string; label: string; } | null) => {
         const island = territories.find(t => t.id === option?.value) || null;
@@ -122,6 +137,7 @@ export const useIupManagementEdit = () => {
         setSelectedGroup(null);
         setSelectedArea(null);
         setSelectedIupZone(null);
+        setSelectedIupSegmentation(null);
         
         setFormData(prev => ({
             ...prev,
@@ -132,7 +148,8 @@ export const useIupManagementEdit = () => {
             area_id: '',
             area_name: '',
             iup_zone_id: '',
-            iup_zone_name: ''
+            iup_zone_name: '',
+            iup_segment_id: '',
         }));
     };
 
@@ -141,6 +158,7 @@ export const useIupManagementEdit = () => {
         setSelectedGroup(group);
         setSelectedArea(null);
         setSelectedIupZone(null);
+        setSelectedIupSegmentation(null);
         
         setFormData(prev => ({
             ...prev,
@@ -149,7 +167,8 @@ export const useIupManagementEdit = () => {
             area_id: '',
             area_name: '',
             iup_zone_id: '',
-            iup_zone_name: ''
+            iup_zone_name: '',
+            iup_segment_id: '',
         }));
     };
 
@@ -157,24 +176,38 @@ export const useIupManagementEdit = () => {
         const area = getAvailableAreas().find(a => a.id === option?.value) || null;
         setSelectedArea(area);
         setSelectedIupZone(null);
+        setSelectedIupSegmentation(null);
         
         setFormData(prev => ({
             ...prev,
             area_id: area?.id || '',
             area_name: area?.name || '',
             iup_zone_id: '',
-            iup_zone_name: ''
+            iup_zone_name: '',
+            iup_segment_id: '',
         }));
     };
 
     const handleIupZoneChange = (option: { value: string; label: string; } | null) => {
         const iupZone = getAvailableIupZones().find(z => z.id === option?.value) || null;
         setSelectedIupZone(iupZone);
+        setSelectedIupSegmentation(null);
         
         setFormData(prev => ({
             ...prev,
             iup_zone_id: iupZone?.id || '',
-            iup_zone_name: iupZone?.name || ''
+            iup_zone_name: iupZone?.name || '',
+            iup_segment_id: '',
+        }));
+    };
+
+    const handleIupSegmentationChange = (option: { value: string; label: string; } | null) => {
+        const iupSegmentation = getAvailableIupSegmentations().find(s => s.id === option?.value) || null;
+        setSelectedIupSegmentation(iupSegmentation);
+        
+        setFormData(prev => ({
+            ...prev,
+            iup_segment_id: iupSegmentation?.id || '',
         }));
     };
 
@@ -214,7 +247,8 @@ export const useIupManagementEdit = () => {
                     group_name: iup.group_name || '',
                     area_id: iup.area_id || '',
                     area_name: iup.area_name || '',
-                    iup_zone_name: iup.iup_zone_name || ''
+                    iup_zone_name: iup.iup_zone_name || '',
+                    iup_segment_id: iup.iup_segment_id || '',
                 });
                 
             } else {
@@ -342,14 +376,17 @@ export const useIupManagementEdit = () => {
         selectedGroup,
         selectedArea,
         selectedIupZone,
+        selectedIupSegmentation,
         // Territory handlers
         handleIslandChange,
         handleGroupChange,
         handleAreaChange,
         handleIupZoneChange,
+        handleIupSegmentationChange,
         getAvailableGroups,
         getAvailableAreas,
         getAvailableIupZones,
+        getAvailableIupSegmentations,
         // Form handlers
         handleInputChange,
         handleSelectChange,

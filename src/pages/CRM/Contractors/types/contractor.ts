@@ -22,6 +22,7 @@ export interface Contractor {
     armada: number;
     type?: string;
     segmentation_name_en: string;
+    iup_segmentation_name: string;
     business_project_bim: string;
     status: 'active' | 'inactive';
     customer_name: string;
