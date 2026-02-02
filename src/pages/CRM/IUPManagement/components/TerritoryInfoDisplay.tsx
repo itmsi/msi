@@ -5,6 +5,7 @@ interface SelectedTerritoryInfo {
     group?: { id: string; name: string } | null;
     area?: { id: string; name: string } | null;
     iupZone?: { id: string; name: string } | null;
+    iupSegmentation?: { id: string; name: string } | null;
 }
 
 interface TerritoryInfoDisplayProps {
@@ -14,10 +15,10 @@ interface TerritoryInfoDisplayProps {
 const TerritoryInfoDisplay: React.FC<TerritoryInfoDisplayProps> = ({ 
     selectedTerritory 
 }) => {
-    const { island, group, area, iupZone } = selectedTerritory;
+    const { island, group, area, iupZone, iupSegmentation } = selectedTerritory;
     
     // Only show if we have an IUP zone selected
-    if (!iupZone) return null;
+    if (!iupSegmentation) return null;
 
     return (
         <div className="md:col-span-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -40,6 +41,10 @@ const TerritoryInfoDisplay: React.FC<TerritoryInfoDisplayProps> = ({
                 <div>
                     <span className="font-medium text-gray-600">IUP Zone:</span>
                     <span className="ml-2 text-blue-700">{iupZone?.name}</span>
+                </div>
+                <div>
+                    <span className="font-medium text-gray-600">IUP Segmentation:</span>
+                    <span className="ml-2 text-blue-700">{iupSegmentation?.name}</span>
                 </div>
             </div>
         </div>
