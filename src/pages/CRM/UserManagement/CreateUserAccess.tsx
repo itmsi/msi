@@ -121,7 +121,26 @@ const CreateUserAccess: React.FC = () => {
                                 if (area.children) {
                                     area.children.forEach((iupZone: any) => {
                                         if (iupZone.id === currentId && iupZone.children) {
-                                            iupZone.children.forEach((iup: any) => {
+                                            iupZone.children.forEach((iupSegmentation: any) => {
+                                                children.push(iupSegmentation.id);
+                                                collectDescendants(iupSegmentation.id, 'iup_segmentation');
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+
+                if (currentType === 'iup_segmentation' && island.children) {
+                    island.children.forEach((group: any) => {
+                        if (group.children) {
+                            group.children.forEach((area: any) => {
+                                if (area.children) {
+                                    area.children.forEach((iupSegmentation: any) => {
+                                        if (iupSegmentation.id === currentId && iupSegmentation.children) {
+                                            iupSegmentation.children.forEach((iup: any) => {
                                                 children.push(iup.id);
                                             });
                                         }

@@ -120,24 +120,38 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({
 }) => {
     const getCategoryStyle = (category: string) => {
         switch (category) {
-            case 'Purchasing':
+            case 'island':
                 return 'bg-blue-100 text-blue-800 border border-blue-200';
-            case 'HCCA':
+            case 'group':
                 return 'bg-green-100 text-green-800 border border-green-200';
-            case 'Process Excellence':
-                return 'bg-purple-100 text-purple-800 border border-purple-200';
-            case 'Customs & Supply Chain':
+            case 'area':
                 return 'bg-orange-100 text-orange-800 border border-orange-200';
-            case 'ETI':
-                return 'bg-indigo-100 text-indigo-800 border border-indigo-200';
-            case 'Order Management':
-                return 'bg-teal-100 text-teal-800 border border-teal-200';
-            case 'Marketing Report':
-                return 'bg-pink-100 text-pink-800 border border-pink-200';
-            case 'Operations Report':
-                return 'bg-cyan-100 text-cyan-800 border border-cyan-200';
+            case 'iup_zone':
+                return 'bg-purple-100 text-purple-800 border border-purple-200';
+            case 'iup_segmentation':
+                return 'bg-slate-100 text-slate-800 border border-slate-200';
+            case 'iup':
+                return 'bg-gray-100 text-gray-800 border border-gray-200';
             default:
                 return 'bg-gray-100 text-gray-800 border border-gray-200';
+        }
+    };
+    const getCategoryText = (category: string) => {
+        switch (category) {
+            case 'island':
+                return 'Island';
+            case 'group':
+                return 'Group';
+            case 'area':
+                return 'Area';
+            case 'iup_zone':
+                return 'IUP Zone';
+            case 'iup_segmentation':
+                return 'Segmentation';
+            case 'iup':
+                return 'IUP';
+            default:
+                return 'Unknown';
         }
     };
 
@@ -165,7 +179,7 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({
                 ${className}
             `.trim().replace(/\s+/g, ' ')}
         >
-            {showText ? category : ''}
+            {showText ? getCategoryText(category) : ''}
         </span>
     );
 };

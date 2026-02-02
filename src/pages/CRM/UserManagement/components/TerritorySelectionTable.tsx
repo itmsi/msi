@@ -8,7 +8,7 @@ import { CategoryBadge } from '@/components/ui/badge';
 import Button from '@/components/ui/button/Button';
 
 export interface ExpandableRowData extends BaseEntity {
-    type: 'island' | 'group' | 'area' | 'iup_zone' | 'iup';
+    type: 'island' | 'group' | 'area' | 'iup_zone' | 'iup_segmentation' | 'iup';
     level: number;
     parent_id?: string;
     children?: any[];
@@ -63,14 +63,25 @@ const flattenTerritoryData = (territories: Island[]): ExpandableRowData[] => {
                                 });
                                 
                                 if (iupZone.children && iupZone.children.length > 0) {
-                                    iupZone.children.forEach(iup => {
+                                    iupZone.children.forEach(iupSegmentation => {
                                         result.push({
-                                            ...iup,
+                                            ...iupSegmentation,
                                             level: 4,
                                             parent_id: iupZone.id,
-                                            type: 'iup',
-                                            children: undefined
+                                            type: 'iup_segmentation',
                                         });
+                                        
+                                        if (iupSegmentation.children && iupSegmentation.children.length > 0) {
+                                            iupSegmentation.children.forEach(iup => {
+                                                result.push({
+                                                    ...iup,
+                                                    level: 5,
+                                                    parent_id: iupSegmentation.id,
+                                                    type: 'iup',
+                                                    children: undefined
+                                                });
+                                            });
+                                        }
                                     });
                                 }
                             });
@@ -228,7 +239,8 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
                     />
                 </div>
             ),
-            width: '120px'
+            width: '150px',
+            center: true
         },
         // {
         //     name: 'Status',
@@ -247,6 +259,7 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
                 const isDisabled = disabled || disabledTerritories.has(row.id);
                 const isSelected = selectedTerritories.has(row.id);
                 const hasChildrenRow = hasChildren(row);
+                const isEditMode = selectedTerritories.size > 0; 
                 
                 // For parent territories with children
                 if (hasChildrenRow) {
@@ -261,9 +274,28 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
                             </Button>
                         );
                     }
-                    return null;
+                    // If not selected
+                    if (!isEditMode) {
+                        // In create mode, show clickable checkbox
+                        return (
+                            <Button
+                                onClick={() => handleTerritoryClick(row)}
+                                variant='transparent'
+                                disabled={isDisabled}
+                                className={`p-2 rounded-md text-sm font-medium transition-colors ${
+                                    isDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-100'
+                                }`}
+                            >
+                                <MdCheckBoxOutlineBlank className="text-gray-400 text-xl hover:text-gray-600" />
+                            </Button>
+                        );
+                    } else {
+                        // In edit mode, hide checkbox for unselected parent territories
+                        return null;
+                    }
                 }
                 
+                // For child territories (leaf nodes) - normal behavior
                 return (
                     <Button
                         onClick={() => handleTerritoryClick(row)}

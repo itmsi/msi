@@ -566,13 +566,22 @@ export default function EditEmployee() {
                                     </div>
 
                                     {/* Employee Status */}
-                                    <div className="md:col-span-2">
+                                    <div className="md:col-span-4">
                                         <Switch 
                                             label="Status Employee" 
                                             showStatusText={true} 
-                                            position="left"
                                             checked={formData.employee_status === 'active'}
                                             onChange={(checked) => handleInputChange('employee_status', checked ? 'active' : 'inactive')}
+                                        />
+                                    </div>
+
+                                    {/* Employee Salses */}
+                                    <div className="md:col-span-4">
+                                        <Switch 
+                                            label="Status Sales" 
+                                            showStatusText={true} 
+                                            checked={formData.is_sales_quotation === true || formData.is_sales_quotation === 'true'}
+                                            onChange={(checked) => handleInputChange('is_sales_quotation', checked ? 'true' : 'false')}
                                         />
                                     </div>
                                 </div>
