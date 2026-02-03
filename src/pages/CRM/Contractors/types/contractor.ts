@@ -189,3 +189,13 @@ export interface contactPerson {
     phone?: string;
     position?: string;
 }
+
+export interface ContractorActivityInfo {
+    iup_namecustomer_iup_name: string;
+    transactions_id: string;
+    transaction_type: string;
+    transaction_date: string;
+    sales_name: string;
+    pain_point: string;
+    solution_point: string;
+}
