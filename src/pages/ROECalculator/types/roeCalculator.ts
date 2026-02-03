@@ -708,6 +708,7 @@ export interface ManageROEBreakdownResponse {
 /* ========================= MAIN DATA ========================= */
 
 export interface ManageROEBreakdownData {
+    fuel_consumption_type: string;
     key_financial_metrics: KeyFinancialMetrics;
     roe_roa_metrics: ROEROAMetrics;
     charts_data: ChartsData;
@@ -834,6 +835,8 @@ export interface ManageROECompareResponse {
 export interface ManageROECompareData {
   brand: string;
   tonase: number;
+  fuel_consumption: number;
+  fuel_consumption_type: number;
   ritase: number;
   qty: number;
   price: number;
@@ -867,4 +870,5 @@ export interface ComparePayload {
     ritase: number;
     qty: number;
     price_per_unit: number;
+    fuel_consumption: number;
 }
