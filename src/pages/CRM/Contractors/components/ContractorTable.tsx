@@ -108,16 +108,20 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
         },
         {
             name: 'Activity',
-            selector: (row) => row?.activity_status || 'find',
-            cell: (row) => <ActivityTypeBadge type={(row?.activity_status as 'find' | 'pull' | 'survey') || 'find'} />,
+            selector: (row) => row?.activity_status?.toLowerCase() ?? 'find',
+            cell: (row) => (
+                <ActivityTypeBadge
+                    type={(row?.activity_status?.toLowerCase() as 'find' | 'pull' | 'survey') ?? 'find'}
+                />
+            ),
             sortable: false,
             wrap: true,
             center: true,
         },
         {
             name: 'Status',
-            selector: (row) => row?.status || 'inactive',
-            cell: (row) => <ActiveStatusBadge status={(row?.status as 'active' | 'inactive') || 'inactive'} />,
+            selector: (row) => row?.status?.toLowerCase() ?? 'inactive',
+            cell: (row) => <ActiveStatusBadge status={(row?.status?.toLowerCase() as 'active' | 'inactive') ?? 'inactive'} />,
             width: '120px',
             center: true,
             wrap: true,
