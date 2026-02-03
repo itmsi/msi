@@ -4,10 +4,6 @@ import CustomDataTable from '@/components/ui/table/CustomDataTable';
 import { ContractorActivityInfo } from '../types/contractor';
 import { ActivityTypeBadge } from './ContractorBadges';
 
-interface ContractorActivityInformationProps {
-    customers: ContractorActivityInfo[];
-}
-
 const ContractorActivityInformation: React.FC = () => {
     
     const contractorData = [
