@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { ActivityServices } from '../services/activityServices';
 import { ActivityFormData, ActivityValidationErrors } from '../types/activity';
 import { formatDateToYMD } from '@/helpers/generalHelper';
+import { AuthService } from '@/services/authService';
 
 interface UseActivityFormProps {
     mode: 'create' | 'edit';
@@ -12,6 +13,10 @@ interface UseActivityFormProps {
 }
 
 export const useActivityForm = ({ mode, transactions_id, initialData }: UseActivityFormProps) => {
+    const employeeId = useMemo(() => {
+        const user = AuthService.getCurrentUser();
+        return user.employee_id || null;
+    }, []);
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [validationErrors, setValidationErrors] = useState<ActivityValidationErrors>({});
@@ -29,13 +34,16 @@ export const useActivityForm = ({ mode, transactions_id, initialData }: UseActiv
         transcription: '',
         summary_point: '',
         summary_bim: '',
+        pain_point: '',
+        solution_point: '',
         segmentation_id: '',
         segmentation_properties: {
             segmentation_id: '',
             segmentation_name_en: ''
         },
         image_url: '',
-        voice_record_url: ''
+        voice_record_url: '',
+        employee_id: employeeId
     });
 
     // Handle form field changes
@@ -91,17 +99,17 @@ export const useActivityForm = ({ mode, transactions_id, initialData }: UseActiv
             errors.longitude = 'Longitude is required';
         }
 
-        if (!formData.transcription.trim()) {
-            errors.transcription = 'Transcription is required';
-        }
+        // if (!formData.transcription.trim()) {
+        //     errors.transcription = 'Transcription is required';
+        // }
 
-        if (!formData.summary_point.trim()) {
-            errors.summary_point = 'Summary point is required';
-        }
+        // if (!formData.summary_point.trim()) {
+        //     errors.summary_point = 'Summary point is required';
+        // }
 
-        if (!formData.summary_bim.trim()) {
-            errors.summary_bim = 'Summary BIM is required';
-        }
+        // if (!formData.summary_bim.trim()) {
+        //     errors.summary_bim = 'Summary BIM is required';
+        // }
 
         // URL validation if provided
         if (formData.image_url && !isValidUrl(formData.image_url)) {

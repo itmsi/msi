@@ -14,6 +14,8 @@ export interface Activity {
     transcription: string;
     summary_point: string;
     summary_bim: string;
+    pain_point: string;
+    solution_point: string;
     image_url: string;
     voice_record_url: string;
     segmentation_properties: SegmentationProperties;
@@ -49,10 +51,13 @@ export interface ActivityFormData {
     transcription: string;
     summary_point: string;
     summary_bim: string;
+    pain_point: string;
+    solution_point: string;
     segmentation_id: string;
     segmentation_properties: SegmentationProperties;
     image_url?: string;
     voice_record_url?: string;
+    employee_id?: string | null;
 }
 
 // API request/response types
