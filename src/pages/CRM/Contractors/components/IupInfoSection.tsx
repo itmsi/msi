@@ -4,6 +4,7 @@ import { ContractorFormData } from '../types/contractor';
 import Label from '@/components/form/Label';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import { ContractorSelectOption, useContractorSelect } from '@/hooks/useContractorSelect';
+import Input from '@/components/form/input/InputField';
 
 interface IupInfoProps {
     formData: ContractorFormData;
@@ -214,10 +215,10 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
         required: boolean = false
     ) => (
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <Label className="block text-sm font-medium text-gray-700 mb-1">
                 {label} {required && '*'}
-            </label>
-            <input
+            </Label>
+            <Input
                 type="text"
                 value={iup_customers[field] as string}
                 onChange={(e) => onChange(field, e.target.value)}

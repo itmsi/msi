@@ -70,6 +70,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
                         <span className="inline-flex items-center justify-center rounded-md font-medium px-2 bg-green-100 text-green-800 border border-green-200">{`${row.group_name}`}</span>
                         <span className="inline-flex items-center justify-center rounded-md font-medium px-2 bg-orange-100 text-orange-800 border border-orange-200">{`${row.area_name}`}</span>
                         <span className="inline-flex items-center justify-center rounded-md font-medium px-2 bg-purple-100 text-purple-800 border border-purple-200">{`${row.iup_zone_name}`}</span>
+                        <span className="inline-flex items-center justify-center rounded-md font-medium px-2 bg-pink-100 text-pink-800 border border-pink-200">{`${row.iup_segmentation_name}`}</span>
                     </div>
                 </div>
             ),
@@ -107,16 +108,20 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
         },
         {
             name: 'Activity',
-            selector: (row) => row?.activity_status || 'find',
-            cell: (row) => <ActivityTypeBadge type={(row?.activity_status as 'find' | 'pull' | 'survey') || 'find'} />,
+            selector: (row) => row?.activity_status ?? 'Find',
+            cell: (row) => (
+                <ActivityTypeBadge
+                    type={(row?.activity_status as 'Find' | 'Pull' | 'Survey') ?? 'Find'}
+                />
+            ),
             sortable: false,
             wrap: true,
             center: true,
         },
         {
             name: 'Status',
-            selector: (row) => row?.status || 'inactive',
-            cell: (row) => <ActiveStatusBadge status={(row?.status as 'active' | 'inactive') || 'inactive'} />,
+            selector: (row) => row?.status?.toLowerCase() ?? 'inactive',
+            cell: (row) => <ActiveStatusBadge status={(row?.status?.toLowerCase() as 'active' | 'inactive') ?? 'inactive'} />,
             width: '120px',
             center: true,
             wrap: true,

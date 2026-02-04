@@ -2,6 +2,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { MdKeyboardArrowLeft, MdAdd, MdEdit, MdDeleteOutline } from 'react-icons/md';
 import ReactECharts from 'echarts-for-react';
+import * as echarts from 'echarts/core';
+import { BarChart, PieChart } from 'echarts/charts';
+import { 
+    // TitleComponent,
+    // TooltipComponent,
+    // GridComponent,
+    // LegendComponent
+} from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
 import { TableColumn } from 'react-data-table-component';
 import { toast } from 'react-hot-toast';
 
@@ -21,6 +30,16 @@ import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import Alert from '@/components/ui/alert/Alert';
+
+echarts.use([
+    // TitleComponent,
+    // TooltipComponent,
+    // GridComponent,
+    // LegendComponent,
+    BarChart,
+    PieChart,
+    CanvasRenderer
+]);
 
 
 export default function BreakdownROECalculator() {
@@ -45,7 +64,8 @@ export default function BreakdownROECalculator() {
         tonase: '',
         ritase: '',
         qty: '',
-        price_per_unit: ''
+        price_per_unit: '',
+        fuel_consumption: '',
     });
     const [compareFormErrors, setCompareFormErrors] = useState({
         brand: ''
@@ -164,7 +184,8 @@ export default function BreakdownROECalculator() {
                 tonase: compareFormData.tonase !=='' ? parseFloat(compareFormData.tonase) : 0,
                 ritase: compareFormData.ritase !=='' ? parseFloat(compareFormData.ritase) : 0,
                 qty: compareFormData.qty !=='' ? parseInt(compareFormData.qty) : 0,
-                price_per_unit: compareFormData.price_per_unit !=='' ? parseInt(compareFormData.price_per_unit.replace(/[^\d]/g, '')) : 0
+                price_per_unit: compareFormData.price_per_unit !=='' ? parseInt(compareFormData.price_per_unit.replace(/[^\d]/g, '')) : 0,
+                fuel_consumption: compareFormData.fuel_consumption !=='' ? parseFloat(compareFormData.fuel_consumption) : 0,
             };
 
             const response = await RoecalculatorService.addCompare(payload);
@@ -177,7 +198,8 @@ export default function BreakdownROECalculator() {
                     tonase: '',
                     ritase: '',
                     qty: '',
-                    price_per_unit: ''
+                    price_per_unit: '',
+                    fuel_consumption: ''
                 });
                 setCompareFormErrors({
                     brand: ''
@@ -259,6 +281,11 @@ export default function BreakdownROECalculator() {
                     <div className="text-xs text-gray-500 mt-1">
                         Tonase: {row.tonase}
                     </div>
+                    {row.fuel_consumption && 
+                    <div className="text-xs text-gray-500 mt-1">
+                        Fuel Consumption ({breakdownData?.fuel_consumption_type || 'L/km'}): {row.fuel_consumption}
+                    </div>
+                    }
                 </div>
             ),
             wrap: true
@@ -868,6 +895,26 @@ export default function BreakdownROECalculator() {
                                             onChange={(e) => {
                                                 const value = e.target.value.replace(/[^\d]/g, '');
                                                 handleCompareFormChange('price_per_unit', value);
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="fuel_consumption">Konsumsi BBM {breakdownData?.fuel_consumption_type || 'L/km'}</Label>
+                                        <Input
+                                            id="fuel_consumption"
+                                            placeholder="0.00"
+                                            value={compareFormData.fuel_consumption}
+                                            onChange={(e) => {
+                                                const rawValue = e.target.value;                                                
+                                                handleDecimalInput(
+                                                    rawValue,
+                                                    (validValue) => handleCompareFormChange('fuel_consumption', validValue),
+                                                    () => handleCompareFormChange('fuel_consumption', ''),
+                                                    true,
+                                                    7,
+                                                    4
+                                                );
                                             }}
                                         />
                                     </div>

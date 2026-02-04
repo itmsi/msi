@@ -5,6 +5,7 @@ export interface Activity {
     transaction_source: string;
     iup_customer_id: string;
     customer_iup_name: string;
+    employee_name: string;
     segmentation_id: string;
     transaction_date: string;
     transaction_time: string;
@@ -13,6 +14,8 @@ export interface Activity {
     transcription: string;
     summary_point: string;
     summary_bim: string;
+    pain_point: string;
+    solution_point: string;
     image_url: string;
     voice_record_url: string;
     segmentation_properties: SegmentationProperties;
@@ -48,10 +51,13 @@ export interface ActivityFormData {
     transcription: string;
     summary_point: string;
     summary_bim: string;
+    pain_point: string;
+    solution_point: string;
     segmentation_id: string;
     segmentation_properties: SegmentationProperties;
     image_url?: string;
     voice_record_url?: string;
+    employee_id?: string | null;
 }
 
 // API request/response types
@@ -63,6 +69,7 @@ export interface ActivityListRequest {
     transaction_source?: string;
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
+    is_admin?: boolean;
 }
 
 export interface ActivityListResponse {

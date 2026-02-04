@@ -104,6 +104,17 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.text('(+62) 21-4585-9155', pageWidth - margin - 20, footerY + 10);
     };
 
+    const checkNewPage = (spaceNeeded: number = 20) => {
+        if (yPos + spaceNeeded > pageHeight - footerHeight - margin) {
+            doc.addPage();
+            addHeader();
+            addFooter();
+            yPos = margin + headerHeight + 5;
+            return true;
+        }
+        return false;
+    };
+
     addHeader();
     addFooter();
 
@@ -229,8 +240,6 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         const netProfitBoxWidth = colWidth * 0.85;
         const netProfitBoxHeight = 17;
         const netProfitBoxX = col1X - netProfitBoxWidth / 2;
-        // doc.setFillColor(245, 245, 245);
-        // doc.roundedRect(netProfitBoxX, varYPos - 2, netProfitBoxWidth, netProfitBoxHeight, 1, 1, 'F');
         doc.setDrawColor(245, 245, 245);
         doc.setLineWidth(0.3);
         doc.roundedRect(netProfitBoxX - 4, varYPos - 6, netProfitBoxWidth + 4, netProfitBoxHeight, 1, 1, 'S');
@@ -425,11 +434,6 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
         doc.setTextColor(99, 106, 232);
         setFontSafe(doc, 'Futura', 'bold');
         doc.text(`${formatCurrency(data.pdf_data.expenses.total_expense)}`,margin + 70, (varYPos + 53), { align: 'center' });
-        
-        // doc.setFontSize(9);
-        // doc.setTextColor(86, 93, 109);
-        // setFontSafe(doc, 'Futura', 'normal');
-        // doc.text('Tonase/Bulan x Harga/Ton x Qty Unit',margin + 70, (varYPos + 50) + 13, { align: 'center' });
         
         varYPos += 25;
         return varYPos;
@@ -626,6 +630,94 @@ export const generateROEPDF = async (data: ManageROEDataPDF) => {
     yPos = expenseFunction(yPos - 5);
     yPos = assetliabilityFunction(yPos);
     yPos += 5;
+
+    checkNewPage(30);
+    // TABEL COMPARE
+    
+    doc.setFontSize(14);
+    doc.setTextColor(23, 26, 31);
+    setFontSafe(doc, 'Futura', 'bold');
+    doc.text('Table Komparasi', margin + 2, yPos - 5);
+    
+    // Add border line below title
+    doc.setDrawColor(0, 48, 97);
+    doc.setLineWidth(0.5);
+    doc.line(margin, yPos - 2, margin + disclaimerBoxWidth, yPos - 2);
+    
+    const itemData = data.properties_list_compare.list_compare.map((item, index) => [
+        (index + 1).toString() + '.',
+        item.brand + 
+        '\nTonase: ' + item.tonase + 
+        '\nFuel Consumption ('+ data.fuel_consumption_type  + '): ' + item.fuel_consumption,
+        item.qty || '-',
+        {
+            content: item.roe_percentage + '%',
+            styles: {
+                textColor: [152, 16, 250] as [number, number, number]
+            }
+        },
+        {
+            content: Math.abs(item.roe_percentage_diff) + '%',
+            styles: {
+                textColor: item.roe_percentage_diff > 0 ? [231, 0, 11] as [number, number, number] : item.roe_percentage_diff < 0 ? [0, 166, 62] as [number, number, number] : [0, 0, 0] as [number, number, number]
+            }
+        },
+        {
+            content: item.roa_percentage + '%',
+            styles: {
+                textColor: [21, 93, 252] as [number, number, number]
+            }
+        },
+        {
+            content: Math.abs(item.roa_percentage_diff) + '%',
+            styles: {
+                textColor: item.roa_percentage_diff > 0 ? [231, 0, 11] as [number, number, number] : item.roa_percentage_diff < 0 ? [0, 166, 62] as [number, number, number] : [0, 0, 0] as [number, number, number]
+            }
+        },
+        formatCurrency(item.revenue),
+    ]);
+    autoTable(doc, {
+        startY: yPos + 2,
+        head: [
+            [
+                {content: 'No', styles: { halign: 'center' }},
+                {content: 'Calculator Info'},
+                {content: 'Qty', styles: { halign: 'center' }},
+                {content: 'ROE', colSpan: 2, styles: { halign: 'center' }},
+                {content: 'ROA', colSpan: 2, styles: { halign: 'center' }},
+                {content: 'Revenue', styles: { halign: 'center' }}
+            ]
+        ],
+        body: itemData,
+        margin: { left: margin, right: margin },
+        styles: {
+            fontSize: 9, 
+            cellPadding: 2,
+            font: 'OpenSans',
+            fontStyle: 'normal',
+            valign: 'middle',
+            textColor: [0, 0, 0]
+        },
+        headStyles: { 
+            fillColor: [228, 231, 236], 
+            textColor: [0, 0, 0],
+            font: 'Futura',
+            fontStyle: 'bold',
+            cellPadding: 3
+        },
+        alternateRowStyles: { fillColor: [255, 255, 255] },
+        columnStyles: {
+            0: { cellWidth: 15, halign: "center", valign: 'top' },
+            1: { cellWidth: 70, fontStyle: 'semibold' },
+            2: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold'},
+            3: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold'},
+            4: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold'},
+            5: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold'},
+            6: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold'},
+            7: { cellWidth: 'auto', halign: "center" }
+        },
+        
+    });
     
     
     const customerName = (data.customer_name || 'Unknown').replace(/\s+/g, '_');

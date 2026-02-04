@@ -23,6 +23,7 @@ export interface IupSummary {
 }
 
 export interface CustomerInfo {
+    iup_customer_id: string;
     customer_id: string;
     customer_name: string;
     customer_phone: string;
@@ -60,6 +61,7 @@ export interface IupItemDetails {
     group_name: string;
     island_id: string;
     island_name: string;
+    iup_segment_id?: string;
     customer_count: string;
     customers: CustomerInfo[];
 }
@@ -70,6 +72,7 @@ export interface IupItem {
     iup_status: string;
     iup_zone_name: string;
     segmentation_name: string;
+    iup_segmentation_name: string;
     area_name: string;
     group_name: string;
     island_name: string;
@@ -126,6 +129,7 @@ export interface IupManagementFormData {
     area_id?: string;
     area_name?: string;
     iup_zone_name?: string;
+    iup_segment_id?: string;
 }
 export interface Contractor {
     iup_customer_id: string;

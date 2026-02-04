@@ -76,13 +76,22 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                 <Input
                     type={type}
                     value={formData[field] ? String(formData[field]) : ''}
-                    onKeyPress={type === 'number' ? allowOnlyNumeric : undefined}
+                    onKeyPress={type === 'number' && field !== 'latitude' && field !== 'longitude' ? allowOnlyNumeric : undefined}
                     onChange={(e) => {
                         let value: any = e.target.value;
                         
                         if (type === 'number') {
-                            value = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            if (isNaN(value)) value = 0;
+                            // Untuk latitude dan longitude, izinkan nilai kosong dan minus
+                            if (field === 'latitude' || field === 'longitude') {
+                                value = e.target.value === '' ? '' : e.target.value;
+                                // Hanya parse jika value bukan string kosong
+                                if (value !== '' && !isNaN(parseFloat(value))) {
+                                    value = parseFloat(value);
+                                }
+                            } else {
+                                value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                                if (isNaN(value)) value = 0;
+                            }
                         }
                         
                         onChange(field, value);
@@ -354,7 +363,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                     {/* Transcription */}
                     <div>
                         <Label>
-                            Transcription <span className="text-red-500">*</span>
+                            Transcription
                         </Label>
                         <TextArea
                             value={formData.transcription}
@@ -362,18 +371,18 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                             placeholder="Transcription of voice recording..."
                             rows={3}
                             disabled={isSubmitting}
-                            error={!!errors.transcription}
+                            // error={!!errors.transcription}
                             className='flex'
                         />
-                        {errors.transcription && (
+                        {/* {errors.transcription && (
                             <p className="text-red-500 text-sm mt-1">{errors.transcription}</p>
-                        )}
+                        )} */}
                     </div>
 
                     {/* Summary Point */}
                     <div>
                         <Label>
-                            Summary Point <span className="text-red-500">*</span>
+                            Summary Point
                         </Label>
                         <TextArea
                             value={formData.summary_point}
@@ -381,31 +390,61 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                             placeholder="Key points from the transaction..."
                             rows={3}
                             disabled={isSubmitting}
-                            error={!!errors.summary_point}
+                            // error={!!errors.summary_point}
                             className='flex'
                         />
-                        {errors.summary_point && (
+                        {/* {errors.summary_point && (
                             <p className="text-red-500 text-sm mt-1">{errors.summary_point}</p>
-                        )}
+                        )} */}
                     </div>
 
                     {/* Summary BIM */}
                     <div>
                         <Label>
-                            Summary BIM <span className="text-red-500">*</span>
+                            Summary BIM
                         </Label>
                         <TextArea
                             value={formData.summary_bim}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange('summary_bim', e.target.value)}
                             placeholder="BIM summary information..."
                             rows={3}
-                            error={!!errors.summary_bim}
+                            // error={!!errors.summary_bim}
                             disabled={isSubmitting}
                             className='flex'
                         />
-                        {errors.summary_bim && (
+                        {/* {errors.summary_bim && (
                             <p className="text-red-500 text-sm mt-1">{errors.summary_bim}</p>
-                        )}
+                        )} */}
+                    </div>
+
+                    {/* Pain Point */}
+                    <div>
+                        <Label>
+                            Pain Point
+                        </Label>
+                        <TextArea
+                            value={formData.pain_point}
+                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange('pain_point', e.target.value)}
+                            placeholder="Pain Point information..."
+                            rows={3}
+                            disabled={isSubmitting}
+                            className='flex'
+                        />
+                    </div>
+
+                    {/* Solution */}
+                    <div>
+                        <Label>
+                            Solution
+                        </Label>
+                        <TextArea
+                            value={formData.solution_point}
+                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange('solution_point', e.target.value)}
+                            placeholder="Solution information..."
+                            rows={3}
+                            disabled={isSubmitting}
+                            className='flex'
+                        />
                     </div>
                 </div>
             </div>

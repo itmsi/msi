@@ -11,6 +11,7 @@ import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
 import Label from '@/components/form/Label';
+import { AuthService } from '@/services/authService';
 
 interface CreateFormData {
     employee_id: string;
@@ -25,7 +26,6 @@ interface ValidationErrors {
 const CreateUserAccess: React.FC = () => {
     const navigate = useNavigate();
 
-    // Form state
     const [formData, setFormData] = useState<CreateFormData>({
         employee_id: '',
         selectedTerritories: new Map()
@@ -33,15 +33,14 @@ const CreateUserAccess: React.FC = () => {
     const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
     const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [allowedTerritories, setAllowedTerritories] = useState<Set<string>>(new Set());
 
-    // Territory data
     const {
         territories,
         loading: territoriesLoading,
         fetchTerritories
     } = useTerritory();
 
-    // Employee select hook
     const { 
         employeeOptions, 
         pagination: employeePagination, 
@@ -59,14 +58,39 @@ const CreateUserAccess: React.FC = () => {
         });
     }, []);
 
-    // Handle input changes
+    useEffect(() => {
+        if (territories.length === 0) return;
+        
+        try {
+            const currentTerritories = AuthService.getCurrentTerritories();
+            
+            if (currentTerritories && currentTerritories.length > 0) {
+                const allowedIds = new Set<string>();
+                
+                currentTerritories.forEach((territory: any) => {
+                    if (territory.id_territory) {
+                        allowedIds.add(territory.id_territory);
+                        const childrenIds = getAllChildren(territory.id_territory, territory.access_level.toLowerCase());
+                        childrenIds.forEach(childId => allowedIds.add(childId));
+                    }
+                });
+                
+                setAllowedTerritories(allowedIds);
+            } else {
+                setAllowedTerritories(new Set());
+            }
+        } catch (error) {
+            console.error('Error setting allowed territories:', error);
+            setAllowedTerritories(new Set());
+        }
+    }, [territories]);
+
     const handleInputChange = (field: keyof CreateFormData, value: any) => {
         setFormData(prev => ({
             ...prev,
             [field]: value
         }));
         
-        // Clear validation error for this field
         if (validationErrors[field as keyof ValidationErrors]) {
             setValidationErrors(prev => ({
                 ...prev,
@@ -75,89 +99,132 @@ const CreateUserAccess: React.FC = () => {
         }
     };
 
-    // Helper function to get all descendants of a territory (recursive)
+    const isTerritoryAllowed = (territoryId: string): boolean => {
+        if (allowedTerritories.size === 0) return true;
+        
+        return allowedTerritories.has(territoryId);
+    };
+
     const getAllChildren = (parentId: string, parentType: string): string[] => {
+        if (!territories || territories.length === 0) return [];
+        
         const children: string[] = [];
         
         const collectDescendants = (currentId: string, currentType: string) => {
-            territories.forEach(island => {
-                if (currentType === 'island' && island.id === currentId && island.children) {
-                    island.children.forEach((group: any) => {
-                        children.push(group.id);
-                        collectDescendants(group.id, 'group');
-                    });
-                }
-                
-                if (currentType === 'group' && island.children) {
-                    island.children.forEach((group: any) => {
-                        if (group.id === currentId && group.children) {
-                            group.children.forEach((area: any) => {
-                                children.push(area.id);
-                                collectDescendants(area.id, 'area');
-                            });
-                        }
-                    });
-                }
-                
-                if (currentType === 'area' && island.children) {
-                    island.children.forEach((group: any) => {
-                        if (group.children) {
-                            group.children.forEach((area: any) => {
-                                if (area.id === currentId && area.children) {
-                                    area.children.forEach((iupZone: any) => {
-                                        children.push(iupZone.id);
-                                        collectDescendants(iupZone.id, 'iup_zone');
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-                
-                if (currentType === 'iup_zone' && island.children) {
-                    island.children.forEach((group: any) => {
-                        if (group.children) {
-                            group.children.forEach((area: any) => {
-                                if (area.children) {
-                                    area.children.forEach((iupZone: any) => {
-                                        if (iupZone.id === currentId && iupZone.children) {
-                                            iupZone.children.forEach((iup: any) => {
-                                                children.push(iup.id);
-                                            });
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-            });
+            try {
+                territories.forEach(island => {
+                    if (currentType === 'island' && island.id === currentId && island.children) {
+                        island.children.forEach((group: any) => {
+                            children.push(group.id);
+                            collectDescendants(group.id, 'group');
+                        });
+                    }
+                    
+                    if (currentType === 'group' && island.children) {
+                        island.children.forEach((group: any) => {
+                            if (group.id === currentId && group.children) {
+                                group.children.forEach((area: any) => {
+                                    children.push(area.id);
+                                    collectDescendants(area.id, 'area');
+                                });
+                            }
+                        });
+                    }
+                    
+                    if (currentType === 'area' && island.children) {
+                        island.children.forEach((group: any) => {
+                            if (group.children) {
+                                group.children.forEach((area: any) => {
+                                    if (area.id === currentId && area.children) {
+                                        area.children.forEach((iupZone: any) => {
+                                            children.push(iupZone.id);
+                                            collectDescendants(iupZone.id, 'iup_zone');
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    
+                    if (currentType === 'iup_zone' && island.children) {
+                        island.children.forEach((group: any) => {
+                            if (group.children) {
+                                group.children.forEach((area: any) => {
+                                    if (area.children) {
+                                        area.children.forEach((iupZone: any) => {
+                                            if (iupZone.id === currentId && iupZone.children) {
+                                                iupZone.children.forEach((iupSegmentation: any) => {
+                                                    children.push(iupSegmentation.id);
+                                                    collectDescendants(iupSegmentation.id, 'iup_segmentation');
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+                    if (currentType === 'iup_segmentation' && island.children) {
+                        island.children.forEach((group: any) => {
+                            if (group.children) {
+                                group.children.forEach((area: any) => {
+                                    if (area.children) {
+                                        area.children.forEach((iupZone: any) => {
+                                            if (iupZone.children) {
+                                                iupZone.children.forEach((iupSegmentation: any) => {
+                                                    if (iupSegmentation.id === currentId && iupSegmentation.children) {
+                                                        iupSegmentation.children.forEach((iup: any) => {
+                                                            children.push(iup.id);
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error('Error in collectDescendants:', error);
+            }
         };
 
         collectDescendants(parentId, parentType);
         return children;
     };
 
-    // Helper function to find territory by ID
     const findTerritoryById = (id: string): any => {
-        for (const island of territories) {
-            if (island.id === id) return island;
-            
-            if (island.children) {
-                for (const group of island.children) {
-                    if (group.id === id) return group;
-                    
-                    if (group.children) {
-                        for (const area of group.children) {
-                            if (area.id === id) return area;
-                            
-                            if (area.children) {
-                                for (const iupZone of area.children) {
-                                    if (iupZone.id === id) return iupZone;
-                                    
-                                    if (iupZone.children) {
-                                        for (const iup of iupZone.children) {
-                                            if (iup.id === id) return iup;
+        if (!territories || territories.length === 0) return null;
+        
+        try {
+            for (const island of territories) {
+                if (island.id === id) return island;
+                
+                if (island.children) {
+                    for (const group of island.children) {
+                        if (group.id === id) return group;
+                        
+                        if (group.children) {
+                            for (const area of group.children) {
+                                if (area.id === id) return area;
+                                
+                                if (area.children) {
+                                    for (const iupZone of area.children) {
+                                        if (iupZone.id === id) return iupZone;
+                                        
+                                        if (iupZone.children) {
+                                            for (const iupSegmentation of iupZone.children) {
+                                                if (iupSegmentation.id === id) return iupSegmentation;
+                                                
+                                                if (iupSegmentation.children) {
+                                                    for (const iup of iupSegmentation.children) {
+                                                        if (iup.id === id) return iup;
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -166,16 +233,17 @@ const CreateUserAccess: React.FC = () => {
                     }
                 }
             }
+        } catch (error) {
+            console.error('Error in findTerritoryById:', error);
         }
         return null;
     };
 
-    // Helper function to get disabled territories (children of selected parents)
     const getDisabledTerritories = (): Set<string> => {
         const disabled = new Set<string>();
         
         formData.selectedTerritories.forEach((territory, territoryId) => {
-            if (!territory.ui_only) { // Only for explicitly selected territories
+            if (!territory.ui_only) {
                 const childrenIds = getAllChildren(territoryId, territory.type);
                 childrenIds.forEach(childId => disabled.add(childId));
             }
@@ -184,18 +252,20 @@ const CreateUserAccess: React.FC = () => {
         return disabled;
     };
 
-    // Handle territory selection  
     const handleTerritoryToggle = (territoryId: string, territoryData: ExpandableRowData) => {
+        if (!isTerritoryAllowed(territoryId)) {
+            console.warn(`Territory ${territoryId} is not allowed for current user`);
+            return;
+        }
+        
         setFormData(prev => {
             const newSelected = new Map(prev.selectedTerritories);
             
             if (newSelected.has(territoryId)) {
-                // Uncheck: remove territory and all its children
                 newSelected.delete(territoryId);
                 const childrenIds = getAllChildren(territoryId, territoryData.type);
                 childrenIds.forEach(childId => newSelected.delete(childId));
             } else {
-                // Check: add territory and all its children
                 newSelected.set(territoryId, {
                     access_level: territoryData.type.toUpperCase(),
                     ref_id: territoryId,
@@ -203,18 +273,19 @@ const CreateUserAccess: React.FC = () => {
                     type: territoryData.type
                 });
                 
-                // Add children with ui_only flag
                 const childrenIds = getAllChildren(territoryId, territoryData.type);
                 childrenIds.forEach(childId => {
-                    const childTerritory = findTerritoryById(childId);
-                    if (childTerritory) {
-                        newSelected.set(childId, {
-                            access_level: childTerritory.type.toUpperCase(),
-                            ref_id: childId,
-                            name: childTerritory.name,
-                            type: childTerritory.type,
-                            ui_only: true
-                        });
+                    if (isTerritoryAllowed(childId)) {
+                        const childTerritory = findTerritoryById(childId);
+                        if (childTerritory) {
+                            newSelected.set(childId, {
+                                access_level: childTerritory.type.toUpperCase(),
+                                ref_id: childId,
+                                name: childTerritory.name,
+                                type: childTerritory.type,
+                                ui_only: true
+                            });
+                        }
                     }
                 });
             }
@@ -225,7 +296,6 @@ const CreateUserAccess: React.FC = () => {
             };
         });
 
-        // Clear validation error
         if (validationErrors.territories) {
             setValidationErrors(prev => ({
                 ...prev,
@@ -234,7 +304,6 @@ const CreateUserAccess: React.FC = () => {
         }
     };
 
-    // Form validation
     const validateForm = (): boolean => {
         const errors: ValidationErrors = {};
 
@@ -250,7 +319,6 @@ const CreateUserAccess: React.FC = () => {
         return Object.keys(errors).length === 0;
     };
 
-    // Create handler
     const handleCreate = async () => {
         if (!validateForm()) {
             console.error('Please fix validation errors');
@@ -260,7 +328,6 @@ const CreateUserAccess: React.FC = () => {
         setIsSubmitting(true);
         
         try {
-            // Filter out UI-only territories (children), send only parents
             const territoryData: TerritoryAccess[] = Array.from(formData.selectedTerritories.values())
                 .filter(territory => !territory.ui_only);
             
@@ -289,7 +356,6 @@ const CreateUserAccess: React.FC = () => {
             <div className="bg-gray-50 overflow-auto">
                 <div className="mx-auto px-4 sm:px-3">
 
-                    {/* Header */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
                             <Button
@@ -344,6 +410,8 @@ const CreateUserAccess: React.FC = () => {
                             loading={territoriesLoading}
                             selectedTerritories={new Set(formData.selectedTerritories.keys())}
                             disabledTerritories={getDisabledTerritories()}
+                            currentTerritories={new Set()}
+                            userTerritories={allowedTerritories}
                             onTerritoryToggle={handleTerritoryToggle}
                             disabled={isSubmitting}
                         />

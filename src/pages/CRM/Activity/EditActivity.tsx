@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
@@ -11,8 +11,13 @@ import { ActivityServices } from '@/pages/CRM/Activity/services/activityServices
 import ActivityForm from '@/pages/CRM/Activity/components/ActivityForm';
 import { useActivityForm } from './hooks/useActivityForm';
 import { formatDateToYMD } from '@/helpers/generalHelper';
+import { AuthService } from '@/services/authService';
 
 const EditActivity: React.FC = () => {
+    const employeeId = useMemo(() => {
+        const user = AuthService.getCurrentUser();
+        return user.employee_id || null;
+    }, []);
     const navigate = useNavigate();
     const { transactions_id } = useParams<{ transactions_id: string }>();
     const [isLoading, setIsLoading] = useState(true);
@@ -58,10 +63,13 @@ const EditActivity: React.FC = () => {
                         transcription: activity.transcription,
                         summary_point: activity.summary_point,
                         summary_bim: activity.summary_bim,
+                        pain_point: activity.pain_point,
+                        solution_point: activity.solution_point,
                         segmentation_id: activity.segmentation_id,
                         segmentation_properties: activity.segmentation_properties,
                         image_url: activity.image_url || '',
-                        voice_record_url: activity.voice_record_url || ''
+                        voice_record_url: activity.voice_record_url || '',
+                        employee_id: employeeId || null,
                     });
                 } else {
                     toast.error('Activity not found');

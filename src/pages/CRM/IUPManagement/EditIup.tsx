@@ -28,14 +28,17 @@ const EditIupManagement: React.FC = () => {
         selectedGroup,
         selectedArea,
         selectedIupZone,
+        selectedIupSegmentation,
         // Territory handlers
         handleIslandChange,
         handleGroupChange,
         handleAreaChange,
         handleIupZoneChange,
+        handleIupSegmentationChange,
         getAvailableGroups,
         getAvailableAreas,
         getAvailableIupZones,
+        getAvailableIupSegmentations,
         // Form handlers
         handleInputChange,
         handleSelectChange,
@@ -64,7 +67,8 @@ const EditIupManagement: React.FC = () => {
         island: selectedIsland,
         group: selectedGroup,
         area: selectedArea,
-        iupZone: selectedIupZone
+        iupZone: selectedIupZone,
+        iupSegmentation: selectedIupSegmentation
     };
 
     return (
@@ -105,9 +109,11 @@ const EditIupManagement: React.FC = () => {
                         onGroupChange={handleGroupChange}
                         onAreaChange={handleAreaChange}
                         onIupZoneChange={handleIupZoneChange}
+                        onIupSegmentationChange={handleIupSegmentationChange}
                         getAvailableGroups={getAvailableGroups}
                         getAvailableAreas={getAvailableAreas}
                         getAvailableIupZones={getAvailableIupZones}
+                        getAvailableIupSegmentations={getAvailableIupSegmentations}
                     />
                     
                     <IupInformtionsFormFields
