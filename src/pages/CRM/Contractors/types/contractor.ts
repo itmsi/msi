@@ -113,6 +113,7 @@ export interface ContractorDetailResponse {
             sparepart_cost: string | null;
             manpower_cost: string | null;
             activity_status: string[];
+            activity_data: ContractorActivityInfo[];
             status: string;
             type: string;
             units: Array<{
@@ -172,6 +173,7 @@ export interface ContractorFormData {
         type: 'contractor' | 'sub_contractor' | '';
         activity_status: string[];
         contact_persons: contactPerson[];
+        activity_data: ContractorActivityInfo[];
         units: ContractorUnit[];
         parent_contractor_id?: string;
         parent_contractor_name?: string;
@@ -191,11 +193,12 @@ export interface contactPerson {
 }
 
 export interface ContractorActivityInfo {
-    iup_namecustomer_iup_name: string;
     transactions_id: string;
     transaction_type: string;
     transaction_date: string;
-    sales_name: string;
+    employee_id: string;
+    employee_name: string;
     pain_point: string;
     solution_point: string;
+    created_by_name: string;
 }

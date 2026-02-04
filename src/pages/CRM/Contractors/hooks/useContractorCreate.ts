@@ -53,6 +53,7 @@ export const useContractorCreate = () => {
             manpower_cost: '',
             status: 'active',
             activity_status: [],
+            activity_data: [],
             contact_persons: [],
             units: [],
             type: '',

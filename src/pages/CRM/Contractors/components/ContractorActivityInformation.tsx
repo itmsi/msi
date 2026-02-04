@@ -3,56 +3,23 @@ import { TableColumn } from 'react-data-table-component';
 import CustomDataTable from '@/components/ui/table/CustomDataTable';
 import { ContractorActivityInfo } from '../types/contractor';
 import { ActivityTypeBadge } from './ContractorBadges';
+import { formatDate } from '@/helpers/generalHelper';
 
-const ContractorActivityInformation: React.FC = () => {
+interface IupFormFieldsProps {
+    activityData: ContractorActivityInfo[];
+}
+const ContractorActivityInformation: React.FC<IupFormFieldsProps> = ({ activityData }) => {
     
-    const contractorData = [
-        {
-            "iup_namecustomer_iup_name": "PT MESTIKA AGUNG SEJAHTERA - MUSTIKA INDAH PERMAI",
-            "transactions_id": "e4efd58f-5004-4457-ae97-03c8d9807249",
-            "transaction_type": "Find",
-            "transaction_date": "2025-02-02",
-            "sales_name": "Haris",
-            "pain_point": "bla bla bla",
-            "solution_point": "bla bla bla"
-        },
-        {
-            "iup_namecustomer_iup_name": "CV BINTANG SARANA ANDALAN",
-            "transactions_id": "4ba40d5f-8438-4136-aace-8d3c23297fc6",
-            "transaction_type": "Find",
-            "transaction_date": "2025-01-25",
-            "sales_name": "Dharma",
-            "pain_point": "bla bla bla",
-            "solution_point": "bla bla bla"
-        },
-        {
-            "iup_namecustomer_iup_name": "PT GATRA MANDIRI ABADI",
-            "transactions_id": "43728395-1588-4588-8a71-7c28003c3247",
-            "transaction_type": "Find",
-            "transaction_date": "2025-01-22",
-            "sales_name": "Dharma",
-            "pain_point": "bla bla bla",
-            "solution_point": "bla bla bla"
-        }
-    ]
+    const contractorData = activityData;
+    console.log({
+        contractorData
+    });
     
     const contractorColumns: TableColumn<ContractorActivityInfo>[] = [
         {
-            name: 'Customer Name',
-            selector: (row: ContractorActivityInfo) => row.iup_namecustomer_iup_name || '-',
-            wrap: true,
-            cell: (row: ContractorActivityInfo) => (
-                <div className="py-2">
-                    <p className="font-medium text-gray-900 text-sm">
-                        {row.iup_namecustomer_iup_name || '-'}
-                    </p>
-                </div>
-            ),
-        },
-        {
             name: 'Transaction Type',
-            selector: (row) => row?.transaction_type || 'find',
-            cell: (row) => <ActivityTypeBadge type={(row?.transaction_type.toLowerCase() as 'find' | 'pull' | 'survey') || 'find'} />,
+            selector: (row) => row?.transaction_type || 'Find',
+            cell: (row) => <ActivityTypeBadge type={(row?.transaction_type as 'Find' | 'Pull' | 'Survey') || 'Find'} />,
             center: true,
         },
         {
@@ -62,19 +29,19 @@ const ContractorActivityInformation: React.FC = () => {
             cell: (row: ContractorActivityInfo) => (
                 <div className="py-2">
                     <p className="text-gray-700 text-sm">
-                        {row.transaction_date || '-'}
+                        {row.transaction_date ? formatDate(row.transaction_date) : '-'}
                     </p>
                 </div>
             ),
         },
         {
             name: 'Sales Name',
-            selector: (row: ContractorActivityInfo) => row.sales_name || '-',
+            selector: (row: ContractorActivityInfo) => row.employee_name || '-',
             wrap: true,
             cell: (row: ContractorActivityInfo) => (
                 <div className="py-2">
                     <p className="text-gray-700 text-sm">
-                        {row.sales_name || '-'}
+                        {row.employee_name || '-'}
                     </p>
                 </div>
             ),
@@ -99,7 +66,7 @@ const ContractorActivityInformation: React.FC = () => {
             cell: (row: ContractorActivityInfo) => (
                 <div className="py-2">
                     <p className="text-gray-700 text-sm">
-                        {row.solution_point || 'Unknown'}
+                        {row.solution_point || '-'}
                     </p>
                 </div>
             ),

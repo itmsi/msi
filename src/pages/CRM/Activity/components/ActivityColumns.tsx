@@ -8,7 +8,7 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
     {
         name: 'Transaction Type',
         selector: (row) => row?.transaction_type || 'find',
-        cell: (row) => <ActivityTypeBadge type={(row?.transaction_type.toLowerCase() as 'find' | 'pull' | 'survey') || 'find'} />
+        cell: (row) => <ActivityTypeBadge type={(row?.transaction_type as 'Find' | 'Pull' | 'Survey') || 'Find'} />
     },
     {
         name: 'Sales Name',

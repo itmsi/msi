@@ -549,9 +549,35 @@ export interface ManageROEDataPDF {
     cost: CostPDF;
     financial: FinancialPDF;
 
+    properties_list_compare: {
+        list_compare: PDFCompareItem[];
+    };
     pdf_data: PDFData;
 }
 
+export interface PDFCompareItem {
+    qty: number;
+    fuel: number;
+    asset: number;
+    brand: string;
+    equity: number;
+    ritase: number;
+    tonase: number;
+    revenue: number;
+    expenses: number;
+    liability: number;
+    roa_nominal: number;
+    roe_nominal: number;
+    price_per_unit: number;
+    roa_percentage: number;
+    roe_percentage: number;
+    fuel_consumption: number;
+    roa_nominal_diff: number;
+    roe_nominal_diff: number;
+    roa_percentage_diff: number;
+    roe_percentage_diff: number;
+    properties_list_compare_id: string;
+}
 /* ---------------------------- CHILD INTERFACES ---------------------------- */
 
 export interface UnitPurchasePDF {
