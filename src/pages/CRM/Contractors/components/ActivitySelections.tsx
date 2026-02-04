@@ -54,9 +54,9 @@ const ActivitySelections: React.FC<IupFormFieldsProps> = ({
         <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-2">
             <div className="md:col-span-1 bg-white rounded-2xl shadow-sm mb-6 p-6">
                 <div className="space-y-4 grid grid-cols-1 gap-2">
-                    {renderCheckbox('find', 'Find', 'Process finding new customers and business opportunities.')}
-                    {renderCheckbox('pull', 'Pull', 'Process pulling new customers and business opportunities.')}
-                    {renderCheckbox('survey', 'Survey', 'Process surveying new customers and business opportunities.')}
+                    {renderCheckbox('Find', 'Find', 'Process finding new customers and business opportunities.')}
+                    {renderCheckbox('Pull', 'Pull', 'Process pulling new customers and business opportunities.')}
+                    {renderCheckbox('Survey', 'Survey', 'Process surveying new customers and business opportunities.')}
                 </div>
             </div>
         </div>

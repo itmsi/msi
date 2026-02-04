@@ -222,7 +222,9 @@ const EditContractor: React.FC = () => {
                 {/* Accessories Tab */}
                 {activeTab === 'activity' && (
                     <div className='product-accessories-information'>
-                        <ContractorActivityInformation />
+                        <ContractorActivityInformation 
+                            activityData={formData.iup_customers.activity_data || []}
+                        />
                     </div>
                 )}
                 </div>

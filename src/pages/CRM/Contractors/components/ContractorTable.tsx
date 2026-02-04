@@ -108,10 +108,10 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
         },
         {
             name: 'Activity',
-            selector: (row) => row?.activity_status?.toLowerCase() ?? 'find',
+            selector: (row) => row?.activity_status ?? 'Find',
             cell: (row) => (
                 <ActivityTypeBadge
-                    type={(row?.activity_status?.toLowerCase() as 'find' | 'pull' | 'survey') ?? 'find'}
+                    type={(row?.activity_status as 'Find' | 'Pull' | 'Survey') ?? 'Find'}
                 />
             ),
             sortable: false,

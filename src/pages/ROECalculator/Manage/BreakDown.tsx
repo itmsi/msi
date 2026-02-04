@@ -2,6 +2,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { MdKeyboardArrowLeft, MdAdd, MdEdit, MdDeleteOutline } from 'react-icons/md';
 import ReactECharts from 'echarts-for-react';
+import * as echarts from 'echarts/core';
+import { BarChart, PieChart } from 'echarts/charts';
+import { 
+    // TitleComponent,
+    // TooltipComponent,
+    // GridComponent,
+    // LegendComponent
+} from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
 import { TableColumn } from 'react-data-table-component';
 import { toast } from 'react-hot-toast';
 
@@ -21,6 +30,16 @@ import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import Alert from '@/components/ui/alert/Alert';
+
+echarts.use([
+    // TitleComponent,
+    // TooltipComponent,
+    // GridComponent,
+    // LegendComponent,
+    BarChart,
+    PieChart,
+    CanvasRenderer
+]);
 
 
 export default function BreakdownROECalculator() {

@@ -59,6 +59,7 @@ export const useContractorEdit = () => {
             activity_status: [],
             contact_persons: [],
             units: [],
+            activity_data: [],
             type: ''
         }
     });
@@ -137,7 +138,8 @@ export const useContractorEdit = () => {
                                 engine: unit.engine || '',
                                 quantity: unit.quantity || 0,
                                 physical_availability: unit.physical_availability || ''
-                            }))
+                            })),
+                            activity_data: response.data.iup_customers.activity_data || []
                         }
                     };
                     setFormData(transformedData);
