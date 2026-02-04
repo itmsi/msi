@@ -5,6 +5,7 @@ export interface Activity {
     transaction_source: string;
     iup_customer_id: string;
     customer_iup_name: string;
+    employee_name: string;
     segmentation_id: string;
     transaction_date: string;
     transaction_time: string;
