@@ -11,19 +11,27 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
         cell: (row) => <ActivityTypeBadge type={(row?.transaction_type.toLowerCase() as 'find' | 'pull' | 'survey') || 'find'} />
     },
     {
-        name: 'Transaction Source',
-        selector: (row: Activity) => row.transaction_source || '-',
-        // width: '140px',
+        name: 'Sales Name',
+        selector: (row: Activity) => row.employee_name || '-',
         cell: (row: Activity) => (
-            <div className="capitalize">
-                <Badge
-                    color={row.transaction_source.toLowerCase() === 'manual' ? 'primary' :'info'}
-                    variant='light'
-                >
-                    {row.transaction_source}
-                </Badge>
+            <div className="py-2">
+                <p className="text-sm font-medium text-gray-900">
+                    {row.employee_name || '-'}
+                </p>
             </div>
         ),
+    },
+    {
+        name: 'Contractor Name',
+        selector: (row: Activity) => row.customer_iup_name || '-',
+        cell: (row: Activity) => (
+            <div className="py-2">
+                <p className="text-sm font-medium text-gray-900">
+                    {row.customer_iup_name || '-'}
+                </p>
+            </div>
+        ),
+        minWidth: '250px'
     },
     {
         name: 'Segmentation',
@@ -38,7 +46,7 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
         ),
     },
     {
-        name: 'Date',
+        name: 'Visit Date',
         selector: (row: Activity) => row.transaction_date || '-',
         cell: (row: Activity) => (
             <div className=" items-center gap-3 py-2">
@@ -79,6 +87,21 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
             </div>
         ),
         width: '200px'
+    },
+    {
+        name: 'Transaction Source',
+        selector: (row: Activity) => row.transaction_source || '-',
+        // width: '140px',
+        cell: (row: Activity) => (
+            <div className="items-center capitalize">
+                <Badge
+                    color={row.transaction_source.toLowerCase() === 'manual' ? 'primary' :'info'}
+                    variant='light'
+                >
+                    {row.transaction_source}
+                </Badge>
+            </div>
+        ),
     }
 ];
 
