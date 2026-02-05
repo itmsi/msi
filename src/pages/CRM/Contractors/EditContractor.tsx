@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
-import { MdKeyboardArrowLeft } from 'react-icons/md';
+import { MdKeyboardArrowLeft, MdTaskAlt } from 'react-icons/md';
 import { useIupSelect } from '@/hooks/useIupSelect';
 import { useBrandSelect } from '@/hooks/useBrandSelect';
 import { useSegementationSelect } from '@/hooks/useSegmentSelect';
 import Loading from '@/components/common/Loading';
 import { useContractorEdit } from './hooks';
+import { usePermissionsFor } from '@/hooks/usePermissions';
 
 // Separated components
 import {
@@ -20,6 +21,9 @@ import FormActions from '@/components/form/FormActions';
 import ActivitySelections from './components/ActivitySelections';
 import { AiOutlineHistory, AiOutlineIdcard } from 'react-icons/ai';
 import ContractorActivityInformation from './components/ContractorActivityInformation';
+import { GrDocumentVerified } from 'react-icons/gr';
+import ContractorQuotationInformation from './components/ContractorQuotationInformation';
+import ContractorSurveyInformation from './components/ContractorSurveyInformation';
 
 const EditContractor: React.FC = () => {
     const navigate = useNavigate();
@@ -85,7 +89,10 @@ const EditContractor: React.FC = () => {
         initializeSegementationOptions();
     }, [initializeSegementationOptions]);
 
-    const [activeTab, setActiveTab] = useState<'info_contractor' | 'activity'>('info_contractor');
+    const [activeTab, setActiveTab] = useState<'info_contractor' | 'activity' | 'quotation' | 'survey'>('info_contractor');
+
+    // Check permission untuk tab quotation
+    const quotationPermissions = usePermissionsFor('Manage Quotation');
 
     if (isLoading) {
         return (
@@ -133,6 +140,28 @@ const EditContractor: React.FC = () => {
                             >
                                 <AiOutlineIdcard size={'1.5rem'} /> Detail Contractor
                             </button>
+                            <button
+                                onClick={() => setActiveTab('survey')}
+                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                    activeTab === 'survey'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                            >
+                                <MdTaskAlt size={'1.5rem'} /> Survey
+                            </button>
+                            {quotationPermissions.canRead && (
+                                <button
+                                    onClick={() => setActiveTab('quotation')}
+                                    className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                        activeTab === 'quotation'
+                                            ? 'border-blue-500 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                >
+                                    <GrDocumentVerified size={'1.5rem'} /> Quotation
+                                </button>
+                            )}
                             <button
                                 onClick={() => setActiveTab('activity')}
                                 className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
@@ -219,14 +248,22 @@ const EditContractor: React.FC = () => {
                             />
                         </div>
                     )}
-                {/* Accessories Tab */}
-                {activeTab === 'activity' && (
-                    <div className='product-accessories-information'>
+                    {/* Survey Tab */}
+                    {activeTab === 'survey' && (
+                        <ContractorSurveyInformation />
+                    )}
+                    {/* Quotation Tab */}
+                    {activeTab === 'quotation' && quotationPermissions.canRead && (
+                        <ContractorQuotationInformation 
+                            customerID={formData.customer_data.customer_id || ''}
+                        />
+                    )}
+                    {/* Activity Tab */}
+                    {activeTab === 'activity' && (
                         <ContractorActivityInformation 
                             activityData={formData.iup_customers.activity_data || []}
                         />
-                    </div>
-                )}
+                    )}
                 </div>
             </div>
         </>

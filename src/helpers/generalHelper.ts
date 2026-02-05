@@ -469,3 +469,16 @@ export const formatPhoneNumber = (phone: string): string => {
     
     return phone;
 }
+
+export const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
+        draft: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Draft' },
+        submit: { bg: 'bg-green-100', text: 'text-green-800', label: 'Submit' },
+        pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending' },
+        approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Approved' },
+        rejected: { bg: 'bg-red-100', text: 'text-red-800', label: 'Rejected' },
+        cancelled: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Cancelled' },
+    };
+
+    return statusConfig[status.toLowerCase()] || statusConfig.draft;
+};

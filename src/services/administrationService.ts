@@ -115,11 +115,7 @@ export class administrationService {
     static async deleteMenuPermission(mhpId: number): Promise<{ status: number }> {
         return await apiDelete(`${API_BASE_URL}/menu-has-permissions/${mhpId}`);
     }
-
-    /**
-     * @deprecated Use createMenuPermission for checking and deleteMenuPermission for unchecking
-     * This method is kept for backward compatibility only
-     */
+    
     static async updateMenuPermissionStatus(requestBody: { menu_id: number; permission_id: number; updatedBy: number }): Promise<{ status: number }> {
         return await apiPut(`${API_BASE_URL}/api/menu-has-permissions/${requestBody.menu_id}`, requestBody);
     }
