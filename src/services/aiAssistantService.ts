@@ -17,10 +17,13 @@ export class AIAssistantService {
      */
     static async sendMessage(request: ChatRequest): Promise<ChatResponse> {
         try {
-            // Build request body - only include sessionId if provided
+            // Build request body - only include sessionId and system if provided
             const requestBody: any = { message: request.message };
             if (request.sessionId) {
                 requestBody.sessionId = request.sessionId;
+            }
+            if (request.system) {
+                requestBody.system = request.system;
             }
 
             // Override timeout for AI endpoint (AI processing takes longer)
