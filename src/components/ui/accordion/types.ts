@@ -18,6 +18,7 @@ export interface AccordionProps {
     items: AccordionItemData[];
     allowMultiple?: boolean;
     defaultOpenItems?: string[];
+    defaultOpenAll?: boolean;
     className?: string;
     itemClassName?: string;
     onItemToggle?: (itemId: string, isOpen: boolean) => void;

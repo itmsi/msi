@@ -13,6 +13,7 @@ import { toast } from 'react-hot-toast';
 
 // Activity specific imports
 import { useActivities } from './hooks/useActivities';
+import { ActivityFilters } from './types/activity';
 import { getActivityColumns, NoDataComponent, FilterSection } from './components';
 
 
@@ -55,6 +56,10 @@ const Activity: React.FC = () => {
             handleFilters({ sort_by: value });
         } else if (field === 'sort_order') {
             handleFilters({ sort_order: value as 'asc' | 'desc' | '' });
+        } else if (field === 'start_date') {
+            handleFilters({ start_date: value });
+        } else if (field === 'end_date') {
+            handleFilters({ end_date: value });
         }
     };
 
@@ -65,7 +70,9 @@ const Activity: React.FC = () => {
             transaction_type: '',
             transaction_source: '',
             sort_by: 'updated_at',
-            sort_order: 'desc'
+            sort_order: 'desc',
+            start_date: '',
+            end_date: ''
         });
     };
 

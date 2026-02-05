@@ -33,10 +33,11 @@ const ContractorPersonsCard: React.FC<ContractorPersonsCardProps> = ({
         const errorKey = `contact_${index}_${field}`;
         return (
             <div>
-                <Label>
+                <Label htmlFor={`contact_${index}_${field}`}>
                     {label} {required && '*'}
                 </Label>
                 <Input
+                    id={`contact_${index}_${field}`}
                     type={'text'}
                     value={contact[field]}
                     onKeyPress={type === 'number' ? handleKeyPress : undefined}

@@ -32,10 +32,11 @@ const CustomerInfoSection: React.FC<CustomerInfoProps> = ({
         required: boolean = false
     ) => (
         <div>
-            <Label>
+            <Label htmlFor={field}>
                 {label} {required && '*'}
             </Label>
             <Input
+                id={field}
                 type={type}
                 value={(customer_data[field] as string) || ''}
                 onChange={(e) => onChange(field, e.target.value)}

@@ -1,5 +1,6 @@
 import { Accordion } from '@/components/ui/accordion';
 import { AccordionItemData } from '@/components/ui/accordion/types';
+import FileUpload from '@/components/ui/FileUpload/FileUpload';
 import React from 'react';
 
 const ContractorSurveyInformation: React.FC = () => {
@@ -18,7 +19,30 @@ const ContractorSurveyInformation: React.FC = () => {
         {
             id: '3',
             judul: 'MAP',
-            konten: <p>Ini adalah konten MAP...</p>
+            konten: (
+            <div>
+                <FileUpload
+                    id="product_image"
+                    name="product_image"
+                    label="Foto Produk"
+                    accept="image/jpeg,image/jpg,image/png"
+                    icon="image"
+                    acceptedFormats={['jpg', 'jpeg', 'png']}
+                    maxSize={5}
+                    multiple={true}
+                    existingImageUrl={[
+                        '/images/image-weecom-1.png', 
+                        '/images/image-weecom-2.png'
+                    ]}
+                    onFileChange={() => {}}
+                    validationError={''}
+                    disabled={false}
+                    description="Format: JPG, JPEG, PNG - Maksimal 5MB"
+                    showPreview={true}
+                    previewSize="lg"
+                    colLength={4}
+                />
+            </div>)
         },
         {
             id: '4', 

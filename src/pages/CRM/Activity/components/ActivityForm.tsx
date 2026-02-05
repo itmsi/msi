@@ -70,10 +70,11 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
     ) => {
         return (
             <div>
-                <Label>
+                <Label htmlFor={field}>
                     {label} {required && <span className="text-red-500">*</span>}
                 </Label>
                 <Input
+                    id={field}
                     type={type}
                     value={formData[field] ? String(formData[field]) : ''}
                     onKeyPress={type === 'number' && field !== 'latitude' && field !== 'longitude' ? allowOnlyNumeric : undefined}
@@ -198,10 +199,11 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:col-span-2">
                         {/* Transaction Type */}
                         <div>
-                            <Label>
+                            <Label htmlFor='test'>
                                 Transaction Type <span>*</span>
                             </Label>
                             <CustomSelect
+                                id='test'
                                 value={transactionTypes.find(option => option.value === formData.transaction_type) || null}
                                 onChange={(option) => onChange('transaction_type', option?.value || '')}
                                 options={transactionTypes}
@@ -219,7 +221,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                     </div>
 
                     <div>
-                        <Label>Date</Label>
+                        <Label htmlFor="transaction_date">Date</Label>
                         <div className="relative" ref={datePickerRef}>
                             <div 
                                 className={`flex items-center justify-between w-full px-3 py-2 border rounded-md cursor-pointer bg-white hover:border-gray-400 ${
@@ -287,11 +289,12 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:col-span-2">
                         {/* Customer Selection */}
                         <div>
-                            <Label>
+                            <Label htmlFor="customer-select">
                                 Customer <span className="text-red-500">*</span>
                             </Label>
                             
                             <CustomAsyncSelect
+                                id="customer-select"
                                 placeholder="Selected Customer..."
                                 value={selectedContractor}
                                 defaultOptions={contractorOptions}
@@ -320,8 +323,9 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
 
                         {/* Segmentation Selection */}
                         <div>
-                            <Label>Select Segmentation</Label>
+                            <Label htmlFor="segmentation-select">Select Segmentation</Label>
                             <CustomAsyncSelect
+                                id="segmentation-select"
                                 placeholder="Select Segmentation..."
                                 value={selectedSegment}
                                 defaultOptions={segementationOptions}
@@ -362,14 +366,14 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
                 <div className="grid grid-cols-1 gap-6">
                     {/* Transcription */}
                     <div>
-                        <Label>
+                        <Label htmlFor='transcription'>
                             Transcription
                         </Label>
                         <TextArea
                             value={formData.transcription}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange('transcription', e.target.value)}
                             placeholder="Transcription of voice recording..."
-                            rows={3}
+                            rows={10}
                             disabled={isSubmitting}
                             // error={!!errors.transcription}
                             className='flex'
@@ -381,14 +385,14 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
 
                     {/* Summary Point */}
                     <div>
-                        <Label>
+                        <Label htmlFor='summary_point'>
                             Summary Point
                         </Label>
                         <TextArea
                             value={formData.summary_point}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange('summary_point', e.target.value)}
                             placeholder="Key points from the transaction..."
-                            rows={3}
+                            rows={10}
                             disabled={isSubmitting}
                             // error={!!errors.summary_point}
                             className='flex'
@@ -400,14 +404,14 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
 
                     {/* Summary BIM */}
                     <div>
-                        <Label>
+                        <Label htmlFor='summary_bim'>
                             Summary BIM
                         </Label>
                         <TextArea
                             value={formData.summary_bim}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange('summary_bim', e.target.value)}
                             placeholder="BIM summary information..."
-                            rows={3}
+                            rows={10}
                             // error={!!errors.summary_bim}
                             disabled={isSubmitting}
                             className='flex'
@@ -419,14 +423,14 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
 
                     {/* Pain Point */}
                     <div>
-                        <Label>
+                        <Label htmlFor='pain_point'>
                             Pain Point
                         </Label>
                         <TextArea
                             value={formData.pain_point}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange('pain_point', e.target.value)}
                             placeholder="Pain Point information..."
-                            rows={3}
+                            rows={10}
                             disabled={isSubmitting}
                             className='flex'
                         />
@@ -434,14 +438,14 @@ const ActivityForm: React.FC<ActivityFormProps> = ({
 
                     {/* Solution */}
                     <div>
-                        <Label>
+                        <Label htmlFor='solution_point'>
                             Solution
                         </Label>
                         <TextArea
                             value={formData.solution_point}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange('solution_point', e.target.value)}
                             placeholder="Solution information..."
-                            rows={3}
+                            rows={10}
                             disabled={isSubmitting}
                             className='flex'
                         />

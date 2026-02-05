@@ -8,12 +8,13 @@ const Accordion: React.FC<AccordionProps> = ({
     items,
     allowMultiple = false,
     defaultOpenItems = [],
+    defaultOpenAll = false,
     className = "",
     itemClassName = "",
     onItemToggle
 }) => {
     const [openItems, setOpenItems] = useState<Set<string>>(
-        new Set(defaultOpenItems)
+        new Set(defaultOpenAll ? items.map(item => item.id) : defaultOpenItems)
     );
 
     const handleToggle = useCallback((itemId: string) => {
