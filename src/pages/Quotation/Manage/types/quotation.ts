@@ -229,6 +229,7 @@ export interface QuotationRequest {
     island_id?: string;
     start_date?: string;
     end_date?: string;
+    customer_id?: string;
 }
 export interface QuotationFilters {
     search: string;
