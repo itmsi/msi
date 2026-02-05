@@ -73,11 +73,24 @@ export const useAIAssistant = () => {
                 console.error('Failed to parse auth_system from localStorage:', e);
             }
 
+            // Get employee_id from auth_user object in localStorage
+            let employeeId: string | undefined = undefined;
+            try {
+                const authUser = localStorage.getItem('auth_user');
+                if (authUser) {
+                    const parsed = JSON.parse(authUser);
+                    employeeId = parsed.employee_id;
+                }
+            } catch (e) {
+                console.error('Failed to parse auth_user from localStorage:', e);
+            }
+
             // Send message without sessionId on first request, or with sessionId for subsequent requests
             const response = await AIAssistantService.sendMessage({
                 message: messageText,
                 sessionId: sessionId,  // undefined on first request, backend will create
-                system: systemArray
+                system: systemArray,
+                userId: employeeId
             });
 
             // Save sessionId from backend response for future requests
