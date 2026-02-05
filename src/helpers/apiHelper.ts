@@ -169,8 +169,8 @@ const handleApiError = (error: AxiosError<ApiErrorResponse>): ApiError => {
     if (error.response) {
         // Server responded with error status
         const errorData = error.response.data;
-        if (errorData?.message === 'Token sudah expired') {
-            // // Clear all auth data from localStorage
+        if (errorData?.message === 'Token sudah expired' || error.response.status === 401) {
+            // Clear all auth data from localStorage
             localStorage.removeItem('auth_token');
             localStorage.removeItem('auth_user');
             localStorage.removeItem('auth_permissions');
