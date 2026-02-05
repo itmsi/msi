@@ -25,6 +25,7 @@ interface FileUploadProps {
     showPreview?: boolean;
     previewSize?: 'sm' | 'md' | 'lg';
     viewMode?: boolean;
+    colLength?: number;
 }
 
 interface DragState {
@@ -56,7 +57,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
     className = '',
     showPreview = true,
     previewSize = 'md',
-    viewMode = false
+    viewMode = false,
+    colLength = 1,
 }) => {
     
     const [dragState, setDragState] = useState<DragState>({ isDragging: false });
@@ -451,20 +453,20 @@ const FileUpload: React.FC<FileUploadProps> = ({
                         const imageFiles = files.filter(isImageFile);
                         // Use preserved existing images if current existingImageUrl is null/empty
                         const currentExistingImages = existingImageUrl || preservedExistingImages;
-                        const existingImagesCount = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
-                        const totalImages = imageFiles.length + existingImagesCount;
-                        const getImageLength = totalImages > 3 ? 3 : (totalImages > 0 ? totalImages : 1);
+                        // const existingImagesCount = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
+                        // const totalImages = imageFiles.length + existingImagesCount;
+                        // const getImageLength = totalImages > 3 ? 3 : (totalImages > 0 ? totalImages : 1);
                         
                         if (multiple) {
                             return (
-                                <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(${getImageLength}, 1fr)` }}>
+                                <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(${colLength}, 1fr)` }}>
                                     {/* Show existing images first */}
                                     {currentExistingImages && (
                                         Array.isArray(currentExistingImages) ? (
                                             currentExistingImages.map((imageUrl, index) => {
                                                 return (
-                                                    <div key={`existing-${index}`} className="space-y-2">
-                                                        <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
+                                                    <div key={`existing-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center` }>
+                                                        <div>
                                                             <img
                                                                 src={imageUrl}
                                                                 alt={`Existing ${index + 1}`}
@@ -486,8 +488,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                 );
                                             })
                                         ) : (
-                                            <div className="space-y-2">
-                                                <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
+                                            <div className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center`}>
+                                                <div className={``}>
                                                     <img
                                                         src={currentExistingImages}
                                                         alt="Existing"
@@ -518,9 +520,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                         }
                                         
                                         return (
-                                            <div key={`new-${file.name}-${file.size}-${file.lastModified}-${index}`} className="space-y-2">
+                                            <div key={`new-${file.name}-${file.size}-${file.lastModified}-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center`}>
                                                 {/* Image Preview */}
-                                                <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
+                                                <div>
                                                     <img
                                                         src={url}
                                                         alt={`${file.name} - Preview ${index + 1}`}
