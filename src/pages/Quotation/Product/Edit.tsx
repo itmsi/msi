@@ -14,7 +14,6 @@ import { handleKeyPress, formatNumberInput } from "@/helpers/generalHelper";
 import CustomSelect from "@/components/form/select/CustomSelect";
 import { PermissionGate } from "@/components/common/PermissionComponents";
 
-// Form data type for editing
 interface EditProductFormData {
     code_unique: string;
     segment: string;
@@ -170,6 +169,7 @@ export default function EditProduct() {
     const [existingImageUrl, setExistingImageUrl] = useState<any[] | null>(null);
     const [originalImages, setOriginalImages] = useState<any[]>([]);
     const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
+    const [allImagesRemoved, setAllImagesRemoved] = useState<boolean>(false);
 
     useEffect(() => {
         if (id) {
@@ -182,7 +182,6 @@ export default function EditProduct() {
             const product = await loadProduct(productId);
             
             if (product) {
-                // Define default specifications template
                 const defaultSpecifications = [
                     {
                         componen_product_specification_label: 'GVW',
@@ -277,22 +276,18 @@ export default function EditProduct() {
                     }
                 ];
 
-                // Merge API data with default template
                 const specificationsData = defaultSpecifications.map(defaultSpec => {
-                    // Find matching specification from API response
                     const apiSpec = product.componen_product_specifications?.find(spec => 
                         spec.specification_label_name === defaultSpec.specification_label_name ||
                         spec.componen_product_specification_label === defaultSpec.componen_product_specification_label
                     );
 
-                    // If found in API, use API data, otherwise use default template
                     return apiSpec ? {
                         ...defaultSpec,
                         ...apiSpec
                     } : defaultSpec;
                 });
 
-                // Map product data to form data
                 setFormData({
                     code_unique: product.code_unique || '',
                     segment: product.segment || '',
@@ -315,14 +310,12 @@ export default function EditProduct() {
                     componen_product_specifications: specificationsData,
                 });
                 
-                // Set specifications state with the merged data
                 setSpecifications(specificationsData);
                 
-                // Load existing image URL if available
-                if (product.images && product.images.length > 0) {
+                if (product.images && product.images.length > 0 && !allImagesRemoved) {
                     const imageUrls = product.images.map((img: any) => img.image_url);
                     setExistingImageUrl(imageUrls);
-                    setOriginalImages(product.images); // Store original images with image_id
+                    setOriginalImages(product.images);
                 }
             } else {
                 toast.error('Gagal memuat data produk');
@@ -335,7 +328,6 @@ export default function EditProduct() {
         }
     };
 
-    // Handle input changes
     const handleInputChange = (field: keyof EditProductFormData, value: string) => {
         setFormData(prev => ({
             ...prev,
@@ -352,7 +344,6 @@ export default function EditProduct() {
         handleInputChange(field, formattedValue);
     };
 
-    // Handle product image change
     const handleImageChange = (files: File | File[] | null) => {
         if (files === null) {
             setProductImage([]);
@@ -365,27 +356,39 @@ export default function EditProduct() {
         
     };
 
-    // Handle removing existing image by index
     const handleRemoveExistingImage = (index?: number) => {
         if (typeof index === 'number' && Array.isArray(existingImageUrl)) {
-            // Track the deleted image ID
             if (originalImages[index] && originalImages[index].image_id) {
                 setDeletedImageIds(prev => [...prev, originalImages[index].image_id]);
             }
             
             const newExistingImages = existingImageUrl.filter((_, i) => i !== index);
-            setExistingImageUrl(newExistingImages.length > 0 ? newExistingImages : null);
+            const newOriginalImages = originalImages.filter((_, i) => i !== index);
+            
+            if (newExistingImages.length === 0) {
+                setExistingImageUrl(null);
+                setOriginalImages([]);
+                setAllImagesRemoved(true);
+            } else {
+                setExistingImageUrl(newExistingImages);
+                setOriginalImages(newOriginalImages);
+            }
         } else {
-            // Track all deleted image IDs when removing all
             if (originalImages.length > 0) {
                 const allImageIds = originalImages.map(img => img.image_id).filter(Boolean);
                 setDeletedImageIds(prev => [...prev, ...allImageIds]);
             }
+            
             setExistingImageUrl(null);
+            setOriginalImages([]);
+            setAllImagesRemoved(true);
+            
+            setTimeout(() => {
+                setExistingImageUrl(null);
+            }, 0);
         }
     };
 
-    // Validate form data
     const validateForm = (): boolean => {
         const errors: Partial<ItemProductValidationErrors> = {};
 
@@ -404,7 +407,6 @@ export default function EditProduct() {
         return true;
     };
 
-    // Handle form submission
     const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault();
         
@@ -413,10 +415,8 @@ export default function EditProduct() {
         }
 
         try {
-            // Create FormData for multipart/form-data
             const formDataToSend = new FormData();
             
-            // Prepare data based on product_type
             let specificationsData = specifications.length > 0 ? specifications : formData.componen_product_specifications;;
             let segmentValue = formData.segment;
             let msiModelValue = formData.msi_model;
@@ -429,7 +429,6 @@ export default function EditProduct() {
             let unitModelValue = formData.componen_product_unit_model;
 
             if (formData.product_type !== 'unit') {
-                // For non_unit type, clear unit-specific fields
                 segmentValue = '';
                 msiModelValue = '';
                 msiProductValue = '';
@@ -448,7 +447,6 @@ export default function EditProduct() {
                 }));
             }
             
-            // Append all form fields
             formDataToSend.append('code_unique', formData.code_unique);
             formDataToSend.append('product_type', formData.product_type);
             formDataToSend.append('componen_product_description', formData.componen_product_description);
@@ -469,7 +467,6 @@ export default function EditProduct() {
             formDataToSend.append('selling_price_star_5', formData.selling_price_star_5.replace(/\./g, ''));
             formDataToSend.append('componen_product_specifications', JSON.stringify(specificationsData));
             
-            // Add deleted images information if any
             if (deletedImageIds.length > 0) {
                 const deletedImagesData = deletedImageIds.map(imageId => {
                     const originalImage = originalImages.find(img => img.image_id === imageId);
@@ -482,7 +479,6 @@ export default function EditProduct() {
                 formDataToSend.append('images', JSON.stringify(deletedImagesData));
             }
 
-            // Append image files if new files are uploaded
             if (productImage && productImage.length > 0) {
                 if (productImage.length === 1) {
                     formDataToSend.append('images[0]', productImage[0]);
@@ -501,12 +497,10 @@ export default function EditProduct() {
                 navigate('/quotations/products');
             }
         } catch (error) {
-            // Error handling sudah dihandle di hook
             toast.error('Gagal memperbarui produk');
         }
     };
 
-    // Handle back navigation
     const handleBack = () => {
         navigate('/quotations/products');
     };
@@ -561,7 +555,6 @@ export default function EditProduct() {
             <div className="bg-gray-50 overflow-auto">
                 <div className="mx-auto px-4 sm:px-3">
                     
-                    {/* HEADER */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
                             <Button
@@ -578,10 +571,8 @@ export default function EditProduct() {
                         </div>
                     </div>
 
-                    {/* Form */}
                     <form onSubmit={(e) => e.preventDefault()} className=" space-y-6">
 
-                        {/* Basic Information Section */}
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
                                 Informasi Dasar
@@ -640,7 +631,6 @@ export default function EditProduct() {
                             </div>
                         </div>
 
-                        {/* Pricing Section */}
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
                                 Informasi Harga
@@ -905,6 +895,7 @@ export default function EditProduct() {
 
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <FileUpload
+                                key={`fileupload-${allImagesRemoved ? 'cleared' : 'normal'}-${existingImageUrl?.length || 0}`}
                                 id="product_image"
                                 name="product_image"
                                 label="Foto Produk"
@@ -914,7 +905,7 @@ export default function EditProduct() {
                                 maxSize={5}
                                 multiple={true}
                                 currentFiles={productImage}
-                                existingImageUrl={existingImageUrl}
+                                existingImageUrl={allImagesRemoved ? null : existingImageUrl}
                                 onFileChange={handleImageChange}
                                 onRemoveExistingImage={handleRemoveExistingImage}
                                 validationError={validationErrors.image}
@@ -922,10 +913,10 @@ export default function EditProduct() {
                                 description="Format: JPG, JPEG, PNG - Maksimal 5MB"
                                 showPreview={true}
                                 previewSize="lg"
+                                colLength={4}
                             />
                         </div>
 
-                        {/* Action Buttons */}
                         <div className="flex justify-end space-x-3 pt-6">
                             <Button
                                 type="button"
