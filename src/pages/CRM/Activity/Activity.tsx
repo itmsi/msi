@@ -13,7 +13,6 @@ import { toast } from 'react-hot-toast';
 
 // Activity specific imports
 import { useActivities } from './hooks/useActivities';
-import { ActivityFilters } from './types/activity';
 import { getActivityColumns, NoDataComponent, FilterSection } from './components';
 
 
