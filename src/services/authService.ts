@@ -168,6 +168,8 @@ export class AuthService {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('current_territories');
         localStorage.removeItem('isLoggedIn');
+        sessionStorage.removeItem('ai_chat_messages');
+        sessionStorage.removeItem('ai_chat_session_id');
     }
 
     /**
