@@ -126,7 +126,6 @@ export const useAIAssistant = () => {
         setSessionId(undefined);
         sessionStorage.removeItem(STORAGE_KEY_MESSAGES);
         sessionStorage.removeItem(STORAGE_KEY_SESSION);
-        localStorage.removeItem('ai_chat_session_id');
     }, [sessionId]);
 
     return {

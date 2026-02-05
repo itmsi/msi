@@ -99,23 +99,4 @@ export class AIAssistantService {
             throw new Error('An unexpected error occurred while clearing history');
         }
     }
-
-    /**
-     * Generate a unique session ID (for reference, not used in current flow)
-     */
-    static generateSessionId(): string {
-        const user = localStorage.getItem('auth_user');
-        let userId = 'guest';
-        
-        if (user) {
-            try {
-                const userData = JSON.parse(user);
-                userId = userData.user_id || 'guest';
-            } catch (e) {
-                // fallback to guest
-            }
-        }
-        
-        return `session_${userId}_${Date.now()}`;
-    }
 }
