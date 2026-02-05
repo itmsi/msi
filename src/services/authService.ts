@@ -92,6 +92,7 @@ export class AuthService {
             localStorage.setItem('auth_menu', JSON.stringify(data.menu));
             localStorage.setItem('auth_session', JSON.stringify(data.session));
             localStorage.setItem('auth_oauth', JSON.stringify(data.oauth));
+            localStorage.setItem('auth_system', JSON.stringify(data.system));
             localStorage.setItem('auth_token', data.oauth.sso_token);
             localStorage.setItem('isLoggedIn', 'true');
         } catch (error) {
@@ -109,10 +110,11 @@ export class AuthService {
             const menu = localStorage.getItem('auth_menu');
             const session = localStorage.getItem('auth_session');
             const oauth = localStorage.getItem('auth_oauth');
+            const system = localStorage.getItem('auth_system');
             const token = localStorage.getItem('auth_token');
             const isLoggedIn = localStorage.getItem('isLoggedIn');
 
-            if (!user || !menu || !session || !oauth || !token || !isLoggedIn) {
+            if (!user || !menu || !session || !oauth || !system || !token || !isLoggedIn) {
                 return null;
             }
 
@@ -121,6 +123,7 @@ export class AuthService {
                 session: JSON.parse(session),
                 menu: JSON.parse(menu),
                 oauth: JSON.parse(oauth),
+                system: JSON.parse(system),
             };
         } catch (error) {
             console.error('Failed to parse stored auth data:', error);
@@ -161,6 +164,7 @@ export class AuthService {
         localStorage.removeItem('auth_menu');
         localStorage.removeItem('auth_session');
         localStorage.removeItem('auth_oauth');
+        localStorage.removeItem('auth_system');
         localStorage.removeItem('auth_token');
         localStorage.removeItem('current_territories');
         localStorage.removeItem('isLoggedIn');
