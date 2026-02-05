@@ -159,6 +159,18 @@ export class AuthService {
      * Clear all authentication data
      */
     static clearAuthData(): void {
+        // Clear AI chat from backend before clearing localStorage
+        const sessionId = sessionStorage.getItem('ai_chat_session_id');
+        if (sessionId) {
+            // Call API to delete conversation history from database
+            // Using dynamic import to avoid circular dependency
+            import('./aiAssistantService').then(({ AIAssistantService }) => {
+                AIAssistantService.clearHistory(sessionId).catch(err => {
+                    console.warn('Failed to clear AI chat history from backend:', err);
+                });
+            });
+        }
+
         localStorage.removeItem('auth_user');
         localStorage.removeItem('auth_permissions');
         localStorage.removeItem('auth_menu');
@@ -168,6 +180,8 @@ export class AuthService {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('current_territories');
         localStorage.removeItem('isLoggedIn');
+        sessionStorage.removeItem('ai_chat_messages');
+        sessionStorage.removeItem('ai_chat_session_id');
     }
 
     /**
