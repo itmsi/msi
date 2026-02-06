@@ -39,7 +39,10 @@ const CustomerInfoSection: React.FC<CustomerInfoProps> = ({
                 id={field}
                 type={type}
                 value={(customer_data[field] as string) || ''}
-                onChange={(e) => onChange(field, e.target.value)}
+                onChange={(e) => {
+                    const replaceDot = e.target.value.replace(/\./g, "")
+                    field === 'customer_name' ? onChange(field, replaceDot.toUpperCase()) : onChange(field, e.target.value);
+                }}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors[field] ? 'border-red-500' : 'border-gray-300'
                 }`}
