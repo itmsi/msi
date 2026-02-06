@@ -9,11 +9,19 @@ pipeline {
     }
 
     stages {
-        stage('Pull Branch') {
+           stage('Pull Branch') {
             steps {
-                echo '📥 Checkout repository'
-                sh 'git fetch origin'
-                sh 'git pull'
+                script {
+                    def workspaceDir = pwd()
+                    if (!fileExists("${workspaceDir}/.git")) {
+                        echo "Repo belum ada, lakukan git clone"
+                        sh "git clone --branch ${env.BRANCH_NAME} git@github.com:itmsi/msi.git ."
+                    } else {
+                        echo "Repo sudah ada, lakukan git fetch & pull"
+                        sh "git fetch origin"
+                        sh "git reset --hard origin/${env.BRANCH_NAME}"
+                    }
+                }
             }
         }
 
