@@ -9,18 +9,19 @@ pipeline {
     }
 
     stages {
-           stage('Pull Branch') {
+          stage('Pull Branch') {
             steps {
-                script {
-                    def workspaceDir = pwd()
-                    if (!fileExists("${workspaceDir}/.git")) {
-                        echo "Repo belum ada, lakukan git clone"
-                        sh "git clone --branch ${env.BRANCH_NAME} git@github.com:itmsi/msi.git ."
-                    } else {
-                        echo "Repo sudah ada, lakukan git fetch & pull"
-                        sh "git fetch origin"
-                        sh "git reset --hard origin/${env.BRANCH_NAME}"
-                    }
+                echo "Pulling branch ${env.BRANCH_NAME}"
+                withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'TOKEN')]) {
+                    sh """
+                        if [ ! -d .git ]; then
+                            git clone --branch ${env.BRANCH_NAME} https://${TOKEN}@github.com/itmsi/msi.git .
+                        else
+                            git fetch origin
+                            git checkout ${env.BRANCH_NAME}
+                            git pull
+                        fi
+                    """
                 }
             }
         }
