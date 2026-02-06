@@ -13,7 +13,6 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
         {
             name: 'Customer Name',
             selector: (row: CustomerInfo) => row.customer_name || '-',
-            sortable: true,
             wrap: true,
             cell: (row: CustomerInfo) => (
                 <div className="py-2">
@@ -26,7 +25,6 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
         {
             name: 'Phone Number',
             selector: (row: CustomerInfo) => row.customer_phone || '-',
-            sortable: true,
             wrap: true,
             cell: (row: CustomerInfo) => (
                 <div className="py-2">
@@ -39,7 +37,6 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
         {
             name: 'Contact Person',
             selector: (row: CustomerInfo) => row.contact_person || '-',
-            sortable: true,
             wrap: true,
             cell: (row: CustomerInfo) => (
                 <div className="py-2">
@@ -52,7 +49,6 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
         {
             name: 'Segmentation',
             selector: (row: CustomerInfo) => row.segmentation_name_en || '-',
-            sortable: true,
             width: '160px',
             wrap: true,
             cell: (row: CustomerInfo) => (
@@ -66,7 +62,6 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
         {
             name: 'Fleet Count',
             selector: (row: CustomerInfo) => row.number_of_fleet || '0',
-            sortable: true,
             width: '160px',
             wrap: true,
             center: true,
@@ -81,7 +76,6 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
         {
             name: 'Status',
             selector: (row: CustomerInfo) => row.status || 'Unknown',
-            sortable: true,
             width: '120px',
             center: true,
             cell: (row: CustomerInfo) => (
@@ -138,6 +132,7 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
                     persistTableHead
                     headerBackground="rgba(2, 83, 165, 0.1)"
                     hoverBackground="rgba(223, 232, 242, 0.3)"
+                    onRowClicked={(row) => window.open(`/crm/contractors/edit/${row.iup_customer_id}`, '_blank')}
                 />
             </div>
         </div>

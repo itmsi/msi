@@ -209,6 +209,46 @@ export const handlePercentageInput = (
     return validatedPercentage.toString();
 };
 
+export const handlePercentageInputComma = (
+    inputValue: string, 
+    min: number = 0, 
+    max: number = 100
+): string => {
+    // Return empty if empty
+    if (!inputValue) return '';
+
+    // Allow typing only numbers and comma
+    const cleanedValue = inputValue.replace(/[^\d,]/g, '');
+    
+    // Check if it's just a comma or starts with comma, prefix with 0
+    if (cleanedValue === ',') return '0,';
+    if (cleanedValue.startsWith(',')) return '0' + cleanedValue;
+
+    // Split by comma to check for multiple commas
+    const parts = cleanedValue.split(',');
+    if (parts.length > 2) return parts[0] + ',' + parts.slice(1).join('');
+    
+    // Validate range
+    // Replace comma with dot for parsing
+    const dotValue = cleanedValue.replace(',', '.');
+    // If it ends with dot (comma originally), we can't fully parse it as float yet for validation if we want to allow "50,"
+    // So we only validate if it's a complete number or doesn't end in comma
+    
+    const numericValue = parseFloat(dotValue);
+
+    if (isNaN(numericValue)) return cleanedValue; // Should be handled by regex above but safe check
+
+    if (numericValue > max) return max.toString().replace('.', ',');
+    if (numericValue < min) return min.toString().replace('.', ',');
+
+    // Limit decimal places to 2 (optional, but good for currency/percentage)
+    if (parts.length > 1 && parts[1].length > 2) {
+        return parts[0] + ',' + parts[1].substring(0, 2);
+    }
+
+    return cleanedValue;
+};
+
 export const hasChanged = <T extends object>(oldData: T, newData: Partial<T>, keys: (keyof T)[]): boolean => {
     return keys.some((key) => oldData[key] !== newData[key]);
 };
@@ -229,6 +269,14 @@ export const tableDateFormat = {
     day: '2-digit' as const,
     month: 'short' as const,
     year: 'numeric' as const
+}
+export const tableDateFormatTime = {
+    day: '2-digit' as const,
+    month: 'short' as const,
+    year: 'numeric' as const,
+    hour: '2-digit' as const,
+    minute: '2-digit' as const,
+    second: '2-digit' as const
 }
 
 export const formatDate = (dateString: string, includeTime: boolean = false) => {
@@ -271,6 +319,13 @@ export const formatTime = (dateString: string) => {
         minute: '2-digit',
         second: '2-digit'
     });
+};
+
+export const formatDateToYMD = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
 
 export const formatDecimalValue = (value: string | number): string => {
@@ -340,18 +395,23 @@ export const handleDecimalInput = (
         return; // Don't update if exceeds max decimal digits
     }
     
-    // Allow typing "0" or "0.x" patterns for decimal input
-    if (cleanValue === '0' || cleanValue.startsWith('0.')) {
-        onValidInput(cleanValue);
+    let processedValue = cleanValue;
+    if (integerPart && integerPart.length > 1 && integerPart.startsWith('0') && !cleanValue.startsWith('0.')) {
+        const trimmedInteger = integerPart.replace(/^0+/, '') || '0';
+        processedValue = decimalPart !== undefined ? `${trimmedInteger}.${decimalPart}` : trimmedInteger;
+    }
+    
+    if (processedValue === '0' || processedValue.startsWith('0.')) {
+        onValidInput(processedValue);
         return;
     }
     
-    const numericValue = parseFloat(cleanValue) || 0;
+    const numericValue = parseFloat(processedValue) || 0;
     
     if (numericValue <= 0) {
         onInvalidInput();
     } else {
-        const finalValue = formatWithComma ? fourdigitcomma(cleanValue) : cleanValue;
+        const finalValue = formatWithComma ? fourdigitcomma(processedValue) : processedValue;
         onValidInput(finalValue);
     }
 };

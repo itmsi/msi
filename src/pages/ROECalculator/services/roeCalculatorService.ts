@@ -30,7 +30,7 @@ export class ROECalculatorService {
                 jumlah_unit: apiData.unit_purchases?.quantity?.toString() || '',
                 down_payment_pct: parseFloat(apiData.unit_purchases?.down_payment_percent || '30') || 30,
                 tenor_pembiayaan: apiData.unit_purchases?.financing_tenor_months || '',
-                interest_rate: apiData.unit_purchases?.interest_rate_flat_per_year || '',
+                interest_rate: apiData.unit_purchases?.interest_rate_flat_per_year || 0,
                 periode_depresiasi: apiData.unit_purchases?.depreciation_period_months || '',
 
                 // Step 3 - Operational
@@ -209,9 +209,10 @@ export class ROECalculatorService {
                         quantity: data.jumlah_unit,
                         down_payment_percent: data.down_payment_pct,
                         financing_tenor_months: data.tenor_pembiayaan,
-                        interest_rate_flat_per_year: data.interest_rate,
+                        interest_rate_flat_per_year: data.interest_rate || 0,
                         depreciation_period_months: data.periode_depresiasi
                     };
+                    
                     const response = await apiPost(`${API_BASE_URL}/calculations/unit-purchases/create`, apiData);
                     return {
                         success: true,
@@ -231,10 +232,17 @@ export class ROECalculatorService {
                         fuel_price: parseFormatNumber(data.fuel_price?.toString() || '0'),
                     };
                     const resStep3 = await apiPut(`${API_BASE_URL}/calculations/quotes/${id}/operational`, apiData);                    
+                    
+                    const isSuccess = (resStep3.data as any)?.success === true;
+                    
                     return {
-                        success: true,
-                        data: resStep3.data,
-                        message: 'Step 3 data saved successfully'
+                        success: isSuccess,
+                        data: (resStep3.data as any)?.data || resStep3.data,
+                        message: isSuccess 
+                            ? 'Step 3 data saved successfully' 
+                            : Array.isArray((resStep3.data as any)?.message) 
+                                ? (resStep3.data as any).message.join(', ') 
+                                : (resStep3.data as any)?.message || (resStep3.data as any)?.exception || 'Failed to save step 3 data'
                     };
                 case 4:
                     apiData = {
@@ -287,7 +295,7 @@ export class ROECalculatorService {
                 quantity: data.jumlah_unit,
                 down_payment_percent: data.down_payment_pct,
                 financing_tenor_months: data.tenor_pembiayaan,
-                interest_rate_flat_per_year: data.interest_rate,
+                interest_rate_flat_per_year: data.interest_rate || 0,
                 depreciation_period_months: data.periode_depresiasi
             };
 

@@ -23,7 +23,7 @@ const EditTerritoryModal: React.FC<EditTerritoryModalProps> = ({
     loading = false
 }) => {
     const [formData, setFormData] = useState({
-        type: 'island' as 'island' | 'group' | 'area' | 'iup_zone' | 'iup',
+        type: 'island' as 'island' | 'group' | 'area' | 'iup_zone' | 'iup_segmentation' | 'iup',
         name: '',
         code: '',
         status: 'aktif' as 'aktif' | 'non aktif'
@@ -42,7 +42,7 @@ const EditTerritoryModal: React.FC<EditTerritoryModalProps> = ({
             const mappedStatus = territoryData.status;
                               
             setFormData({
-                type: territoryData.type as 'island' | 'group' | 'area' | 'iup_zone' | 'iup',
+                type: territoryData.type as 'island' | 'group' | 'area' | 'iup_zone' | 'iup_segmentation' | 'iup',
                 name: territoryData.name,
                 code: territoryData.code,
                 status: mappedStatus as 'aktif' | 'non aktif'
@@ -56,10 +56,6 @@ const EditTerritoryModal: React.FC<EditTerritoryModalProps> = ({
 
         if (!formData.name.trim()) {
             newErrors.name = 'Territory name is required';
-        }
-
-        if (!formData.code.trim()) {
-            newErrors.code = 'Territory code is required';
         }
 
         setErrors(newErrors);
@@ -120,6 +116,7 @@ const EditTerritoryModal: React.FC<EditTerritoryModalProps> = ({
             case 'group': return 'Group';
             case 'area': return 'Area';
             case 'iup_zone': return 'IUP Zone';
+            case 'iup_segmentation': return 'Segmentation';
             case 'iup': return 'IUP';
             default: return type;
         }
@@ -177,7 +174,7 @@ const EditTerritoryModal: React.FC<EditTerritoryModalProps> = ({
                         {/* Code Field */}
                         <div>
                             <Label>
-                                {getTypeLabel(territoryData.type)} Code *
+                                {getTypeLabel(territoryData.type)} Code
                             </Label>
                             <Input
                                 type="text"

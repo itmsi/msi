@@ -144,22 +144,12 @@ export const formatFileSize = (bytes: number): string => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-/**
- * Check if file is an image
- * @param filename - The filename to check
- * @returns boolean
- */
 export const isImageFile = (filename: string): boolean => {
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'ico', 'tiff', 'tif'];
     const extension = filename.split('.').pop()?.toLowerCase();
     return imageExtensions.includes(extension || '');
 };
 
-/**
- * Check if file can be previewed in browser
- * @param filename - The filename to check
- * @returns boolean
- */
 export const isPreviewableFile = (filename: string): boolean => {
     const previewableExtensions = [
         // Images
@@ -172,12 +162,6 @@ export const isPreviewableFile = (filename: string): boolean => {
     const extension = filename.split('.').pop()?.toLowerCase();
     return previewableExtensions.includes(extension || '');
 };
-
-/**
- * Get appropriate action text based on file type
- * @param filename - The filename to analyze
- * @returns Object with view and download action texts
- */
 export const getFileActions = (filename: string) => {
     const fileInfo = getFileTypeInfo(filename);
     
@@ -194,7 +178,7 @@ export const getFileActions = (filename: string) => {
 export const isUser = (): string => {
     const profileString = localStorage.getItem("auth_user");
     const profile = profileString ? JSON.parse(profileString) : null;
-    const roleCode = profile?.roles?.roleCode;
+    const roleCode = profile?.employee_id
     return roleCode;
 };
 export const formatDateTime = (dateStr: string | null | undefined) => {

@@ -1290,7 +1290,7 @@ export const useDepartment = () => {
 };
 
 // Employee Hook
-export const useEmployees = (autoInit: boolean = true) => {
+export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<EmployeeFilters> = {}) => {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [employee, setEmployee] = useState<Employee | null>(null);
     const [pagination, setPagination] = useState<EmployeePagination>({
@@ -1303,6 +1303,8 @@ export const useEmployees = (autoInit: boolean = true) => {
     const [formData, setFormData] = useState<EmployeeFormData>({
         employee_name: "",
         employee_email: "",
+        employee_status: "inactive",
+        is_sales_quotation: false,
         title_id: "",
         company_id: "",
         department_id: ""
@@ -1314,7 +1316,9 @@ export const useEmployees = (autoInit: boolean = true) => {
         title_name: "",
         company_name: "",
         department_name: "",
-        title_id: ""
+        title_id: "",
+        employee_status: "",
+        ...initialFilters
     });
     const [validationErrors, setValidationErrors] = useState<EmployeeValidationErrors>({});
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; employeeId?: string; }>({ show: false });
@@ -1371,7 +1375,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             sort_order: filters.sort_order,
             title_id: filters.title_id,
             company_name: filters.company_name,
-            department_name: filters.department_name
+            department_name: filters.department_name,
+            employee_status: filters.employee_status
         };
 
         debouncedFetch(params, appendData);
@@ -1400,6 +1405,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             setFormData({
                 employee_name: "",
                 employee_email: "",
+                employee_status: "inactive",
+                is_sales_quotation: false,
                 title_id: "",
                 company_id: "",
                 department_id: ""
@@ -1427,6 +1434,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             setFormData({
                 employee_name: "",
                 employee_email: "",
+                employee_status: "inactive",
+                is_sales_quotation: false,
                 title_id: "",
                 company_id: "",
                 department_id: ""
@@ -1479,6 +1488,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             employee_name: employee.employee_name,
             title_id: employee.title_id.toString(),
             employee_email: employee.employee_email,
+            employee_status: employee.employee_status,
+            is_sales_quotation: employee.is_sales_quotation,
             company_id: employee.company_id.toString(),
             department_id: employee.department_id.toString()
         });
@@ -1520,13 +1531,6 @@ export const useEmployees = (autoInit: boolean = true) => {
         fetchEmployees(1, limit, false);
     };
 
-    const handleFilterChange = (key: keyof EmployeeFilters, value: string) => {
-        setFilters(prev => ({ ...prev, [key]: value }));
-        if (key !== 'search') {
-            setPagination(prev => ({ ...prev, page: 1 }));
-        }
-    };
-
     // Debounced filter change for search
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
     
@@ -1536,7 +1540,6 @@ export const useEmployees = (autoInit: boolean = true) => {
             [filterKey]: value
         }));
         
-        // Debounce API calls for filter changes
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
@@ -1551,7 +1554,8 @@ export const useEmployees = (autoInit: boolean = true) => {
                 sort_order: filterKey === 'sort_order' ? value : filters.sort_order,
                 title_id: filterKey === 'title_id' ? value : filters.title_id,
                 company_name: filterKey === 'company_name' ? value : filters.company_name,
-                department_name: filterKey === 'department_name' ? value : filters.department_name
+                department_name: filterKey === 'department_name' ? value : filters.department_name,
+                employee_status: filterKey === 'employee_status' ? value : filters.employee_status
             };
             
             // Update pagination to first page if filtering
@@ -1559,10 +1563,18 @@ export const useEmployees = (autoInit: boolean = true) => {
             
             debouncedFetch(params, false); // Don't append data for search
         }, 500);
-    }, [pagination.limit, filters, debouncedFetch]);
+    }, [pagination.limit, debouncedFetch]);
 
     const handleSearchChange = useCallback((value: string) => {
         handleFilterChangeDebounced('search', value);
+    }, [handleFilterChangeDebounced]);
+
+    const handleFilterChange = useCallback((key: keyof EmployeeFilters, value: string) => {
+        if (key === 'search') {
+            handleFilterChangeDebounced(key, value);
+        } else {
+            handleFilterChangeDebounced(key, value);
+        }
     }, [handleFilterChangeDebounced]);
 
     const clearFilters = () => {
@@ -1579,7 +1591,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             title_name: "",
             company_name: "",
             department_name: "",
-            title_id: ""
+            title_id: "",
+            employee_status: ""
         });
         
         // Reset pagination
@@ -1594,7 +1607,8 @@ export const useEmployees = (autoInit: boolean = true) => {
             sort_order: "",
             title_id: "",
             company_name: "",
-            department_name: ""
+            department_name: "",
+            employee_status: ""
         };
         
         debouncedFetch(clearedParams, false);
@@ -1605,6 +1619,8 @@ export const useEmployees = (autoInit: boolean = true) => {
         setEditingEmployee(null);
         setFormData({
             employee_name: "",
+            employee_status: "inactive",
+            is_sales_quotation: false,
             title_id: "",
             department_id: "",
             company_id: "",
@@ -1618,6 +1634,8 @@ export const useEmployees = (autoInit: boolean = true) => {
         setEditingEmployee(null);
         setFormData({
             employee_name: "",
+            employee_status: "inactive",
+            is_sales_quotation: false,
             title_id: "",
             department_id: "",
             company_id: "",
@@ -2548,6 +2566,8 @@ export const useEmployeeDetail = () => {
     const [formData, setFormData] = useState<EmployeeFormData>({
         employee_name: '',
         employee_email: '',
+        employee_status: 'inactive',
+        is_sales_quotation: false,
         title_id: '',
         company_id: '',
         department_id: '',
@@ -2582,6 +2602,8 @@ export const useEmployeeDetail = () => {
                 setFormData({
                     employee_name: response.data.employee_name,
                     employee_email: response.data.employee_email,
+                    employee_status: response.data.employee_status,
+                    is_sales_quotation: response.data.is_sales_quotation,
                     title_id: response.data.title_id,
                     company_id: response.data.company_id,
                     department_id: response.data.department_id,

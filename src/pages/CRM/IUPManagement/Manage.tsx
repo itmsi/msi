@@ -1,4 +1,4 @@
-import { MdAdd, MdClear, MdSearch } from 'react-icons/md';
+import { MdAdd, MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch } from 'react-icons/md';
 import CustomDataTable from '../../../components/ui/table/CustomDataTable';
 import Input from '../../../components/form/input/InputField';
 import CustomSelect from '../../../components/form/select/CustomSelect';
@@ -12,12 +12,14 @@ import Badge from '@/components/ui/badge/Badge';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { useNavigate } from 'react-router';
-import {  formatDateTime } from '@/helpers/generalHelper';
-import { useMemo } from 'react';
+import { formatDateTime } from '@/helpers/generalHelper';
+import { useMemo, useState } from 'react';
+import FilterSection from './components/FilterSection';
 
 export default function ManageIUPManagement() {
     
     const navigate = useNavigate();
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const {
         // State
         iup,
@@ -30,23 +32,32 @@ export default function ManageIUPManagement() {
         sortModify,
         setSearchValue,
         statusFilter,
-        // setStatusFilter,
-        // fetchIup,
+        segmentationFilter,
 
         // Actions
         handlePageChange,
         handleRowsPerPageChange,
-        // handleFilters,
         
         // Filter actions
         handleFilterChange,
-        // handleSearch,
         
         // Search functions
-        // executeSearch,
         handleKeyPress,
         handleClearSearch,
     } = useIupManagement();
+
+    const handleToggleFilter = () => {
+        setShowAdvancedFilters(prev => !prev);
+    };
+
+    // Clear filters handler
+    const handleClearFilters = () => {
+        // Call the clear filter function from the hook if it exists
+        // For now, we'll manually reset known filters
+        handleFilterChange('status', '');
+        handleFilterChange('segmentation', '');
+        handleFilterChange('sort_by', '');
+    };
 
     // Definisi kolom untuk DataTable
     const iupColumns: TableColumn<IupItem>[] = [
@@ -54,28 +65,53 @@ export default function ManageIUPManagement() {
             name: 'IUP Name',
             selector: row => row.iup_name,
             wrap: true,
-            width: '300px',
-        },
-        {
-            name: 'Island',
-            selector: row => row.island_name,
+            // width: '300px',
+        },{
+            name: 'Territory',
+            selector: (row) => row?.island_name || '-',
+            cell: (row) => (
+                <div className=" items-center gap-3 py-2">
+                    <div className="flex flex-wrap gap-1 mt-1 gap">
+                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-blue-100 text-blue-800 border border-blue-200">{`${row.island_name}`}</span>
+                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-green-100 text-green-800 border border-green-200">{`${row.group_name}`}</span>
+                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-orange-100 text-orange-800 border border-orange-200">{`${row.area_name}`}</span>
+                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-purple-100 text-purple-800 border border-purple-200">{`${row.iup_zone_name}`}</span>
+                        <span className="inline-flex items-center justify-center border rounded-md font-medium px-2 bg-pink-100 text-pink-800 border border-pink-200">{`${row.iup_segmentation_name}`}</span>
+                    </div>
+                </div>
+            ),
+            sortable: false,
             wrap: true,
-            // minWidth: '120px',
+            // width: '350px',
         },
+        // {
+        //     name: 'Island',
+        //     selector: row => row.island_name,
+        //     wrap: true,
+        //     width: '150px',
+        // },
+        // {
+        //     name: 'Group',
+        //     selector: row => row.group_name,
+        //     wrap: true,
+        //     center: true,
+        // },
+        // {
+        //     name: 'Area',
+        //     selector: row => row.area_name,
+        //     center: true,
+        //     wrap: true,
+        // },
+        // {
+        //     name: 'IUP Zone',
+        //     selector: row => row.iup_zone_name,
+        //     width: '200px',
+        //     wrap: true,
+        // },
         {
-            name: 'Group',
-            selector: row => row.group_name,
-            wrap: true,
-        },
-        {
-            name: 'Area',
-            selector: row => row.area_name,
-            wrap: true,
-        },
-        {
-            name: 'IUP Zone',
-            selector: row => row.iup_zone_name,
-            width: '300px',
+            name: 'Segmentation',
+            selector: row => row.segmentation_name,
+            width: '150px',
             wrap: true,
         },
         {
@@ -120,61 +156,34 @@ export default function ManageIUPManagement() {
             width: '200px'
         },
     ];
-
-    const STATUS_OPTIONS = [
-        { value: '', label: 'All Status' },
-        { value: 'aktif', label: 'Active' },
-        { value: 'non aktif', label: 'Inactive' }
-    ];
-    const MODIFY_OPTIONS = [
-        { value: '', label: 'All Modify' },
-        { value: 'updated_at', label: 'Updated' },
-        { value: 'created_at', label: 'Created' }
-    ];
     
-    const SearchAndFilters = useMemo(() => (
-        <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-7 gap-6">
-            <div className="relative md:col-span-3">
-                <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <Input
-                    type="text"
-                    placeholder="Search IUP... (Press Enter to search)"
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className={`pl-10 py-2 w-full ${searchValue ? 'pr-10' : 'pr-4'}`}
-                />
-                {searchValue && (
-                    <button
-                        onClick={handleClearSearch}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                        type="button"
-                    >
-                        <MdClear className="h-4 w-4" />
-                    </button>
-                )}
+    const SearchAndFilters = useMemo(() => { 
+        return (<>
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+            <div className="flex-1">
+                <div className="relative flex">
+                    <div className="relative flex-1">
+                        <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <Input
+                            type="text"
+                            placeholder="Search IUP Name... (Press Enter to search)"
+                            value={searchValue}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            className={`pl-10 py-2 w-full ${searchValue ? 'pr-10' : 'pr-4'}`}
+                        />
+                        {searchValue && (
+                            <button
+                                onClick={handleClearSearch}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                type="button"
+                            >
+                                <MdClear className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
-            
-            <CustomSelect
-                value={STATUS_OPTIONS.find(option => option.value === statusFilter) || null}
-                onChange={(option) => handleFilterChange('status', option?.value || '')}
-                options={STATUS_OPTIONS}
-                placeholder="Filter by Status"
-                className="w-full md:col-span-2"
-                isClearable={false}
-                isSearchable={false}
-            />
-            
-            <CustomSelect
-                value={MODIFY_OPTIONS.find(option => option.value === sortModify) || null}
-                onChange={(option) => handleFilterChange('sort_by', option?.value || '')}
-                options={MODIFY_OPTIONS}
-                placeholder="Sort by Field"
-                className="w-full"
-                isClearable={false}
-                isSearchable={false}
-            />
-            
             <div className="flex items-center gap-2">
                 <CustomSelect
                     id="sort_order"
@@ -196,8 +205,28 @@ export default function ManageIUPManagement() {
                     className="w-full"
                 />
             </div>
+            
+            <div className="flex items-center gap-2">
+                <Button
+                    onClick={handleToggleFilter}
+                    className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
+                    size="sm"
+                >
+                    <MdFilterListAlt className="w-4 h-4 mr-2" />
+                    Filter
+                    {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                </Button>
+            </div>
         </div>
-    ), [searchValue, statusFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange]);
+        
+        {showAdvancedFilters && (
+            <FilterSection
+                onFilterChange={handleFilterChange}
+                onClearFilters={handleClearFilters}
+            />
+        )}
+    </>);
+    }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleClearFilters]);
     
     return (
         <>
@@ -309,7 +338,7 @@ export default function ManageIUPManagement() {
                 </div>
 
                 {/* Search and Filter Section */}
-                <div className="bg-white shadow rounded-lg">
+                <div className="bg-white shadow rounded-lg px-6 py-4">
                     {SearchAndFilters}
                 </div>
                 

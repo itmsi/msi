@@ -12,6 +12,7 @@ import { MdKeyboardArrowLeft } from 'react-icons/md';
 import Label from '@/components/form/Label';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import LoadingSpinner from '@/components/common/Loading';
+import { AuthService } from '@/services/authService';
 
 interface EditFormData {
     employee_id: string;
@@ -32,6 +33,8 @@ const EditUserAccess: React.FC = () => {
         selectedTerritories: new Map()
     });
     const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+    const [currentTerritories, setCurrentTerritories] = useState<Set<string>>(new Set());
+    const [allowedTerritories, setAllowedTerritories] = useState<Set<string>>(new Set());
     const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -58,7 +61,6 @@ const EditUserAccess: React.FC = () => {
         });
     }, []);
 
-    // Load existing data when territories are loaded
     useEffect(() => {
         if (id && territories.length > 0 && !territoriesLoading) {
             loadExistingData(id);
@@ -73,18 +75,15 @@ const EditUserAccess: React.FC = () => {
             if (response.success && response.data) {
                 const { data } = response;
                 
-                // Set employee_id
                 setFormData(prev => ({
                     ...prev,
                     employee_id: data.employee_id
                 }));
                 
-                // Find the employee in options or create placeholder option
                 const employee = employeeOptions.find((emp: any) => emp.value === data.employee_id);
                 if (employee) {
                     setSelectedEmployee(employee);
                 } else if (data.employee_name) {
-                    // Create a placeholder option if employee not found in options
                     const placeholderEmployee = {
                         value: data.employee_id,
                         label: data.employee_name,
@@ -93,10 +92,27 @@ const EditUserAccess: React.FC = () => {
                     setSelectedEmployee(placeholderEmployee);
                 }
                 
-                // Set territory access based on the loaded data
                 const newSelectedTerritories = new Map();
+                const newCurrentTerritories = new Set<string>();
                 
-                // Process all territories from the response
+                if (data.current_territories) {
+                    data.current_territories.forEach(territoryAccess => {
+                        newCurrentTerritories.add(territoryAccess.id_territory);
+                    });
+                    
+                    AuthService.saveCurrentTerritories(data.current_territories);
+                    
+                    const allowedIds = new Set<string>();
+                    data.current_territories.forEach((territory: any) => {
+                        if (territory.id_territory) {
+                            allowedIds.add(territory.id_territory);
+                            const childrenIds = getAllChildren(territory.id_territory, territory.access_level.toLowerCase());
+                            childrenIds.forEach(childId => allowedIds.add(childId));
+                        }
+                    });
+                    setAllowedTerritories(allowedIds);
+                }
+                
                 data.territories.forEach(territoryAccess => {
                     const territory = findTerritoryById(territoryAccess.id_territory);
                     if (territory) {
@@ -106,24 +122,10 @@ const EditUserAccess: React.FC = () => {
                             name: territory.name,
                             type: territory.type
                         });
-                        
-                        // Add child territories if needed
-                        const childrenIds = getAllChildren(territoryAccess.id_territory, territory.type);
-                        childrenIds.forEach(childId => {
-                            const childTerritory = findTerritoryById(childId);
-                            if (childTerritory) {
-                                newSelectedTerritories.set(childId, {
-                                    access_level: childTerritory.type.toUpperCase(),
-                                    ref_id: childId,
-                                    name: childTerritory.name,
-                                    type: childTerritory.type,
-                                    ui_only: true
-                                });
-                            }
-                        });
                     }
                 });
                 
+                setCurrentTerritories(newCurrentTerritories);
                 setFormData(prev => ({
                     ...prev,
                     selectedTerritories: newSelectedTerritories
@@ -181,8 +183,31 @@ const EditUserAccess: React.FC = () => {
                                 if (area.children) {
                                     area.children.forEach((iupZone: any) => {
                                         if (iupZone.id === currentId && iupZone.children) {
-                                            iupZone.children.forEach((iup: any) => {
-                                                children.push(iup.id);
+                                            iupZone.children.forEach((iupSegmentation: any) => {
+                                                children.push(iupSegmentation.id);
+                                                collectDescendants(iupSegmentation.id, 'iup_segmentation');
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                if (currentType === 'iup_segmentation' && island.children) {
+                    island.children.forEach((group: any) => {
+                        if (group.children) {
+                            group.children.forEach((area: any) => {
+                                if (area.children) {
+                                    area.children.forEach((iupZone: any) => {
+                                        if (iupZone.children) {
+                                            iupZone.children.forEach((iupSegmentation: any) => {
+                                                if (iupSegmentation.id === currentId && iupSegmentation.children) {
+                                                    iupSegmentation.children.forEach((iup: any) => {
+                                                        children.push(iup.id);
+                                                    });
+                                                }
                                             });
                                         }
                                     });
@@ -198,7 +223,6 @@ const EditUserAccess: React.FC = () => {
         return children;
     };
 
-    // Helper function to find territory by ID
     const findTerritoryById = (id: string): any => {
         for (const island of territories) {
             if (island.id === id) return island;
@@ -216,8 +240,14 @@ const EditUserAccess: React.FC = () => {
                                     if (iupZone.id === id) return iupZone;
                                     
                                     if (iupZone.children) {
-                                        for (const iup of iupZone.children) {
-                                            if (iup.id === id) return iup;
+                                        for (const iupSegmentation of iupZone.children) {
+                                            if (iupSegmentation.id === id) return iupSegmentation;
+                                            
+                                            if (iupSegmentation.children) {
+                                                for (const iup of iupSegmentation.children) {
+                                                    if (iup.id === id) return iup;
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -253,20 +283,17 @@ const EditUserAccess: React.FC = () => {
         return expanded;
     };
 
-    // Helper function to find all parent IDs of a territory
     const findParentIds = (targetId: string): string[] => {
         const parentIds: string[] = [];
         
         for (const island of territories) {
             if (island.id === targetId) {
-                // Target is an island, no parents
                 return parentIds;
             }
             
             if (island.children) {
                 for (const group of island.children) {
                     if (group.id === targetId) {
-                        // Target is a group, island is parent
                         parentIds.push(island.id);
                         return parentIds;
                     }
@@ -274,7 +301,6 @@ const EditUserAccess: React.FC = () => {
                     if (group.children) {
                         for (const area of group.children) {
                             if (area.id === targetId) {
-                                // Target is an area, group and island are parents
                                 parentIds.push(group.id, island.id);
                                 return parentIds;
                             }
@@ -282,17 +308,24 @@ const EditUserAccess: React.FC = () => {
                             if (area.children) {
                                 for (const iupZone of area.children) {
                                     if (iupZone.id === targetId) {
-                                        // Target is an iup_zone, area, group and island are parents
                                         parentIds.push(area.id, group.id, island.id);
                                         return parentIds;
                                     }
                                     
                                     if (iupZone.children) {
-                                        for (const iup of iupZone.children) {
-                                            if (iup.id === targetId) {
-                                                // Target is an iup, all above are parents
+                                        for (const iupSegmentation of iupZone.children) {
+                                            if (iupSegmentation.id === targetId) {
                                                 parentIds.push(iupZone.id, area.id, group.id, island.id);
                                                 return parentIds;
+                                            }
+                                            
+                                            if (iupSegmentation.children) {
+                                                for (const iup of iupSegmentation.children) {
+                                                    if (iup.id === targetId) {
+                                                        parentIds.push(iupSegmentation.id, iupZone.id, area.id, group.id, island.id);
+                                                        return parentIds;
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -321,6 +354,11 @@ const EditUserAccess: React.FC = () => {
     };
 
     const handleTerritoryToggle = (territoryId: string, territoryData: ExpandableRowData) => {
+        if (allowedTerritories.size > 0 && !allowedTerritories.has(territoryId)) {
+            console.warn(`Territory ${territoryId} is not allowed for current user`);
+            return;
+        }
+        
         setFormData(prev => {
             const newSelected = new Map(prev.selectedTerritories);
             
@@ -338,15 +376,17 @@ const EditUserAccess: React.FC = () => {
                 
                 const childrenIds = getAllChildren(territoryId, territoryData.type);
                 childrenIds.forEach(childId => {
-                    const childTerritory = findTerritoryById(childId);
-                    if (childTerritory) {
-                        newSelected.set(childId, {
-                            access_level: childTerritory.type.toUpperCase(),
-                            ref_id: childId,
-                            name: childTerritory.name,
-                            type: childTerritory.type,
-                            ui_only: true
-                        });
+                    if (allowedTerritories.size === 0 || allowedTerritories.has(childId)) {
+                        const childTerritory = findTerritoryById(childId);
+                        if (childTerritory) {
+                            newSelected.set(childId, {
+                                access_level: childTerritory.type.toUpperCase(),
+                                ref_id: childId,
+                                name: childTerritory.name,
+                                type: childTerritory.type,
+                                ui_only: true
+                            });
+                        }
                     }
                 });
             }
@@ -390,7 +430,6 @@ const EditUserAccess: React.FC = () => {
                 .filter(territory => !territory.ui_only);
             
             if (territoryData.length > 0) {
-                // Prepare data_territory array for new API format
                 const dataTerritory = territoryData.map(territory => ({
                     access_level: territory.access_level.toUpperCase(),
                     ref_id: territory.ref_id
@@ -401,7 +440,7 @@ const EditUserAccess: React.FC = () => {
                     data_territory: dataTerritory
                 });
             }
-            navigate('/user-management');
+            navigate('/crm/user-management');
         } catch (error: any) {
             console.error('Error updating user access:', error);
             console.error(error?.message || 'Failed to update user access');
@@ -428,12 +467,11 @@ const EditUserAccess: React.FC = () => {
             <div className="bg-gray-50 overflow-auto">
                 <div className="mx-auto px-4 sm:px-3">
 
-                    {/* Header */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/user-management')}
+                                onClick={() => navigate('/crm/user-management')}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -484,6 +522,8 @@ const EditUserAccess: React.FC = () => {
                             selectedTerritories={new Set(formData.selectedTerritories.keys())}
                             disabledTerritories={getDisabledTerritories()}
                             preExpandedTerritories={getExpandedTerritories()}
+                            currentTerritories={currentTerritories}
+                            userTerritories={allowedTerritories}
                             onTerritoryToggle={handleTerritoryToggle}
                             disabled={isSubmitting}
                         />
@@ -493,7 +533,7 @@ const EditUserAccess: React.FC = () => {
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => navigate('/user-management')}
+                            onClick={() => navigate('/crm/user-management')}
                             className="px-6 rounded-full"
                             disabled={isSubmitting}
                         >

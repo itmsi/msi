@@ -2,13 +2,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Label from '@/components/form/Label';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import Input from '@/components/form/input/InputField';
-import { STATUS_OPTIONS } from '../constants/iupConstants';
 import { allowOnlyNumeric } from '@/helpers/generalHelper';
 import { IupManagementFormData } from '../types/iupmanagement';
 import { Calendar } from 'react-date-range';
 import 'react-date-range/dist/styles.css'; // main css file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import toast from 'react-hot-toast';
+import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
+import { useSegementationSelect } from '@/hooks/useSegmentSelect';
 
 interface IupFormFieldsProps {
     formData: IupManagementFormData;
@@ -17,7 +18,10 @@ interface IupFormFieldsProps {
     onSelectChange: (name: string, value: string) => void;
     onDateChange?: (name: string, value: string) => void; // Add date change handler
 }
-
+export interface SegmentSelectOption {
+    value: string;
+    label: string;
+}
 const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
     formData,
     errors,
@@ -25,6 +29,19 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
     onSelectChange,
     onDateChange // Add date change handler
 }) => {
+    const {
+        segementationOptions,
+        inputValue: segmentationInputValue,
+        handleInputChange: handleSegmentationInputChange,
+        pagination: segmentationPagination,
+        handleMenuScrollToBottom: handleSegmentationMenuScrollToBottom,
+        initializeOptions: initializeSegementationOptions
+    } = useSegementationSelect();
+
+    useEffect(() => {
+        initializeSegementationOptions();
+    }, [initializeSegementationOptions]);
+
     const [skDate, setSkDate] = useState(new Date());
     const [dueDate, setDueDate] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
     const [showSkDatePicker, setShowSkDatePicker] = useState(false);
@@ -32,6 +49,9 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
     const skDatePickerRef = useRef<HTMLDivElement>(null);
     const skDueDatePickerRef = useRef<HTMLDivElement>(null);
     // Helper function untuk render input field dengan consistent styling
+    
+    // Segmentation states
+    const [selectedSegment, setSelectedSegment] = useState<SegmentSelectOption | null>(null);
 
     const formatDate = (date: Date) => {
         return date.toLocaleDateString('id-ID', {
@@ -99,7 +119,15 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
         if (formData.sk_end_date) {
             setDueDate(new Date(formData.sk_end_date));
         }
-    }, [formData.sk_effective_date, formData.sk_end_date]);
+        
+        if (formData.segmentation_id) {
+            setSelectedSegment({
+                value: formData.segmentation_id,
+                label: formData.segmentation_name_en || 'Select Segment'
+            });
+        }
+
+    }, [formData.sk_effective_date, formData.sk_end_date, formData.segmentation_id]);
 
     // Handle click outside for SK effective date picker
     useEffect(() => {
@@ -132,16 +160,43 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
         }
     }, [showDueDatePicker]);
 
+    const STATUS_OPTIONS = [
+        { value: 'aktif', label: 'Active' },
+        { value: 'non aktif', label: 'Inactive' }
+    ]
     return (<>
         <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
             <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">IUP Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                {renderInput('rkab', 'RKAB', 'text', true)}
-                {renderInput('sk_number', 'SK Number', 'text', true)}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">
+                    {renderInput('rkab', 'RKAB', 'text', false)}
+                    {renderInput('sk_number', 'SK Number', 'text', false)}
+                    <div>
+                        <Label>Select Segmentation</Label>
+                        <CustomAsyncSelect
+                            placeholder="Select Segmentation..."
+                            value={selectedSegment}
+                            defaultOptions={segementationOptions}
+                            loadOptions={handleSegmentationInputChange}
+                            onMenuScrollToBottom={handleSegmentationMenuScrollToBottom}
+                            isLoading={segmentationPagination.loading}
+                            noOptionsMessage={() => "No segments found"}
+                            loadingMessage={() => "Loading segments..."}
+                            isSearchable={true}
+                            inputValue={segmentationInputValue}
+                            onInputChange={(inputValue) => {
+                                handleSegmentationInputChange(inputValue);
+                            }}
+                            onChange={(option: any) => {
+                                setSelectedSegment(option);
+                                onSelectChange('segmentation_id', option?.value || '');
+                            }}
+                        />
+                    </div>
+                </div>
 
                 <div>
-                    <Label>SK Effective Date *</Label>
+                    <Label>SK Effective Date</Label>
                     <div className="relative" ref={skDatePickerRef}>
                         <div 
                             className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500"
@@ -166,16 +221,16 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
                             </div>
                         )}
                     </div>
-                    {errors.sk_effective_date && (
+                    {/* {errors.sk_effective_date && (
                         <span className="text-sm text-red-500">
                             {errors.sk_effective_date}
                         </span>
-                    )}
+                    )} */}
                 </div>
 
                 {/* Due Date */}
                 <div>
-                    <Label>SK End Date *</Label>
+                    <Label>SK End Date</Label>
                     <div className="relative" ref={skDueDatePickerRef}>
                         <div 
                             className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500"
@@ -234,20 +289,21 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
                         )}
                     </div>
 
-                    {errors.sk_end_date && (
+                    {/* {errors.sk_end_date && (
                         <span className="text-sm text-red-500">
                             {errors.sk_end_date}
                         </span>
-                    )}
+                    )} */}
                 </div>
             </div>
         </div>
         <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
             <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Location Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {renderInput('mine_location', 'Mine Location', 'text', true)}
+                {renderInput('province_name', 'Province Name', 'text', false)}
+                {renderInput('mine_location', 'Mine Location', 'text', false)}
                 {renderInput('area_size_ha', 'Area Size (Ha)', 'number', false)}
-                {renderInput('regency_name', 'Regency Name', 'text', true)}
+                {renderInput('regency_name', 'Regency Name', 'text', false)}
                 
                 
                 {/* Status Field */}

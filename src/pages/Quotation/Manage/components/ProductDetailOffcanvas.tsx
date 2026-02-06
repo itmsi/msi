@@ -31,6 +31,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
 }) => {
     const [error, setError] = useState<string | null>(null);
     const [showImageModal, setShowImageModal] = useState(false);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     const [activeTab, setActiveTab] = useState<'specifications' | 'accessories'>('specifications');
     const [accessories, setAccessories] = useState<QuotationAccessory[]>([]);
@@ -322,7 +323,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 </div>
             );
         }
-
+        
         return (
             <div className="p-6 space-y-6">
 
@@ -330,39 +331,57 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 <div className="border-b border-gray-200 pb-6">
                     <div className='md:grid md:grid-cols-5 md:gap-4'>
                         <div className="flex md:col-span-2 justify-center">
-                            {initialData.image ? (
-                                <div className="relative cursor-pointer" onClick={() => setShowImageModal(true)}>
-                                    <img
-                                        src={initialData.image}
-                                        alt={initialData.componen_product_name || 'Product Image'}
-                                        className="max-w-full max-h-50 object-contain rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
-                                        onError={(e) => {
-                                            const target = e.target as HTMLImageElement;
-                                            target.style.display = 'none';
-                                            target.parentElement?.querySelector('.image-placeholder')?.classList.remove('hidden');
-                                        }}
-                                    />
-                                    {!readOnly && (
-                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black bg-opacity-30 rounded-lg">
-                                            <div className="text-white text-center">
-                                                <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                                                </svg>
-                                                <p className="text-sm">Klik untuk memperbesar</p>
+                            {(() => {
+                                // Flatten nested array structure
+                                const flatImages = initialData.images ? initialData.images.flat() : [];
+                                return flatImages?.length ? (
+                                    flatImages.map((img: any, idx: number) => (
+                                        <div key={idx} className="relative cursor-pointer" onClick={() => {
+                                            setSelectedImageIndex(idx);
+                                            setShowImageModal(true);
+                                        }}>
+                                            <img
+                                                src={img.image_url || img}
+                                                alt={initialData.componen_product_name || 'Product Image'}
+                                                className="max-w-full max-h-50 object-contain rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    target.style.display = 'none';
+                                                    target.parentElement?.querySelector('.image-placeholder')?.classList.remove('hidden');
+                                                }}
+                                            />
+                                            {!readOnly && (
+                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black bg-opacity-30 rounded-lg">
+                                                    <div className="text-white text-center">
+                                                        <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                                        </svg>
+                                                        <p className="text-sm">Klik untuk memperbesar</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {/* Hidden placeholder for error handling */}
+                                            <div className="image-placeholder hidden flex items-center justify-center w-50 h-50 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
+                                                <div className="text-center">
+                                                    <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                    <p className="text-gray-500 text-sm">Gambar tidak valid</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="flex items-center justify-center w-50 h-50 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
-                                    <div className="text-center">
-                                        <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                        <p className="text-gray-500 text-sm">Tidak ada gambar</p>
+                                    ))
+                                ) : (
+                                    <div className="flex items-center justify-center w-50 h-50 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
+                                        <div className="text-center">
+                                            <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <p className="text-gray-500 text-sm">Tidak ada gambar</p>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                );
+                            })()}
                         </div>
                         <div className='md:col-span-3 space-y-1'>
                             <p className="text-gray-700 text-sm">
@@ -782,14 +801,17 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
             {renderProductInfo()}
             
             {/* Image Modal */}
-            {showImageModal && initialData?.image && (
+            {showImageModal && initialData?.images && (() => {
+                const flatImages = initialData.images.flat();
+                return flatImages.length > 0 && flatImages[selectedImageIndex]?.image_url;
+            })() && (
                 <div 
                     className="fixed inset-0 z-[9999] flex items-center justify-center bg-black-900 backdrop-blur-sm"
                     onClick={() => setShowImageModal(false)}
                 >
                     <div className="relative max-w-4xl max-h-[90vh] p-4 overflow-hidden">
                         <img
-                            src={initialData.image}
+                            src={initialData.images.flat()[selectedImageIndex]?.image_url}
                             alt={initialData.componen_product_name || 'Product Image'}
                             className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
                             onClick={(e) => e.stopPropagation()}

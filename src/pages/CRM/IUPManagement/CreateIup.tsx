@@ -16,13 +16,16 @@ const CreateIup: React.FC = () => {
         selectedGroup,
         selectedArea,
         selectedIupZone,
+        selectedIupSegmentation,
         handleIslandChange,
         handleGroupChange,
         handleAreaChange,
         handleIupZoneChange,
+        handleIupSegmentationChange,
         getAvailableGroups,
         getAvailableAreas,
         getAvailableIupZones,
+        getAvailableIupSegmentations,
         territoriesLoading,
         territories,
         isSubmitting,
@@ -39,14 +42,16 @@ const CreateIup: React.FC = () => {
         island: selectedIsland,
         group: selectedGroup,
         area: selectedArea,
-        iupZone: selectedIupZone
+        iupZone: selectedIupZone,
+        iupSegmentation: selectedIupSegmentation
     };
 
     const selectedTerritoryInfo = {
         island: selectedIsland,
         group: selectedGroup,
         area: selectedArea,
-        iupZone: selectedIupZone
+        iupZone: selectedIupZone,
+        iupSegmentation: selectedIupSegmentation
     };
     return (
         <>
@@ -56,8 +61,8 @@ const CreateIup: React.FC = () => {
                 image="/motor-sights-international.png"
             />
             
-            <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-4 sm:px-3">
+            <div className="bg-gray-50">
+                <div className="mx-auto">
 
                     {/* Header */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
@@ -88,9 +93,11 @@ const CreateIup: React.FC = () => {
                         onGroupChange={handleGroupChange}
                         onAreaChange={handleAreaChange}
                         onIupZoneChange={handleIupZoneChange}
+                        onIupSegmentationChange={handleIupSegmentationChange}
                         getAvailableGroups={getAvailableGroups}
                         getAvailableAreas={getAvailableAreas}
                         getAvailableIupZones={getAvailableIupZones}
+                        getAvailableIupSegmentations={getAvailableIupSegmentations}
                     />
                     
                     <IupInformtionsFormFields

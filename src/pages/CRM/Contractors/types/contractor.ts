@@ -1,21 +1,28 @@
 export interface ContractorListRequest {
     page: number;
     limit: number;
-    sort_order: 'asc' | 'desc';
+    sort_order: 'asc' | 'desc' | '';
     search: string;
     mine_type?: 'batu bara' | 'nikel' | 'lainnya' | '';
     status?: 'active' | 'inactive' | '';
     is_admin?: boolean;
+    employee_id?: string;
+    iup_id?: string;
+    type?: string;
+    segmentation_id?: string;
 }
 
 export interface Contractor {
     iup_customer_id: string;
+    customer_iup_name: string;
     iup_id: string;
     customer_id: string;
     customer_code?: string;
     rkab: string;
     armada: number;
+    type?: string;
     segmentation_name_en: string;
+    iup_segmentation_name: string;
     business_project_bim: string;
     status: 'active' | 'inactive';
     customer_name: string;
@@ -29,6 +36,7 @@ export interface Contractor {
     updated_by_name: string;
     updated_at: string;
     activity_status: string;
+    bim_persen?: string | number;
 }
 
 export interface Pagination {
@@ -83,6 +91,8 @@ export interface ContractorDetailResponse {
             iup_customer_id: string;
             iup_id: string;
             iup_name?: string;
+            parent_contractor_id?: string;
+            parent_contractor_name?: string;
             segmentation_id: string;
             rkab: string;
             achievement_production_bim: string | null;
@@ -103,7 +113,9 @@ export interface ContractorDetailResponse {
             sparepart_cost: string | null;
             manpower_cost: string | null;
             activity_status: string[];
+            activity_data: ContractorActivityInfo[];
             status: string;
+            type: string;
             units: Array<{
                 brand_id: string;
                 brand_name: string;
@@ -113,6 +125,7 @@ export interface ContractorDetailResponse {
                 quantity: number;
                 engine: string | null;
             }>;
+            properties?: any;
         };
     };
 }
@@ -138,7 +151,7 @@ export interface ContractorFormData {
         iup_name?: string;
         segmentation_id: string;
         segmentation_name?: string;
-        rkab: string;
+        properties: any; // Added dynamic entries
         achievement_production_bim: string;
         business_project_bim: string;
         unit_brand_bim: string;
@@ -157,14 +170,35 @@ export interface ContractorFormData {
         sparepart_cost: string;
         manpower_cost: string;
         status: 'active' | 'inactive';
+        type: 'contractor' | 'sub_contractor' | '';
         activity_status: string[];
         contact_persons: contactPerson[];
+        activity_data: ContractorActivityInfo[];
         units: ContractorUnit[];
+        parent_contractor_id?: string;
+        parent_contractor_name?: string;
     };
 }
+export interface RkabEntry {
+    year: number;
+    current_production: number;
+    target_production: number;
+}
+
 export interface contactPerson {
     name?: string;
     email?: string;
     phone?: string;
     position?: string;
+}
+
+export interface ContractorActivityInfo {
+    transactions_id: string;
+    transaction_type: string;
+    transaction_date: string;
+    employee_id: string;
+    employee_name: string;
+    pain_point: string;
+    solution_point: string;
+    created_by_name: string;
 }

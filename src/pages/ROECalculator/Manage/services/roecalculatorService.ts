@@ -1,8 +1,10 @@
 import { apiDelete, apiGet, apiPost, apiPut, ApiResponse } from '@/helpers/apiHelper';
 import { RorEntity, RorListRequest, RorListResponse } from '../types/roecalculator';
-import { ManageROEBreakdownData, ManageROEDataPDF } from '../../types/roeCalculator';
+import { ComparePayload, ManageROEBreakdownData, ManageROECompareResponse, ManageROEDataPDF } from '../../types/roeCalculator';
+import api from '@/helpers/apiHelper';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_IS_ADMIN = import.meta.env.VITE_PARAM_IS_ADMIN;
 
 export class RoecalculatorService {
 
@@ -12,6 +14,7 @@ export class RoecalculatorService {
             limit: 10,
             sort_order: 'desc',
             search: '',
+            is_admin: API_IS_ADMIN,
             ...params
         };
         
@@ -44,5 +47,36 @@ export class RoecalculatorService {
 
     static async breakdownRoe(quoteId : string): Promise<ApiResponse<{ success: boolean; message: string; data: ManageROEBreakdownData }>> {
         return await apiGet(`${API_BASE_URL}/calculations/quotes/breakdown/${quoteId}`);
+    }
+
+    static async getCompareRoe(params: Partial<RorListRequest> = {}): Promise<ManageROECompareResponse> {
+        const requestData: RorListRequest = {
+            page: 1,
+            limit: 10,
+            sort_order: 'desc',
+            search: '',
+            ...params
+        };
+        
+        const response = await apiPost(`${API_BASE_URL}/calculations/list_compare/get`, requestData as Record<string, any>);
+        return response.data as ManageROECompareResponse;
+    }
+
+    static async addCompare(data: ComparePayload): Promise<any> {
+        const response = await apiPost(`${API_BASE_URL}/calculations/list_compare/create`, data as Record<string, any>);
+        return response.data;
+    }
+
+    static async deleteCompare(competitorID: string, requestBody: { quote_id: string }): Promise<{ status: number }> {
+        try {
+            const response = await api.delete(`${API_BASE_URL}/calculations/list_compare/${competitorID}`, {
+                data: requestBody
+            });
+            return {
+                status: response.status
+            };
+        } catch (error: any) {
+            throw error;
+        }
     }
 }

@@ -1,5 +1,6 @@
 import { apiDelete, apiGet, apiPost, apiPut } from '@/helpers/apiHelper';
 import { EmployeeTerritoryRequest, EmployeeTerritoryResponse, GetUserAccessByIdResponse } from '../types/usermanagement';
+import { AuthService } from '@/services/authService';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_IS_ADMIN = import.meta.env.VITE_PARAM_IS_ADMIN;
@@ -36,7 +37,14 @@ export class UsermanagementServices {
         };
         
         const response = await apiPost(`${API_BASE_URL}/crm/employee-data-access/get`, requestData as Record<string, any>);
-        return response.data as EmployeeTerritoryResponse;
+        const responseData = response.data as EmployeeTerritoryResponse;
+        
+        // Save current_territories to localStorage if present
+        if (responseData.current_territories) {
+            AuthService.saveCurrentTerritories(responseData.current_territories);
+        }
+        
+        return responseData;
     }
 
     // Create new user access

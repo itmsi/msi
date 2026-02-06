@@ -19,7 +19,9 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
     const [previewUrl, setPreviewUrl] = useState<string | null>(currentAvatar || null);
     const [uploadFile, setUploadFile] = useState<File | null>(null);
 
-    const handleFileChange = (file: File | null) => {
+    const handleFileChange = (files: File | File[] | null) => {
+        // Since we're using single file mode, extract the first file
+        const file = Array.isArray(files) ? files[0] : files;
         setUploadFile(file);
         
         if (file) {

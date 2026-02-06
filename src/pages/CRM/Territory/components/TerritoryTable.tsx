@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { MdExpandMore, MdExpandLess, MdAdd, MdEdit, MdDeleteOutline } from 'react-icons/md';
-import { FaMapMarkerAlt, FaLayerGroup, FaMapPin, FaIndustry } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaLayerGroup, FaMapPin, FaIndustry, FaCubes } from 'react-icons/fa';
 import CustomDataTable from '@/components/ui/table/CustomDataTable';
 import { Island, BaseEntity } from '../types/territory';
 import { ActiveStatusBadge, CategoryBadge } from '@/components/ui/badge';
@@ -10,7 +10,7 @@ import { PermissionButton } from '@/components/common/PermissionComponents';
 import Badge from '@/components/ui/badge/Badge';
 
 export interface ExpandableRowData extends BaseEntity {
-    type: 'island' | 'group' | 'area' | 'iup_zone' | 'iup';
+    type: 'island' | 'group' | 'area' | 'iup_zone' | 'iup_segmentation' | 'iup';
     level: number;
     parent_id?: string;
     children?: any[];
@@ -60,18 +60,29 @@ const flattenTerritoryData = (territories: Island[]): ExpandableRowData[] => {
                                     ...iupZone,
                                     level: 3,
                                     parent_id: area.id,
-                                    type: 'iup_zone'
+                                    type: 'iup_zone',
                                 });
                                 
                                 if (iupZone.children && iupZone.children.length > 0) {
-                                    iupZone.children.forEach(iup => {
+                                    iupZone.children.forEach(iupSegmentation => {
                                         result.push({
-                                            ...iup,
+                                            ...iupSegmentation,
                                             level: 4,
                                             parent_id: iupZone.id,
-                                            type: 'iup',
-                                            children: undefined
+                                            type: 'iup_segmentation',
                                         });
+                                        
+                                        if (iupSegmentation.children && iupSegmentation.children.length > 0) {
+                                            iupSegmentation.children.forEach(iup => {
+                                                result.push({
+                                                    ...iup,
+                                                    level: 5,
+                                                    parent_id: iupSegmentation.id,
+                                                    type: 'iup',
+                                                    children: undefined
+                                                });
+                                            });
+                                        }
                                     });
                                 }
                             });
@@ -98,6 +109,8 @@ const TypeIcon: React.FC<{ type: string; level: number }> = ({ type }) => {
             return <FaMapPin {...iconProps} className="text-orange-600 text-sm mr-2" />;
         case 'iup_zone':
             return <FaIndustry {...iconProps} className="text-purple-600 text-sm mr-2" />;
+        case 'iup_segmentation':
+            return <FaCubes {...iconProps} className="text-slate-600 text-sm mr-2" />;
         case 'iup':
             return <FaIndustry {...iconProps} className="text-gray-600 text-sm mr-2" />;
         default:
@@ -168,7 +181,8 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
             case 'island': return 'group';
             case 'group': return 'area';
             case 'area': return 'iup_zone';
-            case 'iup_zone': return 'iup';
+            case 'iup_zone': return 'iup_segmentation';
+            case 'iup_segmentation': return 'iup';
             case 'iup': return null;
             default: return null;
         }
@@ -180,6 +194,7 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
             case 'group': return 'Group';
             case 'area': return 'Area';
             case 'iup_zone': return 'IUP Zone';
+            case 'iup_segmentation': return 'Segmentation';
             case 'iup': return 'IUP';
             default: return 'Item';
         }
@@ -210,12 +225,12 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
                     <span className="font-medium">{row.name}</span>
                 </div>
             ),
-            minWidth: '200px'
         },
         {
             name: 'Code',
             selector: (row) => row.code,
             cell: (row) => (
+                row.code ? (
                 <Badge 
                     variant='solid'
                     color='info'
@@ -223,8 +238,10 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
                 >
                     {row.code}
                 </Badge>
+                ) : ('-')
             ),
-            width: '120px'
+            width: '120px',
+            center: true
         },
         {
             name: 'Type',
@@ -238,7 +255,8 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
                     />
                 </div>
             ),
-            width: '120px'
+            width: '150px',
+            center: true
         },
         {
             name: 'Status',
@@ -269,7 +287,7 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
                     )}
                     <Tooltip content={`Edit ${row.type.replace('_', ' ')}`} position="top">
                         <PermissionButton
-                            permission={'read'}
+                            permission={'create'}
                             onClick={() => onEdit && onEdit(row)}
                             className={`p-2 rounded-md text-sm font-medium transition-colors relative text-blue-600 hover:text-blue-700 hover:bg-blue-50`}
                         >
@@ -289,7 +307,6 @@ const TerritoryTable: React.FC<TerritoryTableProps> = ({
             ),
             ignoreRowClick: true,
             allowOverflow: true,
-            button: true,
             width: '220px'
         }
     ];

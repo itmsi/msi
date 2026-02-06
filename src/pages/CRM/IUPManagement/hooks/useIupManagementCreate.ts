@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
-import { Island, Group, Area, IUPZone, useTerritory } from '../../Territory';
+import { Island, Group, Area, IUPZone, IUPSegmentation, useTerritory } from '../../Territory';
 import { IupManagementFormData } from '../types/iupmanagement';
 import { IupService } from '../services/iupManagementService';
 
@@ -21,13 +21,15 @@ export const useIupManagementCreate = () => {
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
     const [selectedArea, setSelectedArea] = useState<Area | null>(null);
     const [selectedIupZone, setSelectedIupZone] = useState<IUPZone | null>(null);
+    const [selectedIupSegmentation, setSelectedIupSegmentation] = useState<IUPSegmentation | null>(null);
     
     const [formData, setFormData] = useState<IupManagementFormData>({
         company_name: '',
         iup_zone_id: '',
         business_type: '',
         permit_type: '',
-        segmentation_id: 'kosong',
+        segmentation_id: '',
+        segmentation_name_en: '',
         province_name: '',
         pic: '',
         mine_location: '',
@@ -47,7 +49,8 @@ export const useIupManagementCreate = () => {
         group_name: '',
         area_id: '',
         area_name: '',
-        iup_zone_name: ''
+        iup_zone_name: '',
+        iup_segment_id: '',
     });
 
     // Fetch territories on component mount
@@ -73,12 +76,19 @@ export const useIupManagementCreate = () => {
         return selectedArea.children || [];
     };
 
+    // Get available IUP Segmentations based on selected IUP Zone
+    const getAvailableIupSegmentations = (): IUPSegmentation[] => {
+        if (!selectedIupZone) return [];
+        return selectedIupZone.children || [];
+    };
+
     const handleIslandChange = (option: { value: string; label: string; } | null) => {
         const island = territories.find(t => t.id === option?.value) || null;
         setSelectedIsland(island);
         setSelectedGroup(null);
         setSelectedArea(null);
         setSelectedIupZone(null);
+        setSelectedIupSegmentation(null);
         
         setFormData(prev => ({
             ...prev,
@@ -89,7 +99,8 @@ export const useIupManagementCreate = () => {
             area_id: '',
             area_name: '',
             iup_zone_id: '',
-            iup_zone_name: ''
+            iup_zone_name: '',
+            iup_segment_id: '',
         }));
     };
 
@@ -98,6 +109,7 @@ export const useIupManagementCreate = () => {
         setSelectedGroup(group);
         setSelectedArea(null);
         setSelectedIupZone(null);
+        setSelectedIupSegmentation(null);
         
         setFormData(prev => ({
             ...prev,
@@ -106,7 +118,8 @@ export const useIupManagementCreate = () => {
             area_id: '',
             area_name: '',
             iup_zone_id: '',
-            iup_zone_name: ''
+            iup_zone_name: '',
+            iup_segment_id: '',
         }));
     };
 
@@ -114,24 +127,38 @@ export const useIupManagementCreate = () => {
         const area = getAvailableAreas().find(a => a.id === option?.value) || null;
         setSelectedArea(area);
         setSelectedIupZone(null);
+        setSelectedIupSegmentation(null);
         
         setFormData(prev => ({
             ...prev,
             area_id: area?.id || '',
             area_name: area?.name || '',
             iup_zone_id: '',
-            iup_zone_name: ''
+            iup_zone_name: '',
+            iup_segment_id: '',
         }));
     };
 
     const handleIupZoneChange = (option: { value: string; label: string; } | null) => {
         const iupZone = getAvailableIupZones().find(z => z.id === option?.value) || null;
         setSelectedIupZone(iupZone);
+        setSelectedIupSegmentation(null);
         
         setFormData(prev => ({
             ...prev,
             iup_zone_id: iupZone?.id || '',
-            iup_zone_name: iupZone?.name || ''
+            iup_zone_name: iupZone?.name || '',
+            iup_segment_id: '',
+        }));
+    };
+
+    const handleIupSegmentationChange = (option: { value: string; label: string; } | null) => {
+        const iupSegmentation = getAvailableIupSegmentations().find(s => s.id === option?.value) || null;
+        setSelectedIupSegmentation(iupSegmentation);
+        
+        setFormData(prev => ({
+            ...prev,
+            iup_segment_id: iupSegmentation?.id || '',
         }));
     };
 
@@ -193,14 +220,6 @@ export const useIupManagementCreate = () => {
             newErrors.company_name = 'IUP Name is required';
         }
         
-        if (!formData.rkab.trim()) {
-            newErrors.rkab = 'RKAB is required';
-        }
-
-        if (!formData.sk_number) {
-            newErrors.sk_number = 'SK Number is required';
-        }
-
         if (!formData.mine_location) {
             newErrors.mine_location = 'Mine Location is required';
         }
@@ -250,7 +269,7 @@ export const useIupManagementCreate = () => {
                 // Ensure iup_zone_id is set from selected IUP Zone
                 iup_zone_id: selectedIupZone.id,
                 // Auto-fill some fields based on selections if needed
-                province_name: formData.province_name || 'province name - kosong',
+                province_name: formData.province_name || '',
                 mine_location: formData.mine_location || '',
                 // Set default values for hidden required fields
                 business_type: formData.business_type || '',
@@ -263,7 +282,7 @@ export const useIupManagementCreate = () => {
                 pic: formData.pic || 'pic - kosong',
                 regency_name: formData.regency_name || selectedArea.name || '',
                 company_full_name: formData.company_full_name || formData.company_name,
-                segmentation_id: formData.segmentation_id || selectedIupZone.id || 'segmentasi kosong',
+                segmentation_id: formData.segmentation_id || selectedIupZone.id || '',
                 area_size_ha: formData.area_size_ha || '',
                 rkab: formData.rkab || ''
             };
@@ -285,12 +304,15 @@ export const useIupManagementCreate = () => {
         selectedGroup,
         selectedArea,
         selectedIupZone,
+        selectedIupSegmentation,
         handleIslandChange,
         handleGroupChange,
         handleAreaChange,
         handleIupZoneChange,
+        handleIupSegmentationChange,
         getAvailableGroups,
         getAvailableAreas,
+        getAvailableIupSegmentations,
         getAvailableIupZones,
         territoriesLoading,
         territories,

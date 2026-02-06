@@ -10,19 +10,21 @@ interface FileUploadProps {
     accept: string;
     icon?: 'image' | 'upload' | 'cloud';
     acceptedFormats: string[];
-    maxSize?: number; // in MB
+    maxSize?: number;
+    multiple?: boolean;
     currentFile?: File | null;
-    existingImageUrl?: string | null; // URL for existing image from database
-    onFileChange: (file: File | null) => void;
-    onRemoveExistingImage?: () => void; // Callback to remove existing image
+    currentFiles?: File[];
+    existingImageUrl?: any[] | string |null;
+    onFileChange: (files: File | File[] | null) => void;
+    onRemoveExistingImage?: (index?: number) => void;
     validationError?: string;
     required?: boolean;
     disabled?: boolean;
     description?: string;
     className?: string;
-    showPreview?: boolean;          // Show file preview
-    previewSize?: 'sm' | 'md' | 'lg'; // Preview size
-    viewMode?: boolean;         // If true, disable file input interactions
+    showPreview?: boolean;
+    previewSize?: 'sm' | 'md' | 'lg';
+    viewMode?: boolean;
 }
 
 interface DragState {
@@ -41,7 +43,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
     icon = 'upload',
     acceptedFormats,
     maxSize = 10, // 10MB default
+    multiple = false,
     currentFile,
+    currentFiles,
     existingImageUrl,
     onFileChange,
     onRemoveExistingImage,
@@ -54,30 +58,80 @@ const FileUpload: React.FC<FileUploadProps> = ({
     previewSize = 'md',
     viewMode = false
 }) => {
+    
     const [dragState, setDragState] = useState<DragState>({ isDragging: false });
     const [previewState, setPreviewState] = useState<PreviewState>({ 
         url: null
     });
+    const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+    const [preservedExistingImages, setPreservedExistingImages] = useState<any[] | string | null>(null);
+
+    // Preserve existing images when component first loads
+    useEffect(() => {
+        if (existingImageUrl && !preservedExistingImages) {
+            setPreservedExistingImages(existingImageUrl);
+        }
+    }, [existingImageUrl, preservedExistingImages]);
+
+    // Helper function to get current files based on mode
+    const getCurrentFiles = (): File[] => {
+        if (multiple) {
+            return currentFiles || [];
+        } else {
+            return currentFile ? [currentFile] : [];
+        }
+    };
 
     useEffect(() => {
+        // Cleanup previous URLs
         if (previewState.url && previewState.url.startsWith('blob:')) {
             URL.revokeObjectURL(previewState.url);
         }
+        previewUrls.forEach(url => {
+            if (url.startsWith('blob:')) {
+                URL.revokeObjectURL(url);
+            }
+        });
 
-        if (currentFile && isImageFile(currentFile)) {
-            const url = URL.createObjectURL(currentFile);
-            setPreviewState({ url });
+        const files = getCurrentFiles();
+        
+        if (multiple) {
+            // Handle multiple files
+            const imageFiles = files.filter(isImageFile);
+            const urls = imageFiles.map((file, index) => {
+                const url = URL.createObjectURL(file);
+                return {
+                    url,
+                    fileName: file.name,
+                    fileSize: file.size,
+                    lastModified: file.lastModified,
+                    index
+                };
+            });
             
-            // Return cleanup function
+            setPreviewUrls(urls.map(item => item.url));
+            setPreviewState({ url: null });
+            
             return () => {
-                if (previewState.url && previewState.url.startsWith('blob:')) {
-                    URL.revokeObjectURL(previewState.url);
-                }
+                urls.forEach(item => URL.revokeObjectURL(item.url));
             };
         } else {
-            setPreviewState({ url: null });
+            // Handle single file (existing logic)
+            const file = files[0];
+            if (file && isImageFile(file)) {
+                const url = URL.createObjectURL(file);
+                setPreviewState({ url });
+                setPreviewUrls([]);
+                
+                return () => {
+                    URL.revokeObjectURL(url);
+                };
+            } else {
+                setPreviewState({ url: null });
+                setPreviewUrls([]);
+            }
         }
-    }, [currentFile]);
+    }, [currentFile, currentFiles, multiple]);
 
     const isImageFile = (file: File): boolean => {
         if (!file || typeof file !== 'object' || !file.name || typeof file.type !== 'string') {
@@ -102,14 +156,36 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }
     };
 
-    const handleRemoveFile = () => {
+    const handleRemoveFile = (indexToRemove?: number) => {
+        // Cleanup URLs
         if (previewState.url && previewState.url.startsWith('blob:')) {
             URL.revokeObjectURL(previewState.url);
         }
-        setPreviewState({ url: null });
-        onFileChange(null);
-        if (existingImageUrl && onRemoveExistingImage) {
-            onRemoveExistingImage();
+        previewUrls.forEach(url => {
+            if (url.startsWith('blob:')) {
+                URL.revokeObjectURL(url);
+            }
+        });
+        
+        if (multiple && typeof indexToRemove === 'number') {
+            // Remove specific file from multiple files
+            const files = getCurrentFiles();
+            const newFiles = files.filter((_, index) => index !== indexToRemove);
+            onFileChange(newFiles.length > 0 ? newFiles : null);
+        } else {
+            // Remove all files
+            setPreviewState({ url: null });
+            setPreviewUrls([]);
+            onFileChange(null);
+            if (existingImageUrl && onRemoveExistingImage) {
+                onRemoveExistingImage();
+            }
+        }
+    };
+
+    const handleRemoveExistingImage = (indexToRemove: number) => {
+        if (onRemoveExistingImage) {
+            onRemoveExistingImage(indexToRemove);
         }
     };    
     const getIcon = () => {
@@ -149,22 +225,58 @@ const FileUpload: React.FC<FileUploadProps> = ({
     };
 
     // Handle file selection
-    const handleFileChange = (file: File | null) => {
-        if (file && !validasiFile(file)) {
+    const handleFileChange = (newFiles: File[]) => {
+        const validFiles: File[] = [];
+        
+        for (const file of newFiles) {
+            if (validasiFile(file)) {
+                validFiles.push(file);
+            }
+        }
+        
+        if (validFiles.length === 0) {
             return;
         }
         
-        onFileChange(file);
-        
-        if (file) {
+        if (multiple) {
+            const currentFiles = getCurrentFiles();
+            const currentExistingImages = existingImageUrl || preservedExistingImages;
+            
+            const cekFiles = validFiles.filter(newFile => {
+                return !currentFiles.some(existingFile => 
+                    existingFile.name === newFile.name && 
+                    existingFile.size === newFile.size && 
+                    existingFile.lastModified === newFile.lastModified
+                );
+            });
+            
+            if (cekFiles.length === 0) {
+                toast.error('All selected files are already added');
+                return;
+            }
+            
+            const allFiles = [...currentFiles, ...cekFiles];
+            const totalExisting = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
+            const totalImages = allFiles.length + totalExisting;
+            
+            onFileChange(allFiles);
+            toast.success(`${cekFiles.length} file(s) added successfully! Total: ${totalImages} images`);
+        } else {
+            onFileChange(validFiles[0]);
             toast.success('File uploaded successfully!');
         }
     };
 
     // Handle input change
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0] || null;
-        handleFileChange(file);
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            const fileArray = Array.from(files);
+            handleFileChange(fileArray);
+            
+            // Reset input untuk mencegah masalah caching
+            e.target.value = '';
+        }
     };
 
     // Drag & Drop handlers
@@ -196,8 +308,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
         const files = e.dataTransfer.files;
         if (files && files.length > 0) {
-            const file = files[0];
-            handleFileChange(file);
+            const fileArray = Array.from(files);
+            handleFileChange(fileArray);
         }
     };
 
@@ -246,13 +358,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                 `}
                             >
                                 <span>
-                                    {currentFile ? 'Change file' : `Upload ${getAcceptedFormatsText()} file`}
+                                    {(getCurrentFiles().length > 0 || existingImageUrl) 
+                                        ? (multiple ? 'Add more files' : 'Change file') 
+                                        : `Upload ${getAcceptedFormatsText()} ${multiple ? 'files' : 'file'}`
+                                    }
                                 </span>
                                 <input
                                     id={id}
                                     name={name}
                                     type="file"
                                     accept={accept}
+                                    multiple={multiple}
                                     disabled={disabled}
                                     className="sr-only"
                                     onChange={handleInputChange}
@@ -270,13 +386,24 @@ const FileUpload: React.FC<FileUploadProps> = ({
                             </p>
                             
                             {/* Current File Display */}
-                            {currentFile && (
-                                <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
-                                    <span className="mr-1">✓</span>
-                                    <span className="font-medium">{currentFile.name}</span>
-                                    <span className="ml-2 text-xs text-green-600">
-                                        ({(currentFile.size / 1024 / 1024).toFixed(2)} MB)
-                                    </span>
+                            {getCurrentFiles().length > 0 && (
+                                <div className="space-y-2">
+                                    {multiple ? (
+                                        <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                                            <span className="mr-1">✓</span>
+                                            <span className="font-medium">{getCurrentFiles().length} file(s) selected</span>
+                                        </div>
+                                    ) : (
+                                        getCurrentFiles().map((file, index) => (
+                                            <div key={index} className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                                                <span className="mr-1">✓</span>
+                                                <span className="font-medium">{file.name}</span>
+                                                <span className="ml-2 text-xs text-green-600">
+                                                    ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                                                </span>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             )}
 
@@ -299,83 +426,184 @@ const FileUpload: React.FC<FileUploadProps> = ({
             )}
 
             {/* File Preview Section */}
-            {showPreview && ((currentFile && isImageFile(currentFile)) || existingImageUrl) && (
+            {showPreview && (getCurrentFiles().some(isImageFile) || existingImageUrl) && (
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="flex items-start justify-between mb-3">
-                        <h4 className="text-sm font-medium text-gray-900">Preview</h4>
+                        <h4 className="text-sm font-medium text-gray-900">
+                            Preview {multiple && getCurrentFiles().length > 1 && `(${getCurrentFiles().filter(isImageFile).length} images)`}
+                        </h4>
                         {!viewMode && (
                             <button
-                                onClick={handleRemoveFile}
+                                onClick={() => handleRemoveFile()}
                                 className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
                                 disabled={disabled}
                             >
                                 <MdClose className="w-4 h-4" />
-                                Remove
+                                Remove All
                             </button>
                         )}
                     </div>
 
 
-                    {/* Get the appropriate image source and info */}
+                    {/* Render preview based on mode */}
                     {(() => {
-                        const hasNewFile = currentFile && isImageFile(currentFile);
-                        const imageUrl = hasNewFile ? previewState.url : existingImageUrl;
-                        const isLoading = hasNewFile && !previewState.url;
-
-                        if (isLoading) {
+                        const files = getCurrentFiles();
+                        const imageFiles = files.filter(isImageFile);
+                        // Use preserved existing images if current existingImageUrl is null/empty
+                        const currentExistingImages = existingImageUrl || preservedExistingImages;
+                        const existingImagesCount = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
+                        const totalImages = imageFiles.length + existingImagesCount;
+                        const getImageLength = totalImages > 3 ? 3 : (totalImages > 0 ? totalImages : 1);
+                        
+                        if (multiple) {
                             return (
-                                <div className="text-center py-4 text-gray-500">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                                    <p>Generating preview...</p>
-                                </div>
-                            );
-                        }
-
-                        if (imageUrl) {
-                            const isSvg = hasNewFile 
-                                ? currentFile!.name.toLowerCase().endsWith('.svg')
-                                : existingImageUrl!.toLowerCase().includes('.svg');
-
-                            return (
-                                <div className="space-y-2">
-                                    {/* Image Preview */}
-                                    <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
-                                        {isSvg ? (
-                                            <img
-                                                src={imageUrl}
-                                                alt="Preview"
-                                                className="w-full h-full object-contain"
-                                            />
+                                <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(${getImageLength}, 1fr)` }}>
+                                    {/* Show existing images first */}
+                                    {currentExistingImages && (
+                                        Array.isArray(currentExistingImages) ? (
+                                            currentExistingImages.map((imageUrl, index) => {
+                                                return (
+                                                    <div key={`existing-${index}`} className="space-y-2">
+                                                        <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
+                                                            <img
+                                                                src={imageUrl}
+                                                                alt={`Existing ${index + 1}`}
+                                                                className="w-full h-full object-contain"
+                                                            />
+                                                            {!viewMode && (
+                                                                <button
+                                                                    onClick={() => handleRemoveExistingImage(index)}
+                                                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                >
+                                                                    <MdClose className="w-3 h-3" />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                        {/* <p className="text-xs font-medium text-gray-900">
+                                                            Existing Image {currentExistingImages.length > 1 ? `${index + 1}` : ''}
+                                                        </p> */}
+                                                    </div>
+                                                );
+                                            })
                                         ) : (
-                                            <img
-                                                src={imageUrl}
-                                                alt="Preview"
-                                                className="w-full h-full object-contain"
-                                            />
-                                        )}
-                                    </div>
-
-                                    {/* File Info */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="space-y-2">
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-900 truncate">
-                                                    {hasNewFile ? currentFile!.name : 'Existing Image'}
-                                                </p>
-                                                <p className="text-xs text-gray-500">
-                                                    {hasNewFile ? (currentFile!.type || 'Unknown type') : ''}
+                                            <div className="space-y-2">
+                                                <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
+                                                    <img
+                                                        src={currentExistingImages}
+                                                        alt="Existing"
+                                                        className="w-full h-full object-contain"
+                                                    />
+                                                    {!viewMode && (
+                                                        <button
+                                                            onClick={() => handleRemoveExistingImage(0)}
+                                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        >
+                                                            <MdClose className="w-3 h-3" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs font-medium text-gray-900">
+                                                    Existing Image
                                                 </p>
                                             </div>
-                                            
-                                            <div className="text-xs text-gray-500 space-y-1">
-                                                {hasNewFile && (
-                                                    <p>Size: {(currentFile!.size / 1024 / 1024).toFixed(2)} MB</p>
-                                                )}
+                                        )
+                                    )}
+                                    
+                                    {/* Then show new files */}
+                                    {imageFiles.map((file, index) => {
+                                        const url = previewUrls[index];
+                                        
+                                        if (!url) {
+                                            return null;
+                                        }
+                                        
+                                        return (
+                                            <div key={`new-${file.name}-${file.size}-${file.lastModified}-${index}`} className="space-y-2">
+                                                {/* Image Preview */}
+                                                <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
+                                                    <img
+                                                        src={url}
+                                                        alt={`${file.name} - Preview ${index + 1}`}
+                                                        className="w-full h-full object-contain"
+                                                    />
+                                                    {!viewMode && (
+                                                        <button
+                                                            onClick={() => handleRemoveFile(index)}
+                                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        >
+                                                            <MdClose className="w-3 h-3" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                
+                                                {/* File Info */}
+                                                <div className="space-y-1">
+                                                    <p className="text-xs font-medium text-gray-900 truncate" title={file.name}>
+                                                        {file.name}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {(file.size / 1024 / 1024).toFixed(2)} MB
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        } else {
+                            // Single file preview (existing logic)
+                            const hasNewFile = imageFiles.length > 0;
+                            const imageUrl = hasNewFile ? previewState.url : (Array.isArray(existingImageUrl) ? existingImageUrl[0] : existingImageUrl);
+                            const isLoading = hasNewFile && !previewState.url;
+
+                            if (isLoading) {
+                                return (
+                                    <div className="text-center py-4 text-gray-500">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                                        <p>Generating preview...</p>
+                                    </div>
+                                );
+                            }
+
+                            if (imageUrl) {
+                                const file = imageFiles[0];
+                                // const isSvg = hasNewFile 
+                                //     ? file.name.toLowerCase().endsWith('.svg')
+                                //     : existingImageUrl!.toLowerCase().includes('.svg');
+
+                                return (
+                                    <div className="space-y-2">
+                                        {/* Image Preview */}
+                                        <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
+                                            <img
+                                                src={imageUrl}
+                                                alt="Preview"
+                                                className="w-full h-full object-contain"
+                                            />
+                                        </div>
+
+                                        {/* File Info */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="space-y-2">
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                                        {hasNewFile ? file.name : 'Existing Image'}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {hasNewFile ? (file.type || 'Unknown type') : ''}
+                                                    </p>
+                                                </div>
+                                                
+                                                <div className="text-xs text-gray-500 space-y-1">
+                                                    {hasNewFile && (
+                                                        <p>Size: {(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
+                                );
+                            }
                         }
 
                         return null;

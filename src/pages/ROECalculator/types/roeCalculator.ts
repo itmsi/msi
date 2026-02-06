@@ -12,7 +12,7 @@ export interface ROECalculatorFormData {
     jumlah_unit: string;
     down_payment_pct: number | string;
     tenor_pembiayaan: number | string;
-    interest_rate: string;
+    interest_rate: string | number;
     periode_depresiasi: number | string;
     
     // Step 3 - Operational
@@ -549,9 +549,35 @@ export interface ManageROEDataPDF {
     cost: CostPDF;
     financial: FinancialPDF;
 
+    properties_list_compare: {
+        list_compare: PDFCompareItem[];
+    };
     pdf_data: PDFData;
 }
 
+export interface PDFCompareItem {
+    qty: number;
+    fuel: number;
+    asset: number;
+    brand: string;
+    equity: number;
+    ritase: number;
+    tonase: number;
+    revenue: number;
+    expenses: number;
+    liability: number;
+    roa_nominal: number;
+    roe_nominal: number;
+    price_per_unit: number;
+    roa_percentage: number;
+    roe_percentage: number;
+    fuel_consumption: number;
+    roa_nominal_diff: number;
+    roe_nominal_diff: number;
+    roa_percentage_diff: number;
+    roe_percentage_diff: number;
+    properties_list_compare_id: string;
+}
 /* ---------------------------- CHILD INTERFACES ---------------------------- */
 
 export interface UnitPurchasePDF {
@@ -708,6 +734,7 @@ export interface ManageROEBreakdownResponse {
 /* ========================= MAIN DATA ========================= */
 
 export interface ManageROEBreakdownData {
+    fuel_consumption_type: string;
     key_financial_metrics: KeyFinancialMetrics;
     roe_roa_metrics: ROEROAMetrics;
     charts_data: ChartsData;
@@ -814,4 +841,60 @@ export interface DetailBiayaBulanan {
 export interface BiayaItem {
     nominal: number;
     persentase: number;
+}
+
+export interface Pagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+export interface ManageROECompareResponse {
+    success: boolean;
+    message: string;
+    data: {
+        data: ManageROECompareData[];
+        pagination: Pagination;
+    };
+}
+export interface ManageROECompareData {
+  brand: string;
+  tonase: number;
+  fuel_consumption: number;
+  fuel_consumption_type: number;
+  ritase: number;
+  qty: number;
+  price: number;
+  fuel: number;
+  revenue: number;
+  expenses: number;
+  asset: number;
+  equity: number;
+  liability: number;
+  roe_percentage: number;
+  roe_nominal: number;
+  roa_percentage: number;
+  roa_nominal: number;
+  roe_percentage_diff: number;
+  roe_nominal_diff: number;
+  roa_percentage_diff: number;
+  roa_nominal_diff: number;
+}
+
+export interface CompareListRequest {
+    quote_id: string;
+    page: number;
+    limit: number;
+    search?: string;
+    sort_order?: "asc" | "desc";
+}
+export interface ComparePayload {
+    quote_id: string;
+    brand: string;
+    tonase: number;
+    ritase: number;
+    qty: number;
+    price_per_unit: number;
+    fuel_consumption: number;
 }

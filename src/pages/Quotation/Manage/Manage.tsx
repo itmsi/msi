@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { MdAdd, MdSearch, MdClear, MdDeleteOutline } from 'react-icons/md';
+import React, { useMemo, useState } from 'react';
+import { MdAdd, MdSearch, MdClear, MdDeleteOutline, MdFilterListAlt, MdExpandLess, MdExpandMore } from 'react-icons/md';
 import { FaRegFilePdf } from "react-icons/fa6";
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
@@ -14,14 +14,16 @@ import Button from '@/components/ui/button/Button';
 import { createActionsColumn } from '@/components/ui/table';
 import { formatCurrency, formatDate, formatDateTime } from '@/helpers/generalHelper';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import FilterSection from './components/FilterSection';
 
 const ManageQuotations: React.FC = () => {
     const navigate = useNavigate();
-    
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
     const {
         searchTerm,
         sortOrder,
-        sortStatus,
+        quotationFor,
         quotations,
         pagination,
         loading,
@@ -29,7 +31,6 @@ const ManageQuotations: React.FC = () => {
         handlePageChange,
         handleRowsPerPageChange,
         handleSearchChange,
-        handleManualSearch,
         handleClearFilters,
         handleFilterChange,
         handleEdit,
@@ -38,7 +39,14 @@ const ManageQuotations: React.FC = () => {
         handleDownload,
         confirmDeleteQuotations,
         cancelDelete,
+        setSearchTerm,
+        handleKeyPress,
     } = useQuotationManagement();
+
+    // Toggle filter collapse
+    const handleToggleFilter = () => {
+        setShowAdvancedFilters(prev => !prev);
+    };
 
     // Helper function to render status badge
     const getStatusBadge = (status: string) => {
@@ -52,7 +60,7 @@ const ManageQuotations: React.FC = () => {
         };
 
         const config = statusConfig[status.toLowerCase()] || statusConfig.draft;
-        
+
         return (
             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${config.bg} ${config.text}`}>
                 {config.label}
@@ -74,25 +82,28 @@ const ManageQuotations: React.FC = () => {
                         <div className="block text-sm text-gray-500">{formatDate(row.manage_quotation_date)} - {formatDate(row.manage_quotation_valid_date)}</div>
                     </div>
                 ),
+                width: '220px',
             },
-            // {
-            //     name: 'Customer',
-            //     selector: (row) => row.customer_id,
-            //     cell: (row) => (
-            //         <span className="text-sm">{row.customer_id.substring(0, 20)}...</span>
-            //     ),
-            // },
-            // createDateColumn('Quotation Date', 'manage_quotation_date', tableDateFormat),
-            // createDateColumn('Valid Until', 'manage_quotation_valid_date', tableDateFormat),
             {
                 name: 'Customer Name',
                 selector: (row) => row.customer_name,
                 wrap: true,
             },
-            // {
-            //     name: 'Sales Name',
-            //     selector: (row) => row.employee_name,
-            // },
+            {
+                name: 'Quotation For',
+                selector: (row) => row.quotation_for || 'customer',
+                cell: (row) => (
+                    <span className="capitalize text-sm">
+                        {row.quotation_for === 'leasing' ? 'Leasing' : 'Customer'}
+                    </span>
+                ),
+                center: true,
+                width: '140px',
+            },
+            {
+                name: 'Island',
+                selector: (row) => row.island_name,
+            },
             {
                 name: 'Status',
                 selector: (row) => row.status,
@@ -122,7 +133,6 @@ const ManageQuotations: React.FC = () => {
                 ),
                 width: '200px'
             },
-            // createDateColumn('Created At', 'created_at', tableDateFormat),
             createActionsColumn([
                 {
                     icon: FaRegFilePdf,
@@ -144,6 +154,7 @@ const ManageQuotations: React.FC = () => {
     );
 
     const SearchAndFilters = useMemo(() => (
+        <>
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
             <div className="flex-1">
                 <div className="relative flex">
@@ -153,14 +164,9 @@ const ManageQuotations: React.FC = () => {
                             type="text"
                             placeholder="Search by quotation number, customer ID..."
                             value={searchTerm}
-                            onChange={(e) => handleSearchChange(e.target.value)}
-                            onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    handleManualSearch();
-                                }
-                            }}
-                            className={`pl-10 py-2 w-full rounded-r-none ${searchTerm ? 'pr-10' : 'pr-4'}`}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            className={`pl-10 py-2 w-full ${searchTerm ? 'pr-10' : 'pr-4'}`}
                         />
                         {searchTerm && (
                             <button
@@ -172,49 +178,18 @@ const ManageQuotations: React.FC = () => {
                             </button>
                         )}
                     </div>
-                    <Button
-                        onClick={handleManualSearch}
-                        className="rounded-l-none px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 border-l-0"
-                        size="sm"
-                    >
-                        <MdSearch className="w-4 h-4" />
-                    </Button>
                 </div>
             </div>
-            
-            <div className="flex items-center gap-2">
-                <CustomSelect
-                    id="sort_status"
-                    name="sort_status"
-                    value={sortStatus ? { 
-                        value: sortStatus, 
-                        label: sortStatus === 'submit' ? 'Submit' : sortStatus === 'draft' ? 'Draft' : 'Rejected'
-                    } : null}
-                    onChange={(selectedOption) => 
-                        handleFilterChange('status', selectedOption?.value || '')
-                    }
-                    options={[
-                        { value: 'submit', label: 'Submit' },
-                        { value: 'draft', label: 'Draft' },
-                        { value: 'rejected', label: 'Rejected' }
-                    ]}
-                    placeholder="Status"
-                    isClearable={false}
-                    isSearchable={false}
-                    className="w-60"
-                />
-            </div>
-            
             {/* Sort Order */}
             <div className="flex items-center gap-2">
                 <CustomSelect
                     id="sort_order"
                     name="sort_order"
-                    value={sortOrder ? { 
-                        value: sortOrder, 
-                        label: sortOrder === 'asc' ? 'Ascending' : 'Descending' 
+                    value={sortOrder ? {
+                        value: sortOrder,
+                        label: sortOrder === 'asc' ? 'Ascending' : 'Descending'
                     } : null}
-                    onChange={(selectedOption) => 
+                    onChange={(selectedOption) =>
                         handleFilterChange('sort_order', selectedOption?.value || '')
                     }
                     options={[
@@ -227,20 +202,40 @@ const ManageQuotations: React.FC = () => {
                     className="w-40"
                 />
             </div>
-            
+            <div className="flex items-center gap-2">
+                <Button
+                    onClick={handleToggleFilter}
+                    className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
+                    size="sm"
+                >
+                    <MdFilterListAlt className="w-4 h-4 mr-2" />
+                    Filter
+                    {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                </Button>
+            </div>
         </div>
-    ), [searchTerm, sortOrder, sortStatus, loading, quotations.length, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange]);
-    
+        
+        {/* Advanced Filters Collapse */}
+        {showAdvancedFilters && (
+            <FilterSection
+                quotationFor={quotationFor}
+                onFilterChange={handleFilterChange}
+                onClearFilters={handleClearFilters}
+            />
+        )}
+        </>
+    ), [searchTerm, sortOrder, quotationFor, loading, quotations.length, showAdvancedFilters, handleSearchChange, handleClearFilters, handleFilterChange, handleToggleFilter]);
+
     return (
         <>
-            <PageMeta 
-                title="Manage Quotations - Motor Sights International" 
+            <PageMeta
+                title="Manage Quotations - Motor Sights International"
                 description="Manage Quotations - Motor Sights International"
                 image="/motor-sights-international.png"
             />
-            
+
             <div className="bg-white shadow rounded-lg">
-                
+
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-gray-200">
                     <div className="flex justify-between items-center">
@@ -266,13 +261,6 @@ const ManageQuotations: React.FC = () => {
                     {SearchAndFilters}
                 </div>
 
-                {/* Error Message */}
-                {/* {error && (
-                    <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-red-800">{error}</p>
-                    </div>
-                )} */}
-
                 {/* Data Table */}
                 <div className="p-6 font-secondary">
                     <CustomDataTable
@@ -284,7 +272,7 @@ const ManageQuotations: React.FC = () => {
                         paginationTotalRows={pagination?.total || 0}
                         paginationPerPage={pagination?.limit || 10}
                         paginationDefaultPage={pagination?.page || 1}
-                        paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
+                        paginationRowsPerPageOptions={[10, 25, 50, 100]}
                         onChangePage={handlePageChange}
                         onChangeRowsPerPage={handleRowsPerPageChange}
                         fixedHeader={true}
@@ -298,7 +286,7 @@ const ManageQuotations: React.FC = () => {
                     />
                 </div>
             </div>
-            
+
             {/* Delete Confirmation Modal */}
             <ConfirmationModal
                 isOpen={confirmDelete.show}

@@ -61,29 +61,29 @@ export const MineTypeBadge: React.FC<MineTypeBadgeProps> = ({ type }) => {
 };
 
 interface ActivityTypeBadgeProps {
-    type: 'find' | 'pull' | 'survey';
+    type: 'Find' | 'Pull' | 'Survey';
 }
 export const ActivityTypeBadge: React.FC<ActivityTypeBadgeProps> = ({ type }) => {
     const typeConfig = {
-        'find': { 
-            variant: 'solid' as const, 
-            color: 'light' as const, 
+        'Find': { 
+            variant: 'outline' as const, 
+            color: 'info' as const, 
             label: 'Find' 
         },
-        'pull': { 
+        'Pull': { 
             variant: 'solid' as const, 
             color: 'warning' as const, 
             label: 'Pull' 
         },
-        'survey': { 
+        'Survey': { 
             variant: 'solid' as const, 
             color: 'success' as const, 
             label: 'Survey' 
         },
     };
 
-    const config = typeConfig[type];
 
+    const config = typeConfig[type];
     return (
         <Badge variant={config.variant} color={config.color}>
             {config.label}

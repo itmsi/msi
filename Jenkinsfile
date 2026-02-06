@@ -3,27 +3,31 @@
 
 pipeline {
     agent any
-    
+
     stages {
-        stage('Git Pull') {
+        stage('Checkout') {
             steps {
-                echo '📥 Pulling code from repository...'
+                echo '📥 Checkout repository'
                 checkout scm
-                echo '✅ Code pulled successfully!'
             }
         }
-        
-        stage('Info') {
+
+        stage('Install Dependencies') {
             steps {
-                echo '📋 Project Information:'
-                echo 'Repository: ' + env.JOB_NAME
-                echo 'Branch: ' + env.BRANCH_NAME
-                echo 'Build Number: ' + env.BUILD_NUMBER
-                echo 'Workspace: ' + env.WORKSPACE
+                echo '📦 Installing dependencies'
+                sh 'npm install'
             }
         }
+
+        stage('Build') {
+            steps {
+                echo '🏗️ Building React app'
+                sh 'npm run build'
+            }
+        }
+
     }
-    
+
     post {
         always {
             echo '✅ Pipeline completed!'
@@ -31,11 +35,10 @@ pipeline {
         }
         
         success {
-            echo '🎉 Success: Code pulled successfully!'
+            echo '🎉 Build & Deploy SUCCESS'
         }
-        
         failure {
-            echo '❌ Failed: Check git pull logs for errors'
+            echo '❌ Build or Deploy FAILED'
         }
     }
 }

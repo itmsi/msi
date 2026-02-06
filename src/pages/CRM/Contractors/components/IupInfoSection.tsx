@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import { ContractorFormData } from '../types/contractor';
 import Label from '@/components/form/Label';
 import CustomSelect from '@/components/form/select/CustomSelect';
+import { ContractorSelectOption, useContractorSelect } from '@/hooks/useContractorSelect';
+import Input from '@/components/form/input/InputField';
 
 interface IupInfoProps {
     formData: ContractorFormData;
@@ -39,8 +41,59 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
     onSegementationSelect,
 }) => {
     const { iup_customers } = formData;
+
+    const {
+        contractorOptions,
+        inputValue: contractorInputValue,
+        handleInputChange: handleContractorInputChange,
+        pagination: contractorPagination,
+        handleMenuScrollToBottom: handleContractorMenuScrollToBottom,
+        loadContractorOptions
+    } = useContractorSelect();
+
+    // Load contractors when IUP or Type changes
+    useEffect(() => {
+        if (iup_customers.iup_id && iup_customers.type) {
+            if (!iup_customers.parent_contractor_id) {
+                setSelectedContractor(null);
+                if (onChange) {
+                    onChange('parent_contractor_id' as any, '');
+                }
+            }
+            loadContractorOptions('', [], 1, iup_customers.iup_id, 'contractor', true);
+        }
+    }, [iup_customers.iup_id, iup_customers.type]);
+
+    // Load contractors on initial mount for edit mode
+    useEffect(() => {
+        if (iup_customers.parent_contractor_id && iup_customers.iup_id && iup_customers.type && contractorOptions.length === 0) {
+            loadContractorOptions('', [], 1, iup_customers.iup_id, 'contractor', true);
+        }
+    }, [iup_customers.parent_contractor_id, iup_customers.iup_id, iup_customers.type, contractorOptions.length]);
+
+    const [selectedContractor, setSelectedContractor] = useState<ContractorSelectOption | null>(null);
     
-    // State untuk menyimpan recently selected options dan loaded options for edit mode
+    useEffect(() => {
+        if (iup_customers.parent_contractor_id && contractorOptions.length > 0) {
+            const existingContractor = contractorOptions.find(option => option.value === iup_customers.parent_contractor_id);
+            if (existingContractor && !selectedContractor) {
+                setSelectedContractor(existingContractor);
+            }
+        }
+    }, [iup_customers.parent_contractor_id, contractorOptions, selectedContractor]);
+    
+    const handleContractorChange = useCallback((option: ContractorSelectOption | null) => {
+        if (option) {
+            if (onChange) {
+                onChange('parent_contractor_id' as any, option.value);
+            }
+        } else {
+            if (onChange) {
+                onChange('parent_contractor_id' as any, '');
+            } 
+        }
+    }, [onChange]);
+    
     const [recentlySelectedIup, setRecentlySelectedIup] = React.useState<any>(null);
     const [recentlySelectedSegmentation, setRecentlySelectedSegmentation] = React.useState<any>(null);
     const [loadedEditOptions, setLoadedEditOptions] = React.useState<{
@@ -48,8 +101,7 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
         segmentation: any | null;
     }>({ iup: null, segmentation: null });
     
-    // Effect to load names for IDs in edit mode
-    React.useEffect(() => {
+    useEffect(() => {
         const loadEditModeOptions = async () => {
             if (iup_customers.iup_id && !iupOptions.find(opt => opt.value === iup_customers.iup_id)) {
                 const tempIupOption = {
@@ -80,7 +132,7 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
     }, [iup_customers.iup_id, iup_customers.segmentation_id, iupOptions, segementationOptions]);
     
     // Create a more robust selectedIup logic
-    const selectedIup = React.useMemo(() => {
+    const selectedIup = useMemo(() => {
         if (!iup_customers.iup_id) return null;
         
         if (recentlySelectedIup && recentlySelectedIup.value === iup_customers.iup_id) {
@@ -103,8 +155,7 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
         };
     }, [iup_customers.iup_id, iupOptions, recentlySelectedIup, loadedEditOptions.iup]);
 
-    // Create a more robust selectedSegementasi logic  
-    const selectedSegementasi = React.useMemo(() => {
+    const selectedSegementasi = useMemo(() => {
         if (!iup_customers.segmentation_id) return null;
         
         if (recentlySelectedSegmentation && recentlySelectedSegmentation.value === iup_customers.segmentation_id) {
@@ -127,11 +178,36 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
         };
     }, [iup_customers.segmentation_id, segementationOptions, recentlySelectedSegmentation, loadedEditOptions.segmentation]);
 
+    const selectedCustomer = useMemo(() => {
+        if (!iup_customers.parent_contractor_id) return null;
+        
+        if (selectedContractor && selectedContractor.value === iup_customers.parent_contractor_id) {
+            return selectedContractor;
+        }
+        
+        let found = contractorOptions.find(option => option.value === iup_customers.parent_contractor_id);
+        if (found) {
+            return found;
+        }
+        
+        return {
+            value: iup_customers.parent_contractor_id,
+            label: iup_customers.parent_contractor_name || 
+                  formData.customer_data?.customer_name ||
+                  'Loading Customer...',
+            __isPlaceholder: true
+        };
+    }, [iup_customers.parent_contractor_id, iup_customers.parent_contractor_name, selectedContractor, contractorOptions, formData.customer_data]);
+
     const STATUS_OPTIONS = [
         { value: 'active', label: 'Active' },
         { value: 'inactive', label: 'Inactive' }
     ];
-    // Helper untuk render text input
+    const TYPE_OPTIONS = [
+        { value: 'contractor', label: 'Contractor' },
+        { value: 'sub_contractor', label: 'Sub Contractor' }
+    ];
+
     const renderInput = (
         field: keyof Omit<ContractorFormData['iup_customers'], 'units'>,
         label: string,
@@ -139,10 +215,10 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
         required: boolean = false
     ) => (
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <Label className="block text-sm font-medium text-gray-700 mb-1">
                 {label} {required && '*'}
-            </label>
-            <input
+            </Label>
+            <Input
                 type="text"
                 value={iup_customers[field] as string}
                 onChange={(e) => onChange(field, e.target.value)}
@@ -182,10 +258,8 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                     </Label>
                     <CustomAsyncSelect
                         loadOptions={async (_inputValue) => {
-                            // Ensure selected option is included in options
                             let allOptions = [...iupOptions];
                             
-                            // If we have a selected option that's not in current options, add it
                             if (selectedIup && !allOptions.find(opt => opt.value === selectedIup.value)) {
                                 allOptions.unshift(selectedIup);
                             }
@@ -195,7 +269,6 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                         defaultOptions={(() => {
                             let defaultOpts = iupOptions?.length > 0 ? [...iupOptions] : [];
                             
-                            // Ensure selected option is in default options
                             if (selectedIup && !defaultOpts.find(opt => opt.value === selectedIup.value)) {
                                 defaultOpts.unshift(selectedIup);
                             }
@@ -210,6 +283,10 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                             // Save recently selected option
                             setRecentlySelectedIup(option);
                             onIupSelect(option);
+                            
+                            // Reset customer selection when IUP changes
+                            setSelectedContractor(null);
+                            onChange('parent_contractor_id' as any, '');
                         }}
                         placeholder="Select IUP..."
                         error={errors.iup_id}
@@ -227,10 +304,8 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                     </Label>
                     <CustomAsyncSelect
                         loadOptions={async (_inputValue) => {
-                            // Ensure selected option is included in options
                             let allOptions = [...segementationOptions];
                             
-                            // If we have a selected option that's not in current options, add it
                             if (selectedSegementasi && !allOptions.find(opt => opt.value === selectedSegementasi.value)) {
                                 allOptions.unshift(selectedSegementasi);
                             }
@@ -240,7 +315,6 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                         defaultOptions={(() => {
                             let defaultOpts = segementationOptions?.length > 0 ? [...segementationOptions] : [];
                             
-                            // Ensure selected option is in default options
                             if (selectedSegementasi && !defaultOpts.find(opt => opt.value === selectedSegementasi.value)) {
                                 defaultOpts.unshift(selectedSegementasi);
                             }
@@ -252,7 +326,6 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                         onInputChange={onSegementationInputChange}
                         onMenuScrollToBottom={onSegementationMenuScroll}
                         onChange={(option) => {
-                            // Save recently selected option
                             setRecentlySelectedSegmentation(option);
                             onSegementationSelect(option);
                         }}
@@ -267,8 +340,83 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
                         <p className="text-red-500 text-sm mt-1">{errors.segmentation_id}</p>
                     )}
                 </div>
+                <div>
+                    <Label>
+                        Type
+                    </Label>
+                    
+                    <CustomSelect
+                        value={TYPE_OPTIONS.find(option => option.value === iup_customers.type) || null}
+                        onChange={(option) => {
+                            const newType = option?.value as 'contractor' | 'sub_contractor';
+                            onChange('type', newType);
+                            
+                            // Reset customer selection when type changes
+                            setSelectedContractor(null);
+                            onChange('parent_contractor_id' as any, '');
+                        }}
+                        options={TYPE_OPTIONS}
+                        placeholder="Select type"
+                        isClearable={false}
+                        isSearchable={false}
+                    />
+                </div>
+                <div>
+                    <Label>
+                        Customer
+                    </Label>
+                    <CustomAsyncSelect
+                        loadOptions={async (inputValue) => {
+                            if (!iup_customers.iup_id || !iup_customers.type) {
+                                return Promise.resolve([]);
+                            }
+                            
+                            const options = await loadContractorOptions(inputValue, [], 1, iup_customers.iup_id, 'contractor', true);
+                            let allOptions = [...options];
+                            
+                            // Ensure selected customer is always in options for edit mode
+                            if (selectedCustomer && !allOptions.find(opt => opt.value === selectedCustomer.value)) {
+                                allOptions.unshift(selectedCustomer);
+                            }
+                            
+                            return allOptions;
+                        }}
+                        defaultOptions={(() => {
+                            let defaultOpts = contractorOptions?.length > 0 ? [...contractorOptions] : [];
+                            
+                            // Ensure selected customer is in default options for edit mode
+                            if (selectedCustomer && !defaultOpts.find(opt => opt.value === selectedCustomer.value)) {
+                                defaultOpts.unshift(selectedCustomer);
+                            }
+                            
+                            return defaultOpts;
+                        })()}
+                        inputValue={contractorInputValue}
+                        value={selectedCustomer}
+                        key={`customer-select-${iup_customers.parent_contractor_id || 'empty'}`} // Force re-render on value change
+                        onInputChange={(inputValue) => {
+                            if (iup_customers.iup_id && iup_customers.type) {
+                                handleContractorInputChange(inputValue, iup_customers.iup_id, 'contractor');
+                            }
+                        }}
+                        onMenuScrollToBottom={handleContractorMenuScrollToBottom}
+                        onChange={(option: any) => {
+                            setSelectedContractor(option);
+                            handleContractorChange(option);
+                        }}
+                        placeholder={!iup_customers.iup_id || !iup_customers.type ? "Please select IUP and Type first" : "Select Customer..."}
+                        isLoading={contractorPagination.loading}
+                        disabled={!iup_customers.iup_id || !iup_customers.type || iup_customers.type === 'contractor'}
+                        isClearable={false}
+                        noOptionsMessage={() => !iup_customers.iup_id || !iup_customers.type ? "Please select IUP and Type first" : "No customers found"}
+                        loadingMessage={() => "Loading customers..."}
+                    />
+                    {errors.parent_contractor_id && (
+                        <p className="text-red-500 text-sm mt-1">{errors.parent_contractor_id}</p>
+                    )}
+                </div>
 
-                {renderInput('rkab', 'RKAB', undefined, true)}
+
                 {renderInput('ritase', 'Ritase')}
                 {renderInput('hauling_distance', 'Hauling Distance')}
                 {renderInput('barging_distance', 'Barging Distance')}
