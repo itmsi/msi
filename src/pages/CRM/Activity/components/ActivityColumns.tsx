@@ -31,7 +31,6 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
                 </p>
             </div>
         ),
-        minWidth: '250px'
     },
     {
         name: 'Segmentation',
@@ -76,7 +75,7 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
         ),
     },
     {
-        name: 'Updated At',
+        name: 'Updated By',
         selector: row => row.updated_at,
         cell: (row) => (
             <div className="items-center gap-3 py-2">
@@ -102,6 +101,7 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
                 </Badge>
             </div>
         ),
+        center: true,
     }
 ];
 

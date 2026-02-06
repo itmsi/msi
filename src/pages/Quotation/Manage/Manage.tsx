@@ -12,7 +12,7 @@ import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { createActionsColumn } from '@/components/ui/table';
-import { formatCurrency, formatDate, formatDateTime } from '@/helpers/generalHelper';
+import { formatCurrency, formatDate, formatDateTime, getStatusBadge } from '@/helpers/generalHelper';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import FilterSection from './components/FilterSection';
 
@@ -46,26 +46,6 @@ const ManageQuotations: React.FC = () => {
     // Toggle filter collapse
     const handleToggleFilter = () => {
         setShowAdvancedFilters(prev => !prev);
-    };
-
-    // Helper function to render status badge
-    const getStatusBadge = (status: string) => {
-        const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
-            draft: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Draft' },
-            submit: { bg: 'bg-green-100', text: 'text-green-800', label: 'Submit' },
-            pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending' },
-            approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Approved' },
-            rejected: { bg: 'bg-red-100', text: 'text-red-800', label: 'Rejected' },
-            cancelled: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Cancelled' },
-        };
-
-        const config = statusConfig[status.toLowerCase()] || statusConfig.draft;
-
-        return (
-            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${config.bg} ${config.text}`}>
-                {config.label}
-            </span>
-        );
     };
 
     // Define columns
@@ -107,7 +87,14 @@ const ManageQuotations: React.FC = () => {
             {
                 name: 'Status',
                 selector: (row) => row.status,
-                cell: (row) => getStatusBadge(row.status),
+                cell: (row) => {
+                    const badge = getStatusBadge(row.status);
+                    return (
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>
+                            {badge.label}
+                        </span>
+                    );
+                },
                 center: true,
             },
             {

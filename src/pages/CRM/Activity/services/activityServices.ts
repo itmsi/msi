@@ -20,10 +20,12 @@ export class ActivityServices {
             sort_by: params.sort_by || "updated_at",
             search: params.search || '',
             transaction_type: params.transaction_type || '',
+            start_date: params.start_date || '',
+            end_date: params.end_date || '',
             is_admin: API_IS_ADMIN,
         };
         
-        const response = await apiPost(`${API_BASE_URL}/crm//transactions/get`, requestData as Record<string, any>);
+        const response = await apiPost(`${API_BASE_URL}/crm/transactions/get`, requestData as Record<string, any>);
         return response.data as ActivityListResponse;
     }
 

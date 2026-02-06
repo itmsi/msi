@@ -11,10 +11,6 @@ interface IupFormFieldsProps {
 const ContractorActivityInformation: React.FC<IupFormFieldsProps> = ({ activityData }) => {
     
     const contractorData = activityData;
-    console.log({
-        contractorData
-    });
-    
     const contractorColumns: TableColumn<ContractorActivityInfo>[] = [
         {
             name: 'Transaction Type',
@@ -91,7 +87,7 @@ const ContractorActivityInformation: React.FC<IupFormFieldsProps> = ({ activityD
             <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-lg font-semibold text-gray-800">Activity Information</h2>
+                        <h2 className="text-lg leading-6 font-primary-bold text-gray-900">Activity Information</h2>
                     </div>
                 </div>
             </div>

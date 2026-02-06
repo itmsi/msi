@@ -397,6 +397,7 @@ export default function CreateProduct() {
                                 description="Format: JPG, JPEG, PNG - Maksimal 5MB"
                                 showPreview={true}
                                 previewSize="lg"
+                                colLength={4}
                             />
                         </div>
 

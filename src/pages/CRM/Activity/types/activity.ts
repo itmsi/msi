@@ -69,6 +69,8 @@ export interface ActivityListRequest {
     transaction_source?: string;
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
+    start_date?: string;
+    end_date?: string;
     is_admin?: boolean;
 }
 
@@ -106,6 +108,8 @@ export interface ActivityFilters {
     transaction_source: string;
     sort_by: string;
     sort_order: 'asc' | 'desc' | '';
+    start_date: string;
+    end_date: string;
 }
 
 // Validation errors

@@ -11,6 +11,7 @@ import { useCreateCustomer } from "./hooks/useCustomerCreate";
 import { handleKeyPress } from "@/helpers/generalHelper";
 import CustomerPersonsSection from "./components/CustomerPersonsSection";
 import { CustomerUtilityService } from "./services/customerUtilityService";
+import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 
 interface CreateCustomerFormData {
     customer_code: string;
@@ -32,10 +33,15 @@ export default function CreateCustomer() {
 
     // Hook for creating customer
     const { 
-        isCreating, 
+        isCreating,
+        isValidating,
         validationErrors, 
-        clearFieldError,
-        createCustomer 
+        validationResult,
+        showConfirmation,
+        validateCustomer,
+        proceedWithCreation,
+        cancelConfirmation,
+        clearFieldError
     } = useCreateCustomer();
     
     const [contactErrors, setContactErrors] = useState<Record<string,string>>({});
@@ -167,7 +173,21 @@ export default function CreateCustomer() {
         }
 
         try {
-            const response = await createCustomer(formData);
+            // First validate for duplicates
+            const response = await validateCustomer(formData);
+            
+            if (!response.success) {
+                toast.error(response.message || 'Validation failed');
+            }
+        } catch (error: any) {
+            console.error('Error validating customer:', error);
+            toast.error(error.message || 'An error occurred while validating customer');
+        }
+    };
+
+    const handleConfirmCreation = async () => {
+        try {
+            const response = await proceedWithCreation();
             
             if (response.success) {
                 toast.success('Customer created successfully');
@@ -177,6 +197,86 @@ export default function CreateCustomer() {
             console.error('Error creating customer:', error);
             toast.error(error.message || 'An error occurred while creating customer');
         }
+    };
+
+    // Helper function to create validation modal content
+    const getValidationModalContent = () => {
+        if (!validationResult) return null;
+
+        const { data } = validationResult;
+        const hasDuplicates = data.hasDuplicates;
+
+        if (!hasDuplicates) {
+            return (
+                <div className="space-y-3">
+                    <p className="text-sm text-gray-700">
+                        {data.message}
+                    </p>
+                    <p className="text-sm text-green-600">
+                       The customer can be created successfully.
+                    </p>
+                </div>
+            );
+        }
+
+        return (
+            <div className="space-y-4">
+                <div>
+                    <p className="text-sm font-medium text-gray-900 mb-2">
+                        {data.message}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                        Are you sure you want to proceed with creating this customer?
+                    </p>
+                </div>
+
+                <div className="bg-[#F3F4F6] p-3 rounded">
+                    <h4 className="text-sm font-medium text-gray-900 font-primary-bold mb-2">
+                        Duplicate Details:
+                    </h4>
+                    <div className="space-y-3">
+                        <div className="text-sm space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                                <span className="font-medium">Entered Name:</span>
+                                <span className="text-gray-900 font-primary-bold">{data?.duplicates?.[0]?.requestName || '-'}</span>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 gap-2">
+                                <span className="font-medium">Matched Name:</span>
+                                <ul className="list-outside list-disc rounded-xl pl-5">
+                                    {data.duplicates.map((duplicate, index) => (
+                                        <li key={index}><span className="text-gray-900 font-primary-bold">{duplicate.matchedName}</span></li>
+                                    ))}
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        {/* {data.duplicates.map((duplicate, index) => (
+                            <div key={index} className="text-sm space-y-1">
+                                <div className="grid grid-cols-2 gap-2">
+                                    <span className="font-medium">Entered Name:</span>
+                                    <span className="text-gray-900 font-primary-bold">{duplicate.requestName}</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <span className="font-medium">Matched Name:</span>
+                                    <span className="text-gray-900 font-primary-bold">{duplicate.matchedName}</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <span className="font-medium">Similarity:</span>
+                                    <span className="font-semibold text-gray-900 font-primary-bold">{duplicate.similarity}</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <span className="font-medium">Type:</span>
+                                    <span className="capitalize text-gray-900 font-primary-bold">
+                                        {duplicate.matchType === 'identical' ? 'Identical' : 'Similar'}
+                                    </span>
+                                </div>
+                            </div>
+                        ))} */}
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -384,7 +484,7 @@ export default function CreateCustomer() {
                                 variant="outline"
                                 onClick={() => navigate('/quotations/administration/customers')}
                                 className="px-6 rounded-full"
-                                disabled={isCreating}
+                                disabled={isCreating || isValidating}
                             >
                                 Cancel
                             </Button>
@@ -393,16 +493,33 @@ export default function CreateCustomer() {
                                     const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
                                     handleSubmit(fakeEvent);
                                 }}
-                                disabled={isCreating}
+                                disabled={isCreating || isValidating}
                                 className="px-6 flex items-center gap-2 rounded-full"
                             >
                                 <MdSave size={20} />
-                                {isCreating ? 'Creating...' : 'Create Customer'}
+                                {isValidating ? 'Validating...' : 'Validate & Create Customer'}
                             </Button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            {showConfirmation && validationResult && (
+                <ConfirmationModal
+                    isOpen={showConfirmation}
+                    onClose={cancelConfirmation}
+                    onConfirm={handleConfirmCreation}
+                    title="Confirm Customer Creation"
+                    message={getValidationModalContent()}
+                    confirmText="Create Customer"
+                    cancelText="Cancel"
+                    type={validationResult.data.hasDuplicates ? 'info' : 'success'}
+                    loading={isCreating}
+                    size="md"
+                    showIcon={false}
+                />
+            )}
         </>
     );
 }

@@ -3,6 +3,7 @@ import { MdDelete, MdWarning } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import Button from '@/components/ui/button/Button';
 import { RkabEntry } from '../types/contractor';
+import Label from '@/components/form/Label';
 
 interface RkabCardProps {
     rkab: RkabEntry;
@@ -53,10 +54,11 @@ const RkabCard: React.FC<RkabCardProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Year */}
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <Label htmlFor={`rkab_year_${index}`}>
                         Year *
-                    </label>
+                    </Label>
                     <Input
+                        id={`rkab_year_${index}`}
                         type="number"
                         placeholder="YYYY"
                         value={rkab.year || ''}
@@ -70,10 +72,11 @@ const RkabCard: React.FC<RkabCardProps> = ({
 
                 {/* Current Production */}
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <Label htmlFor={`rkab_current_production_${index}`}>
                         Current Production *
-                    </label>
+                    </Label>
                     <Input
+                        id={`rkab_current_production_${index}`}
                         type="number"
                         placeholder="0"
                         value={rkab.current_production || ''}
@@ -87,10 +90,11 @@ const RkabCard: React.FC<RkabCardProps> = ({
 
                 {/* Target Production */}
                 <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <Label htmlFor={`rkab_target_production_${index}`}>
                         Target Production *
-                    </label>
+                    </Label>
                     <Input
+                        id={`rkab_target_production_${index}`}
                         type="number"
                         placeholder="0"
                         value={rkab.target_production || ''}

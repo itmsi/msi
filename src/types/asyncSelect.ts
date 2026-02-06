@@ -13,6 +13,7 @@ export interface AsyncSelectConfig {
     error?: string;
     success?: boolean;
     isLoading?: boolean;
+    id?: string;
 }
 
 export interface AsyncSelectCallbacks {

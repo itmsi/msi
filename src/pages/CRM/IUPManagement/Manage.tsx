@@ -40,6 +40,7 @@ export default function ManageIUPManagement() {
         
         // Filter actions
         handleFilterChange,
+        handleTerritoryFilterChange,
         
         // Search functions
         handleKeyPress,
@@ -52,11 +53,19 @@ export default function ManageIUPManagement() {
 
     // Clear filters handler
     const handleClearFilters = () => {
-        // Call the clear filter function from the hook if it exists
-        // For now, we'll manually reset known filters
+        // Reset filter biasa
         handleFilterChange('status', '');
         handleFilterChange('segmentation', '');
         handleFilterChange('sort_by', '');
+        
+        // Reset territory filters dalam satu batch call
+        handleTerritoryFilterChange({
+            island_id: '',
+            group_id: '',
+            area_id: '',
+            iup_zone_id: '',
+            iup_segment_id: ''
+        });
     };
 
     // Definisi kolom untuk DataTable
@@ -64,8 +73,7 @@ export default function ManageIUPManagement() {
         {
             name: 'IUP Name',
             selector: row => row.iup_name,
-            wrap: true,
-            // width: '300px',
+            wrap: true
         },{
             name: 'Territory',
             selector: (row) => row?.island_name || '-',
@@ -81,33 +89,8 @@ export default function ManageIUPManagement() {
                 </div>
             ),
             sortable: false,
-            wrap: true,
-            // width: '350px',
+            wrap: true
         },
-        // {
-        //     name: 'Island',
-        //     selector: row => row.island_name,
-        //     wrap: true,
-        //     width: '150px',
-        // },
-        // {
-        //     name: 'Group',
-        //     selector: row => row.group_name,
-        //     wrap: true,
-        //     center: true,
-        // },
-        // {
-        //     name: 'Area',
-        //     selector: row => row.area_name,
-        //     center: true,
-        //     wrap: true,
-        // },
-        // {
-        //     name: 'IUP Zone',
-        //     selector: row => row.iup_zone_name,
-        //     width: '200px',
-        //     wrap: true,
-        // },
         {
             name: 'Segmentation',
             selector: row => row.segmentation_name,
@@ -184,7 +167,7 @@ export default function ManageIUPManagement() {
                     </div>
                 </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
                 <CustomSelect
                     id="sort_order"
                     name="sort_order"
@@ -222,11 +205,12 @@ export default function ManageIUPManagement() {
         {showAdvancedFilters && (
             <FilterSection
                 onFilterChange={handleFilterChange}
+                onTerritoryFilterChange={handleTerritoryFilterChange}
                 onClearFilters={handleClearFilters}
             />
         )}
     </>);
-    }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleClearFilters]);
+    }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, handleTerritoryFilterChange, showAdvancedFilters, handleClearFilters]);
     
     return (
         <>

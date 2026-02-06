@@ -215,10 +215,11 @@ const IupInfoSection: React.FC<IupInfoProps> = ({
         required: boolean = false
     ) => (
         <div>
-            <Label className="block text-sm font-medium text-gray-700 mb-1">
+            <Label htmlFor={field}>
                 {label} {required && '*'}
             </Label>
             <Input
+                id={field}
                 type="text"
                 value={iup_customers[field] as string}
                 onChange={(e) => onChange(field, e.target.value)}

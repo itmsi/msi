@@ -20,6 +20,7 @@ const CustomAsyncSelect: React.FC<CustomAsyncSelectProps> = ({
     onInputChange,
     noOptionsMessage,
     loadingMessage,
+    id,
     ...props 
 }) => {
 
@@ -68,6 +69,7 @@ const CustomAsyncSelect: React.FC<CustomAsyncSelectProps> = ({
     return (
         <AsyncSelect
             {...props}
+            id={id}
             styles={selectStyles}
             isDisabled={disabled}
             className={selectClassNames}

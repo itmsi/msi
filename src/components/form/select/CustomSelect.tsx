@@ -27,9 +27,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
     ...props 
 }) => {
     const handleChange = (newValue: SingleValue<Option> | MultiValue<Option>, _actionMeta: ActionMeta<Option>) => {
-        // actionMeta = untuk melakukan tracing jenis aksi yang terjadi
         if (onChange) {
-            // Handle single select
             if (!Array.isArray(newValue)) {
                 const singleValue = newValue as SingleValue<Option>;
                 if (singleValue) {
