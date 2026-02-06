@@ -2,7 +2,12 @@
 // Simpan sebagai Jenkinsfile di root repository
 
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:18-alpine'
+            args '-u root'
+        }
+    }
 
     stages {
         stage('Checkout') {
