@@ -8,6 +8,7 @@ export interface ChatRequest {
     message: string;
     sessionId?: string;  // Optional - backend will auto-create if not provided
     system?: string[];  // Optional - list of available systems
+    userId?: string; // Optional - to identify user in backend
 }
 
 export interface ChatResponseData {

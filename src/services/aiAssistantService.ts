@@ -25,6 +25,9 @@ export class AIAssistantService {
             if (request.system) {
                 requestBody.system = request.system;
             }
+            if (request.userId) {
+                requestBody.userId = request.userId;
+            }
 
             // Override timeout for AI endpoint (AI processing takes longer)
             const response = await apiPost<ChatResponse>(
