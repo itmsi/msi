@@ -7,9 +7,13 @@ export interface IupRequest {
     search?: string;
     status?: string;
     segmentation_id?: string;
+    island_id?: string;
+    group_id?: string;
+    area_id?: string;
+    iup_zone_id?: string;
+    iup_segment_id?: string;
     is_admin?: boolean;
 }
-
 export interface IupFilters {
     search: string;
     sort_order: 'asc' | 'desc' | '';
