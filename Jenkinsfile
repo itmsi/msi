@@ -19,7 +19,7 @@ pipeline {
                         else
                             git fetch origin
                             git checkout ${env.BRANCH_NAME}
-                            git pull
+                            git pull --force
                         fi
                     """
                 }
