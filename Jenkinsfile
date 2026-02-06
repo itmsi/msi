@@ -9,10 +9,11 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Pull Branch') {
             steps {
                 echo '📥 Checkout repository'
-                checkout scm
+                sh 'git fetch origin'
+                sh 'git pull'
             }
         }
 
