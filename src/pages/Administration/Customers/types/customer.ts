@@ -82,3 +82,26 @@ export interface CustomerValidationErrors {
     job_title?: string;
     contact_person?: string;
 }
+
+export interface DuplicateItem {
+  requestName: string;
+  matchedName: string;
+  matchType: "identical" | "similar" | string;
+  similarity: string;
+}
+
+export interface DuplicateData {
+  hasDuplicates: boolean;
+  duplicates: DuplicateItem[];
+  message: string;
+  requestCount: number;
+}
+
+export interface DuplicateCustomerResponse {
+  success: boolean;
+  message: string;
+  data: DuplicateData;
+}
+export interface CheckDuplicateCustomerPayload {
+  customer_name: string[];
+}
