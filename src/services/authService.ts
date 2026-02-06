@@ -92,6 +92,7 @@ export class AuthService {
             localStorage.setItem('auth_menu', JSON.stringify(data.menu));
             localStorage.setItem('auth_session', JSON.stringify(data.session));
             localStorage.setItem('auth_oauth', JSON.stringify(data.oauth));
+            localStorage.setItem('auth_system', JSON.stringify(data.system));
             localStorage.setItem('auth_token', data.oauth.sso_token);
             localStorage.setItem('isLoggedIn', 'true');
         } catch (error) {
@@ -109,10 +110,11 @@ export class AuthService {
             const menu = localStorage.getItem('auth_menu');
             const session = localStorage.getItem('auth_session');
             const oauth = localStorage.getItem('auth_oauth');
+            const system = localStorage.getItem('auth_system');
             const token = localStorage.getItem('auth_token');
             const isLoggedIn = localStorage.getItem('isLoggedIn');
 
-            if (!user || !menu || !session || !oauth || !token || !isLoggedIn) {
+            if (!user || !menu || !session || !oauth || !system || !token || !isLoggedIn) {
                 return null;
             }
 
@@ -121,6 +123,7 @@ export class AuthService {
                 session: JSON.parse(session),
                 menu: JSON.parse(menu),
                 oauth: JSON.parse(oauth),
+                system: JSON.parse(system),
             };
         } catch (error) {
             console.error('Failed to parse stored auth data:', error);
@@ -156,14 +159,29 @@ export class AuthService {
      * Clear all authentication data
      */
     static clearAuthData(): void {
+        // Clear AI chat from backend before clearing localStorage
+        const sessionId = sessionStorage.getItem('ai_chat_session_id');
+        if (sessionId) {
+            // Call API to delete conversation history from database
+            // Using dynamic import to avoid circular dependency
+            import('./aiAssistantService').then(({ AIAssistantService }) => {
+                AIAssistantService.clearHistory(sessionId).catch(err => {
+                    console.warn('Failed to clear AI chat history from backend:', err);
+                });
+            });
+        }
+
         localStorage.removeItem('auth_user');
         localStorage.removeItem('auth_permissions');
         localStorage.removeItem('auth_menu');
         localStorage.removeItem('auth_session');
         localStorage.removeItem('auth_oauth');
+        localStorage.removeItem('auth_system');
         localStorage.removeItem('auth_token');
         localStorage.removeItem('current_territories');
         localStorage.removeItem('isLoggedIn');
+        sessionStorage.removeItem('ai_chat_messages');
+        sessionStorage.removeItem('ai_chat_session_id');
     }
 
     /**

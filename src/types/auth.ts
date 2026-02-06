@@ -50,6 +50,7 @@ export interface LoginResponseData {
   menu: Menu[];
   session: Session;
   oauth: OAuth;
+  system: string[];
 }
 
 export interface LoginResponse {

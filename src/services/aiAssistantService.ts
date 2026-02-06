@@ -17,10 +17,16 @@ export class AIAssistantService {
      */
     static async sendMessage(request: ChatRequest): Promise<ChatResponse> {
         try {
-            // Build request body - only include sessionId if provided
+            // Build request body - only include sessionId and system if provided
             const requestBody: any = { message: request.message };
             if (request.sessionId) {
                 requestBody.sessionId = request.sessionId;
+            }
+            if (request.system) {
+                requestBody.system = request.system;
+            }
+            if (request.userId) {
+                requestBody.userId = request.userId;
             }
 
             // Override timeout for AI endpoint (AI processing takes longer)
@@ -95,24 +101,5 @@ export class AIAssistantService {
             }
             throw new Error('An unexpected error occurred while clearing history');
         }
-    }
-
-    /**
-     * Generate a unique session ID (for reference, not used in current flow)
-     */
-    static generateSessionId(): string {
-        const user = localStorage.getItem('auth_user');
-        let userId = 'guest';
-        
-        if (user) {
-            try {
-                const userData = JSON.parse(user);
-                userId = userData.user_id || 'guest';
-            } catch (e) {
-                // fallback to guest
-            }
-        }
-        
-        return `session_${userId}_${Date.now()}`;
     }
 }
