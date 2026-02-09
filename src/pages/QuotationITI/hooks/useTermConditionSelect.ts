@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { TermCondition } from '../TermCondition/types/termcondition';
+import { AuthService } from '@/services/authService';
 
 export interface TermConditionSelectOption {
     value: string;
@@ -16,6 +17,12 @@ export interface TermConditionPaginationState {
 }
 
 export const useTermConditionSelect = () => {
+    // Get company_name from localStorage auth_user
+    const companyName = useMemo(() => {
+        const user = AuthService.getCurrentUser();
+        return user.company_name || undefined;
+    }, []);
+
     const [termConditionOptions, setTermConditionOptions] = useState<TermConditionSelectOption[]>([]);
     const [pagination, setPagination] = useState<TermConditionPaginationState>({
         page: 1,
@@ -40,7 +47,8 @@ export const useTermConditionSelect = () => {
                 search: inputValue,
                 page: page,
                 limit: 10,
-                sort_order: 'desc'
+                sort_order: 'desc',
+                company_name: companyName
             });
 
             if (response.status) {
@@ -69,7 +77,7 @@ export const useTermConditionSelect = () => {
         }
 
         return loadedOptions;
-    }, [pagination.loading]);
+    }, [pagination.loading, companyName]);
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
