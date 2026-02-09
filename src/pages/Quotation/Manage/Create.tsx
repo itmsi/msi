@@ -1084,7 +1084,7 @@ export default function CreateQuotation() {
                                             <Input
                                                 id="quotation_number"
                                                 type="text"
-                                                value={`###/IEC-MSI/${monthRoman}/${new Date().getFullYear()}`}
+                                                value={`###/${getCompanyName()}/${monthRoman}/${new Date().getFullYear()}`}
                                                 disabled={true}
                                             />
                                         </div>
