@@ -83,7 +83,7 @@ const navItems: NavItem[] = [
         ],
     },
     {
-        name: "Quotation",
+        name: "Quotation ITI",
         icon: <GrDocumentVerified />,
         allowedRoles: ['Product ITI Quotation', 'Accessories ITI Quotation', 'Manage ITI Quotation', 'TNC ITI Quotation', 'Customer ITI Quotation', 'Bank ITI Quotation', 'Island ITI'],
         subItems: [
