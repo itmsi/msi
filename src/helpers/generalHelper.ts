@@ -1,4 +1,5 @@
 import { ENUM_MONTH } from './constants';
+import { AuthService } from '@/services/authService';
 
 export const buildLabel = (...parts: (string | undefined | null)[]) => {
     return parts.filter(Boolean).join(' - ');
@@ -481,4 +482,10 @@ export const getStatusBadge = (status: string) => {
     };
 
     return statusConfig[status.toLowerCase()] || statusConfig.draft;
+};
+
+// Get company_name from logged in user
+export const getCompanyName = (): string => {
+    const user = AuthService.getCurrentUser();
+    return (user as any)?.company_name || '';
 };

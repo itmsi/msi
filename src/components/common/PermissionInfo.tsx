@@ -41,6 +41,7 @@ export const PermissionInfo: React.FC<PermissionInfoProps> = ({
                 {permissionBadge('Read', permissions.canRead)}
                 {permissionBadge('Update', permissions.canUpdate)}
                 {permissionBadge('Delete', permissions.canDelete)}
+                {permissionBadge('Duplicate', permissions.canDuplicate)}
             </div>
             
             {permissions.permissions.length > 0 && (
@@ -71,6 +72,7 @@ export const PermissionBadges: React.FC<{ className?: string }> = ({ className =
             <span className={badgeClasses(permissions.canRead)} title="Read Permission">R</span>
             <span className={badgeClasses(permissions.canUpdate)} title="Update Permission">U</span>
             <span className={badgeClasses(permissions.canDelete)} title="Delete Permission">D</span>
+            <span className={badgeClasses(permissions.canDuplicate)} title="Duplicate Permission">Dup</span>
         </div>
     );
 };

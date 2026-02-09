@@ -7,6 +7,7 @@ import CustomSelect from "@/components/form/select/CustomSelect";
 import { MdArrowBack, MdEdit, MdKeyboardArrowLeft, MdSave, MdExpandMore, MdExpandLess } from "react-icons/md";
 import LoadingSpinner from "@/components/common/Loading";
 import PageMeta from "@/components/common/PageMeta";
+import Avatar from "@/components/common/Avatar";
 import { useDropdownData, useEmployeeDetail } from "@/hooks/useAdministration";
 import { EmployeePermissionDetail, EmployeeMenuPermission, EmployeeSystemPermission } from "@/types/administration";
 import Switch from "@/components/form/switch/Switch";
@@ -153,7 +154,8 @@ export default function EditEmployee() {
             'edit': 3,      // Update
             'update': 3,    // Update alternative
             'delete': 4,    // Delete
-            'remove': 4     // Delete alternative
+            'remove': 4,     // Delete alternative
+            'duplicate': 5   // Duplicate
         };
         
         // First filter to only include CRUD permissions
@@ -261,7 +263,8 @@ export default function EditEmployee() {
         // Determine if this is a CRUD permission
         const isCUD = permissionName.includes('write') || permissionName.includes('create') || 
                      permissionName.includes('edit') || permissionName.includes('update') || 
-                     permissionName.includes('delete') || permissionName.includes('remove');
+                     permissionName.includes('delete') || permissionName.includes('remove') ||
+                     permissionName.includes('duplicate') || permissionName.includes('duplicate');
         
         const isRead = permissionName.includes('read') || permissionName.includes('view');
 
@@ -303,7 +306,8 @@ export default function EditEmployee() {
                                         const pName = permission.permission_name.toLowerCase();
                                         if (pName.includes('write') || pName.includes('create') || 
                                             pName.includes('edit') || pName.includes('update') || 
-                                            pName.includes('delete') || pName.includes('remove')) {
+                                            pName.includes('delete') || pName.includes('remove') ||
+                                            pName.includes('duplicate') || pName.includes('duplicate')) {
                                             return {
                                                 ...permission,
                                                 permission_status: false
@@ -423,15 +427,13 @@ export default function EditEmployee() {
                         <div className="p-8 border-b border-gray-200">
                             <div className="flex flex-col items-center gap-6 sm:flex-row">
                                 <div className="relative">
-                                    <div className="w-24 h-24 overflow-hidden border-2 border-gray-200 rounded-full bg-gray-100">
-                                        {employee.employee_foto && (
-                                            <img 
-                                                src={employee.employee_foto} 
-                                                alt="Profile Preview" 
-                                                className="w-full h-full object-cover"
-                                            />
-                                        )}
-                                    </div>
+                                    <Avatar
+                                        src={employee.employee_foto}
+                                        nama={employee.employee_name}
+                                        size={96}
+                                        className="border-2 border-gray-200"
+                                        alt="Profile Preview"
+                                    />
                                 </div>
                                 
                                 <div className="text-center sm:text-left">

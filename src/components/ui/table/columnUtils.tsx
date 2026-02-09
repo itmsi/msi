@@ -102,7 +102,7 @@ export const createDateColumn = (
 export const createActionsColumn = (actions: Array<{
     icon: React.ComponentType<any>;
     onClick: (row: any) => void;
-    permission?: 'create' | 'read' | 'update' | 'delete';
+    permission?: 'create' | 'read' | 'update' | 'delete' | 'duplicate';
     className?: string;
     tooltip?: string;
     condition?: (row: any) => boolean;

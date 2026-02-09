@@ -83,6 +83,37 @@ const navItems: NavItem[] = [
         ],
     },
     {
+        name: "Quotation",
+        icon: <GrDocumentVerified />,
+        allowedRoles: ['Product ITI Quotation', 'Accessories ITI Quotation', 'Manage ITI Quotation', 'TNC ITI Quotation', 'Customer ITI Quotation', 'Bank ITI Quotation', 'Island ITI'],
+        subItems: [
+            { name: "Manage", path: "/quotations-iti/manage", allowedRoles: ['Manage ITI Quotation'], },
+            { name: "Product", path: "/quotations-iti/products", allowedRoles: ['Product ITI Quotation'], },
+            { name: "Accessories", path: "/quotations-iti/accessories", allowedRoles: ['Accessories ITI Quotation'], },
+            { name: "Term Condition", path: "/quotations-iti/term-condition", allowedRoles: ['TNC ITI Quotation'], },
+            {
+                name: "Administration",
+                subItems: [
+                    { 
+                        name: "Customers", 
+                        path: "/quotations-iti/administration/customers", 
+                        allowedRoles: ['Customer ITI Quotation']
+                    },
+                    { 
+                        name: "Bank Accounts", 
+                        path: "/quotations-iti/administration/bank-accounts", 
+                        allowedRoles: ['Bank ITI Quotation']
+                    },
+                    { 
+                        name: "Regions", 
+                        path: "/quotations-iti/administration/islands", 
+                        allowedRoles: ['Island']
+                    }
+                ],
+            },
+        ],
+    },
+    {
         name: "Return on Equity ",
         icon: <GiChart />,
         allowedRoles: ['Manage ROA ROE Calculate', 'Setting ROA ROE Calculate'],

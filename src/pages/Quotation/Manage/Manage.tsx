@@ -137,7 +137,7 @@ const ManageQuotations: React.FC = () => {
                     onClick: handleDuplicate,
                     className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
                     tooltip: 'Duplicate',
-                    permission: 'create',
+                    permission: 'duplicate',
                 },
                 {
                     icon: MdDeleteOutline,

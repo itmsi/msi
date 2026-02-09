@@ -1,10 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { ItemProductValidationErrors, ProductSpecification } from "../types/product";
 import { useNavigate } from "react-router";
-import { formatNumberInput } from "@/helpers/generalHelper";
+import { getCompanyName, formatNumberInput } from "@/helpers/generalHelper";
 import { ItemProductService } from "../services/productService";
-import { AuthService } from "@/services/authService";
 
 // Form data type for creating
 interface CreateProductFormData {
@@ -33,12 +32,6 @@ interface CreateProductFormData {
 export const useCreateProduct = () => {
     const navigate = useNavigate();
     
-    // Get company_name from logged in user
-    const companyName = useMemo(() => {
-        const user = AuthService.getCurrentUser();
-        return (user as any)?.company_name || '';
-    }, []);
-    
     const [isCreating, setIsCreating] = useState(false);
     const [validationErrors, setValidationErrors] = useState<ItemProductValidationErrors>({});
     const [productImage, setProductImage] = useState<File[]>([]);
@@ -62,7 +55,7 @@ export const useCreateProduct = () => {
         componen_type: 1,
         volume: '',
         componen_product_unit_model: '',
-        company_name: companyName,
+        company_name: getCompanyName(),
         componen_product_specifications: [
             {
                 componen_product_specification_label: 'GVW',
