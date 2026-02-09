@@ -7,6 +7,7 @@ import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import { TermConditionService } from './services/termconditionService';
 import WysiwygEditor from '@/components/form/editor/WysiwygEditor';
+import { AuthService } from '@/services/authService';
 
 const CreateTermCondition: React.FC = () => {
     const navigate = useNavigate();
@@ -43,7 +44,14 @@ const CreateTermCondition: React.FC = () => {
             setLoading(true);
             setError(null);
             
-            const response = await TermConditionService.createTermCondition(formData);
+            // Get company_name from current logged-in user
+            const currentUser = AuthService.getCurrentUser();
+            const payload = {
+                ...formData,
+                company_name: currentUser?.company_name || undefined
+            };
+            
+            const response = await TermConditionService.createTermCondition(payload);
             
             if (response.status) {
                 navigate('/quotations/term-condition');
