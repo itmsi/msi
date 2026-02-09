@@ -14,6 +14,7 @@ export interface TermCondition {
     term_content_title: string;
     term_content_directory: string;
     term_content_payload?: string;
+    company_name?: string;
     created_at?: string;
     updated_at?: string;
     updated_by_name?: string;
@@ -40,11 +41,13 @@ export interface TermConditionRequest {
     limit: number;
     sort_order: 'asc' | 'desc';
     search: string;
+    company_name?: string;
 }
 
 export interface TermConditionFormData {
     term_content_title: string;
     term_content_directory: string;
+    company_name?: string;
 }
 
 export interface TermConditionValidationErrors {
@@ -55,6 +58,7 @@ export interface TermConditionValidationErrors {
 export interface TermConditionFormDataEdit {
     term_content_title: string;
     term_content_directory: string;
+    company_name?: string;
 }
 
 export interface TermConditionValidationErrorsEdit {
