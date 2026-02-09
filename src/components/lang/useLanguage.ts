@@ -29,7 +29,7 @@ export const SUPPORTED_LANGS: LangOption[] = [
  * const { langField, lang, setLang } = useLanguage(myLabels);
  * <Label>{langField('fieldName')}</Label>
  */
-export function useLanguage(labels: TranslationMap, defaultLang: LangCode = 'en') {
+export function useLanguage(labels: TranslationMap, defaultLang: LangCode = 'id') {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const lang = useMemo<LangCode>(() => {
@@ -42,7 +42,7 @@ export function useLanguage(labels: TranslationMap, defaultLang: LangCode = 'en'
         (key: string): string => {
             const entry = labels[key];
             if (!entry) return key;
-            return entry[lang] || entry['en'] || key;
+            return entry[lang] || entry['id'] || key;
         },
         [lang, labels]
     );
