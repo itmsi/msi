@@ -26,3 +26,4 @@ src/components/demo
 *.sw?
 .env
 package-lock.json
+.github
