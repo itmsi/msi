@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { MdAdd, MdSearch, MdClear, MdDeleteOutline, MdFilterListAlt, MdExpandLess, MdExpandMore } from 'react-icons/md';
+import { MdAdd, MdSearch, MdClear, MdDeleteOutline, MdFilterListAlt, MdExpandLess, MdExpandMore, MdContentCopy } from 'react-icons/md';
 import { FaRegFilePdf } from "react-icons/fa6";
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +28,7 @@ const ManageQuotations: React.FC = () => {
         pagination,
         loading,
         confirmDelete,
+        confirmDuplicate,
         handlePageChange,
         handleRowsPerPageChange,
         handleSearchChange,
@@ -37,8 +38,11 @@ const ManageQuotations: React.FC = () => {
         handleView,
         handleDelete,
         handleDownload,
+        handleDuplicate,
         confirmDeleteQuotations,
+        confirmDuplicateQuotations,
         cancelDelete,
+        cancelDuplicate,
         setSearchTerm,
         handleKeyPress,
     } = useQuotationManagement();
@@ -129,6 +133,13 @@ const ManageQuotations: React.FC = () => {
                     permission: 'read',
                 },
                 {
+                    icon: MdContentCopy,
+                    onClick: handleDuplicate,
+                    className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                    tooltip: 'Duplicate',
+                    permission: 'create',
+                },
+                {
                     icon: MdDeleteOutline,
                     onClick: handleDelete,
                     className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
@@ -137,7 +148,7 @@ const ManageQuotations: React.FC = () => {
                 }
             ]),
         ],
-        [handleView, handleEdit, handleDelete]
+        [handleView, handleEdit, handleDelete, handleDuplicate]
     );
 
     const SearchAndFilters = useMemo(() => (
@@ -283,6 +294,18 @@ const ManageQuotations: React.FC = () => {
                 message="Are you sure you want to delete this quotation? This action cannot be undone."
                 confirmText="Delete"
                 cancelText="Cancel"
+            />
+
+            {/* Duplicate Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={confirmDuplicate.show}
+                onClose={cancelDuplicate}
+                onConfirm={confirmDuplicateQuotations}
+                title="Duplicate Quotation"
+                message="Are you sure you want to duplicate this quotation? A copy will be created with all the details."
+                confirmText="Duplicate"
+                cancelText="Cancel"
+                type="info"
             />
         </>
     );

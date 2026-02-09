@@ -197,6 +197,29 @@ export const useQuotation = () => {
         }
     }, []);
 
+    const duplicateQuotation = useCallback(async (quotation_id: string) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await QuotationService.duplicateQuotation(quotation_id);
+            if (response.data?.status) {
+                toast.success(response.data?.message || 'Quotation duplicated successfully');
+                return true;
+            } else {
+                toast.error(response.data?.message || 'Failed to duplicate quotation');
+                return false;
+            }
+        } catch (err) {
+            setError('Failed to duplicate quotation');
+            console.error('Duplicate quotation error:', err);
+            toast.error('Failed to duplicate quotation');
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
 
     return {
         quotations,
@@ -209,6 +232,7 @@ export const useQuotation = () => {
         clearAllFilters,
         deleteQuotation,
         downloadQuotation,
+        duplicateQuotation,
         fetchQuotations,
         handleSearchChange,
     };
