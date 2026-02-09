@@ -148,6 +148,10 @@ export class QuotationService {
         return await apiGet(`${API_BASE_URL}/quotation/manage-quotation/pdf/${quotationId}`);
     }
 
+    static async duplicateQuotation(quotationId: string): Promise<ApiResponse<{ status: boolean; message: string; data: any }>> {
+        return await apiPost(`${API_BASE_URL}/quotation/manage-quotation/duplikat/${quotationId}`, {});
+    }
+
     static async getQuotationAccessories(islandID: string): Promise<ApiResponse<{ status: boolean; message: string; data: AccessoryByIslandCombined }>> {
         return await apiGet(`${API_BASE_URL}/quotation/accessory/get-data-by-id-island/${islandID}`)
     }
