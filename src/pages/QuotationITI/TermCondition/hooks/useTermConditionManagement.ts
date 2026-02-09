@@ -91,7 +91,7 @@ export const useTermConditionManagement = () => {
     }, []);
 
     const handleEdit = useCallback((termCondition: any) => {
-        navigate(`/quotations/term-condition/edit/${termCondition.term_content_id}`);
+        navigate(`/quotations-iti/term-condition/edit/${termCondition.term_content_id}`);
     }, [navigate]);
 
     const handleDelete = useCallback((termCondition: any) => {

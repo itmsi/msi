@@ -83,7 +83,7 @@ export const useAccessoriesEdit = () => {
         } catch (error) {
             console.error('Error loading accessory:', error);
             toast.error('Gagal memuat data accessory');
-            navigate('/quotations/accessories');
+            navigate('/quotations-iti/accessories');
         } finally {
             setFetching(false);
         }
@@ -127,7 +127,7 @@ export const useAccessoriesEdit = () => {
         try {
             await AccessoriesService.updateAccessories(id!, form);
             toast.success('Accessory berhasil diupdate');
-            navigate('/quotations/accessories');
+            navigate('/quotations-iti/accessories');
         } catch (error: any) {
             if (error.errors && typeof error.errors === 'object') {
                 setErrors(error.errors);
@@ -140,7 +140,7 @@ export const useAccessoriesEdit = () => {
     };
 
     const handleBack = () => {
-        navigate('/quotations/accessories');
+        navigate('/quotations-iti/accessories');
     };
 
     // Island management functions

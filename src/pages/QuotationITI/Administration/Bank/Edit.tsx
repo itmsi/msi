@@ -53,12 +53,12 @@ export default function EditBank() {
                 });
             } else {
                 toast.error('Bank account not found');
-                navigate('/quotations/administration/bank-accounts');
+                navigate('/quotations-iti/administration/bank-accounts');
             }
         } catch (error: any) {
             console.error('Error loading bank account:', error);
             toast.error('Failed to load bank account data');
-            navigate('/quotations/administration/bank-accounts');
+            navigate('/quotations-iti/administration/bank-accounts');
         } finally {
             setIsLoading(false);
         }
@@ -118,7 +118,7 @@ export default function EditBank() {
             
             if (response) {
                 toast.success('Bank account updated successfully');
-                navigate('/quotations/administration/bank-accounts');
+                navigate('/quotations-iti/administration/bank-accounts');
             }
         } catch (error: any) {
             console.error('Error updating bank account:', error);
@@ -152,7 +152,7 @@ export default function EditBank() {
                     {/* HEADER */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
-                            <Link to="/quotations/administration/bank-accounts">
+                            <Link to="/quotations-iti/administration/bank-accounts">
                                 <Button
                                     variant="outline"
                                     className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
@@ -229,7 +229,7 @@ export default function EditBank() {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => navigate('/quotations/administration/bank-accounts')}
+                                onClick={() => navigate('/quotations-iti/administration/bank-accounts')}
                                 className="px-6 rounded-full"
                                 disabled={isUpdating}
                             >

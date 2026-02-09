@@ -54,7 +54,7 @@ const CreateTermCondition: React.FC = () => {
             const response = await TermConditionService.createTermCondition(payload);
             
             if (response.status) {
-                navigate('/quotations/term-condition');
+                navigate('/quotations-iti/term-condition');
             } else {
                 setError(response.message || 'Failed to create term condition template');
             }
@@ -80,7 +80,7 @@ const CreateTermCondition: React.FC = () => {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/quotations/term-condition')}
+                                onClick={() => navigate('/quotations-iti/term-condition')}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -128,7 +128,7 @@ const CreateTermCondition: React.FC = () => {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => navigate('/quotations/term-condition')}
+                                onClick={() => navigate('/quotations-iti/term-condition')}
                                 className="px-6 rounded-full"
                                 disabled={loading}
                             >

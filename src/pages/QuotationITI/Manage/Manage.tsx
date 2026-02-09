@@ -243,7 +243,7 @@ const ManageQuotations: React.FC = () => {
                         </div>
                         <PermissionGate permission="create">
                             <Button
-                                onClick={() => navigate('/quotations/manage/create')}
+                                onClick={() => navigate('/quotations-iti/manage/create')}
                                 className="flex items-center gap-2"
                                 size="sm"
                             >

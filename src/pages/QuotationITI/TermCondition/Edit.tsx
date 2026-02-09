@@ -9,7 +9,7 @@ import { TermConditionService } from "./services/termconditionService";
 import { TermConditionFormDataEdit } from "./types/termcondition";
 // import { FaBold, FaItalic, FaListOl, FaListUl, FaQuoteLeft, FaStrikethrough, FaUnderline } from "react-icons/fa6";
 import WysiwygEditor from "@/components/form/editor";
-import { AuthService } from "@/services/authService";
+import { getCompanyName } from "@/helpers/generalHelper";
 
 const EditTermCondition: React.FC = () => {
     const navigate = useNavigate();
@@ -45,12 +45,12 @@ const EditTermCondition: React.FC = () => {
                 });
             } else {
                 setError('Term condition not found');
-                // navigate('/quotations/term-condition');
+                // navigate('/quotations-iti/term-condition');
             }
         } catch (error: any) {
             console.error('Error loading term condition:', error);
             setError('Failed to load term condition data');
-            // navigate('/quotations/term-condition');
+            // navigate('/quotations-iti/term-condition');
         } finally {
             setLoading(false);
         }
@@ -92,14 +92,13 @@ const EditTermCondition: React.FC = () => {
             setError(null);
             
             // Get company_name from current logged-in user
-            const currentUser = AuthService.getCurrentUser();
             const payload = {
                 ...formData,
-                company_name: currentUser?.company_name || undefined
+                company_name: getCompanyName()
             };
             
             await TermConditionService.updateTermCondition(id, payload);
-            navigate('/quotations/term-condition');
+            navigate('/quotations-iti/term-condition');
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
             setError(errorMessage);
@@ -132,7 +131,7 @@ const EditTermCondition: React.FC = () => {
                     {/* HEADER */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
-                            <Link to="/quotations/term-condition">
+                            <Link to="/quotations-iti/term-condition">
                                 <Button
                                     variant="outline"
                                     className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
@@ -189,7 +188,7 @@ const EditTermCondition: React.FC = () => {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => navigate('/quotations/term-condition')}
+                                onClick={() => navigate('/quotations-iti/term-condition')}
                                 disabled={saving}
                                 className="px-6 rounded-full"
                             >

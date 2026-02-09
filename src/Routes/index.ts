@@ -472,7 +472,7 @@ export const routes: TAppRoute[] = [
     },
     {
         path: '/quotations-iti/administration/bank-accounts',
-        name: 'Bank ITIQuotation',
+        name: 'Bank ITI Quotation',
         isProtected: true,
         roles: ['Bank ITI Quotation'],
         component: ManageBankITI,

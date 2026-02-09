@@ -252,7 +252,7 @@ const ManageProduct: React.FC = () => {
                         </div>
                         <PermissionGate permission="create">
                             <Button
-                                onClick={() => navigate('/quotations/products/create')}
+                                onClick={() => navigate('/quotations-iti/products/create')}
                                 className="flex items-center gap-2"
                                 size="sm"
                             >

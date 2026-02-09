@@ -99,7 +99,7 @@ export const useProductManagement = () => {
     }, []);
 
     const handleEdit = useCallback((product: any) => {
-        navigate(`/quotations/products/edit/${product.componen_product_id}`);
+        navigate(`/quotations-iti/products/edit/${product.componen_product_id}`);
     }, [navigate]);
 
     const handleDelete = useCallback((product: any) => {

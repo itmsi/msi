@@ -74,12 +74,12 @@ export default function EditCustomer() {
                 });
             } else {
                 toast.error('Customer not found');
-                navigate('/quotations/administration/customers');
+                navigate('/quotations-iti/administration/customers');
             }
         } catch (error: any) {
             console.error('Error loading customer:', error);
             toast.error('Failed to load customer data');
-            navigate('/quotations/administration/customers');
+            navigate('/quotations-iti/administration/customers');
         } finally {
             setIsLoading(false);
         }
@@ -211,7 +211,7 @@ export default function EditCustomer() {
             
             if (response) {
                 toast.success('Customer updated successfully');
-                navigate('/quotations/administration/customers');
+                navigate('/quotations-iti/administration/customers');
             }
         } catch (error: any) {
             console.error('Error updating customer:', error);
@@ -245,7 +245,7 @@ export default function EditCustomer() {
                     {/* HEADER */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
-                            <Link to="/quotations/administration/customers">
+                            <Link to="/quotations-iti/administration/customers">
                                 <Button
                                     variant="outline"
                                     className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
@@ -441,7 +441,7 @@ export default function EditCustomer() {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => navigate('/quotations/administration/customers')}
+                                onClick={() => navigate('/quotations-iti/administration/customers')}
                                 className="px-6 rounded-full"
                                 disabled={isUpdating}
                             >

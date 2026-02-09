@@ -96,11 +96,11 @@ export const useQuotationManagement = () => {
 
     // Navigation handlers
     const handleEdit = useCallback((quotation: any) => {
-        navigate(`/quotations/manage/edit/${quotation.manage_quotation_id}`);
+        navigate(`/quotations-iti/manage/edit/${quotation.manage_quotation_id}`);
     }, [navigate]);
 
     const handleView = useCallback((quotation: any) => {
-        navigate(`/quotations/detail/${quotation.manage_quotation_id}`);
+        navigate(`/quotations-iti/detail/${quotation.manage_quotation_id}`);
     }, [navigate]);
 
     const handleDelete = useCallback((quotation: any) => {

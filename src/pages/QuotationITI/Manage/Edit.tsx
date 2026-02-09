@@ -348,7 +348,7 @@ export default function EditQuotation() {
             }
         } catch (err: any) {
             toast.error(err.message || 'Failed to load quotation');
-            navigate('/quotations/manage');
+            navigate('/quotations-iti/manage');
         }
     }, [quotationId, fetchQuotation, navigate, QuotationService]);
 
@@ -1251,7 +1251,7 @@ console.log({
             const response = await updateQuotation(quotationId!, finalPayload);
             if (response.success) {
                 toast.success(`Quotation ${status === 'submit' ? 'updated' : 'saved as draft'} successfully`);
-                navigate('/quotations/manage');
+                navigate('/quotations-iti/manage');
             } else {
                 toast.error(response.message || 'Failed to update quotation');
             }
@@ -1295,7 +1295,7 @@ console.log({
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/quotations/manage')}
+                                onClick={() => navigate('/quotations-iti/manage')}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -2138,7 +2138,7 @@ console.log({
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => navigate('/quotations/manage')}
+                                onClick={() => navigate('/quotations-iti/manage')}
                                 className="px-6 rounded-full"
                                 disabled={isUpdating}
                             >

@@ -45,7 +45,7 @@ export const useBankManagement = () => {
     }, []);
 
     const handleEdit = useCallback((bankAccount: any) => {
-        navigate(`/quotations/administration/bank-accounts/edit/${bankAccount.bank_account_id}`);
+        navigate(`/quotations-iti/administration/bank-accounts/edit/${bankAccount.bank_account_id}`);
     }, [navigate]);
 
     const handleDelete = useCallback((bankAccount: any) => {

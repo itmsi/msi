@@ -87,7 +87,7 @@ export const useCreateAccessories = () => {
         try {
             await AccessoriesService.createAccessories(form);
             toast.success('Accessory berhasil dibuat');
-            navigate('/quotations/accessories');
+            navigate('/quotations-iti/accessories');
         } catch (error: any) {
             if (error.errors && typeof error.errors === 'object') {
                 setErrors(error.errors);
@@ -100,7 +100,7 @@ export const useCreateAccessories = () => {
     };
 
     const handleBack = () => {
-        navigate('/quotations/accessories');
+        navigate('/quotations-iti/accessories');
     };
 
     // Island management functions

@@ -299,7 +299,7 @@ export const useCreateProduct = () => {
             const response = await ItemProductService.createItemProduct(formDataToSend);
             if (response.status) {
                 toast.success('Produk berhasil dibuat');
-                navigate('/quotations/products');
+                navigate('/quotations-iti/products');
             } else {
                 toast.success(response.message || 'Produk tidak berhasil dibuat');
             }
@@ -316,7 +316,7 @@ export const useCreateProduct = () => {
 
     // Handle back navigation
     const handleBack = () => {
-        navigate('/quotations/products');
+        navigate('/quotations-iti/products');
     };
 
     const companyOptions = [

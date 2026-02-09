@@ -182,7 +182,7 @@ const ManageAccessories: React.FC = () => {
                         </div>
                         <PermissionGate permission="create">
                             <Button
-                                onClick={() => navigate('/quotations/accessories/create')}
+                                onClick={() => navigate('/quotations-iti/accessories/create')}
                                 className="flex items-center gap-2"
                                 size="sm"
                             >

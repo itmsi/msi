@@ -319,12 +319,12 @@ export default function EditProduct() {
                 }
             } else {
                 toast.error('Gagal memuat data produk');
-                navigate('/quotations/products');
+                navigate('/quotations-iti/products');
             }
         } catch (error) {
             console.error('Error loading product:', error);
             toast.error('Gagal memuat data produk');
-            navigate('/quotations/products');
+            navigate('/quotations-iti/products');
         }
     };
 
@@ -494,7 +494,7 @@ export default function EditProduct() {
             
             if (success) {
                 toast.success('Produk berhasil diperbarui');
-                navigate('/quotations/products');
+                navigate('/quotations-iti/products');
             }
         } catch (error) {
             toast.error('Gagal memperbarui produk');
@@ -502,7 +502,7 @@ export default function EditProduct() {
     };
 
     const handleBack = () => {
-        navigate('/quotations/products');
+        navigate('/quotations-iti/products');
     };
 
     if (isLoading) {
