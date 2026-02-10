@@ -59,13 +59,19 @@ const ManageQuotations: React.FC = () => {
                 name: 'Quotation No',
                 selector: (row) => row.manage_quotation_no,
                 cell: (row) => (
-                    <div className=" items-center gap-3 py-2">
+                <>
+                    <a
+                        href={`/quotations-iti/manage/edit/${row.manage_quotation_id}`}
+                        className="absolute inset-0 z-10"
+                        aria-label="Open quotation"
+                    />
+                    <div className="items-center gap-3 py-2">
                         <div className="font-medium text-[#0253a5]">
                             {row.manage_quotation_no}
                         </div>
                         <div className="block text-sm text-gray-500">{formatDate(row.manage_quotation_date)} - {formatDate(row.manage_quotation_valid_date)}</div>
                     </div>
-                ),
+                </>),
                 width: '220px',
             },
             {
@@ -280,7 +286,7 @@ const ManageQuotations: React.FC = () => {
                         striped={false}
                         persistTableHead
                         borderRadius="8px"
-                        onRowClicked={handleEdit}
+                        // onRowClicked={handleEdit}
                     />
                 </div>
             </div>

@@ -310,22 +310,6 @@ const AppSidebar: React.FC = () => {
         setOpenSubmenu(bestMatch);
         setOpenNestedSubmenu(bestNestedKey);
     }, [location.pathname]);
-
-    // useEffect(() => {
-    //     if (openSubmenu !== null) {
-    //         const key = openSubmenu.key;
-    //         // Use setTimeout to ensure DOM is updated
-    //         setTimeout(() => {
-    //             if (subMenuRefs.current[key]) {
-    //                 // const scrollHeight = subMenuRefs.current[key]?.scrollHeight || 0;
-    //                 // setSubMenuHeight((prevHeights) => ({
-    //                 //     ...prevHeights,
-    //                 //     [key]: scrollHeight,
-    //                 // }));
-    //             }
-    //         }, 0);
-    //     }
-    // }, [openSubmenu]);
     
     const handleSubmenuToggle = (menuType: 'main' | 'others', nav: NavItem) => {
         const key = buildNavKey(menuType, nav);
@@ -381,7 +365,7 @@ const AppSidebar: React.FC = () => {
                                 <Link
                                     to={nav.path}
                                     className={`menu-item group ${
-                                        isActive(nav.path) ? "menu-item-active xx" : "menu-item-inactive cc"
+                                        isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
                                     } ${!isHovered ? '' : 'color-[#606060]'}`}
                                 >
                                     <span

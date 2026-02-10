@@ -1503,7 +1503,6 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
             const res = await employeesService.resetEmployeePassword(id);
             setConfirmResetPassword({ show: false });
             fetchEmployees();
-            console.log({res});
 
             toast.success(res.message || 'Password reset successfully');
             return true;
@@ -1561,7 +1560,7 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
             // Update pagination to first page if filtering
             setPagination(prev => ({ ...prev, page: 1 }));
             
-            debouncedFetch(params, false); // Don't append data for search
+            debouncedFetch(params, false);
         }, 500);
     }, [pagination.limit, debouncedFetch]);
 
@@ -1648,7 +1647,6 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
         if (autoInit) {
             fetchEmployees();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [autoInit]);
 
     useEffect(() => {

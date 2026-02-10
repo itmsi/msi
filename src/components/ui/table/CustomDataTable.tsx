@@ -168,6 +168,7 @@ const CustomDataTable = <T extends Record<string, any>>({
                 paddingLeft: '16px',
                 paddingRight: '16px',
                 fontSize: '14px',
+                position: 'initial',
             },
         },
         pagination: {
