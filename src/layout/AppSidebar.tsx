@@ -221,7 +221,7 @@ const AppSidebar: React.FC = () => {
     const mainFiltered = useMemo(
         () => navItems.filter((item) => {
             if (!authMenu || authMenu.length === 0) {
-                return true;
+                return !item.allowedRoles || item.allowedRoles.length === 0;
             }
             if (!item.allowedRoles || item.allowedRoles.length === 0) {
                 return true;
@@ -234,7 +234,7 @@ const AppSidebar: React.FC = () => {
     const othersFiltered = useMemo(
         () => othersItems.filter((item) => {
             if (!authMenu || authMenu.length === 0) {
-                return true;
+                return !item.allowedRoles || item.allowedRoles.length === 0;
             }
             if (!item.allowedRoles || item.allowedRoles.length === 0) {
                 return true;
@@ -327,7 +327,12 @@ const AppSidebar: React.FC = () => {
 
                 const navKey = buildNavKey(menuType, nav);
                 const filteredSubItems = nav.subItems?.filter(
-                    (sub) => !sub.allowedRoles || sub.allowedRoles.some(name => allowedMenuNames.includes(name))
+                    (sub) => {
+                        if (!authMenu || authMenu.length === 0) {
+                            return !sub.allowedRoles || sub.allowedRoles.length === 0;
+                        }
+                        return !sub.allowedRoles || sub.allowedRoles.some(name => allowedMenuNames.includes(name));
+                    }
                 );
                 const isOpen = openSubmenu?.type === menuType && openSubmenu?.key === navKey;
                 return (
@@ -400,7 +405,7 @@ const AppSidebar: React.FC = () => {
                                         // Filter nested items untuk mengecek apakah ada yang diizinkan
                                         const allowedNestedItems = hasNestedSubItems ? subItem.subItems?.filter((nestedItem) => {
                                             if (!authMenu || authMenu.length === 0) {
-                                                return true;
+                                                return !nestedItem.allowedRoles || nestedItem.allowedRoles.length === 0;
                                             }
                                             if (!nestedItem.allowedRoles || nestedItem.allowedRoles.length === 0) {
                                                 return true;

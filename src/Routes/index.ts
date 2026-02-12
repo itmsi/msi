@@ -10,9 +10,11 @@ const UserProfiles = lazy(() => import('@/pages/UserProfiles'));
 const ManageMenu = lazy(() => import('@/pages/Administration/ManageMenu'));
 const ManageCompany = lazy(() => import('@/pages/Administration/ManageCompany'));
 const ManageDepartment = lazy(() => import('@/pages/Administration/ManageDepartment'));
-const ManageEmployee = lazy(() => import('@/pages/Administration/ManageEmployee'));
+// const ManageEmployee = lazy(() => import('@/pages/Administration/ManageEmployee'));
+const ManageUser = lazy(() => import('@/pages/Administration/Users/Manage'));
 const CreateEmployee = lazy(() => import('@/pages/Administration/CreateEmployee'));
 const EditEmployee = lazy(() => import('@/pages/Administration/EditEmployee'));
+const EditUser = lazy(() => import('@/pages/Administration/Users/Edit'));
 const ManageRole = lazy(() => import('@/pages/Administration/ManageRole'));
 const ManagePosition = lazy(() => import('@/pages/Administration/ManagePosition'));
 const DashboardPowerBI = lazy(() => import('@/pages/PowerBI/DashboardPowerBI'));
@@ -155,7 +157,7 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Employees'],
         requiredPermissions: ['read'],
-        component: ManageEmployee,
+        component: ManageUser,
         layout: AppLayout,
     },
     {
@@ -174,6 +176,15 @@ export const routes: TAppRoute[] = [
         roles: ['Employees'],
         requiredPermissions: ['update'],
         component: EditEmployee,
+        layout: AppLayout,
+    },
+    {
+        path: '/users/edit/:id',
+        name: 'Employees',
+        isProtected: true,
+        roles: ['Employees'],
+        requiredPermissions: ['update'],
+        component: EditUser,
         layout: AppLayout,
     },
     {

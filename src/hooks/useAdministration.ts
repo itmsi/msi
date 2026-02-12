@@ -1,4 +1,4 @@
-import { administrationService, companyService, departmentService, employeesService, roleService, positionService } from "@/services/administrationService";
+import { administrationService, companyService, departmentService, employeesService, roleService, positionService, usersService } from "@/services/administrationService";
 import { 
     Menu, 
     MenuFormData, 
@@ -37,7 +37,15 @@ import {
     PositionFilters,
     PositionListRequest,
     PositionValidationErrors,
-    EmployeeDetailData
+    EmployeeDetailData,
+    UserListRequest,
+    UsersManage,
+    UsersFilters,
+    // UsersFormData,
+    UserPagination,
+    UserDetail,
+    UserEditFormData,
+    UserValidationErrors
 } from "@/types/administration";
 import { useCallback, useState, useEffect, useRef } from "react";
 
@@ -1698,6 +1706,295 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
     };
 };
 
+// Employee Hook
+export const useUsersManage = (autoInit: boolean = true, initialFilters: Partial<UsersFilters> = {}) => {
+    const [users, setUsers] = useState<UsersManage[]>([]);
+    // const [employee, setEmployee] = useState<UsersManage | null>(null);
+    const [pagination, setPagination] = useState<UserPagination>({
+        page: 1,
+        limit: 10,
+        total: 0,
+        total_page: 1
+    });
+    const [isLoading, setIsLoading] = useState(false);
+    const [filters, setFilters] = useState<UsersFilters>({
+        search: "",
+        sort_by: "",
+        sort_order: "",
+        is_customer: '',
+        status: "",
+        ...initialFilters
+    });
+    // const [validationErrors, setValidationErrors] = useState<EmployeeValidationErrors>({});
+    const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; user_id?: string; }>({ show: false });
+    const [confirmResetPassword, setConfirmResetPassword] = useState<{ show: boolean; user?: UsersManage; }>({ show: false });
+
+    const pendingRequestRef = useRef<boolean>(false);
+    const lastRequestRef = useRef<number>(0);
+    const debouncedFetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const debouncedFetch = useCallback((params: UserListRequest, appendData: boolean = false) => {
+        if (debouncedFetchTimeoutRef.current) {
+            clearTimeout(debouncedFetchTimeoutRef.current);
+        }
+
+        const requestId = Date.now();
+        lastRequestRef.current = requestId;
+
+        debouncedFetchTimeoutRef.current = setTimeout(async () => {
+            if (requestId !== lastRequestRef.current) return;
+            if (pendingRequestRef.current) return;
+            
+            try {
+                pendingRequestRef.current = true;
+                setIsLoading(true);
+                const data = await usersService.getManageUsers(params);
+                
+                if (requestId === lastRequestRef.current) {
+                    // For infinite scroll (appendData = true), combine existing data with new data
+                    // For regular fetch (appendData = false), replace data
+                    if (appendData && params.page && params.page > 1) {
+                        setUsers(prev => [...prev, ...data.data.list]);
+                    } else {
+                        setUsers(data.data.list);
+                    }
+                    setPagination(data.data.meta);
+                }
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            } finally {
+                pendingRequestRef.current = false;
+                setIsLoading(false);
+            }
+        }, 300);
+    }, []);
+
+    const fetchUsers = useCallback((page?: number, limit?: number, appendData: boolean = false) => {
+        const params: UserListRequest = {
+            page: page !== undefined ? page : pagination.page,
+            limit: limit !== undefined ? limit : pagination.limit,
+            search: filters.search,
+            sort_by: filters.sort_by,
+            sort_order: filters.sort_order
+        };
+
+        // Only include is_customer if it's explicitly set
+        if (filters.is_customer !== '') {
+            params.is_customer = filters.is_customer === 'true';
+        }
+
+        // Only include status if it's explicitly set
+        if (filters.status !== '') {
+            params.status = filters.status === 'true';
+        }
+
+        debouncedFetch(params, appendData);
+    }, [debouncedFetch, pagination.page, pagination.limit, filters]);
+
+    // const getUserById = async (id: string) => {
+    //     setIsLoading(true);
+    //     try {
+    //         const data = await usersService.getManageUserById(id);
+    //         setUsers([data.data]);
+    //         return data.data;
+    //     } catch (error) {
+    //         console.error('Error fetching user:', error);
+    //         throw error;
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
+
+    const deleteUsers = async (id: string) => {
+        setIsLoading(true);
+        try {
+            await usersService.deleteUser(id);
+            setConfirmDelete({ show: false });
+            fetchUsers();
+            return true;
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
+    const resetUserPassword = async () => {
+        if (!confirmResetPassword.user) return false;
+        
+        setIsLoading(true);
+        try {
+            const res = await usersService.resetUserPassword({
+                id: confirmResetPassword.user.id,
+                is_customer: confirmResetPassword.user.is_customer
+            });
+            setConfirmResetPassword({ show: false });
+            fetchUsers();
+
+            toast.success(res.message || 'Password reset successfully');
+            return true;
+        } catch (error) {
+            console.error('Error resetting user password:', error);
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDelete = (user_id: string) => {
+        setConfirmDelete({ show: true, user_id });
+    };
+
+    const handleResetPassword = (user: UsersManage) => {
+        setConfirmResetPassword({ show: true, user });
+    };
+
+    const handlePageChange = (page: number) => {
+        fetchUsers(page, pagination.limit, false);
+    };
+
+    const handleLimitChange = (limit: number) => {
+        fetchUsers(1, limit, false);
+    };
+
+    // Debounced filter change for search
+    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+    
+    const handleFilterChangeDebounced = useCallback((filterKey: keyof UsersFilters, value: string | boolean) => {
+        setFilters(prev => ({
+            ...prev,
+            [filterKey]: value
+        }));
+        
+        if (debounceTimer.current) {
+            clearTimeout(debounceTimer.current);
+        }
+        
+        debounceTimer.current = setTimeout(() => {
+            // Create params with the new value instead of using stale state
+            const params: UserListRequest = {
+                page: 1, // Reset to first page when filtering
+                limit: pagination.limit,
+                search: filterKey === 'search' ? value as string : filters.search,
+                sort_by: filterKey === 'sort_by' ? value as string : filters.sort_by,
+                sort_order: filterKey === 'sort_order' ? value as string : filters.sort_order
+            };
+
+            // Handle is_customer filter
+            const isCustomerValue = filterKey === 'is_customer' ? value as string : filters.is_customer as string;
+            if (isCustomerValue !== '') {
+                params.is_customer = isCustomerValue === 'true';
+            }
+
+            // Only include status if it's explicitly set
+            const statusValue = filterKey === 'status' ? value as string : filters.status;
+            if (statusValue !== '') {
+                params.status = statusValue === 'true';
+            }
+            
+            // Update pagination to first page if filtering
+            setPagination(prev => ({ ...prev, page: 1 }));
+            
+            debouncedFetch(params, false);
+        }, 500);
+    }, [pagination.limit, debouncedFetch, filters]);
+
+    const handleSearchChange = useCallback((value: string) => {
+        handleFilterChangeDebounced('search', value);
+    }, [handleFilterChangeDebounced]);
+
+    const handleFilterChange = useCallback((key: keyof UsersFilters, value: string | boolean) => {
+        handleFilterChangeDebounced(key, value);
+    }, [handleFilterChangeDebounced]);
+
+    const clearFilters = () => {
+        // Clear all debounce timers first
+        if (debounceTimer.current) {
+            clearTimeout(debounceTimer.current);
+        }
+        
+        // Reset filters state
+        setFilters({
+            search: "",
+            sort_by: "",
+            sort_order: "",
+            is_customer: "",
+            status: ""
+        });
+        
+        // Reset pagination
+        setPagination(prev => ({ ...prev, page: 1 }));
+        
+        // Immediately fetch with cleared filters
+        const clearedParams: UserListRequest = {
+            page: 1,
+            limit: pagination.limit,
+            search: "",
+            sort_by: "",
+            sort_order: "",
+            is_customer: ""
+        };
+        
+        debouncedFetch(clearedParams, false);
+    };
+
+
+    useEffect(() => {
+        if (autoInit) {
+            fetchUsers();
+        }
+    }, [autoInit]);
+
+    useEffect(() => {
+        return () => {
+            if (debouncedFetchTimeoutRef.current) {
+                clearTimeout(debouncedFetchTimeoutRef.current);
+            }
+            if (debounceTimer.current) {
+                clearTimeout(debounceTimer.current);
+            }
+        };
+    }, []);
+
+    return {
+        // State
+        users,
+        // employee,
+        pagination,
+        isLoading,
+        // formData,
+        filters,
+        // validationErrors,
+        confirmDelete,
+        confirmResetPassword,
+        // showForm,
+        // editingUser,
+
+        // Actions
+        // setFormData,
+        fetchUsers,
+        // getUserById,
+        // createUser,
+        // updateUser,
+        deleteUsers,
+        // handleEdit,
+        handleDelete,
+        handleResetPassword,
+        resetUserPassword,
+        handlePageChange,
+        handleLimitChange,
+        handleFilterChange,
+        handleSearchChange,
+        clearFilters,
+        // handleAddUser,
+        // closeForm,
+        setConfirmDelete,
+        setConfirmResetPassword
+    };
+};
+
 // Role Hook
 export const useRole = () => {
     const [roles, setRoles] = useState<Role[]>([]);
@@ -2849,5 +3146,294 @@ export const useCreateEmployee = () => {
         validationErrors,
         setValidationErrors,
         createEmployee
+    };
+};
+
+// Create Users Hook
+export const useCreateUser = () => {
+    const [isCreating, setIsCreating] = useState(false);
+    const [validationErrors, setValidationErrors] = useState<EmployeeValidationErrors>({});
+
+    // Create Users with photo
+    const createUser = useCallback(async (formData: FormData): Promise<{ success: boolean; message?: string; errors?: any }> => {
+        setIsCreating(true);
+        setValidationErrors({});
+
+        try {
+            const response = await usersService.createUsersWithPhoto(formData);
+            
+            if (response.success) {
+                toast.success('User created successfully!');
+                return { success: true };
+            } else {
+                // Handle validation errors from server
+                if (response.errors) {
+                    setValidationErrors(response.errors);
+                }
+                toast.error(response.message || 'Failed to create user');
+                return { 
+                    success: false, 
+                    message: response.message, 
+                    errors: response.errors 
+                };
+            }
+        } catch (err: any) {
+            const errorMessage = getErrorMessage(err);
+            
+            // Handle validation errors
+            if (err.response?.status === 422 && err.response?.data?.errors) {
+                setValidationErrors(err.response.data.errors);
+                toast.error('Please check the form for errors');
+            } else if (err.response?.status === 400 && err.response?.data?.message) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error(`Failed to create user: ${errorMessage}`);
+            }
+            
+            return { 
+                success: false, 
+                message: errorMessage, 
+                errors: err.response?.data?.errors 
+            };
+        } finally {
+            setIsCreating(false);
+        }
+    }, []);
+
+    return {
+        isCreating,
+        validationErrors,
+        setValidationErrors,
+        createUser
+    };
+};
+
+// Hook untuk edit user detail
+export const useUserDetail = () => {
+    const [user, setUser] = useState<UserDetail | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [validationErrors, setValidationErrors] = useState<UserValidationErrors>({});
+    
+    // Form state
+    const [formData, setFormData] = useState<UserEditFormData>({
+        email: '',
+        password: '',
+        is_customer: false,
+        is_active: true,
+        customer_id: '',
+        foto: null
+    });
+    
+    // Photo states
+    const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+    const [originalPhoto, setOriginalPhoto] = useState<string | null>(null);
+
+    // Fetch user by ID
+    const fetchUser = useCallback(async (id: string): Promise<boolean> => {
+        setIsLoading(true);
+        try {
+            const response = await usersService.getManageUserById(id);
+            
+            if (response.success && response.data) {
+                const userData = response.data;
+                setUser(userData);
+                
+                // Populate form data
+                setFormData({
+                    email: userData.email || '',
+                    password: '',
+                    is_customer: userData.is_customer,
+                    is_active: userData.is_active,
+                    customer_id: userData.customer_id || '',
+                    foto: null
+                });
+                
+                // Set photo preview
+                if (userData.photo) {
+                    setPhotoPreview(userData.photo);
+                    setOriginalPhoto(userData.photo);
+                }
+                
+                return true;
+            } else {
+                toast.error('Failed to load user data');
+                return false;
+            }
+        } catch (err: any) {
+            const errorMessage = getErrorMessage(err);
+            toast.error(errorMessage);
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    // Handle input change
+    const handleInputChange = useCallback((field: keyof UserEditFormData, value: string | boolean) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value
+        }));
+
+        // Clear validation error
+        if (validationErrors[field as keyof UserValidationErrors]) {
+            setValidationErrors(prev => ({
+                ...prev,
+                [field]: undefined
+            }));
+        }
+    }, [validationErrors]);
+
+    // Handle file change
+    const handleFileChange = useCallback((file: File | null) => {
+        if (!file) return;
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please select a valid image file');
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('File size must be less than 5MB');
+            return;
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            foto: file
+        }));
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setPhotoPreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+
+        // Clear validation error
+        if (validationErrors.foto) {
+            setValidationErrors(prev => ({
+                ...prev,
+                foto: undefined
+            }));
+        }
+    }, [validationErrors]);
+
+    // Remove photo
+    const removePhoto = useCallback(() => {
+        setFormData(prev => ({
+            ...prev,
+            foto: null
+        }));
+        setPhotoPreview(originalPhoto);
+    }, [originalPhoto]);
+
+    // Validate form
+    const validateForm = useCallback((): boolean => {
+        const errors: UserValidationErrors = {};
+        
+        if (!formData.email.trim()) {
+            errors.email = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            errors.email = 'Please enter a valid email address';
+        }
+        
+        if (formData.password && formData.password.length < 6) {
+            errors.password = 'Password must be at least 6 characters long';
+        }
+
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
+    }, [formData.email, formData.password]);
+
+    // Update user
+    const updateUser = useCallback(async (id: string): Promise<boolean> => {
+        if (!validateForm()) {
+            toast.error('Please fix the validation errors');
+            return false;
+        }
+
+        setIsSubmitting(true);
+        try {
+            let response;
+            
+            if (formData.foto) {
+                // With photo upload
+                const submitData = new FormData();
+                submitData.append('email', formData.email);
+                if (formData.password) {
+                    submitData.append('password', formData.password);
+                }
+                submitData.append('is_customer', formData.is_customer.toString());
+                submitData.append('is_active', formData.is_active.toString());
+                if (formData.customer_id) {
+                    submitData.append('customer_id', formData.customer_id);
+                }
+                submitData.append('foto', formData.foto);
+                
+                response = await usersService.updateUserWithPhoto(id, submitData);
+            } else {
+                // Without photo
+                const submitData: Record<string, unknown> = {
+                    email: formData.email,
+                    is_customer: formData.is_customer,
+                    is_active: formData.is_active
+                };
+                
+                if (formData.password) {
+                    submitData.password = formData.password;
+                }
+                if (formData.customer_id) {
+                    submitData.customer_id = formData.customer_id;
+                }
+                
+                response = await usersService.updateUser(id, submitData);
+            }
+            
+            if (response.success) {
+                toast.success('User updated successfully');
+                return true;
+            } else {
+                toast.error(response.message || 'Failed to update user');
+                return false;
+            }
+        } catch (err: any) {
+            const errorMessage = getErrorMessage(err);
+            
+            if (err.response?.status === 422 && err.response?.data?.errors) {
+                setValidationErrors(err.response.data.errors);
+                toast.error('Please check the form for errors');
+            } else {
+                toast.error(errorMessage);
+            }
+            return false;
+        } finally {
+            setIsSubmitting(false);
+        }
+    }, [formData, validateForm]);
+
+    return {
+        // State
+        user,
+        isLoading,
+        isSubmitting,
+        validationErrors,
+        formData,
+        photoPreview,
+        
+        // Setters
+        setFormData,
+        setValidationErrors,
+        
+        // Actions
+        fetchUser,
+        updateUser,
+        handleInputChange,
+        handleFileChange,
+        removePhoto,
+        validateForm
     };
 };

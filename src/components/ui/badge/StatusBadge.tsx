@@ -15,7 +15,8 @@ export const ActiveStatusBadge: React.FC<ActiveStatusBadgeProps> = ({
     className = '' 
 }) => {
     const getStatusStyles = () => {
-        switch (status) {
+        const getStatus = status.toLocaleLowerCase();
+        switch (getStatus) {
             case 'active':
                 return {
                     bgColor: 'bg-green-100',

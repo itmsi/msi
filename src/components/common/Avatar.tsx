@@ -23,11 +23,13 @@ const Avatar: React.FC<AvatarComponentProps> = ({
   onError,
   onLoad,
 }) => {
-  const [imgSrc, setImgSrc] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(Boolean(src));
-
   // Generate fallback avatar
   const fallbackSrc = generateAvatarSVG(nama, { size, fontSize });
+  
+  // Initialize with proper src or fallback to avoid empty string
+  const initialSrc = src && src.trim() !== '' ? src : fallbackSrc;
+  const [imgSrc, setImgSrc] = useState<string>(initialSrc);
+  const [isLoading, setIsLoading] = useState<boolean>(Boolean(src && src.trim() !== ''));
 
   // Initialize avatar source
   useEffect(() => {
