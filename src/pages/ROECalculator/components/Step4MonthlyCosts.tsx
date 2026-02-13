@@ -97,7 +97,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Maintenance Expense */}
                 <div>
-                    <Label htmlFor="maintenance_expense">Biaya Perawatan per Unit (Rp)</Label>
+                    <Label htmlFor="maintenance_expense">Biaya Perawatan per Unit (Rp/Bulan)</Label>
                     <Input
                         id="sparepart_expense_monthly"
                         onKeyPress={handleKeyPress}
@@ -124,7 +124,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Operator Salary */}
                 <div>
-                    <Label htmlFor="operator_salary">Gaji Operator per Unit (Rp)</Label>
+                    <Label htmlFor="operator_salary">Gaji Operator per Unit (Rp/Bulan)</Label>
                     <Input
                         id="operator_salary"
                         onKeyPress={handleKeyPress}
@@ -151,7 +151,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Insurance Expense */}
                 <div>
-                    <Label htmlFor="insurance_expense">Depresiasi semua Unit (Rp)</Label>
+                    <Label htmlFor="insurance_expense">Depresiasi semua Unit (Rp/Bulan)</Label>
                     <Input
                         id="insurance_expense"
                         onKeyPress={handleKeyPress}
@@ -215,7 +215,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Other Expense */}
                 <div>
-                    <Label htmlFor="overhead_monthly">Overhead/G&A (Rp/bulan)</Label>
+                    <Label htmlFor="overhead_monthly">Overhead/G&A (Semua Unit)</Label>
                     <Input
                         id="overhead_monthly"
                         onKeyPress={handleKeyPress}
