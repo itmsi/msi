@@ -62,7 +62,7 @@ const ManageQuotations: React.FC = () => {
                 <>
                     <a
                         href={`/quotations/manage/edit/${row.manage_quotation_id}`}
-                        className="absolute inset-0 z-10"
+                        className="absolute inset-0"
                         aria-label="Open quotation"
                     />
                     <div className=" items-center gap-3 py-2">
