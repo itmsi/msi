@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { CustomerService } from '@/pages/Administration/Customers/services/customerService';
 import { Customer } from '@/pages/Administration/Customers/types/customer';
 
@@ -21,6 +21,10 @@ export const useCustomerSelect = () => {
         loading: false
     });
     const [inputValue, setInputValue] = useState('');
+    
+    // Add ref to prevent multiple initializations
+    const isInitialized = useRef(false);
+    const isLoadingRef = useRef(false);
 
     const loadCustomerOptions = useCallback(async (
         inputValue: string = '', 
@@ -29,14 +33,15 @@ export const useCustomerSelect = () => {
         reset: boolean = false
     ) => {
         try {
-            if (pagination.loading && !reset) return loadedOptions;
-
+            if (isLoadingRef.current && !reset) return loadedOptions;
+            
+            isLoadingRef.current = true;
             setPagination(prev => ({ ...prev, loading: true }));
 
             const response = await CustomerService.getCustomers({
                 search: inputValue,
                 page: page,
-                limit: 5,
+                limit: 25,
                 sort_order: 'desc'
             });
 
@@ -60,12 +65,14 @@ export const useCustomerSelect = () => {
                 return updatedOptions;
             }
         } catch (error) {
-            console.error('Error loading term conditions:', error);
+            console.error('Error loading customers:', error);
             setPagination(prev => ({ ...prev, loading: false }));
+        } finally {
+            isLoadingRef.current = false;
         }
 
         return loadedOptions;
-    }, [pagination.loading]);
+    }, []);
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -77,17 +84,19 @@ export const useCustomerSelect = () => {
     }, [loadCustomerOptions]);
     // Handle scroll to bottom - load next page
     const handleMenuScrollToBottom = useCallback(() => {
-        if (pagination.hasMore && !pagination.loading) {
+        if (pagination.hasMore && !isLoadingRef.current) {
             loadCustomerOptions(inputValue, customerOptions, pagination.page + 1, false);
         }
-    }, [pagination, customerOptions, inputValue, loadCustomerOptions]);
+    }, [pagination.hasMore, pagination.page, inputValue, customerOptions, loadCustomerOptions]);
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
-        if (customerOptions.length === 0) {
-            await loadCustomerOptions('', [], 1, true);
-        }
-    }, [customerOptions.length, loadCustomerOptions]);
+        // Prevent multiple initializations
+        if (isInitialized.current || isLoadingRef.current) return;
+        
+        isInitialized.current = true;
+        await loadCustomerOptions('', [], 1, true);
+    }, [loadCustomerOptions]);
 
     return {
         customerOptions,

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { AuthService } from '@/services/authService';
 import { ItemProductService } from '../Product/services/productService';
 import { AccessoriesService } from '../Accessories/services/accessoriesService';
@@ -46,6 +46,12 @@ export const useAsyncSelect = () => {
         loading: false
     });
     const [accessoryInputValue, setAccessoryInputValue] = useState('');
+    
+    // Add refs to prevent multiple initializations
+    const productInitialized = useRef(false);
+    const productLoadingRef = useRef(false);
+    const accessoryInitialized = useRef(false);
+    const accessoryLoadingRef = useRef(false);
 
     // Load products for async select
     const loadProducts = useCallback(async (
@@ -55,8 +61,9 @@ export const useAsyncSelect = () => {
         reset: boolean = false
     ) => {
         try {
-            if (productPagination.loading && !reset) return loadedOptions;
+            if (productLoadingRef.current && !reset) return loadedOptions;
 
+            productLoadingRef.current = true;
             setProductPagination(prev => ({ ...prev, loading: true }));
 
             // Get company_name from logged in user
@@ -66,7 +73,7 @@ export const useAsyncSelect = () => {
             const response = await ItemProductService.getItemProduct({
                 search: inputValue,
                 page: page,
-                limit: 10,
+                limit: 25,
                 sort_order: 'desc',
                 company_name: companyName
             });
@@ -101,10 +108,12 @@ export const useAsyncSelect = () => {
         } catch (error) {
             console.error('Error loading products:', error);
             setProductPagination(prev => ({ ...prev, loading: false }));
+        } finally {
+            productLoadingRef.current = false;
         }
 
         return loadedOptions;
-    }, [productPagination.loading]);
+    }, []);
 
     // Load accessories for async select
     const loadAccessories = useCallback(async (
@@ -114,8 +123,10 @@ export const useAsyncSelect = () => {
         reset: boolean = false
     ) => {
         try {
-            if (accessoryPagination.loading && !reset) return loadedOptions;
+            // Prevent concurrent calls
+            if (accessoryLoadingRef.current && !reset) return loadedOptions;
 
+            accessoryLoadingRef.current = true;
             setAccessoryPagination(prev => ({ ...prev, loading: true }));
 
             const response = await AccessoriesService.getAccessories({
@@ -154,10 +165,12 @@ export const useAsyncSelect = () => {
         } catch (error) {
             console.error('Error loading accessories:', error);
             setAccessoryPagination(prev => ({ ...prev, loading: false }));
+        } finally {
+            accessoryLoadingRef.current = false;
         }
 
         return loadedOptions;
-    }, [accessoryPagination.loading]);
+    }, []);
 
     // Handle product input change
     const handleProductInputChange = useCallback(async (inputValue: string) => {
@@ -179,31 +192,34 @@ export const useAsyncSelect = () => {
 
     // Handle scroll to bottom for products
     const handleProductMenuScrollToBottom = useCallback(() => {
-        if (productPagination.hasMore && !productPagination.loading) {
+        if (productPagination.hasMore && !productLoadingRef.current) {
             loadProducts(productInputValue, productOptions, productPagination.page + 1, false);
         }
-    }, [productPagination, productOptions, productInputValue, loadProducts]);
+    }, [productPagination.hasMore, productPagination.page, productInputValue, productOptions, loadProducts]);
 
     // Handle scroll to bottom for accessories
     const handleAccessoryMenuScrollToBottom = useCallback(() => {
-        if (accessoryPagination.hasMore && !accessoryPagination.loading) {
+        if (accessoryPagination.hasMore && !accessoryLoadingRef.current) {
             loadAccessories(accessoryInputValue, accessoryOptions, accessoryPagination.page + 1, false);
         }
-    }, [accessoryPagination, accessoryOptions, accessoryInputValue, loadAccessories]);
+    }, [accessoryPagination.hasMore, accessoryPagination.page, accessoryInputValue, accessoryOptions, loadAccessories]);
 
     // Initialize product options
     const initializeProductOptions = useCallback(async () => {
-        if (productOptions.length === 0) {
-            await loadProducts('', [], 1, true);
-        }
-    }, [productOptions.length, loadProducts]);
+        if (productInitialized.current || productLoadingRef.current) return;
+        
+        productInitialized.current = true;
+        await loadProducts('', [], 1, true);
+    }, [loadProducts]);
 
     // Initialize accessory options
     const initializeAccessoryOptions = useCallback(async () => {
-        if (accessoryOptions.length === 0) {
-            await loadAccessories('', [], 1, true);
-        }
-    }, [accessoryOptions.length, loadAccessories]);
+        // Prevent multiple initializations
+        if (accessoryInitialized.current || accessoryLoadingRef.current) return;
+        
+        accessoryInitialized.current = true;
+        await loadAccessories('', [], 1, true);
+    }, [loadAccessories]);
 
     return {
         // Product related

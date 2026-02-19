@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { BankService } from '@/pages/Administration/Bank/services/bankService';
 import { BankAccount } from '@/pages/Administration/Bank/types/bank';
 
@@ -22,6 +22,9 @@ export const useBankSelect = () => {
         loading: false
     });
     const [inputValue, setInputValue] = useState('');
+    
+    const isInitialized = useRef(false);
+    const isLoadingRef = useRef(false);
 
     const loadBankAccounts = useCallback(async (
         inputValue: string = '', 
@@ -30,14 +33,15 @@ export const useBankSelect = () => {
         reset: boolean = false
     ) => {
         try {
-            if (pagination.loading && !reset) return loadedOptions;
-
+            if (isLoadingRef.current && !reset) return loadedOptions;
+            
+            isLoadingRef.current = true;
             setPagination(prev => ({ ...prev, loading: true }));
 
             const response = await BankService.getBankAccounts({
                 search: inputValue,
                 page: page,
-                limit: 10,
+                limit: 25,
                 sort_order: 'desc'
             });
 
@@ -62,12 +66,14 @@ export const useBankSelect = () => {
                 return updatedOptions;
             }
         } catch (error) {
-            console.error('Error term conditions:', error);
+            console.error('Error loading bank accounts:', error);
             setPagination(prev => ({ ...prev, loading: false }));
+        } finally {
+            isLoadingRef.current = false;
         }
 
         return loadedOptions;
-    }, [pagination.loading]);
+    }, []);
 
         // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -80,17 +86,18 @@ export const useBankSelect = () => {
 
     // Handle scroll to bottom - load next page
     const handleMenuScrollToBottom = useCallback(() => {
-        if (pagination.hasMore && !pagination.loading) {
+        if (pagination.hasMore && !isLoadingRef.current) {
             loadBankAccounts(inputValue, bankOptions, pagination.page + 1, false);
         }
-    }, [pagination, bankOptions, inputValue, loadBankAccounts]);
+    }, [pagination.hasMore, pagination.page, inputValue, bankOptions, loadBankAccounts]);
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
-        if (bankOptions.length === 0) {
-            await loadBankAccounts('', [], 1, true);
-        }
-    }, [bankOptions.length, loadBankAccounts]);
+        if (isInitialized.current || isLoadingRef.current) return;
+        
+        isInitialized.current = true;
+        await loadBankAccounts('', [], 1, true);
+    }, [loadBankAccounts]);
 
     return {
         bankOptions,
