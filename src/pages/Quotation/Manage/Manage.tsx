@@ -61,7 +61,7 @@ const ManageQuotations: React.FC = () => {
                 cell: (row) => (
                 <>
                     <a
-                        href={`/quotations-iti/manage/edit/${row.manage_quotation_id}`}
+                        href={`/quotations/manage/edit/${row.manage_quotation_id}`}
                         className="absolute inset-0 z-10"
                         aria-label="Open quotation"
                     />
