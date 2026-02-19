@@ -133,6 +133,9 @@ export const createActionsColumn = (actions: Array<{
     width: '200px',
     center: true, // This handles both header and cell centering
     ignoreRowClick: true,
+    style: {
+        zIndex: '10'
+    },
     // allowOverflow: true, // Removed to prevent styled-components warning
     // button: true,
 });
