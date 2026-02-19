@@ -152,6 +152,7 @@ const CustomDataTable = <T extends Record<string, any>>({
                 fontSize: '14px',
                 color: '#374151',
                 borderBottom: '1px solid #ededed !important',  
+                position: 'relative',
                 '&:last-of-type': {
                     borderBottomWidth: '0px',
                 },
