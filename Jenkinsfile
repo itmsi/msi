@@ -9,11 +9,20 @@ pipeline {
     }
 
     stages {
-        stage('Pull Branch') {
+          stage('Pull Branch') {
             steps {
-                echo '📥 Checkout repository'
-                sh 'git fetch origin'
-                sh 'git pull'
+                echo "Pulling branch ${env.BRANCH_NAME}"
+                withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'TOKEN')]) {
+                    sh """
+                        if [ ! -d .git ]; then
+                            git clone --branch ${env.BRANCH_NAME} https://${TOKEN}@github.com/itmsi/msi.git .
+                        else
+                            git fetch origin
+                            git checkout ${env.BRANCH_NAME}
+                            git pull --force
+                        fi
+                    """
+                }
             }
         }
 

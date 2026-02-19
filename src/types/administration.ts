@@ -472,6 +472,49 @@ export interface Employee {
     department_name: string;
     company_name: string;
 }
+export interface UsersManage {
+    id: string;
+    name: string;
+    email: string;
+    position: string;
+    department_name: string;
+    company_name: string;
+    is_customer: boolean;
+    status: boolean | 'active' | 'inactive' | '';
+}
+
+// User Detail interface for edit page
+export interface UserDetail {
+    id: string;
+    email: string;
+    password?: string;
+    is_customer: boolean;
+    is_active: boolean;
+    customer_name?: string;
+    customer_photo?: string;
+    employee_name?: string;
+    employee_photo?: string;
+    full_name: string;
+    photo?: string;
+    type: string;
+    // Employee specific fields
+    company_id?: string;
+    department_id?: string;
+    title_id?: string;
+    employee_mobile?: string;
+    employee_office_number?: string;
+    employee_address?: string;
+    is_sales_quotation?: boolean;
+    customer_id?: string;
+}
+
+// User pagination for meta response
+export interface UserPagination {
+    page: number;
+    limit: number;
+    total: number;
+    total_page: number;
+}
 
 // Permission detail interface for employee detail response
 export interface EmployeePermissionDetail {
@@ -519,9 +562,18 @@ export interface EmployeeFormData {
     island_id?: string;
     permission_detail?: EmployeeSystemPermission[]; // Updated to new structure
 }
+export interface UsersFormData {
+  email: string,
+  password: string,
+  is_customer: boolean,
+  is_active: boolean,
+  employee_id: string,
+  customer_id: string
+}
 
 // Employee validation errors
 export interface EmployeeValidationErrors {
+    user_type?: string;
     employee_name?: string;
     employee_email?: string;
     employee_password?: string;
@@ -537,6 +589,32 @@ export interface EmployeeValidationErrors {
     gender_id?: string;
     island_id?: string;
     employee_foto?: string;
+    // Customer fields
+    customer_name?: string;
+    customer_email?: string;
+    customer_password?: string;
+    customer_id?: string;
+    is_customer?: string;
+    is_active?: string;
+    customer_foto?: string;
+}
+
+// User edit form data (for edit page)
+export interface UserEditFormData {
+    email: string;
+    password: string;
+    is_customer: boolean;
+    is_active: boolean;
+    customer_id?: string;
+    foto?: File | null;
+}
+
+// User validation errors
+export interface UserValidationErrors {
+    email?: string;
+    password?: string;
+    customer_id?: string;
+    foto?: string;
 }
 
 // Employee list request parameters
@@ -553,6 +631,15 @@ export interface EmployeeListRequest {
     is_sales_quotation?: boolean;
     employee_status?: string;
 }
+export interface UserListRequest {
+    page: number;
+    limit: number;
+    search?: string;
+    sort_by?: string;
+    sort_order?: string;
+    is_customer?: boolean | string;
+    status?: boolean | string;
+}
 
 // Employee list response
 export interface EmployeeListResponse {
@@ -563,6 +650,15 @@ export interface EmployeeListResponse {
         pagination: EmployeePagination;
     };
     timestamp: string;
+}
+
+export interface UserListResponse {
+    success: boolean;
+    message: string;
+    data: {
+        list: UsersManage[];
+        meta: UserPagination;
+    };
 }
 
 // Employee pagination
@@ -584,6 +680,13 @@ export interface EmployeeFilters {
     sort_order: 'asc' | 'desc' | '';
     employee_status: string;
 }
+export interface UsersFilters {
+    search: string;
+    sort_by: string;
+    sort_order: 'asc' | 'desc' | '';
+    is_customer: string;
+    status: string;
+}
 
 // Employee detail response
 export interface EmployeeDetailResponse {
@@ -591,6 +694,11 @@ export interface EmployeeDetailResponse {
     message: string;
     data: Employee;
     timestamp: string;
+}
+export interface UsersDetailResponse {
+    success: boolean;
+    message: string;
+    data: UserDetail;
 }
 
 // Employee state management interface

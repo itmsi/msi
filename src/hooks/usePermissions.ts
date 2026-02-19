@@ -7,6 +7,7 @@ export interface PagePermissions {
     canRead: boolean;
     canUpdate: boolean;
     canDelete: boolean;
+    canDuplicate: boolean;
     permissions: string[];
     routeName: string;
 }
@@ -34,6 +35,7 @@ export const usePermissions = (): PagePermissions => {
         canRead: isAdmin || permissions.includes('read'),
         canUpdate: isAdmin || permissions.includes('update'),
         canDelete: isAdmin || permissions.includes('delete'),
+        canDuplicate: isAdmin || permissions.includes('duplicate'),
         permissions,
         routeName
     };
@@ -60,6 +62,7 @@ export const usePermissionsFor = (targetRouteName: string): PagePermissions => {
         canRead: isAdmin || permissions.includes('read'),
         canUpdate: isAdmin || permissions.includes('update'),
         canDelete: isAdmin || permissions.includes('delete'),
+        canDuplicate: isAdmin || permissions.includes('duplicate'),
         permissions,
         routeName: targetRouteName
     };
@@ -67,12 +70,12 @@ export const usePermissionsFor = (targetRouteName: string): PagePermissions => {
 
 /**
  * Hook untuk mengecek permission spesifik
- * @param permission - Permission yang ingin dicek ('create', 'read', 'update', 'delete')
+ * @param permission - Permission yang ingin dicek ('create', 'read', 'update', 'delete', 'duplicate')
  * @param targetRouteName - Optional: nama route tertentu (default: current route)
  * @returns boolean apakah user punya permission tersebut
  */
 export const useHasPermission = (
-    permission: 'create' | 'read' | 'update' | 'delete',
+    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate',
     targetRouteName?: string
 ): boolean => {
     const location = useLocation();

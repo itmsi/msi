@@ -15,7 +15,8 @@ export const ActiveStatusBadge: React.FC<ActiveStatusBadgeProps> = ({
     className = '' 
 }) => {
     const getStatusStyles = () => {
-        switch (status) {
+        const getStatus = status.toLocaleLowerCase();
+        switch (getStatus) {
             case 'active':
                 return {
                     bgColor: 'bg-green-100',
@@ -119,40 +120,39 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({
     className = '' 
 }) => {
     const getCategoryStyle = (category: string) => {
-        switch (category) {
-            case 'island':
-                return 'bg-blue-100 text-blue-800 border border-blue-200';
-            case 'group':
-                return 'bg-green-100 text-green-800 border border-green-200';
-            case 'area':
-                return 'bg-orange-100 text-orange-800 border border-orange-200';
-            case 'iup_zone':
-                return 'bg-purple-100 text-purple-800 border border-purple-200';
-            case 'iup_segmentation':
-                return 'bg-slate-100 text-slate-800 border border-slate-200';
-            case 'iup':
-                return 'bg-gray-100 text-gray-800 border border-gray-200';
-            default:
-                return 'bg-gray-100 text-gray-800 border border-gray-200';
-        }
+        const lowerCategory = category.toLowerCase();
+        
+        // IUP Categories
+        if (lowerCategory === 'island') return 'bg-blue-100 text-blue-800 border border-blue-200';
+        if (lowerCategory === 'group') return 'bg-green-100 text-green-800 border border-green-200';
+        if (lowerCategory === 'area') return 'bg-orange-100 text-orange-800 border border-orange-200';
+        if (lowerCategory === 'iup_zone') return 'bg-purple-100 text-purple-800 border border-purple-200';
+        if (lowerCategory === 'iup_segmentation') return 'bg-slate-100 text-slate-800 border border-slate-200';
+        if (lowerCategory === 'iup') return 'bg-gray-100 text-gray-800 border border-gray-200';
+        
+        // PowerBI Categories
+        if (lowerCategory === 'service') return 'bg-green-100 text-green-800 border border-green-200';
+        if (lowerCategory === 'order management') return 'bg-blue-100 text-blue-800 border border-blue-200';
+        if (lowerCategory.includes('customs') || lowerCategory.includes('supply chain')) return 'bg-purple-100 text-purple-800 border border-purple-200';
+        if (lowerCategory.includes('sales')) return 'bg-orange-100 text-orange-800 border border-orange-200';
+        if (lowerCategory.includes('finance') || lowerCategory.includes('accounting')) return 'bg-teal-100 text-teal-800 border border-teal-200';
+        
+        // Default - use primary color
+        return 'bg-indigo-100 text-indigo-800 border border-indigo-200';
     };
+    
     const getCategoryText = (category: string) => {
-        switch (category) {
-            case 'island':
-                return 'Island';
-            case 'group':
-                return 'Group';
-            case 'area':
-                return 'Area';
-            case 'iup_zone':
-                return 'IUP Zone';
-            case 'iup_segmentation':
-                return 'Segmentation';
-            case 'iup':
-                return 'IUP';
-            default:
-                return 'Unknown';
-        }
+        // For IUP categories, provide formatted names
+        const lowerCategory = category.toLowerCase();
+        if (lowerCategory === 'island') return 'Island';
+        if (lowerCategory === 'group') return 'Group';
+        if (lowerCategory === 'area') return 'Area';
+        if (lowerCategory === 'iup_zone') return 'IUP Zone';
+        if (lowerCategory === 'iup_segmentation') return 'Segmentation';
+        if (lowerCategory === 'iup') return 'IUP';
+        
+        // For PowerBI and other categories, return the original category name as-is
+        return category;
     };
 
     const getSizeClasses = () => {

@@ -9,6 +9,7 @@ import { TermConditionService } from "./services/termconditionService";
 import { TermConditionFormDataEdit } from "./types/termcondition";
 // import { FaBold, FaItalic, FaListOl, FaListUl, FaQuoteLeft, FaStrikethrough, FaUnderline } from "react-icons/fa6";
 import WysiwygEditor from "@/components/form/editor";
+import { AuthService } from "@/services/authService";
 
 const EditTermCondition: React.FC = () => {
     const navigate = useNavigate();
@@ -90,7 +91,14 @@ const EditTermCondition: React.FC = () => {
             setSaving(true);
             setError(null);
             
-            await TermConditionService.updateTermCondition(id, formData);
+            // Get company_name from current logged-in user
+            const currentUser = AuthService.getCurrentUser();
+            const payload = {
+                ...formData,
+                company_name: currentUser?.company_name || undefined
+            };
+            
+            await TermConditionService.updateTermCondition(id, payload);
             navigate('/quotations/term-condition');
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';

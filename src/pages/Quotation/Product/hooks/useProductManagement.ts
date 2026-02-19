@@ -1,16 +1,10 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { useProduct } from './useProduct';
-import { AuthService } from '@/services/authService';
+import { getCompanyName } from '@/helpers/generalHelper';
 
 export const useProductManagement = () => {
     const navigate = useNavigate();
-    
-    // Get company_name from localStorage auth_user (more efficient than fetching profile)
-    const companyName = useMemo(() => {
-        const user = AuthService.getCurrentUser();
-        return user.company_name || undefined;
-    }, []);
     
     // Local state untuk form inputs
     const [searchTerm, setSearchTerm] = useState('');
@@ -40,10 +34,10 @@ export const useProductManagement = () => {
             limit: itemsPerPage,
             sort_order: sortOrder,
             search: debouncedSearch,
-            company_name: companyName,
+            company_name: getCompanyName(),
             product_type: productTypeFilter
         });
-    }, [debouncedSearch, sortOrder, productTypeFilter, currentPage, itemsPerPage, companyName, fetchProduct]);
+    }, [debouncedSearch, sortOrder, productTypeFilter, currentPage, itemsPerPage, fetchProduct]);
 
     // Handler untuk pagination
     const handlePageChange = useCallback((page: number) => {
@@ -68,10 +62,10 @@ export const useProductManagement = () => {
             limit: itemsPerPage,
             sort_order: sortOrder,
             search: searchTerm,
-            company_name: companyName,
+            company_name: getCompanyName(),
             product_type: productTypeFilter
         });
-    }, [searchTerm, sortOrder, productTypeFilter, itemsPerPage, companyName, fetchProduct]);
+    }, [searchTerm, sortOrder, productTypeFilter, itemsPerPage, fetchProduct]);
 
     const handleClearFilters = useCallback(() => {
         setSearchTerm('');
@@ -82,10 +76,10 @@ export const useProductManagement = () => {
             limit: itemsPerPage,
             sort_order: sortOrder,
             search: '',
-            company_name: companyName,
+            company_name: getCompanyName(),
             product_type: ''
         });
-    }, [sortOrder, itemsPerPage, companyName, fetchProduct]);
+    }, [sortOrder, itemsPerPage, fetchProduct]);
 
     // Handler untuk sort change
     const handleFilterChange = useCallback((key: string, value: string) => {
@@ -120,13 +114,13 @@ export const useProductManagement = () => {
                 limit: itemsPerPage,
                 sort_order: sortOrder,
                 search: debouncedSearch,
-                company_name: companyName,
+                company_name: getCompanyName(),
                 product_type: productTypeFilter
             });
         } catch (error) {
             console.error('Failed to delete product:', error);
         }
-    }, [confirmDelete.productId, deleteProduct, fetchProduct, currentPage, itemsPerPage, sortOrder, debouncedSearch, companyName]);
+    }, [confirmDelete.productId, deleteProduct, fetchProduct, currentPage, itemsPerPage, sortOrder, debouncedSearch]);
 
     const cancelDelete = useCallback(() => {
         setConfirmDelete({ show: false });

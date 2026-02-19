@@ -1,9 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useTermCondition } from './useTermCondition';
+import { AuthService } from '@/services/authService';
 
 export const useTermConditionManagement = () => {
     const navigate = useNavigate();
+    
+    // Get company_name from localStorage auth_user
+    const companyName = useMemo(() => {
+        const user = AuthService.getCurrentUser();
+        return user.company_name || undefined;
+    }, []);
     
     // Local state untuk form inputs
     const [searchTerm, setSearchTerm] = useState('');
@@ -31,9 +38,10 @@ export const useTermConditionManagement = () => {
             page: currentPage,
             limit: itemsPerPage,
             sort_order: sortOrder,
-            search: debouncedSearch
+            search: debouncedSearch,
+            company_name: companyName
         });
-    }, [debouncedSearch, sortOrder, currentPage, itemsPerPage, fetchTermConditions]);
+    }, [debouncedSearch, sortOrder, currentPage, itemsPerPage, companyName, fetchTermConditions]);
 
     // Handler untuk pagination
     const handlePageChange = useCallback((page: number) => {
@@ -57,9 +65,10 @@ export const useTermConditionManagement = () => {
             page: 1,
             limit: itemsPerPage,
             sort_order: sortOrder,
-            search: searchTerm
+            search: searchTerm,
+            company_name: companyName
         });
-    }, [searchTerm, sortOrder, itemsPerPage, fetchTermConditions]);
+    }, [searchTerm, sortOrder, itemsPerPage, companyName, fetchTermConditions]);
 
     const handleClearFilters = useCallback(() => {
         setSearchTerm('');
@@ -68,9 +77,10 @@ export const useTermConditionManagement = () => {
             page: 1,
             limit: itemsPerPage,
             sort_order: sortOrder,
-            search: ''
+            search: '',
+            company_name: companyName
         });
-    }, [sortOrder, itemsPerPage, fetchTermConditions]);
+    }, [sortOrder, itemsPerPage, companyName, fetchTermConditions]);
 
     // Handler untuk sort change
     const handleFilterChange = useCallback((key: string, value: string) => {
@@ -101,7 +111,8 @@ export const useTermConditionManagement = () => {
                 page: currentPage,
                 limit: itemsPerPage,
                 sort_order: sortOrder,
-                search: debouncedSearch
+                search: debouncedSearch,
+                company_name: companyName
             });
         } catch (error) {
             console.error('Failed to delete term condition:', error);

@@ -32,7 +32,11 @@ import {
     PositionFormData,
     PositionDetailResponse,
     Position,
-    PositionValidationErrors
+    PositionValidationErrors,
+    UsersFormData,
+    UserListResponse,
+    UserListRequest,
+    UsersDetailResponse
 } from '@/types/administration';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -447,6 +451,120 @@ export class employeesService {
         return await apiPut(`${API_BASE_URL}/employees/${employeeId}/toggle-status`, {});
     }
 }
+// ====================================
+// UNTUK IS_CUSTOMER SAAT DI HALAMAN EMPLOYEE CREATE/EDIT
+export class usersService {
+
+    static async createUser(data: UsersFormData): Promise<{ status: number }> {
+        return await apiPost(`${API_BASE_URL}/users/create`, data as unknown as Record<string, unknown>);
+    }
+    // static async createUser(formData: FormData): Promise<{ success: boolean; data?: any; message?: string; errors?: any }> {
+    //     try {
+    //         const response = await apiPost(`${API_BASE_URL}/users/create`, formData);
+    //         return response.data as { success: boolean; data?: any; message?: string; errors?: any };
+    //     } catch (error: any) {
+    //         return {
+    //             success: false,
+    //             message: error.message || 'Failed to create user',
+    //             errors: error.errors
+    //         };
+    //     }
+    //     // return await apiPost(`${API_BASE_URL}/users/create`, data as unknown as Record<string, unknown>);
+    // }
+
+    // Create user with photo support using multipart
+    static async createUsersWithPhoto(formData: FormData): Promise<{ success: boolean; data?: any; message?: string; errors?: any }> {
+        try {
+            const response = await apiPostMultipart(`${API_BASE_URL}/users/create`, formData);
+            return response.data as { success: boolean; data?: any; message?: string; errors?: any };
+        } catch (error: any) {
+            return {
+                success: false,
+                message: error.message || 'Failed to create user',
+                errors: error.errors
+            };
+        }
+    }
+    static async getManageUsers(params: UserListRequest): Promise<UserListResponse> {
+        // Filter out empty parameters to avoid sending unnecessary data
+        const filteredParams: Record<string, unknown> = {
+            page: params.page,
+            limit: params.limit
+        };
+
+        // Only include non-empty optional parameters
+        if (params.sort_by && params.sort_by.trim() !== '') {
+            filteredParams.sort_by = params.sort_by;
+        }
+        
+        if (params.sort_order && params.sort_order.trim() !== '') {
+            filteredParams.sort_order = params.sort_order;
+        }
+        
+        if (params.search && params.search.trim() !== '') {
+            filteredParams.search = params.search;
+        }
+
+        // Include is_customer filter (boolean)
+        if (params.is_customer !== undefined) {
+            filteredParams.is_customer = params.is_customer;
+        }
+
+        // Include status filter (boolean)
+        if (params.status !== undefined) {
+            filteredParams.status = params.status;
+        }
+
+        const response = await apiPost(`${API_BASE_URL}/users/get`, filteredParams);
+        return response.data as UserListResponse;
+    }
+
+    static async getManageUserById(id: string): Promise<UsersDetailResponse> {
+        const response = await apiGet(`${API_BASE_URL}/users/${id}`);
+        return response.data as UsersDetailResponse;
+    }
+    
+    static async updateUser(id: string, data: Record<string, unknown>): Promise<{ success: boolean; data?: any; message?: string; errors?: any }> {
+        try {
+            const response = await apiPut(`${API_BASE_URL}/users/${id}`, data);
+            return response.data as { success: boolean; data?: any; message?: string; errors?: any };
+        } catch (error: any) {
+            return {
+                success: false,
+                message: error.message || 'Failed to update user',
+                errors: error.errors
+            };
+        }
+    }
+
+    static async updateUserWithPhoto(id: string, formData: FormData): Promise<{ success: boolean; data?: any; message?: string; errors?: any }> {
+        try {
+            const response = await apiPut(`${API_BASE_URL}/users/${id}`, formData);
+            return response.data as { success: boolean; data?: any; message?: string; errors?: any };
+        } catch (error: any) {
+            return {
+                success: false,
+                message: error.message || 'Failed to update user',
+                errors: error.errors
+            };
+        }
+    }
+
+    static async deleteUser(id: string): Promise<{ status: number }> {
+        return await apiDelete(`${API_BASE_URL}/users/${id}`);
+    }
+
+    static async resetUserPassword(payload: { id: string; is_customer: boolean }): Promise<ApiResponse> {
+        return await apiPut(`${API_BASE_URL}/users/reset_password`, payload);
+    }
+
+    // Toggle employee status (if needed for active/inactive functionality)
+    // static async toggleEmployeeStatus(employeeId: string): Promise<{ status: number }> {
+    //     return await apiPut(`${API_BASE_URL}/employees/${employeeId}/toggle-status`, {});
+    // }
+}
+
+
 
 // Role Service class
 export class roleService {

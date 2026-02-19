@@ -1,4 +1,5 @@
 import { ENUM_MONTH } from './constants';
+import { AuthService } from '@/services/authService';
 
 export const buildLabel = (...parts: (string | undefined | null)[]) => {
     return parts.filter(Boolean).join(' - ');
@@ -38,7 +39,7 @@ export const allowOnlyNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
     }
     
     if (
-        !/[0-9.,]/.test(e.key) && // hanya angka, koma, titik
+        !/[0-9.,]/.test(e.key) &&
         !allowedKeys.includes(e.key)
     ) {
         e.preventDefault();
@@ -55,8 +56,6 @@ export const parseNumberInput = (value: string | undefined | null, isZero?: bool
     return value;
 };
 
-// Parse decimal input - handles both comma and dot as decimal separator
-// Examples: "12.5" -> 12.5, "20,1" -> 20.1, "100" -> 100
 export const parseDecimalInput = (value: string | number | undefined | null, defaultVal: number = 0): number => {
     if (!value && value !== 0) return defaultVal;
     
@@ -67,14 +66,11 @@ export const parseDecimalInput = (value: string | number | undefined | null, def
     const str = value.toString().trim();
     if (!str) return defaultVal;
 
-    // Keep only digits, dots, and commas
     const cleaned = str.replace(/[^\d,.]/g, '');
     if (!cleaned) return defaultVal;
 
-    // Replace comma with dot for JS parsing
     let normalized = cleaned.replace(',', '.');
     
-    // Handle multiple dots (e.g., "1.000.5" -> "1000.5")
     const dots = (normalized.match(/\./g) || []).length;
     if (dots > 1) {
         const lastDotIdx = normalized.lastIndexOf('.');
@@ -135,29 +131,6 @@ export const formatNumberInputwithComma = (value: string | number | undefined | 
     return formattedInteger;
 };
 
-// export const formatNumberInput = (value: string | number | null | undefined): string => {
-//     if (value === null) return '';
-//     if (value === undefined || value === '') return '';
-//     if (value === 0) return '0';
-    
-//     const stringValue = value.toString();
-//     const [integerPart, decimalPart] = stringValue.replace(/[^\d.]/g, '').split('.');
-    
-//     // Format the integer part with thousand separators
-//     const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart || '0', 10));
-    
-//     // If there's a decimal part, add it back
-//     if (decimalPart !== undefined) {
-//         return `${formattedInteger},${decimalPart}`;
-//     }
-
-//     console.log(formattedInteger);
-    
-//     return formattedInteger;
-// };
-
-
-
 export const parseFormatNumber = (formatValue: string): string => {
     if (!formatValue) return '';
     return formatValue.replace(/\./g, '');
@@ -214,29 +187,21 @@ export const handlePercentageInputComma = (
     min: number = 0, 
     max: number = 100
 ): string => {
-    // Return empty if empty
     if (!inputValue) return '';
 
-    // Allow typing only numbers and comma
     const cleanedValue = inputValue.replace(/[^\d,]/g, '');
     
-    // Check if it's just a comma or starts with comma, prefix with 0
     if (cleanedValue === ',') return '0,';
     if (cleanedValue.startsWith(',')) return '0' + cleanedValue;
 
-    // Split by comma to check for multiple commas
     const parts = cleanedValue.split(',');
     if (parts.length > 2) return parts[0] + ',' + parts.slice(1).join('');
     
-    // Validate range
-    // Replace comma with dot for parsing
     const dotValue = cleanedValue.replace(',', '.');
-    // If it ends with dot (comma originally), we can't fully parse it as float yet for validation if we want to allow "50,"
-    // So we only validate if it's a complete number or doesn't end in comma
     
     const numericValue = parseFloat(dotValue);
 
-    if (isNaN(numericValue)) return cleanedValue; // Should be handled by regex above but safe check
+    if (isNaN(numericValue)) return cleanedValue;
 
     if (numericValue > max) return max.toString().replace('.', ',');
     if (numericValue < min) return min.toString().replace('.', ',');
@@ -387,12 +352,12 @@ export const handleDecimalInput = (
     
     // Check max integer digits
     if (maxIntegerDigits && integerPart && integerPart.length > maxIntegerDigits) {
-        return; // Don't update if exceeds max integer digits
+        return;
     }
     
     // Check max decimal digits
     if (decimalPart && decimalPart.length > maxDecimalDigits) {
-        return; // Don't update if exceeds max decimal digits
+        return;
     }
     
     let processedValue = cleanValue;
@@ -432,17 +397,14 @@ export const handleDecimalInputComma = (
     const cleanValue = rawValue.replace(/[^\d,]/g, '');
     const [integerPart, decimalPart] = cleanValue.split(',');
     
-    // Check max integer digits
     if (maxIntegerDigits && integerPart && integerPart.length > maxIntegerDigits) {
         return;
     }
     
-    // Check max decimal digits
     if (decimalPart && decimalPart.length > maxDecimalDigits) {
         return; 
     }
     
-    // Allow typing "0" or "0,x" patterns for decimal input
     if (cleanValue === '0' || cleanValue.startsWith('0,')) {
         onValidInput(cleanValue);
         return;
@@ -481,4 +443,10 @@ export const getStatusBadge = (status: string) => {
     };
 
     return statusConfig[status.toLowerCase()] || statusConfig.draft;
+};
+
+// Get company_name from logged in user
+export const getCompanyName = (): string => {
+    const user = AuthService.getCurrentUser();
+    return (user as any)?.company_name || '';
 };

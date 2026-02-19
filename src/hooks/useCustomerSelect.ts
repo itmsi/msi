@@ -5,6 +5,7 @@ import { Customer } from '@/pages/Administration/Customers/types/customer';
 export interface CustomerSelectOption {
     value: string;
     label: string;
+    data?: Customer;
 }
 
 export interface CustomerPaginationState {
@@ -43,7 +44,8 @@ export const useCustomerSelect = () => {
             if (response.success) {
                 const newOptions = response.data.data.map((customer: Customer) => ({
                     value: customer.customer_id,
-                    label: customer.customer_name
+                    label: customer.customer_name,
+                    data: customer
                 }));
 
                 const updatedOptions = reset ? newOptions : [...loadedOptions, ...newOptions];
@@ -96,7 +98,8 @@ export const useCustomerSelect = () => {
             if (response.data.success && response.data.data) {
                 return {
                     value: response.data.data.customer_id,
-                    label: response.data.data.customer_name
+                    label: response.data.data.customer_name,
+                    data: response.data.data
                 };
             }
         } catch (error) {

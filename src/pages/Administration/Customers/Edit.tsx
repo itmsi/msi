@@ -272,7 +272,10 @@ export default function EditCustomer() {
                                         id="customer_name"
                                         type="text"
                                         value={formData.customer_name}
-                                        onChange={(e) => handleInputChange('customer_name', e.target.value)}
+                                        onChange={(e) => {
+                                            const replaceDot = e.target.value.replace(/\./g, "")
+                                            handleInputChange('customer_name', replaceDot.toUpperCase());
+                                        }}
                                         placeholder="Enter customer name"
                                         error={!!validationErrors.customer_name}
                                     />

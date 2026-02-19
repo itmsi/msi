@@ -83,6 +83,37 @@ const navItems: NavItem[] = [
         ],
     },
     {
+        name: "Quotation ITI",
+        icon: <GrDocumentVerified />,
+        allowedRoles: ['Product ITI Quotation', 'Accessories ITI Quotation', 'Manage ITI Quotation', 'TNC ITI Quotation', 'Customer ITI Quotation', 'Bank ITI Quotation', 'Island ITI'],
+        subItems: [
+            { name: "Manage", path: "/quotations-iti/manage", allowedRoles: ['Manage ITI Quotation'], },
+            { name: "Product", path: "/quotations-iti/products", allowedRoles: ['Product ITI Quotation'], },
+            { name: "Accessories", path: "/quotations-iti/accessories", allowedRoles: ['Accessories ITI Quotation'], },
+            { name: "Term Condition", path: "/quotations-iti/term-condition", allowedRoles: ['TNC ITI Quotation'], },
+            {
+                name: "Administration",
+                subItems: [
+                    { 
+                        name: "Customers", 
+                        path: "/quotations-iti/administration/customers", 
+                        allowedRoles: ['Customer ITI Quotation']
+                    },
+                    { 
+                        name: "Bank Accounts", 
+                        path: "/quotations-iti/administration/bank-accounts", 
+                        allowedRoles: ['Bank ITI Quotation']
+                    },
+                    { 
+                        name: "Regions", 
+                        path: "/quotations-iti/administration/islands", 
+                        allowedRoles: ['Island']
+                    }
+                ],
+            },
+        ],
+    },
+    {
         name: "Return on Equity ",
         icon: <GiChart />,
         allowedRoles: ['Manage ROA ROE Calculate', 'Setting ROA ROE Calculate'],
@@ -190,7 +221,7 @@ const AppSidebar: React.FC = () => {
     const mainFiltered = useMemo(
         () => navItems.filter((item) => {
             if (!authMenu || authMenu.length === 0) {
-                return true;
+                return !item.allowedRoles || item.allowedRoles.length === 0;
             }
             if (!item.allowedRoles || item.allowedRoles.length === 0) {
                 return true;
@@ -203,7 +234,7 @@ const AppSidebar: React.FC = () => {
     const othersFiltered = useMemo(
         () => othersItems.filter((item) => {
             if (!authMenu || authMenu.length === 0) {
-                return true;
+                return !item.allowedRoles || item.allowedRoles.length === 0;
             }
             if (!item.allowedRoles || item.allowedRoles.length === 0) {
                 return true;
@@ -279,22 +310,6 @@ const AppSidebar: React.FC = () => {
         setOpenSubmenu(bestMatch);
         setOpenNestedSubmenu(bestNestedKey);
     }, [location.pathname]);
-
-    // useEffect(() => {
-    //     if (openSubmenu !== null) {
-    //         const key = openSubmenu.key;
-    //         // Use setTimeout to ensure DOM is updated
-    //         setTimeout(() => {
-    //             if (subMenuRefs.current[key]) {
-    //                 // const scrollHeight = subMenuRefs.current[key]?.scrollHeight || 0;
-    //                 // setSubMenuHeight((prevHeights) => ({
-    //                 //     ...prevHeights,
-    //                 //     [key]: scrollHeight,
-    //                 // }));
-    //             }
-    //         }, 0);
-    //     }
-    // }, [openSubmenu]);
     
     const handleSubmenuToggle = (menuType: 'main' | 'others', nav: NavItem) => {
         const key = buildNavKey(menuType, nav);
@@ -312,7 +327,12 @@ const AppSidebar: React.FC = () => {
 
                 const navKey = buildNavKey(menuType, nav);
                 const filteredSubItems = nav.subItems?.filter(
-                    (sub) => !sub.allowedRoles || sub.allowedRoles.some(name => allowedMenuNames.includes(name))
+                    (sub) => {
+                        if (!authMenu || authMenu.length === 0) {
+                            return !sub.allowedRoles || sub.allowedRoles.length === 0;
+                        }
+                        return !sub.allowedRoles || sub.allowedRoles.some(name => allowedMenuNames.includes(name));
+                    }
                 );
                 const isOpen = openSubmenu?.type === menuType && openSubmenu?.key === navKey;
                 return (
@@ -350,7 +370,7 @@ const AppSidebar: React.FC = () => {
                                 <Link
                                     to={nav.path}
                                     className={`menu-item group ${
-                                        isActive(nav.path) ? "menu-item-active xx" : "menu-item-inactive cc"
+                                        isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
                                     } ${!isHovered ? '' : 'color-[#606060]'}`}
                                 >
                                     <span
@@ -385,7 +405,7 @@ const AppSidebar: React.FC = () => {
                                         // Filter nested items untuk mengecek apakah ada yang diizinkan
                                         const allowedNestedItems = hasNestedSubItems ? subItem.subItems?.filter((nestedItem) => {
                                             if (!authMenu || authMenu.length === 0) {
-                                                return true;
+                                                return !nestedItem.allowedRoles || nestedItem.allowedRoles.length === 0;
                                             }
                                             if (!nestedItem.allowedRoles || nestedItem.allowedRoles.length === 0) {
                                                 return true;

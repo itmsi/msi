@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { MdAdd, MdSearch, MdClear, MdDeleteOutline, MdFilterListAlt, MdExpandLess, MdExpandMore } from 'react-icons/md';
+import { MdAdd, MdSearch, MdClear, MdDeleteOutline, MdFilterListAlt, MdExpandLess, MdExpandMore, MdContentCopy } from 'react-icons/md';
 import { FaRegFilePdf } from "react-icons/fa6";
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +28,7 @@ const ManageQuotations: React.FC = () => {
         pagination,
         loading,
         confirmDelete,
+        confirmDuplicate,
         handlePageChange,
         handleRowsPerPageChange,
         handleSearchChange,
@@ -37,8 +38,11 @@ const ManageQuotations: React.FC = () => {
         handleView,
         handleDelete,
         handleDownload,
+        handleDuplicate,
         confirmDeleteQuotations,
+        confirmDuplicateQuotations,
         cancelDelete,
+        cancelDuplicate,
         setSearchTerm,
         handleKeyPress,
     } = useQuotationManagement();
@@ -55,12 +59,19 @@ const ManageQuotations: React.FC = () => {
                 name: 'Quotation No',
                 selector: (row) => row.manage_quotation_no,
                 cell: (row) => (
+                <>
+                    <a
+                        href={`/quotations-iti/manage/edit/${row.manage_quotation_id}`}
+                        className="absolute inset-0 z-10"
+                        aria-label="Open quotation"
+                    />
                     <div className=" items-center gap-3 py-2">
                         <div className="font-medium text-[#0253a5]">
                             {row.manage_quotation_no}
                         </div>
                         <div className="block text-sm text-gray-500">{formatDate(row.manage_quotation_date)} - {formatDate(row.manage_quotation_valid_date)}</div>
                     </div>
+                </>
                 ),
                 width: '220px',
             },
@@ -129,6 +140,13 @@ const ManageQuotations: React.FC = () => {
                     permission: 'read',
                 },
                 {
+                    icon: MdContentCopy,
+                    onClick: handleDuplicate,
+                    className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                    tooltip: 'Duplicate',
+                    permission: 'duplicate',
+                },
+                {
                     icon: MdDeleteOutline,
                     onClick: handleDelete,
                     className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
@@ -137,7 +155,7 @@ const ManageQuotations: React.FC = () => {
                 }
             ]),
         ],
-        [handleView, handleEdit, handleDelete]
+        [handleView, handleEdit, handleDelete, handleDuplicate]
     );
 
     const SearchAndFilters = useMemo(() => (
@@ -283,6 +301,18 @@ const ManageQuotations: React.FC = () => {
                 message="Are you sure you want to delete this quotation? This action cannot be undone."
                 confirmText="Delete"
                 cancelText="Cancel"
+            />
+
+            {/* Duplicate Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={confirmDuplicate.show}
+                onClose={cancelDuplicate}
+                onConfirm={confirmDuplicateQuotations}
+                title="Duplicate Quotation"
+                message="Are you sure you want to duplicate this quotation? A copy will be created with all the details."
+                confirmText="Duplicate"
+                cancelText="Cancel"
+                type="info"
             />
         </>
     );

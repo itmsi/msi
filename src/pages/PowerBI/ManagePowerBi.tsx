@@ -34,6 +34,16 @@ export default function ManagePowerBi() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedDashboard, setSelectedDashboard] = useState<PowerBIDashboard | null>(null);
 
+    // Helper function to strip HTML tags from text
+    const stripHtmlTags = (html: string): string => {
+        if (!html) return '';
+        // Create a temporary div element to parse HTML
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        // Get text content and replace multiple spaces/newlines with single space
+        return tmp.textContent || tmp.innerText || '';
+    };
+
     // Handle Create - navigate to create page
     const handleCreate = () => {
         navigate('/power-bi/manage/create');
@@ -73,11 +83,14 @@ export default function ManagePowerBi() {
         {
             name: 'Description',
             selector: row => row.description,
-            cell: (row: PowerBIDashboard) => (
-                <div className="max-w-xs truncate" title={row.description}>
-                    {row.description}
-                </div>
-            ),
+            cell: (row: PowerBIDashboard) => {
+                const cleanDescription = stripHtmlTags(row.description);
+                return (
+                    <div className="max-w-xs truncate" title={cleanDescription}>
+                        {cleanDescription}
+                    </div>
+                );
+            },
             wrap: true,
         },
         {

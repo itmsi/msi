@@ -25,6 +25,14 @@ export default function UserProfiles() {
         employee_mobile: '',
         employee_office_number: '',
         employee_address: '',
+        customer_name: '',
+        customer_email: '',
+        customer_phone: '',
+        customer_address: '',
+        customer_city: '',
+        customer_state: '',
+        customer_zip: '',
+        customer_country: '',
         current_password: '',
         new_password: '',
         confirm_password: ''
@@ -177,11 +185,15 @@ export default function UserProfiles() {
                                 
                                 <div className="text-center sm:text-left">
                                     <h2 className="text-2xl font-primary-bold text-gray-900 mb-2">
-                                        {profile?.employee_name}
+                                        {profile?.is_customer ? profile?.customer_name : profile?.employee_name}
                                     </h2>
                                     <div className="space-y-1 text-sm text-gray-600">
                                         <p className="font-medium">{profile?.title_name}</p>
-                                        <p>{profile?.department_name} • {profile?.company_name}</p>
+                                        {profile?.is_customer ? (
+                                            <p>{profile?.company_name}</p>
+                                        ) : (
+                                            <p>{profile?.department_name} • {profile?.company_name}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -196,12 +208,13 @@ export default function UserProfiles() {
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+                                    {/* Full Name */}
                                     <div className="md:col-span-2">
                                         <Label className="flex items-center gap-2">
                                             Full Name
                                         </Label>
                                         <Input
-                                            value={formData.employee_name}
+                                            value={profile?.is_customer ? (profile?.customer_name || '') : formData.employee_name}
                                             onChange={(e) => setFormData({...formData, employee_name: e.target.value})}
                                             placeholder="Enter full name"
                                             className="w-full text-gray-700 opacity-100"
@@ -209,6 +222,7 @@ export default function UserProfiles() {
                                         />
                                     </div>
 
+                                    {/* Company */}
                                     <div>
                                         <Label className="flex items-center gap-2">
                                             Company
@@ -222,19 +236,23 @@ export default function UserProfiles() {
                                         />
                                     </div>
 
-                                    <div>
-                                        <Label className="flex items-center gap-2">
-                                            Department
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            value={profile?.department_name || ''}
-                                            placeholder="Department"
-                                            className="w-full text-gray-700 opacity-100"
-                                            disabled={true}
-                                        />
-                                    </div>
+                                    {/* Department - hidden when is_customer */}
+                                    {!profile?.is_customer && (
+                                        <div>
+                                            <Label className="flex items-center gap-2">
+                                                Department
+                                            </Label>
+                                            <Input
+                                                type="text"
+                                                value={profile?.department_name || ''}
+                                                placeholder="Department"
+                                                className="w-full text-gray-700 opacity-100"
+                                                disabled={true}
+                                            />
+                                        </div>
+                                    )}
 
+                                    {/* Position */}
                                     <div>
                                         <Label className="flex items-center gap-2">
                                             Position
@@ -248,13 +266,14 @@ export default function UserProfiles() {
                                         />
                                     </div>
 
+                                    {/* Email */}
                                     <div>
                                         <Label className="flex items-center gap-2">
                                             Email Address
                                         </Label>
                                         <Input
                                             type="email"
-                                            value={formData.employee_email}
+                                            value={profile?.is_customer ? (profile?.customer_email || '') : formData.employee_email}
                                             onChange={(e) => setFormData({...formData, employee_email: e.target.value})}
                                             placeholder="Enter email address"
                                             className="w-full text-gray-700 opacity-100"

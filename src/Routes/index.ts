@@ -10,9 +10,11 @@ const UserProfiles = lazy(() => import('@/pages/UserProfiles'));
 const ManageMenu = lazy(() => import('@/pages/Administration/ManageMenu'));
 const ManageCompany = lazy(() => import('@/pages/Administration/ManageCompany'));
 const ManageDepartment = lazy(() => import('@/pages/Administration/ManageDepartment'));
-const ManageEmployee = lazy(() => import('@/pages/Administration/ManageEmployee'));
+// const ManageEmployee = lazy(() => import('@/pages/Administration/ManageEmployee'));
+const ManageUser = lazy(() => import('@/pages/Administration/Users/Manage'));
 const CreateEmployee = lazy(() => import('@/pages/Administration/CreateEmployee'));
 const EditEmployee = lazy(() => import('@/pages/Administration/EditEmployee'));
+const EditUser = lazy(() => import('@/pages/Administration/Users/Edit'));
 const ManageRole = lazy(() => import('@/pages/Administration/ManageRole'));
 const ManagePosition = lazy(() => import('@/pages/Administration/ManagePosition'));
 const DashboardPowerBI = lazy(() => import('@/pages/PowerBI/DashboardPowerBI'));
@@ -68,6 +70,34 @@ const EditContractors = lazy(() => import('@/pages/CRM/Contractors/EditContracto
 const Activities = lazy(() => import('@/pages/CRM/Activity/Activity'));
 const CreateActivities = lazy(() => import('@/pages/CRM/Activity/CreateActivity'));
 const EditActivities = lazy(() => import('@/pages/CRM/Activity/EditActivity'));
+
+// ========================================
+// QUOTATION ITI
+const ManageCustomersITI = lazy(() => import('@/pages/QuotationITI/Administration/Customers/Manage'));
+const CreateCustomersITI = lazy(() => import('@/pages/QuotationITI/Administration/Customers/Create'));
+const EditCustomersITI = lazy(() => import('@/pages/QuotationITI/Administration/Customers/Edit'));
+const ManageBankITI = lazy(() => import('@/pages/QuotationITI/Administration/Bank/Manage'));
+const CreateBankITI = lazy(() => import('@/pages/QuotationITI/Administration/Bank/Create'));
+const EditBankITI = lazy(() => import('@/pages/QuotationITI/Administration/Bank/Edit'));
+// ISLAND
+const ManageIslandITI = lazy(() => import('@/pages/Administration/Island/Manage'));
+
+const ManageItemsProductITI = lazy(() => import('@/pages/QuotationITI/Product/Manage'));
+const CreateItemsProductITI = lazy(() => import('@/pages/QuotationITI/Product/Create'));
+const EditItemsProductITI = lazy(() => import('@/pages/QuotationITI/Product/Edit'));
+
+const ManageQuotationITI = lazy(() => import('@/pages/QuotationITI/Manage/Manage'));
+const CreateQuotationITI = lazy(() => import('@/pages/QuotationITI/Manage/Create'));
+const EditQuotationITI = lazy(() => import('@/pages/QuotationITI/Manage/Edit'));
+// const ManageItemsProductITI = lazy(() => import('@/pages/QuotationITI/Product/Manage'));
+const AccessoriesProductITI = lazy(() => import('@/pages/QuotationITI/Accessories/Manage'));
+const CreateAccessoriesITI = lazy(() => import('@/pages/QuotationITI/Accessories/Create'));
+const EditAccessoriesITI = lazy(() => import('@/pages/QuotationITI/Accessories/Edit'));
+
+const CreateTNCITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Create'));
+const TNCManageITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Manage'));
+const TNCEditITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Edit'));
+// ========================================
 
 export type TAppRoute = {
     path: string;
@@ -127,7 +157,7 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Employees'],
         requiredPermissions: ['read'],
-        component: ManageEmployee,
+        component: ManageUser,
         layout: AppLayout,
     },
     {
@@ -146,6 +176,15 @@ export const routes: TAppRoute[] = [
         roles: ['Employees'],
         requiredPermissions: ['update'],
         component: EditEmployee,
+        layout: AppLayout,
+    },
+    {
+        path: '/users/edit/:id',
+        name: 'Employees',
+        isProtected: true,
+        roles: ['Employees'],
+        requiredPermissions: ['update'],
+        component: EditUser,
         layout: AppLayout,
     },
     {
@@ -412,6 +451,185 @@ export const routes: TAppRoute[] = [
         component: TNCEdit,
         layout: AppLayout,
     },
+
+    // ========================================
+    // QUOTATION ITI ROUTES
+    // ========================================
+    {
+        path: '/quotations-iti/administration/customers',
+        name: 'Customer ITI Quotation',
+        isProtected: true,
+        roles: ['Customer ITI Quotation'],
+        component: ManageCustomersITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/administration/customers/create',
+        name: 'Customer ITI Quotation',
+        isProtected: true,
+        roles: ['Customer ITI Quotation'],
+        requiredPermissions: ['create'],
+        component: CreateCustomersITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/administration/customers/edit/:id',
+        name: 'Customer ITI Quotation',
+        isProtected: true,
+        roles: ['Customer ITI Quotation'],
+        requiredPermissions: ['update', 'read'],
+        component: EditCustomersITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/administration/bank-accounts',
+        name: 'Bank ITI Quotation',
+        isProtected: true,
+        roles: ['Bank ITI Quotation'],
+        component: ManageBankITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/administration/bank-accounts/create',
+        name: 'Bank ITI Quotation',
+        isProtected: true,
+        roles: ['Bank ITI Quotation'],
+        requiredPermissions: ['create'],
+        component: CreateBankITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/administration/bank-accounts/edit/:id',
+        name: 'Bank ITI Quotation',
+        isProtected: true,
+        roles: ['Bank ITI Quotation'],
+        requiredPermissions: ['update', 'read'],
+        component: EditBankITI,
+        layout: AppLayout,
+    },
+    // ISLAND ROUTES
+    {
+        path: '/quotations-iti/administration/islands',
+        name: 'Island',
+        isProtected: true,
+        roles: ['Island'],
+        component: ManageIslandITI,
+        requiredPermissions: ['read'],
+        layout: AppLayout,
+    },
+    
+    {
+        path: '/quotations-iti/products',
+        name: 'Product ITI Quotation',
+        isProtected: true,
+        roles: ['Product ITI Quotation'],
+        component: ManageItemsProductITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/products/create',
+        name: 'Product ITI Quotation',
+        isProtected: true,
+        roles: ['Product ITI Quotation'],
+        requiredPermissions: ['create'],
+        component: CreateItemsProductITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/products/edit/:id',
+        name: 'Product ITI Quotation',
+        isProtected: true,
+        roles: ['Product ITI Quotation'],
+        requiredPermissions: ['update', 'read'],
+        component: EditItemsProductITI,
+        layout: AppLayout,
+    },
+
+    {
+        path: '/quotations-iti/manage',
+        name: 'Manage ITI Quotation',
+        isProtected: true,
+        roles: ['Manage ITI Quotation'],
+        component: ManageQuotationITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/manage/create',
+        name: 'Manage ITI Quotation',
+        isProtected: true,
+        roles: ['Manage ITI Quotation'],
+        requiredPermissions: ['create'],
+        component: CreateQuotationITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/manage/edit/:quotationId',
+        name: 'Manage ITI Quotation',
+        isProtected: true,
+        roles: ['Manage ITI Quotation'],
+        requiredPermissions: ['update', 'read'],
+        component: EditQuotationITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/accessories',
+        name: 'Accessories ITI Quotation',
+        isProtected: true,
+        roles: ['Accessories ITI Quotation'],
+        requiredPermissions: ['read'],
+        component: AccessoriesProductITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/accessories/create',
+        name: 'Accessories ITI Quotation',
+        isProtected: true,
+        roles: ['Accessories ITI Quotation'],
+        requiredPermissions: ['create'],
+        component: CreateAccessoriesITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/accessories/edit/:id',
+        name: 'Accessories ITI Quotation',
+        isProtected: true,
+        roles: ['Accessories ITI Quotation'],
+        requiredPermissions: ['update', 'read'],
+        component: EditAccessoriesITI,
+        layout: AppLayout,
+    },
+    
+    {
+        path: '/quotations-iti/term-condition/create',
+        name: 'TNC ITI Quotation',
+        isProtected: true,
+        roles: ['TNC ITI Quotation'],
+        requiredPermissions: ['create'],
+        component: CreateTNCITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/term-condition',
+        name: 'TNC ITI Quotation',
+        isProtected: false,
+        roles: ['TNC ITI Quotation'],
+        requiredPermissions: ['read'],
+        component: TNCManageITI,
+        layout: AppLayout,
+    },
+    {
+        path: '/quotations-iti/term-condition/edit/:id',
+        name: 'TNC ITI Quotation',
+        isProtected: true,
+        roles: ['TNC ITI Quotation'],
+        requiredPermissions: ['update', 'read'],
+        component: TNCEditITI,
+        layout: AppLayout,
+    },
+    // ========================================
+    // END QUOTATION ITI ROUTES
+    // ========================================
+
     // ROE CALCULATOR ROUTES
     {
         path: '/roe-roa-calculator/manage/create',

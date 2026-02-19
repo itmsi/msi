@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+﻿import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-hot-toast';
 import { MdSave, MdKeyboardArrowLeft, MdAdd, MdDelete } from 'react-icons/md';
@@ -28,7 +28,7 @@ import { ItemProduct } from '../Product/types/product';
 import { useCreateQuotation } from './hooks/useCreateQuotation';
 import { useAsyncSelect, SelectOption } from '../hooks/useAsyncSelect';
 import { useTermConditionSelect, TermConditionSelectOption } from '../hooks/useTermConditionSelect';
-import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalInput, handleDecimalInputComma, formatNumberInputwithComma, handlePercentageInputComma } from '@/helpers/generalHelper';
+import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalInput, handleDecimalInputComma, formatNumberInputwithComma, handlePercentageInputComma, getCompanyName } from '@/helpers/generalHelper';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { ItemProductService } from '../Product/services/productService';
 import { QuotationService } from './services/quotationService';
@@ -39,9 +39,13 @@ import { useCustomerSelect } from '../hooks/useCustomerSelect';
 import Checkbox from '@/components/form/input/Checkbox';
 import { FaEye } from 'react-icons/fa6';
 import { IslandSelectOption, useIslandSelect } from '@/hooks/useIslandSelect';
+import { useLanguage } from '@/components/lang/useLanguage';
+import { quotationLabels } from './language/quotationLabels';
+import LanguageSwitcher from '@/components/lang/LanguageSwitcher';
 
 export default function CreateQuotation() {
     const navigate = useNavigate();
+    const { lang, langField, setLang } = useLanguage(quotationLabels);
     const { isCreating, validationErrors, clearFieldError, createQuotation } = useCreateQuotation();
 
     // Use useEmployees hook
@@ -138,7 +142,8 @@ export default function CreateQuotation() {
         include_msf_page: false,        // Added for API payload
         status: 'draft',
         manage_quotation_items: [],
-        manage_quotation_item_accessories: [] // Will be removed from form level
+        manage_quotation_item_accessories: [],
+        company: getCompanyName()
     });
 
     // Date picker states for separate invoice and due dates
@@ -1061,30 +1066,31 @@ export default function CreateQuotation() {
                                 <MdKeyboardArrowLeft size={20} />
                             </Button>
                             <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Create Quotation</h1>
+                            <h1 className="ms-2 font-primary-bold font-normal text-xl">{langField('createQuotation')}</h1>
                         </div>
+                        <LanguageSwitcher currentLang={lang} onChangeLang={setLang} />
                     </div>
 
                     {/* Form */}
                     <form onSubmit={(e) => handleSubmit(e, 'submit')} className="space-y-6">
                         <div className='md:grid-cols-5 grid gap-6'>
                             <div className="bg-white rounded-2xl shadow-sm p-6 lg:col-span-3">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">Quotation Detail</h2>
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('quotationDetail')}</h2>
                                 <div className='md:grid-cols-2 grid gap-x-5'>
                                     <div className="md:col-span-1 space-y-3">
                                         {/* INVOICE NUMBER */}
                                         <div>
-                                            <Label htmlFor="quotation_number">Quotation Number</Label>
+                                            <Label htmlFor="quotation_number">{langField('quotationNumber')}</Label>
                                             <Input
                                                 id="quotation_number"
                                                 type="text"
-                                                value={`###/IEC-MSI/${monthRoman}/${new Date().getFullYear()}`}
+                                                value={`###/${getCompanyName()}/${monthRoman}/${new Date().getFullYear()}`}
                                                 disabled={true}
                                             />
                                         </div>
                                         {/* Quotation Date */}
                                         <div>
-                                            <Label>Quotation Date</Label>
+                                            <Label>{langField('quotationDate')}</Label>
                                             <div className="relative" ref={invoiceDatePickerRef}>
                                                 <div
                                                     className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 h-11"
@@ -1117,7 +1123,7 @@ export default function CreateQuotation() {
                                         </div>
                                         {/* Due Date */}
                                         <div>
-                                            <Label>Quotation Valid Until</Label>
+                                            <Label>{langField('quotationValidUntil')}</Label>
                                             <div className="relative" ref={dueDatePickerRef}>
                                                 <div
                                                     className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 h-11"
@@ -1134,35 +1140,35 @@ export default function CreateQuotation() {
                                                 {showDueDatePicker && (
                                                     <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
                                                         <div className="p-3 border-b border-gray-200">
-                                                            <div className="text-sm text-gray-600 mb-2">Quick Select:</div>
+                                                            <div className="text-sm text-gray-600 mb-2">{langField('quickSelect')}</div>
                                                             <div className="flex flex-wrap gap-2">
                                                                 <button
                                                                     type="button"
                                                                     className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
                                                                     onClick={() => handleDueDateChange(new Date(invoiceDate.getTime() + 24 * 60 * 60 * 1000))}
                                                                 >
-                                                                    +1 Day
+                                                                    {langField('plus1Day')}
                                                                 </button>
                                                                 <button
                                                                     type="button"
                                                                     className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
                                                                     onClick={() => handleDueDateChange(new Date(invoiceDate.getTime() + 7 * 24 * 60 * 60 * 1000))}
                                                                 >
-                                                                    +7 Days
+                                                                    {langField('plus7Days')}
                                                                 </button>
                                                                 <button
                                                                     type="button"
                                                                     className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
                                                                     onClick={() => handleDueDateChange(new Date(invoiceDate.getTime() + 14 * 24 * 60 * 60 * 1000))}
                                                                 >
-                                                                    +14 Days
+                                                                    {langField('plus14Days')}
                                                                 </button>
                                                                 <button
                                                                     type="button"
                                                                     className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
                                                                     onClick={() => handleDueDateChange(new Date(invoiceDate.getTime() + 30 * 24 * 60 * 60 * 1000))}
                                                                 >
-                                                                    +30 Days
+                                                                    {langField('plus30Days')}
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -1184,7 +1190,7 @@ export default function CreateQuotation() {
 
                                         {/* Quotation For */}
                                         <div>
-                                            <Label htmlFor="quotation_for">Quotation For</Label>
+                                            <Label htmlFor="quotation_for">{langField('quotationFor')}</Label>
                                             <CustomSelect
                                                 id="quotation_for"
                                                 value={
@@ -1207,7 +1213,7 @@ export default function CreateQuotation() {
                                     <div className="md:col-span-1 space-y-3">
                                         {/* Customer */}
                                         <div>
-                                            <Label>Select Customer</Label>
+                                            <Label>{langField('selectCustomer')}</Label>
                                             <CustomAsyncSelect
                                                 name="customer_id"
                                                 placeholder="Select customer..."
@@ -1235,7 +1241,7 @@ export default function CreateQuotation() {
                                         </div>
                                         {/* Employee */}
                                         <div>
-                                            <Label>Select Sales</Label>
+                                            <Label>{langField('selectSales')}</Label>
                                             <CustomAsyncSelect
                                                 placeholder="Select employee..."
                                                 value={selectedEmployee}
@@ -1262,7 +1268,7 @@ export default function CreateQuotation() {
                                         </div>
 
                                         <div>
-                                            <Label>Select Island</Label>
+                                            <Label>{langField('selectIsland')}</Label>
                                             <CustomAsyncSelect
                                                 placeholder="Select Island..."
                                                 value={selectedIsland}
@@ -1374,13 +1380,13 @@ export default function CreateQuotation() {
 
                                         {/* Star */}
                                         <div>
-                                            <Label htmlFor="star">Star</Label>
+                                            <Label htmlFor="star">{langField('star')}</Label>
                                             <Input
                                                 id="star"
                                                 type="text"
                                                 value={formData.star || ''}
                                                 onChange={(e) => handleInputChange('star', e.target.value)}
-                                                placeholder="Enter star value example 0"
+                                                placeholder={langField('placeholderStar')}
                                             />
                                         </div>
                                     </div>
@@ -1388,10 +1394,10 @@ export default function CreateQuotation() {
 
                             </div>
                             <div className="bg-white rounded-2xl shadow-sm p-6 lg:col-span-2 space-y-3">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">Beneficiary Details</h2>
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('beneficiaryDetails')}</h2>
                                 {/* GET BANK */}
                                 <div>
-                                    <Label>Select Bank</Label>
+                                    <Label>{langField('selectBank')}</Label>
                                     <CustomAsyncSelect
                                         placeholder="Select Bank..."
                                         value={selectedBank}
@@ -1419,37 +1425,37 @@ export default function CreateQuotation() {
 
                                 {/* Beneficiary Name */}
                                 <div>
-                                    <Label htmlFor="bank_account_name">Beneficiary Name</Label>
+                                    <Label htmlFor="bank_account_name">{langField('beneficiaryName')}</Label>
                                     <Input
                                         id="bank_account_name"
                                         type="text"
                                         value={formData.bank_account_name || ''}
                                         readonly={true}
-                                        placeholder="Auto filled when bank selected"
+                                        placeholder={langField('autoFilledWhenBankSelected')}
                                         className="bg-gray-100 cursor-not-allowed"
                                     />
                                 </div>
                                 {/* Beneficiary Bank */}
                                 <div>
-                                    <Label htmlFor="bank_account_type">Beneficiary Bank</Label>
+                                    <Label htmlFor="bank_account_type">{langField('beneficiaryBank')}</Label>
                                     <Input
                                         id="bank_account_type"
                                         type="text"
                                         value={formData.bank_account_type || ''}
                                         readonly={true}
-                                        placeholder="Auto filled when bank selected"
+                                        placeholder={langField('autoFilledWhenBankSelected')}
                                         className="bg-gray-100 cursor-not-allowed"
                                     />
                                 </div>
                                 {/* Beneficiary Account */}
                                 <div>
-                                    <Label htmlFor="bank_account_number">Beneficiary Account</Label>
+                                    <Label htmlFor="bank_account_number">{langField('beneficiaryAccount')}</Label>
                                     <Input
                                         id="bank_account_number"
                                         type="text"
                                         value={formData.bank_account_number || ''}
                                         readonly={true}
-                                        placeholder="Auto filled when bank selected"
+                                        placeholder={langField('autoFilledWhenBankSelected')}
                                         className="bg-gray-100 cursor-not-allowed"
                                     />
                                 </div>
@@ -1462,10 +1468,10 @@ export default function CreateQuotation() {
                             {/* Products Section */}
                             <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5 col-span-1">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 pb-6 relative">
-                                    Products
+                                    {langField('products')}
 
                                     {!formData.island_id && (
-                                        <span className="text-sm text-orange-500 font-primary italic mt-1 block absolute bottom-0">Please select an island first to add products</span>
+                                        <span className="text-sm text-orange-500 font-primary italic mt-1 block absolute bottom-0">{langField('selectIslandFirst')}</span>
                                     )}
                                 </h2>
 
@@ -1512,7 +1518,7 @@ export default function CreateQuotation() {
                                         disabled={!selectedProduct || !formData.island_id}
                                     >
                                         <MdAdd size={16} />
-                                        Add Product
+                                        {langField('addProduct')}
                                     </Button>
                                 </div>
 
@@ -1529,7 +1535,7 @@ export default function CreateQuotation() {
                                             highlightOnHover
                                             noDataComponent={
                                                 <div className="text-center py-8 text-gray-500">
-                                                    No products added yet
+                                                    {langField('noProductsYet')}
                                                 </div>
                                             }
                                         />
@@ -1545,11 +1551,11 @@ export default function CreateQuotation() {
                         <div className='md:grid-cols-5 grid gap-6'>
 
                             <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-3 space-y-6">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Terms & Conditions</h2>
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('termsConditions')}</h2>
 
                                 {/* Term Condition */}
                                 <div className="md:col-span-2">
-                                    <Label>Term Condition</Label>
+                                    <Label>{langField('termCondition')}</Label>
                                     <CustomAsyncSelect
                                         name="term_condition"
                                         placeholder="Select term condition..."
@@ -1587,18 +1593,18 @@ export default function CreateQuotation() {
                                 <div className="md:col-span-2">
                                     <WysiwygEditor
                                         id="wysiwyg-editor"
-                                        label={termConditionLoading ? 'Term Content (Loading...)' : 'Term Content'}
+                                        label={termConditionLoading ? langField('termContentLoading') : langField('termContent')}
                                         value={termConditionContent}
                                         onChange={(content) => {
                                             setTermConditionContent(content);
                                             handleInputChange('term_content_directory', content);
                                         }}
-                                        placeholder="Select a term condition or start typing..."
+                                        placeholder={langField('selectTermCondition')}
                                         minHeight="200px"
                                         disabled={termConditionLoading}
                                     />
                                     <div className="text-xs text-gray-500 mt-1">
-                                        Selected: {selectedTermCondition?.label || ''}
+                                        {langField('selected')}: {selectedTermCondition?.label || ''}
                                     </div>
                                 </div>
                             </div>
@@ -1607,7 +1613,7 @@ export default function CreateQuotation() {
                             <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
                                 <div className="space-y-3">
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                        <Label htmlFor="manage_quotation_items" className='text-end'>Subtotal</Label>
+                                        <Label htmlFor="manage_quotation_items" className='text-end'>{langField('subtotal')}</Label>
                                         <Input
                                             id="manage_quotation_items"
                                             type="text"
@@ -1623,7 +1629,7 @@ export default function CreateQuotation() {
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                                         <Label>
                                             <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center text-end'>
-                                                PPN
+                                                {langField('ppn')}
                                                 <div className="relative md:col-span-1">
                                                     <Input
                                                         id="manage_quotation_ppn"
@@ -1659,7 +1665,7 @@ export default function CreateQuotation() {
 
                                     {/* Delivery Fee */}
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                        <Label htmlFor="manage_quotation_delivery_fee" className='text-end mb-0'>Delivery Fee</Label>
+                                        <Label htmlFor="manage_quotation_delivery_fee" className='text-end mb-0'>{langField('deliveryFee')}</Label>
                                         <Input
                                             id="manage_quotation_delivery_fee"
                                             type="text"
@@ -1672,7 +1678,7 @@ export default function CreateQuotation() {
                                     </div>
                                     {/* Other Fee */}
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                        <Label htmlFor="manage_quotation_other" className='text-end mb-0'>Other Fee</Label>
+                                        <Label htmlFor="manage_quotation_other" className='text-end mb-0'>{langField('otherFee')}</Label>
                                         <Input
                                             id="manage_quotation_other"
                                             type="text"
@@ -1687,16 +1693,16 @@ export default function CreateQuotation() {
                                     {/* Mutation Type & Nominal */}
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center border-t border-gray-300 pt-4 mt-4'>
                                         <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                            <Label htmlFor="manage_quotation_mutation_type" className='text-end mb-0'>Adjustment Type</Label>
+                                            <Label htmlFor="manage_quotation_mutation_type" className='text-end mb-0'>{langField('adjustmentType')}</Label>
                                             <select
                                                 id="manage_quotation_mutation_type"
                                                 value={formData.manage_quotation_mutation_type || ''}
                                                 onChange={(e) => handleInputChange('manage_quotation_mutation_type', e.target.value)}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             >
-                                                <option value="">No Adjustment</option>
-                                                <option value="plus">Plus (+)</option>
-                                                <option value="minus">Minus (-)</option>
+                                                <option value="">{langField('noAdjustment')}</option>
+                                                <option value="plus">{langField('plus')}</option>
+                                                <option value="minus">{langField('minus')}</option>
                                             </select>
                                         </div>
                                         <Input
@@ -1721,7 +1727,7 @@ export default function CreateQuotation() {
                                     {formData.manage_quotation_mutation_type && (
                                         <>
                                             <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                                <Label className='text-end mb-0 text-gray-600'>Grand Total (Before Adjustment)</Label>
+                                                <Label className='text-end mb-0 text-gray-600'>{langField('grandTotalBefore')}</Label>
                                                 <Input
                                                     type="text"
                                                     value={(parseFloat(formData.manage_quotation_grand_total_before || '0')).toLocaleString('id-ID')}
@@ -1733,7 +1739,7 @@ export default function CreateQuotation() {
                                     )}
 
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-300 pt-4 mt-4 items-center'>
-                                        <Label className='font-bold text-lg mb-0 text-end'>Grand Total</Label>
+                                        <Label className='font-bold text-lg mb-0 text-end'>{langField('grandTotal')}</Label>
                                         <Input
                                             type="text"
                                             onKeyPress={handleKeyPress}
@@ -1746,7 +1752,7 @@ export default function CreateQuotation() {
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                                         <Label htmlFor="manage_quotation_payment_presentase" className='text-end mb-0'>
                                             <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center text-end'>
-                                                Down Payment
+                                                {langField('downPayment')}
                                                 <div className="relative md:col-span-1">
                                                     <Input
                                                         id="manage_quotation_payment_presentase"
@@ -1784,7 +1790,7 @@ export default function CreateQuotation() {
                                     </div>
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
                                         <Label className='text-end mb-0'>
-                                            Remaining Payment
+                                            {langField('remainingPayment')}
                                         </Label>
                                         <Input
                                             type="text"
@@ -1800,60 +1806,60 @@ export default function CreateQuotation() {
 
                         <div className='md:grid-cols-5 grid gap-6'>
                             <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-3 space-y-6">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Shipping T&C</h2>
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('shippingTC')}</h2>
                                 <div className='md:grid-cols-3 grid gap-6'>
                                     {/* Shipping Term */}
                                     <div>
-                                        <Label htmlFor="manage_quotation_shipping_term">Shipping Term</Label>
+                                        <Label htmlFor="manage_quotation_shipping_term">{langField('shippingTerm')}</Label>
                                         <Input
                                             id="manage_quotation_shipping_term"
                                             type="text"
                                             value={formData?.manage_quotation_shipping_term}
                                             onChange={(e) => handleInputChange('manage_quotation_shipping_term', e.target.value)}
-                                            placeholder="Enter shipping term..."
+                                            placeholder={langField('placeholderShippingTerm')}
                                         />
                                     </div>
 
                                     {/* Franco */}
                                     <div>
-                                        <Label htmlFor="manage_quotation_franco">Franco</Label>
+                                        <Label htmlFor="manage_quotation_franco">{langField('franco')}</Label>
                                         <Input
                                             id="manage_quotation_franco"
                                             type="text"
                                             value={formData.manage_quotation_franco}
                                             onChange={(e) => handleInputChange('manage_quotation_franco', e.target.value)}
-                                            placeholder="Enter franco..."
+                                            placeholder={langField('placeholderFranco')}
                                         />
                                     </div>
 
                                     {/* Lead Time */}
                                     <div>
-                                        <Label htmlFor="manage_quotation_lead_time">Lead Time</Label>
+                                        <Label htmlFor="manage_quotation_lead_time">{langField('leadTime')}</Label>
                                         <Input
                                             id="manage_quotation_lead_time"
                                             type="text"
                                             value={formData.manage_quotation_lead_time}
                                             onChange={(e) => handleInputChange('manage_quotation_lead_time', e.target.value)}
-                                            placeholder="Enter lead time..."
+                                            placeholder={langField('placeholderLeadTime')}
                                         />
                                     </div>
                                 </div>
                             </div>
                             <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">Additional Pages</h2>
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('additionalPages')}</h2>
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3">
                                         <Checkbox
                                             checked={formData.include_aftersales_page ?? true}
                                             onChange={(checked) => handleInputChange('include_aftersales_page', checked)}
-                                            label="Include Aftersales Page"
+                                            label={langField('includeAftersalesPage')}
                                         />
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <Checkbox
                                             checked={formData.include_msf_page ?? false}
                                             onChange={(checked) => handleInputChange('include_msf_page', checked)}
-                                            label="Include MSF Page"
+                                            label={langField('includeMsfPage')}
                                         />
                                     </div>
                                 </div>
@@ -1869,7 +1875,7 @@ export default function CreateQuotation() {
                                 className="px-6 rounded-full"
                                 disabled={isCreating}
                             >
-                                Cancel
+                                {langField('cancel')}
                             </Button>
                             {/* <Button
                                 type="button"
@@ -1890,7 +1896,7 @@ export default function CreateQuotation() {
                                 className="px-6 flex items-center gap-2 rounded-full"
                             >
                                 <MdSave size={16} />
-                                {isCreating ? 'Submitting...' : 'Submit Quotation'}
+                                {isCreating ? langField('submitting') : langField('submitQuotation')}
                             </Button>
                         </div>
                     </form>

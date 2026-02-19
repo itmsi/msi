@@ -12,6 +12,7 @@ export const useQuotationManagement = () => {
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; quotationId?: string; }>({ show: false });
+    const [confirmDuplicate, setConfirmDuplicate] = useState<{ show: boolean; quotationId?: string; }>({ show: false });
 
     const { 
         quotations,
@@ -23,6 +24,7 @@ export const useQuotationManagement = () => {
         handleSearchChange: quotationSearch,
         deleteQuotation,
         downloadQuotation,
+        duplicateQuotation,
         updateFilters,
         applyFilters,
         clearAllFilters 
@@ -127,6 +129,28 @@ export const useQuotationManagement = () => {
         setConfirmDelete({ show: false });
     }, []);
 
+    const handleDuplicate = useCallback((quotation: any) => {
+        const quotationId = typeof quotation === 'string' ? quotation : quotation.manage_quotation_id;
+        setConfirmDuplicate({ show: true, quotationId: quotationId });
+    }, []);
+
+    const confirmDuplicateQuotations = useCallback(async () => {
+        if (!confirmDuplicate.quotationId) return;
+
+        try {
+            await duplicateQuotation(confirmDuplicate.quotationId);
+            setConfirmDuplicate({ show: false });
+            // Refresh data setelah duplicate
+            fetchQuotations(currentPage, itemsPerPage);
+        } catch (error) {
+            console.error('Failed to duplicate quotation:', error);
+        }
+    }, [confirmDuplicate.quotationId, duplicateQuotation, fetchQuotations, currentPage, itemsPerPage]);
+
+    const cancelDuplicate = useCallback(() => {
+        setConfirmDuplicate({ show: false });
+    }, []);
+
     return {
         searchTerm,
         setSearchTerm,
@@ -140,8 +164,12 @@ export const useQuotationManagement = () => {
         confirmDelete,
         confirmDeleteQuotations,
         cancelDelete,
+        confirmDuplicate,
+        confirmDuplicateQuotations,
+        cancelDuplicate,
         handleDelete,
         handleDownload,
+        handleDuplicate,
         handlePageChange,
         handleRowsPerPageChange,
         handleSearchChange,
