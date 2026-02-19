@@ -565,45 +565,9 @@ export default function EditQuotation() {
         handleInputChange(field, numberic);
     };
 
-    // const handleDecimalInputChange = (field: keyof QuotationFormData, inputValue: string) => {
-    //     // Allow digits, comma, and dot
-    //     const cleaned = inputValue.replace(/[^\d,.]/g, '');
-    //     handleInputChange(field, cleaned);
-    // };
-
     const handleNumericCleanInput = (field: keyof QuotationFormData, inputValue: string) => {
         handleInputChange(field, inputValue);
     };
-
-    // Format decimal for display - preserves decimal separator and trailing digits
-    // const formatDecimalDisplayInput = (value: string | undefined | null): string => {
-    //     if (!value) return '';
-
-    //     const str = value.toString();
-
-    //     // Check if there's a decimal separator (comma or dot)
-    //     const hasComma = str.includes(',');
-    //     const hasDot = str.includes('.');
-
-    //     if (!hasComma && !hasDot) {
-    //         // No decimal - just format as integer with thousand separators
-    //         const cleaned = str.replace(/[^\d]/g, '');
-    //         if (!cleaned) return '';
-    //         return new Intl.NumberFormat('id-ID').format(parseInt(cleaned));
-    //     }
-
-    //     // Has decimal separator - preserve it
-    //     const separator = hasComma ? ',' : '.';
-    //     const parts = str.split(separator);
-    //     const integerPart = parts[0].replace(/[^\d]/g, '') || '0';
-    //     const decimalPart = parts[1] || '';
-
-    //     // Format integer part with thousand separators
-    //     const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart));
-
-    //     // Return with comma as decimal separator (Indonesian format)
-    //     return `${formattedInteger},${decimalPart}`;
-    // };
 
     const handlePercentageInputChange = (field: keyof QuotationFormData, inputValue: string) => {
         handleInputChange(field, handlePercentageInput(inputValue));
@@ -866,9 +830,6 @@ export default function EditQuotation() {
             toast.error('Product not found in quotation');
             return;
         }
-console.log({
-    existingItem: formData.manage_quotation_items
-});
 
         // Initialize offcanvas data if not exists
         if (!unsavedProductChanges[productId]) {
