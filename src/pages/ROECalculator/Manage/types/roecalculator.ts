@@ -102,6 +102,7 @@ export interface RorListRequest {
   search?: string;
   is_admin?: string | boolean;
   sort_order?: "asc" | "desc";
+  sort_by?: string;
   status?: string; // contoh: "draft", "published"
   commodity?: string | 'batu bara' | 'nikel'; 
 }
