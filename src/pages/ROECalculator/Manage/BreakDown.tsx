@@ -4,12 +4,6 @@ import { MdKeyboardArrowLeft, MdAdd, MdEdit, MdDeleteOutline } from 'react-icons
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts/core';
 import { BarChart, PieChart } from 'echarts/charts';
-import { 
-    // TitleComponent,
-    // TooltipComponent,
-    // GridComponent,
-    // LegendComponent
-} from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { TableColumn } from 'react-data-table-component';
 import { toast } from 'react-hot-toast';
@@ -30,12 +24,9 @@ import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import Alert from '@/components/ui/alert/Alert';
+import CustomSelect from '@/components/form/select/CustomSelect';
 
 echarts.use([
-    // TitleComponent,
-    // TooltipComponent,
-    // GridComponent,
-    // LegendComponent,
     BarChart,
     PieChart,
     CanvasRenderer
@@ -76,10 +67,21 @@ export default function BreakdownROECalculator() {
         name: ''
     });
     const [isDeletingCompare, setIsDeletingCompare] = useState(false);
+    
+    // Sort states
+    const [sortField, setSortField] = useState<string>('created_at');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const fetchCompareData = async (params: Partial<CompareListRequest> = {}) => {
         try {
-            const response = await RoecalculatorService.getCompareRoe(params);
+            // Add sort parameters to the request
+            const requestParams = {
+                ...params,
+                sort_by: sortField,
+                sort_order: sortDirection
+            };
+            
+            const response = await RoecalculatorService.getCompareRoe(requestParams);
             if (response.success) {
                 setCompareBreakDown(response.data.data);
                 const apiPagination = response.data.pagination;
@@ -395,8 +397,35 @@ export default function BreakdownROECalculator() {
         }
     ];
 
+    // Handle sort changes
+    const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+        setSortField(field);
+        setSortDirection(direction);
+    };
+
+    // Refetch data when sort changes
+    useEffect(() => {
+        if (calculatorId) {
+            const compareParams = {
+                quote_id: calculatorId,
+                page: 1,
+                limit: 10,
+            };
+            fetchCompareData(compareParams);
+        }
+    }, [sortField, sortDirection]);
+
     // Compare section component
     const CompareBreakdownSection = () => {
+        const sortOptions = [
+            { value: 'created_at', label: 'Created At' },
+            { value: 'brand', label: 'Brand' },
+            { value: 'qty', label: 'Quantity' },
+            { value: 'roe_percentage', label: 'ROE %' },
+            { value: 'roa_percentage', label: 'ROA %' },
+            { value: 'revenue', label: 'Revenue' }
+        ];
+
         return (
             <div className="bg-white rounded-xl shadow-sm p-6 mt-8">
                 <div className="flex justify-between items-center mb-6">
@@ -410,6 +439,47 @@ export default function BreakdownROECalculator() {
                             <MdAdd size={16} /> Tambah Perbandingan
                         </Button>
                     </PermissionGate>
+                </div>
+                
+                {/* Sort Controls */}
+                <div className="mb-6 flex flex-wrap items-center gap-4 p-4 bg-gray-50 rounded-lg hidden">
+                    <span className="text-sm font-medium text-gray-700">Sort by:</span>
+                    <div className="w-40 flex-none">
+                        <CustomSelect
+                            options={sortOptions}
+                            value={sortOptions.find(option => option.value === sortField) || sortOptions[0]}
+                            onChange={(option) => handleSortChange(option?.value || '', sortDirection)}
+                            placeholder="User Type"
+                            isClearable={false}
+                            isSearchable={false}
+                            className="font-secondary"
+                        />
+                    </div>
+                    <div className="flex items-center">
+                        <CustomSelect
+                            id="sort_order"
+                            name="sort_order"
+                            value={sortDirection ? { 
+                                value: sortDirection, 
+                                label: sortDirection === 'asc' ? 'Ascending' : 'Descending' 
+                            } : null}
+                            onChange={(selectedOption) => 
+                                handleSortChange(sortField, selectedOption?.value as 'asc' | 'desc' || 'asc')
+                            }
+                            options={[
+                                { value: 'asc', label: 'Ascending' },
+                                { value: 'desc', label: 'Descending' }
+                            ]}
+                            placeholder="Order by"
+                            isClearable={false}
+                            isSearchable={false}
+                            className="w-40"
+                        />
+                    </div>
+                    
+                    <div className="text-xs text-gray-500">
+                        Sorted by {sortOptions.find(opt => opt.value === sortField)?.label} ({sortDirection.toUpperCase()})
+                    </div>
                 </div>
                 
                 {/* Add horizontal scroll container */}

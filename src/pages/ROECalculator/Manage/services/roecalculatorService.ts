@@ -53,7 +53,8 @@ export class RoecalculatorService {
         const requestData: RorListRequest = {
             page: 1,
             limit: 10,
-            sort_order: 'desc',
+            sort_order: 'asc',
+            sort_by: 'created_at',
             search: '',
             ...params
         };
