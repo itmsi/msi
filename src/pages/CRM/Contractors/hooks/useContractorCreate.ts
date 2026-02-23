@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { ContractorFormData, ContractorUnit, RkabEntry, contactPerson } from '../types/contractor';
 import { ContractorServices } from '../services/contractorServices';
+import { CheckDuplicateCustomerPayload } from '@/pages/QuotationITI/Administration/Customers/types/customer';
+import { DuplicateCustomerResponse } from '@/pages/Administration/Customers/types/customer';
+import { CustomerService } from '@/pages/QuotationITI/Administration/Customers/services/customerService';
 
 interface ValidationErrors {
     [key: string]: string;
@@ -329,6 +332,78 @@ export const useContractorCreate = () => {
         return Object.keys(errors).length === 0;
     };
 
+    const getErrorMessage = (error: unknown): string => {
+        if (error instanceof Error) {
+            return error.message;
+        }
+        if (error && typeof error === 'object' && 'message' in error) {
+            return String(error.message);
+        }
+        return 'An unknown error occurred';
+    };
+
+    const [isValidating, setIsValidating] = useState(false);
+    const [validationResult, setValidationResult] = useState<DuplicateCustomerResponse | null>(null);
+    const [showConfirmation, setShowConfirmation] = useState(false);
+
+    const cancelConfirmation = useCallback(() => {
+        setValidationResult(null);
+        setShowConfirmation(false);
+    }, []);
+
+    const validateCustomer = useCallback(async (customer_name: string): Promise<{ success: boolean; message?: string; errors?: any }> => {
+        setIsValidating(true);
+        setValidationErrors({});
+        const payloadValidasi: CheckDuplicateCustomerPayload = {
+            customer_name: [customer_name],
+        };
+        try {
+            const response = await CustomerService.validateCustomer(payloadValidasi);
+            
+            if (response.success) {
+                setValidationResult(response);
+                setShowConfirmation(true);
+                return { success: true };
+            } else {
+                toast.error(response.message || 'Failed to validate customer');
+                return { 
+                    success: false, 
+                    message: response.message
+                };
+            }
+        } catch (err: any) {
+            const errorMessage = getErrorMessage(err);
+            toast.error(`Failed to validate customer: ${errorMessage}`);
+            
+            return { 
+                success: false, 
+                message: errorMessage, 
+                errors: err.response?.data?.errors 
+            };
+        } finally {
+            setIsValidating(false);
+        }
+    }, []);
+
+    // Form submission
+    const handleValidateAndSubmit = async () => {
+        if (!validateForm()) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+
+        try {
+            // First validate for duplicates
+            const response = await validateCustomer(formData.customer_data.customer_name);
+            
+            if (!response.success) {
+                toast.error(response.message || 'Validation failed');
+            }
+        } catch (error: any) {
+            console.error('Error validating customer:', error);
+            toast.error(error.message || 'An error occurred while validating customer');
+        }
+    };
     // Submit handler
     const handleSubmit = async () => {
         if (!validateForm()) {
@@ -410,6 +485,13 @@ export const useContractorCreate = () => {
         
         // Form handlers
         validateForm,
+
+        isValidating,
+        showConfirmation,
+        validationResult,
+        cancelConfirmation,
+        validateCustomer,
+        handleValidateAndSubmit,
         handleSubmit
     };
 };
