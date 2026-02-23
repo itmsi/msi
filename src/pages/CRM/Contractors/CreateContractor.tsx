@@ -247,9 +247,9 @@ const CreateContractor: React.FC = () => {
                     isOpen={showConfirmation}
                     onClose={cancelConfirmation}
                     onConfirm={handleSubmit}
-                    title="Confirm Customer Creation"
+                    title="Confirm Contractor Creation"
                     message={getValidationModalContent()}
-                    confirmText="Create Customer"
+                    confirmText="Create Contractor"
                     cancelText="Cancel"
                     type={validationResult.data.hasDuplicates ? 'info' : 'success'}
                     loading={isSubmitting}
