@@ -17,7 +17,6 @@ import {
 } from './components';
 import FormActions from '@/components/form/FormActions';
 import ActivitySelections from './components/ActivitySelections';
-import { useCreateCustomer } from '@/pages/QuotationITI/Administration/Customers/hooks/useCustomerCreate';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 
 const CreateContractor: React.FC = () => {
