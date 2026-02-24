@@ -28,6 +28,8 @@ const CreateContractor: React.FC = () => {
         validationErrors,
         isSubmitting,
         brandInputValues,
+        handleNewCustomerToggle,
+        handleExistingCustomerSelect,
         handleCustomerChange,
         handleAddContact,
         handleRemoveContact,
@@ -181,6 +183,8 @@ const CreateContractor: React.FC = () => {
                         onAddContact={handleAddContact}
                         onRemoveContact={handleRemoveContact}
                         onContactChange={handleContactChange}
+                        onNewCustomerToggle={handleNewCustomerToggle}
+                        onExistingCustomerSelect={handleExistingCustomerSelect}
                     />
 
                     {/* IUP Customer Info Form */}

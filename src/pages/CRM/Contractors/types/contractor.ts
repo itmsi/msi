@@ -144,7 +144,8 @@ export interface ContractorFormData {
         customer_state: string;
         customer_zip: string;
         customer_country: string;
-        contact_persons: contactPerson[]
+        contact_persons: contactPerson[];
+        new_customer: boolean;
     };
     iup_customers: {
         iup_id: string;
