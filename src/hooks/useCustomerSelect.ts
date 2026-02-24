@@ -14,7 +14,7 @@ export interface CustomerPaginationState {
     loading: boolean;
 }
 
-export const useCustomerSelect = () => {
+export const useCustomerSelect = (limit: number = 30) => {
     const [customerOptions, setCustomerOptions] = useState<CustomerSelectOption[]>([]);
     const [pagination, setPagination] = useState<CustomerPaginationState>({
         page: 1,
@@ -37,7 +37,7 @@ export const useCustomerSelect = () => {
             const response = await CustomerService.getCustomers({
                 search: inputValue,
                 page: page,
-                limit: 30,
+                limit: limit,
                 sort_order: 'desc'
             });
 

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { ContractorFormData, ContractorUnit, RkabEntry, contactPerson } from '../types/contractor';
@@ -11,28 +11,34 @@ interface ValidationErrors {
     [key: string]: string;
 }
 
+const emptyCustomerData = {
+    customer_code: '',
+    customer_name: '',
+    customer_email: '',
+    customer_phone: '',
+    job_title: '',
+    contact_person: '',
+    customer_address: '',
+    customer_city: '',
+    customer_state: '',
+    customer_zip: '',
+    customer_country: '',
+    contact_persons: [],
+    new_customer: true
+};
+
 export const useContractorCreate = () => {
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isValidating, setIsValidating] = useState(false);
     const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
     const [brandInputValues, setBrandInputValues] = useState<Record<number, string>>({});
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [validationResult, setValidationResult] = useState<DuplicateCustomerResponse | null>(null);
 
     // Initial form data
     const [formData, setFormData] = useState<ContractorFormData>({
-        customer_data: {
-            customer_code: '',
-            customer_name: '',
-            customer_email: '',
-            customer_phone: '',
-            job_title: '',
-            contact_person: '',
-            customer_address: '',
-            customer_city: '',
-            customer_state: '',
-            customer_zip: '',
-            customer_country: '',
-            contact_persons: []
-        },
+        customer_data: { ...emptyCustomerData, new_customer: true },
         iup_customers: {
             iup_id: '',
             segmentation_id: '',
@@ -63,6 +69,53 @@ export const useContractorCreate = () => {
             parent_contractor_id: ''
         }
     });
+
+    // Toggle new_customer mode
+    const handleNewCustomerToggle = (isNew: boolean) => {
+        setFormData(prev => ({
+            ...prev,
+            customer_data: { ...emptyCustomerData, new_customer: isNew }
+        }));
+        setValidationErrors({});
+    };
+
+    // Handle existing customer selection → auto-fill customer_data
+    const handleExistingCustomerSelect = async (selectedOption: any) => {
+        if (!selectedOption) return;
+        try {
+            const response = await CustomerService.getCustomerById(selectedOption.value);
+            if (response.data?.success && response.data?.data) {
+                const c = response.data.data;
+                setFormData(prev => ({
+                    ...prev,
+                    customer_data: {
+                        customer_id: c.customer_id,
+                        customer_code: c.customer_code || '',
+                        customer_name: c.customer_name || '',
+                        customer_email: c.customer_email || '',
+                        customer_phone: c.customer_phone || '',
+                        job_title: c.job_title || '',
+                        contact_person: c.contact_person || '',
+                        customer_address: c.customer_address || '',
+                        customer_city: c.customer_city || '',
+                        customer_state: c.customer_state || '',
+                        customer_zip: c.customer_zip || '',
+                        customer_country: c.customer_country || '',
+                        contact_persons: (c.contact_persons || []).map((cp: any) => ({
+                            name: cp.contact_person_name || '',
+                            email: cp.contact_person_email || '',
+                            phone: cp.contact_person_phone || '',
+                            position: cp.contact_person_position || ''
+                        })),
+                        new_customer: false
+                    }
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching customer:', error);
+            toast.error('Gagal mengambil data customer');
+        }
+    };
 
     // Customer data handlers
     const handleCustomerChange = (field: keyof ContractorFormData['customer_data'], value: string) => {
@@ -332,85 +385,42 @@ export const useContractorCreate = () => {
         return Object.keys(errors).length === 0;
     };
 
-    const getErrorMessage = (error: unknown): string => {
-        if (error instanceof Error) {
-            return error.message;
-        }
-        if (error && typeof error === 'object' && 'message' in error) {
-            return String(error.message);
-        }
-        return 'An unknown error occurred';
-    };
-
-    const [isValidating, setIsValidating] = useState(false);
-    const [validationResult, setValidationResult] = useState<DuplicateCustomerResponse | null>(null);
-    const [showConfirmation, setShowConfirmation] = useState(false);
-
-    const cancelConfirmation = useCallback(() => {
-        setValidationResult(null);
-        setShowConfirmation(false);
-    }, []);
-
-    const validateCustomer = useCallback(async (customer_name: string): Promise<{ success: boolean; message?: string; errors?: any }> => {
-        setIsValidating(true);
-        setValidationErrors({});
-        const payloadValidasi: CheckDuplicateCustomerPayload = {
-            customer_name: [customer_name],
-        };
-        try {
-            const response = await CustomerService.validateCustomer(payloadValidasi);
-            
-            if (response.success) {
-                setValidationResult(response);
-                setShowConfirmation(true);
-                return { success: true };
-            } else {
-                toast.error(response.message || 'Failed to validate customer');
-                return { 
-                    success: false, 
-                    message: response.message
-                };
-            }
-        } catch (err: any) {
-            const errorMessage = getErrorMessage(err);
-            toast.error(`Failed to validate customer: ${errorMessage}`);
-            
-            return { 
-                success: false, 
-                message: errorMessage, 
-                errors: err.response?.data?.errors 
-            };
-        } finally {
-            setIsValidating(false);
-        }
-    }, []);
-
-    // Form submission
+    // Validate & prompt duplicate confirmation (only for new customer)
     const handleValidateAndSubmit = async () => {
         if (!validateForm()) {
             toast.error('Please fill in all required fields');
             return;
         }
 
-        try {
-            // First validate for duplicates
-            const response = await validateCustomer(formData.customer_data.customer_name);
-            
-            if (!response.success) {
-                toast.error(response.message || 'Validation failed');
-            }
-        } catch (error: any) {
-            console.error('Error validating customer:', error);
-            toast.error(error.message || 'An error occurred while validating customer');
-        }
-    };
-    // Submit handler
-    const handleSubmit = async () => {
-        if (!validateForm()) {
-            toast.error('Please fill in all required fields');
+        // Skip duplicate validation for existing customer
+        if (!formData.customer_data.new_customer) {
+            await handleSubmit();
             return;
         }
 
+        setIsValidating(true);
+        try {
+            const payload: CheckDuplicateCustomerPayload = {
+                customer_name: [formData.customer_data.customer_name]
+            };
+            const result = await CustomerService.validateCustomer(payload);
+            setValidationResult(result);
+            setShowConfirmation(true);
+        } catch (error) {
+            console.error('Validation error:', error);
+            await handleSubmit();
+        } finally {
+            setIsValidating(false);
+        }
+    };
+
+    const cancelConfirmation = () => {
+        setShowConfirmation(false);
+        setValidationResult(null);
+    };
+
+    // Submit handler
+    const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
             // Transform RKAB entries to properties JSON
@@ -447,6 +457,7 @@ export const useContractorCreate = () => {
             toast.error('Failed to create contractor');
         } finally {
             setIsSubmitting(false);
+            setShowConfirmation(false);
         }
     };
 
@@ -455,8 +466,15 @@ export const useContractorCreate = () => {
         formData,
         validationErrors,
         isSubmitting,
+        isValidating,
+        showConfirmation,
+        validationResult,
         brandInputValues,
         
+        // new_customer toggle
+        handleNewCustomerToggle,
+        handleExistingCustomerSelect,
+
         // Customer handlers
         handleCustomerChange,
         handleAddContact,
@@ -485,12 +503,7 @@ export const useContractorCreate = () => {
         
         // Form handlers
         validateForm,
-
-        isValidating,
-        showConfirmation,
-        validationResult,
         cancelConfirmation,
-        validateCustomer,
         handleValidateAndSubmit,
         handleSubmit
     };
