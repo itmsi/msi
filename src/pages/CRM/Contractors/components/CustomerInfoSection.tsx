@@ -13,8 +13,8 @@ interface CustomerInfoProps {
     onAddContact: () => void;
     onRemoveContact: (index: number) => void;
     onContactChange: (index: number, field: keyof contactPerson, value: string | number) => void;
-    onNewCustomerToggle: (isNew: boolean) => void;
-    onExistingCustomerSelect: (option: any) => Promise<void>;
+    onNewCustomerToggle?: (isNew: boolean) => void;
+    onExistingCustomerSelect?: (option: any) => Promise<void>;
 }
 
 const CustomerInfoSection: React.FC<CustomerInfoProps> = ({ 
