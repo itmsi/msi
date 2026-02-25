@@ -31,7 +31,8 @@ export const useContractorEdit = () => {
             customer_state: '',
             customer_zip: '',
             customer_country: '',
-            contact_persons: []
+            contact_persons: [],
+            new_customer: false
         },
         iup_customers: {
             iup_id: '',
@@ -92,7 +93,8 @@ export const useContractorEdit = () => {
                             customer_state: response.data.customer_data.customer_state || '',
                             customer_zip: response.data.customer_data.customer_zip || '',
                             customer_country: response.data.customer_data.customer_country || '',
-                            contact_persons: response.data.customer_data.contact_persons || []
+                            contact_persons: response.data.customer_data.contact_persons || [],
+                            new_customer: false
                         },
                         iup_customers: {
                             iup_id: response.data.iup_customers.iup_id || '',
