@@ -24,7 +24,7 @@ const emptyCustomerData = {
     customer_zip: '',
     customer_country: '',
     contact_persons: [],
-    new_customer: true
+    new_customer: false
 };
 
 export const useContractorCreate = () => {
@@ -38,7 +38,7 @@ export const useContractorCreate = () => {
 
     // Initial form data
     const [formData, setFormData] = useState<ContractorFormData>({
-        customer_data: { ...emptyCustomerData, new_customer: true },
+        customer_data: { ...emptyCustomerData },
         iup_customers: {
             iup_id: '',
             segmentation_id: '',

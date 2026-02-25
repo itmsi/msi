@@ -88,17 +88,6 @@ const CustomerInfoSection: React.FC<CustomerInfoProps> = ({
                         <div className="flex rounded-lg border border-gray-300 overflow-hidden">
                             <button
                                 type="button"
-                                onClick={() => onNewCustomerToggle(true)}
-                                className={`px-4 py-2 text-sm font-medium transition-colors ${
-                                    new_customer
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                                }`}
-                            >
-                                New Customer
-                            </button>
-                            <button
-                                type="button"
                                 onClick={() => onNewCustomerToggle(false)}
                                 className={`px-4 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
                                     !new_customer
@@ -107,6 +96,17 @@ const CustomerInfoSection: React.FC<CustomerInfoProps> = ({
                                 }`}
                             >
                                 Existing Customer
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => onNewCustomerToggle(true)}
+                                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                                    new_customer
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                }`}
+                            >
+                                New Customer
                             </button>
                         </div>
                     </div>
