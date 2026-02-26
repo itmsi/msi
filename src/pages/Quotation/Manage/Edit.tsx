@@ -236,6 +236,7 @@ export default function EditQuotation() {
                     market_price: item.cp_market_price || '',
                     product_type: item.product_type || '',
                     image: item.images || [],
+                    componen_type: item.cp_componen_type || item.componen_type || 1,
                     componen_product_unit_model: '',
                     selling_price_star_1: '',
                     selling_price_star_2: '',
@@ -856,7 +857,7 @@ export default function EditQuotation() {
                     images: existingItem.image ? [existingItem.image] : null,
                     componen_product_description: existingItem.description || '',
                     is_delete: false,
-                    componen_type: 1,
+                    componen_type: (existingItem as any).componen_type || 1,
                     componen_product_unit_model: existingItem.componen_product_unit_model || '',
                     componen_product_specifications: existingItem.manage_quotation_item_specifications?.map((spec: any) => ({
                         componen_product_specification_label: spec.manage_quotation_item_specification_label || spec.specification_label_name || '',

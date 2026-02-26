@@ -10,6 +10,7 @@ import CustomDataTable from "../../../../components/ui/table/CustomDataTable";
 import { TableColumn } from "react-data-table-component";
 import { useAsyncSelect, SelectOption } from '../../hooks/useAsyncSelect';
 import { createActionsColumn } from '@/components/ui/table';
+import { getDefaultSpecs } from '../../Product/hooks/useProductCreate';
 
 interface ProductDetailOffcanvasProps {
     productId: string | null;
@@ -54,22 +55,15 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         }
     }, [activeTab, isOpen, initializeAccessoryOptions]);
 
-    // Default specifications template - use useMemo to prevent re-creation
-    const defaultSpecifications = React.useMemo(() => [
-        { label: "Unit Model", value: "" },
-        { label: "GVW", value: "" },
-        { label: "Wheelbase", value: "" },
-        { label: "Engine Brand Model", value: "" },
-        { label: "Horse Power", value: "" },
-        { label: "Max Torque", value: "" },
-        { label: "Displacement", value: "" },
-        { label: "Emission Standard", value: "" },
-        { label: "Engine Guard", value: "" },
-        { label: "Gearbox Transmission", value: "" },
-        { label: "Fuel Tank", value: "" },
-        { label: "Tyre", value: "" },
-        { label: "Cargobox/Vessel", value: "" }
-    ], []);
+    // Default specifications template - dinamis berdasarkan componen_type produk
+    const defaultSpecifications = React.useMemo(() => {
+        const componentType = (initialData as any)?.componen_type || 1;
+        return getDefaultSpecs(componentType).map(spec => ({
+            label: spec.specification_label_name,
+            value: spec.specification_value_name || ''
+        }));
+    }, [(initialData as any)?.componen_type]);
+
 
 
     useEffect(() => {
@@ -583,7 +577,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                             type="text"
                                             value={spec.componen_product_specification_value || ''}
                                             onChange={(e) => handleSpecificationUpdate(index, e.target.value)}
-                                            placeholder={`Masukkan ${spec.componen_product_specification_label.toLowerCase()}`}
+                                            placeholder={`Masukkan ${(spec.componen_product_specification_label ?? '').toLowerCase()}`}
                                             className="w-full text-sm"
                                         />
                                     </div>
