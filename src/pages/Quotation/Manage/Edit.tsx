@@ -745,6 +745,7 @@ export default function EditQuotation() {
                     selling_price_star_4: apiProductData.selling_price_star_4 || '0',
                     selling_price_star_5: apiProductData.selling_price_star_5 || '0',
                     description: apiProductData.componen_product_description || '',
+                    componen_type: apiProductData.componen_type || 1,
                     manage_quotation_item_accessories: islandAccessories,
                     manage_quotation_item_specifications: apiProductData.componen_product_specifications?.map((spec: any) => ({
                         manage_quotation_item_specification_label: spec.componen_product_specification_label || spec.specification_label_name || '',
