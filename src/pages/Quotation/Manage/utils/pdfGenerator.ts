@@ -831,12 +831,21 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         "Cargobox/Vessel",
         "Horse Power",
         // EV specs (OFF ROAD EV / ON ROAD EV)
-        "Motor Type",
-        "Rated power/torque",
-        "Peak power/torque",
-        "Power battery",
+        "Overall Length",
+        "Wheelbase",
+        "Curb Weight",
+        "Gross Vehicle Weight (GVW)",
+        "Rated Power / Torque",
+        "Peak Power / Torque",
+        "Battery Capacity",
+        "Battery Protection",
         "Charging Ports",
-        "Input socket power"
+        "Input Socket Power",
+        "Frame",
+        "Rear Axles",
+        "Tires",
+        "Structure Thickness",
+        "Cargo Box Size"
     ];
     
     

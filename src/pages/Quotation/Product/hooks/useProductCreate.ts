@@ -20,8 +20,11 @@ export const REGULAR_SPECS: ProductSpecification[] = [
 ].map(makeSpec);
 
 export const EV_SPECS: ProductSpecification[] = [
-    'Motor Type', 'Rated power/torque', 'Peak power/torque',
-    'Power battery', 'Charging Ports', 'Input socket power'
+    'Overall Length', 'Wheelbase', 'Curb Weight',
+    'Gross Vehicle Weight (GVW)', 'Rated Power / Torque', 'Peak Power / Torque',
+    'Battery Capacity', 'Battery Protection', 'Charging Ports',
+    'Input Socket Power', 'Frame', 'Rear Axles',
+    'Tires', 'Structure Thickness', 'Cargo Box Size'
 ].map(makeSpec);
 
 export const EV_COMPONENT_TYPES = [4, 5];
