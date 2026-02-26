@@ -43,6 +43,7 @@ export interface QuotationItem {
     image: imageItems[];
     manage_quotation_item_accessories?: QuotationItemAccessory[]; // Nested accessories
     manage_quotation_item_specifications?: QuotationItemSpecification[]; // Nested specifications
+    componen_type?: number; // EV type support (4: OFF ROAD EV, 5: ON ROAD EV)
 }
 export interface imageItems {
     image_id: string;
@@ -386,6 +387,8 @@ export interface ManageQuotationItem {
     cp_market_price: string;
     cp_componen_product_name: string;
     cp_image: string;
+    cp_componen_type?: number; // EV type support
+    componen_type?: number;    // Alternative field name from API
 
     manage_quotation_item_accessories: QuotationItemAccessory[];
     manage_quotation_item_specifications: QuotationItemSpecification[];
