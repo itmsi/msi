@@ -13,6 +13,7 @@ import { ItemProductValidationErrors, ProductSpecification } from "./types/produ
 import { handleKeyPress, formatNumberInput } from "@/helpers/generalHelper";
 import CustomSelect from "@/components/form/select/CustomSelect";
 import { PermissionGate } from "@/components/common/PermissionComponents";
+import { getDefaultSpecs } from "./hooks/useProductCreate";
 
 interface EditProductFormData {
     code_unique: string;
@@ -69,99 +70,7 @@ export default function EditProduct() {
         volume: '',
         componen_product_unit_model: '',
         msi_product: '',
-        componen_product_specifications: [
-            {
-                componen_product_specification_label: 'GVW',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'GVW',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Unit Model',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Unit Model',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Horse Power',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Horse Power',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Cargobox/Vessel',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Cargobox/Vessel',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Wheelbase',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Wheelbase',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Engine Brand Model',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Engine Brand Model',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Max Torque',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Max Torque',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Displacement',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Displacement',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Emission Standard',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Emission Standard',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Engine Guard',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Engine Guard',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Gearbox Transmission',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Gearbox Transmission',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Fuel Tank',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Fuel Tank',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Tyre',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Tyre',
-                specification_value_name: ''
-            }
-        ],
+        componen_product_specifications: getDefaultSpecs(1),
     });
     
     const [specifications, setSpecifications] = useState<any[]>([]);
@@ -182,99 +91,7 @@ export default function EditProduct() {
             const product = await loadProduct(productId);
             
             if (product) {
-                const defaultSpecifications = [
-                    {
-                        componen_product_specification_label: 'GVW',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'GVW',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Unit Model',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Unit Model',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Horse Power',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Horse Power',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Cargobox/Vessel',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Cargobox/Vessel',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Wheelbase',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Wheelbase',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Engine Brand Model',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Engine Brand Model',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Max Torque',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Max Torque',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Displacement',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Displacement',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Emission Standard',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Emission Standard',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Engine Guard',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Engine Guard',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Gearbox Transmission',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Gearbox Transmission',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Fuel Tank',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Fuel Tank',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Tyre',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Tyre',
-                        specification_value_name: ''
-                    }
-                ];
+                const defaultSpecifications = getDefaultSpecs(product.componen_type || 1);
 
                 const specificationsData = defaultSpecifications.map(defaultSpec => {
                     const apiSpec = product.componen_product_specifications?.find(spec => 
@@ -537,6 +354,8 @@ export default function EditProduct() {
         { value: 1, label: 'OFF ROAD REGULAR' },
         { value: 2, label: 'ON ROAD REGULAR' },
         { value: 3, label: 'OFF ROAD IRREGULAR' },
+        { value: 4, label: 'OFF ROAD EV' },
+        { value: 5, label: 'ON ROAD EV' },
     ];
 
     const productOptions = [
@@ -780,15 +599,18 @@ export default function EditProduct() {
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="componen_type">Product Type</Label>
+                                    <Label htmlFor="componen_type">Unit Type</Label>
                                     <CustomSelect
                                         options={companyOptions}
                                         value={companyOptions.find(option => option.value === formData.componen_type) || null}
                                         onChange={(option) => {
+                                            const newType = Number(option?.value) || 1;
                                             setFormData(prev => ({
                                                 ...prev,
-                                                componen_type: Number(option?.value) || 1
+                                                componen_type: newType,
+                                                componen_product_specifications: getDefaultSpecs(newType)
                                             }));
+                                            setSpecifications(getDefaultSpecs(newType));
                                         }}
                                         placeholder="Select Company"
                                         isClearable={false}
