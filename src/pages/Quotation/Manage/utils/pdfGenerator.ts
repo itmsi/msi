@@ -816,6 +816,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     yPos += 15;
 
     const specOrder = [
+        // Regular specs
         "Unit Model",
         "GVW",
         "Wheelbase",
@@ -828,7 +829,14 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         "Gearbox Transmission",
         "Engine Brand Model",
         "Cargobox/Vessel",
-        "Horse Power"
+        "Horse Power",
+        // EV specs (OFF ROAD EV / ON ROAD EV)
+        "Motor Type",
+        "Rated power/torque",
+        "Peak power/torque",
+        "Power battery",
+        "Charging Ports",
+        "Input socket power"
     ];
     
     
