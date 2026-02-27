@@ -1852,6 +1852,11 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     }
 
     if(data.include_msf_page) {
+        const hasNonEVProduct = data.manage_quotation_items.some((item: any) =>
+            !item.componen_type || !String(item.componen_type).toLowerCase().includes('ev')
+        );
+        
+        if(hasNonEVProduct) {
         doc.addPage();
         addHeaderMSF();
         addFooter();
@@ -2235,13 +2240,12 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         yPos += 2;
         yPos = dataTouch(yPos);
         yPos += 2;
-    }
+        } // end hasNonEVProduct
 
-    
-    // ============================================================
-    // EV MSF PAGE - rendered when there are EV products and include_msf_page is true
-    // ============================================================
-    if (data.include_msf_page) {
+        // ============================================================
+        // EV MSF PAGE - rendered when there are EV products and include_msf_page is true
+        // ============================================================
+        {
         const hasEVProduct = data.manage_quotation_items.some((item: any) =>
             item.componen_type && String(item.componen_type).toLowerCase().includes('ev')
         );
@@ -2429,7 +2433,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 doc.roundedRect(columnX, columnStartY, evColWidth, columnHeight, 2, 2);
             });
         }
-    }
+        } // end ev block
+    } // end include_msf_page
 
     const totalPages = (doc as any).internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
