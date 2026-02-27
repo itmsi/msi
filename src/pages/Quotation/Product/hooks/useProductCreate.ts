@@ -5,6 +5,33 @@ import { useNavigate } from "react-router";
 import { getCompanyName, formatNumberInput } from "@/helpers/generalHelper";
 import { ItemProductService } from "../services/productService";
 
+const makeSpec = (label: string): ProductSpecification => ({
+    componen_product_specification_label: label,
+    componen_product_specification_value: '',
+    componen_product_specification_description: '',
+    specification_label_name: label,
+    specification_value_name: ''
+});
+
+export const REGULAR_SPECS: ProductSpecification[] = [
+    'GVW', 'Unit Model', 'Horse Power', 'Cargobox/Vessel', 'Wheelbase',
+    'Engine Brand Model', 'Max Torque', 'Displacement', 'Emission Standard',
+    'Engine Guard', 'Gearbox Transmission', 'Fuel Tank', 'Tyre'
+].map(makeSpec);
+
+export const EV_SPECS: ProductSpecification[] = [
+    'Overall Length', 'Wheelbase', 'Curb Weight',
+    'Gross Vehicle Weight (GVW)', 'Rated Power / Torque', 'Peak Power / Torque',
+    'Battery Capacity', 'Battery Protection', 'Charging Ports',
+    'Input Socket Power', 'Frame', 'Rear Axles',
+    'Tires', 'Structure Thickness', 'Cargo Box Size'
+].map(makeSpec);
+
+export const EV_COMPONENT_TYPES = [4, 5];
+
+export const getDefaultSpecs = (componentType: number): ProductSpecification[] =>
+    EV_COMPONENT_TYPES.includes(componentType) ? EV_SPECS.map(s => ({ ...s })) : REGULAR_SPECS.map(s => ({ ...s }));
+
 // Form data type for creating
 interface CreateProductFormData {
     code_unique: string;
@@ -56,99 +83,7 @@ export const useCreateProduct = () => {
         volume: '',
         componen_product_unit_model: '',
         company_name: getCompanyName(),
-        componen_product_specifications: [
-            {
-                componen_product_specification_label: 'GVW',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'GVW',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Unit Model',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Unit Model',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Horse Power',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Horse Power',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Cargobox/Vessel',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Cargobox/Vessel',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Wheelbase',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Wheelbase',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Engine Brand Model',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Engine Brand Model',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Max Torque',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Max Torque',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Displacement',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Displacement',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Emission Standard',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Emission Standard',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Engine Guard',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Engine Guard',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Gearbox Transmission',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Gearbox Transmission',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Fuel Tank',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Fuel Tank',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Tyre',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Tyre',
-                specification_value_name: ''
-            }
-        ],
+        componen_product_specifications: REGULAR_SPECS.map(s => ({ ...s })),
     });
     
 
@@ -316,6 +251,8 @@ export const useCreateProduct = () => {
         { value: 1, label: 'OFF ROAD REGULAR' },
         { value: 2, label: 'ON ROAD REGULAR' },
         { value: 3, label: 'OFF ROAD IRREGULAR' },
+        { value: 4, label: 'OFF ROAD EV' },
+        { value: 5, label: 'ON ROAD EV' },
     ];
 
     const productOptions = [

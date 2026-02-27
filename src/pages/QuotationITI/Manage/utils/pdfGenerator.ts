@@ -2220,6 +2220,199 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         yPos += 2;
     }
 
+    // ============================================================
+    // EV MSF PAGE - rendered when there are EV products and include_msf_page is true
+    // ============================================================
+    if (data.include_msf_page) {
+        const hasEVProduct = data.manage_quotation_items.some((item: any) =>
+            item.componen_type && String(item.componen_type).toLowerCase().includes('ev')
+        );
+
+        if (hasEVProduct) {
+            doc.addPage();
+            addHeaderMSF();
+            addFooter();
+            yPos = margin + headerHeight;
+
+            // --- HEADER ---
+            const evHeaderWidth = (pageWidth - 2 * margin) * 0.6;
+
+            doc.setFontSize(14);
+            doc.setTextColor(0, 48, 97);
+            setFontSafe(doc, 'Futura', 'bold');
+            doc.text('Motor Sights Fleet \u2013 EV Unit Solution', margin, yPos);
+            yPos += 7;
+
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            setFontSafe(doc, 'Futura', 'normal');
+            const evDescText = 'Motor Sights Fleet provides complete visibility into electric vehicle (EV) movement, energy consumption, and battery performance. With fully integrated telematics technology, companies can manage fleet operations with higher accuracy, efficiency, and data-driven decision-making.';
+            const evDescLines = doc.splitTextToSize(evDescText, evHeaderWidth);
+            evDescLines.forEach((line: string) => {
+                doc.text(line, margin, yPos, { lineHeightFactor: 1.3 });
+                yPos += 4.2;
+            });
+            yPos += 5;
+
+            // --- SUBSCRIPTION TABLE ---
+            doc.setFontSize(10);
+            doc.setTextColor(23, 26, 31);
+            setFontSafe(doc, 'Futura', 'bold');
+            doc.text('MSF 1.0 Software Monthly Subscription (per EV Unit)', margin, yPos);
+            yPos += 3;
+
+            const evSubItems = [
+                { title: 'GPS Tracking' },
+                { title: 'Energy Consumption Monitoring (kWh)' },
+                { title: 'Battery Status Monitoring' }
+            ];
+
+            const evTableWidth = pageWidth - 2 * margin;
+            const evTableStartY = yPos;
+            const evRowHeight = 7;
+            const evTitleHeight = 12;
+            const evTotalTableHeight = evTitleHeight + evSubItems.length * evRowHeight;
+
+            doc.setDrawColor(228, 231, 236);
+            doc.setLineWidth(0.3);
+            doc.roundedRect(margin, evTableStartY, evTableWidth, evTotalTableHeight, 1, 1);
+
+            yPos += 6;
+            doc.setFontSize(10);
+            doc.setTextColor(23, 26, 31);
+            setFontSafe(doc, 'Futura', 'bold');
+            doc.text('Basic Subscription Includes:', pageWidth / 2, yPos + 1, { align: 'center' });
+            yPos += evTitleHeight - 4;
+
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            setFontSafe(doc, 'Futura', 'normal');
+            evSubItems.forEach((item) => {
+                const iconSize = 4;
+                const iconX = pageWidth / 2.2 - 16;
+                const iconY = yPos - 3;
+                try {
+                    doc.addImage('/pdf/check.png', 'PNG', iconX, iconY, iconSize, iconSize);
+                } catch {
+                    doc.setDrawColor(0, 128, 0);
+                    doc.setLineWidth(0.5);
+                    doc.line(iconX, iconY + 2, iconX + 1.5, iconY + 3);
+                    doc.line(iconX + 1.5, iconY + 3, iconX + 4, iconY);
+                }
+                doc.text(item.title, iconX + 6, yPos);
+                yPos += evRowHeight - 2;
+            });
+            yPos += 5;
+
+            // --- 3-COLUMN FEATURES ---
+            const evColWidth = (pageWidth - 2 * margin) * 0.317;
+            const evColGap = 5;
+
+            const evColumns = [
+                {
+                    headertitle: 'FITUR MOTOR SIGHTS FLEET 1.0',
+                    icon: '/pdf/asset-tracking.png',
+                    title: 'GPS & Route Tracking',
+                    items: [
+                        { subtitle: 'Pelacakan GPS Real-Time', content: 'Memantau posisi kendaraan secara langsung melalui aplikasi web dan mobile.' },
+                        { subtitle: 'Riwayat Perjalanan & Replay', content: 'Melacak rute historis, titik pengisian daya, pola pergerakan, serta waktu idle kendaraan.' },
+                        { subtitle: 'Geofencing & Notifikasi', content: 'Menentukan area operasional dan menerima notifikasi otomatis saat kendaraan masuk atau keluar dari area yang telah ditentukan.' },
+                        { subtitle: 'Monitoring Status Kendaraan', content: 'Memantau status Online/Offline, kondisi idle, deteksi pergerakan, dan aktivitas operasional unit.' },
+                        { subtitle: 'Monitoring Konsumsi Energi', content: 'Menganalisis penggunaan energi (kWh) per perjalanan dan per kilometer untuk meningkatkan efisiensi operasional.' },
+                        { subtitle: 'Monitoring Status Baterai', content: 'Memantau State of Charge (SOC) secara real-time, aktivitas pengisian dan pemakaian baterai.' },
+                    ]
+                },
+                {
+                    headertitle: 'LAYANAN IMPLEMENTASI',
+                    icon: '/pdf/installation.png',
+                    title: 'Implementation Services',
+                    items: [
+                        { subtitle: 'Pembacaan Data CANBus Kendaraan', content: '' },
+                        { subtitle: 'Instalasi perangkat telematika', content: '' },
+                        { subtitle: 'Integrasi dan konfigurasi software MSF 1.0', content: '' },
+                    ]
+                },
+                {
+                    headertitle: 'PRODUK & DETAIL YANG DIBERIKAN',
+                    icon: '/pdf/installation.png',
+                    title: 'Product & Deliverables',
+                    items: [
+                        { subtitle: 'Telematics', content: '(Motor Sights Fleet 650)' },
+                        { subtitle: 'Modul eCAN', content: '(Kabel Harness komunikasi EV CANBus kendaraan)' },
+                        { subtitle: 'MSF 300', content: '(Membaca data CANBus EV kendaraan)' },
+                    ]
+                }
+            ];
+
+            const evStartY = yPos;
+            evColumns.forEach((colData, index) => {
+                const columnX = margin + (index * (evColWidth + evColGap));
+                let columnY = evStartY;
+                const columnStartY = columnY;
+
+                doc.setFillColor(228, 231, 236);
+                doc.roundedRect(columnX, columnY, evColWidth, 12, 2, 2, 'F');
+
+                doc.setFontSize(8);
+                doc.setTextColor(0, 0, 0);
+                setFontSafe(doc, 'Futura', 'bold');
+                const headerLines = doc.splitTextToSize(colData.headertitle, evColWidth - 8);
+                headerLines.forEach((line: string, lineIndex: number) => {
+                    doc.text(line, columnX + evColWidth / 2, columnY + 5 + (lineIndex * 3.5), { align: 'center' });
+                });
+                columnY += 17;
+
+                if (colData.icon && colData.title) {
+                    const iconSize = 6;
+                    const iconX2 = columnX + 3;
+                    try {
+                        doc.addImage(colData.icon, 'PNG', iconX2, columnY, iconSize, iconSize);
+                    } catch {
+                        doc.setFillColor(220, 220, 220);
+                        doc.circle(iconX2 + iconSize / 2, columnY + iconSize / 2, iconSize / 2, 'F');
+                    }
+                    doc.setFontSize(9);
+                    doc.setTextColor(23, 26, 31);
+                    setFontSafe(doc, 'Futura', 'bold');
+                    const titleLines2 = doc.splitTextToSize(colData.title, evColWidth - (iconSize + 7));
+                    titleLines2.forEach((line: string, li: number) => {
+                        doc.text(line, iconX2 + iconSize + 3, columnY + 4 + li * 4);
+                    });
+                    columnY += 10 + (titleLines2.length > 1 ? (titleLines2.length - 1) * 4 : 0);
+                }
+
+                doc.setFontSize(8);
+                colData.items.forEach((item: any) => {
+                    const iconX3 = columnX + 3;
+                    if (item.subtitle) {
+                        doc.setTextColor(23, 26, 31);
+                        setFontSafe(doc, 'Futura', 'bold');
+                        const subLines = doc.splitTextToSize(item.subtitle, evColWidth - 15);
+                        subLines.forEach((line: string) => {
+                            doc.text(line, iconX3 + 9, columnY);
+                            columnY += 3;
+                        });
+                        if (item.content) {
+                            doc.setTextColor(0, 0, 0);
+                            setFontSafe(doc, 'Futura', 'normal');
+                            const contentLines2 = doc.splitTextToSize(item.content, evColWidth - 15);
+                            contentLines2.forEach((line: string) => {
+                                doc.text(line, iconX3 + 9, columnY);
+                                columnY += 3;
+                            });
+                        }
+                        columnY += 2;
+                    }
+                });
+
+                const columnHeight = columnY - columnStartY;
+                doc.setDrawColor(228, 231, 236);
+                doc.setLineWidth(0.3);
+                doc.roundedRect(columnX, columnStartY, evColWidth, columnHeight, 2, 2);
+            });
+        }
+    }
+
     const totalPages = (doc as any).internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
