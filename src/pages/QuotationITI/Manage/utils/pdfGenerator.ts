@@ -2310,36 +2310,36 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
             const evColumns = [
                 {
-                    headertitle: 'MOTOR SIGHTS FLEET 1.0 FEATURES (EV FOCUS)',
+                    headertitle: 'FITUR MOTOR SIGHTS FLEET 1.0',
                     icon: '/pdf/asset-tracking.png',
                     title: 'GPS & Route Tracking',
                     items: [
-                        { subtitle: 'Real-Time GPS Tracking', content: 'Monitor vehicle positions in real time via web and mobile application.' },
-                        { subtitle: 'Route History & Replay', content: 'Track historical routes, charging stops, movement patterns, and idle time.' },
-                        { subtitle: 'Geofencing & Alerts', content: 'Set operational zones and receive instant alerts when vehicles enter or exit predefined areas.' },
-                        { subtitle: 'Vehicle Status Monitoring', content: 'Monitor Online/Offline status, unit idle, movement detection, and operational activity.' },
-                        { subtitle: 'Energy Consumption Monitoring', content: 'Analyze energy usage (kWh) per trip and per kilometer to improve operational efficiency.' },
-                        { subtitle: 'Battery Monitoring', content: 'Monitors real-time State of Charge (SOC), charging and discharging activity, and overall battery performance to ensure optimal usage.' },
+                        { subtitle: 'Pelacakan GPS Real-Time', content: 'Memantau posisi kendaraan secara langsung melalui aplikasi web dan mobile.' },
+                        { subtitle: 'Riwayat Perjalanan & Replay', content: 'Melacak rute historis, titik pengisian daya, pola pergerakan, serta waktu idle kendaraan.' },
+                        { subtitle: 'Geofencing & Notifikasi', content: 'Menentukan area operasional dan menerima notifikasi otomatis saat kendaraan masuk atau keluar dari area yang telah ditentukan.' },
+                        { subtitle: 'Monitoring Status Kendaraan', content: 'Memantau status Online/Offline, kondisi idle, deteksi pergerakan, dan aktivitas operasional unit.' },
+                        { subtitle: 'Monitoring Konsumsi Energi', content: 'Menganalisis penggunaan energi (kWh) per perjalanan dan per kilometer untuk meningkatkan efisiensi operasional.' },
+                        { subtitle: 'Monitoring Status Baterai', content: 'Memantau State of Charge (SOC) secara real-time, aktivitas pengisian dan pemakaian baterai.' },
                     ]
                 },
                 {
-                    headertitle: 'IMPLEMENTATION SERVICES & DELIVERABLES',
+                    headertitle: 'LAYANAN IMPLEMENTASI',
                     icon: '/pdf/installation.png',
                     title: 'Implementation Services',
                     items: [
-                        { subtitle: 'CAN line tracing', content: '' },
-                        { subtitle: 'Telematics Installation', content: '' },
-                        { subtitle: 'Software Configuration & Integration', content: '' },
+                        { subtitle: 'Pembacaan Data CANBus Kendaraan', content: '' },
+                        { subtitle: 'Instalasi perangkat telematika', content: '' },
+                        { subtitle: 'Integrasi dan konfigurasi software MSF 1.0', content: '' },
                     ]
                 },
                 {
-                    headertitle: 'PRODUCT & DELIVERABLES',
+                    headertitle: 'PRODUK & DETAIL YANG DIBERIKAN',
                     icon: '/pdf/installation.png',
                     title: 'Product & Deliverables',
                     items: [
                         { subtitle: 'Telematics', content: '(Motor Sights Fleet 650)' },
-                        { subtitle: 'eCAN Module', content: '(EV CANBus Communication Harness)' },
-                        { subtitle: 'MSF 300', content: '(EV Diagnostic & Battery Data Integration)' },
+                        { subtitle: 'Modul eCAN', content: '(Kabel Harness komunikasi EV CANBus kendaraan)' },
+                        { subtitle: 'MSF 300', content: '(Membaca data CANBus EV kendaraan)' },
                     ]
                 }
             ];
