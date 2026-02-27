@@ -2258,13 +2258,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             doc.setFontSize(14);
             doc.setTextColor(0, 48, 97);
             setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Motor Sights Fleet \u2013 EV Unit Solution', margin, yPos);
+            doc.text('MOTOR SIGHTS FLEET \u2013 SOLUSI UNIT EV', margin, yPos);
             yPos += 7;
 
             doc.setFontSize(9);
             doc.setTextColor(0, 0, 0);
             setFontSafe(doc, 'Futura', 'normal');
-            const evDescText = 'Motor Sights Fleet provides complete visibility into electric vehicle (EV) movement, energy consumption, and battery performance. With fully integrated telematics technology, companies can manage fleet operations with higher accuracy, efficiency, and data-driven decision-making.';
+            const evDescText = 'Motor Sights Fleet menyediakan visibilitas menyeluruh terhadap pergerakan kendaraan listrik (EV), konsumsi energi, serta performa baterai. Dengan teknologi telematika yang terintegrasi penuh, perusahaan dapat mengelola operasional armada dengan tingkat akurasi, efisiensi, dan pengambilan keputusan berbasis data yang lebih baik.';
             const evDescLines = doc.splitTextToSize(evDescText, evHeaderWidth);
             evDescLines.forEach((line: string) => {
                 doc.text(line, margin, yPos, { lineHeightFactor: 1.3 });
@@ -2276,13 +2276,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             doc.setFontSize(10);
             doc.setTextColor(23, 26, 31);
             setFontSafe(doc, 'Futura', 'bold');
-            doc.text('MSF 1.0 Software Monthly Subscription (per EV Unit)', margin, yPos);
+            doc.text('MSF 1.0 SOFTWARE MONTHLY SUBSCRIPTION', margin, yPos);
             yPos += 3;
 
             const evSubItems = [
                 { title: 'GPS Tracking' },
-                { title: 'Energy Consumption Monitoring (kWh)' },
-                { title: 'Battery Status Monitoring' }
+                { title: 'Monitoring Konsumsi Energi (kWh)' },
+                { title: 'Monitoring Status Baterai' }
             ];
 
             const evTableWidth = pageWidth - 2 * margin;
@@ -2299,7 +2299,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             doc.setFontSize(10);
             doc.setTextColor(23, 26, 31);
             setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Basic Subscription Includes:', pageWidth / 2, yPos + 1, { align: 'center' });
+            doc.text('Paket Dasar', pageWidth / 2, yPos + 1, { align: 'center' });
             yPos += evTitleHeight - 4;
 
             doc.setFontSize(9);
@@ -2328,36 +2328,36 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
             const evColumns = [
                 {
-                    headertitle: 'MOTOR SIGHTS FLEET 1.0 FEATURES (EV FOCUS)',
+                    headertitle: 'FITUR MOTOR SIGHTS FLEET 1.0',
                     icon: '/pdf/asset-tracking.png',
                     title: 'GPS & Route Tracking',
                     items: [
-                        { subtitle: 'Real-Time GPS Tracking', content: 'Monitor vehicle positions in real time via web and mobile application.' },
-                        { subtitle: 'Route History & Replay', content: 'Track historical routes, charging stops, movement patterns, and idle time.' },
-                        { subtitle: 'Geofencing & Alerts', content: 'Set operational zones and receive instant alerts when vehicles enter or exit predefined areas.' },
-                        { subtitle: 'Vehicle Status Monitoring', content: 'Monitor Online/Offline status, unit idle, movement detection, and operational activity.' },
-                        { subtitle: 'Energy Consumption Monitoring', content: 'Analyze energy usage (kWh) per trip and per kilometer to improve operational efficiency.' },
-                        { subtitle: 'Battery Monitoring', content: 'Monitors real-time State of Charge (SOC), charging and discharging activity, and overall battery performance to ensure optimal usage.' },
+                        { subtitle: 'Pelacakan GPS Real-Time', content: 'Memantau posisi kendaraan secara langsung melalui aplikasi web dan mobile.' },
+                        { subtitle: 'Riwayat Perjalanan & Replay', content: 'Melacak rute historis, titik pengisian daya, pola pergerakan, serta waktu idle kendaraan.' },
+                        { subtitle: 'Geofencing & Notifikasi', content: 'Menentukan area operasional dan menerima notifikasi otomatis saat kendaraan masuk atau keluar dari area yang telah ditentukan.' },
+                        { subtitle: 'Monitoring Status Kendaraan', content: 'Memantau status Online/Offline, kondisi idle, deteksi pergerakan, dan aktivitas operasional unit.' },
+                        { subtitle: 'Monitoring Konsumsi Energi', content: 'Menganalisis penggunaan energi (kWh) per perjalanan dan per kilometer untuk meningkatkan efisiensi operasional.' },
+                        { subtitle: 'Monitoring Status Baterai', content: 'Memantau State of Charge (SOC) secara real-time, aktivitas pengisian dan pemakaian baterai.' },
                     ]
                 },
                 {
-                    headertitle: 'IMPLEMENTATION SERVICES & DELIVERABLES',
+                    headertitle: 'LAYANAN IMPLEMENTASI',
                     icon: '/pdf/installation.png',
                     title: 'Implementation Services',
                     items: [
-                        { subtitle: 'CAN line tracing', content: '' },
-                        { subtitle: 'Telematics Installation', content: '' },
-                        { subtitle: 'Software Configuration & Integration', content: '' },
+                        { subtitle: 'Pembacaan Data CANBus Kendaraan', content: '' },
+                        { subtitle: 'Instalasi perangkat telematika', content: '' },
+                        { subtitle: 'Integrasi dan konfigurasi software MSF 1.0', content: '' },
                     ]
                 },
                 {
-                    headertitle: 'PRODUCT & DELIVERABLES',
+                    headertitle: 'PRODUK & DETAIL YANG DIBERIKAN',
                     icon: '/pdf/installation.png',
                     title: 'Product & Deliverables',
                     items: [
                         { subtitle: 'Telematics', content: '(Motor Sights Fleet 650)' },
-                        { subtitle: 'eCAN Module', content: '(EV CANBus Communication Harness)' },
-                        { subtitle: 'MSF 300', content: '(EV Diagnostic & Battery Data Integration)' },
+                        { subtitle: 'Modul eCAN', content: '(Kabel Harness komunikasi EV CANBus kendaraan)' },
+                        { subtitle: 'MSF 300', content: '(Membaca data CANBus EV kendaraan)' },
                     ]
                 }
             ];
