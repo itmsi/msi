@@ -6,91 +6,72 @@ import { TableColumn } from 'react-data-table-component';
 import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
-import { formatDateTime, tableDateFormat } from '@/helpers/generalHelper';
-import { createActionsColumn, createDateColumn } from '@/components/ui/table';
+import { createActionsColumn } from '@/components/ui/table';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
-import { useIslandManagement } from './hooks/useIslandManagement';
+import { useDivisionManagement } from './hooks/useDivisionManagement';
 import { Modal } from '@/components/ui/modal';
 import Label from '@/components/form/Label';
 import { useConfirmation } from '@/hooks/useConfirmation';
-import { Island } from './types/island';
+import { Division } from './types/division';
 
-export default function ManageIsland() {
+export default function ManageDivision() {
     const {
         // State
         loading,
-        islands,
+        divisions,
         pagination,
         filters,
         isModalOpen,
-        editingIsland,
+        editingDivision,
         formData,
         validationErrors,
 
         // Actions
         handleClearFilters,
         handleInputChange,
-        handleAddIsland,
-        handleEditIsland,
-        handleDeleteIsland,
+        handleAddDivision,
+        handleEditDivision,
+        handleDeleteDivision,
         handleSubmit,
         handleCloseModal,
         handlePageChange,
-        fetchIslands,
+        fetchDivisions,
         
         // Filter actions
         handleFilterChange,
         handleSearchChange,
-    } = useIslandManagement();
+    } = useDivisionManagement();
     
-    // const { showConfirmation, ...confirmationState } = useConfirmation();
-        
     const { showConfirmation, modalProps } = useConfirmation();
 
-    // Handler untuk delete island dengan konfirmasi
-    const handleDelete = async (island: Island) => {
-        const typeLabel = island.island_name;
+    // Handler untuk delete division dengan konfirmasi
+    const handleDelete = async (division: Division) => {
+        const typeLabel = "Division";
                 
         const confirmed = await showConfirmation({
             title: `Delete ${typeLabel}`,
-            message: `Are you sure you want to delete "${island.island_name}"?\n\nType: ${typeLabel}\nCode: ${island.island_name}\n\nThis action cannot be undone and will also delete.`,
+            message: `Are you sure you want to delete the division "${division.devision_project_name}"?\n\nThis action cannot be undone and may affect related data.`,
             confirmText: `Delete ${typeLabel}`,
             cancelText: 'Cancel',
             type: 'danger',
         });
 
         if (confirmed) {
-            handleDeleteIsland(island);
+            handleDeleteDivision(division);
         }
     };
 
     // Definisi kolom untuk DataTable
-    const islandColumns: TableColumn<Island>[] = [
+    const divisionColumns: TableColumn<Division>[] = [
         {
-            name: 'Island',
-            selector: row => row.island_name,
+            name: 'Division',
+            selector: row => row.devision_project_name,
         },
-        createDateColumn('Created At', 'created_at', tableDateFormat),
-        {
-            name: 'Updated By',
-            selector: row => row.updated_at || '',
-            sortable: false,
-            cell: (row) => (
-                <div className="flex flex-col py-2">
-                    <span className="font-medium text-gray-900">
-                        {row.updated_by_name || '-'}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                        {row.updated_at ? formatDateTime(row.updated_at) : '-'}
-                    </span>
-                </div>
-            ),
-            width: '200px'
-        },
+        // createDateColumn('Created At', 'created_at', tableDateFormat),
         createActionsColumn([
             {
                 icon: MdEdit,
-                onClick: handleEditIsland,
+                onClick: handleEditDivision,
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'Edit',
                 permission: 'update'
@@ -108,8 +89,8 @@ export default function ManageIsland() {
     return (
         <>
             <PageMeta 
-                title="Manage Islands - Motor Sights International" 
-                description="Manage Islands - Motor Sights International"
+                title="Manage Divisions - Motor Sights International" 
+                description="Manage Divisions - Motor Sights International"
                 image="/motor-sights-international.png"
             />
 
@@ -118,20 +99,20 @@ export default function ManageIsland() {
                     <div className="flex justify-between items-center">
                         <div>
                             <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                Company Management
+                                Division Management
                             </h3>
                             <p className="mt-1 text-sm text-gray-500">
-                                Manage system companies and their configurations
+                                Manage system divisions and their configurations
                             </p>
                         </div>
                         <PermissionGate permission="create">
                             <Button
-                                onClick={handleAddIsland}
+                                onClick={handleAddDivision}
                                 className="rounded-md w-full md:w-40 flex items-center justify-center gap-2"
                                 size="sm"
                             >
                                 <MdAdd className="w-4 h-4 mr-2" />
-                                Add Island
+                                Add Division
                             </Button>
                         </PermissionGate>
                     </div>
@@ -148,7 +129,7 @@ export default function ManageIsland() {
                                 </div>
                                 <Input
                                     type="text"
-                                    placeholder="Search companies..."
+                                    placeholder="Search divisions..."
                                     value={filters.search}
                                     onChange={(e) => handleSearchChange(e.target.value)}
                                     className="pl-10 pr-4 py-2 w-full"
@@ -192,8 +173,8 @@ export default function ManageIsland() {
                 <div className="p-6 font-secondary">
 
                     <CustomDataTable
-                        columns={islandColumns}
-                        data={islands}
+                        columns={divisionColumns}
+                        data={divisions}
                         loading={loading}
                         pagination
                         paginationServer
@@ -203,7 +184,7 @@ export default function ManageIsland() {
                         paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
                         onChangePage={handlePageChange}
                         onChangeRowsPerPage={(newPerPage) => {
-                            fetchIslands(1, newPerPage);
+                            fetchDivisions(1, newPerPage);
                         }}
                         responsive
                         highlightOnHover
@@ -216,31 +197,31 @@ export default function ManageIsland() {
                 </div>
             </div>
 
-            {/* Add/Edit Company Modal */}
+            {/* Add/Edit Division Modal */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 className="max-w-xl"
-                title={`${editingIsland ? 'Edit Island' : 'Add New Island'}`}
-                description={editingIsland ? 'Update island information' : 'Fill in the details to create a new island'}
+                title={`${editingDivision ? 'Edit Division' : 'Add New Division'}`}
+                description={editingDivision ? 'Update division information' : 'Fill in the details to create a new division'}
             >
                 <div className="p-6">
                     <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-                        {/* Island Name */}
+                        {/* Division Name */}
                         <div>
-                            <Label htmlFor="island_name">Island Name *</Label>
+                            <Label htmlFor="devision_project_name">Division Name *</Label>
                             <Input
-                                id="island_name"
-                                name="island_name"
+                                id="devision_project_name"
+                                name="devision_project_name"
                                 type="text"
-                                value={formData.island_name}
+                                value={formData.devision_project_name}
                                 onChange={handleInputChange}
-                                placeholder="Enter company name"
-                                className={validationErrors.island_name ? 'border-red-500 focus:border-red-500' : ''}
+                                placeholder="Enter division name"
+                                className={validationErrors.devision_project_name ? 'border-red-500 focus:border-red-500' : ''}
                             />
-                            {validationErrors.island_name && (
+                            {validationErrors.devision_project_name && (
                                 <p className="mt-1 text-sm text-red-600">
-                                    {validationErrors.island_name}
+                                    {validationErrors.devision_project_name}
                                 </p>
                             )}
                         </div>
@@ -269,7 +250,7 @@ export default function ManageIsland() {
                                                 : 'bg-blue-600 hover:bg-blue-700'
                                     } text-white`}
                                 >
-                                    {loading ? 'Saving...' : (editingIsland ? 'Update Island' : 'Create Island')}
+                                    {loading ? 'Saving...' : (editingDivision ? 'Update Division' : 'Create Division')}
                                 </Button>
                             </PermissionGate>
                         </div>

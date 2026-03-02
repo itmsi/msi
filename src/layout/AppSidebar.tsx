@@ -131,14 +131,16 @@ const navItems: NavItem[] = [
             'IUP Management CRM', 
             'Contractors CRM',
             'Activities CRM',
-            'User Management CRM'
+            'User Management CRM',
+            'Division CRM'
         ],
         subItems: [
             { name: "Area Structure", path: "/crm/area-structure", allowedRoles: ['Area Structure CRM'] },
             { name: "IUP Management", path: "/crm/iup-management", allowedRoles: ['IUP Management CRM'] },
             { name: "Contractors", path: "/crm/contractors", allowedRoles: ['Contractors CRM'] },
             { name: "Activities", path: "/crm/activity", allowedRoles: ['Activities CRM'] },
-            { name: "User Management", path: "/crm/user-management", allowedRoles: ['User Management CRM'] }
+            { name: "User Management", path: "/crm/user-management", allowedRoles: ['User Management CRM'] },
+            { name: "Division", path: "/crm/manage-division", allowedRoles: ['Division CRM'] }
         ],
     }
 ];
@@ -206,7 +208,10 @@ const AppSidebar: React.FC = () => {
     const location = useLocation();
     const { menu: authMenu } = useAuth();
     
-    const allowedMenuNames = authMenu?.map(menu => menu.name) || [];
+    const allowedMenuNames = useMemo(
+        () => authMenu?.map(menu => menu.name) || [],
+        [authMenu]
+    );
 
     type OpenState = { type: 'main' | 'others'; key: string } | null;
     const [openSubmenu, setOpenSubmenu] = useState<OpenState>(null);
@@ -309,7 +314,7 @@ const AppSidebar: React.FC = () => {
 
         setOpenSubmenu(bestMatch);
         setOpenNestedSubmenu(bestNestedKey);
-    }, [location.pathname]);
+    }, [location.pathname, mainFiltered, othersFiltered]);
     
     const handleSubmenuToggle = (menuType: 'main' | 'others', nav: NavItem) => {
         const key = buildNavKey(menuType, nav);
@@ -342,7 +347,7 @@ const AppSidebar: React.FC = () => {
                                 onClick={() => handleSubmenuToggle(menuType, nav)}
                                 className={`menu-item group ${
                                     isOpen
-                                    ? "menu-item-active ccc"
+                                    ? "menu-item-active"
                                     : "menu-item-inactive"
                                 } cursor-pointer ${
                                     !isExpanded && !isHovered
