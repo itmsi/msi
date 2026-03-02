@@ -625,6 +625,25 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 fontStyle: 'bold'
             }
         },
+        willDrawCell: (data) => {
+            // Check if cell contains Chinese characters and apply appropriate font
+            const cellText = data.cell.text?.join('') || '';
+            if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
+                const isFirstColumn = data.column.index === 0;
+                const isBold = data.cell.styles.fontStyle === 'bold';
+                try {
+                    if (isFirstColumn) {
+                        doc.setFont('NotoSansSC', 'normal');
+                    } else if (isBold) {
+                        doc.setFont('NotoSansSC', 'bold');
+                    } else {
+                        doc.setFont('NotoSansSC', 'normal');
+                    }
+                } catch (error) {
+                    doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
+                }
+            }
+        }
     });
 
     // Update financialYPos setelah autoTable pertama
@@ -668,33 +687,43 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             if (data.row.index === 1 && data.column.index === 1) {
                 data.cell.styles.textColor = [34, 197, 94];
                 data.cell.styles.fontStyle = 'bold';
-                // data.cell.styles.font = 'OpenSans';
                 data.cell.styles.fontSize = 10;
             }
             if (data.row.index === 2 && data.column.index === 1) {
                 data.cell.styles.textColor = [220, 38, 38];
                 data.cell.styles.fontStyle = 'bold';
-                // data.cell.styles.font = 'OpenSans';
                 data.cell.styles.fontSize = 10;
+            }
+        },
+        willDrawCell: (data) => {
+            const cellText = data.cell.text?.join('') || '';
+            if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
+                const isFirstColumn = data.column.index === 0;
+                const isBold = data.cell.styles.fontStyle === 'bold';
+                try {
+                    if (isFirstColumn) {
+                        doc.setFont('NotoSansSC', 'normal');
+                    } else if (isBold) {
+                        doc.setFont('NotoSansSC', 'bold');
+                    } else {
+                        doc.setFont('NotoSansSC', 'normal');
+                    }
+                } catch (error) {
+                    doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
+                }
             }
         }
     });
 
     // Simpan posisi akhir Financial Summary
     const financialEndYPos = doc.lastAutoTable?.finalY || financialYPos;
-    
-    // Pindah ke halaman di mana Term & Condition selesai
     doc.setPage(termEndPage);
-    
-    // Gunakan posisi akhir dari Term & Condition atau Financial Summary (yang lebih bawah)
-    // Jika masih di halaman yang sama dengan Financial Summary, pastikan tidak menimpa
     if (termEndPage === startPageNumber) {
         yPos = Math.max(termYPos + 10, financialEndYPos + 10);
     } else {
         yPos = termYPos + 10;
     }
 
-    // SHIPPING & PAYMENT INFORMATION (Side by Side)
     checkNewPage(50);
     
     const sectionStartY = yPos - 7;
@@ -2273,14 +2302,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
 
             doc.setFontSize(14);
             doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('MOTOR SIGHTS FLEET \u2013 SOLUSI UNIT EV', margin, yPos);
+            const evTitle = langField('evFleetSolution');
+            setFontByLanguage(doc, evTitle, 'Futura', 'bold', language);
+            doc.text(evTitle, margin, yPos);
             yPos += 7;
 
             doc.setFontSize(9);
             doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
-            const evDescText = 'Motor Sights Fleet menyediakan visibilitas menyeluruh terhadap pergerakan kendaraan listrik (EV), konsumsi energi, serta performa baterai. Dengan teknologi telematika yang terintegrasi penuh, perusahaan dapat mengelola operasional armada dengan tingkat akurasi, efisiensi, dan pengambilan keputusan berbasis data yang lebih baik.';
+            const evDescText = langField('evFleetDescription');
+            setFontByLanguage(doc, evDescText, 'Futura', 'normal', language);
             const evDescLines = doc.splitTextToSize(evDescText, evHeaderWidth);
             evDescLines.forEach((line: string) => {
                 doc.text(line, margin, yPos, { lineHeightFactor: 1.3 });
@@ -2291,14 +2321,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             // --- SUBSCRIPTION TABLE ---
             doc.setFontSize(10);
             doc.setTextColor(23, 26, 31);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('MSF 1.0 SOFTWARE MONTHLY SUBSCRIPTION', margin, yPos);
+            const subscriptionTitle = langField('evSoftwareSubscription');
+            setFontByLanguage(doc, subscriptionTitle, 'Futura', 'bold', language);
+            doc.text(subscriptionTitle, margin, yPos);
             yPos += 3;
 
             const evSubItems = [
-                { title: 'GPS Tracking' },
-                { title: 'Monitoring Konsumsi Energi (kWh)' },
-                { title: 'Monitoring Status Baterai' }
+                { title: langField('evGpsTracking') },
+                { title: langField('evEnergyMonitoring') },
+                { title: langField('evBatteryStatus') }
             ];
 
             const evTableWidth = pageWidth - 2 * margin;
@@ -2314,13 +2345,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             yPos += 6;
             doc.setFontSize(10);
             doc.setTextColor(23, 26, 31);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Paket Dasar', pageWidth / 2, yPos + 1, { align: 'center' });
+            const basicPackageTitle = langField('evBasicPackage');
+            setFontByLanguage(doc, basicPackageTitle, 'Futura', 'bold', language);
+            doc.text(basicPackageTitle, pageWidth / 2, yPos + 1, { align: 'center' });
             yPos += evTitleHeight - 4;
 
             doc.setFontSize(9);
             doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
             evSubItems.forEach((item) => {
                 const iconSize = 4;
                 const iconX = pageWidth / 2.2 - 16;
@@ -2333,6 +2364,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     doc.line(iconX, iconY + 2, iconX + 1.5, iconY + 3);
                     doc.line(iconX + 1.5, iconY + 3, iconX + 4, iconY);
                 }
+                setFontByLanguage(doc, item.title, 'Futura', 'normal', language);
                 doc.text(item.title, iconX + 6, yPos);
                 yPos += evRowHeight - 2;
             });
@@ -2344,36 +2376,36 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
 
             const evColumns = [
                 {
-                    headertitle: 'FITUR MOTOR SIGHTS FLEET 1.0',
+                    headertitle: langField('evFeatures'),
                     icon: '/pdf/asset-tracking.png',
-                    title: 'GPS & Route Tracking',
+                    title: langField('evGpsRouteTracking'),
                     items: [
-                        { subtitle: 'Pelacakan GPS Real-Time', content: 'Memantau posisi kendaraan secara langsung melalui aplikasi web dan mobile.' },
-                        { subtitle: 'Riwayat Perjalanan & Replay', content: 'Melacak rute historis, titik pengisian daya, pola pergerakan, serta waktu idle kendaraan.' },
-                        { subtitle: 'Geofencing & Notifikasi', content: 'Menentukan area operasional dan menerima notifikasi otomatis saat kendaraan masuk atau keluar dari area yang telah ditentukan.' },
-                        { subtitle: 'Monitoring Status Kendaraan', content: 'Memantau status Online/Offline, kondisi idle, deteksi pergerakan, dan aktivitas operasional unit.' },
-                        { subtitle: 'Monitoring Konsumsi Energi', content: 'Menganalisis penggunaan energi (kWh) per perjalanan dan per kilometer untuk meningkatkan efisiensi operasional.' },
-                        { subtitle: 'Monitoring Status Baterai', content: 'Memantau State of Charge (SOC) secara real-time, aktivitas pengisian dan pemakaian baterai.' },
+                        { subtitle: langField('evRealtimeGpsTracking'), content: langField('evRealtimeGpsDesc') },
+                        { subtitle: langField('evHistoryReplay'), content: langField('evHistoryDesc') },
+                        { subtitle: langField('evGeofencingAlert'), content: langField('evGeofencingDesc') },
+                        { subtitle: langField('evVehicleStatusMonitoring'), content: langField('evVehicleStatusDesc') },
+                        { subtitle: langField('evEnergyConsumptionMonitoring2'), content: langField('evEnergyConsumptionDesc') },
+                        { subtitle: langField('evBatteryStatusMonitoring2'), content: langField('evBatteryStatusDesc') },
                     ]
                 },
                 {
-                    headertitle: 'LAYANAN IMPLEMENTASI',
+                    headertitle: langField('evImplementationServices'),
                     icon: '/pdf/installation.png',
-                    title: 'Implementation Services',
+                    title: langField('evImplementationTitle'),
                     items: [
-                        { subtitle: 'Pembacaan Data CANBus Kendaraan', content: '' },
-                        { subtitle: 'Instalasi perangkat telematika', content: '' },
-                        { subtitle: 'Integrasi dan konfigurasi software MSF 1.0', content: '' },
+                        { subtitle: langField('evCanBusReading'), content: '' },
+                        { subtitle: langField('evTelematicsInstall'), content: '' },
+                        { subtitle: langField('evSoftwareIntegration'), content: '' },
                     ]
                 },
                 {
-                    headertitle: 'PRODUK & DETAIL YANG DIBERIKAN',
+                    headertitle: langField('evProductsDeliverables'),
                     icon: '/pdf/installation.png',
-                    title: 'Product & Deliverables',
+                    title: langField('evProductsTitle'),
                     items: [
-                        { subtitle: 'Telematics', content: '(Motor Sights Fleet 650)' },
-                        { subtitle: 'Modul eCAN', content: '(Kabel Harness komunikasi EV CANBus kendaraan)' },
-                        { subtitle: 'MSF 300', content: '(Membaca data CANBus EV kendaraan)' },
+                        { subtitle: langField('evTelematicsProduct'), content: langField('evTelematicsDesc') },
+                        { subtitle: langField('evEcanModule'), content: langField('evEcanDesc') },
+                        { subtitle: langField('evMsf300'), content: langField('evMsf300Desc') },
                     ]
                 }
             ];
@@ -2389,7 +2421,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
 
                 doc.setFontSize(8);
                 doc.setTextColor(0, 0, 0);
-                setFontSafe(doc, 'Futura', 'bold');
+                setFontByLanguage(doc, colData.headertitle, 'Futura', 'bold', language);
                 const headerLines = doc.splitTextToSize(colData.headertitle, evColWidth - 8);
                 headerLines.forEach((line: string, lineIndex: number) => {
                     doc.text(line, columnX + evColWidth / 2, columnY + 5 + (lineIndex * 3.5), { align: 'center' });
@@ -2407,7 +2439,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     }
                     doc.setFontSize(9);
                     doc.setTextColor(23, 26, 31);
-                    setFontSafe(doc, 'Futura', 'bold');
+                    setFontByLanguage(doc, colData.title, 'Futura', 'bold', language);
                     const titleLines2 = doc.splitTextToSize(colData.title, evColWidth - (iconSize + 7));
                     titleLines2.forEach((line: string, li: number) => {
                         doc.text(line, iconX2 + iconSize + 3, columnY + 4 + li * 4);
@@ -2420,7 +2452,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     const iconX3 = columnX + 3;
                     if (item.subtitle) {
                         doc.setTextColor(23, 26, 31);
-                        setFontSafe(doc, 'Futura', 'bold');
+                        setFontByLanguage(doc, item.subtitle, 'Futura', 'bold', language);
                         const subLines = doc.splitTextToSize(item.subtitle, evColWidth - 15);
                         subLines.forEach((line: string) => {
                             doc.text(line, iconX3 + 9, columnY);
@@ -2428,7 +2460,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                         });
                         if (item.content) {
                             doc.setTextColor(0, 0, 0);
-                            setFontSafe(doc, 'Futura', 'normal');
+                            setFontByLanguage(doc, item.content, 'Futura', 'normal', language);
                             const contentLines2 = doc.splitTextToSize(item.content, evColWidth - 15);
                             contentLines2.forEach((line: string) => {
                                 doc.text(line, iconX3 + 9, columnY);

@@ -713,5 +713,177 @@ export const quotationLabelPDF: TranslationMap = {
         id: 'Clear All',
         en: 'Clear All',  
         zh: '清除全部'
+    },
+    
+    // EV MSF Section
+    evFleetSolution: {
+        id: 'MOTOR SIGHTS FLEET – SOLUSI UNIT EV',
+        en: 'MOTOR SIGHTS FLEET – EV UNIT SOLUTION',
+        zh: 'MOTOR SIGHTS FLEET – 电动车解决方案'
+    },
+    evFleetDescription: {
+        id: 'Motor Sights Fleet menyediakan visibilitas menyeluruh terhadap pergerakan kendaraan listrik (EV), konsumsi energi, serta performa baterai. Dengan teknologi telematika yang terintegrasi penuh, perusahaan dapat mengelola operasional armada dengan tingkat akurasi, efisiensi, dan pengambilan keputusan berbasis data yang lebih baik.',
+        en: 'Motor Sights Fleet provides comprehensive visibility of electric vehicle (EV) movements, energy consumption, and battery performance. With fully integrated telematics technology, companies can manage fleet operations with better levels of accuracy, efficiency, and data-driven decision making.',
+        zh: 'Motor Sights Fleet 为电动车 (EV) 的移动、能耗和电池性能提供全面的可视性。通过完全集成的远程信息处理技术，企业可以以更好的准确性、效率和数据驱动的决策制定来管理车队运营。'
+    },
+    evSoftwareSubscription: {
+        id: 'MSF 1.0 SOFTWARE MONTHLY SUBSCRIPTION',
+        en: 'MSF 1.0 SOFTWARE MONTHLY SUBSCRIPTION',
+        zh: 'MSF 1.0 软件月订阅'
+    },
+    evBasicPackage: {
+        id: 'Paket Dasar',
+        en: 'Basic Package',
+        zh: '基础套餐'
+    },
+    evGpsTracking: {
+        id: 'GPS Tracking',
+        en: 'GPS Tracking',
+        zh: 'GPS 跟踪'
+    },
+    evEnergyMonitoring: {
+        id: 'Monitoring Konsumsi Energi (kWh)',
+        en: 'Energy Consumption Monitoring (kWh)',
+        zh: '能耗监控 (千瓦时)'
+    },
+    evBatteryStatus: {
+        id: 'Monitoring Status Baterai',
+        en: 'Battery Status Monitoring',
+        zh: '电池状态监控'
+    },
+    evFeatures: {
+        id: 'FITUR MOTOR SIGHTS FLEET 1.0',
+        en: 'MOTOR SIGHTS FLEET 1.0 FEATURES',
+        zh: 'MOTOR SIGHTS FLEET 1.0 功能'
+    },
+    evGpsRouteTracking: {
+        id: 'GPS & Route Tracking',
+        en: 'GPS & Route Tracking',
+        zh: 'GPS 和路线跟踪'
+    },
+    evRealtimeGpsTracking: {
+        id: 'Pelacakan GPS Real-Time',
+        en: 'Real-time GPS Tracking',
+        zh: '实时 GPS 跟踪'
+    },
+    evRealtimeGpsDesc: {
+        id: 'Memantau posisi kendaraan secara langsung melalui aplikasi web dan mobile.',
+        en: 'Monitor vehicle positions directly through web and mobile applications.',
+        zh: '通过网络和移动应用程序直接监控车辆位置。'
+    },
+    evHistoryReplay: {
+        id: 'Riwayat Perjalanan & Replay',
+        en: 'Travel History & Replay',
+        zh: '行程历史和回放'
+    },
+    evHistoryDesc: {
+        id: 'Melacak rute historis, titik pengisian daya, pola pergerakan, serta waktu idle kendaraan.',
+        en: 'Track historical routes, charging points, movement patterns, and vehicle idle times.',
+        zh: '跟踪历史路线、充电点、移动模式和车辆空闲时间。'
+    },
+    evGeofencingAlert: {
+        id: 'Geofencing & Notifikasi',
+        en: 'Geofencing & Notifications',
+        zh: '地理围栏和通知'
+    },
+    evGeofencingDesc: {
+        id: 'Menentukan area operasional dan menerima notifikasi otomatis saat kendaraan masuk atau keluar dari area yang telah ditentukan.',
+        en: 'Define operational areas and receive automatic notifications when vehicles enter or exit designated areas.',
+        zh: '定义运营区域，当车辆进入或离开指定区域时接收自动通知。'
+    },
+    evVehicleStatusMonitoring: {
+        id: 'Monitoring Status Kendaraan',
+        en: 'Vehicle Status Monitoring',
+        zh: '车辆状态监控'
+    },
+    evVehicleStatusDesc: {
+        id: 'Memantau status Online/Offline, kondisi idle, deteksi pergerakan, dan aktivitas operasional unit.',
+        en: 'Monitor Online/Offline status, idle condition, movement detection, and unit operational activities.',
+        zh: '监控在线/离线状态、空闲状态、移动检测和单元运营活动。'
+    },
+    evEnergyConsumptionMonitoring2: {
+        id: 'Monitoring Konsumsi Energi',
+        en: 'Energy Consumption Monitoring',
+        zh: '能耗监控'
+    },
+    evEnergyConsumptionDesc: {
+        id: 'Menganalisis penggunaan energi (kWh) per perjalanan dan per kilometer untuk meningkatkan efisiensi operasional.',
+        en: 'Analyze energy usage (kWh) per trip and per kilometer to improve operational efficiency.',
+        zh: '分析每次行程和每公里的能耗 (千瓦时) 以提高运营效率。'
+    },
+    evBatteryStatusMonitoring2: {
+        id: 'Monitoring Status Baterai',
+        en: 'Battery Status Monitoring',
+        zh: '电池状态监控'
+    },
+    evBatteryStatusDesc: {
+        id: 'Memantau State of Charge (SOC) secara real-time, aktivitas pengisian dan pemakaian baterai.',
+        en: 'Monitor State of Charge (SOC) in real-time, battery charging and usage activities.',
+        zh: '实时监控电量状态 (SOC)，电池充电和使用活动。'
+    },
+    evImplementationServices: {
+        id: 'LAYANAN IMPLEMENTASI',
+        en: 'IMPLEMENTATION SERVICES',
+        zh: '实施服务'
+    },
+    evImplementationTitle: {
+        id: 'Implementation Services',
+        en: 'Implementation Services',
+        zh: '实施服务'
+    },
+    evCanBusReading: {
+        id: 'Pembacaan Data CANBus Kendaraan',
+        en: 'Vehicle CANBus Data Reading',
+        zh: '车辆 CANBus 数据读取'
+    },
+    evTelematicsInstall: {
+        id: 'Instalasi perangkat telematika',
+        en: 'Telematics device installation',
+        zh: '远程信息处理设备安装'
+    },
+    evSoftwareIntegration: {
+        id: 'Integrasi dan konfigurasi software MSF 1.0',
+        en: 'MSF 1.0 software integration and configuration',
+        zh: 'MSF 1.0 软件集成和配置'
+    },
+    evProductsDeliverables: {
+        id: 'PRODUK & DETAIL YANG DIBERIKAN',
+        en: 'PRODUCTS & DELIVERABLES',
+        zh: '产品和交付物'
+    },
+    evProductsTitle: {
+        id: 'Product & Deliverables',
+        en: 'Product & Deliverables',
+        zh: '产品和交付物'
+    },
+    evTelematicsProduct: {
+        id: 'Telematics',
+        en: 'Telematics',
+        zh: '远程信息处理'
+    },
+    evTelematicsDesc: {
+        id: '(Motor Sights Fleet 650)',
+        en: '(Motor Sights Fleet 650)',
+        zh: '(Motor Sights Fleet 650)'
+    },
+    evEcanModule: {
+        id: 'Modul eCAN',
+        en: 'eCAN Module',
+        zh: 'eCAN 模块'
+    },
+    evEcanDesc: {
+        id: '(Kabel Harness komunikasi EV CANBus kendaraan)',
+        en: '(Harness Cable for EV CANBus vehicle communication)',
+        zh: '(电动车 CANBus 车辆通信线束电缆)'
+    },
+    evMsf300: {
+        id: 'MSF 300',
+        en: 'MSF 300',
+        zh: 'MSF 300'
+    },
+    evMsf300Desc: {
+        id: '(Membaca data CANBus EV kendaraan)',
+        en: '(Reads EV vehicle CANBus data)',
+        zh: '(读取电动车 CANBus 数据)'
     }
 };
