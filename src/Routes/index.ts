@@ -99,6 +99,9 @@ const TNCManageITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Manag
 const TNCEditITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Edit'));
 // ========================================
 
+// DIVISION
+const ManageDivision = lazy(() => import('@/pages/Administration/Divisions/Manage'));
+
 export type TAppRoute = {
     path: string;
     name: string;
@@ -805,8 +808,16 @@ export const routes: TAppRoute[] = [
         name: 'Activities CRM',
         isProtected: true,
         roles: ['Activities CRM'],
-        requiredPermissions: ['update', 'read'],
         component: EditActivities,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/manage-division',
+        name: 'Division CRM',
+        isProtected: true,
+        roles: ['Division CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: ManageDivision,
         layout: AppLayout,
     },
 ];
