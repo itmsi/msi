@@ -6,7 +6,7 @@ import { MdAdd, MdKeyboardArrowLeft, MdSave } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
 import { handleKeyPress } from "@/helpers/generalHelper";
 import CustomSelect from "@/components/form/select/CustomSelect";
-import { useCreateProduct } from "./hooks/useProductCreate";
+import { useCreateProduct, getDefaultSpecs } from "./hooks/useProductCreate";
 
 export default function CreateProduct() {
     const {
@@ -261,14 +261,16 @@ export default function CreateProduct() {
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="componen_type">Component Type</Label>
+                                    <Label htmlFor="componen_type">Unit Type</Label>
                                     <CustomSelect
                                         options={companyOptions}
                                         value={companyOptions.find(option => option.value === formData.componen_type) || null}
                                         onChange={(option) => {
+                                            const newType = Number(option?.value) || 1;
                                             setFormData(prev => ({
                                                 ...prev,
-                                                componen_type: Number(option?.value) || 1
+                                                componen_type: newType,
+                                                componen_product_specifications: getDefaultSpecs(newType)
                                             }));
                                         }}
                                         placeholder="Select Product Type"

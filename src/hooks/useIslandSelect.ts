@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { IslandService } from '@/pages/Administration/Island/services/islandService';
 import { Island } from '@/pages/Administration/Island/types/island';
 
@@ -21,6 +21,9 @@ export const useIslandSelect = () => {
         loading: false
     });
     const [inputValue, setInputValue] = useState('');
+    
+    const isInitialized = useRef(false);
+    const isLoadingRef = useRef(false);
 
     const loadIslandOptions = useCallback(async (
         inputValue: string = '', 
@@ -29,8 +32,9 @@ export const useIslandSelect = () => {
         reset: boolean = false
     ) => {
         try {
-            if (pagination.loading && !reset) return loadedOptions;
-
+            if (isLoadingRef.current && !reset) return loadedOptions;
+            
+            isLoadingRef.current = true;
             setPagination(prev => ({ ...prev, loading: true }));
 
             const response = await IslandService.getIslands({
@@ -60,12 +64,14 @@ export const useIslandSelect = () => {
                 return updatedOptions;
             }
         } catch (error) {
-            console.error('Error loading term conditions:', error);
+            console.error('Error loading islands:', error);
             setPagination(prev => ({ ...prev, loading: false }));
+        } finally {
+            isLoadingRef.current = false;
         }
 
         return loadedOptions;
-    }, [pagination.loading]);
+    }, []); // Remove pagination.loading dependency
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -77,17 +83,18 @@ export const useIslandSelect = () => {
     }, [loadIslandOptions]);
     // Handle scroll to bottom - load next page
     const handleMenuScrollToBottom = useCallback(() => {
-        if (pagination.hasMore && !pagination.loading) {
+        if (pagination.hasMore && !isLoadingRef.current) {
             loadIslandOptions(inputValue, islandOptions, pagination.page + 1, false);
         }
-    }, [pagination, islandOptions, inputValue, loadIslandOptions]);
+    }, [pagination.hasMore, pagination.page, inputValue, islandOptions, loadIslandOptions]);
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
-        if (islandOptions.length === 0) {
-            await loadIslandOptions('', [], 1, true);
-        }
-    }, [islandOptions.length, loadIslandOptions]);
+        if (isInitialized.current || isLoadingRef.current) return;
+        
+        isInitialized.current = true;
+        await loadIslandOptions('', [], 1, true);
+    }, [loadIslandOptions]);
 
     return {
         islandOptions,

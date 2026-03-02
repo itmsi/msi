@@ -236,6 +236,7 @@ export default function EditQuotation() {
                     market_price: item.cp_market_price || '',
                     product_type: item.product_type || '',
                     image: item.images || [],
+                    componen_type: item.cp_componen_type || item.componen_type || 1,
                     componen_product_unit_model: '',
                     selling_price_star_1: '',
                     selling_price_star_2: '',
@@ -565,45 +566,9 @@ export default function EditQuotation() {
         handleInputChange(field, numberic);
     };
 
-    // const handleDecimalInputChange = (field: keyof QuotationFormData, inputValue: string) => {
-    //     // Allow digits, comma, and dot
-    //     const cleaned = inputValue.replace(/[^\d,.]/g, '');
-    //     handleInputChange(field, cleaned);
-    // };
-
     const handleNumericCleanInput = (field: keyof QuotationFormData, inputValue: string) => {
         handleInputChange(field, inputValue);
     };
-
-    // Format decimal for display - preserves decimal separator and trailing digits
-    // const formatDecimalDisplayInput = (value: string | undefined | null): string => {
-    //     if (!value) return '';
-
-    //     const str = value.toString();
-
-    //     // Check if there's a decimal separator (comma or dot)
-    //     const hasComma = str.includes(',');
-    //     const hasDot = str.includes('.');
-
-    //     if (!hasComma && !hasDot) {
-    //         // No decimal - just format as integer with thousand separators
-    //         const cleaned = str.replace(/[^\d]/g, '');
-    //         if (!cleaned) return '';
-    //         return new Intl.NumberFormat('id-ID').format(parseInt(cleaned));
-    //     }
-
-    //     // Has decimal separator - preserve it
-    //     const separator = hasComma ? ',' : '.';
-    //     const parts = str.split(separator);
-    //     const integerPart = parts[0].replace(/[^\d]/g, '') || '0';
-    //     const decimalPart = parts[1] || '';
-
-    //     // Format integer part with thousand separators
-    //     const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart));
-
-    //     // Return with comma as decimal separator (Indonesian format)
-    //     return `${formattedInteger},${decimalPart}`;
-    // };
 
     const handlePercentageInputChange = (field: keyof QuotationFormData, inputValue: string) => {
         handleInputChange(field, handlePercentageInput(inputValue));
@@ -780,6 +745,7 @@ export default function EditQuotation() {
                     selling_price_star_4: apiProductData.selling_price_star_4 || '0',
                     selling_price_star_5: apiProductData.selling_price_star_5 || '0',
                     description: apiProductData.componen_product_description || '',
+                    componen_type: apiProductData.componen_type || 1,
                     manage_quotation_item_accessories: islandAccessories,
                     manage_quotation_item_specifications: apiProductData.componen_product_specifications?.map((spec: any) => ({
                         manage_quotation_item_specification_label: spec.componen_product_specification_label || spec.specification_label_name || '',
@@ -866,9 +832,6 @@ export default function EditQuotation() {
             toast.error('Product not found in quotation');
             return;
         }
-console.log({
-    existingItem: formData.manage_quotation_items
-});
 
         // Initialize offcanvas data if not exists
         if (!unsavedProductChanges[productId]) {
@@ -895,7 +858,7 @@ console.log({
                     images: existingItem.image ? [existingItem.image] : null,
                     componen_product_description: existingItem.description || '',
                     is_delete: false,
-                    componen_type: 1,
+                    componen_type: (existingItem as any).componen_type || 1,
                     componen_product_unit_model: existingItem.componen_product_unit_model || '',
                     componen_product_specifications: existingItem.manage_quotation_item_specifications?.map((spec: any) => ({
                         componen_product_specification_label: spec.manage_quotation_item_specification_label || spec.specification_label_name || '',

@@ -17,6 +17,7 @@ import {
 } from './components';
 import FormActions from '@/components/form/FormActions';
 import ActivitySelections from './components/ActivitySelections';
+import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 
 const CreateContractor: React.FC = () => {
     const navigate = useNavigate();
@@ -27,6 +28,8 @@ const CreateContractor: React.FC = () => {
         validationErrors,
         isSubmitting,
         brandInputValues,
+        handleNewCustomerToggle,
+        handleExistingCustomerSelect,
         handleCustomerChange,
         handleAddContact,
         handleRemoveContact,
@@ -43,7 +46,13 @@ const CreateContractor: React.FC = () => {
         handleRemoveRkab,
         handleRkabChange,
         handleActivitySelectionChange,
-        handleSubmit
+        handleSubmit,
+
+        isValidating,
+        showConfirmation,
+        validationResult,
+        cancelConfirmation,
+        handleValidateAndSubmit
     } = useContractorCreate();
 
     // External selection hooks
@@ -83,6 +92,64 @@ const CreateContractor: React.FC = () => {
         initializeSegementationOptions();
     }, [initializeSegementationOptions]);
 
+    
+    // Helper function to create validation modal content
+    const getValidationModalContent = () => {
+        if (!validationResult) return null;
+
+        const { data } = validationResult;
+        const hasDuplicates = data.hasDuplicates;
+
+        if (!hasDuplicates) {
+            return (
+                <div className="space-y-3">
+                    <p className="text-sm text-gray-700">
+                        {data.message}
+                    </p>
+                    <p className="text-sm text-green-600">
+                       The contractor can be created successfully.
+                    </p>
+                </div>
+            );
+        }
+
+        return (
+            <div className="space-y-4">
+                <div>
+                    <p className="text-sm font-medium text-gray-900 mb-2">
+                        {data.message}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                        Are you sure you want to proceed with creating this contractor?
+                    </p>
+                </div>
+
+                <div className="bg-[#F3F4F6] p-3 rounded">
+                    <h4 className="text-sm font-medium text-gray-900 font-primary-bold mb-2">
+                        Duplicate Details:
+                    </h4>
+                    <div className="space-y-3">
+                        <div className="text-sm space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                                <span className="font-medium">Entered Name:</span>
+                                <span className="text-gray-900 font-primary-bold">{data?.duplicates?.[0]?.requestName || '-'}</span>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 gap-2">
+                                <span className="font-medium">Matched Name:</span>
+                                <ul className="list-outside list-disc rounded-xl pl-5">
+                                    {data.duplicates.map((duplicate, index) => (
+                                        <li key={index}><span className="text-gray-900 font-primary-bold">{duplicate.matchedName}</span></li>
+                                    ))}
+                                </ul>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
     return (
         <>
             <PageMeta 
@@ -116,6 +183,8 @@ const CreateContractor: React.FC = () => {
                         onAddContact={handleAddContact}
                         onRemoveContact={handleRemoveContact}
                         onContactChange={handleContactChange}
+                        onNewCustomerToggle={handleNewCustomerToggle}
+                        onExistingCustomerSelect={handleExistingCustomerSelect}
                     />
 
                     {/* IUP Customer Info Form */}
@@ -168,13 +237,30 @@ const CreateContractor: React.FC = () => {
 
                     {/* Form Actions */}
                     <FormActions
-                        isSubmitting={isSubmitting}
-                        submitText={isSubmitting ? 'Creating...' : 'Create Contractor'}
+                        isSubmitting={isValidating}
+                        submitText={isValidating ? 'Creating...' : 'Create Contractor'}
                         cancelRoute={'/crm/contractors'}
-                        onSubmit={handleSubmit}
+                        onSubmit={handleValidateAndSubmit}
                     />
                 </div>
             </div>
+            
+            {/* Confirmation Modal */}
+            {showConfirmation && validationResult && (
+                <ConfirmationModal
+                    isOpen={showConfirmation}
+                    onClose={cancelConfirmation}
+                    onConfirm={handleSubmit}
+                    title="Confirm Contractor Creation"
+                    message={getValidationModalContent()}
+                    confirmText="Create Contractor"
+                    cancelText="Cancel"
+                    type={validationResult.data.hasDuplicates ? 'info' : 'success'}
+                    loading={isSubmitting}
+                    size="md"
+                    showIcon={false}
+                />
+            )}
         </>
     );
 };
