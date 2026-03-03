@@ -5,6 +5,9 @@ import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useQuotationManagement } from './hooks/useQuotationManagement';
 import { ManageQuotationItem } from './types/quotation';
+import { useLanguage } from '@/components/lang/useLanguage';
+import LanguageSwitcher from '@/components/lang/LanguageSwitcher';
+import { quotationManage } from './language/quotationManage';
 import CustomDataTable from '../../../components/ui/table/CustomDataTable';
 import Input from '../../../components/form/input/InputField';
 import CustomSelect from '../../../components/form/select/CustomSelect';
@@ -19,6 +22,7 @@ import FilterSection from './components/FilterSection';
 const ManageQuotations: React.FC = () => {
     const navigate = useNavigate();
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const { lang, langField, setLang } = useLanguage(quotationManage);
 
     const {
         searchTerm,
@@ -45,7 +49,7 @@ const ManageQuotations: React.FC = () => {
         cancelDuplicate,
         setSearchTerm,
         handleKeyPress,
-    } = useQuotationManagement();
+    } = useQuotationManagement(lang);
 
     // Toggle filter collapse
     const handleToggleFilter = () => {
@@ -56,12 +60,12 @@ const ManageQuotations: React.FC = () => {
     const columns = useMemo<TableColumn<ManageQuotationItem>[]>(
         () => [
             {
-                name: 'Quotation No',
+                name: langField('quotationNo'),
                 selector: (row) => row.manage_quotation_no,
                 cell: (row) => (
                 <>
                     <a
-                        href={`/quotations/manage/edit/${row.manage_quotation_id}`}
+                        href={`/quotations/manage/edit/${row.manage_quotation_id}?lang=${lang}`}
                         className="absolute inset-0"
                     />
                     <div className=" items-center gap-3 py-2">
@@ -75,27 +79,27 @@ const ManageQuotations: React.FC = () => {
                 width: '220px',
             },
             {
-                name: 'Customer Name',
+                name: langField('customerName'),
                 selector: (row) => row.customer_name,
                 wrap: true,
             },
             {
-                name: 'Quotation For',
+                name: langField('quotationFor'),
                 selector: (row) => row.quotation_for || 'customer',
                 cell: (row) => (
                     <span className="capitalize text-sm">
-                        {row.quotation_for === 'leasing' ? 'Leasing' : 'Customer'}
+                        {row.quotation_for === 'leasing' ? langField('leasing') : langField('customer')}
                     </span>
                 ),
                 center: true,
                 width: '140px',
             },
             {
-                name: 'Island',
+                name: langField('island'),
                 selector: (row) => row.island_name,
             },
             {
-                name: 'Status',
+                name: langField('status'),
                 selector: (row) => row.status,
                 cell: (row) => {
                     const badge = getStatusBadge(row.status);
@@ -108,14 +112,14 @@ const ManageQuotations: React.FC = () => {
                 center: true,
             },
             {
-                name: 'Grand Total',
+                name: langField('grandTotal'),
                 selector: (row) => row.manage_quotation_grand_total,
                 cell: (row) => (
                     <span className="font-semibold">{formatCurrency(row.manage_quotation_grand_total)}</span>
                 ),
             },
             {
-                name: 'Updated By',
+                name: langField('updatedBy'),
                 selector: row => row.updated_at || '',
                 sortable: false,
                 cell: (row) => (
@@ -135,26 +139,26 @@ const ManageQuotations: React.FC = () => {
                     icon: FaRegFilePdf,
                     onClick: handleDownload,
                     className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                    tooltip: 'Download',
+                    tooltip: langField('download'),
                     permission: 'read',
                 },
                 {
                     icon: MdContentCopy,
                     onClick: handleDuplicate,
                     className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
-                    tooltip: 'Duplicate',
+                    tooltip: langField('duplicate'),
                     permission: 'duplicate',
                 },
                 {
                     icon: MdDeleteOutline,
                     onClick: handleDelete,
                     className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
-                    tooltip: 'Delete',
+                    tooltip: langField('delete'),
                     permission: 'delete'
                 }
             ]),
         ],
-        [handleView, handleEdit, handleDelete, handleDuplicate]
+        [lang, langField, handleView, handleEdit, handleDelete, handleDuplicate]
     );
 
     const SearchAndFilters = useMemo(() => (
@@ -166,7 +170,7 @@ const ManageQuotations: React.FC = () => {
                         <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                         <Input
                             type="text"
-                            placeholder="Search by quotation number, customer ID..."
+                            placeholder={langField('searchPlaceholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             onKeyPress={handleKeyPress}
@@ -191,16 +195,16 @@ const ManageQuotations: React.FC = () => {
                     name="sort_order"
                     value={sortOrder ? {
                         value: sortOrder,
-                        label: sortOrder === 'asc' ? 'Ascending' : 'Descending'
+                        label: sortOrder === 'asc' ? langField('ascending') : langField('descending')
                     } : null}
                     onChange={(selectedOption) =>
                         handleFilterChange('sort_order', selectedOption?.value || '')
                     }
                     options={[
-                        { value: 'asc', label: 'Ascending' },
-                        { value: 'desc', label: 'Descending' }
+                        { value: 'asc', label: langField('ascending') },
+                        { value: 'desc', label: langField('descending') }
                     ]}
-                    placeholder="Order by"
+                    placeholder={langField('orderBy')}
                     isClearable={false}
                     isSearchable={false}
                     className="w-40"
@@ -213,7 +217,7 @@ const ManageQuotations: React.FC = () => {
                     size="sm"
                 >
                     <MdFilterListAlt className="w-4 h-4 mr-2" />
-                    Filter
+                    {langField('filter')}
                     {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
                 </Button>
             </div>
@@ -228,7 +232,7 @@ const ManageQuotations: React.FC = () => {
             />
         )}
         </>
-    ), [searchTerm, sortOrder, quotationFor, loading, quotations.length, showAdvancedFilters, handleSearchChange, handleClearFilters, handleFilterChange, handleToggleFilter]);
+    ), [lang, langField, searchTerm, sortOrder, quotationFor, loading, quotations.length, showAdvancedFilters, handleSearchChange, handleClearFilters, handleFilterChange, handleToggleFilter]);
 
     return (
         <>
@@ -244,19 +248,22 @@ const ManageQuotations: React.FC = () => {
                 <div className="px-6 py-4 border-b border-gray-200">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h3 className="text-lg leading-6 font-primary-bold text-gray-900">Manage Quotations</h3>
-                            <p className="mt-1 text-sm text-gray-500">Manage and organize your quotation database</p>
+                            <h3 className="text-lg leading-6 font-primary-bold text-gray-900">{langField('manageQuotations')}</h3>
+                            <p className="mt-1 text-sm text-gray-500">{langField('manageDescription')}</p>
                         </div>
-                        <PermissionGate permission="create">
-                            <Button
-                                onClick={() => navigate('/quotations/manage/create')}
-                                className="flex items-center gap-2"
-                                size="sm"
-                            >
-                                <MdAdd className="h-4 w-4" />
-                                Create Quotation
-                            </Button>
-                        </PermissionGate>
+                        <div className="flex items-center gap-4">
+                            <LanguageSwitcher currentLang={lang} onChangeLang={setLang} />
+                            <PermissionGate permission="create">
+                                <Button
+                                    onClick={() => navigate(`/quotations/manage/create?lang=${lang}`)}
+                                    className="flex items-center gap-2"
+                                    size="sm"
+                                >
+                                    <MdAdd className="h-4 w-4" />
+                                    {langField('createQuotation')}
+                                </Button>
+                            </PermissionGate>
+                        </div>
                     </div>
                 </div>
 
@@ -296,10 +303,10 @@ const ManageQuotations: React.FC = () => {
                 isOpen={confirmDelete.show}
                 onClose={cancelDelete}
                 onConfirm={confirmDeleteQuotations}
-                title="Delete Quotation"
-                message="Are you sure you want to delete this quotation? This action cannot be undone."
-                confirmText="Delete"
-                cancelText="Cancel"
+                title={langField('deleteQuotationTitle')}
+                message={langField('deleteQuotationMessage')}
+                confirmText={langField('delete')}
+                cancelText={langField('cancel')}
             />
 
             {/* Duplicate Confirmation Modal */}
@@ -307,10 +314,10 @@ const ManageQuotations: React.FC = () => {
                 isOpen={confirmDuplicate.show}
                 onClose={cancelDuplicate}
                 onConfirm={confirmDuplicateQuotations}
-                title="Duplicate Quotation"
-                message="Are you sure you want to duplicate this quotation? A copy will be created with all the details."
-                confirmText="Duplicate"
-                cancelText="Cancel"
+                title={langField('duplicateQuotationTitle')}
+                message={langField('duplicateQuotationMessage')}
+                confirmText={langField('duplicate')}
+                cancelText={langField('cancel')}
                 type="info"
             />
         </>

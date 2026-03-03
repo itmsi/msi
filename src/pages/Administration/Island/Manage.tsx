@@ -1,4 +1,4 @@
-import { MdAdd, MdEdit, MdSearch, MdDeleteOutline } from 'react-icons/md';
+import { MdAdd, MdEdit, MdSearch, MdDeleteOutline, MdClear } from 'react-icons/md';
 import CustomDataTable from '../../../components/ui/table/CustomDataTable';
 import Input from '../../../components/form/input/InputField';
 import CustomSelect from '../../../components/form/select/CustomSelect';
@@ -28,6 +28,7 @@ export default function ManageIsland() {
         validationErrors,
 
         // Actions
+        handleClearFilters,
         handleInputChange,
         handleAddIsland,
         handleEditIsland,
@@ -42,7 +43,26 @@ export default function ManageIsland() {
         handleSearchChange,
     } = useIslandManagement();
     
-    const { showConfirmation, ...confirmationState } = useConfirmation();
+    // const { showConfirmation, ...confirmationState } = useConfirmation();
+        
+    const { showConfirmation, modalProps } = useConfirmation();
+
+    // Handler untuk delete island dengan konfirmasi
+    const handleDelete = async (island: Island) => {
+        const typeLabel = island.island_name;
+                
+        const confirmed = await showConfirmation({
+            title: `Delete ${typeLabel}`,
+            message: `Are you sure you want to delete "${island.island_name}"?\n\nType: ${typeLabel}\nCode: ${island.island_name}\n\nThis action cannot be undone and will also delete.`,
+            confirmText: `Delete ${typeLabel}`,
+            cancelText: 'Cancel',
+            type: 'danger',
+        });
+
+        if (confirmed) {
+            handleDeleteIsland(island);
+        }
+    };
 
     // Definisi kolom untuk DataTable
     const islandColumns: TableColumn<Island>[] = [
@@ -77,7 +97,7 @@ export default function ManageIsland() {
             },
             {
                 icon: MdDeleteOutline,
-                onClick: handleDeleteIsland,
+                onClick: handleDelete,
                 className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
                 tooltip: 'Delete',
                 permission: 'delete'
@@ -133,6 +153,15 @@ export default function ManageIsland() {
                                     onChange={(e) => handleSearchChange(e.target.value)}
                                     className="pl-10 pr-4 py-2 w-full"
                                 />
+                                {filters.search && (
+                                    <button
+                                        onClick={handleClearFilters}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                        type="button"
+                                    >
+                                        <MdClear className="h-4 w-4" />
+                                    </button>
+                                )}
                             </div>
                         </div>
 
@@ -248,7 +277,8 @@ export default function ManageIsland() {
                 </div>
             </Modal>
 
-            <ConfirmationModal {...confirmationState.modalProps} />
+            {/* Delete Confirmation Modal */}
+            <ConfirmationModal {...modalProps} />
         </>
     );
 };

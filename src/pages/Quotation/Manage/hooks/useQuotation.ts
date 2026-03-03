@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast';
 import { getCompanyName } from '@/helpers/generalHelper';
 
 export const useQuotation = () => {
+    
     const [quotations, setQuotations] = useState<ManageQuotationItem[]>([]);
     const [pagination, setPagination] = useState<QuotationPagination>({
         page: 1,
@@ -175,14 +176,14 @@ export const useQuotation = () => {
         }
     }, []);
 
-    const downloadQuotation = useCallback(async (quotation_id: string) => {
+    const downloadQuotation = useCallback(async (quotation_id: string, lang?: string) => {
         setLoading(true);
         setError(null);
 
         try {
             const response = await QuotationService.downloadQuotation(quotation_id);
             if (response.data?.status) {
-                await generateQuotationPDF(response.data.data);
+                await generateQuotationPDF(response.data.data, lang || 'en');
                 toast.success('PDF downloaded successfully');
                 return true;
             } else {
