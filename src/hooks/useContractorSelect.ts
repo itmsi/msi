@@ -27,6 +27,7 @@ export const useContractorSelect = () => {
         type: ''
     });
     
+    const [initialized, setInitialized] = useState(false);
     const loadingRef = useRef(false);
 
     const loadContractorOptions = useRef(async (
@@ -100,10 +101,11 @@ export const useContractorSelect = () => {
 
 
     const initializeOptions = useCallback(async () => {
-        if (contractorOptions.length === 0) {
+        if (!initialized && contractorOptions.length === 0) {
+            setInitialized(true);
             await loadContractorOptions.current('', [], 1, '', '', true);
         }
-    }, [contractorOptions.length]);
+    }, [initialized, contractorOptions.length]);
 
     return {
         contractorOptions,

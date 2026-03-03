@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ProjectAttachment, ProjectFormData, ProjectValidationErrors } from '../types/project';
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
@@ -59,10 +59,15 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         initializeOptions: initializeEmployeeOptions
     } = useEmployeeSelect();
 
+    const initReference = useRef(false);
+
     useEffect(() => {
-        initializeContractorOptions();
-        initializeEmployeeOptions();
-    }, [initializeContractorOptions, initializeEmployeeOptions]);
+        if (!initReference.current) {
+            initReference.current = true;
+            initializeContractorOptions();
+            initializeEmployeeOptions();
+        }
+    }, []);
 
     const [selectedContractor, setSelectedContractor] = useState<ContractorSelectOption | null>(null);
     const [selectedEmployee, setSelectedEmployee] = useState<{ value: string; label: string } | null>(null);
