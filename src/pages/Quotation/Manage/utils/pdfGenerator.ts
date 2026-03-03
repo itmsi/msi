@@ -48,6 +48,41 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         return key; // fallback to key if translation not found
     };
     
+    // Helper function to translate specification labels
+    const translateSpecLabel = (label: string): string => {
+        const specMap: { [key: string]: string } = {
+            'Unit Model': langField('spec_unitModel'),
+            'GVW': langField('spec_gvw'),
+            'Wheelbase': langField('spec_wheelbase'),
+            'Max Torque': langField('spec_maxTorque'),
+            'Displacement': langField('spec_displacement'),
+            'Emission Standard': langField('spec_emissionStandard'),
+            'Engine Guard': langField('spec_engineGuard'),
+            'Fuel Tank': langField('spec_fuelTank'),
+            'Tyre': langField('spec_tyre'),
+            'Gearbox Transmission': langField('spec_gearboxTransmission'),
+            'Engine Brand Model': langField('spec_engineBrandModel'),
+            'Cargobox/Vessel': langField('spec_cargoboxVessel'),
+            'Horse Power': langField('spec_horsePower'),
+            'Overall Length': langField('spec_overallLength'),
+            'Curb Weight': langField('spec_curbWeight'),
+            'Gross Vehicle Weight (GVW)': langField('spec_grossVehicleWeight'),
+            'Rated Power / Torque': langField('spec_ratedPowerTorque'),
+            'Peak Power / Torque': langField('spec_peakPowerTorque'),
+            'Battery Capacity': langField('spec_batteryCapacity'),
+            'Battery Protection': langField('spec_batteryProtection'),
+            'Charging Ports': langField('spec_chargingPorts'),
+            'Input Socket Power': langField('spec_inputSocketPower'),
+            'Frame': langField('spec_frame'),
+            'Rear Axles': langField('spec_rearAxles'),
+            'Tires': langField('spec_tires'),
+            'Structure Thickness': langField('spec_structureThickness'),
+            'Cargo Box Size': langField('spec_cargoBoxSize')
+        };
+        
+        return specMap[label] || label;
+    };
+    
     // Helper function untuk safely get image URL
     const getImageUrl = (imageData: any): string => {
         try {
@@ -1002,7 +1037,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                         const orderB = indexB === -1 ? 999 : indexB;
                         return orderA - orderB;
                     })
-                    .map((spec: any) => [spec.label, spec.value]);
+                    .map((spec: any) => [translateSpecLabel(spec.label), spec.value]);
 
                 const specTableStartY = item1YPos;
                 autoTable(doc, {
@@ -1031,6 +1066,25 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                         // Set minimum height for Gearbox Transmission rows
                         if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
                             data.cell.styles.minCellHeight = 8;
+                        }
+                    },
+                    willDrawCell: (data) => {
+                        // Check if cell contains Chinese characters and apply appropriate font
+                        const cellText = data.cell.text?.join('') || '';
+                        if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
+                            const isFirstColumn = data.column.index === 0;
+                            const isBold = data.cell.styles.fontStyle === 'bold';
+                            try {
+                                if (isFirstColumn) {
+                                    doc.setFont('NotoSansSC', isBold ? 'bold' : 'normal');
+                                } else if (isBold) {
+                                    doc.setFont('NotoSansSC', 'bold');
+                                } else {
+                                    doc.setFont('NotoSansSC', 'normal');
+                                }
+                            } catch (error) {
+                                doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
+                            }
                         }
                     }
                 });
@@ -1178,7 +1232,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                             const orderB = indexB === -1 ? 999 : indexB;
                             return orderA - orderB;
                         })
-                        .map((spec: any) => [spec.label, spec.value]);
+                    .map((spec: any) => [translateSpecLabel(spec.label), spec.value]);
 
                     const specTableStartY2 = item2YPos;
                     autoTable(doc, {
@@ -1207,6 +1261,25 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                             // Set minimum height for Gearbox Transmission rows
                             if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
                                 data.cell.styles.minCellHeight = 8;
+                            }
+                        },
+                        willDrawCell: (data) => {
+                            // Check if cell contains Chinese characters and apply appropriate font
+                            const cellText = data.cell.text?.join('') || '';
+                            if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
+                                const isFirstColumn = data.column.index === 0;
+                                const isBold = data.cell.styles.fontStyle === 'bold';
+                                try {
+                                    if (isFirstColumn) {
+                                        doc.setFont('NotoSansSC', isBold ? 'bold' : 'normal');
+                                    } else if (isBold) {
+                                        doc.setFont('NotoSansSC', 'bold');
+                                    } else {
+                                        doc.setFont('NotoSansSC', 'normal');
+                                    }
+                                } catch (error) {
+                                    doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
+                                }
                             }
                         }
                     });
