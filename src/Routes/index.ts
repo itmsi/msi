@@ -71,6 +71,11 @@ const Activities = lazy(() => import('@/pages/CRM/Activity/Activity'));
 const CreateActivities = lazy(() => import('@/pages/CRM/Activity/CreateActivity'));
 const EditActivities = lazy(() => import('@/pages/CRM/Activity/EditActivity'));
 
+// CRM - Projects
+const ManageCRMProject = lazy(() => import('@/pages/CRM/Project/Manage'));
+const CreateCRMProject = lazy(() => import('@/pages/CRM/Project/CreateProject'));
+const EditCRMProject = lazy(() => import('@/pages/CRM/Project/EditProject'));
+
 // ========================================
 // QUOTATION ITI
 const ManageCustomersITI = lazy(() => import('@/pages/QuotationITI/Administration/Customers/Manage'));
@@ -791,6 +796,34 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Activities CRM'],
         component: Activities,
+        layout: AppLayout,
+    },
+
+    // CRM - Projects
+    {
+        path: '/crm/project',
+        name: 'Project CRM',
+        isProtected: true,
+        roles: ['Project CRM'],
+        component: ManageCRMProject,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/project/create',
+        name: 'Project CRM',
+        isProtected: true,
+        roles: ['Project CRM'],
+        requiredPermissions: ['create'],
+        component: CreateCRMProject,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/project/edit/:id',
+        name: 'Project CRM',
+        isProtected: true,
+        roles: ['Project CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: EditCRMProject,
         layout: AppLayout,
     },
 
