@@ -132,7 +132,7 @@ const navItems: NavItem[] = [
             'Contractors CRM',
             'Activities CRM',
             'User Management CRM',
-            'Project CRM'
+            'Project CRM',
             'Division CRM'
         ],
         subItems: [
@@ -141,7 +141,6 @@ const navItems: NavItem[] = [
             { name: "Contractors", path: "/crm/contractors", allowedRoles: ['Contractors CRM'] },
             { name: "Activities", path: "/crm/activity", allowedRoles: ['Activities CRM'] },
             { name: "Projects", path: "/crm/project", allowedRoles: ['Project CRM'] },
-            { name: "User Management", path: "/crm/user-management", allowedRoles: ['User Management CRM'] },
             { name: "User Management", path: "/crm/user-management", allowedRoles: ['User Management CRM'] },
             { name: "Division", path: "/crm/manage-division", allowedRoles: ['Division CRM'] }
         ],
