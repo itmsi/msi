@@ -885,5 +885,142 @@ export const quotationLabelPDF: TranslationMap = {
         id: '(Membaca data CANBus EV kendaraan)',
         en: '(Reads EV vehicle CANBus data)',
         zh: '(读取电动车 CANBus 数据)'
+    },
+    
+    // Specification Labels  
+    spec_unitModel: {
+        id: 'Model Unit',
+        en: 'Unit Model',
+        zh: '单元型号'
+    },
+    spec_gvw: {
+        id: 'GVW',
+        en: 'GVW',
+        zh: '总重量'
+    },
+    spec_wheelbase: {
+        id: 'Wheelbase',
+        en: 'Wheelbase',
+        zh: '轴距'
+    },
+    spec_maxTorque: {
+        id: 'Torsi Maksimal',
+        en: 'Max Torque',
+        zh: '最大扭矩'
+    },
+    spec_displacement: {
+        id: 'Displacement',
+        en: 'Displacement',
+        zh: '排量'
+    },
+    spec_emissionStandard: {
+        id: 'Standar Emisi',
+        en: 'Emission Standard',
+        zh: '排放标准'
+    },
+    spec_engineGuard: {
+        id: 'Pelindung Mesin',
+        en: 'Engine Guard',
+        zh: '发动机护罩'
+    },
+    spec_fuelTank: {
+        id: 'Tangki Bahan Bakar',
+        en: 'Fuel Tank',
+        zh: '油箱'
+    },
+    spec_tyre: {
+        id: 'Ban',
+        en: 'Tyre',
+        zh: '轮胎'
+    },
+    spec_gearboxTransmission: {
+        id: 'Transmisi Gearbox',
+        en: 'Gearbox Transmission',
+        zh: '变速箱传动'
+    },
+    spec_engineBrandModel: {
+        id: 'Model Merek Mesin',
+        en: 'Engine Brand Model',
+        zh: '发动机品牌型号'
+    },
+    spec_cargoboxVessel: {
+        id: 'Kotak Kargo/Kapal',
+        en: 'Cargobox/Vessel',
+        zh: '货箱/船只'
+    },
+    spec_horsePower: {
+        id: 'Tenaga Kuda',
+        en: 'Horse Power',
+        zh: '马力'
+    },
+    spec_overallLength: {
+        id: 'Panjang Keseluruhan',
+        en: 'Overall Length',
+        zh: '总长度'
+    },
+    spec_curbWeight: {
+        id: 'Berat Kosong',
+        en: 'Curb Weight',
+        zh: '整备重量'
+    },
+    spec_grossVehicleWeight: {
+        id: 'Berat Kendaraan Bruto (GVW)',
+        en: 'Gross Vehicle Weight (GVW)',
+        zh: '车辆总重 (GVW)'
+    },
+    spec_ratedPowerTorque: {
+        id: 'Daya/Torsi Terukur',
+        en: 'Rated Power / Torque',
+        zh: '额定功率/扭矩'
+    },
+    spec_peakPowerTorque: {
+        id: 'Daya/Torsi Puncak',
+        en: 'Peak Power / Torque',
+        zh: '峰值功率/扭矩'
+    },
+    spec_batteryCapacity: {
+        id: 'Kapasitas Baterai',
+        en: 'Battery Capacity',
+        zh: '电池容量'
+    },
+    spec_batteryProtection: {
+        id: 'Perlindungan Baterai',
+        en: 'Battery Protection',
+        zh: '电池保护'
+    },
+    spec_chargingPorts: {
+        id: 'Port Pengisian',
+        en: 'Charging Ports',
+        zh: '充电端口'
+    },
+    spec_inputSocketPower: {
+        id: 'Daya Socket Input',
+        en: 'Input Socket Power',
+        zh: '输入插座功率'
+    },
+    spec_frame: {
+        id: 'Rangka',
+        en: 'Frame',
+        zh: '车架'
+    },
+    spec_rearAxles: {
+        id: 'As Roda Belakang',
+        en: 'Rear Axles',
+        zh: '后轴'
+    },
+    spec_tires: {
+        id: 'Ban',
+        en: 'Tires',
+        zh: '轮胎'
+    },
+    spec_structureThickness: {
+        id: 'Ketebalan Struktur',
+        en: 'Structure Thickness',
+        zh: '结构厚度'
+    },
+    spec_cargoBoxSize: {
+        id: 'Ukuran Kotak Kargo',
+        en: 'Cargo Box Size',
+        zh: '货箱尺寸'
     }
 };

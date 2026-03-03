@@ -5,8 +5,8 @@ import { MdSave, MdKeyboardArrowLeft, MdAdd, MdDelete } from 'react-icons/md';
 import { Calendar } from 'react-date-range';
 import { TableColumn } from "react-data-table-component";
 
-import 'react-date-range/dist/styles.css'; // main css file
-import 'react-date-range/dist/theme/default.css'; // theme css file
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 
 // Components
 import PageMeta from '@/components/common/PageMeta';
@@ -137,12 +137,12 @@ export default function EditQuotation() {
         manage_quotation_shipping_term: '',
         manage_quotation_franco: '',
         manage_quotation_lead_time: '',
-        quotation_for: 'customer',  // New field with default value
-        star: '',                    // New field
+        quotation_for: 'customer',
+        star: '',
         term_content_id: '',
         term_content_directory: '',
-        include_aftersales_page: true,  // Added for API payload
-        include_msf_page: false,        // Added for API payload
+        include_aftersales_page: true,
+        include_msf_page: false,
         status: 'draft',
         manage_quotation_items: [],
         manage_quotation_item_accessories: [],
@@ -190,7 +190,6 @@ export default function EditQuotation() {
         if (!quotationId) return;
         try {
             const data = await fetchQuotation(quotationId);
-            // Transform API response to form data
             const transformedData: QuotationFormData = {
                 customer_id: data.customer_id || '',
                 employee_id: data.employee_id || '',
@@ -277,14 +276,10 @@ export default function EditQuotation() {
             if (transformedData.manage_quotation_valid_date) {
                 setDueDate(new Date(transformedData.manage_quotation_valid_date));
             }
-
-            // Set term condition content
             if (transformedData.term_content_directory) {
                 setTermConditionContent(transformedData.term_content_directory);
             }
-
-            // Set selected values for dropdowns from loaded data
-            const apiData = data as any; // API might return more fields than typed
+            const apiData = data as any;
 
             if (data.customer_id) {
                 setSelectedCustomer({
@@ -408,7 +403,6 @@ export default function EditQuotation() {
         }
     }, [quotationData, bankOptions, bankInitialized]);
 
-    // Sync individual dates with form data (but don't override on initial load)
     useEffect(() => {
         if (formData.manage_quotation_date && !loading) {
             const newDateString = invoiceDate.toISOString().split('T')[0];
@@ -464,15 +458,6 @@ export default function EditQuotation() {
     };
 
     const resetQuotationFormattedNumbers = (formData: any): any => {
-        // const quotationNumericFields = [
-        //     'manage_quotation_delivery_fee',
-        //     'manage_quotation_other',
-        //     'manage_quotation_payment_presentase',
-        //     'manage_quotation_ppn',
-        //     'manage_quotation_grand_total',
-        //     'manage_quotation_payment_nominal'
-        // ];
-        // return resetFormatNumbers(formData, quotationNumericFields);
         return formData;
     };
 
@@ -1228,15 +1213,10 @@ export default function EditQuotation() {
     if (loading && !formData.customer_id) {
         return (
             <>
-                <PageMeta
-                    title="Loading... - MSI Dashboard"
-                    description="Loading quotation data"
-                    image="/motor-sights-international.png"
-                />
                 <div className="flex items-center justify-center min-h-[400px]">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Loading quotation data...</p>
+                        <p className="text-gray-600">{langField('loadingQuotationData')}</p>
                     </div>
                 </div>
             </>
@@ -1258,7 +1238,7 @@ export default function EditQuotation() {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/quotations/manage')}
+                                onClick={() => navigate(`/quotations/manage?lang=${lang}`)}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -1379,7 +1359,7 @@ export default function EditQuotation() {
                                                             date={dueDate}
                                                             onChange={handleDueDateChange}
                                                             color="#3b82f6"
-                                                            minDate={invoiceDate} // Due date cannot be before invoice date
+                                                            minDate={invoiceDate}
                                                         />
                                                     </div>
                                                 )}
@@ -1492,7 +1472,6 @@ export default function EditQuotation() {
                                                     handleInputChange('island_id', option?.value || '');
 
                                                     if (option?.value) {
-                                                        // Fetch new accessories for the selected island
                                                         try {
                                                             const response = await QuotationService.getQuotationAccessories(option.value);
 
@@ -1513,10 +1492,7 @@ export default function EditQuotation() {
                                                                     accessory_region: accessory.accessory_region || ''
                                                                 }));
 
-                                                                // Store accessories in separate state for new items
                                                                 setCurrentIslandAccessories(transformedAccessories);
-
-                                                                // Update accessories in all existing quotation items
                                                                 setFormData(prev => ({
                                                                     ...prev,
                                                                     manage_quotation_item_accessories: transformedAccessories,
@@ -1525,13 +1501,10 @@ export default function EditQuotation() {
                                                                         manage_quotation_item_accessories: transformedAccessories
                                                                     }))
                                                                 }));
-
-                                                                // Clear unsaved product changes to force refresh of ProductDetailDrawer with new accessories
                                                                 setUnsavedProductChanges({});
 
                                                                 toast.success(`Accessories updated for ${transformedAccessories.length} items based on selected island`);
                                                             } else {
-                                                                // Clear accessories if no data
                                                                 setCurrentIslandAccessories([]);
                                                                 setFormData(prev => ({
                                                                     ...prev,
@@ -1541,8 +1514,6 @@ export default function EditQuotation() {
                                                                         manage_quotation_item_accessories: []
                                                                     }))
                                                                 }));
-
-                                                                // Clear unsaved product changes to force refresh
                                                                 setUnsavedProductChanges({});
 
                                                                 toast.success('No accessories found for selected island');
@@ -1550,7 +1521,6 @@ export default function EditQuotation() {
                                                         } catch (error: any) {
                                                             console.error('Error fetching accessories by island:', error);
                                                             toast.error('Failed to load accessories for selected island');
-                                                            // Clear accessories on error
                                                             setCurrentIslandAccessories([]);
                                                             setFormData(prev => ({
                                                                 ...prev,
@@ -1560,12 +1530,9 @@ export default function EditQuotation() {
                                                                     manage_quotation_item_accessories: []
                                                                 }))
                                                             }));
-
-                                                            // Clear unsaved product changes to force refresh
                                                             setUnsavedProductChanges({});
                                                         }
                                                     } else {
-                                                        // Clear accessories when no island selected
                                                         setCurrentIslandAccessories([]);
                                                         setFormData(prev => ({
                                                             ...prev,
@@ -1575,8 +1542,6 @@ export default function EditQuotation() {
                                                                 manage_quotation_item_accessories: []
                                                             }))
                                                         }));
-
-                                                        // Clear unsaved product changes to force refresh
                                                         setUnsavedProductChanges({});
                                                     }
                                                 }}
@@ -1624,7 +1589,6 @@ export default function EditQuotation() {
                                         onChange={(option: any) => {
                                             setSelectedBank(option);
                                             if (option) {
-                                                // Update all bank-related fields when bank is selected
                                                 setFormData(prev => ({
                                                     ...prev,
                                                     bank_account_id: option.value || '',
@@ -1634,7 +1598,6 @@ export default function EditQuotation() {
                                                     bank_account_bank_name: option.data?.bank_account_type || ''
                                                 }));
                                             } else {
-                                                // Clear all bank-related fields when no bank selected
                                                 setFormData(prev => ({
                                                     ...prev,
                                                     bank_account_id: '',
@@ -2101,25 +2064,12 @@ export default function EditQuotation() {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => navigate('/quotations/manage')}
+                                onClick={() => navigate(`/quotations/manage?lang=${lang}`)}
                                 className="px-6 rounded-full"
                                 disabled={isUpdating}
                             >
                                 {langField('cancel')}
                             </Button>
-                            {/* <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => {
-                                    const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
-                                    handleSubmit(fakeEvent, 'draft');
-                                }}
-                                disabled={isUpdating}
-                                className="px-6 flex items-center gap-2 rounded-full"
-                            >
-                                <MdSave size={16} />
-                                Save as Draft
-                            </Button> */}
 
                             <PermissionGate permission={["create", "update"]}>
                                 <Button
