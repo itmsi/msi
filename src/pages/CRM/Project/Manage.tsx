@@ -16,14 +16,9 @@ import { ProjectService } from './services/projectService';
 import toast from 'react-hot-toast';
 import { createActionsColumn } from '@/components/ui/table';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import { ActivityTypeBadge } from '../Contractors/components/ContractorBadges';
 
-const STATUS_BADGE: Record<string, string> = {
-    'Not Started': 'bg-gray-100 text-gray-700',
-    'Find': 'bg-blue-100 text-blue-800',
-    'Pull': 'bg-yellow-100 text-yellow-800',
-    'Survey': 'bg-purple-100 text-purple-800',
-    'BAST': 'bg-green-100 text-green-800',
-};
+
 
 export default function ManageCRMProject() {
     const navigate = useNavigate();
@@ -106,9 +101,9 @@ export default function ManageCRMProject() {
             name: 'Status',
             selector: row => row.status || '-',
             cell: row => (
-                <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize ${STATUS_BADGE[row.status] || 'bg-gray-100 text-gray-700'}`}>
-                    {row.status || '-'}
-                </span>
+                <ActivityTypeBadge
+                    type={(row.status as 'Not Started' | 'Find' | 'Pull' | 'Survey' | 'BAST') || 'Not Started'}
+                />
             ),
         },
         {

@@ -61,10 +61,15 @@ export const MineTypeBadge: React.FC<MineTypeBadgeProps> = ({ type }) => {
 };
 
 interface ActivityTypeBadgeProps {
-    type: 'Find' | 'Pull' | 'Survey';
+    type: 'Not Started' | 'Find' | 'Pull' | 'Survey' | 'BAST';
 }
 export const ActivityTypeBadge: React.FC<ActivityTypeBadgeProps> = ({ type }) => {
     const typeConfig = {
+        'Not Started': { 
+            variant: 'outline' as const, 
+            color: 'light' as const, 
+            label: 'Not Started' 
+        },
         'Find': { 
             variant: 'outline' as const, 
             color: 'info' as const, 
@@ -77,8 +82,13 @@ export const ActivityTypeBadge: React.FC<ActivityTypeBadgeProps> = ({ type }) =>
         },
         'Survey': { 
             variant: 'solid' as const, 
-            color: 'success' as const, 
+            color: 'indigo' as const, 
             label: 'Survey' 
+        },
+        'BAST': { 
+            variant: 'solid' as const, 
+            color: 'success' as const, 
+            label: 'BAST' 
         },
     };
 

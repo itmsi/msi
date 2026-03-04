@@ -106,6 +106,171 @@ export const formatNumberInputFadlan = (value: string | number | undefined | nul
     
     return formattedInteger;
 };
+
+export const formatNumberPriceKoma = (value: string | number | undefined | null): string => {
+    if (!value && value !== 0) return '';
+
+    const stringValue = value.toString();
+    const [integerPart, decimalPart] = stringValue.replace(/[^\d.]/g, '').split('.');
+    
+    const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart || '0', 10));
+    
+    if (decimalPart !== undefined) {
+        return `${formattedInteger},${decimalPart}`;
+    }
+    
+    return formattedInteger;
+};
+
+// New helper for currency formatting with proper decimal support
+export const formatCurrencyIDR = (value: string | number | undefined | null, maxDecimals: number = 2): string => {
+    if (!value && value !== 0) return '';
+    
+    let stringValue = value.toString();
+    
+    // Handle case where value might already be formatted (contains dots and commas)
+    if (typeof value === 'string' && (value.includes('.') || value.includes(','))) {
+        // If it's already a formatted string, parse it first
+        const cleaned = value.replace(/\./g, '').replace(',', '.');
+        const numericValue = parseFloat(cleaned);
+        if (isNaN(numericValue)) return '';
+        stringValue = numericValue.toString();
+    } else {
+        // Convert number to string
+        const numericValue = parseFloat(stringValue);
+        if (isNaN(numericValue)) return '';
+        stringValue = numericValue.toString();
+    }
+    
+    // Split into integer and decimal parts
+    const [integerPart, decimalPart] = stringValue.split('.');
+    
+    // Format integer part with thousand separators (dots)
+    const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart || '0', 10));
+    
+    // Handle decimal part
+    if (decimalPart !== undefined && decimalPart.length > 0) {
+        // Limit decimal places
+        const limitedDecimals = decimalPart.slice(0, maxDecimals);
+        return `${formattedInteger},${limitedDecimals}`;
+    }
+    
+    return formattedInteger;
+};
+
+// Helper to format during typing (more lenient)
+export const formatCurrencyTyping = (value: string): string => {
+    if (!value) return '';
+    
+    // Remove all non-digit characters except comma
+    const cleaned = value.replace(/[^\d,]/g, '');
+    
+    // Split by comma
+    const parts = cleaned.split(',');
+    
+    if (parts.length > 2) {
+        // If more than one comma, keep only the first part and first decimal
+        return formatCurrencyTyping(`${parts[0]},${parts[1]}`);
+    }
+    
+    const integerPart = parts[0] || '';
+    const decimalPart = parts[1];
+    
+    if (!integerPart) return '';
+    
+    // Format integer part
+    const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart, 10));
+    
+    // Return with or without decimal part
+    if (decimalPart !== undefined) {
+        // Limit to 2 decimal places
+        const limitedDecimal = decimalPart.slice(0, 2);
+        return `${formattedInteger},${limitedDecimal}`;
+    }
+    
+    // Check if original value ended with comma (user is starting to type decimal)
+    if (value.endsWith(',')) {
+        return `${formattedInteger},`;
+    }
+    
+    return formattedInteger;
+};
+
+// Helper to parse currency back to number
+export const parseCurrencyIDR = (value: string): number => {
+    if (!value) return 0;
+    
+    // Remove thousand separators (dots) and replace decimal separator (comma) with dot
+    const cleanValue = value
+        .replace(/\./g, '')  // Remove thousand separators
+        .replace(',', '.');  // Replace decimal separator
+    
+    const numericValue = parseFloat(cleanValue);
+    return isNaN(numericValue) ? 0 : numericValue;
+};
+
+// Key press handler for currency input (supports decimal)
+export const handleCurrencyKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End', 'Enter'];
+    
+    // Allow control keys
+    if (e.ctrlKey && ['a', 'c', 'v', 'x', 'z', 'y'].includes(e.key.toLowerCase())) {
+        return;
+    }
+    
+    // Allow navigation keys
+    if (allowedKeys.includes(e.key)) {
+        return;
+    }
+    
+    const input = e.currentTarget;
+    const currentValue = input.value;
+    
+    // Allow digits
+    if (/[0-9]/.test(e.key)) {
+        return;
+    }
+    
+    // Allow comma for decimal separator (only one comma allowed)
+    if (e.key === ',') {
+        // Don't allow comma if one already exists
+        if (currentValue.includes(',')) {
+            e.preventDefault();
+            return;
+        }
+        // Allow comma
+        return;
+    }
+    
+    // Prevent all other characters
+    e.preventDefault();
+};
+export const formatCurrencyForBackend = (value: string | number | null | undefined): string => {
+    if (!value && value !== 0) return '';
+    
+    let numericValue: number;
+    
+    if (typeof value === 'string') {
+        if (value.includes(',')) {
+            numericValue = parseCurrencyIDR(value);
+        } else if (value.includes('.')) {
+            const lastDotIndex = value.lastIndexOf('.');
+            const afterDot = value.substring(lastDotIndex + 1);
+            
+            if (afterDot.length <= 3 && /^\d+$/.test(afterDot)) {
+                numericValue = parseFloat(value);
+            } else {
+                numericValue = parseFloat(value.replace(/\./g, ''));
+            }
+        } else {
+            numericValue = parseFloat(value);
+        }
+    } else {
+        numericValue = value;
+    }
+    
+    return (numericValue % 1 !== 0) ? numericValue.toFixed(2) : numericValue.toString();
+};
 export const formatNumberInputwithComma = (value: string | number | undefined | null): string => {
     if (!value && value !== 0) return '';
 

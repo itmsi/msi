@@ -1,14 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { ProjectAttachment, ProjectFormData, ProjectValidationErrors } from '../types/project';
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import TextArea from '@/components/form/input/TextArea';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
+import IupContractorSelect from '@/components/form/select/IupContractorSelect';
 import FileUpload from '@/components/ui/FileUpload/FileUpload';
-import { useContractorSelect } from '@/hooks/useContractorSelect';
 import { useEmployeeSelect } from '@/hooks/useEmployeeSelect';
-import { allowOnlyNumeric } from '@/helpers/generalHelper';
+import { formatNumberInputwithComma, handleDecimalInputComma, handleKeyPress } from '@/helpers/generalHelper';
 
 interface ProjectFormProps {
     formData: ProjectFormData;
@@ -42,15 +42,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     isSubmitting,
 }) => {
     const {
-        contractorOptions,
-        inputValue: contractorInputValue,
-        handleInputChange: handleContractorInputChange,
-        pagination: contractorPagination,
-        handleMenuScrollToBottom: handleContractorMenuScrollToBottom,
-        initializeOptions: initializeContractorOptions
-    } = useContractorSelect();
-
-    const {
         employeeOptions,
         inputValue: employeeInputValue,
         handleInputChange: handleEmployeeInputChange,
@@ -58,31 +49,18 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         handleMenuScrollToBottom: handleEmployeeMenuScrollToBottom,
         initializeOptions: initializeEmployeeOptions
     } = useEmployeeSelect();
-
+        
     const initReference = useRef(false);
 
+    const [selectedEmployee, setSelectedEmployee] = useState<{ value: string; label: string } | null>(null);
+    
     useEffect(() => {
         if (!initReference.current) {
             initReference.current = true;
-            initializeContractorOptions();
             initializeEmployeeOptions();
         }
     }, []);
 
-    const [selectedContractor, setSelectedContractor] = useState<ContractorSelectOption | null>(null);
-    const [selectedEmployee, setSelectedEmployee] = useState<{ value: string; label: string } | null>(null);
-
-    // Sync customer selection when editing
-    useEffect(() => {
-        if (formData.iup_customer_id) {
-            setSelectedContractor({
-                value: formData.iup_customer_id,
-                label: formData.customer_name || 'Selected Customer',
-            });
-        } else {
-            setSelectedContractor(null);
-        }
-    }, [formData.iup_customer_id, formData.customer_name]);
 
     // Sync employee selection when editing
     useEffect(() => {
@@ -96,15 +74,41 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         }
     }, [formData.employee_id, formData.employee_name]);
 
-    const handleContractorChange = (selectedOption: any) => {
-        if (selectedOption) {
-            onChange('iup_customer_id', selectedOption.value);
-            onChange('customer_name', selectedOption.customer_name || selectedOption.label || '');
+    // Handle IUP and Contractor selection from the reusable component - memoized
+    const handleIupChange = useCallback((iup: { value: string; label: string } | null) => {
+        if (iup) {
+            onChange('iup_id', iup.value);
+            onChange('iup_name', iup.label);
+        } else {
+            onChange('iup_id', '');
+            onChange('iup_name', '');
+        }
+    }, [onChange]);
+
+    const handleContractorChange = useCallback((contractor: ContractorSelectOption | null) => {
+        if (contractor) {
+            onChange('iup_customer_id', contractor.value);
+            onChange('customer_name', contractor.customer_name || contractor.label || '');
         } else {
             onChange('iup_customer_id', '');
             onChange('customer_name', '');
         }
-    };
+    }, [onChange]);
+
+    // Memoized values to prevent unnecessary re-renders
+    const iupValue = useMemo(() => {
+        return formData.iup_id && formData.iup_name ? {
+            value: formData.iup_id,
+            label: formData.iup_name
+        } : null;
+    }, [formData.iup_id, formData.iup_name]);
+
+    const contractorValue = useMemo(() => {
+        return formData.iup_customer_id && formData.customer_name ? {
+            value: formData.iup_customer_id,
+            label: formData.customer_name
+        } : null;
+    }, [formData.iup_customer_id, formData.customer_name]);
 
     // Build existing image URLs for FileUpload
     const existingAttachments = Array.isArray(formData.property_attachment)
@@ -118,7 +122,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                 <h3 className="text-lg font-primary-bold font-medium text-gray-900">Project Information</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     {/* Project Name */}
+                    {/* Project Name */}
                     <div>
                         <Label htmlFor="project_name">Project Name</Label>
                         <Input
@@ -131,35 +135,23 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                         />
                     </div>
 
-                    {/* Customer */}
-                    <div>
-                        <Label htmlFor="customer-select">
-                            Customer <span className="text-red-500">*</span>
-                        </Label>
-                        <CustomAsyncSelect
-                            id="customer-select"
-                            placeholder="Search customer..."
-                            value={selectedContractor}
-                            defaultOptions={contractorOptions}
-                            loadOptions={handleContractorInputChange}
-                            onMenuScrollToBottom={handleContractorMenuScrollToBottom}
-                            isLoading={contractorPagination.loading}
-                            noOptionsMessage={() => 'No customers found'}
-                            loadingMessage={() => 'Loading...'}
-                            isSearchable={true}
-                            inputValue={contractorInputValue}
-                            className={`w-full ${errors.iup_customer_id ? 'border rounded-[0.5rem] border-red-500' : ''}`}
-                            onInputChange={handleContractorInputChange}
-                            onChange={(option: any) => {
-                                setSelectedContractor(option);
-                                handleContractorChange(option);
-                            }}
-                        />
-                        {errors.iup_customer_id && (
-                            <p className="text-red-500 text-sm mt-1">{errors.iup_customer_id}</p>
-                        )}
-                    </div>
-
+                    {/* IUP Selection and Contractor - Reusable Component */}
+                    <IupContractorSelect
+                        iupValue={iupValue}
+                        contractorValue={contractorValue}
+                        iupLabel="IUP Selection"
+                        iupRequired={true}
+                        iupError={errors.iup_id}
+                        contractorLabel="Contractor"
+                        contractorRequired={true}
+                        contractorError={errors.iup_customer_id}
+                        onIupChange={handleIupChange}
+                        onContractorChange={handleContractorChange}
+                        disabled={isSubmitting}
+                        layout="horizontal"
+                        gridCols="grid-cols-1 md:grid-cols-2"
+                        className="md:col-span-2"
+                    />
                     {/* Employee */}
                     <div>
                         <Label htmlFor="employee-select">Sales</Label>
@@ -212,14 +204,11 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                         <Label htmlFor="propose_unit">Propose Unit</Label>
                         <Input
                             id="propose_unit"
-                            type="number"
-                            value={formData.propose_unit !== '' ? String(formData.propose_unit) : ''}
-                            onKeyPress={allowOnlyNumeric}
-                            onChange={(e) => {
-                                const v = e.target.value;
-                                onChange('propose_unit', v === '' ? '' : parseInt(v, 10));
-                            }}
-                            placeholder="0"
+                            value={formData.propose_unit}
+                            onChange={(e) => onChange('propose_unit', e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            error={!!errors.propose_unit}
+                            maxLength={10}
                             disabled={isSubmitting}
                         />
                         {errors.propose_unit && <p className="text-red-500 text-sm mt-1">{errors.propose_unit}</p>}
@@ -228,18 +217,23 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                     {/* Propose Value */}
                     <div>
                         <Label htmlFor="propose_value">Propose Value</Label>
+                        
                         <Input
                             id="propose_value"
-                            type="number"
-                            value={formData.propose_value !== '' ? String(formData.propose_value) : ''}
+                            value={formData.propose_value === null ? '' : formatNumberInputwithComma(formData.propose_value || '')}
                             onChange={(e) => {
-                                const v = e.target.value;
-                                onChange('propose_value', v === '' ? '' : parseFloat(v));
+                                const rawValue = e.target.value;
+
+                                handleDecimalInputComma(
+                                    rawValue,
+                                    (validValue) => onChange('propose_value', validValue),
+                                    () => onChange('propose_value', ''),
+                                    true,
+                                    20,
+                                    2
+                                );
                             }}
-                            placeholder="0"
-                            disabled={isSubmitting}
                         />
-                        {errors.propose_value && <p className="text-red-500 text-sm mt-1">{errors.propose_value}</p>}
                     </div>
                 </div>
             </div>
@@ -315,7 +309,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                     label="Project Attachments"
                     accept="image/jpeg,image/jpg,image/png,application/pdf"
                     icon="upload"
-                    acceptedFormats={['jpg', 'jpeg', 'png', 'pdf']}
+                    acceptedFormats={['jpg', 'jpeg', 'png']}
                     maxSize={5}
                     multiple={true}
                     currentFiles={formData.property_attachment_files || []}
