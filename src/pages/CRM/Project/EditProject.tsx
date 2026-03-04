@@ -16,7 +16,7 @@ import DivisionOverviewContainer from './components/DivisionOverview/DivisionOve
 const EditProject: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const [activeTab, setActiveTab] = useState< 'project_overview' | 'sales_tracking' | 'division_overview' | 'task_division'>('sales_tracking');
+    const [activeTab, setActiveTab] = useState< 'project_overview' | 'sales_tracking' | 'division_overview' | 'task_division'>('project_overview');
 
     const {
         formData,
