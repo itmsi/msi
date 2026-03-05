@@ -3,7 +3,7 @@ import { TaskProjectDevisionService } from '../services/taskProjectDevisionServi
 import { TaskProjectDevision, TaskProjectDevisionRequest } from '../types/taskProjectDevision';
 import toast from 'react-hot-toast';
 
-export const useTaskProjectDevision = (project_detail_devision_id: string) => {
+export const useTaskProjectDevision = (project_id: string) => {
     const [tasks, setTasks] = useState<TaskProjectDevision[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -19,7 +19,7 @@ export const useTaskProjectDevision = (project_detail_devision_id: string) => {
             const search = searchStr !== undefined ? searchStr : searchValue;
 
             const response = await TaskProjectDevisionService.getTasks({
-                project_detail_devision_id,
+                project_id,
                 page,
                 limit,
                 search
@@ -38,13 +38,13 @@ export const useTaskProjectDevision = (project_detail_devision_id: string) => {
         } finally {
             setLoading(false);
         }
-    }, [project_detail_devision_id, pagination.page, pagination.limit, searchValue]);
+    }, [project_id, pagination.page, pagination.limit, searchValue]);
 
     useEffect(() => {
-        if (project_detail_devision_id) {
+        if (project_id) {
             fetchTasks(1);
         }
-    }, [project_detail_devision_id]);
+    }, [project_id]);
 
     const handleCreateTask = async (data: TaskProjectDevisionRequest) => {
         try {

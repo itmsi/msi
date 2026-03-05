@@ -11,12 +11,14 @@ import { formatDateTime } from '@/helpers/generalHelper';
 import { useTaskProjectDevision } from '../../hooks/useTaskProjectDevision';
 import { TaskProjectDevision, TaskProjectDevisionRequest } from '../../types/taskProjectDevision';
 import TaskProjectDevisionModal from './TaskProjectDevisionModal';
+import { createByDateColumn } from '@/components/ui/table/columnUtils';
 
 interface TaskProjectDevisionTabProps {
-    project_detail_devision_id: string;
+    project_id: string;
+    onGoToDivision?: () => void;
 }
 
-const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project_detail_devision_id }) => {
+const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project_id, onGoToDivision }) => {
     const {
         tasks,
         loading,
@@ -28,7 +30,7 @@ const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project
         handlePageChange,
         handleRowsPerPageChange,
         handleSearch
-    } = useTaskProjectDevision(project_detail_devision_id);
+    } = useTaskProjectDevision(project_id);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editData, setEditData] = useState<TaskProjectDevision | null>(null);
@@ -102,20 +104,7 @@ const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project
                 <span>{row.date_transaction ? row.date_transaction.substring(0, 10) : '-'}</span>
             )
         },
-        {
-            name: 'Created By',
-            selector: row => row.created_by || '-',
-            cell: row => (
-                <div className="flex flex-col py-2">
-                    <span className="font-medium text-gray-900">
-                        {row.created_by_name || '-'}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                        {row.created_at ? formatDateTime(row.created_at) : '-'}
-                    </span>
-                </div>
-            )
-        },
+        createByDateColumn('Updated By', 'updated_at', 'updated_by_name'),
         createActionsColumn([
             {
                 icon: MdEdit,
@@ -201,8 +190,9 @@ const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSubmit={handleModalSubmit}
-                project_detail_devision_id={project_detail_devision_id}
+                project_id={project_id}
                 editData={editData}
+                onGoToDivision={onGoToDivision}
             />
 
             <ConfirmationModal

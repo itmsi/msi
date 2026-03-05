@@ -15,6 +15,7 @@ export interface ProjectAttachment {
 // Division Overview Types
 export interface DivisionOverviewItem {
     project_detail_id: string;
+    project_detail_division_id: string;
     project_id: string;
     project_detail_division_id: string;
     division_project_id: string;

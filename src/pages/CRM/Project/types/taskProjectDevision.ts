@@ -26,10 +26,12 @@ export interface TaskProjectDevisionRequest {
 }
 
 export interface TaskProjectDevisionQuery {
-    project_detail_devision_id?: string;
+    project_id?: string | null;
     page?: number;
     limit?: number;
     search?: string;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
 }
 
 export interface TaskProjectDevisionResponse {
