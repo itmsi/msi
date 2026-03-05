@@ -96,6 +96,14 @@ const SalesTrackingForm: React.FC<SalesTrackingFormProps> = ({
             ? (formData.existing_attachments as ProjectAttachment[]).map(a => a.file_url)
             : [];
 
+    const existingAttachmentsData = Array.isArray(formData.existing_attachments)
+            ? (formData.existing_attachments as ProjectAttachment[]).map(a => ({
+                file_id: a.file_id,
+                file_url: a.file_url,
+                file_name: a.file_url.split('/').pop() || 'attachment'
+            }))
+            : [];
+
     return (
         <div className="space-y-6">
             {/* Remarks Field */}
@@ -118,16 +126,17 @@ const SalesTrackingForm: React.FC<SalesTrackingFormProps> = ({
             {/* File Upload Field */}
             <div>
                 <FileUpload
-                    id="property_attachment"
+                    id={`property_attachment-${Math.random().toString(36).substr(2, 9)}`}
                     name="property_attachment"
                     label="Project Attachments"
                     accept="image/jpeg,image/jpg,image/png,application/pdf"
                     icon="upload"
-                    acceptedFormats={['jpg', 'jpeg', 'png']}
+                    acceptedFormats={['jpg', 'jpeg', 'png', 'pdf']}
                     maxSize={5}
                     multiple={true}
                     currentFiles={formData.property_attachment_files || []}
                     existingImageUrl={existingAttachments.length > 0 ? existingAttachments : null}
+                    existingFiles={existingAttachmentsData}
                     onFileChange={onAttachmentChange}
                     onRemoveExistingImage={onRemoveExistingAttachment}
                     validationError={errors.property_attachment || ''}
@@ -136,6 +145,7 @@ const SalesTrackingForm: React.FC<SalesTrackingFormProps> = ({
                     showPreview={true}
                     previewSize="lg"
                     colLength={4}
+                    hasDownloadButton={true}
                 />
             </div>
 

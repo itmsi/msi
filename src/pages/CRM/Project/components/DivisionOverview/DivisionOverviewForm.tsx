@@ -118,12 +118,12 @@ const DivisionOverviewForm: React.FC<DivisionOverviewFormProps> = ({
             {/* File Upload Field */}
             <div>
                 <FileUpload
-                    id="property_attachment"
+                    id={`property_attachment-${Math.random().toString(36).substr(2, 9)}`}
                     name="property_attachment"
                     label="Project Attachments"
-                    accept="image/jpeg,image/jpg,image/png,application/pdf"
+                    accept="image/jpeg,image/jpg,image/png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     icon="upload"
-                    acceptedFormats={['jpg', 'jpeg', 'png']}
+                    acceptedFormats={['jpg', 'jpeg', 'png', 'doc', 'docx', 'pdf']}
                     maxSize={5}
                     multiple={true}
                     currentFiles={formData.property_attachment_files || []}
@@ -132,7 +132,7 @@ const DivisionOverviewForm: React.FC<DivisionOverviewFormProps> = ({
                     onRemoveExistingImage={onRemoveExistingAttachment}
                     validationError={errors.property_attachment || ''}
                     disabled={isSubmitting}
-                    description="Format: JPG, JPEG, PNG, PDF - Max 5MB each"
+                    description="Format: JPG, JPEG, PNG, PDF, DOC, DOCX - Max 5MB each"
                     showPreview={true}
                     previewSize="lg"
                     colLength={4}

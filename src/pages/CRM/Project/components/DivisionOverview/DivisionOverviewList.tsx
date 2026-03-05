@@ -64,7 +64,7 @@ const DivisionOverviewList: React.FC<DivisionOverviewListProps> = ({
                                 key={currentItemKey}
                                 formData={currentFormData}
                                 onFormDataChange={(data: DivisionOverviewFormData) => onFormDataChange(currentItemKey, data)}
-                                onSubmit={(data: DivisionOverviewFormData) => onSubmit(data, item.project_detail_id, item.devision_project_name)}
+                                onSubmit={(data: DivisionOverviewFormData) => onSubmit(data, item.project_detail_id, item.devision_project_id)}
                                 isSubmitting={false}
                                 isNewItem={isNewItem}
                                 type={item.devision_project_name}
