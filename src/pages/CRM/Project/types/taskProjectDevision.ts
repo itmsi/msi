@@ -1,6 +1,7 @@
 export interface TaskProjectDevision {
     task_project_devision_id: string;
     project_detail_devision_id: string;
+    devision_project_name: string | null;
     title: string;
     description: string;
     employee_id: string;
@@ -27,6 +28,7 @@ export interface TaskProjectDevisionRequest {
 
 export interface TaskProjectDevisionQuery {
     project_id?: string | null;
+    devision_project_id?: string | null;
     page?: number;
     limit?: number;
     search?: string;

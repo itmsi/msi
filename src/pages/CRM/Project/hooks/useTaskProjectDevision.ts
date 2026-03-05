@@ -9,20 +9,28 @@ export const useTaskProjectDevision = (project_id: string) => {
     const [error, setError] = useState<string | null>(null);
     const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
     const [searchValue, setSearchValue] = useState('');
+    const [divisionFilter, setDivisionFilter] = useState<string | null>(null);
 
-    const fetchTasks = useCallback(async (pageStr?: number, limitStr?: number, searchStr?: string) => {
+    const fetchTasks = useCallback(async (
+        pageStr?: number,
+        limitStr?: number,
+        searchStr?: string,
+        divisionId?: string | null
+    ) => {
         setLoading(true);
         setError(null);
         try {
             const page = pageStr || pagination.page;
             const limit = limitStr || pagination.limit;
             const search = searchStr !== undefined ? searchStr : searchValue;
+            const devision_project_id = divisionId !== undefined ? divisionId : divisionFilter;
 
             const response = await TaskProjectDevisionService.getTasks({
                 project_id,
                 page,
                 limit,
-                search
+                search,
+                devision_project_id
             });
 
             if (response.success) {
@@ -38,7 +46,7 @@ export const useTaskProjectDevision = (project_id: string) => {
         } finally {
             setLoading(false);
         }
-    }, [project_id, pagination.page, pagination.limit, searchValue]);
+    }, [project_id, pagination.page, pagination.limit, searchValue, divisionFilter]);
 
     useEffect(() => {
         if (project_id) {
@@ -92,7 +100,12 @@ export const useTaskProjectDevision = (project_id: string) => {
 
     const handleSearch = (value: string) => {
         setSearchValue(value);
-        fetchTasks(1, pagination.limit, value);
+        fetchTasks(1, pagination.limit, value, divisionFilter);
+    };
+
+    const handleDivisionFilter = (divisionId: string | null) => {
+        setDivisionFilter(divisionId);
+        fetchTasks(1, pagination.limit, searchValue, divisionId);
     };
 
     return {
@@ -101,12 +114,14 @@ export const useTaskProjectDevision = (project_id: string) => {
         error,
         pagination,
         searchValue,
+        divisionFilter,
         fetchTasks,
         handleCreateTask,
         handleUpdateTask,
         handleDeleteTask,
         handlePageChange,
         handleRowsPerPageChange,
-        handleSearch
+        handleSearch,
+        handleDivisionFilter
     };
 };

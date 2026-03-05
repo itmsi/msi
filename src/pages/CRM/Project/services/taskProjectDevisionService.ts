@@ -5,17 +5,22 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export class TaskProjectDevisionService {
     static async getTasks(params: TaskProjectDevisionQuery = {}): Promise<TaskProjectDevisionResponse> {
-        const requestData = {
+        const { devision_project_id, ...restParams } = params;
+        const requestData: Record<string, any> = {
             page: 1,
             limit: 10,
             search: '',
             sort_by: 'created_at',
             sort_order: 'desc',
             project_id: null,
-            ...params
+            ...restParams
         };
+        // hanya tambahkan devision_project_id jika ada nilainya
+        if (devision_project_id) {
+            requestData.devision_project_id = devision_project_id;
+        }
 
-        const response = await apiPost(`${API_BASE_URL}/crm/task_project_devision/get`, requestData as Record<string, any>);
+        const response = await apiPost(`${API_BASE_URL}/crm/task_project_devision/get`, requestData);
         return response.data as TaskProjectDevisionResponse;
     }
 
