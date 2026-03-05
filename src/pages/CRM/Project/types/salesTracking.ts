@@ -5,12 +5,35 @@ export interface ProjectRequest {
     sort_order: 'asc' | 'desc' | '';
     sort_by?: 'updated_at' | 'created_at' | '';
     search?: string;
-    status?: string;
+    project_id?: string;
 }
 
 export interface ProjectAttachment {
     file_id: string;
     file_url: string;
+}
+
+// Sales Tracking Types
+export interface SalesTrackingItem {
+    project_detail_id: string;
+    project_id: string;
+    type: 'Not Started' | 'Find' | 'Pull' | 'Survey' | 'BAST' | 'BASTK';
+    remarks: string;
+    property_attachment: ProjectAttachment[] | null;
+}
+
+export interface SalesTrackingResponse {
+    status: boolean;
+    message: string;
+    data: SalesTrackingItem[];
+    pagination: Pagination;
+}
+
+export interface SalesTrackingFormData {
+    remarks: string;
+    property_attachment_files?: File[];
+    property_attachment_delete?: ProjectAttachment[];
+    existing_attachments?: ProjectAttachment[];
 }
 
 export interface ProjectItem {

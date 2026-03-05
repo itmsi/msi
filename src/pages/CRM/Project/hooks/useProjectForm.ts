@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { ProjectService } from '../services/projectService';
 import { ProjectAttachment, ProjectFormData, ProjectItemDetails, ProjectValidationErrors } from '../types/project';
 import { AuthService } from '@/services/authService';
+import { formatCurrencyForBackend } from '@/helpers/generalHelper';
 
 interface UseProjectFormProps {
     mode: 'create' | 'edit';
@@ -18,10 +19,12 @@ export const useProjectForm = ({ mode, project_id }: UseProjectFormProps) => {
 
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+    const [isLoadingDetail, setIsLoadingDetail] = useState(true);
     const [validationErrors, setValidationErrors] = useState<ProjectValidationErrors>({});
 
     const [formData, setFormData] = useState<ProjectFormData>({
+        iup_id: '',
+        iup_name: '',
         iup_customer_id: '',
         customer_name: '',
         project_name: '',
@@ -58,6 +61,8 @@ export const useProjectForm = ({ mode, project_id }: UseProjectFormProps) => {
                 }
 
                 setFormData({
+                    iup_id: detail.iup_id || '',
+                    iup_name: detail.iup_name || '',
                     iup_customer_id: detail.iup_customer_id || '',
                     customer_name: detail.customer_name || '',
                     project_name: detail.project_name || '',
@@ -122,7 +127,11 @@ export const useProjectForm = ({ mode, project_id }: UseProjectFormProps) => {
         const fd = new FormData();
         fd.append('iup_customer_id', formData.iup_customer_id);
         fd.append('propose_unit', String(formData.propose_unit ?? ''));
-        fd.append('propose_value', String(formData.propose_value ?? ''));
+        
+        // Convert propose_value to backend format (dot decimal)
+        const proposeValueForBackend = formatCurrencyForBackend(formData.propose_value);
+        fd.append('propose_value', proposeValueForBackend);
+        
         fd.append('status', formData.status);
         fd.append('description', formData.description);
         fd.append('remark', formData.remark);

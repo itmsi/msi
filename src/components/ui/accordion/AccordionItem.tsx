@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { HiChevronDown } from "react-icons/hi2";
+import { MdDeleteOutline } from "react-icons/md";
 import { twMerge } from "tailwind-merge";
 import clsx from "clsx";
 import { AccordionItemProps } from "./types";
@@ -10,7 +11,12 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
     onToggle,
     className = "",
 }) => {
-    const { judul, konten, disabled = false } = item;
+    const { judul, konten, disabled = false, onDelete, showDeleteButton = false } = item;
+
+    const handleDeleteClick = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent accordion toggle when delete is clicked
+        onDelete?.();
+    };
 
     return (
         <div
@@ -24,30 +30,55 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
             )}
         >
             {/* Header */}
-            <button
-                onClick={disabled ? undefined : onToggle}
-                disabled={disabled}
+            <div
                 className={clsx(
-                    "w-full px-4 py-3 text-left",
                     "flex items-center justify-between",
-                    "font-medium text-gray-700",
                     "transition-colors duration-200",
-                    "focus:outline-none",
                     // Background colors berdasarkan state
                     isOpen 
                         ? "bg-[#dfe8f2] border-b border-gray-200" 
                         : "bg-gray-50 hover:bg-gray-100",
-                    disabled && "hover:bg-gray-50 cursor-not-allowed"
+                    disabled && "hover:bg-gray-50"
                 )}
             >
-                <span>{judul}</span>
-                <HiChevronDown
+                <button
+                    onClick={disabled ? undefined : onToggle}
+                    disabled={disabled}
                     className={clsx(
-                        "w-5 h-5 text-gray-500 transition-transform duration-200",
-                        isOpen && "rotate-180"
+                        "flex-1 px-4 py-3 text-left",
+                        "flex items-center justify-between",
+                        "font-medium text-gray-700",
+                        "transition-colors duration-200",
+                        "focus:outline-none",
+                        disabled && "cursor-not-allowed"
                     )}
-                />
-            </button>
+                >
+                    <span>{judul}</span>
+                    <HiChevronDown
+                        className={clsx(
+                            "w-5 h-5 text-gray-500 transition-transform duration-200",
+                            isOpen && "rotate-180"
+                        )}
+                    />
+                </button>
+
+                {/* Delete Button */}
+                {showDeleteButton && onDelete && (
+                    <button
+                        onClick={handleDeleteClick}
+                        className={clsx(
+                            "p-2 mr-2 text-red-500 hover:text-red-700 hover:bg-red-50",
+                            "rounded-md transition-colors duration-200",
+                            "focus:outline-none focus:ring-2 focus:ring-red-300",
+                            disabled && "opacity-50 cursor-not-allowed"
+                        )}
+                        disabled={disabled}
+                        title="Hapus"
+                    >
+                        <MdDeleteOutline className="w-5 h-5" />
+                    </button>
+                )}
+            </div>
 
             {/* Konten */}
             <AnimatePresence initial={false}>

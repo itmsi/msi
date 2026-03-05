@@ -1,4 +1,4 @@
-import { MdAdd, MdClear, MdSearch, MdEdit, MdDeleteOutline } from 'react-icons/md';
+import { MdAdd, MdClear, MdSearch, MdDeleteOutline } from 'react-icons/md';
 import CustomDataTable from '../../../components/ui/table/CustomDataTable';
 import Input from '../../../components/form/input/InputField';
 import CustomSelect from '../../../components/form/select/CustomSelect';
@@ -11,19 +11,14 @@ import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { useNavigate } from 'react-router';
 import { formatDateTime } from '@/helpers/generalHelper';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { ProjectService } from './services/projectService';
 import toast from 'react-hot-toast';
 import { createActionsColumn } from '@/components/ui/table';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import { ActivityTypeBadge } from '../Contractors/components/ContractorBadges';
 
-const STATUS_BADGE: Record<string, string> = {
-    'Not Started': 'bg-gray-100 text-gray-700',
-    'Find': 'bg-blue-100 text-blue-800',
-    'Pull': 'bg-yellow-100 text-yellow-800',
-    'Survey': 'bg-purple-100 text-purple-800',
-    'BAST': 'bg-green-100 text-green-800',
-};
+
 
 export default function ManageCRMProject() {
     const navigate = useNavigate();
@@ -68,16 +63,33 @@ export default function ManageCRMProject() {
         navigate(`/crm/project/edit/${row.project_id}`);
     };
 
+    const handlePageChangeAman = useCallback((halamanBaru: number) => {
+        const halamanSaatIni = pagination?.page || 1;
+        if (halamanBaru === halamanSaatIni) return;
+        handlePageChange(halamanBaru);
+    }, [pagination?.page, handlePageChange]);
+
+    const handleRowsPerPageAman = useCallback((limitBaru: number, halamanBaru: number) => {
+        const halamanSaatIni = pagination?.page || 1;
+        const limitSaatIni = pagination?.limit || 10;
+        if (limitBaru === limitSaatIni && halamanBaru === halamanSaatIni) return;
+        handleRowsPerPageChange(limitBaru, halamanBaru);
+    }, [pagination?.page, pagination?.limit, handleRowsPerPageChange]);
+
     const columns: TableColumn<ProjectItem>[] = [
         {
             name: 'Project Name',
             selector: row => row.project_name || '-',
-            cell: row => (
+            cell: row => (<>
+                <a
+                    href={`/crm/project/edit/${row.project_id}`}
+                    className="absolute inset-0"
+                />
                 <div className="py-2">
                     <div className="font-medium text-gray-900">{row.project_name || '-'}</div>
                     <div className="text-sm text-gray-500">{row.customer_name || ''}</div>
                 </div>
-            ),
+            </>),
             wrap: true,
         },
         {
@@ -89,9 +101,9 @@ export default function ManageCRMProject() {
             name: 'Status',
             selector: row => row.status || '-',
             cell: row => (
-                <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize ${STATUS_BADGE[row.status] || 'bg-gray-100 text-gray-700'}`}>
-                    {row.status || '-'}
-                </span>
+                <ActivityTypeBadge
+                    type={(row.status as 'Not Started' | 'Find' | 'Pull' | 'Survey' | 'BAST') || 'Not Started'}
+                />
             ),
         },
         {
@@ -105,13 +117,6 @@ export default function ManageCRMProject() {
             ),
         },
         createActionsColumn([
-            {
-                icon: MdEdit,
-                onClick: handleEdit,
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'Edit',
-                permission: 'update'
-            },
             {
                 icon: MdDeleteOutline,
                 onClick: handleDelete,
@@ -256,8 +261,8 @@ export default function ManageCRMProject() {
                             paginationPerPage={pagination?.limit || 10}
                             paginationDefaultPage={pagination?.page || 1}
                             paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
-                            onChangePage={handlePageChange}
-                            onChangeRowsPerPage={handleRowsPerPageChange}
+                            onChangePage={handlePageChangeAman}
+                            onChangeRowsPerPage={handleRowsPerPageAman}
                             fixedHeader={true}
                             fixedHeaderScrollHeight="625px"
                             responsive
@@ -274,6 +279,7 @@ export default function ManageCRMProject() {
                             }
                             persistTableHead
                             borderRadius="8px"
+                            onRowClicked={handleEdit}
                         />
                     </div>
                 </div>
