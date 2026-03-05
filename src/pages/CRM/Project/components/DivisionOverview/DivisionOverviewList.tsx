@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Accordion from '@/components/ui/accordion/Accordion';
 import { AccordionItemData } from '@/components/ui/accordion/types';
 import DivisionOverviewItemComponent from './DivisionOverviewItem';
@@ -20,6 +20,23 @@ const DivisionOverviewList: React.FC<DivisionOverviewListProps> = ({
     onSubmit,
     onDelete
 }) => {
+    const [submittingItems, setSubmittingItems] = useState<Set<string>>(new Set());
+    const handleSubmit = async (formData: DivisionOverviewFormData, projectDetailId: string, divisionName: string, projectDetailDivisionId: string) => {
+        const itemKey = projectDetailId;
+        
+        setSubmittingItems(prev => new Set(prev).add(itemKey));
+        
+        try {
+            await onSubmit(formData, projectDetailId, divisionName, projectDetailDivisionId);
+        } finally {
+            setSubmittingItems(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(itemKey);
+                return newSet;
+            });
+        }
+    };
+    
     // Group data berdasarkan division name
     const groupedData = divisionData.reduce((acc, item, index) => {
         const key = item.devision_project_name;
@@ -58,14 +75,15 @@ const DivisionOverviewList: React.FC<DivisionOverviewListProps> = ({
                         };
 
                         const isNewItem = item.project_detail_id?.startsWith('temp_') || false;
+                        const isSubmitting = submittingItems.has(item.project_detail_id);
                         
                         return (
                             <DivisionOverviewItemComponent
                                 key={currentItemKey}
                                 formData={currentFormData}
                                 onFormDataChange={(data: DivisionOverviewFormData) => onFormDataChange(currentItemKey, data)}
-                                onSubmit={(data: DivisionOverviewFormData) => onSubmit(data, item.project_id, item?.division_project_id || '',  item.project_detail_division_id)}
-                                isSubmitting={false}
+                                onSubmit={(data: DivisionOverviewFormData) => handleSubmit(data, item.project_detail_id, item?.division_project_id || '',  item.project_detail_division_id)}
+                                isSubmitting={isSubmitting}
                                 isNewItem={isNewItem}
                                 type={item.devision_project_name}
                             />

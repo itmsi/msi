@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Accordion from '@/components/ui/accordion/Accordion';
 import { AccordionItemData } from '@/components/ui/accordion/types';
 import SalesTrackingItemComponent from './SalesTrackingItem';
@@ -20,6 +20,23 @@ const SalesTrackingList: React.FC<SalesTrackingListProps> = ({
     onSubmit,
     onDelete
 }) => {
+    const [submittingItems, setSubmittingItems] = useState<Set<string>>(new Set());
+
+    const handleSubmit = async (formData: SalesTrackingFormData, projectDetailId: string, type: string) => {
+        const itemKey = projectDetailId;
+        
+        setSubmittingItems(prev => new Set(prev).add(itemKey));
+        
+        try {
+            await onSubmit(formData, projectDetailId, type);
+        } finally {
+            setSubmittingItems(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(itemKey);
+                return newSet;
+            });
+        }
+    };
     // Group data berdasarkan type
     const groupedData = salesData.reduce((acc, item, index) => {
         const key = item.type;
@@ -59,14 +76,15 @@ const SalesTrackingList: React.FC<SalesTrackingListProps> = ({
                         };
 
                         const isNewItem = item.project_detail_id.startsWith('temp_');
+                        const isSubmitting = submittingItems.has(item.project_detail_id);
                         
                         return (
                             <SalesTrackingItemComponent
                                 key={currentItemKey}
                                 formData={currentFormData}
                                 onFormDataChange={(data: SalesTrackingFormData) => onFormDataChange(currentItemKey, data)}
-                                onSubmit={(data: SalesTrackingFormData) => onSubmit(data, item.project_detail_id, item.type)}
-                                isSubmitting={false}
+                                onSubmit={(data: SalesTrackingFormData) => handleSubmit(data, item.project_detail_id, item.type)}
+                                isSubmitting={isSubmitting}
                                 isNewItem={isNewItem}
                                 type={item.type}
                             />
