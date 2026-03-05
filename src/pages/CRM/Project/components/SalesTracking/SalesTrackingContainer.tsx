@@ -86,6 +86,8 @@ const SalesTrackingContainer: React.FC<SalesTrackingContainerProps> = ({ classNa
             const message = response?.message || (isNewItem ? 'Data berhasil ditambahkan!' : 'Data berhasil diperbarui!');
             toast.success(message);
             
+            await loadSalesTracking();
+            
         } catch (error: any) {
             console.error('Error submitting form:', error);
             const errorMessage = error?.response?.data?.message || error?.message || 'Gagal menyimpan data';
