@@ -177,7 +177,10 @@ const EditProject: React.FC = () => {
                     )}
 
                     {activeTab === 'task_division' && id && (
-                        <TaskProjectDevisionTab project_detail_devision_id={id} />
+                        <TaskProjectDevisionTab
+                            project_id={id}
+                            onGoToDivision={() => setActiveTab('division_overview')}
+                        />
                     )}
                 </div>
             </div>

@@ -5,25 +5,28 @@ import { TaskProjectDevisionRequest, TaskProjectDevision } from '../../types/tas
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { useEmployeeSelect } from '@/hooks/useEmployeeSelect';
+import { useProjectDetailDivisionSelect } from '@/hooks/useProjectDetailDivisionSelect';
 import CustomSelect from '@/components/form/select/CustomSelect';
 
 interface TaskProjectDevisionModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: TaskProjectDevisionRequest) => Promise<boolean>;
-    project_detail_devision_id: string;
+    project_id: string;
     editData?: TaskProjectDevision | null;
+    onGoToDivision?: () => void;
 }
 
 const TaskProjectDevisionModal: React.FC<TaskProjectDevisionModalProps> = ({
     isOpen,
     onClose,
     onSubmit,
-    project_detail_devision_id,
-    editData
+    project_id,
+    editData,
+    onGoToDivision
 }) => {
     const [formData, setFormData] = useState<TaskProjectDevisionRequest>({
-        project_detail_devision_id,
+        project_detail_devision_id: '',
         title: '',
         description: '',
         employee_id: '',
@@ -40,12 +43,21 @@ const TaskProjectDevisionModal: React.FC<TaskProjectDevisionModalProps> = ({
         initializeOptions: initializeEmployeeOptions
     } = useEmployeeSelect();
 
+    const {
+        options: divisionOptions,
+        inputValue: divisionInputValue,
+        handleInputChange: handleDivisionInputChange,
+        handleMenuScrollToBottom: handleDivisionMenuScrollToBottom,
+        initializeOptions: initializeDivisionOptions
+    } = useProjectDetailDivisionSelect(project_id);
+
     useEffect(() => {
         if (isOpen) {
             initializeEmployeeOptions();
+            initializeDivisionOptions();
             if (editData) {
                 setFormData({
-                    project_detail_devision_id: editData.project_detail_devision_id || project_detail_devision_id,
+                    project_detail_devision_id: editData.project_detail_devision_id || '',
                     title: editData.title || '',
                     description: editData.description || '',
                     employee_id: editData.employee_id || '',
@@ -53,7 +65,7 @@ const TaskProjectDevisionModal: React.FC<TaskProjectDevisionModalProps> = ({
                 });
             } else {
                 setFormData({
-                    project_detail_devision_id,
+                    project_detail_devision_id: '',
                     title: '',
                     description: '',
                     employee_id: '',
@@ -62,10 +74,11 @@ const TaskProjectDevisionModal: React.FC<TaskProjectDevisionModalProps> = ({
             }
             setErrors({});
         }
-    }, [isOpen, editData, project_detail_devision_id, initializeEmployeeOptions]);
+    }, [isOpen, editData, initializeEmployeeOptions, initializeDivisionOptions]);
 
     const validate = () => {
         const newErrors: Record<string, string> = {};
+        if (!formData.project_detail_devision_id) newErrors.project_detail_devision_id = 'Division is required';
         if (!formData.title.trim()) newErrors.title = 'Title is required';
         if (!formData.employee_id) newErrors.employee_id = 'PIC is required';
         if (!formData.date_transaction) newErrors.date_transaction = 'Date is required';
@@ -95,6 +108,11 @@ const TaskProjectDevisionModal: React.FC<TaskProjectDevisionModalProps> = ({
         if (errors.employee_id) setErrors(prev => ({ ...prev, employee_id: '' }));
     };
 
+    const handleDivisionSelect = (selected: any) => {
+        setFormData(prev => ({ ...prev, project_detail_devision_id: selected ? selected.value : '' }));
+        if (errors.project_detail_devision_id) setErrors(prev => ({ ...prev, project_detail_devision_id: '' }));
+    };
+
     return (
         <Modal
             isOpen={isOpen}
@@ -105,6 +123,36 @@ const TaskProjectDevisionModal: React.FC<TaskProjectDevisionModalProps> = ({
         >
             <div className="p-6">
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <Label>Division *</Label>
+                        <CustomSelect
+                            id="project_detail_devision_id"
+                            name="project_detail_devision_id"
+                            value={divisionOptions.find(opt => opt.value === formData.project_detail_devision_id) || null}
+                            options={divisionOptions}
+                            onChange={handleDivisionSelect}
+                            onInputChange={handleDivisionInputChange}
+                            onMenuScrollToBottom={handleDivisionMenuScrollToBottom}
+                            inputValue={divisionInputValue}
+                            placeholder="Search division..."
+                            error={errors.project_detail_devision_id}
+                            isDisabled={submitting}
+                            noOptionsMessage={() => (
+                                <div className="py-2 text-center">
+                                    <p className="text-sm text-gray-500 mb-2">No division found</p>
+                                    {onGoToDivision && (
+                                        <button
+                                            type="button"
+                                            onClick={() => { onClose(); onGoToDivision(); }}
+                                            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                                        >
+                                            + Add Division
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        />
+                    </div>
                     <div>
                         <Label>Title *</Label>
                         <Input
