@@ -5,10 +5,12 @@ import { createActionsColumn } from '@/components/ui/table';
 import { TableColumn } from 'react-data-table-component';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
+import CustomSelect from '@/components/form/select/CustomSelect';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import { formatDateTime } from '@/helpers/generalHelper';
 
 import { useTaskProjectDevision } from '../../hooks/useTaskProjectDevision';
+import { useDivisionSelect } from '@/hooks/useDivisionSelect';
 import { TaskProjectDevision, TaskProjectDevisionRequest } from '../../types/taskProjectDevision';
 import TaskProjectDevisionModal from './TaskProjectDevisionModal';
 
@@ -28,15 +30,26 @@ const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project
         handleDeleteTask,
         handlePageChange,
         handleRowsPerPageChange,
-        handleSearch
+        handleSearch,
+        handleDivisionFilter
     } = useTaskProjectDevision(project_id);
+
+    const {
+        divisionOptions,
+        inputValue: divisionInputValue,
+        handleInputChange: handleDivisionInputChange,
+        handleMenuScrollToBottom: handleDivisionMenuScrollToBottom,
+        initializeOptions: initializeDivisionOptions
+    } = useDivisionSelect();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editData, setEditData] = useState<TaskProjectDevision | null>(null);
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; id?: string; title?: string }>({ show: false });
-
-    // Internal search value state to handle Enter key
     const [localSearch, setLocalSearch] = useState(searchValue);
+    const [selectedDivision, setSelectedDivision] = useState<{ value: string; label: string } | null>(null);
+
+    // Initialize division options on mount
+    useMemo(() => { initializeDivisionOptions(); }, []);
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
@@ -47,6 +60,11 @@ const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project
     const handleClearSearch = () => {
         setLocalSearch('');
         handleSearch('');
+    };
+
+    const handleDivisionSelectFilter = (selected: { value: string; label: string } | null) => {
+        setSelectedDivision(selected);
+        handleDivisionFilter(selected ? selected.value : null);
     };
 
     const handleAddClick = () => {
@@ -92,6 +110,16 @@ const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project
             wrap: true,
         },
         {
+            name: 'Division',
+            selector: row => row.devision_project_name || '-',
+            cell: row => (
+                <span className="px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full">
+                    {row.devision_project_name || '-'}
+                </span>
+            ),
+            wrap: true,
+        },
+        {
             name: 'PIC',
             selector: row => row.employee_name || '-',
             wrap: true,
@@ -131,8 +159,9 @@ const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project
         ]),
     ];
 
-    const SearchComponent = useMemo(() => (
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center w-full">
+    const FilterBar = useMemo(() => (
+        <div className="flex flex-col md:flex-row gap-3 items-start md:items-center w-full">
+            {/* Search */}
             <div className="relative flex-1">
                 <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <Input
@@ -153,13 +182,29 @@ const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project
                     </button>
                 )}
             </div>
+
+            {/* Division Filter */}
+            <div className="w-full md:w-64">
+                <CustomSelect
+                    id="division-filter"
+                    name="division-filter"
+                    value={selectedDivision}
+                    options={divisionOptions}
+                    onChange={handleDivisionSelectFilter}
+                    onInputChange={handleDivisionInputChange}
+                    onMenuScrollToBottom={handleDivisionMenuScrollToBottom}
+                    inputValue={divisionInputValue}
+                    placeholder="Filter by Division..."
+                    isClearable={true}
+                />
+            </div>
         </div>
-    ), [localSearch, handleKeyPress, handleClearSearch]);
+    ), [localSearch, selectedDivision, divisionOptions, divisionInputValue]);
 
     return (
         <div className="space-y-6 mt-6">
             <div className="bg-white shadow rounded-lg px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                {SearchComponent}
+                {FilterBar}
                 <Button onClick={handleAddClick} className="flex items-center gap-2 flex-shrink-0">
                     <MdAdd size={20} />
                     <span className="whitespace-nowrap">Create Task</span>
