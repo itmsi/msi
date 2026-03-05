@@ -13,6 +13,7 @@ import { Modal } from '@/components/ui/modal';
 import Label from '@/components/form/Label';
 import { useConfirmation } from '@/hooks/useConfirmation';
 import { Division } from './types/division';
+import { createByDateColumn } from '@/components/ui/table/columnUtils';
 
 export default function ManageDivision() {
     const {
@@ -67,7 +68,7 @@ export default function ManageDivision() {
             name: 'Division',
             selector: row => row.devision_project_name,
         },
-        // createDateColumn('Created At', 'created_at', tableDateFormat),
+        createByDateColumn('Created By', 'created_at', 'created_by_name'),
         createActionsColumn([
             {
                 icon: MdEdit,
@@ -244,11 +245,7 @@ export default function ManageDivision() {
                                         handleSubmit(tipu);
                                     }}
                                     disabled={loading}
-                                    className={`rounded-[50px] ${
-                                        Object.keys(validationErrors).length > 0 
-                                                ? 'bg-red-600 hover:bg-red-700' 
-                                                : 'bg-blue-600 hover:bg-blue-700'
-                                    } text-white`}
+                                    className={`rounded-full`}
                                 >
                                     {loading ? 'Saving...' : (editingDivision ? 'Update Division' : 'Create Division')}
                                 </Button>

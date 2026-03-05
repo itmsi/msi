@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
-import { DivisionService } from '@/pages/Administration/Divisions/services/divisionService';
-import { Division } from '@/pages/Administration/Divisions/types/division';
+import { DivisionService } from '@/pages/CRM/Divisions/services/divisionService';
+import { Division } from '@/pages/CRM/Divisions/types/division';
 
 export interface DivisionSelectOption {
     value: string;

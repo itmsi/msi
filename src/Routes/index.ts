@@ -105,7 +105,7 @@ const TNCEditITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Edit'))
 // ========================================
 
 // DIVISION
-const ManageDivision = lazy(() => import('@/pages/Administration/Divisions/Manage'));
+const ManageDivision = lazy(() => import('@/pages/CRM/Divisions/Manage'));
 
 export type TAppRoute = {
     path: string;

@@ -60,12 +60,13 @@ const DivisionOverviewContainer: React.FC<DivisionOverviewContainerProps> = ({ c
     const handleSubmit = async (
         formData: DivisionOverviewFormData, 
         projectDetailId: string, 
-        divisionName: string
+        divisionName: string,
+        projectDetailDivisionId: string
     ) => {
         if (!projectId) return;
 
         try {
-            const isNewItem = projectDetailId.startsWith('temp_');
+            const isNewItem = projectDetailId && projectDetailId.startsWith('temp_');
             const apiFormData = buildFormData(formData, projectId, divisionName);
             
             let response: any;
@@ -73,11 +74,14 @@ const DivisionOverviewContainer: React.FC<DivisionOverviewContainerProps> = ({ c
                 response = await createDivisionOverview(apiFormData);
                 setTempItems(prev => prev.filter(item => item.project_detail_id !== projectDetailId));
             } else {
-                response = await updateDivisionOverview(projectDetailId, apiFormData);
+                response = await updateDivisionOverview(projectDetailDivisionId, apiFormData);
             }
             
             const message = response?.message || (isNewItem ? 'Data berhasil ditambahkan!' : 'Data berhasil diperbarui!');
             toast.success(message);
+            
+            // Reload data untuk memastikan data terbaru
+            await loadDivisionOverview();
             
         } catch (error: any) {
             console.error('Error submitting form:', error);
@@ -125,7 +129,6 @@ const DivisionOverviewContainer: React.FC<DivisionOverviewContainerProps> = ({ c
     };
 
     const handleAddNewItem = (newItem: DivisionOverviewItem) => {
-        // Add to temporary items list
         setTempItems(prev => [newItem, ...prev]);
     };
 

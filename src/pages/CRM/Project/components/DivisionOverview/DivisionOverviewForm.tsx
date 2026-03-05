@@ -136,6 +136,7 @@ const DivisionOverviewForm: React.FC<DivisionOverviewFormProps> = ({
                     showPreview={true}
                     previewSize="lg"
                     colLength={4}
+                    hasDownloadButton={true}
                 />
             </div>
 

@@ -8,6 +8,7 @@ export interface TaskProjectDevision {
     date_transaction: string;
     created_at: string;
     created_by: string;
+    created_by_name: string;
     updated_at: string | null;
     updated_by: string | null;
     updated_by_name: string | null;

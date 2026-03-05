@@ -31,8 +31,8 @@ export const useDivisionOverview = (projectId?: string) => {
         return response;
     }, [loadDivisionOverview]);
 
-    const updateDivisionOverview = useCallback(async (projectDetailId: string, formData: FormData) => {
-        const response = await ProjectDivisionOverviewService.updateDivisionOverview(projectDetailId, formData);
+    const updateDivisionOverview = useCallback(async (projectDetailDivisionId: string, formData: FormData) => {
+        const response = await ProjectDivisionOverviewService.updateDivisionOverview(projectDetailDivisionId, formData);
         await loadDivisionOverview();
         return response;
     }, [loadDivisionOverview]);

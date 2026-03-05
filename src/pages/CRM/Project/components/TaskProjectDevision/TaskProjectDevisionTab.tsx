@@ -106,11 +106,13 @@ const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project
             name: 'Created By',
             selector: row => row.created_by || '-',
             cell: row => (
-                <div className="items-center gap-3 py-2">
-                    <div className="font-medium text-gray-900">
-                        {row.created_by || '-'}
-                    </div>
-                    <div className="block text-sm text-gray-500">{formatDateTime(row.created_at)}</div>
+                <div className="flex flex-col py-2">
+                    <span className="font-medium text-gray-900">
+                        {row.created_by_name || '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        {row.created_at ? formatDateTime(row.created_at) : '-'}
+                    </span>
                 </div>
             )
         },

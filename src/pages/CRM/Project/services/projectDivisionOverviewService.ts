@@ -24,8 +24,8 @@ export class ProjectDivisionOverviewService {
         return response.data;
     }
 
-    static async updateDivisionOverview(projectDetailId: string, formData: FormData): Promise<any> {
-        const response = await apiPutMultipart(`${API_BASE_URL}/crm/project_detail_divisions/${projectDetailId}`, formData);
+    static async updateDivisionOverview(projectDetailDivisionId: string, formData: FormData): Promise<any> {
+        const response = await apiPutMultipart(`${API_BASE_URL}/crm/project_detail_divisions/${projectDetailDivisionId}`, formData);
         return response.data;
     }
 

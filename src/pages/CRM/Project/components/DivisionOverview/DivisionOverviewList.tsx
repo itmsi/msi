@@ -9,7 +9,7 @@ interface DivisionOverviewListProps {
     divisionData: DivisionOverviewItem[];
     formDataMap: Record<string, DivisionOverviewFormData>;
     onFormDataChange: (itemKey: string, formData: DivisionOverviewFormData) => void;
-    onSubmit: (formData: DivisionOverviewFormData, projectDetailId: string, divisionName: string) => Promise<void>;
+    onSubmit: (formData: DivisionOverviewFormData, projectDetailId: string, divisionName: string, projectDetailDivisionId: string) => Promise<void>;
     onDelete: (divisionName: string, projectDetailId?: string) => Promise<void>;
 }
 
@@ -64,7 +64,7 @@ const DivisionOverviewList: React.FC<DivisionOverviewListProps> = ({
                                 key={currentItemKey}
                                 formData={currentFormData}
                                 onFormDataChange={(data: DivisionOverviewFormData) => onFormDataChange(currentItemKey, data)}
-                                onSubmit={(data: DivisionOverviewFormData) => onSubmit(data, item.project_detail_id, item.devision_project_id)}
+                                onSubmit={(data: DivisionOverviewFormData) => onSubmit(data, item.project_id, item?.division_project_id || '',  item.project_detail_division_id)}
                                 isSubmitting={false}
                                 isNewItem={isNewItem}
                                 type={item.devision_project_name}

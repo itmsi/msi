@@ -46,7 +46,8 @@ const NewItemSelector: React.FC<NewItemSelectorProps> = ({ projectId, onAddItem 
             const newItem: DivisionOverviewItem = {
                 project_detail_id: tempId,
                 project_id: projectId,
-                devision_project_id: selectedDivision.value,
+                project_detail_division_id: '',
+                division_project_id: selectedDivision.value,
                 devision_project_name: selectedDivision.label,
                 remarks: '',
                 property_attachment: null
