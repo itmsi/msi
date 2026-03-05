@@ -13,10 +13,11 @@ import { TaskProjectDevision, TaskProjectDevisionRequest } from '../../types/tas
 import TaskProjectDevisionModal from './TaskProjectDevisionModal';
 
 interface TaskProjectDevisionTabProps {
-    project_detail_devision_id: string;
+    project_id: string;
+    onGoToDivision?: () => void;
 }
 
-const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project_detail_devision_id }) => {
+const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project_id, onGoToDivision }) => {
     const {
         tasks,
         loading,
@@ -28,7 +29,7 @@ const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project
         handlePageChange,
         handleRowsPerPageChange,
         handleSearch
-    } = useTaskProjectDevision(project_detail_devision_id);
+    } = useTaskProjectDevision(project_id);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editData, setEditData] = useState<TaskProjectDevision | null>(null);
@@ -103,14 +104,14 @@ const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project
             )
         },
         {
-            name: 'Created By',
-            selector: row => row.created_by || '-',
+            name: 'Updated By',
+            selector: row => row.updated_by_name || '-',
             cell: row => (
                 <div className="items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">
-                        {row.created_by || '-'}
+                        {row.updated_by_name || '-'}
                     </div>
-                    <div className="block text-sm text-gray-500">{formatDateTime(row.created_at)}</div>
+                    <div className="block text-sm text-gray-500">{row.updated_at ? formatDateTime(row.updated_at) : '-'}</div>
                 </div>
             )
         },
@@ -199,8 +200,9 @@ const TaskProjectDevisionTab: React.FC<TaskProjectDevisionTabProps> = ({ project
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSubmit={handleModalSubmit}
-                project_detail_devision_id={project_detail_devision_id}
+                project_id={project_id}
                 editData={editData}
+                onGoToDivision={onGoToDivision}
             />
 
             <ConfirmationModal

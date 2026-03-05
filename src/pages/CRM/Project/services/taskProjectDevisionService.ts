@@ -9,6 +9,9 @@ export class TaskProjectDevisionService {
             page: 1,
             limit: 10,
             search: '',
+            sort_by: 'created_at',
+            sort_order: 'desc',
+            project_id: null,
             ...params
         };
 
