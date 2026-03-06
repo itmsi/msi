@@ -98,6 +98,25 @@ export default function ManageCRMProject() {
             wrap: true,
         },
         {
+            name: 'Division',
+            cell: row => (
+                <div className="flex flex-wrap gap-1 py-1">
+                    {row.devision_project_names && row.devision_project_names.length > 0
+                        ? row.devision_project_names.map((name, idx) => (
+                            <span
+                                key={idx}
+                                className="inline-flex items-center justify-center rounded-md font-medium px-2 bg-blue-100 text-blue-800 border border-blue-200"
+                            >
+                                {name}
+                            </span>
+                        ))
+                        : <span className="text-gray-400 text-sm">-</span>
+                    }
+                </div>
+            ),
+            wrap: true,
+        },
+        {
             name: 'Status',
             selector: row => row.status || '-',
             cell: row => (
