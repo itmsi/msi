@@ -148,6 +148,7 @@ export interface ContractorFormData {
         new_customer: boolean;
     };
     iup_customers: {
+        iup_customer_id?: string;
         iup_id: string;
         iup_name?: string;
         segmentation_id: string;

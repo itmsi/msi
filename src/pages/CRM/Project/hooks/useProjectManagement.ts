@@ -2,7 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { ProjectItem, ProjectRequest, Pagination } from '../types/project';
 import { ProjectService } from '../services/projectService';
 
-export const useProjectManagement = () => {
+interface UseProjectManagementProps {
+    iup_customer_id: string;
+}
+
+export const useProjectManagement = ({ iup_customer_id }: UseProjectManagementProps) => {
     const [searchValue, setSearchValue] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
     const [sortModify, setSortModify] = useState<'updated_at' | 'created_at' | ''>('updated_at');
@@ -30,6 +34,7 @@ export const useProjectManagement = () => {
                 sort_order: params?.sort_order || sortOrder || 'desc',
                 search: params?.search !== undefined ? params.search : searchValue,
                 status: params?.status !== undefined ? params.status : statusFilter,
+                iup_customer_id: iup_customer_id ? iup_customer_id : '',
                 ...params
             });
 
