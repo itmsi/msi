@@ -12,6 +12,7 @@ export class ProjectService {
             sort_order: 'desc',
             search: '',
             status: '',
+            iup_customer_id: '',
             ...params
         };
 

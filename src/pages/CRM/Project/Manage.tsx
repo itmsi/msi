@@ -6,7 +6,6 @@ import { TableColumn } from 'react-data-table-component';
 import PageMeta from '@/components/common/PageMeta';
 import { useProjectManagement } from './hooks/useProjectManagement';
 import { ProjectItem } from './types/project';
-import { FaProjectDiagram } from 'react-icons/fa';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { useNavigate } from 'react-router';
@@ -41,7 +40,7 @@ export default function ManageCRMProject() {
         handleKeyPress,
         handleClearSearch,
         fetchProjects,
-    } = useProjectManagement();
+    } = useProjectManagement( { iup_customer_id: '' });
 
     const handleDelete = (row: ProjectItem) => {
         setConfirmDelete({ show: true, projectId: row.project_id, projectName: row.project_name || row.project_id });
@@ -268,15 +267,6 @@ export default function ManageCRMProject() {
                             responsive
                             highlightOnHover
                             striped={false}
-                            noDataComponent={
-                                <div className="text-center py-8">
-                                    <FaProjectDiagram className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                    <p className="text-gray-500">No project data found</p>
-                                    <p className="text-sm text-gray-400">
-                                        {searchValue ? 'Try adjusting your search' : 'Start by adding your first project'}
-                                    </p>
-                                </div>
-                            }
                             persistTableHead
                             borderRadius="8px"
                             onRowClicked={handleEdit}

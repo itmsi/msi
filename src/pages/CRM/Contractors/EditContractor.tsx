@@ -24,6 +24,10 @@ import ContractorActivityInformation from './components/ContractorActivityInform
 import { GrDocumentVerified } from 'react-icons/gr';
 import ContractorQuotationInformation from './components/ContractorQuotationInformation';
 import ContractorSurveyInformation from './components/ContractorSurveyInformation';
+import ContractorProjectInformation from './components/ContractorProjectInformation';
+import { TbTopologyStar3 } from 'react-icons/tb';
+import { GiChart } from 'react-icons/gi';
+import ContractorROEInformation from './components/ContractorROEInformation';
 
 const EditContractor: React.FC = () => {
     const navigate = useNavigate();
@@ -89,7 +93,7 @@ const EditContractor: React.FC = () => {
         initializeSegementationOptions();
     }, [initializeSegementationOptions]);
 
-    const [activeTab, setActiveTab] = useState<'info_contractor' | 'activity' | 'quotation' | 'survey'>('info_contractor');
+    const [activeTab, setActiveTab] = useState<'info_contractor' | 'activity' | 'quotation' | 'survey' | 'roe' | 'project'>('info_contractor');
 
     // Check permission untuk tab quotation
     const quotationPermissions = usePermissionsFor('Manage Quotation');
@@ -128,8 +132,8 @@ const EditContractor: React.FC = () => {
                     </div>
 
                     {/* Tab Navigation */}
-                    <div className="border-b border-gray-200 mb-6">
-                        <nav className="flex space-x-4">
+                    <div className="border-b border-gray-200 mb-6 overflow-auto">
+                        <nav className="flex justify-between w-[910px] xl:w-full">
                             <button
                                 onClick={() => setActiveTab('info_contractor')}
                                 className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
@@ -163,6 +167,26 @@ const EditContractor: React.FC = () => {
                                 </button>
                             )}
                             <button
+                                onClick={() => setActiveTab('roe')}
+                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                    activeTab === 'roe'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                            >
+                                <GiChart size={'1.5rem'} /> Return of Equity
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('project')}
+                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                    activeTab === 'project'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                            >
+                                <TbTopologyStar3 size={'1.5rem'} /> Projects
+                            </button>
+                            <button
                                 onClick={() => setActiveTab('activity')}
                                 className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
                                     activeTab === 'activity'
@@ -171,11 +195,6 @@ const EditContractor: React.FC = () => {
                                 }`}
                             >
                                 <AiOutlineHistory size={'1.5rem'} /> Activity
-                                {/* {accessories.length > 0 && (
-                                    <span className="ml-1 bg-blue-100 text-blue-600 py-1 px-2 rounded-full text-xs">
-                                        {accessories.length}
-                                    </span>
-                                )} */}
                             </button>
                         </nav>
                     </div>
@@ -258,7 +277,17 @@ const EditContractor: React.FC = () => {
                             customerID={formData.customer_data.customer_id || ''}
                         />
                     )}
+                    {activeTab === 'roe' && quotationPermissions.canRead && (
+                        <ContractorROEInformation 
+                            iup_customer_id={formData.iup_customers.iup_customer_id || ''}
+                        />
+                    )}
                     {/* Activity Tab */}
+                    {activeTab === 'project' && (
+                        <ContractorProjectInformation 
+                            iup_customer_id={formData.iup_customers.iup_customer_id || ''}
+                        />
+                    )}
                     {activeTab === 'activity' && (
                         <ContractorActivityInformation 
                             activityData={formData.iup_customers.activity_data || []}

@@ -2,7 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { useRoeCalculator } from './useRoeCalculator';
 
-export const useRoeCalculatorManagement = () => {
+interface UseRoeCalculatorManagementProps {
+    iup_customer_id: string;
+}
+
+export const useRoeCalculatorManagement = ({ iup_customer_id }: UseRoeCalculatorManagementProps) => {
     const navigate = useNavigate();
     
     const [searchTerm, setSearchTerm] = useState('');
@@ -31,6 +35,7 @@ export const useRoeCalculatorManagement = () => {
             sort_order: sortOrder,
             search: debouncedSearch,
             commodity: sortCommodity || undefined,
+            iup_customer_id: iup_customer_id || '',
         });
     }, [debouncedSearch, sortOrder, currentPage, itemsPerPage, sortCommodity, fetchRoeCalculator]);
 

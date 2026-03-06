@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MdImage, MdUpload, MdCloudUpload, MdClose, MdDownload } from 'react-icons/md';
+import { MdImage, MdUpload, MdCloudUpload, MdClose, MdDownload, MdZoomIn } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import Label from '@/components/form/Label';
 import { FaFileExcel, FaFilePowerpoint, FaFileWord, FaRegFile, FaRegFilePdf } from 'react-icons/fa6';
@@ -40,6 +40,12 @@ interface PreviewState {
     url: string | null;
 }
 
+interface ModalState {
+    isOpen: boolean;
+    imageUrl: string;
+    imageName: string;
+}
+
 const FileUpload: React.FC<FileUploadProps> = ({
     id,
     name,
@@ -73,6 +79,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
     });
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const [preservedExistingImages, setPreservedExistingImages] = useState<any[] | string | null>(null);
+    const [modalState, setModalState] = useState<ModalState>({
+        isOpen: false,
+        imageUrl: '',
+        imageName: ''
+    });
 
     // Preserve existing images when component first loads
     useEffect(() => {
@@ -193,6 +204,24 @@ const FileUpload: React.FC<FileUploadProps> = ({
             console.error('Error downloading file:', error);
             toast.error('Failed to download file');
         }
+    };
+
+    // Handle image click untuk popup preview
+    const handleImageClick = (imageUrl: string, imageName: string) => {
+        setModalState({
+            isOpen: true,
+            imageUrl,
+            imageName
+        });
+    };
+
+    // Handle modal close
+    const handleModalClose = () => {
+        setModalState({
+            isOpen: false,
+            imageUrl: '',
+            imageName: ''
+        });
     };
 
     const getPreviewSizeClasses = () => {
@@ -368,7 +397,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     return (
         <div className={`space-y-2 ${className}`}>
             <Label htmlFor={id} className='font-secondary'>
-                {label} {required && <span className="text-red-500">*</span>}
+                {label} {required && <span className="text-white">*</span>}
             </Label>
             {!viewMode && (<>
                 <div
@@ -517,7 +546,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                 const isImage = !isDocumentFile(fileName);
                                                 
                                                 return (
-                                                    <div key={`existing-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square` }>
+                                                    <div key={`existing-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square hover:brightness-90` }>
                                                         {/* Action buttons */}
                                                         <div className="absolute top-2 right-2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
 
@@ -543,13 +572,28 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                                 </Button>
                                                             )}
                                                         </div>
+                                                        
+                                                        {isImage && (
+                                                            <div
+                                                                className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
+                                                                onClick={() => handleImageClick(imageUrl, fileName)}
+                                                            >
+                                                                <MdZoomIn 
+                                                                    className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg" 
+                                                                    size={40}
+                                                                />
+                                                            </div>
+                                                        )}
                                                         <div className="relative">
                                                             {isImage ? (
-                                                                <img
-                                                                    src={imageUrl}
-                                                                    alt={`Existing ${index + 1}`}
-                                                                    className="w-full h-full object-contain"
-                                                                />
+                                                                <div className="relative group">
+                                                                    <img
+                                                                        src={imageUrl}
+                                                                        alt={`Existing ${index + 1}`}
+                                                                        className="w-full h-full object-contain transition-all"
+                                                                        title="Click untuk preview"
+                                                                    />
+                                                                </div>
                                                             ) : (
                                                                 <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center">
                                                                     <div className="text-4xl mb-2">
@@ -566,7 +610,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                 );
                                             })
                                         ) : (
-                                            <div className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center  aspect-square`}>
+                                            <div className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center hover:brightness-90 aspect-square`}>
                                                 <div className="relative">
                                                     {(() => {
                                                         const fileName = existingFiles?.[0]?.file_name || 
@@ -574,13 +618,25 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                                         'attachment';
                                                         const isImage = !isDocumentFile(fileName);
                                                         
-                                                        return isImage ? (
-                                                            <img
-                                                                src={currentExistingImages}
-                                                                alt="Existing"
-                                                                className="w-full h-full object-contain"
-                                                            />
-                                                        ) : (
+                                                        return isImage ? (<>
+                                                            <div
+                                                                className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
+                                                                onClick={() => handleImageClick(currentExistingImages, fileName)}
+                                                            >
+                                                                <MdZoomIn 
+                                                                    className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg" 
+                                                                    size={40}
+                                                                />
+                                                            </div>
+                                                            <div className="relative group">
+                                                                <img
+                                                                    src={currentExistingImages}
+                                                                    alt="Existing"
+                                                                    className="w-full h-full object-contain transition-all"
+                                                                    title="Click untuk preview"
+                                                                />
+                                                            </div>
+                                                        </>) : (
                                                             <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center">
                                                                 <div className="text-4xl mb-2">
                                                                     {getDocumentIcon(fileName)}
@@ -633,13 +689,26 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                         }
                                         
                                         return (
-                                            <div key={`new-image-${file.name}-${file.size}-${file.lastModified}-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square`}>
+                                            <div key={`new-image-${file.name}-${file.size}-${file.lastModified}-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square hover:brightness-90`}>
+                                                
+                                                {/* Zoom icon overlay */}
+                                                <div
+                                                    className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
+                                                    onClick={() => handleImageClick(url, file.name)}
+                                                >
+                                                    <MdZoomIn 
+                                                        className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg" 
+                                                        size={40}
+                                                    />
+                                                </div>
+
                                                 {/* Image Preview */}
-                                                <div>
+                                                <div className="relative group">
                                                     <img
                                                         src={url}
                                                         alt={`${file.name} - Preview ${index + 1}`}
-                                                        className="w-full h-full object-contain"
+                                                        className="w-full h-full object-contain transition-all"
+                                                        title="Click untuk preview"
                                                     />
                                                     {!viewMode && (
                                                         <button
@@ -716,13 +785,26 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                     <div className="space-y-2">
                                         {/* File Preview */}
                                         <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
-                                            {isImageFile(file) ? (
-                                                <img
-                                                    src={imageUrl}
-                                                    alt="Preview"
-                                                    className="w-full h-full object-contain"
-                                                />
-                                            ) : (
+                                            {isImageFile(file) ? (<>
+                                                {/* Zoom icon overlay */}
+                                                <div
+                                                    className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
+                                                    onClick={() => handleImageClick(imageUrl || '', file.name)}
+                                                >
+                                                    <MdZoomIn 
+                                                        className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg" 
+                                                        size={40}
+                                                    />
+                                                </div>
+                                                <div className="relative group">
+                                                    <img
+                                                        src={imageUrl}
+                                                        alt="Preview"
+                                                        className="w-full h-full object-contain transition-all"
+                                                        title="Click untuk preview"
+                                                    />
+                                                </div>
+                                            </>) : (
                                                 <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center p-5">
                                                     <div className="text-4xl mb-2">
                                                         {getDocumentIcon(file.name)}
@@ -758,11 +840,24 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                     <div className="space-y-2">
                                         {/* Image Preview */}
                                         <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
-                                            <img
-                                                src={imageUrl}
-                                                alt="Preview"
-                                                className="w-full h-full object-contain"
-                                            />
+                                            <div className="relative group">
+                                                <img
+                                                    src={imageUrl}
+                                                    alt="Preview"
+                                                    className="w-full h-full object-contain transition-all"
+                                                    title="Click untuk preview"
+                                                />
+                                                {/* Zoom icon overlay */}
+                                                <div 
+                                                    className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
+                                                    onClick={() => handleImageClick(imageUrl, 'Existing Image')}
+                                                >
+                                                    <MdZoomIn 
+                                                        className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg" 
+                                                        size={40}
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
 
                                         {/* File Info */}
@@ -782,6 +877,36 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
                         return null;
                     })()}
+                </div>
+            )}
+
+            {/* Modal Popup untuk Preview Image */}
+            {modalState.isOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={handleModalClose}>
+                    <div className="relative max-w-4xl max-h-full p-4" onClick={e => e.stopPropagation()}>
+                        {/* Tombol Close */}
+                        <button
+                            onClick={handleModalClose}
+                            className="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75 transition-all z-10"
+                            title="Tutup preview"
+                        >
+                            <MdClose className="w-6 h-6" />
+                        </button>
+                        
+                        {/* Image */}
+                        <img
+                            src={modalState.imageUrl}
+                            alt={modalState.imageName}
+                            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                        />
+                        
+                        {/* Image Name */}
+                        <div className="absolute bottom-4 left-4 right-4 text-center">
+                            <p className="text-white bg-black/50 rounded-b-lg px-3 py-2 text-sm font-medium">
+                                {modalState.imageName}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
