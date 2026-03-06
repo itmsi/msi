@@ -89,6 +89,27 @@ export const useIupSelect = () => {
         }
     }, [iupOptions.length, loadIupOptions]);
 
+    const getIupById = useCallback(async (iupId: string): Promise<IupSelectOption | null> => {
+        try {
+            const response = await IupService.getIUPManagement({
+                search: '',
+                page: 1,
+                limit: 100,
+                sort_order: 'desc'
+            });
+
+            if (response.success) {
+                const found = response.data.find((iup: IupItem) => iup.iup_id === iupId);
+                if (found) {
+                    return { value: found.iup_id, label: found.iup_name };
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching IUP by ID:', error);
+        }
+        return null;
+    }, []);
+
     return {
         iupOptions,
         pagination,
@@ -96,6 +117,7 @@ export const useIupSelect = () => {
         handleInputChange,
         handleMenuScrollToBottom,
         initializeOptions,
-        loadIupOptions
+        loadIupOptions,
+        getIupById
     };
 };
