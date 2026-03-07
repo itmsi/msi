@@ -2,6 +2,7 @@ import React from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { PermissionButton } from '@/components/common/PermissionComponents';
 import { Tooltip } from '../tooltip';
+import { formatDateTime } from '@/helpers/generalHelper';
 
 // Common column configurations with React components
 export const createSerialNumberColumn = (pagination?: { current_page: number; per_page: number }): TableColumn<any> => ({
@@ -99,6 +100,27 @@ export const createDateColumn = (
     width: formatOptions ? '180px' : '150px',
 });
 
+export const createByDateColumn = (
+    name: string,
+    dateField: string,
+    createdByField: string,
+): TableColumn<any> => ({
+    name,
+    selector: (row: any) => row[dateField],
+    cell: row => (
+        <div className="flex flex-col py-2">
+            <span className="font-medium text-gray-900">
+                {row[createdByField] || '-'}
+            </span>
+            <span className="text-xs text-gray-500">
+                {row[dateField] ? formatDateTime(row[dateField]) : '-'}
+            </span>
+        </div>
+    ),
+    center: true,
+    wrap: true,
+    width: '180px',
+});
 export const createActionsColumn = (actions: Array<{
     icon: React.ComponentType<any>;
     onClick: (row: any) => void;

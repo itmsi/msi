@@ -3,7 +3,6 @@ import { jsPDF } from 'jspdf';
 // Font loading utility for jsPDF
 export const loadCustomFonts = async (doc: jsPDF): Promise<void> => {
     try {
-        // Load Futura fonts
         const fonts = [
             { path: '/fonts/futumd.ttf', name: 'Futura', style: 'normal' },
             { path: '/fonts/futumditalic.ttf', name: 'Futura', style: 'italic' },
@@ -19,8 +18,15 @@ export const loadCustomFonts = async (doc: jsPDF): Promise<void> => {
             { path: '/fonts/opensans-semibolditalic.ttf', name: 'OpenSans', style: 'semibolditalic' }
         ];
 
-        // Load all fonts
-        const fontPromises = fonts.map(async (font) => {
+        // Chinese fonts (Noto Sans SC for Chinese characters)
+        const chineseFonts = [
+            { path: '/fonts/notosanssc-regular.ttf', name: 'NotoSansSC', style: 'normal' },
+            { path: '/fonts/notosanssc-bold.ttf', name: 'NotoSansSC', style: 'bold' }
+        ];
+
+        const allFonts = [...fonts, ...chineseFonts];
+
+        const fontPromises = allFonts.map(async (font) => {
             try {
                 const response = await fetch(font.path);
                 if (!response.ok) {
@@ -64,12 +70,30 @@ const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
     return btoa(binary);
 };
 
-// Helper function to set font with fallback
 export const setFontSafe = (doc: jsPDF, fontName: string = 'Futura', fontStyle: string = 'normal'): void => {
     try {
         doc.setFont(fontName, fontStyle);
     } catch (error) {
         console.warn(`Font ${fontName} ${fontStyle} not available, falling back to helvetica`);
-        doc.setFont('helvetica', fontStyle === 'bold' || fontStyle === 'bolditalic' ? 'bold' : 'normal');
+        doc.setFont('helvetica', 'normal');
+    }
+};
+
+export const hasChinese = (text: string): boolean => {
+    const chineseRegex = /[\u4e00-\u9fff\u3400-\u4dbf\u{20000}-\u{2a6df}\u{2a700}-\u{2b73f}\u{2b740}-\u{2b81f}\u{2b820}-\u{2ceaf}\uf900-\ufaff\u3300-\u33ff\ufe30-\ufe4f\uf900-\ufaff\u{2f800}-\u{2fa1f}]/u;
+    return chineseRegex.test(text);
+};
+
+export const setFontByLanguage = (doc: jsPDF, text: string, fontName: string = 'Futura', fontStyle: string = 'normal', language?: string): void => {
+    if (language === 'zh' || hasChinese(text)) {
+        try {
+            const chineseStyle = fontStyle === 'bold' ? 'bold' : 'normal';
+            doc.setFont('NotoSansSC', chineseStyle);
+        } catch (error) {
+            console.warn('NotoSansSC font not available, falling back to helvetica');
+            doc.setFont('helvetica', fontStyle);
+        }
+    } else {
+        setFontSafe(doc, fontName, fontStyle);
     }
 };

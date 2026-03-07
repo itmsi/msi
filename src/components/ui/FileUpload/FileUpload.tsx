@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { MdImage, MdUpload, MdCloudUpload, MdClose } from 'react-icons/md';
+import { MdImage, MdUpload, MdCloudUpload, MdClose, MdDownload } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import Label from '@/components/form/Label';
+import { FaFileExcel, FaFilePowerpoint, FaFileWord, FaRegFile, FaRegFilePdf } from 'react-icons/fa6';
+import Button from '../button/Button';
 
 interface FileUploadProps {
     id: string;
@@ -26,6 +28,8 @@ interface FileUploadProps {
     previewSize?: 'sm' | 'md' | 'lg';
     viewMode?: boolean;
     colLength?: number;
+    existingFiles?: Array<{file_id: string; file_url: string; file_name?: string}>;
+    hasDownloadButton?: boolean;
 }
 
 interface DragState {
@@ -59,6 +63,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
     previewSize = 'md',
     viewMode = false,
     colLength = 1,
+    existingFiles,
+    hasDownloadButton = false,
 }) => {
     
     const [dragState, setDragState] = useState<DragState>({ isDragging: false });
@@ -148,6 +154,45 @@ const FileUpload: React.FC<FileUploadProps> = ({
         const imageExtensions = ['.svg', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'];
         
         return imageExtensions.some(ext => fileName.endsWith(ext));
+    };
+
+    // Check if file is a document (PDF, DOC, etc.)
+    const isDocumentFile = (fileName: string): boolean => {
+        const documentExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt'];
+        const lowerFileName = fileName.toLowerCase();
+        return documentExtensions.some(ext => lowerFileName.endsWith(ext));
+    };
+
+    // Get document icon based on file type
+    const getDocumentIcon = (fileName: string) => {
+        const lowerFileName = fileName.toLowerCase();
+        if (lowerFileName.endsWith('.pdf')) {
+            return <FaRegFilePdf />;
+        } else if (lowerFileName.endsWith('.doc') || lowerFileName.endsWith('.docx')) {
+            return <FaFileWord />;
+        } else if (lowerFileName.endsWith('.xls') || lowerFileName.endsWith('.xlsx')) {
+            return <FaFileExcel />;
+        } else if (lowerFileName.endsWith('.ppt') || lowerFileName.endsWith('.pptx')) {
+            return <FaFilePowerpoint />;
+        } else {
+            return <FaRegFile />;
+        }
+    };
+
+    // Handle download of existing file
+    const handleDownload = (fileUrl: string, fileName?: string) => {
+        try {
+            const link = document.createElement('a');
+            link.href = fileUrl;
+            link.download = fileName || 'download';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error('Error downloading file:', error);
+            toast.error('Failed to download file');
+        }
     };
 
     const getPreviewSizeClasses = () => {
@@ -259,10 +304,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
             
             const allFiles = [...currentFiles, ...cekFiles];
             const totalExisting = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
-            const totalImages = allFiles.length + totalExisting;
+            const totalFiles = allFiles.length + totalExisting;
             
             onFileChange(allFiles);
-            toast.success(`${cekFiles.length} file(s) added successfully! Total: ${totalImages} images`);
+            toast.success(`${cekFiles.length} file(s) added successfully! Total: ${totalFiles} files`);
         } else {
             onFileChange(validFiles[0]);
             toast.success('File uploaded successfully!');
@@ -428,11 +473,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
             )}
 
             {/* File Preview Section */}
-            {showPreview && (getCurrentFiles().some(isImageFile) || existingImageUrl) && (
+            {showPreview && (getCurrentFiles().length > 0 || existingImageUrl) && (
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="flex items-start justify-between mb-3">
                         <h4 className="text-sm font-medium text-gray-900">
-                            Preview {multiple && getCurrentFiles().length > 1 && `(${getCurrentFiles().filter(isImageFile).length} images)`}
+                            Preview {multiple && getCurrentFiles().length > 1 && `(${getCurrentFiles().length} files)`}
                         </h4>
                         {!viewMode && (
                             <button
@@ -451,6 +496,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                     {(() => {
                         const files = getCurrentFiles();
                         const imageFiles = files.filter(isImageFile);
+                        const documentFiles = files.filter(file => !isImageFile(file));
                         // Use preserved existing images if current existingImageUrl is null/empty
                         const currentExistingImages = existingImageUrl || preservedExistingImages;
                         // const existingImagesCount = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
@@ -460,58 +506,125 @@ const FileUpload: React.FC<FileUploadProps> = ({
                         if (multiple) {
                             return (
                                 <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(${colLength}, 1fr)` }}>
-                                    {/* Show existing images first */}
+                                    {/* Show existing images/documents first */}
                                     {currentExistingImages && (
                                         Array.isArray(currentExistingImages) ? (
                                             currentExistingImages.map((imageUrl, index) => {
+                                                // Get file name from URL or use default
+                                                const fileName = existingFiles?.[index]?.file_name || 
+                                                               imageUrl.split('/').pop() || 
+                                                               `attachment-${index + 1}`;
+                                                const isImage = !isDocumentFile(fileName);
+                                                
                                                 return (
-                                                    <div key={`existing-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center` }>
-                                                        <div>
-                                                            <img
-                                                                src={imageUrl}
-                                                                alt={`Existing ${index + 1}`}
-                                                                className="w-full h-full object-contain"
-                                                            />
-                                                            {!viewMode && (
-                                                                <button
-                                                                    onClick={() => handleRemoveExistingImage(index)}
-                                                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    <div key={`existing-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square` }>
+                                                        {/* Action buttons */}
+                                                        <div className="absolute top-2 right-2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                                                            {/* Download button */}
+                                                            {hasDownloadButton && (
+                                                                <Button
+                                                                    onClick={() => handleDownload(imageUrl, fileName)}
+                                                                    className='rounded-full p-1'
+                                                                    size='sm'
                                                                 >
-                                                                    <MdClose className="w-3 h-3" />
-                                                                </button>
+                                                                    <MdDownload className="w-4 h-4" />
+                                                                </Button>
+                                                            )}
+                                                            
+                                                            {/* Remove button */}
+                                                            {!viewMode && (
+                                                                <Button
+                                                                    onClick={() => handleRemoveExistingImage(index)}
+                                                                    className="bg-red-500 text-white rounded-full p-1"
+                                                                    size='sm'
+                                                                >
+                                                                    <MdClose className="w-4 h-4" />
+                                                                </Button>
                                                             )}
                                                         </div>
-                                                        {/* <p className="text-xs font-medium text-gray-900">
-                                                            Existing Image {currentExistingImages.length > 1 ? `${index + 1}` : ''}
-                                                        </p> */}
+                                                        <div className="relative">
+                                                            {isImage ? (
+                                                                <img
+                                                                    src={imageUrl}
+                                                                    alt={`Existing ${index + 1}`}
+                                                                    className="w-full h-full object-contain"
+                                                                />
+                                                            ) : (
+                                                                <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center">
+                                                                    <div className="text-4xl mb-2">
+                                                                        {getDocumentIcon(fileName)}
+                                                                    </div>
+                                                                    <p className="text-xs font-medium text-gray-900 truncate max-w-full" title={fileName}>
+                                                                        {fileName}
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                            
+                                                        </div>
                                                     </div>
                                                 );
                                             })
                                         ) : (
-                                            <div className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center`}>
-                                                <div className={``}>
-                                                    <img
-                                                        src={currentExistingImages}
-                                                        alt="Existing"
-                                                        className="w-full h-full object-contain"
-                                                    />
-                                                    {!viewMode && (
+                                            <div className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center  aspect-square`}>
+                                                <div className="relative">
+                                                    {(() => {
+                                                        const fileName = existingFiles?.[0]?.file_name || 
+                                                                        currentExistingImages.split('/').pop() || 
+                                                                        'attachment';
+                                                        const isImage = !isDocumentFile(fileName);
+                                                        
+                                                        return isImage ? (
+                                                            <img
+                                                                src={currentExistingImages}
+                                                                alt="Existing"
+                                                                className="w-full h-full object-contain"
+                                                            />
+                                                        ) : (
+                                                            <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center">
+                                                                <div className="text-4xl mb-2">
+                                                                    {getDocumentIcon(fileName)}
+                                                                </div>
+                                                                <p className="text-xs font-medium text-gray-900 truncate max-w-full" title={fileName}>
+                                                                    {fileName}
+                                                                </p>
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                    
+                                                    {/* Action buttons */}
+                                                    <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        {/* Download button */}
                                                         <button
-                                                            onClick={() => handleRemoveExistingImage(0)}
-                                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            onClick={() => {
+                                                                const fileName = existingFiles?.[0]?.file_name || 
+                                                                               currentExistingImages.split('/').pop() || 
+                                                                               'attachment';
+                                                                handleDownload(currentExistingImages, fileName);
+                                                            }}
+                                                            className="bg-blue-500 text-white rounded-full p-1 hover:bg-blue-600 transition-colors"
+                                                            title="Download"
                                                         >
-                                                            <MdClose className="w-3 h-3" />
+                                                            <MdDownload className="w-3 h-3" />
                                                         </button>
-                                                    )}
+                                                        
+                                                        {/* Remove button */}
+                                                        {!viewMode && (
+                                                            <button
+                                                                onClick={() => handleRemoveExistingImage(0)}
+                                                                className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                                                                title="Remove"
+                                                            >
+                                                                <MdClose className="w-3 h-3" />
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <p className="text-xs font-medium text-gray-900">
-                                                    Existing Image
-                                                </p>
                                             </div>
                                         )
                                     )}
                                     
-                                    {/* Then show new files */}
+                                    {/* Then show new image files */}
                                     {imageFiles.map((file, index) => {
                                         const url = previewUrls[index];
                                         
@@ -520,7 +633,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                         }
                                         
                                         return (
-                                            <div key={`new-${file.name}-${file.size}-${file.lastModified}-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center`}>
+                                            <div key={`new-image-${file.name}-${file.size}-${file.lastModified}-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square`}>
                                                 {/* Image Preview */}
                                                 <div>
                                                     <img
@@ -530,7 +643,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                     />
                                                     {!viewMode && (
                                                         <button
-                                                            onClick={() => handleRemoveFile(index)}
+                                                            onClick={() => handleRemoveFile(imageFiles.length > 1 ? index : undefined)}
                                                             className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                                                         >
                                                             <MdClose className="w-3 h-3" />
@@ -550,13 +663,44 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                             </div>
                                         );
                                     })}
+
+                                    {/* Then show new document files */}
+                                    {documentFiles.map((file, index) => {
+                                        return (
+                                            <div key={`new-doc-${file.name}-${file.size}-${file.lastModified}-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square`}>
+                                                {/* Document Preview */}
+                                                <div className="relative">
+                                                    <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center">
+                                                        <div className="text-4xl mb-2">
+                                                            {getDocumentIcon(file.name)}
+                                                        </div>
+                                                        <p className="text-xs font-medium text-gray-900 truncate max-w-full" title={file.name}>
+                                                            {file.name}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                                                        </p>
+                                                    </div>
+                                                    {!viewMode && (
+                                                        <button
+                                                            onClick={() => handleRemoveFile(files.indexOf(file))}
+                                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        >
+                                                            <MdClose className="w-3 h-3" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             );
                         } else {
                             // Single file preview (existing logic)
-                            const hasNewFile = imageFiles.length > 0;
-                            const imageUrl = hasNewFile ? previewState.url : (Array.isArray(existingImageUrl) ? existingImageUrl[0] : existingImageUrl);
-                            const isLoading = hasNewFile && !previewState.url;
+                            const hasNewFile = files.length > 0;
+                            const file = files[0];
+                            const imageUrl = hasNewFile && isImageFile(file) ? previewState.url : (Array.isArray(existingImageUrl) ? existingImageUrl[0] : existingImageUrl);
+                            const isLoading = hasNewFile && isImageFile(file) && !previewState.url;
 
                             if (isLoading) {
                                 return (
@@ -567,12 +711,49 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                 );
                             }
 
-                            if (imageUrl) {
-                                const file = imageFiles[0];
-                                // const isSvg = hasNewFile 
-                                //     ? file.name.toLowerCase().endsWith('.svg')
-                                //     : existingImageUrl!.toLowerCase().includes('.svg');
+                            if (hasNewFile) {
+                                return (
+                                    <div className="space-y-2">
+                                        {/* File Preview */}
+                                        <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
+                                            {isImageFile(file) ? (
+                                                <img
+                                                    src={imageUrl}
+                                                    alt="Preview"
+                                                    className="w-full h-full object-contain"
+                                                />
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center p-5">
+                                                    <div className="text-4xl mb-2">
+                                                        {getDocumentIcon(file.name)}
+                                                    </div>
+                                                    <p className="text-xs font-medium text-gray-900 truncate max-w-full" title={file.name}>
+                                                        {file.name}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
 
+                                        {/* File Info */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="space-y-2">
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                                        {file.name}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {file.type || 'Unknown type'}
+                                                    </p>
+                                                </div>
+                                                
+                                                <div className="text-xs text-gray-500 space-y-1">
+                                                    <p>Size: {(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            } else if (imageUrl) {
                                 return (
                                     <div className="space-y-2">
                                         {/* Image Preview */}
@@ -589,17 +770,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                             <div className="space-y-2">
                                                 <div>
                                                     <p className="text-sm font-medium text-gray-900 truncate">
-                                                        {hasNewFile ? file.name : 'Existing Image'}
+                                                        Existing Image
                                                     </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        {hasNewFile ? (file.type || 'Unknown type') : ''}
-                                                    </p>
-                                                </div>
-                                                
-                                                <div className="text-xs text-gray-500 space-y-1">
-                                                    {hasNewFile && (
-                                                        <p>Size: {(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                                                    )}
                                                 </div>
                                             </div>
                                         </div>

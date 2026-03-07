@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuotation } from './useQuotation';
 
-export const useQuotationManagement = () => {
+export const useQuotationManagement = (lang?: string) => {
     const navigate = useNavigate();
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -109,9 +109,8 @@ export const useQuotationManagement = () => {
     }, []);
 
     const handleDownload = useCallback((quotation: any) => {
-        downloadQuotation(quotation.manage_quotation_id);
-    }, []);
-
+        downloadQuotation(quotation.manage_quotation_id, lang);
+    }, [downloadQuotation, lang]);
     const confirmDeleteQuotations = useCallback(async () => {
         if (!confirmDelete.quotationId) return;
 

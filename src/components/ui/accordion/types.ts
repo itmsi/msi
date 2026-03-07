@@ -2,9 +2,11 @@ import { ReactNode } from "react";
 
 export interface AccordionItemData {
     id: string;
-    judul: string;
+    judul: string | ReactNode;
     konten: ReactNode;
     disabled?: boolean;
+    onDelete?: () => void;
+    showDeleteButton?: boolean;
 }
 
 export interface AccordionItemProps {

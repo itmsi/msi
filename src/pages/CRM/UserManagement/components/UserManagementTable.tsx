@@ -85,7 +85,6 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({
                     </div>
                 </div>
             ),
-            minWidth: '250px',
             sortable: true
         },
         {
@@ -122,7 +121,6 @@ const UserManagementTable: React.FC<UserManagementTableProps> = ({
                     />
                 </div>
             ),
-            minWidth: '350px',
             wrap: true
         },
         // {

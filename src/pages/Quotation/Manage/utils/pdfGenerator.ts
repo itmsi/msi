@@ -3,7 +3,9 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { formatDate } from '@/helpers/generalHelper';
 import { ManageQuotationDataPDF } from '../types/quotation';
-import { loadCustomFonts, setFontSafe } from './fontLoader';
+import { loadCustomFonts, setFontSafe, setFontByLanguage } from './fontLoader';
+import { quotationLabelPDF } from '@/pages/Quotation/Manage/language/quotationLabelPDF';
+import type { LangCode } from '../../../../components/lang/useLanguage';
 
 // Extend jsPDF type to include autoTable
 declare module 'jspdf' {
@@ -28,12 +30,58 @@ const formatCurrency = (value: string | number): string => {
     }).format(numValue);
 };
 
-export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
+export const generateQuotationPDF = async (data: ManageQuotationDataPDF, language: string) => {
     const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: [210, 297]
     });
+    
+    // Language helper function
+    const langField = (key: string): string => {
+        const value = quotationLabelPDF[key];
+        
+        if (value && typeof value === 'object' && value[language as LangCode]) {
+            return value[language as LangCode];
+        }
+        
+        return key; // fallback to key if translation not found
+    };
+    
+    // Helper function to translate specification labels
+    const translateSpecLabel = (label: string): string => {
+        const specMap: { [key: string]: string } = {
+            'Unit Model': langField('spec_unitModel'),
+            'GVW': langField('spec_gvw'),
+            'Wheelbase': langField('spec_wheelbase'),
+            'Max Torque': langField('spec_maxTorque'),
+            'Displacement': langField('spec_displacement'),
+            'Emission Standard': langField('spec_emissionStandard'),
+            'Engine Guard': langField('spec_engineGuard'),
+            'Fuel Tank': langField('spec_fuelTank'),
+            'Tyre': langField('spec_tyre'),
+            'Gearbox Transmission': langField('spec_gearboxTransmission'),
+            'Engine Brand Model': langField('spec_engineBrandModel'),
+            'Cargobox/Vessel': langField('spec_cargoboxVessel'),
+            'Horse Power': langField('spec_horsePower'),
+            'Overall Length': langField('spec_overallLength'),
+            'Curb Weight': langField('spec_curbWeight'),
+            'Gross Vehicle Weight (GVW)': langField('spec_grossVehicleWeight'),
+            'Rated Power / Torque': langField('spec_ratedPowerTorque'),
+            'Peak Power / Torque': langField('spec_peakPowerTorque'),
+            'Battery Capacity': langField('spec_batteryCapacity'),
+            'Battery Protection': langField('spec_batteryProtection'),
+            'Charging Ports': langField('spec_chargingPorts'),
+            'Input Socket Power': langField('spec_inputSocketPower'),
+            'Frame': langField('spec_frame'),
+            'Rear Axles': langField('spec_rearAxles'),
+            'Tires': langField('spec_tires'),
+            'Structure Thickness': langField('spec_structureThickness'),
+            'Cargo Box Size': langField('spec_cargoBoxSize')
+        };
+        
+        return specMap[label] || label;
+    };
     
     // Helper function untuk safely get image URL
     const getImageUrl = (imageData: any): string => {
@@ -42,7 +90,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             
             // If it's already a direct URL
             if (typeof imageData === 'string' && (imageData.startsWith('http') || imageData.startsWith('/'))) {
-                return imageData;
+                return imageData;   
             }
             
             // If it's an object with image_url property
@@ -193,13 +241,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     setFontSafe(doc, 'Futura', 'normal');
 
     const wilayahData = [
-        ['Region :', data.island_name]
+        [langField('region'), data.island_name]
     ];
 
     wilayahData.forEach(([label, value]) => {
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
-        setFontSafe(doc, 'Futura', 'normal');
+        setFontByLanguage(doc, label, 'Futura', 'normal', language);
         doc.text(label, margin + boxWidth + 10, yPos);
         
         doc.setFontSize(9);
@@ -209,15 +257,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     });
     
     const infoData = [
-        ['No Penawaran :', data.manage_quotation_no],
-        ['Tanggal :', formatDate(data.manage_quotation_date)],
-        ['Berlaku Hingga :', formatDate(data.manage_quotation_valid_date)],
+        [langField('quotationNumber'), data.manage_quotation_no],
+        [langField('date'), formatDate(data.manage_quotation_date)],
+        [langField('validUntil'), formatDate(data.manage_quotation_valid_date)],
     ];
 
     infoData.forEach(([label, value]) => {
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
-        setFontSafe(doc, 'Futura', 'normal');
+        setFontByLanguage(doc, label, 'Futura', 'normal', language);
         doc.text(label, margin, yPos);
         
         doc.setFontSize(9);
@@ -235,15 +283,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     
     doc.setFontSize(10);
     doc.setTextColor(0, 48, 97);
-    setFontSafe(doc, 'Futura', 'bold');
-    doc.text('Detail Pelanggan', margin + 5, yPos + 2);
+    setFontByLanguage(doc, langField('customerDetails'), 'Futura', 'bold', language);
+    doc.text(langField('customerDetails'), margin + 5, yPos + 2);
     yPos += 9;
     
     const customersData = [
-        ['Nama Perusahaan : ',data?.customer_name || '-'],
-        ['Contact Person : ',data?.contact_person || '-'],
-        ['Telepon : ',data?.customer_phone || '-'],
-        ['Alamat : ',data?.customer_address || '-'],
+        [langField('companyName'), data?.customer_name || '-'],
+        [langField('contactPerson'), data?.contact_person || '-'],
+        [langField('phone'), data?.customer_phone || '-'],
+        [langField('address'), data?.customer_address || '-'],
     ];
 
     const maxValueWidth = boxWidth - 42;
@@ -251,7 +299,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     customersData.forEach(([label, value]) => {
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
-        setFontSafe(doc, 'Futura', 'normal');
+        setFontByLanguage(doc, label, 'Futura', 'normal', language);
         doc.text(label, margin + 5, yPos);
 
         doc.setFontSize(9);
@@ -277,13 +325,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
     doc.setFontSize(10);
     doc.setTextColor(0, 48, 97);
-    setFontSafe(doc, 'Futura', 'bold');
-    doc.text('Detail Sales', salesBoxStartX + 5, salesYPos);
+    setFontByLanguage(doc, langField('salesDetails'), 'Futura', 'bold', language);
+    doc.text(langField('salesDetails'), salesBoxStartX + 5, salesYPos);
     salesYPos += 7;
     
     const salesData = [
-        ['Nama :', data.employee_name],
-        ['Telepon :', data.employee_phone]
+        [langField('name'), data.employee_name],
+        [langField('phone'), data.employee_phone]
     ];
 
     const maxSalesValueWidth = salesBoxWidth - 42;
@@ -291,7 +339,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     salesData.forEach(([label, value]) => {
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
-        setFontSafe(doc, 'Futura', 'normal');
+        setFontByLanguage(doc, label, 'Futura', 'normal', language);
         doc.text(label, salesBoxStartX + 5, salesYPos);
 
         doc.setFontSize(9);
@@ -312,13 +360,14 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     // Opening text
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(9);
-    setFontSafe(doc, 'Futura', 'normal');
-    doc.text('Dengan hormat,', margin, yPos + 4);
+    setFontByLanguage(doc, langField('greetings'), 'Futura', 'normal', language);
+    doc.text(langField('greetings'), margin, yPos + 4);
     yPos += 6;
     
-    const openingText = 'Bersama ini PT Indonesia Equipment Centre, selaku Authorized dealer truk MOTOR SIGHTS di Indonesia, bermaksud memberikan penawaran kendaraan sebagai berikut :';
+    const openingText = langField('openingText');
     const splitText = doc.splitTextToSize(openingText, pageWidth - 2 * margin);
     const lineHeight = 4.2;
+    setFontByLanguage(doc, openingText, 'Futura', 'normal', language);
     doc.text(splitText, margin, yPos + 3, { lineHeightFactor: 1.3 });
     yPos += splitText.length * lineHeight + 4;
 
@@ -334,7 +383,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     ]);
     autoTable(doc, {
         startY: yPos,
-        head: [['No', 'Tipe Model', 'Model', 'Harga/Unit', 'Qty', 'Total']],
+        head: [[langField('tableHeaders_no'), langField('tableHeaders_typeModel'), langField('tableHeaders_model'), langField('tableHeaders_pricePerUnit'), langField('tableHeaders_qty'), langField('tableHeaders_total')]],
         body: itemData,
         margin: { left: margin, right: margin },
         styles: {
@@ -388,8 +437,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     if (data.term_content_payload) {
         doc.setFontSize(12);
         doc.setTextColor(0, 48, 97);
-        setFontSafe(doc, 'Futura', 'bold');
-        doc.text('Syarat & Ketentuan', margin, termYPos + 3);
+        setFontByLanguage(doc, langField('termsConditions'), 'Futura', 'bold', language);
+        doc.text(langField('termsConditions'), margin, termYPos + 3);
         termYPos += 9;
 
         // Parse HTML content
@@ -580,8 +629,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     const ppnAmount = parseFloat(data.manage_quotation_grand_total) - subtotal;
 
     const financialData = [
-        ['Subtotal:', formatCurrency(subtotal.toString())],
-        [`PPN (${data.manage_quotation_ppn}%):`, formatCurrency(ppnAmount.toString())],
+        [langField('financial_subtotal'), formatCurrency(subtotal.toString())],
+        [`${langField('financial_ppn')} (${data.manage_quotation_ppn}%):`, formatCurrency(ppnAmount.toString())],
         // ['Biaya Pengiriman:', formatCurrency(data.manage_quotation_delivery_fee)],
         // ['Lain-lain:', formatCurrency(data.manage_quotation_other)],
     ];
@@ -611,15 +660,34 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 fontStyle: 'bold'
             }
         },
+        willDrawCell: (data) => {
+            // Check if cell contains Chinese characters and apply appropriate font
+            const cellText = data.cell.text?.join('') || '';
+            if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
+                const isFirstColumn = data.column.index === 0;
+                const isBold = data.cell.styles.fontStyle === 'bold';
+                try {
+                    if (isFirstColumn) {
+                        doc.setFont('NotoSansSC', 'normal');
+                    } else if (isBold) {
+                        doc.setFont('NotoSansSC', 'bold');
+                    } else {
+                        doc.setFont('NotoSansSC', 'normal');
+                    }
+                } catch (error) {
+                    doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
+                }
+            }
+        }
     });
 
     // Update financialYPos setelah autoTable pertama
     financialYPos = doc.lastAutoTable?.finalY || financialYPos;
     financialYPos += 7;
     const summaryPrice = [
-        ['TOTAL:', formatCurrency(data.manage_quotation_grand_total)],
-        [`Down Payment (${data.manage_quotation_payment_presentase}%):`, formatCurrency(data.manage_quotation_payment_nominal)],
-        ['Remaining Payment:', formatCurrency(parseFloat(data.manage_quotation_grand_total) - parseFloat(data.manage_quotation_payment_nominal))],
+        [langField('financial_grandTotal'), formatCurrency(data.manage_quotation_grand_total)],
+        [`${langField('financial_downPayment')} (${data.manage_quotation_payment_presentase}%):`, formatCurrency(data.manage_quotation_payment_nominal)],
+        [langField('financial_remainingPayment'), formatCurrency(parseFloat(data.manage_quotation_grand_total) - parseFloat(data.manage_quotation_payment_nominal))],
     ];
     autoTable(doc, {
         startY: financialYPos,
@@ -654,33 +722,43 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             if (data.row.index === 1 && data.column.index === 1) {
                 data.cell.styles.textColor = [34, 197, 94];
                 data.cell.styles.fontStyle = 'bold';
-                // data.cell.styles.font = 'OpenSans';
                 data.cell.styles.fontSize = 10;
             }
             if (data.row.index === 2 && data.column.index === 1) {
                 data.cell.styles.textColor = [220, 38, 38];
                 data.cell.styles.fontStyle = 'bold';
-                // data.cell.styles.font = 'OpenSans';
                 data.cell.styles.fontSize = 10;
+            }
+        },
+        willDrawCell: (data) => {
+            const cellText = data.cell.text?.join('') || '';
+            if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
+                const isFirstColumn = data.column.index === 0;
+                const isBold = data.cell.styles.fontStyle === 'bold';
+                try {
+                    if (isFirstColumn) {
+                        doc.setFont('NotoSansSC', 'normal');
+                    } else if (isBold) {
+                        doc.setFont('NotoSansSC', 'bold');
+                    } else {
+                        doc.setFont('NotoSansSC', 'normal');
+                    }
+                } catch (error) {
+                    doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
+                }
             }
         }
     });
 
     // Simpan posisi akhir Financial Summary
     const financialEndYPos = doc.lastAutoTable?.finalY || financialYPos;
-    
-    // Pindah ke halaman di mana Term & Condition selesai
     doc.setPage(termEndPage);
-    
-    // Gunakan posisi akhir dari Term & Condition atau Financial Summary (yang lebih bawah)
-    // Jika masih di halaman yang sama dengan Financial Summary, pastikan tidak menimpa
     if (termEndPage === startPageNumber) {
         yPos = Math.max(termYPos + 10, financialEndYPos + 10);
     } else {
         yPos = termYPos + 10;
     }
 
-    // SHIPPING & PAYMENT INFORMATION (Side by Side)
     checkNewPage(50);
     
     const sectionStartY = yPos - 7;
@@ -695,14 +773,14 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         
     doc.setFontSize(12);
     doc.setTextColor(0, 48, 97);
-    setFontSafe(doc, 'Futura', 'bold');
-    doc.text('Shipping Information', margin + 3, shippingYPos);
+    setFontByLanguage(doc, langField('shippingInformation'), 'Futura', 'bold', language);
+    doc.text(langField('shippingInformation'), margin + 3, shippingYPos);
     shippingYPos += 7;
 
     const shippingData = [
-        ['Shipping Term', data?.manage_quotation_shipping_term || '-'],
-        ['Franco', data?.manage_quotation_franco || '-'],
-        ['Lead Time', data?.manage_quotation_lead_time || '-']
+        [langField('shippingTerm'), data?.manage_quotation_shipping_term || '-'],
+        [langField('franco'), data?.manage_quotation_franco || '-'],
+        [langField('leadTime'), data?.manage_quotation_lead_time || '-']
     ];
         
     doc.setFontSize(9);
@@ -711,7 +789,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
     shippingData.forEach(([label, value]) => {
         doc.setTextColor(0, 0, 0);
-        setFontSafe(doc, 'Futura', 'normal');
+        setFontByLanguage(doc, label, 'Futura', 'normal', language);
         doc.text(`${label}:`, margin + 3, shippingYPos);
         
         doc.setTextColor(0, 0, 0);
@@ -736,15 +814,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         
         doc.setFontSize(12);
         doc.setTextColor(0, 48, 97);
-        setFontSafe(doc, 'Futura', 'bold');
-        doc.text('Payment Information', paymentBoxStartX + 3, paymentYPos);
+        setFontByLanguage(doc, langField('paymentInformation'), 'Futura', 'bold', language);
+        doc.text(langField('paymentInformation'), paymentBoxStartX + 3, paymentYPos);
         paymentYPos += 7;
 
         // Data untuk payment table
         const paymentData = [
-            ['Nama Penerima', data?.bank_account_name || '-'],
-            ['Bank', data?.bank_account_bank_name || '-'],
-            ['No. Rekening', data?.bank_account_number || '-']
+            [langField('recipientName'), data?.bank_account_name || '-'],
+            [langField('bank'), data?.bank_account_bank_name || '-'],
+            [langField('accountNumber'), data?.bank_account_number || '-']
         ];
 
         doc.setFontSize(9);
@@ -753,7 +831,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
         
         paymentData.forEach(([label, value]) => {
             doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
+            setFontByLanguage(doc, label, 'Futura', 'normal', language);
             doc.text(`${label}:`, paymentBoxStartX + 3, paymentYPos);
             
             doc.setTextColor(0, 0, 0);
@@ -777,10 +855,11 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
-    setFontSafe(doc, 'Futura', 'normal');
-    doc.text('Hormat Kami,', signatureStartX, signatureYPos);
+    setFontByLanguage(doc, langField('respectfully'), 'Futura', 'normal', language);
+    doc.text(langField('respectfully'), signatureStartX, signatureYPos);
     signatureYPos += 5;
-    doc.text('PT Indonesia Equipment Centre', signatureStartX, signatureYPos);
+    setFontByLanguage(doc, langField('companySignature'), 'Futura', 'normal', language);
+    doc.text(langField('companySignature'), signatureStartX, signatureYPos);
     signatureYPos += 15;
     
     // Signature box
@@ -806,7 +885,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
     signatureYPos += 5;
     doc.setFontSize(8);
     setFontSafe(doc, 'Futura', 'normal');
-    doc.text('Commercial Control Manager', signatureStartX + signatureBoxWidth / 2, signatureYPos, { align: 'center' });
+    doc.text(langField('jobTitle'), signatureStartX + signatureBoxWidth / 2, signatureYPos, { align: 'center' });
     
     // Update yPos berdasarkan yang paling bawah (payment atau signature)
     yPos = Math.max(paymentYPos + 10, signatureYPos + 10);
@@ -937,10 +1016,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 item1YPos += 3;
 
                 
-                setFontSafe(doc, 'Futura', 'bold');
+                setFontByLanguage(doc, langField('specifications'), 'Futura', 'bold', language);
                 doc.setFontSize(10);
                 doc.setTextColor(23, 26, 31);
-                doc.text(`Specifications`, item1StartX + margin + 2, item1YPos, { align: 'center' });
+                doc.text(langField('specifications'), item1StartX + margin + 2, item1YPos, { align: 'center' });
                 item1YPos += 5;
 
                 const specData1 = item1.manage_quotation_item_specifications
@@ -958,7 +1037,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         const orderB = indexB === -1 ? 999 : indexB;
                         return orderA - orderB;
                     })
-                    .map((spec: any) => [spec.label, spec.value]);
+                    .map((spec: any) => [translateSpecLabel(spec.label), spec.value]);
 
                 const specTableStartY = item1YPos;
                 autoTable(doc, {
@@ -988,6 +1067,25 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
                             data.cell.styles.minCellHeight = 8;
                         }
+                    },
+                    willDrawCell: (data) => {
+                        // Check if cell contains Chinese characters and apply appropriate font
+                        const cellText = data.cell.text?.join('') || '';
+                        if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
+                            const isFirstColumn = data.column.index === 0;
+                            const isBold = data.cell.styles.fontStyle === 'bold';
+                            try {
+                                if (isFirstColumn) {
+                                    doc.setFont('NotoSansSC', isBold ? 'bold' : 'normal');
+                                } else if (isBold) {
+                                    doc.setFont('NotoSansSC', 'bold');
+                                } else {
+                                    doc.setFont('NotoSansSC', 'normal');
+                                }
+                            } catch (error) {
+                                doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
+                            }
+                        }
                     }
                 });
 
@@ -1004,10 +1102,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             
             // Accessories for item 1
             if (item1.manage_quotation_item_accessories && item1.manage_quotation_item_accessories.length > 0) {
-                setFontSafe(doc, 'Futura', 'bold');
+                setFontByLanguage(doc, langField('accessories'), 'Futura', 'bold', language);
                 doc.setFontSize(10);
                 doc.setTextColor(23, 26, 31);
-                doc.text(`Accessories`, item1StartX + margin, item1YPos, { align: 'center' });
+                doc.text(langField('accessories'), item1StartX + margin, item1YPos, { align: 'center' });
                 item1YPos += 5;
 
                 const accData1 = item1.manage_quotation_item_accessories.map((acc: any, index: number) => [
@@ -1111,10 +1209,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     item2YPos += 3;
 
                     
-                    setFontSafe(doc, 'Futura', 'bold');
+                    setFontByLanguage(doc, langField('specifications'), 'Futura', 'bold', language);
                     doc.setFontSize(10);
                     doc.setTextColor(23, 26, 31);
-                    doc.text(`Specifications`, item2StartX + margin + 2, item2YPos, { align: 'center' });
+                    doc.text(langField('specifications'), item2StartX + margin + 2, item2YPos, { align: 'center' });
                     item2YPos += 5;
 
                     const specData2 = item2.manage_quotation_item_specifications
@@ -1134,7 +1232,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                             const orderB = indexB === -1 ? 999 : indexB;
                             return orderA - orderB;
                         })
-                        .map((spec: any) => [spec.label, spec.value]);
+                    .map((spec: any) => [translateSpecLabel(spec.label), spec.value]);
 
                     const specTableStartY2 = item2YPos;
                     autoTable(doc, {
@@ -1164,6 +1262,25 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                             if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
                                 data.cell.styles.minCellHeight = 8;
                             }
+                        },
+                        willDrawCell: (data) => {
+                            // Check if cell contains Chinese characters and apply appropriate font
+                            const cellText = data.cell.text?.join('') || '';
+                            if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
+                                const isFirstColumn = data.column.index === 0;
+                                const isBold = data.cell.styles.fontStyle === 'bold';
+                                try {
+                                    if (isFirstColumn) {
+                                        doc.setFont('NotoSansSC', isBold ? 'bold' : 'normal');
+                                    } else if (isBold) {
+                                        doc.setFont('NotoSansSC', 'bold');
+                                    } else {
+                                        doc.setFont('NotoSansSC', 'normal');
+                                    }
+                                } catch (error) {
+                                    doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
+                                }
+                            }
                         }
                     });
 
@@ -1187,10 +1304,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     //     doc.line(item2StartX, item2YPos - 3, item2StartX + itemWidth, item2YPos - 3);
                     //     item2YPos += 2;
                     // }
-                    setFontSafe(doc, 'Futura', 'bold');
+                    setFontByLanguage(doc, langField('accessories'), 'Futura', 'bold', language);
                     doc.setFontSize(10);
                     doc.setTextColor(23, 26, 31);
-                    doc.text(`Accessories`, item2StartX + margin, item2YPos, { align: 'center' });
+                    doc.text(langField('accessories'), item2StartX + margin, item2YPos, { align: 'center' });
                     item2YPos += 5;
 
                     const accData2 = item2.manage_quotation_item_accessories.map((acc: any, index: number) => [
@@ -1243,15 +1360,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             // Title
             doc.setFontSize(12);
             doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Dukungan Produk Motor Sights', margin, varYPos);
+            setFontByLanguage(doc, langField('afterSales_productSupport'), 'Futura', 'bold', language);
+            doc.text(langField('afterSales_productSupport'), margin, varYPos);
             varYPos += 7;
 
             const descWidth = (pageWidth - 2 * margin) * 0.6;
             doc.setFontSize(9);
             doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
-            const descText = 'Motor Sights memberikan dukungan lengkap mulai dari pelatihan, garansi, servis, dan suku cadang untuk menjaga kelancaran operasional Anda setiap hari.';
+            const descText = langField('afterSales_supportDescription');
+            setFontByLanguage(doc, descText, 'Futura', 'normal', language);
             const splitDescText = doc.splitTextToSize(descText, descWidth);
             const lineHeight = 4.2;
             splitDescText.forEach((line: string) => {
@@ -1273,8 +1390,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             
             doc.setFontSize(10);
             doc.setTextColor(255, 255, 255);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('GRATIS', (margin + gratisWidth * 0.5), varYPos + 7 / 2 + 2, { align: 'center' });
+            setFontByLanguage(doc, langField('afterSales_free'), 'Futura', 'bold', language);
+            doc.text(langField('afterSales_free'), (margin + gratisWidth * 0.5), varYPos + 7 / 2 + 2, { align: 'center' });
             
             varYPos += 5;
 
@@ -1313,8 +1430,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 let textY = iconY + iconSize + 5;
                 doc.setFontSize(8);
                 doc.setTextColor(23, 26, 31);
-                setFontSafe(doc, 'Futura', 'bold');
                 const titleLines = doc.splitTextToSize(card.title, cardWidth - 4);
+                setFontByLanguage(doc, card.title, 'Futura', 'bold', language);
                 titleLines.forEach((line: string) => {
                     doc.text(line, cardX + cardWidth/2, textY, { align: 'center' });
                     textY += 4;
@@ -1324,8 +1441,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 
                 doc.setFontSize(6);
                 doc.setTextColor(0, 0, 0);
-                setFontSafe(doc, 'Futura', 'normal');
                 card.items.forEach((item: string) => {
+                    setFontByLanguage(doc, item, 'Futura', 'normal', language);
                     doc.text('•', cardX + 2, textY);
                     const itemLines = doc.splitTextToSize(item, cardWidth - 8);
                     itemLines.forEach((line: string) => {
@@ -1338,8 +1455,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     textY += 1;
                     doc.setFontSize(5);
                     doc.setTextColor(100, 100, 100);
-                    setFontSafe(doc, 'Futura', 'normal');
                     card.notes.forEach((note: string) => {
+                        setFontByLanguage(doc, note, 'Futura', 'normal', language);
                         const noteLines = doc.splitTextToSize(note, cardWidth - 4);
                         noteLines.forEach((line: string) => {
                             doc.text(line, cardX + 2, textY);
@@ -1369,8 +1486,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             let warrantyY = warrantyBoxY + 6;
             doc.setFontSize(9);
             doc.setTextColor(23, 26, 31);
-            setFontSafe(doc, 'Futura', 'bold');
-            const warrantyTitle = doc.splitTextToSize('HIGH LEVEL WARRANTY COMPONENT', warrantyWidth - 8);
+            setFontByLanguage(doc, langField('afterSales_highLevelWarranty'), 'Futura', 'bold', language);
+            const warrantyTitle = doc.splitTextToSize(langField('afterSales_highLevelWarranty'), warrantyWidth - 8);
             warrantyTitle.forEach((line: string) => {
                 doc.text(line, warrantyBoxX + warrantyWidth/2, warrantyY, { align: 'center' });
                 warrantyY += 4;
@@ -1378,25 +1495,24 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             
             const warrantyItems = [
                 {
-                    title: 'Engine',
+                    title: langField('warranty_engine'),
                     icon: '/pdf/icon-engine.png'
                 },
                 {
-                    title: 'Transmission',
+                    title: langField('warranty_transmission'),
                     icon: '/pdf/icon-transmission.png'
                 },
                 {
-                    title: 'Chassis',
+                    title: langField('warranty_chassis'),
                     icon: '/pdf/icon-truck.png'
                 },
                 {
-                    title: 'Electrical',
+                    title: langField('warranty_electrical'),
                     icon: '/pdf/icon-electric.png'
                 },
             ];
             doc.setFontSize(8);
             doc.setTextColor(23, 26, 31);
-            setFontSafe(doc, 'Futura', 'normal');
             
             warrantyItems.forEach(item => {
                 const iconSize = 6;
@@ -1416,14 +1532,16 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 
                 // Title below icon
                 doc.setFontSize(9);
+                setFontByLanguage(doc, item.title, 'Futura', 'normal', language);
                 doc.text(item.title, warrantyBoxX + warrantyWidth/2, warrantyY + iconSize + 3, { align: 'center' });
                 warrantyY += 13;
             });
             
             doc.setFontSize(7);
             doc.setTextColor(100, 100, 100);
-            setFontSafe(doc, 'Futura', 'normal');
-            const notesWaranty = doc.splitTextToSize('*Sampai dengan 2 tahun. Syarat dan ketentuan berlaku.', warrantyWidth - 8);
+            const warrantyNote = langField('warranty_note');
+            const notesWaranty = doc.splitTextToSize(warrantyNote, warrantyWidth - 8);
+            setFontByLanguage(doc, warrantyNote, 'Futura', 'normal', language);
             notesWaranty.forEach((line: string) => {
                 doc.text(line, warrantyBoxX + warrantyWidth/2, warrantyY, { align: 'center' });
                 warrantyY += 4;
@@ -1445,8 +1563,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             
             doc.setFontSize(10);
             doc.setTextColor(255, 255, 255);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('DENGAN INVESTASI', (margin + investWidth * 0.5), investY + 6.2, { align: 'center' });
+            setFontByLanguage(doc, langField('afterSales_withInvestment'), 'Futura', 'bold', language);
+            doc.text(langField('afterSales_withInvestment'), (margin + investWidth * 0.5), investY + 6.2, { align: 'center' });
             
             investY += 10;
 
@@ -1490,8 +1608,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 
                 doc.setFontSize(9);
                 doc.setTextColor(23, 26, 31);
-                setFontSafe(doc, 'Futura', 'bold');
                 const titleLines = doc.splitTextToSize(item.title, twoColCardWidthPt - 10);
+                setFontByLanguage(doc, item.title, 'Futura', 'bold', language);
                 titleLines.forEach((line: string) => {
                     doc.text(line, cardX + twoColCardWidthPt/2, cardY, { align: 'center' });
                     cardY += 4;
@@ -1504,9 +1622,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 if (item.notes && item.notes.length > 0) {
                     doc.setFontSize(7);
                     doc.setTextColor(23, 26, 31);
-                    setFontSafe(doc, 'Futura', 'normal');
                     
                     item.notes.forEach((note: any) => {
+                        setFontByLanguage(doc, note, 'Futura', 'normal', language);
                         const noteLines = doc.splitTextToSize(note, twoColCardWidthPt - 10);
                         noteLines.forEach((line: string) => {
                             doc.text(line, cardX + 5, cardY);
@@ -1519,9 +1637,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 if (item.notesBold && item.notesBold.length > 0) {
                     doc.setFontSize(7);
                     doc.setTextColor(23, 26, 31);
-                    setFontSafe(doc, 'Futura', 'bold');
                     
                     item.notesBold.forEach((boldNote: any) => {
+                        setFontByLanguage(doc, boldNote, 'Futura', 'bold', language);
                         const boldNoteLines = doc.splitTextToSize(boldNote, twoColCardWidthPt - 10);
                         boldNoteLines.forEach((line: string) => {
                             doc.text(line, cardX + 5, cardY);
@@ -1533,7 +1651,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
             return investY;
         }
-        const bagianDeskripsi = (varYpos: number, manfaat: any[], syarat: any[], notes: any[], offroad: boolean): number => {
+        const bagianDeskripsi = (varYpos: number, manfaat: any[], syarat: any[], notes: any[], offroad: boolean, language: string): number => {
             
             // =================================
             // BAGIAN 6 - IN-HOUSE WORKSHOP & SPARE PARTS
@@ -1560,8 +1678,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 workshopY += 5;
                 doc.setFontSize(7);
                 doc.setTextColor(23, 26, 31);
-                setFontSafe(doc, 'Futura', 'normal');
-                const titleLines = doc.splitTextToSize('adalah sistem yang ditawarkan Motor Sights untuk memenuhi kebutuhan stok secara berkelanjutan sesuai dengan kesepakatan.*', workshopBoxWidthPt - 10);
+                const titleLines = doc.splitTextToSize(langField('workshop_vhsDescription'), workshopBoxWidthPt - 10);
+                setFontByLanguage(doc, langField('workshop_vhsDescription'), 'Futura', 'normal', language);
                 titleLines.forEach((line: string) => {
                     doc.text(line, workshopBoxX + 5, workshopY);
                     workshopY += 4;
@@ -1574,8 +1692,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 workshopY += 5;
                 doc.setFontSize(7);
                 doc.setTextColor(23, 26, 31);
-                setFontSafe(doc, 'Futura', 'normal');
-                const titleLines = doc.splitTextToSize('Program inovatif untuk menghadirkan pelayanan yang paripurna demi kelancaran operasi unit customer dengan banyak manfaat*', workshopBoxWidthPt - 10);
+                const titleLines = doc.splitTextToSize(langField('workshop_ihwDescription'), workshopBoxWidthPt - 10);
+                setFontByLanguage(doc, langField('workshop_ihwDescription'), 'Futura', 'normal', language);
                 titleLines.forEach((line: string) => {
                     doc.text(line, workshopBoxX + 5, workshopY);
                     workshopY += 4;
@@ -1586,17 +1704,18 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             // Manfaat subtitle
             doc.setFontSize(8);
             doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Manfaat:', workshopBoxX + 5, workshopY);
+            const manfaatLabel = langField('benefits_label');
+            setFontByLanguage(doc, manfaatLabel, 'Futura', 'bold', language);
+            doc.text(manfaatLabel, workshopBoxX + 5, workshopY);
             workshopY += 6;
             
             // Manfaat items
             doc.setFontSize(7);
-            setFontSafe(doc, 'Futura', 'normal');
             
             manfaat.forEach(item => {
                 doc.text('•', workshopBoxX + 5, workshopY);
                 const itemLines = doc.splitTextToSize(item, workshopBoxWidthPt - 15);
+                setFontByLanguage(doc, item, 'Futura', 'normal', language);
                 itemLines.forEach((line: string) => {
                     doc.text(line, workshopBoxX + 10, workshopY);
                     workshopY += 3;
@@ -1607,17 +1726,18 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             
             // Syarat subtitle
             doc.setFontSize(8);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Syarat:', workshopBoxX + 5, workshopY);
+            const syaratLabel = langField('requirements_label');
+            setFontByLanguage(doc, syaratLabel, 'Futura', 'bold', language);
+            doc.text(syaratLabel, workshopBoxX + 5, workshopY);
             workshopY += 4;
             
             // Syarat items
             doc.setFontSize(7);
-            setFontSafe(doc, 'Futura', 'normal');
             
             syarat.forEach(item => {
                 doc.text('•', workshopBoxX + 5, workshopY);
                 const itemLines = doc.splitTextToSize(item, workshopBoxWidthPt - 15);
+                setFontByLanguage(doc, item, 'Futura', 'normal', language);
                 itemLines.forEach((line: string) => {
                     doc.text(line, workshopBoxX + 10, workshopY);
                     workshopY += 3;
@@ -1625,12 +1745,12 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             });
             
             workshopY += 3;
-            // Syarat items
+            // Notes items
             doc.setFontSize(5);
-            setFontSafe(doc, 'Futura', 'normal');
             
             notes.forEach(item => {
                 const itemLines = doc.splitTextToSize(item, workshopBoxWidthPt - 10);
+                setFontByLanguage(doc, item, 'Futura', 'normal', language);
                 itemLines.forEach((line: string) => {
                     doc.text(line, workshopBoxX + 5, workshopY);
                     workshopY += 2.5;
@@ -1663,48 +1783,48 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             
             const gratisCards = [
                 {
-                    title: 'Paket Perawatan',
+                    title: langField('afterSales_maintenancePackage'),
                     icon: '/pdf/maintenance-service.png',
                     items: [
-                        'Termasuk Spare Part & Oli Mesin',
-                        'Servis untuk PM 1 - PM 3 (5.000KM, 10.000KM, dan 20.000KM)'
+                        langField('afterSales_maintenanceIncluded'),
+                        langField('afterSales_maintenanceService_onroad')
                     ]
                 },
                 {
-                    title: 'Pengiriman Spare Parts',
+                    title: langField('afterSales_partsDelivery'),
                     icon: '/pdf/pre-delivery-inspection.png',
                     items: [
-                        '1x24 Jam (Pulau Jawa)',
-                        '3x24 Jam (Luar Pulau Jawa)'
+                        langField('afterSales_delivery24h'),
+                        langField('afterSales_delivery72h')
                     ]
                 },
                 {
-                    title: 'Garansi Unit',
+                    title: langField('afterSales_unitWarranty'),
                     icon: '/pdf/warranty-service.png',
                     items: [
-                        'Garansi 2 tahun atau 60.000 KM operasi**'
+                        langField('afterSales_warranty2years')
                     ],
                     notes: [
-                        'Dilengkapi garansi hingga 2 tahun sejak tanggal BAST',
-                        '**Mana yang tercapai terlebih dahulu, syarat & ketentuan berlaku'
+                        langField('afterSales_warrantyNote1'),
+                        langField('afterSales_warrantyNote2')
                     ]
                 },
                 {
-                    title: 'Pelatihan Pengemudi',
+                    title: langField('afterSales_driverTraining'),
                     icon: '/pdf/training.png',
                     items: [
-                        'Pelatihan 2 pengemudi/unit',
-                        '5 hari pelatihan',
-                        'Pra-Tes, Belajar di Kelas, & Praktik Langsung'
+                        langField('afterSales_trainPersons'),
+                        langField('afterSales_trainDays'),
+                        langField('afterSales_trainContent')
                     ]
                 },
                 {
-                    title: 'Pelatihan Mekanik',
+                    title: langField('afterSales_mechanicTraining'),
                     icon: '/pdf/training-mechanic.png',
                     items: [
-                        'Pelatihan mekanik',
-                        '5 hari pelatihan',
-                        'Pra-Tes, Belajar di Kelas, & Praktik Langsung'
+                        langField('afterSales_trainPersons_mechanic'),
+                        langField('afterSales_trainDays'),
+                        langField('afterSales_trainContent')
                     ]
                 }
             ];
@@ -1713,44 +1833,44 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             yPos += 3;
             const kontrakItems = [
                 {
-                    title: 'Kontrak Servis',
+                    title: langField('afterSales_contractService'),
                     icon: '/pdf/on-call-service.png',
                     notes: [
-                        'Stand-by mekanik gratis selama 3 bulan dengan minimal pembelian 10 unit. Setelah 3 bulan dapat melanjutkan dengan Kontrak Servis. Memiliki 3 pilihan paket:'
+                        langField('afterSales_contractServiceDesc')
                     ],
                     notesBold : [
-                        'Spare Part/Service/Service & Spare Part.'
+                        langField('afterSales_contractServiceOptions')
                     ]
                 },
                 {
-                    title: 'Mobile Service & Spare Part',
+                    title: langField('afterSales_mobileService'),
                     icon: '/pdf/icontruck.png',
                     notes: [
-                        'Memastikan operasional tetap berjalan tanpa perlu kembali ke bengkel. Mencakup perawatan berkala, general repair, tyre service, hingga emergency roadside assistance (ERA).'
+                        langField('afterSales_mobileServiceDesc')
                     ]
                 }
             ];
             yPos = bagianInvestasi(yPos, kontrakItems);
             
             const manfaatItems = [
-                'Ketersediaan Teknisi (stand by mekanik)',
-                'Jaminan ketersediaan suku cadang fast moving',
-                'Tanpa biaya logistik',
-                'Unit selalu siap bertugas',
-                'Tanpa khawatir harus membeli stock sisa setelah masa kontrak berakhir'
+                langField('benefit_technicianAvailability'),
+                langField('benefit_sparePartsAvailability'),
+                langField('benefit_noLogisticsCost'),
+                langField('benefit_readyUnit'),
+                langField('benefit_noWorryStock')
             ];
             const syaratItems = [
-                'Tanpa deposit untuk pembelian mulai dari 30 unit atau lebih.',
-                'Pembelian 5-29 unit berlaku dengan deposit/Bank Guarantee sebesar stock yang disediakan.**',
-                'Pelanggan menyediakan tempat penyimpanan barang & infrastruktur penunjang (listrik, internet rak, dll.), serta akomodasi manpower (mobilitas mess, & konsumsi).'
+                langField('requirement_noDeposit'),
+                langField('requirement_withDeposit'),
+                langField('requirement_customerProvides')
             ];
             const notesItems = [
-                'Notes:',
-                'Customer bisa menentukan apa saja barang yang akan di stock, 24 jam hari kerja.',
-                '*Paket IHW dan layanan terkait tidak termasuk dalam harga pembelian unit.',
-                '**Deposit menyesuaikan stock spare part yang disediakan. Detai akan didiskusikan bersama team Spare Part kami'
+                langField('notes_label'),
+                langField('notes_customerStock'),
+                langField('notes_ihwPackage'),
+                langField('notes_depositDetails')
             ];
-            yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, notesItems, false);
+            yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, notesItems, false, language);
             yPos += 5;
         }
         
@@ -1765,40 +1885,40 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             yPos += 2;
             const gratisCards = [
                 {
-                    title: 'Paket Perawatan',
+                    title: langField('afterSales_maintenancePackage'),
                     icon: '/pdf/maintenance-service.png',
                     items: [
-                        'Termasuk Spare Part & Oli Mesin',
-                        'Servis untuk PM 1 - PM 3 (250, 500, 750 hour meter)'
+                        langField('afterSales_maintenanceIncluded'),
+                        langField('afterSales_maintenanceService_offroad')
                     ]
                 },
                 {
-                    title: 'Garansi Unit',
+                    title: langField('afterSales_unitWarranty'),
                     icon: '/pdf/warranty-service.png',
                     items: [
-                        'Garansi 1 tahun atau 6.000 jam operasi**'
+                        langField('afterSales_warranty1year')
                     ],
                     notes: [
-                        'Dilengkapi garansi hingga 1 tahun sejak tanggal BAST',
-                        '**Mana yang tercapai terlebih dahulu, syarat & ketentuan berlaku'
+                        langField('afterSales_warrantyNote1_offroad'),
+                        langField('afterSales_warrantyNote2')
                     ]
                 },
                 {
-                    title: 'Pelatihan Pengemudi',
+                    title: langField('afterSales_driverTraining'),
                     icon: '/pdf/training.png',
                     items: [
-                        'Pelatihan 2 pengemudi/unit',
-                        '5 hari pelatihan',
-                        'Pra-Tes, Belajar di Kelas, & Praktik Langsung'
+                        langField('afterSales_trainPersons'),
+                        langField('afterSales_trainDays'),
+                        langField('afterSales_trainContent')
                     ]
                 },
                 {
-                    title: 'Pelatihan Mekanik',
+                    title: langField('afterSales_mechanicTraining'),
                     icon: '/pdf/training-mechanic.png',
                     items: [
-                        'Pelatihan mekanik',
-                        '5 hari pelatihan',
-                        'Pra-Tes, Belajar di Kelas, & Praktik Langsung'
+                        langField('afterSales_trainPersons_mechanic'),
+                        langField('afterSales_trainDays'),
+                        langField('afterSales_trainContent')
                     ]
                 }
             ];
@@ -1808,44 +1928,44 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             
             const kontrakItems = [
                 {
-                    title: 'Stand By Mechanic',
+                    title: langField('afterSales_standByMechanic'),
                     icon: '/pdf/training-mechanic.png',
                     notes: [
-                        'Gratis stand by mechanic selama 3 bulan dengan pembelian minimal 10 unit. Support garansi dan OJT Mekanik.'
+                        langField('afterSales_standByMechanicDesc')
                     ]
                 },
                 {
-                    title: 'KONSER (Kontrak Servis)',
+                    title: langField('afterSales_konser'),
                     icon: '/pdf/icontruck.png',
                     notes: [
-                        'Setelah 3 bulan dapat melanjutkan dengan Kontrak Servis. Memiliki 3 pilihan paket:'
+                        langField('afterSales_konserDesc')
                     ],
                     notesBold : [
-                        'Spare Part / Service / Service & Spare Part'
+                        langField('afterSales_konserOptions')
                     ]
                 }
             ];
             yPos = bagianInvestasi(yPos, kontrakItems);
             
             const manfaatItems = [
-                'Ketersediaan Teknisi (stand by mekanik).',
-                'Jaminan ketersediaan suku cadang fast moving',
-                'Tanpa biaya logistik',
-                'Unit selalu siap bertugas',
-                'Tanpa khawatir harus membeli stock sisa setelah masa kontrak berakhir'
+                langField('benefit_technicianAvailability') + '.',
+                langField('benefit_sparePartsAvailability'),
+                langField('benefit_noLogisticsCost'),
+                langField('benefit_readyUnit'),
+                langField('benefit_noWorryStock')
             ];
             const syaratItems = [
-                'Tanpa deposit untuk pembelian mulai dari 30 unit atau lebih.',
-                'Pembelian 5-29 unit berlaku dengan deposit/Bank Guarantee sebesar stock yang disediakan.**',
-                'Pelanggan menyediakan tempat penyimpanan barang & infrastruktur penunjang (listrik, internet rak, dll.), serta akomodasi manpower (mobilitas mess, & konsumsi).'
+                langField('requirement_noDeposit'),
+                langField('requirement_withDeposit'),
+                langField('requirement_customerProvides')
             ];
             const notesItems = [
-                'Notes:',
-                '*Paket VHS dan layanan terkait tidak termasuk dalam harga pembelian unit.',
-                '**Deposit menyesuaikan stock spare part yang disediakan. Detai akan didiskusikan bersama team Spare Part kami'
+                langField('notes_label'),
+                langField('notes_vhsPackage'),
+                langField('notes_depositDetails')
             ];
 
-            yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, notesItems, true);
+            yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, notesItems, true, language);
             yPos += 5;
         }
             
@@ -1874,8 +1994,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             const descWidth = (pageWidth - 2 * margin) * 0.6;
             doc.setFontSize(9);
             doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
-            const descText = 'Motor Sights Fleet memberikan visibilitas menyeluruh terhadap pergerakan kendaraan, konsumsi bahan bakar, serta pelacakan pendapatan melalui perhitungan ritase. Dengan teknologi telematika yang terintegrasi penuh, perusahaan dapat mengelola operasional armada dengan tepat, efisien, dan memudahkan pengambilan keputusan berbasis data yang lebih baik.';
+            const descText = langField('msf_fleetDescription');
+            setFontByLanguage(doc, descText, 'Futura', 'normal', language);
             const splitDescText = doc.splitTextToSize(descText, descWidth);
             const lineHeight = 4.2;
             splitDescText.forEach((line: string) => {
@@ -1890,14 +2010,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             // Add title above the border
             doc.setFontSize(10);
             doc.setTextColor(23, 26, 31);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Langganan Bulanan Perangkat Lunak MSF 1.0 (per Unit)', margin, varYPos);
+            const subscriptionTitle = langField('msf_monthlySubscription');
+            setFontByLanguage(doc, subscriptionTitle, 'Futura', 'bold', language);
+            doc.text(subscriptionTitle, margin, varYPos);
             varYPos += 3;
 
             const subscriptionData = [
-                {title:'Pelacakan Unit Kendaraan'},
-                {title:'Pemantauan Konsumsi Bahan Bakar'},
-                {title:'Perhitungan Revenue per Unit'}
+                {title: langField('msf_vehicleTracking')},
+                {title: langField('msf_fuelConsumptionMonitoring')},
+                {title: langField('msf_revenuePerUnit')}
             ];
             
             // Calculate table dimensions
@@ -1917,14 +2038,14 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             // Add title inside the border
             doc.setFontSize(10);
             doc.setTextColor(23, 26, 31);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Paket Dasar', pageWidth / 2, varYPos + 1, { align: 'center' });
+            const basicPackageTitle = langField('msf_basicPackage');
+            setFontByLanguage(doc, basicPackageTitle, 'Futura', 'bold', language);
+            doc.text(basicPackageTitle, pageWidth / 2, varYPos + 1, { align: 'center' });
             varYPos += titleHeight - 4;
             
             // Render each subscription item with check icon
             doc.setFontSize(9);
             doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
             
             subscriptionData.forEach((item) => {
                 const iconSize = 4;
@@ -1942,6 +2063,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 }
                 
                 // Center the text
+                setFontByLanguage(doc, item.title, 'Futura', 'normal', language);
                 doc.text(item.title, iconX + 6, varYPos);
                 varYPos += rowHeight - 2;
             });
@@ -2030,81 +2152,77 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
             // INDONESIAN VERSION
             const dataFleet = {
-                headertitle: 'LANGGANAN MOTOR SIGHTS FLEET 1.0',
+                headertitle: langField('msf_subscription'),
                 icon: '/pdf/asset-tracking.png',
-                title: 'Pelacakan Armada & Aset',
+                title: langField('msf_fleetTracking'),
                 items: [
                     {
-                        subtitle: 'Pelacakan GPS Real-Time',
-                        content: 'Memantau posisi kendaraan secara real-time melalui tampilan peta.'
+                        subtitle: langField('msf_realtimeGPS'),
+                        content: langField('msf_realtimeGPSDesc')
                     },
                     {
-                        subtitle: 'Riwayat Perjalanan & Putar Ulang Rute',
-                        content: 'Menampilkan riwayat perjalanan kendaraan, termasuk rute yang dilalui, kecepatan, dan titik berhenti.'
+                        subtitle: langField('msf_routeHistory'),
+                        content: langField('msf_routeHistoryDesc')
                     },
                     {
-                        subtitle: 'Pembatasan Wilayah & Notifikasi',
-                        content: 'Memberikan notifikasi otomatis saat kendaraan masuk atau keluar dari area yang telah ditentukan.'
+                        subtitle: langField('msf_geofencing'),
+                        content: langField('msf_geofencingDesc')
                     },
                     {
-                        subtitle: 'Status Kendaraan',
-                        content: 'Menampilkan status kendaraan secara real-time, meliputi perangkat online/offline, mesin hidup/mati, serta kondisi unit.'
+                        subtitle: langField('msf_vehicleStatus'),
+                        content: langField('msf_vehicleStatusDesc')
                     },
                     {
-                        subtitle: 'Perhitungan Revenue Unit',
-                        content: 'Menghitung jumlah ritase setiap unit kendaraan secara otomatis guna memudahkan pemantauan produktivitas dan kinerja finansial armada.'
+                        subtitle: langField('msf_revenueCalc'),
+                        content: langField('msf_revenueCalcDesc')
                     },
                     {
-                        subtitle: 'Pemantauan Konsumsi Bahan Bakar',
-                        content: 'Menghitung konsumsi bahan bakar rata-rata dalam satuan liter per kilometer, serta akumulasi konsumsi bahan bakar berdasarkan periode waktu harian, mingguan, atau bulanan.'
+                        subtitle: langField('msf_fuelMonitoring'),
+                        content: langField('msf_fuelMonitoringDesc')
                     },
                     {
-                        subtitle: 'Fuel/Refueling Sensor dan Aktivitas Bahan Bakar',
-                        content: 'Mendeteksi aktivitas pengisian atau pengurasan bahan bakar melalui report dan juga grafik untuk mencegah kehilangan dan penyimpangan.'
-                    },
-                    // {
-                    //     subtitle: 'Cost per Liter',
-                    //     content: 'See fuel consumption not only per KM/Liter, but also when units are idle, running, or in operation.'
-                    // }
+                        subtitle: langField('msf_fuelSensor'),
+                        content: langField('msf_fuelSensorDesc')
+                    }
                 ]
             };
             
             const dataService = {
-                headertitle: 'LAYANAN IMPLEMENTASI',
+                headertitle: langField('msf_implementationServices'),
                 icon: '/pdf/installation.png',
-                title: 'Instalasi Hardware',
+                title: langField('msf_hardwareInstallation'),
                 items: [
                     {
-                        subtitle: 'Penarikan jalur CAN',
+                        subtitle: langField('msf_canWiring'),
                     },
                     {
-                        subtitle: 'Pemasangan perangkat telematika',
+                        subtitle: langField('msf_telematicsInstall'),
                     },
                     {
-                        subtitle: 'Integrasi dan konfigurasi perangkat lunak MSF 1.0',
+                        subtitle: langField('msf_softwareIntegration'),
                     }
                 ]
             };
             
             const dataProduct = {
-                headertitle: 'PRODUK & DETAIL YANG DIBERIKAN',
+                headertitle: langField('msf_productDetails'),
                 icon: null,
                 title: null,
                 items: [
                     {
                         icon: '/pdf/telematic.png',
-                        title: 'Perangkat Telematika MSF 150',
-                        content: 'Perangkat telematika MSF 150 yang berfungsi untuk mengirimkan data lokasi dan informasi kendaraan secara real-time.'
+                        title: langField('msf_telematicsDevice'),
+                        content: langField('msf_telematicsDeviceDesc')
                     },
                     {
                         icon: '/pdf/module.png',
-                        title: 'Modul & Kabel eCAN',
-                        content: 'Modul dan kabel harness untuk menghubungkan jalur CAN kendaraan dengan perangkat telematika, guna mengambil data kendaraan secara akurat.'
+                        title: langField('msf_ecanModule'),
+                        content: langField('msf_ecanModuleDesc')
                     },
                     {
                         icon: '/pdf/module.png',
-                        title: 'Software FMS 1.0',
-                        content: 'Platform perangkat lunak berbasis web yang digunakan untuk memonitor, menganalisis, dan melaporkan data armada secara komprehensif.'
+                        title: langField('msf_software'),
+                        content: langField('msf_softwareDesc')
                     },
                 ]
             };
@@ -2124,8 +2242,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 // Header text
                 doc.setFontSize(9);
                 doc.setTextColor(0, 0, 0);
-                setFontSafe(doc, 'Futura', 'bold');
                 const headerLines = doc.splitTextToSize(data.headertitle, dataTouchWidth - 8);
+                setFontByLanguage(doc, data.headertitle, 'Futura', 'bold', language);
                 headerLines.forEach((line: string, lineIndex: number) => {
                     doc.text(line, columnX + dataTouchWidth/2, columnY + 6 + (lineIndex * 3), { align: 'center' });
                 });
@@ -2146,8 +2264,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     // Title next to icon
                     doc.setFontSize(10);
                     doc.setTextColor(23, 26, 31);
-                    setFontSafe(doc, 'Futura', 'bold');
                     const titleLines = doc.splitTextToSize(data.title, dataTouchWidth - (iconSize + 7));
+                    setFontByLanguage(doc, data.title, 'Futura', 'bold', language);
                     titleLines.forEach((line: string, lineIndex: number) => {
                         doc.text(line, iconX + iconSize + 3, columnY + 4 + (lineIndex * 4));
                     });
@@ -2159,14 +2277,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                 if (data.items) {
                     doc.setFontSize(8);
                     doc.setTextColor(0, 0, 0);
-                    setFontSafe(doc, 'Futura', 'normal');
                     
                     data.items.forEach((item: any) => {
                         if (item.subtitle) {
                             // For dataFleet and dataService items
                             doc.setTextColor(23, 26, 31);
-                            setFontSafe(doc, 'Futura', 'bold');
                             const subtitleLines = doc.splitTextToSize(item.subtitle, dataTouchWidth - 15);
+                            setFontByLanguage(doc, item.subtitle, 'Futura', 'bold', language);
                             subtitleLines.forEach((line: string) => {
                                 doc.text(line, iconX + iconSize + 3, columnY);
                                 columnY += 3;
@@ -2174,8 +2291,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                             
                             if (item.content) {
                                 doc.setTextColor(0, 0, 0);
-                                setFontSafe(doc, 'Futura', 'normal');
                                 const contentLines = doc.splitTextToSize(item.content, dataTouchWidth - 15);
+                                setFontByLanguage(doc, item.content, 'Futura', 'normal', language);
                                 contentLines.forEach((line: string) => {
                                     doc.text(line, iconX + iconSize + 3, columnY);
                                     columnY += 3;
@@ -2198,22 +2315,19 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                             }
                             
                             doc.setTextColor(23, 26, 31);
-                            setFontSafe(doc, 'Futura', 'bold');
-                            // doc.text(item.title, iconX + iconSize + 3, columnY + 3);
-                            
                             
                             const titleLinesT = doc.splitTextToSize(item.title, dataTouchWidth - (iconSize + 7));
+                            setFontByLanguage(doc, item.title, 'Futura', 'bold', language);
                             titleLinesT.forEach((line: string, lineIndex: number) => {
                                 doc.text(line, iconX + iconSize + 3, columnY + 3 + (lineIndex * 4));
                             });
                             columnY += 4.5 + (titleLinesT.length > 1 ? (titleLinesT.length - 1) * 4 : 0)
-                            // columnY += 7.5;
                             
                             if (item.content) {
                                 doc.setFontSize(8);
                                 doc.setTextColor(23, 26, 31);
-                                setFontSafe(doc, 'Futura', 'normal');
                                 const contentLines = doc.splitTextToSize(item.content, dataTouchWidth - 15);
+                                setFontByLanguage(doc, item.content, 'Futura', 'normal', language);
                                 contentLines.forEach((line: string) => {
                                     doc.text(line, iconX + iconSize + 3, columnY + 3);
                                     columnY += 3;
@@ -2261,14 +2375,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
             doc.setFontSize(14);
             doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('MOTOR SIGHTS FLEET \u2013 SOLUSI UNIT EV', margin, yPos);
+            const evTitle = langField('evFleetSolution');
+            setFontByLanguage(doc, evTitle, 'Futura', 'bold', language);
+            doc.text(evTitle, margin, yPos);
             yPos += 7;
 
             doc.setFontSize(9);
             doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
-            const evDescText = 'Motor Sights Fleet menyediakan visibilitas menyeluruh terhadap pergerakan kendaraan listrik (EV), konsumsi energi, serta performa baterai. Dengan teknologi telematika yang terintegrasi penuh, perusahaan dapat mengelola operasional armada dengan tingkat akurasi, efisiensi, dan pengambilan keputusan berbasis data yang lebih baik.';
+            const evDescText = langField('evFleetDescription');
+            setFontByLanguage(doc, evDescText, 'Futura', 'normal', language);
             const evDescLines = doc.splitTextToSize(evDescText, evHeaderWidth);
             evDescLines.forEach((line: string) => {
                 doc.text(line, margin, yPos, { lineHeightFactor: 1.3 });
@@ -2279,14 +2394,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             // --- SUBSCRIPTION TABLE ---
             doc.setFontSize(10);
             doc.setTextColor(23, 26, 31);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('MSF 1.0 SOFTWARE MONTHLY SUBSCRIPTION', margin, yPos);
+            const subscriptionTitle = langField('evSoftwareSubscription');
+            setFontByLanguage(doc, subscriptionTitle, 'Futura', 'bold', language);
+            doc.text(subscriptionTitle, margin, yPos);
             yPos += 3;
 
             const evSubItems = [
-                { title: 'GPS Tracking' },
-                { title: 'Monitoring Konsumsi Energi (kWh)' },
-                { title: 'Monitoring Status Baterai' }
+                { title: langField('evGpsTracking') },
+                { title: langField('evEnergyMonitoring') },
+                { title: langField('evBatteryStatus') }
             ];
 
             const evTableWidth = pageWidth - 2 * margin;
@@ -2302,13 +2418,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
             yPos += 6;
             doc.setFontSize(10);
             doc.setTextColor(23, 26, 31);
-            setFontSafe(doc, 'Futura', 'bold');
-            doc.text('Paket Dasar', pageWidth / 2, yPos + 1, { align: 'center' });
+            const basicPackageTitle = langField('evBasicPackage');
+            setFontByLanguage(doc, basicPackageTitle, 'Futura', 'bold', language);
+            doc.text(basicPackageTitle, pageWidth / 2, yPos + 1, { align: 'center' });
             yPos += evTitleHeight - 4;
 
             doc.setFontSize(9);
             doc.setTextColor(0, 0, 0);
-            setFontSafe(doc, 'Futura', 'normal');
             evSubItems.forEach((item) => {
                 const iconSize = 4;
                 const iconX = pageWidth / 2.2 - 16;
@@ -2321,6 +2437,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     doc.line(iconX, iconY + 2, iconX + 1.5, iconY + 3);
                     doc.line(iconX + 1.5, iconY + 3, iconX + 4, iconY);
                 }
+                setFontByLanguage(doc, item.title, 'Futura', 'normal', language);
                 doc.text(item.title, iconX + 6, yPos);
                 yPos += evRowHeight - 2;
             });
@@ -2332,36 +2449,36 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
             const evColumns = [
                 {
-                    headertitle: 'FITUR MOTOR SIGHTS FLEET 1.0',
+                    headertitle: langField('evFeatures'),
                     icon: '/pdf/asset-tracking.png',
-                    title: 'GPS & Route Tracking',
+                    title: langField('evGpsRouteTracking'),
                     items: [
-                        { subtitle: 'Pelacakan GPS Real-Time', content: 'Memantau posisi kendaraan secara langsung melalui aplikasi web dan mobile.' },
-                        { subtitle: 'Riwayat Perjalanan & Replay', content: 'Melacak rute historis, titik pengisian daya, pola pergerakan, serta waktu idle kendaraan.' },
-                        { subtitle: 'Geofencing & Notifikasi', content: 'Menentukan area operasional dan menerima notifikasi otomatis saat kendaraan masuk atau keluar dari area yang telah ditentukan.' },
-                        { subtitle: 'Monitoring Status Kendaraan', content: 'Memantau status Online/Offline, kondisi idle, deteksi pergerakan, dan aktivitas operasional unit.' },
-                        { subtitle: 'Monitoring Konsumsi Energi', content: 'Menganalisis penggunaan energi (kWh) per perjalanan dan per kilometer untuk meningkatkan efisiensi operasional.' },
-                        { subtitle: 'Monitoring Status Baterai', content: 'Memantau State of Charge (SOC) secara real-time, aktivitas pengisian dan pemakaian baterai.' },
+                        { subtitle: langField('evRealtimeGpsTracking'), content: langField('evRealtimeGpsDesc') },
+                        { subtitle: langField('evHistoryReplay'), content: langField('evHistoryDesc') },
+                        { subtitle: langField('evGeofencingAlert'), content: langField('evGeofencingDesc') },
+                        { subtitle: langField('evVehicleStatusMonitoring'), content: langField('evVehicleStatusDesc') },
+                        { subtitle: langField('evEnergyConsumptionMonitoring2'), content: langField('evEnergyConsumptionDesc') },
+                        { subtitle: langField('evBatteryStatusMonitoring2'), content: langField('evBatteryStatusDesc') },
                     ]
                 },
                 {
-                    headertitle: 'LAYANAN IMPLEMENTASI',
+                    headertitle: langField('evImplementationServices'),
                     icon: '/pdf/installation.png',
-                    title: 'Implementation Services',
+                    title: langField('evImplementationTitle'),
                     items: [
-                        { subtitle: 'Pembacaan Data CANBus Kendaraan', content: '' },
-                        { subtitle: 'Instalasi perangkat telematika', content: '' },
-                        { subtitle: 'Integrasi dan konfigurasi software MSF 1.0', content: '' },
+                        { subtitle: langField('evCanBusReading'), content: '' },
+                        { subtitle: langField('evTelematicsInstall'), content: '' },
+                        { subtitle: langField('evSoftwareIntegration'), content: '' },
                     ]
                 },
                 {
-                    headertitle: 'PRODUK & DETAIL YANG DIBERIKAN',
+                    headertitle: langField('evProductsDeliverables'),
                     icon: '/pdf/installation.png',
-                    title: 'Product & Deliverables',
+                    title: langField('evProductsTitle'),
                     items: [
-                        { subtitle: 'Telematics', content: '(Motor Sights Fleet 650)' },
-                        { subtitle: 'Modul eCAN', content: '(Kabel Harness komunikasi EV CANBus kendaraan)' },
-                        { subtitle: 'MSF 300', content: '(Membaca data CANBus EV kendaraan)' },
+                        { subtitle: langField('evTelematicsProduct'), content: langField('evTelematicsDesc') },
+                        { subtitle: langField('evEcanModule'), content: langField('evEcanDesc') },
+                        { subtitle: langField('evMsf300'), content: langField('evMsf300Desc') },
                     ]
                 }
             ];
@@ -2377,7 +2494,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
 
                 doc.setFontSize(8);
                 doc.setTextColor(0, 0, 0);
-                setFontSafe(doc, 'Futura', 'bold');
+                setFontByLanguage(doc, colData.headertitle, 'Futura', 'bold', language);
                 const headerLines = doc.splitTextToSize(colData.headertitle, evColWidth - 8);
                 headerLines.forEach((line: string, lineIndex: number) => {
                     doc.text(line, columnX + evColWidth / 2, columnY + 5 + (lineIndex * 3.5), { align: 'center' });
@@ -2395,7 +2512,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     }
                     doc.setFontSize(9);
                     doc.setTextColor(23, 26, 31);
-                    setFontSafe(doc, 'Futura', 'bold');
+                    setFontByLanguage(doc, colData.title, 'Futura', 'bold', language);
                     const titleLines2 = doc.splitTextToSize(colData.title, evColWidth - (iconSize + 7));
                     titleLines2.forEach((line: string, li: number) => {
                         doc.text(line, iconX2 + iconSize + 3, columnY + 4 + li * 4);
@@ -2408,7 +2525,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                     const iconX3 = columnX + 3;
                     if (item.subtitle) {
                         doc.setTextColor(23, 26, 31);
-                        setFontSafe(doc, 'Futura', 'bold');
+                        setFontByLanguage(doc, item.subtitle, 'Futura', 'bold', language);
                         const subLines = doc.splitTextToSize(item.subtitle, evColWidth - 15);
                         subLines.forEach((line: string) => {
                             doc.text(line, iconX3 + 9, columnY);
@@ -2416,7 +2533,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF) => {
                         });
                         if (item.content) {
                             doc.setTextColor(0, 0, 0);
-                            setFontSafe(doc, 'Futura', 'normal');
+                            setFontByLanguage(doc, item.content, 'Futura', 'normal', language);
                             const contentLines2 = doc.splitTextToSize(item.content, evColWidth - 15);
                             contentLines2.forEach((line: string) => {
                                 doc.text(line, iconX3 + 9, columnY);

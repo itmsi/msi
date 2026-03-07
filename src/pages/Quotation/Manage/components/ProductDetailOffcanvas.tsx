@@ -11,6 +11,9 @@ import { TableColumn } from "react-data-table-component";
 import { useAsyncSelect, SelectOption } from '../../hooks/useAsyncSelect';
 import { createActionsColumn } from '@/components/ui/table';
 import { getDefaultSpecs } from '../../Product/hooks/useProductCreate';
+import { useLanguage } from '@/components/lang/useLanguage';
+import { quotationLabels } from '../language/quotationLabels';
+import { quotationLabelPDF } from '../language/quotationLabelPDF';
 
 interface ProductDetailOffcanvasProps {
     productId: string | null;
@@ -30,6 +33,43 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
     initialData,
     readOnly = false
 }) => {
+    const { langField } = useLanguage(quotationLabels);
+    const { langField: langFieldPDF } = useLanguage(quotationLabelPDF);
+
+    // Helper function to translate specification labels
+    const translateSpecLabel = (label: string): string => {
+        const specMap: { [key: string]: string } = {
+            'Unit Model': langFieldPDF('spec_unitModel'),
+            'GVW': langFieldPDF('spec_gvw'),
+            'Wheelbase': langFieldPDF('spec_wheelbase'),
+            'Max Torque': langFieldPDF('spec_maxTorque'),
+            'Displacement': langFieldPDF('spec_displacement'),
+            'Emission Standard': langFieldPDF('spec_emissionStandard'),
+            'Engine Guard': langFieldPDF('spec_engineGuard'),
+            'Fuel Tank': langFieldPDF('spec_fuelTank'),
+            'Tyre': langFieldPDF('spec_tyre'),
+            'Gearbox Transmission': langFieldPDF('spec_gearboxTransmission'),
+            'Engine Brand Model': langFieldPDF('spec_engineBrandModel'),
+            'Cargobox/Vessel': langFieldPDF('spec_cargoboxVessel'),
+            'Horse Power': langFieldPDF('spec_horsePower'),
+            'Overall Length': langFieldPDF('spec_overallLength'),
+            'Curb Weight': langFieldPDF('spec_curbWeight'),
+            'Gross Vehicle Weight (GVW)': langFieldPDF('spec_grossVehicleWeight'),
+            'Rated Power / Torque': langFieldPDF('spec_ratedPowerTorque'),
+            'Peak Power / Torque': langFieldPDF('spec_peakPowerTorque'),
+            'Battery Capacity': langFieldPDF('spec_batteryCapacity'),
+            'Battery Protection': langFieldPDF('spec_batteryProtection'),
+            'Charging Ports': langFieldPDF('spec_chargingPorts'),
+            'Input Socket Power': langFieldPDF('spec_inputSocketPower'),
+            'Frame': langFieldPDF('spec_frame'),
+            'Rear Axles': langFieldPDF('spec_rearAxles'),
+            'Tires': langFieldPDF('spec_tires'),
+            'Structure Thickness': langFieldPDF('spec_structureThickness'),
+            'Cargo Box Size': langFieldPDF('spec_cargoBoxSize')
+        };
+        
+        return specMap[label] || label;
+    };
     const [error, setError] = useState<string | null>(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -164,7 +204,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
 
     const addAccessoryItem = useCallback(() => {
         if (!selectedAccessory) {
-            const errorMessage = 'Please select an accessory';
+            const errorMessage = langField('pleaseSelectAccessory');
             setAccessorySelectError(errorMessage);
             toast.error(errorMessage);
             return;
@@ -175,7 +215,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         );
 
         if (isDuplicate) {
-            const errorMessage = 'This accessory is already added';
+            const errorMessage = langField('accessoryAlreadyAdded');
             setAccessorySelectError(errorMessage);
             toast.error(errorMessage);
             return;
@@ -204,7 +244,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         
         setSelectedAccessory(null);
         setAccessorySelectError('');
-        toast.success('Accessory added successfully');
+        toast.success(langField('accessoryAddedSuccess'));
     }, [selectedAccessory, accessories, initialData, onChange]);
 
     const removeAccessoryItem = useCallback((index: number) => {
@@ -219,12 +259,12 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
             });
         }
         
-        toast.success('Accessory removed successfully');
+        toast.success(langField('accessoryRemovedSuccess'));
     }, [accessories, initialData, onChange]);
 
     const accessoryColumns: TableColumn<QuotationAccessory>[] = React.useMemo(() => [
         {
-            name: 'Accessory Name',
+            name: langField('accessoryName'),
             selector: (row: QuotationAccessory) => row.accessory_part_name,
             cell: (row) => (
                 <div className=" items-center gap-3 py-2">
@@ -237,20 +277,8 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
             ),
             wrap: true,
         },
-        // {
-        //     name: 'Part Number',
-        //     selector: (row: QuotationAccessory) => row.accessory_part_number || '-',
-        // },
-        // {
-        //     name: 'Brand',
-        //     selector: (row: QuotationAccessory) => row.accessory_brand || '-',
-        // },
-        // {
-        //     name: 'Specification',
-        //     selector: (row: QuotationAccessory) => row.accessory_specification || '-',
-        // },
         {
-            name: 'Quantity',
+            name: langField('quantity'),
             selector: (row: QuotationAccessory) => row.quantity,
             width: '100px',
             center: true,
@@ -265,7 +293,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                     }
                 },
                 className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
-                tooltip: 'Delete',
+                tooltip: langField('delete'),
                 permission: 'delete'
             }
         ]),
@@ -303,7 +331,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                             onClick={onClose}
                             className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
                         >
-                            Tutup
+                            {langField('close')}
                         </button>
                     </div>
                 </div>
@@ -313,7 +341,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         if (!initialData || !initialData) {
             return (
                 <div className="p-6 text-center text-gray-500">
-                    <p>Data produk tidak ditemukan</p>
+                    <p>{langField('productDataNotFound')}</p>
                 </div>
             );
         }
@@ -350,7 +378,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                                         <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                                                         </svg>
-                                                        <p className="text-sm">Klik untuk memperbesar</p>
+                                                        <p className="text-sm">{langField('clickToEnlarge')}</p>
                                                     </div>
                                                 </div>
                                             )}
@@ -360,7 +388,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                                     <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
-                                                    <p className="text-gray-500 text-sm">Gambar tidak valid</p>
+                                                    <p className="text-gray-500 text-sm">{langField('imageNotValid')}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -371,7 +399,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                             <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
-                                            <p className="text-gray-500 text-sm">Tidak ada gambar</p>
+                                            <p className="text-gray-500 text-sm">{langField('noImage')}</p>
                                         </div>
                                     </div>
                                 );
@@ -384,13 +412,16 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                             <p className="font-bold text-gray-900">
                                 {initialData.msi_model || 'n/a'} {initialData.msi_product ? ' - ' + initialData.msi_product : ''}
                             </p>
-                            <p className="text-gray-700 text-sm">
-                                {initialData.engine || 'n/a'} - {initialData.segment || 'n/a'}
-                            </p>
-                            
-                            <p className="text-gray-700 text-sm">
-                                {initialData.segment || '-'}
-                            </p>
+                            {initialData.engine && (
+                                <p className="text-gray-700 text-sm">
+                                    {initialData.engine || ''}
+                                </p>
+                            )}
+                            {initialData.segment && (
+                                <p className="text-gray-700 text-sm">
+                                    {initialData.segment || ''}
+                                </p>
+                            )}
                             {/* <p className="text-gray-700 text-sm">
                                 {initialData.product_type || 'n/a'}
                             </p> */}
@@ -410,7 +441,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                             }`}
                         >
-                            Spesifikasi
+                            {langField('specifications')}
                         </button>
                         <button
                             onClick={() => setActiveTab('accessories')}
@@ -420,7 +451,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                             }`}
                         >
-                            Accessories
+                            {langField('accessories')}
                             {accessories.length > 0 && (
                                 <span className="ml-1 bg-blue-100 text-blue-600 py-1 px-2 rounded-full text-xs">
                                     {accessories.length}
@@ -435,11 +466,11 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                     <div className='product-spesification-information'>
                     {/* Product Basic Info */}
                     <div className="border-b border-gray-200 pb-6">
-                        <h4 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Informasi Dasar</h4>
+                        <h4 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('basicInformation')}</h4>
                         <div className="grid grid-cols-3 gap-4">
                             <div className='md:col-span-3'>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Nama Produk
+                                    {langField('productName')}
                                 </label>
                                 <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.componen_product_name || '-'}
@@ -448,13 +479,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     type="hidden"
                                     value={initialData.componen_product_name || ''}
                                     onChange={(e) => handleFieldUpdate('componen_product_name', e.target.value)}
-                                    placeholder="Masukkan nama produk"
+                                    placeholder={langField('enterProductName')}
                                     className="w-full"
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Kode Unique
+                                    {langField('uniqueCode')}
                                 </label>
                                 <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.code_unique || '-'}
@@ -463,13 +494,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     type="hidden"
                                     value={initialData.code_unique || ''}
                                     onChange={(e) => handleFieldUpdate('code_unique', e.target.value)}
-                                    placeholder="Masukkan kode unique"
+                                    placeholder={langField('enterUniqueCode')}
                                     className="w-full"
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Segment
+                                    {langField('segment')}
                                 </label>
                                 <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.segment || '-'}
@@ -478,13 +509,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     type="hidden"
                                     value={initialData.segment || ''}
                                     onChange={(e) => handleFieldUpdate('segment', e.target.value)}
-                                    placeholder="Masukkan segment"
+                                    placeholder={langField('enterSegment')}
                                     className="w-full"
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    MSI Model
+                                    {langField('msiModel')}
                                 </label>
                                 <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.msi_model || '-'}
@@ -493,13 +524,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     type="hidden"
                                     value={initialData.msi_model || ''}
                                     onChange={(e) => handleFieldUpdate('msi_model', e.target.value)}
-                                    placeholder="Masukkan MSI model"
+                                    placeholder={langField('enterMsiModel')}
                                     className="w-full"
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    MSI Product
+                                    {langField('msiProduct')}
                                 </label>
                                 <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.msi_product || '-'}
@@ -508,14 +539,14 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     type="hidden"
                                     value={initialData.msi_product || ''}
                                     onChange={(e) => handleFieldUpdate('msi_product', e.target.value)}
-                                    placeholder="Masukkan MSI product"
+                                    placeholder={langField('enterMsiProduct')}
                                     className="w-full"
                                 />
                             </div>
                             
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Wheel No
+                                    {langField('wheelNo')}
                                 </label>
                                 <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.wheel_no || '-'}
@@ -524,13 +555,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     type="hidden"
                                     value={initialData.wheel_no || ''}
                                     onChange={(e) => handleFieldUpdate('wheel_no', e.target.value)}
-                                    placeholder="Masukkan wheel no"
+                                    placeholder={langField('enterWheelNo')}
                                     className="w-full"
                                 />
                             </div>
                             <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Volume
+                                {langField('volume')}
                             </label>
                                 <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.volume || '-'}
@@ -539,14 +570,14 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     type="hidden"
                                     value={initialData.volume || ''}
                                     onChange={(e) => handleFieldUpdate('volume', e.target.value)}
-                                    placeholder="Masukkan volume"
+                                    placeholder={langField('enterVolume')}
                                     className="w-full"
                                 />
                             </div>
                             
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Horse Power
+                                    {langField('horsePower')}
                                 </label>
                                 <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.horse_power || '-'}
@@ -555,7 +586,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     type="hidden"
                                     value={initialData.horse_power || ''}
                                     onChange={(e) => handleFieldUpdate('horse_power', e.target.value)}
-                                    placeholder="Masukkan horse power"
+                                    placeholder={langField('enterHorsePower')}
                                     className="w-full"
                                 />
                             </div>
@@ -564,20 +595,20 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
 
                     {/* Product Specifications */}
                     <div className="border-b border-gray-200 pb-6">
-                        <h4 className="text-lg font-semibold text-gray-900 my-4">Spesifikasi</h4>
+                        <h4 className="text-lg font-semibold text-gray-900 my-4">{langField('specifications')}</h4>
                         <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4">
                             {editableSpecifications.map((spec, index) => {
                                 return (
                                 <div key={index} className="flex justify-between items-start">
                                     <div className="flex-1">
                                         <p className="text-sm font-medium text-gray-900 mb-2">
-                                            {spec.componen_product_specification_label}
+                                            {translateSpecLabel(spec.componen_product_specification_label ?? '')}
                                         </p>
                                         <Input
                                             type="text"
                                             value={spec.componen_product_specification_value || ''}
                                             onChange={(e) => handleSpecificationUpdate(index, e.target.value)}
-                                            placeholder={`Masukkan ${(spec.componen_product_specification_label ?? '').toLowerCase()}`}
+                                            placeholder={`${langField('enter')} ${translateSpecLabel(spec.componen_product_specification_label ?? '').toLowerCase()}`}
                                             className="w-full text-sm"
                                         />
                                     </div>
@@ -589,11 +620,11 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
 
                     {/* Product Pricing Info */}
                     <div className="border-b border-gray-200 pb-6 hidden">
-                        <h4 className="text-lg font-semibold text-gray-900 my-4">Informasi Harga</h4>
+                        <h4 className="text-lg font-semibold text-gray-900 my-4">{langField('priceInformation')}</h4>
                         <div className="grid grid-cols-1 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Harga Pasar
+                                    {langField('marketPrice')}
                                 </label>
                                 <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.market_price ? 
@@ -606,14 +637,14 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     type="hidden"
                                     value={initialData.market_price || ''}
                                     onChange={(e) => handleFieldUpdate('market_price', e.target.value)}
-                                    placeholder="Masukkan harga pasar"
+                                    placeholder={langField('enterMarketPrice')}
                                     className="w-full"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Harga Star 1
+                                        {langField('priceStar1')}
                                     </label>
                                     <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                         {initialData.selling_price_star_1 ? 
@@ -626,13 +657,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                         type="hidden"
                                         value={initialData.selling_price_star_1 || ''}
                                         onChange={(e) => handleFieldUpdate('selling_price_star_1', e.target.value)}
-                                        placeholder="Harga star 1"
+                                        placeholder={langField('pricePlaceholderStar1')}
                                         className="w-full"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Harga Star 2
+                                        {langField('priceStar2')}
                                     </label>
                                     <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                         {initialData.selling_price_star_2 ? 
@@ -645,13 +676,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                         type="hidden"
                                         value={initialData.selling_price_star_2 || ''}
                                         onChange={(e) => handleFieldUpdate('selling_price_star_2', e.target.value)}
-                                        placeholder="Harga star 2"
+                                        placeholder={langField('pricePlaceholderStar2')}
                                         className="w-full"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Harga Star 3
+                                        {langField('priceStar3')}
                                     </label>
                                     <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                         {initialData.selling_price_star_3 ? 
@@ -664,13 +695,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                         type="hidden"
                                         value={initialData.selling_price_star_3 || ''}
                                         onChange={(e) => handleFieldUpdate('selling_price_star_3', e.target.value)}
-                                        placeholder="Harga star 3"
+                                        placeholder={langField('pricePlaceholderStar3')}
                                         className="w-full"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Harga Star 4
+                                        {langField('priceStar4')}
                                     </label>
                                     <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                         {initialData.selling_price_star_4 ? 
@@ -683,13 +714,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                         type="hidden"
                                         value={initialData.selling_price_star_4 || ''}
                                         onChange={(e) => handleFieldUpdate('selling_price_star_4', e.target.value)}
-                                        placeholder="Harga star 4"
+                                        placeholder={langField('pricePlaceholderStar4')}
                                         className="w-full"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Harga Star 5
+                                        {langField('priceStar5')}
                                     </label>
                                     <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                         {initialData.selling_price_star_5 ? 
@@ -702,7 +733,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                         type="hidden"
                                         value={initialData.selling_price_star_5 || ''}
                                         onChange={(e) => handleFieldUpdate('selling_price_star_5', e.target.value)}
-                                        placeholder="Harga star 5"
+                                        placeholder={langField('pricePlaceholderStar5')}
                                         className="w-full"
                                     />
                                 </div>
@@ -717,22 +748,22 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                     <div className='product-accessories-information'>
                         {/* Accessories Section */}
                         
-                        <h4 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Accessories</h4>
+                        <h4 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('accessories')}</h4>
                         
                         {/* Add Accessory */}
                         <div className="flex gap-4 mb-6">
                             <div className="flex-1">
                                 <CustomAsyncSelect
                                     name="accessory_select"
-                                    placeholder="Select accessory to add..."
+                                    placeholder={langField('selectAccessoryToAdd')}
                                     value={selectedAccessory}
                                     error={accessorySelectError}
                                     defaultOptions={accessoryOptions}
                                     loadOptions={handleAccessoryInputChange}
                                     onMenuScrollToBottom={handleAccessoryMenuScrollToBottom}
                                     isLoading={accessoryPagination.loading}
-                                    noOptionsMessage={() => "No accessories found"}
-                                    loadingMessage={() => "Loading accessories..."}
+                                    noOptionsMessage={() => langField('noAccessoriesFound')}
+                                    loadingMessage={() => langField('loadingAccessories')}
                                     isSearchable={true}
                                     inputValue={accessoryInputValue}
                                     onInputChange={(inputValue) => {
@@ -761,7 +792,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                 disabled={!selectedAccessory}
                             >
                                 <MdAdd size={16} />
-                                Add Accessory
+                                {langField('addAccessory')}
                             </Button>
                         </div>
 
@@ -778,7 +809,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     highlightOnHover
                                     noDataComponent={
                                         <div className="text-center py-8 text-gray-500">
-                                            No accessories added yet
+                                            {langField('noAccessoriesAdded')}
                                         </div>
                                     }
                                 />

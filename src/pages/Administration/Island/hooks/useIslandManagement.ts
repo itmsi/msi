@@ -188,6 +188,45 @@ export const useIslandManagement = () => {
     // Filter functions with debouncing
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
     
+    
+    const handleClearFilters = useCallback(async () => {
+        // Clear debounce timer first
+        if (debounceTimer.current) {
+            clearTimeout(debounceTimer.current);
+        }
+        
+        // Reset filters state
+        setFilters({
+            search: '',
+            sort_order: ''
+        });
+        
+        // Fetch data langsung dengan parameter yang sudah direset
+        try {
+            setLoading(true);
+            const requestParams: IslandRequest = {
+                page: 1,
+                limit: pagination?.limit || 10,
+                sort_order: 'desc',
+                search: ''
+            };
+
+            const response = await IslandService.getIslands(requestParams);
+
+            if (response.success) {                
+                setIslands(response.data.data || []);
+                setPagination(response.data.pagination);
+            } else {
+                toast.error(response.message || 'Failed to fetch islands');
+            }
+        } catch (error) {
+            console.error('Error fetching islands:', error);
+            toast.error('Failed to fetch islands');
+        } finally {
+            setLoading(false);
+        }
+    }, [pagination?.limit]);
+
     const handleFilterChange = useCallback((filterKey: keyof IslandFilters, value: string) => {
         setFilters(prev => ({
             ...prev,
@@ -278,6 +317,7 @@ export const useIslandManagement = () => {
         validationErrors,
 
         // Actions
+        handleClearFilters,
         handleInputChange,
         handleAddIsland,
         handleEditIsland,

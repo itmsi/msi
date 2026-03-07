@@ -71,6 +71,11 @@ const Activities = lazy(() => import('@/pages/CRM/Activity/Activity'));
 const CreateActivities = lazy(() => import('@/pages/CRM/Activity/CreateActivity'));
 const EditActivities = lazy(() => import('@/pages/CRM/Activity/EditActivity'));
 
+// CRM - Projects
+const ManageCRMProject = lazy(() => import('@/pages/CRM/Project/Manage'));
+const CreateCRMProject = lazy(() => import('@/pages/CRM/Project/CreateProject'));
+const EditCRMProject = lazy(() => import('@/pages/CRM/Project/EditProject'));
+
 // ========================================
 // QUOTATION ITI
 const ManageCustomersITI = lazy(() => import('@/pages/QuotationITI/Administration/Customers/Manage'));
@@ -98,6 +103,9 @@ const CreateTNCITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Creat
 const TNCManageITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Manage'));
 const TNCEditITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Edit'));
 // ========================================
+
+// DIVISION
+const ManageDivision = lazy(() => import('@/pages/CRM/Divisions/Manage'));
 
 export type TAppRoute = {
     path: string;
@@ -791,6 +799,34 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
 
+    // CRM - Projects
+    {
+        path: '/crm/project',
+        name: 'Project CRM',
+        isProtected: true,
+        roles: ['Project CRM'],
+        component: ManageCRMProject,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/project/create',
+        name: 'Project CRM',
+        isProtected: true,
+        roles: ['Project CRM'],
+        requiredPermissions: ['create'],
+        component: CreateCRMProject,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/project/edit/:id',
+        name: 'Project CRM',
+        isProtected: true,
+        roles: ['Project CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: EditCRMProject,
+        layout: AppLayout,
+    },
+
     {
         path: '/crm/activity/create',
         name: 'Activities CRM',
@@ -805,8 +841,16 @@ export const routes: TAppRoute[] = [
         name: 'Activities CRM',
         isProtected: true,
         roles: ['Activities CRM'],
-        requiredPermissions: ['update', 'read'],
         component: EditActivities,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/manage-division',
+        name: 'Division CRM',
+        isProtected: true,
+        roles: ['Division CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: ManageDivision,
         layout: AppLayout,
     },
 ];
