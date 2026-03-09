@@ -91,18 +91,11 @@ export const useIupSelect = () => {
 
     const getIupById = useCallback(async (iupId: string): Promise<IupSelectOption | null> => {
         try {
-            const response = await IupService.getIUPManagement({
-                search: '',
-                page: 1,
-                limit: 100,
-                sort_order: 'desc'
-            });
+            const response = await IupService.getIupById(iupId);
 
-            if (response.success) {
-                const found = response.data.find((iup: IupItem) => iup.iup_id === iupId);
-                if (found) {
-                    return { value: found.iup_id, label: found.iup_name };
-                }
+            if (response.data?.data) {
+                const iup = response.data.data;
+                return { value: iup.iup_id, label: iup.iup_name };
             }
         } catch (error) {
             console.error('Error fetching IUP by ID:', error);
