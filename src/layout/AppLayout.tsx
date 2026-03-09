@@ -20,7 +20,7 @@ const LayoutContent: React.FC<{ children: ReactNode }> = ({ children }) => {
                 }
             >
                 <AppHeader />
-                <div className="p-4 mx-auto md:p-6">{children}</div>
+                <div className="p-4 mx-auto md:p-6 overflow-x-hidden" style={{ height: 'calc(100vh - 80px)' }}>{children}</div>
             </div>
         </div>
     );
