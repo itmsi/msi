@@ -21,7 +21,6 @@ interface FilterOption {
     label: string;
 }
 
-// Config filter - mudah untuk extend dengan field baru
 const filterConfigs = [
     {
         id: 'quotation_for',
@@ -246,15 +245,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 >
                     Clear All
                 </Button>
-                {/* {onApplyFilters && (
-                    <Button
-                        onClick={onApplyFilters}
-                        className="px-4 py-2"
-                        size="sm"
-                    >
-                        Apply Filters
-                    </Button>
-                )} */}
             </div>
         </div>
     );
