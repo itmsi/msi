@@ -40,7 +40,7 @@ const Badge: React.FC<BadgeProps> = ({
     // Define color styles for variants
     const variants = {
         light: {
-            primary: "bg-brand-50 text-brand-500",
+            primary: "bg-brand-50 text-[#0253a5]",
             success: "bg-success-50 text-success-600",
             error: "bg-error-50 text-error-600",
             warning: "bg-warning-50 text-warning-600",
@@ -51,7 +51,7 @@ const Badge: React.FC<BadgeProps> = ({
             secondary: "bg-gray-500 text-white",
         },
         solid: {
-            primary: "bg-brand-500 text-white",
+            primary: "bg-[#0253a5] text-white",
             success: "bg-success-500 text-white",
             error: "bg-error-500 text-white",
             warning: "bg-warning-500 text-white",
@@ -62,7 +62,7 @@ const Badge: React.FC<BadgeProps> = ({
             secondary: "bg-indigo-700 text-white",
         },
         outline: {
-            primary: "border border-brand-500 text-brand-500",
+            primary: "border border-[#0253a5] text-[#0253a5]",
             success: "border border-success-500 text-success-500",
             error: "border border-error-500 text-error-500",
             warning: "border border-warning-500 text-warning-500",
@@ -75,7 +75,7 @@ const Badge: React.FC<BadgeProps> = ({
     };
 
     const dotColors = {
-        primary: "bg-brand-500",
+        primary: "bg-[#0253a5]",
         success: "bg-success-500",
         error: "bg-error-500",
         warning: "bg-warning-500",

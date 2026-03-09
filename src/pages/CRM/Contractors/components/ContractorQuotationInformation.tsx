@@ -95,7 +95,6 @@ const ContractorQuotationInformation: React.FC<ContractorQuotationInformationPro
                 </div>
             </div>
             
-            
             <div className="p-6 font-secondary">
                 {error && (
                     <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">

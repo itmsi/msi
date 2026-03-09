@@ -6,6 +6,7 @@ export interface ProjectRequest {
     sort_by?: 'updated_at' | 'created_at' | '';
     search?: string;
     status?: string;
+    iup_customer_id?: string;
 }
 
 export interface ProjectAttachment {

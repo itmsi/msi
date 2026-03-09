@@ -866,9 +866,6 @@ export default function EditQuotation() {
             toast.error('Product not found in quotation');
             return;
         }
-console.log({
-    existingItem: formData.manage_quotation_items
-});
 
         // Initialize offcanvas data if not exists
         if (!unsavedProductChanges[productId]) {
