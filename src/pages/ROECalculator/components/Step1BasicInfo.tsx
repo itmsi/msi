@@ -1,11 +1,11 @@
+import { useCallback, useMemo, useEffect } from 'react';
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
-import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
-import { useCustomerSelect } from '@/hooks/useCustomerSelect';
+import IupContractorSelect from '@/components/form/select/IupContractorSelect';
 import { ROECalculatorFormData, ROECalculatorValidationErrors } from '../types/roeCalculator';
-import { useEffect, useState } from 'react';
 import { formatNumberInputFadlan, handleDecimalInput, handleKeyPress } from '@/helpers/generalHelper';
 import CustomSelect from '@/components/form/select/CustomSelect';
+import { useIupSelect } from '@/hooks/useIupSelect';
 
 interface Step1Props {
     formData: ROECalculatorFormData;
@@ -31,54 +31,59 @@ export default function Step1BasicInfo({
     validationErrors, 
     loading,
     handleInputChange }: Step1Props) {
-    const {
-        customerOptions,
-        pagination: customerPagination,
-        inputValue: customerInputValue,
-        handleInputChange: handleCustomerInputChange,
-        handleMenuScrollToBottom: handleCustomerMenuScrollToBottom,
-        initializeOptions: initializeCustomerOptions,
-        getCustomerById
-    } = useCustomerSelect();
 
-    const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
-    // const selectedCustomer = customerOptions.find(c => c.value === formData.customer_id) || null;
+    const { getIupById } = useIupSelect();
 
+    // In edit mode: if iup_id is set but iup_name is empty, look it up
     useEffect(() => {
-        initializeCustomerOptions();
-    }, [initializeCustomerOptions]);
-    
-    useEffect(() => {
-        const loadSelectedCustomer = async () => {
-            if (!formData.customer_id) {
-                setSelectedCustomer(null);
-                return;
-            }
-
-            // First, try to find customer in current options
-            const foundInOptions = customerOptions.find(c => c.value === formData.customer_id);
-            
-            if (foundInOptions) {
-                setSelectedCustomer(foundInOptions);
-            } else if (formData.customer_id) {
-                // If not found in current options, fetch customer by ID
-                try {
-                    const customer = await getCustomerById(formData.customer_id);
-                    if (customer) {
-                        setSelectedCustomer(customer);
-                    } else {
-                        setSelectedCustomer(null);
-                    }
-                } catch (error) {
-                    console.error('Error loading selected customer:', error);
-                    setSelectedCustomer(null);
+        if (formData.iup_id && !formData.iup_name) {
+            getIupById(formData.iup_id).then((iup) => {
+                if (iup) {
+                    handleInputChange('iup_name', iup.label);
                 }
-            }
-        };
+            });
+        }
+    }, [formData.iup_id]);
 
-        loadSelectedCustomer();
-    }, [formData.customer_id, customerOptions, getCustomerById]);
-    
+    // Handle IUP change
+    const handleIupChange = useCallback((iup: { value: string; label: string } | null) => {
+        if (iup) {
+            handleInputChange('iup_id', iup.value);
+            handleInputChange('iup_name', iup.label);
+        } else {
+            handleInputChange('iup_id', '');
+            handleInputChange('iup_name', '');
+            // Clear contractor when IUP is cleared
+            handleInputChange('iup_customer_id', '');
+            handleInputChange('customer_name', '');
+        }
+    }, [handleInputChange]);
+
+    // Handle Contractor change
+    const handleContractorChange = useCallback((contractor: { value: string; label: string; customer_name?: string } | null) => {
+        if (contractor) {
+            handleInputChange('iup_customer_id', contractor.value);
+            handleInputChange('customer_name', contractor.customer_name || contractor.label || '');
+        } else {
+            handleInputChange('iup_customer_id', '');
+            handleInputChange('customer_name', '');
+        }
+    }, [handleInputChange]);
+
+    // Memoized IUP value for IupContractorSelect
+    const iupValue = useMemo(() => {
+        return formData.iup_id && formData.iup_name
+            ? { value: formData.iup_id, label: formData.iup_name }
+            : null;
+    }, [formData.iup_id, formData.iup_name]);
+
+    // Memoized Contractor value for IupContractorSelect
+    const contractorValue = useMemo(() => {
+        return formData.iup_customer_id && formData.customer_name
+            ? { value: formData.iup_customer_id, label: formData.customer_name }
+            : null;
+    }, [formData.iup_customer_id, formData.customer_name]);
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -89,8 +94,8 @@ export default function Step1BasicInfo({
             </div>
         );
     }
+
     return (
-        
         <div className="space-y-6">
             <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Informasi Dasar</h3>
@@ -100,33 +105,21 @@ export default function Step1BasicInfo({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Customer Selection */}
-                <div className="md:col-span-2">
-                    <Label>Pilih Customer</Label>
-                    <CustomAsyncSelect
-                        placeholder="Select customer..."
-                        value={selectedCustomer}
-                        error={validationErrors.customer_id}
-                        defaultOptions={customerOptions}
-                        loadOptions={handleCustomerInputChange}
-                        onMenuScrollToBottom={handleCustomerMenuScrollToBottom}
-                        isLoading={customerPagination.loading}
-                        noOptionsMessage={() => "No customers found"}
-                        loadingMessage={() => "Loading customers..."}
-                        isSearchable={true}
-                        inputValue={customerInputValue}
-                        onInputChange={(inputValue) => {
-                            handleCustomerInputChange(inputValue);
-                        }}
-                        onChange={(option: any) => {
-                            setSelectedCustomer(option);
-                            handleInputChange('customer_id', option?.value || '');
-                        }}
-                    />
-                    {validationErrors.customer_id && (
-                        <span className="text-sm text-red-500">{validationErrors.customer_id}</span>
-                    )}
-                </div>
+                {/* IUP & Contractor Selection */}
+                <IupContractorSelect
+                    className="md:col-span-2"
+                    layout="horizontal"
+                    gridCols="grid-cols-1 md:grid-cols-2"
+                    iupValue={iupValue}
+                    iupLabel="IUP Selection"
+                    iupRequired={true}
+                    contractorValue={contractorValue}
+                    contractorLabel="Contractor"
+                    contractorRequired={true}
+                    contractorError={validationErrors.iup_customer_id}
+                    onIupChange={handleIupChange}
+                    onContractorChange={handleContractorChange}
+                />
 
                 {/* Komoditas */}
                 <div>
@@ -197,7 +190,6 @@ export default function Step1BasicInfo({
                     <Input
                         id="jarak_haul"
                         value={formData.jarak_haul}
-                        // onChange={(e) => handleInputChange('jarak_haul', e.target.value)}
                         onChange={(e) => {
                             const rawValue = e.target.value;
                             

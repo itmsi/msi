@@ -42,7 +42,7 @@ export default function ManageRor() {
         confirmdeleteRorCalculator,
         cancelDelete,
         handleDownload,
-    } = useRoeCalculatorManagement();
+    } = useRoeCalculatorManagement({ iup_customer_id: '' });
 
     // Conditional row click handler based on step
     const handleRowClick = (row: any) => {

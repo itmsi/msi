@@ -13,7 +13,10 @@ export const useROECalculatorForm = (calculatorId?: string) => {
 
     const [formData, setFormData] = useState<ROECalculatorFormData>({
         // Step 1
-        customer_id: '',
+        iup_customer_id: '',
+        iup_id: '',
+        iup_name: '',
+        customer_name: '',
         komoditas: '',
         tonase_per_ritase: '',
         jarak_haul: '',
@@ -145,7 +148,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
         
         switch (step) {
             case 1:
-                if (!formData.customer_id) errors.customer_id = 'Customer is required';
+                if (!formData.iup_customer_id) errors.iup_customer_id = 'Contractor is required';
                 if (!formData.komoditas) errors.komoditas = 'Komoditas is required';
                 // if (!formData.status) errors.status = 'Status is required';
                 if (!formData.tonase_per_ritase) errors.tonase_per_ritase = 'Tonase per ritase is required';

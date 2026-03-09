@@ -35,6 +35,7 @@ export const useContractorEdit = () => {
             new_customer: false
         },
         iup_customers: {
+            iup_customer_id: '',
             iup_id: '',
             iup_name: '',
             segmentation_id: '',
@@ -97,6 +98,7 @@ export const useContractorEdit = () => {
                             new_customer: false
                         },
                         iup_customers: {
+                            iup_customer_id: response.data.iup_customers.iup_customer_id || '',
                             iup_id: response.data.iup_customers.iup_id || '',
                             iup_name: response.data.iup_customers.iup_name || '',
                             parent_contractor_id: response.data.iup_customers.parent_contractor_id || '',

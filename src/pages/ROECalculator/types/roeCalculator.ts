@@ -1,6 +1,9 @@
 export interface ROECalculatorFormData {
     // Step 1 - Basic Info
-    customer_id: string;
+    iup_customer_id: string;
+    iup_id?: string;
+    iup_name?: string;
+    customer_name?: string;
     komoditas: 'batu_bara' | 'nikel' | '';
     tonase_per_ritase: string;
     jarak_haul: string;
@@ -52,7 +55,7 @@ export interface ROECalculatorFormData {
 }
 
 export interface ROECalculatorValidationErrors {
-    customer_id?: string;
+    iup_customer_id?: string;
     komoditas?: string;
     tonase_per_ritase?: string;
     jarak_haul?: string;

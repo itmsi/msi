@@ -6,7 +6,6 @@ import { TableColumn } from 'react-data-table-component';
 import PageMeta from '@/components/common/PageMeta';
 import { useProjectManagement } from './hooks/useProjectManagement';
 import { ProjectItem } from './types/project';
-import { FaProjectDiagram } from 'react-icons/fa';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { useNavigate } from 'react-router';
@@ -41,7 +40,7 @@ export default function ManageCRMProject() {
         handleKeyPress,
         handleClearSearch,
         fetchProjects,
-    } = useProjectManagement();
+    } = useProjectManagement( { iup_customer_id: '' });
 
     const handleDelete = (row: ProjectItem) => {
         setConfirmDelete({ show: true, projectId: row.project_id, projectName: row.project_name || row.project_id });
@@ -95,6 +94,25 @@ export default function ManageCRMProject() {
         {
             name: 'Sales',
             selector: row => row.employee_name || '-',
+            wrap: true,
+        },
+        {
+            name: 'Division',
+            cell: row => (
+                <div className="flex flex-wrap gap-1 py-1">
+                    {row.devision_project_names && row.devision_project_names.length > 0
+                        ? row.devision_project_names.map((name, idx) => (
+                            <span
+                                key={idx}
+                                className="inline-flex items-center justify-center rounded-md font-medium px-2 bg-blue-100 text-blue-800 border border-blue-200"
+                            >
+                                {name}
+                            </span>
+                        ))
+                        : <span className="text-gray-400 text-sm">-</span>
+                    }
+                </div>
+            ),
             wrap: true,
         },
         {
@@ -268,15 +286,6 @@ export default function ManageCRMProject() {
                             responsive
                             highlightOnHover
                             striped={false}
-                            noDataComponent={
-                                <div className="text-center py-8">
-                                    <FaProjectDiagram className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                    <p className="text-gray-500">No project data found</p>
-                                    <p className="text-sm text-gray-400">
-                                        {searchValue ? 'Try adjusting your search' : 'Start by adding your first project'}
-                                    </p>
-                                </div>
-                            }
                             persistTableHead
                             borderRadius="8px"
                             onRowClicked={handleEdit}

@@ -17,7 +17,9 @@ export class ROECalculatorService {
                 roe_calculator_id: apiData.id,
 
                 // Step 1 - Basic Info
-                customer_id: apiData.customer_id,
+                iup_customer_id: (apiData as any).iup_customer_id || apiData.customer_id || '',
+                iup_id: (apiData as any).iup_id || '',
+                customer_name: (apiData as any).customer_name || '',
                 komoditas: apiData.commodity === 'Batu Bara' ? 'batu_bara' : apiData.commodity === 'Nikel' ? 'nikel' : (apiData.commodity?.toLowerCase() === 'batu_bara' || apiData.commodity?.toLowerCase() === 'nikel') ? apiData.commodity?.toLowerCase() as 'batu_bara' | 'nikel' : '',
                 tonase_per_ritase: apiData.tonnage_per_ritase || '',
                 jarak_haul: apiData.haul_distance || '',
@@ -118,7 +120,7 @@ export class ROECalculatorService {
         try {
             // Map frontend fields to API fields
             const apiData = {
-                customer_id: data.customer_id,
+                iup_customer_id: data.iup_customer_id,
                 commodity: data.komoditas === 'batu_bara' ? 'Batu Bara' : data.komoditas === 'nikel' ? 'Nikel' : data.komoditas,
                 tonnage_per_ritase: data.tonase_per_ritase,
                 selling_price_per_ton: data.harga_jual_per_ton,
@@ -131,7 +133,7 @@ export class ROECalculatorService {
             
             const mappedData: ROECalculatorData = {
                 roe_calculator_id: responseData.id,
-                customer_id: responseData.customer_id,
+                iup_customer_id: responseData.customer_id,
                 komoditas: responseData.commodity === 'Batu Bara' ? 'batu_bara' : responseData.commodity === 'Nikel' ? 'nikel' : (responseData.commodity?.toLowerCase() === 'batu_bara' || responseData.commodity?.toLowerCase() === 'nikel') ? responseData.commodity?.toLowerCase() as 'batu_bara' | 'nikel' : '',
                 tonase_per_ritase: responseData.tonnage_per_ritase,
                 harga_jual_per_ton: responseData.selling_price_per_ton,
@@ -188,7 +190,7 @@ export class ROECalculatorService {
             switch (step) {
                 case 1:
                     apiData = {
-                        customer_id: data.customer_id,
+                        iup_customer_id: data.iup_customer_id,
                         commodity: data.komoditas === 'batu_bara' ? 'Batu Bara' : data.komoditas === 'nikel' ? 'Nikel' : data.komoditas,
                         tonnage_per_ritase: data.tonase_per_ritase,
                         selling_price_per_ton: data.harga_jual_per_ton,
@@ -358,7 +360,7 @@ export class ROECalculatorService {
             }
 
             const apiData = {
-                customer_id: payload.customer_id,
+                iup_customer_id: payload.iup_customer_id,
                 commodity: payload.komoditas === 'batu_bara' ? 'Batu Bara' : payload.komoditas === 'nikel' ? 'Nikel' : payload.komoditas,
                 tonnage_per_ritase: payload.tonase_per_ritase,
                 selling_price_per_ton: payload.harga_jual_per_ton,
@@ -429,7 +431,7 @@ export class ROECalculatorService {
             const listData = response.data as ApiQuoteListResponse;
             const mappedData: ROECalculatorData[] = (listData.data || []).map((item: ApiQuoteResponse): ROECalculatorData => ({
                 roe_calculator_id: item.id,
-                customer_id: item.customer_id,
+                iup_customer_id: item.customer_id,
                 customer_name: item.customer?.name || 'Unknown',
                 komoditas: (() => {
                     if (item.commodity === 'Batu Bara') return 'batu_bara' as const;

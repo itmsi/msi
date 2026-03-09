@@ -103,6 +103,7 @@ export interface RorListRequest {
   is_admin?: string | boolean;
   sort_order?: "asc" | "desc";
   sort_by?: string;
+  iup_customer_id?: string;
   status?: string; // contoh: "draft", "published"
   commodity?: string | 'batu bara' | 'nikel'; 
 }
