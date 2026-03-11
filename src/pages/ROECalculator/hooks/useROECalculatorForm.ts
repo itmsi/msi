@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, CalculationResponse, QuoteDefaults } from '../types/roeCalculator';
 import { ROECalculatorService } from '../services/roeCalculatorService';
 
-export const useROECalculatorForm = (calculatorId?: string) => {
+export const useROECalculatorForm = (calculatorId?: string, lang: string = 'id') => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
@@ -254,7 +254,7 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                 if (response.success && response.data) {
                     const newId = response.data.roe_calculator_id;
                     const nextStep = goNext && step < 4 ? step + 1 : step;
-                    navigate(`/roe-roa-calculator/manage/edit/${newId}?step=${nextStep}`, { replace: true });
+                    navigate(`/roe-roa-calculator/manage/edit/${newId}?step=${nextStep}&lang=${lang}`, { replace: true });
                     // toast.success('Calculator created successfully');
                     return true;
                 }
@@ -318,10 +318,10 @@ export const useROECalculatorForm = (calculatorId?: string) => {
                         }
                         
                         const idToUse = step === 2 && response.data?.data?.quote_id ? response.data.data.quote_id : calculatorId;
-                        navigate(`/roe-roa-calculator/manage/edit/${idToUse}?step=${nextStep}`, { replace: true });
+                        navigate(`/roe-roa-calculator/manage/edit/${idToUse}?step=${nextStep}&lang=${lang}`, { replace: true });
                     }
                     if (goNext && step === 4) {
-                    navigate(`/roe-roa-calculator/manage`);
+                    navigate(`/roe-roa-calculator/manage?lang=${lang}`);
                     }
                     return true;
                 }
@@ -386,12 +386,12 @@ export const useROECalculatorForm = (calculatorId?: string) => {
             setCurrentStep(step);
             
             if (calculatorId) {
-                navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${step}`, { replace: true });
+                navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${step}&lang=${lang}`, { replace: true });
             } else {
-                navigate(`/roe-roa-calculator/manage/create?step=${step}`, { replace: true });
+                navigate(`/roe-roa-calculator/manage/create?step=${step}&lang=${lang}`, { replace: true });
             }
         }
-    }, [calculatorId, navigate]);
+    }, [calculatorId, navigate, lang]);
 
     return {
         // State

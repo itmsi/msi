@@ -15,6 +15,7 @@ interface Step4Props {
     loading: boolean;
     calculatorId?: string;
     saveStep: (step: number, validate: boolean) => Promise<boolean>;
+    langField: (key: string) => string;
 }
 
 export default function Step4MonthlyCosts({ 
@@ -23,14 +24,12 @@ export default function Step4MonthlyCosts({
     handleInputChange,
     loading,
     calculatorId,
-    saveStep
+    saveStep,
+    langField
 }: Step4Props) {
-    
     const navigate = useNavigate();
-    
     const [calculating, setCalculating] = useState(false);
 
-    
     useEffect(() => {
         if (calculatorId && formData.step && formData.step < 4) {
             navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`, { replace: true });
@@ -42,7 +41,7 @@ export default function Step4MonthlyCosts({
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
                     <LoadingSpinner />
-                    <p className="text-gray-600">Please wait while we fetch your purchase data...</p>
+                    <p className="text-gray-600">{langField('waitFetchPurchaseData')}</p>
                 </div>
             </div>
         );
@@ -61,16 +60,16 @@ export default function Step4MonthlyCosts({
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Monthly Costs</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">{langField('monthlyCosts')}</h3>
                 <p className="text-sm text-gray-600 mb-6">
-                    Input semua biaya operasional bulanan untuk menghitung total expense
+                    {langField('monthlyCostsDescription')}
                 </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Fuel Expense */}
                 <div>
-                    <Label htmlFor="fuel_expense">Biaya Ban per Unit (Rp/bulan)</Label>
+                    <Label htmlFor="fuel_expense">{langField('tyreCostPerUnit')}</Label>
                     <Input
                         id="tyre_expense_monthly"
                         onKeyPress={handleKeyPress}
@@ -89,7 +88,7 @@ export default function Step4MonthlyCosts({
                         maxLength={15}
                         error={!!validationErrors.tyre_expense_monthly}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Biaya bahan bakar per bulan</p>
+                    <p className="text-xs text-gray-500 mt-1">{langField('fuelCostNote')}</p>
                     {validationErrors.tyre_expense_monthly && (
                         <span className="text-sm text-red-500">{validationErrors.tyre_expense_monthly}</span>
                     )}
@@ -97,7 +96,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Maintenance Expense */}
                 <div>
-                    <Label htmlFor="maintenance_expense">Biaya Perawatan per Unit (Rp/Bulan)</Label>
+                    <Label htmlFor="maintenance_expense">{langField('maintenanceCostPerUnit')}</Label>
                     <Input
                         id="sparepart_expense_monthly"
                         onKeyPress={handleKeyPress}
@@ -116,7 +115,7 @@ export default function Step4MonthlyCosts({
                         maxLength={15}
                         error={!!validationErrors.sparepart_expense_monthly}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Biaya perawatan dan service per bulan</p>
+                    <p className="text-xs text-gray-500 mt-1">{langField('maintenanceCostNote')}</p>
                     {validationErrors.sparepart_expense_monthly && (
                         <span className="text-sm text-red-500">{validationErrors.sparepart_expense_monthly}</span>
                     )}
@@ -124,7 +123,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Operator Salary */}
                 <div>
-                    <Label htmlFor="operator_salary">Gaji Operator per Unit (Rp/Bulan)</Label>
+                    <Label htmlFor="operator_salary">{langField('operatorSalaryPerUnit')}</Label>
                     <Input
                         id="operator_salary"
                         onKeyPress={handleKeyPress}
@@ -143,7 +142,7 @@ export default function Step4MonthlyCosts({
                         maxLength={15}
                         error={!!validationErrors.operator_salary}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Gaji operator dan helper per bulan</p>
+                    <p className="text-xs text-gray-500 mt-1">{langField('operatorSalaryNote')}</p>
                     {validationErrors.operator_salary && (
                         <span className="text-sm text-red-500">{validationErrors.operator_salary}</span>
                     )}
@@ -151,7 +150,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Insurance Expense */}
                 <div>
-                    <Label htmlFor="insurance_expense">Depresiasi semua Unit (Rp/Bulan)</Label>
+                    <Label htmlFor="insurance_expense">{langField('depreciationAllUnits')}</Label>
                     <Input
                         id="insurance_expense"
                         onKeyPress={handleKeyPress}
@@ -170,7 +169,7 @@ export default function Step4MonthlyCosts({
                         maxLength={15}
                         error={!!validationErrors.depreciation_monthly}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Biaya asuransi per bulan</p>
+                    <p className="text-xs text-gray-500 mt-1">{langField('insuranceCostNote')}</p>
                     {validationErrors.depreciation_monthly && (
                         <span className="text-sm text-red-500">{validationErrors.depreciation_monthly}</span>
                     )}
@@ -178,7 +177,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Admin Expense */}
                 <div>
-                    <Label htmlFor="interest_monthly">Bunga semua Unit (Rp/bulan)</Label>
+                    <Label htmlFor="interest_monthly">{langField('interestAllUnits')}</Label>
                     {/* <Input
                         id="interest_monthly"
                         value={formatNumberInputFadlan(formData.interest_monthly || formData?.cost_data?.interest_monthly || '')}
@@ -207,7 +206,7 @@ export default function Step4MonthlyCosts({
                         maxLength={15}
                         error={!!validationErrors.interest_monthly}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Bunga per bulan</p>
+                    <p className="text-xs text-gray-500 mt-1">{langField('interestNote')}</p>
                     {validationErrors.interest_monthly && (
                         <span className="text-sm text-red-500">{validationErrors.interest_monthly}</span>
                     )}
@@ -215,7 +214,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Other Expense */}
                 <div>
-                    <Label htmlFor="overhead_monthly">Overhead/G&A (Semua Unit)</Label>
+                    <Label htmlFor="overhead_monthly">{langField('overheadAllUnits')}</Label>
                     <Input
                         id="overhead_monthly"
                         onKeyPress={handleKeyPress}
@@ -239,7 +238,7 @@ export default function Step4MonthlyCosts({
                         maxLength={15}
                         error={!!validationErrors.overhead_monthly}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Biaya lain-lain per bulan</p>
+                    <p className="text-xs text-gray-500 mt-1">{langField('otherCostNote')}</p>
                     {validationErrors.overhead_monthly && (
                         <span className="text-sm text-red-500">{validationErrors.overhead_monthly}</span>
                     )}
@@ -256,13 +255,13 @@ export default function Step4MonthlyCosts({
                     className="flex items-center gap-2"
                 >
                 <MdCalculate size={16} />
-                    {calculating ? 'Calculating...' : 'Simpan & Hitung'}
+                    {calculating ? langField('calculating') : langField('saveAndCalculate')}
                 </Button>
             </div>
 
             {/* Monthly Cost Breakdown */}
             <div className="border border-red-200 rounded-lg p-4">
-                <h2 className="font-medium text-red-900 mb-4">Detail Biaya Bulanan (Rp)</h2>
+                <h2 className="font-medium text-red-900 mb-4">{langField('monthlyCostDetail')}</h2>
                 <div className="space-y-4">
                     {formData?.charts_data?.breakdown_biaya.map((item) => {
                         return (
@@ -278,14 +277,14 @@ export default function Step4MonthlyCosts({
                 </div>
                 <hr className="my-2" />
                 <div className="flex justify-between font-bold text-base">
-                    <span className='font-secondary'>Total Pengeluaran Bulanan</span>
+                    <span className='font-secondary'>{langField('totalMonthlyExpenditure')}</span>
                     <span className="text-red-700">{formatCurrency(formData?.charts_data?.revenue_expense_profit?.[0]?.expense || '0')}</span>
                 </div>
             </div>
 
             {/* Expense Categories Breakdown Chart */}
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h2 className="font-medium text-red-900 mb-4">Detail Biaya Bulanan (%)</h2>
+                <h2 className="font-medium text-red-900 mb-4">{langField('monthlyCostPercentage')}</h2>
                 <div className="space-y-3">
                     {formData?.charts_data?.breakdown_biaya.map((item, index) => {
                         const colors = [

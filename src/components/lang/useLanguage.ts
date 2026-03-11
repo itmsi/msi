@@ -21,14 +21,6 @@ export const SUPPORTED_LANGS: LangOption[] = [
     { code: 'zh', label: '中文', flag: generateFlag('CN') },
 ];
 
-/**
- * Hook general untuk bilingual label berdasarkan URL param `lang`.
- * Bisa dipakai di halaman mana saja, tinggal passing labels-nya.
- *
- * @example
- * const { langField, lang, setLang } = useLanguage(myLabels);
- * <Label>{langField('fieldName')}</Label>
- */
 export function useLanguage(labels?: TranslationMap, defaultLang: LangCode = 'en') {
     const [searchParams, setSearchParams] = useSearchParams();
 

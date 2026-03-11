@@ -15,6 +15,7 @@ interface Step3Props {
     loading: boolean,
     onLoadDefaults: () => Promise<void>;
     calculatorId?: string;
+    langField: (key: string) => string;
 }
 
 export default function Step3Operational({ 
@@ -22,7 +23,8 @@ export default function Step3Operational({
     validationErrors, 
     handleInputChange,
     loading,
-    calculatorId
+    calculatorId,
+    langField
 }: Step3Props) {
     
     const navigate = useNavigate();
@@ -33,8 +35,8 @@ export default function Step3Operational({
         }
     }, [formData.step, calculatorId, navigate]);
     const STATUS_OPTIONS = [
-        { value: 'L/km', label: 'L/km (per kilometer)' },
-        { value: 'L/km/ton', label: 'L/km/ton (per km per ton)' }
+        { value: 'L/km', label: langField('fuelConsumptionPerKm') },
+        { value: 'L/km/ton', label: langField('fuelConsumptionPerKmTon') }
     ];
     
     if (loading) {
@@ -42,7 +44,7 @@ export default function Step3Operational({
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
                     <LoadingSpinner />
-                    <p className="text-gray-600">Please wait while we fetch your purchase data...</p>
+                    <p className="text-gray-600">{langField('waitFetchPurchaseData')}</p>
                 </div>
             </div>
         );
@@ -50,16 +52,16 @@ export default function Step3Operational({
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Parameter Operasional</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">{langField('operationalParameters')}</h3>
                 <p className="text-sm text-gray-600 mb-6">
-                    Input parameter operasional untuk menghitung revenue dan performa unit
+                    {langField('operationalDescription')}
                 </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Ritase per Shift */}
                 <div>
-                    <Label htmlFor="ritase_per_shift">Ritase per Shift</Label>
+                    <Label htmlFor="ritase_per_shift">{langField('ritasePerShift')}</Label>
                     <Input
                         name='ritase_per_shift'
                         id="ritase_per_shift"
@@ -76,8 +78,8 @@ export default function Step3Operational({
                                 (validValue) => handleInputChange('ritase_per_shift', validValue),
                                 () => handleInputChange('ritase_per_shift', null),
                                 true,
-                                7, // maxIntegerDigits
-                                4 // maxDecimalDigits
+                                7,
+                                4
                             );
                         }}
                         error={!!validationErrors.ritase_per_shift}
@@ -89,7 +91,7 @@ export default function Step3Operational({
 
                 {/* Shift per Hari */}
                 <div>
-                    <Label htmlFor="shift_per_hari">Shift per Hari</Label>
+                    <Label htmlFor="shift_per_hari">{langField('shiftPerDay')}</Label>
                     <Input
                         id="shift_per_hari"
                         value={formData.shift_per_hari === null ? '' : formData.shift_per_hari || formData?.operation_data?.shift_per_hari || '0'}
@@ -101,8 +103,8 @@ export default function Step3Operational({
                                 (validValue) => handleInputChange('shift_per_hari', validValue),
                                 () => handleInputChange('shift_per_hari', null),
                                 true,
-                                7, // maxIntegerDigits
-                                4 // maxDecimalDigits
+                                7,
+                                4
                             );
                         }}
                         error={!!validationErrors.shift_per_hari}
@@ -114,7 +116,7 @@ export default function Step3Operational({
 
                 {/* Hari Kerja per Bulan */}
                 <div>
-                    <Label htmlFor="hari_kerja_per_bulan">Hari Kerja per Bulan</Label>
+                    <Label htmlFor="hari_kerja_per_bulan">{langField('workingDaysPerMonth')}</Label>
                     <Input
                         id="hari_kerja_per_bulan"
                         value={
@@ -130,8 +132,8 @@ export default function Step3Operational({
                                 (validValue) => handleInputChange('hari_kerja_per_bulan', validValue),
                                 () => handleInputChange('hari_kerja_per_bulan', null),
                                 true,
-                                7, // maxIntegerDigits
-                                4 // maxDecimalDigits
+                                7,
+                                4
                             );
                         }}
                         error={!!validationErrors.hari_kerja_per_bulan}
@@ -144,7 +146,7 @@ export default function Step3Operational({
 
                 {/* Utilization Rate Slider */}
                 <div>
-                    <Label htmlFor="utilization_percent">Physical Availability (%)</Label>
+                    <Label htmlFor="utilization_percent">{langField('physicalAvailability')}</Label>
                     <div className="space-y-2">
                         <Input
                             id="utilization_percent"
@@ -175,21 +177,21 @@ export default function Step3Operational({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Working Days */}
                     <div>
-                        <Label htmlFor="fuel_consumption_type">Tipe Konsumsi BBM</Label>
+                        <Label htmlFor="fuel_consumption_type">{langField('fuelConsumptionType')}</Label>
                         <CustomSelect
                             id="fuel_consumption_type"
                             value={STATUS_OPTIONS.find(option => option.value === formData.fuel_consumption_type) || null}
                             onChange={(option) => handleInputChange('fuel_consumption_type', option?.value || '')}
                             options={STATUS_OPTIONS}
                             className="w-full"
-                            placeholder="Select Tipe Konsumsi BBM"
+                            placeholder={langField('selectFuelConsumptionType')}
                             isClearable={false}
                             isSearchable={false}
                             error={validationErrors.fuel_consumption_type}
                         />
                     </div>
                     <div>
-                        <Label htmlFor="fuel_consumption">Konsumsi BBM {formData?.fuel_consumption_type || 'L/km'}</Label>
+                        <Label htmlFor="fuel_consumption">{langField('fuelConsumption')} {formData?.fuel_consumption_type || 'L/km'}</Label>
                         
                         <Input
                             id="fuel_consumption"
@@ -207,8 +209,8 @@ export default function Step3Operational({
                                     (validValue) => handleInputChange('fuel_consumption', validValue),
                                     () => handleInputChange('fuel_consumption', null),
                                     true,
-                                    7, // maxIntegerDigits
-                                    4 // maxDecimalDigits
+                                    7,
+                                    4
                                 );
                             }}
                             error={!!validationErrors.fuel_consumption}
@@ -219,7 +221,7 @@ export default function Step3Operational({
                     </div>
 
                     <div>
-                        <Label htmlFor="fuel_price">Harga BBM (Rp/L)</Label>                        
+                        <Label htmlFor="fuel_price">{langField('fuelPrice')}</Label>                        
                         <Input
                             id="fuel_price"
                             type="text"
