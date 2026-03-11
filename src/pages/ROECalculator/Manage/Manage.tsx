@@ -264,11 +264,10 @@ export default function ManageRor() {
                             <p className="mt-1 text-sm text-gray-500">{langField('manageCalculators')}</p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <LanguageSwitcher currentLang={lang} onChangeLang={setLang} />
                             <PermissionGate permission="create">
                                 <Button
                                     onClick={() => navigate(`/roe-roa-calculator/manage/create?lang=${lang}`)}
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-2 lg:w-[220px]"
                                     size="sm"
                                 >
                                     <MdAdd className="h-4 w-4" />
