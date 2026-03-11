@@ -2,8 +2,8 @@ import { TranslationMap } from '@/components/lang/useLanguage';
 
 export const quotationLabelPDF: TranslationMap = {
     region: {
-        id: '地区 :',
-        en: '地区 :',
+        id: 'Wilayah :',
+        en: 'Region :',
         zh: '地区 :'
     },
     quotationNumber: {
