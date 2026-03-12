@@ -15,10 +15,9 @@ import { formatCurrency, formatDateTime } from "@/helpers/generalHelper";
 import { FaRegFilePdf } from "react-icons/fa6";
 import { useLanguage } from "@/components/lang/useLanguage";
 import { roeCalculatorLabels } from "../language/roeCalculatorLabels";
-import LanguageSwitcher from "@/components/lang/LanguageSwitcher";
 
 export default function ManageRor() {
-    const { lang, langField, setLang } = useLanguage(roeCalculatorLabels);
+    const { lang, langField } = useLanguage(roeCalculatorLabels);
     const navigate = useNavigate();
     const {
         searchTerm,
@@ -264,7 +263,6 @@ export default function ManageRor() {
                             <p className="mt-1 text-sm text-gray-500">{langField('manageCalculators')}</p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <LanguageSwitcher currentLang={lang} onChangeLang={setLang} /> 
                             <PermissionGate permission="create">
                                 <Button
                                     onClick={() => navigate(`/roe-roa-calculator/manage/create?lang=${lang}`)}
