@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { useQuotationManagement } from './hooks/useQuotationManagement';
 import { ManageQuotationItem } from './types/quotation';
 import { useLanguage } from '@/components/lang/useLanguage';
-import LanguageSwitcher from '@/components/lang/LanguageSwitcher';
 import { quotationManage } from './language/quotationManage';
 import CustomDataTable from '../../../components/ui/table/CustomDataTable';
 import Input from '../../../components/form/input/InputField';
@@ -22,7 +21,7 @@ import FilterSection from './components/FilterSection';
 const ManageQuotations: React.FC = () => {
     const navigate = useNavigate();
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-    const { lang, langField, setLang } = useLanguage(quotationManage);
+    const { lang, langField } = useLanguage(quotationManage);
 
     const {
         searchTerm,
@@ -252,7 +251,6 @@ const ManageQuotations: React.FC = () => {
                             <p className="mt-1 text-sm text-gray-500">{langField('manageDescription')}</p>
                         </div>
                         <div className="flex items-center gap-4">
-                            <LanguageSwitcher currentLang={lang} onChangeLang={setLang} />
                             <PermissionGate permission="create">
                                 <Button
                                     onClick={() => navigate(`/quotations/manage/create?lang=${lang}`)}

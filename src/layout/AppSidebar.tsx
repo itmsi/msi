@@ -15,6 +15,8 @@ import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "@/hooks/useAuth";
 import GridShape from "@/components/common/GridShape";
 import { TbTopologyStar3 } from "react-icons/tb";
+import { useLanguage } from "@/components/lang/useLanguage";
+import { menuTranslations } from "@/components/lang/menuTranslations";
 
 type SubNavItem = {
     name: string;
@@ -34,186 +36,192 @@ type NavItem = {
     subItems?: SubNavItem[];
 };
 
-const navItems: NavItem[] = [
-    {
-        icon: <GridIcon />,
-        name: "Dashboard",
-        allowedRoles: ['ADMIN'],
-        subItems: [{ name: "Main", path: "/home", allowedRoles: ['ADMIN'], }],
-    },
-    {
-        name: "Power BI",
-        icon: <GrLineChart />,
-        allowedRoles: ['Dashboard Power BI', 'Manage Power BI', 'Category Power BI'],
-        subItems: [
-            { name: "Dashboard", path: "/power-bi/dashboard", allowedRoles: ['Dashboard Power BI'], },
-            { name: "Category", path: "/power-bi/category", allowedRoles: ['Category Power BI'], },
-            { name: "Manage", path: "/power-bi/manage", allowedRoles: ['Manage Power BI'], },
-        ],
-    },
-    {
-        name: "Quotation",
-        icon: <GrDocumentVerified />,
-        allowedRoles: ['Product Quotation', 'Accessories Quotation', 'Manage Quotation', 'TNC Quotation', 'Customer Quotation', 'Bank Quotation', 'Island'],
-        subItems: [
-            { name: "Manage", path: "/quotations/manage", allowedRoles: ['Manage Quotation'], },
-            { name: "Product", path: "/quotations/products", allowedRoles: ['Product Quotation'], },
-            { name: "Accessories", path: "/quotations/accessories", allowedRoles: ['Accessories Quotation'], },
-            { name: "Term Condition", path: "/quotations/term-condition", allowedRoles: ['TNC Quotation'], },
-            {
-                name: "Administration",
-                subItems: [
-                    { 
-                        name: "Customers", 
-                        path: "/quotations/administration/customers", 
-                        allowedRoles: ['Customer Quotation']
-                    },
-                    { 
-                        name: "Bank Accounts", 
-                        path: "/quotations/administration/bank-accounts", 
-                        allowedRoles: ['Bank Quotation']
-                    },
-                    { 
-                        name: "Regions", 
-                        path: "/quotations/administration/islands", 
-                        allowedRoles: ['Island']
-                    }
-                ],
-            },
-        ],
-    },
-    {
-        name: "Quotation ITI",
-        icon: <GrDocumentVerified />,
-        allowedRoles: ['Product ITI Quotation', 'Accessories ITI Quotation', 'Manage ITI Quotation', 'TNC ITI Quotation', 'Customer ITI Quotation', 'Bank ITI Quotation', 'Island ITI'],
-        subItems: [
-            { name: "Manage", path: "/quotations-iti/manage", allowedRoles: ['Manage ITI Quotation'], },
-            { name: "Product", path: "/quotations-iti/products", allowedRoles: ['Product ITI Quotation'], },
-            { name: "Accessories", path: "/quotations-iti/accessories", allowedRoles: ['Accessories ITI Quotation'], },
-            { name: "Term Condition", path: "/quotations-iti/term-condition", allowedRoles: ['TNC ITI Quotation'], },
-            {
-                name: "Administration",
-                subItems: [
-                    { 
-                        name: "Customers", 
-                        path: "/quotations-iti/administration/customers", 
-                        allowedRoles: ['Customer ITI Quotation']
-                    },
-                    { 
-                        name: "Bank Accounts", 
-                        path: "/quotations-iti/administration/bank-accounts", 
-                        allowedRoles: ['Bank ITI Quotation']
-                    },
-                    { 
-                        name: "Regions", 
-                        path: "/quotations-iti/administration/islands", 
-                        allowedRoles: ['Island']
-                    }
-                ],
-            },
-        ],
-    },
-    {
-        name: "Return on Equity ",
-        icon: <GiChart />,
-        allowedRoles: ['Manage ROA ROE Calculate', 'Setting ROA ROE Calculate'],
-        path: "/roe-roa-calculator/manage"
-        // subItems: [
-        //     { name: "Manage", path: "/roe-roa-calculator/manage", allowedRoles: ['Manage ROA ROE Calculate'] },
-        //     // { name: "Settings", path: "/roe-roa-calculator/settings", allowedRoles: ['Setting ROA ROE Calculate'] },
-        // ],
-    },
-    {
-        name: "CRM",
-        icon: <TbTopologyStar3 />,
-        allowedRoles: [
-            'Area Structure CRM', 
-            'IUP Management CRM', 
-            'Contractors CRM',
-            'Activities CRM',
-            'User Management CRM',
-            'Project CRM',
-            'Division CRM'
-        ],
-        subItems: [
-            { name: "Area Structure", path: "/crm/area-structure", allowedRoles: ['Area Structure CRM'] },
-            { name: "IUP Management", path: "/crm/iup-management", allowedRoles: ['IUP Management CRM'] },
-            { name: "Contractors", path: "/crm/contractors", allowedRoles: ['Contractors CRM'] },
-            { name: "Activities", path: "/crm/activity", allowedRoles: ['Activities CRM'] },
-            { name: "Projects", path: "/crm/project", allowedRoles: ['Project CRM'] },
-            { name: "User Management", path: "/crm/user-management", allowedRoles: ['User Management CRM'] },
-            { name: "Division", path: "/crm/manage-division", allowedRoles: ['Division CRM'] }
-        ],
-    }
-];
-
-const othersItems: NavItem[] = [
-    {
-        icon: <PlugInIcon />,
-        name: "Authentication",
-        allowedRoles: ['Sign In', 'Sign Up'], // Kosongkan karena tidak ada di auth_menu
-        subItems: [
-            { name: "Sign In", path: "/signin", allowedRoles: ['Sign In'], },
-            { name: "Sign Up", path: "/signup", allowedRoles: ['Sign Up'], },
-        ],
-    },
-    {
-        icon: <UserIcon />,
-        name: "Employee",
-        subItems: [
-            {
-                name: "Employees",
-                path: "/employees",
-                allowedRoles: ['Employees'],
-            },
-            {
-                name: "Companies",
-                path: "/companies",
-                allowedRoles: ['Companies'],
-            },
-            {
-                name: "Departments",
-                path: "/departments",
-                allowedRoles: ['Departments'],
-            },
-            {
-                name: "Users",
-                path: "/users",
-                allowedRoles: ['Users'],
-            },
-            {
-                name: "Positions",
-                path: "/position",
-                allowedRoles: ['Positions'],
-            },
-            {
-                name: "Roles",
-                path: "/roles",
-                allowedRoles: ['Roles'],
-            },
-            { 
-                name: "Menu", 
-                path: "/menu", 
-                allowedRoles: ['Menu'], 
-            },
-            { 
-                name: "Sign Up", 
-                path: "/signup", 
-                allowedRoles: ['Sign Up'], 
-            },
-        ],
-    },
-];
-
 const AppSidebar: React.FC = () => {
     const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
     const location = useLocation();
     const { menu: authMenu } = useAuth();
+    const { lang, langField, hasLangParam } = useLanguage(menuTranslations);
     
     const allowedMenuNames = useMemo(
         () => authMenu?.map(menu => menu.name) || [],
         [authMenu]
     );
+
+    // Helper function untuk membuat path dengan conditional lang parameter
+    const buildPath = useCallback((basePath: string): string => {
+        return hasLangParam ? `${basePath}?lang=${lang}` : basePath;
+    }, [hasLangParam, lang]);
+
+    const navItems: NavItem[] = useMemo(() => [
+        {
+            icon: <GridIcon />,
+            name: "Dashboard",
+            allowedRoles: ['ADMIN'],
+            subItems: [{ name: "Main", path: buildPath("/home"), allowedRoles: ['ADMIN'], }],
+        },
+        {
+            name: "Power BI",
+            icon: <GrLineChart />,
+            allowedRoles: ['Dashboard Power BI', 'Manage Power BI', 'Category Power BI'],
+            subItems: [
+                { name: "Dashboard", path: buildPath("/power-bi/dashboard"), allowedRoles: ['Dashboard Power BI'], },
+                { name: "Category", path: buildPath("/power-bi/category"), allowedRoles: ['Category Power BI'], },
+                { name: "Manage", path: buildPath("/power-bi/manage"), allowedRoles: ['Manage Power BI'], },
+            ],
+        },
+        {
+            name: "Quotation",
+            icon: <GrDocumentVerified />,
+            allowedRoles: ['Product Quotation', 'Accessories Quotation', 'Manage Quotation', 'TNC Quotation', 'Customer Quotation', 'Bank Quotation', 'Island'],
+            subItems: [
+                { name: "Manage", path: buildPath("/quotations/manage"), allowedRoles: ['Manage Quotation'], },
+                { name: "Product", path: buildPath("/quotations/products"), allowedRoles: ['Product Quotation'], },
+                { name: "Accessories", path: buildPath("/quotations/accessories"), allowedRoles: ['Accessories Quotation'], },
+                { name: "Term Condition", path: buildPath("/quotations/term-condition"), allowedRoles: ['TNC Quotation'], },
+                {
+                    name: "Administration",
+                    subItems: [
+                        { 
+                            name: "Customers", 
+                            path: buildPath("/quotations/administration/customers"), 
+                            allowedRoles: ['Customer Quotation']
+                        },
+                        { 
+                            name: "Bank Accounts", 
+                            path: buildPath("/quotations/administration/bank-accounts"), 
+                            allowedRoles: ['Bank Quotation']
+                        },
+                        { 
+                            name: "Regions", 
+                            path: buildPath("/quotations/administration/islands"), 
+                            allowedRoles: ['Island']
+                        }
+                    ],
+                },
+            ],
+        },
+        {
+            name: "Quotation ITI",
+            icon: <GrDocumentVerified />,
+            allowedRoles: ['Product ITI Quotation', 'Accessories ITI Quotation', 'Manage ITI Quotation', 'TNC ITI Quotation', 'Customer ITI Quotation', 'Bank ITI Quotation', 'Island ITI'],
+            subItems: [
+                { name: "Manage", path: buildPath("/quotations-iti/manage"), allowedRoles: ['Manage ITI Quotation'], },
+                { name: "Product", path: buildPath("/quotations-iti/products"), allowedRoles: ['Product ITI Quotation'], },
+                { name: "Accessories", path: buildPath("/quotations-iti/accessories"), allowedRoles: ['Accessories ITI Quotation'], },
+                { name: "Term Condition", path: buildPath("/quotations-iti/term-condition"), allowedRoles: ['TNC ITI Quotation'], },
+                {
+                    name: "Administration",
+                    subItems: [
+                        { 
+                            name: "Customers", 
+                            path: buildPath("/quotations-iti/administration/customers"), 
+                            allowedRoles: ['Customer ITI Quotation']
+                        },
+                        { 
+                            name: "Bank Accounts", 
+                            path: buildPath("/quotations-iti/administration/bank-accounts"), 
+                            allowedRoles: ['Bank ITI Quotation']
+                        },
+                        { 
+                            name: "Regions", 
+                            path: buildPath("/quotations-iti/administration/islands"), 
+                            allowedRoles: ['Island']
+                        }
+                    ],
+                },
+            ],
+        },
+        {
+            name: "Return on Equity",
+            icon: <GiChart />,
+            allowedRoles: ['Manage ROA ROE Calculate', 'Setting ROA ROE Calculate'],
+            path: buildPath("/roe-roa-calculator/manage")
+            // subItems: [
+            //     { name: "Manage", path: "/roe-roa-calculator/manage", allowedRoles: ['Manage ROA ROE Calculate'] },
+            //     // { name: "Settings", path: "/roe-roa-calculator/settings", allowedRoles: ['Setting ROA ROE Calculate'] },
+            // ],
+        },
+        {
+            name: "CRM",
+            icon: <TbTopologyStar3 />,
+            allowedRoles: [
+                'Area Structure CRM', 
+                'IUP Management CRM', 
+                'Contractors CRM',
+                'Activities CRM',
+                'User Management CRM',
+                'Project CRM',
+                'Division CRM'
+            ],
+            subItems: [
+                { name: "Area Structure", path: buildPath("/crm/area-structure"), allowedRoles: ['Area Structure CRM'] },
+                { name: "IUP Management", path: buildPath("/crm/iup-management"), allowedRoles: ['IUP Management CRM'] },
+                { name: "Contractors", path: buildPath("/crm/contractors"), allowedRoles: ['Contractors CRM'] },
+                { name: "Activities", path: buildPath("/crm/activity"), allowedRoles: ['Activities CRM'] },
+                { name: "Projects", path: buildPath("/crm/project"), allowedRoles: ['Project CRM'] },
+                { name: "User Management", path: buildPath("/crm/user-management"), allowedRoles: ['User Management CRM'] },
+                { name: "Division", path: buildPath("/crm/manage-division"), allowedRoles: ['Division CRM'] }
+            ],
+        }
+    ], [buildPath]);
+
+    const othersItems: NavItem[] = useMemo(() => [
+        {
+            icon: <PlugInIcon />,
+            name: "Authentication",
+            allowedRoles: ['Sign In', 'Sign Up'], // Kosongkan karena tidak ada di auth_menu
+            subItems: [
+                { name: "Sign In", path: buildPath("/signin"), allowedRoles: ['Sign In'], },
+                { name: "Sign Up", path: buildPath("/signup"), allowedRoles: ['Sign Up'], },
+            ],
+        },
+        {
+            icon: <UserIcon />,
+            name: "Employee",
+            subItems: [
+                {
+                    name: "Employees",
+                    path: buildPath("/employees"),
+                    allowedRoles: ['Employees'],
+                },
+                {
+                    name: "Companies",
+                    path: buildPath("/companies"),
+                    allowedRoles: ['Companies'],
+                },
+                {
+                    name: "Departments",
+                    path: buildPath("/departments"),
+                    allowedRoles: ['Departments'],
+                },
+                {
+                    name: "Users",
+                    path: buildPath("/users"),
+                    allowedRoles: ['Users'],
+                },
+                {
+                    name: "Positions",
+                    path: buildPath("/position"),
+                    allowedRoles: ['Positions'],
+                },
+                {
+                    name: "Roles",
+                    path: buildPath("/roles"),
+                    allowedRoles: ['Roles'],
+                },
+                { 
+                    name: "Menu", 
+                    path: buildPath("/menu"), 
+                    allowedRoles: ['Menu'], 
+                },
+                { 
+                    name: "Sign Up", 
+                    path: buildPath("/signup"), 
+                    allowedRoles: ['Sign Up'], 
+                },
+            ],
+        },
+    ], [buildPath]);
 
     type OpenState = { type: 'main' | 'others'; key: string } | null;
     const [openSubmenu, setOpenSubmenu] = useState<OpenState>(null);
@@ -235,7 +243,7 @@ const AppSidebar: React.FC = () => {
             }
             return item.allowedRoles.some(name => allowedMenuNames.includes(name));
         }),
-        [allowedMenuNames, authMenu]
+        [allowedMenuNames, authMenu, navItems, lang]
     );
 
     const othersFiltered = useMemo(
@@ -248,32 +256,46 @@ const AppSidebar: React.FC = () => {
             }
             return item.allowedRoles.some(name => allowedMenuNames.includes(name));
         }),
-        [allowedMenuNames, authMenu]
+        [allowedMenuNames, authMenu, othersItems, lang]
     );
+
+    // Helper function untuk ekstrak pathname dari URL yang mungkin punya search params
+    const extractPathname = useCallback((url: string): string => {
+        try {
+            return new URL(url, window.location.origin).pathname;
+        } catch {
+            // Fallback jika URL parsing gagal
+            return url.split('?')[0];
+        }
+    }, []);
 
     const isActive = useCallback(
         (path: string) => {
-            if (path === location.pathname) {
+            const pathOnly = extractPathname(path);
+            
+            if (pathOnly === location.pathname) {
                 return true;
             }
             
-            const normalizedPath = path.endsWith('/') ? path : path + '/';
+            const normalizedPath = pathOnly.endsWith('/') ? pathOnly : pathOnly + '/';
             const normalizedCurrentPath = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/';
             
             return normalizedCurrentPath.startsWith(normalizedPath);
         },
-        [location.pathname]
+        [location.pathname, extractPathname]
     );
 
     const isSubActive = useCallback((subPath: string) => {
-        if (subPath === location.pathname) {
+        const pathOnly = extractPathname(subPath);
+        
+        if (pathOnly === location.pathname) {
             return true;
         }
-        const normalizedSubPath = subPath.endsWith('/') ? subPath : subPath + '/';
+        const normalizedSubPath = pathOnly.endsWith('/') ? pathOnly : pathOnly + '/';
         const normalizedCurrentPath = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/';
         
         return normalizedCurrentPath.startsWith(normalizedSubPath);
-    }, [location.pathname]);
+    }, [location.pathname, extractPathname]);
 
     useEffect(() => {
         let bestMatch: OpenState = null;
@@ -361,7 +383,7 @@ const AppSidebar: React.FC = () => {
                                     {nav.icon}
                                 </span>
                                 {(isExpanded || isHovered || isMobileOpen) && (
-                                    <span className="menu-item-text">{nav.name}</span>
+                                    <span className="menu-item-text">{langField(nav.name)}</span>
                                 )}
                                 {(isExpanded || isHovered || isMobileOpen) && (
                                     <ChevronDownIcon
@@ -390,7 +412,7 @@ const AppSidebar: React.FC = () => {
                                         {nav.icon}
                                     </span>
                                     {(isExpanded || isHovered || isMobileOpen) && (
-                                        <span className={`menu-item-text`}>{nav.name}</span>
+                                        <span className={`menu-item-text`}>{langField(nav.name)}</span>
                                     )}
                                 </Link>
                         ) : null }
@@ -437,7 +459,7 @@ const AppSidebar: React.FC = () => {
                                                         isNestedOpen ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"
                                                     }`}
                                                 >
-                                                    <span>{subItem.name}</span>
+                                                    <span>{langField(subItem.name)}</span>
                                                     <ChevronDownIcon
                                                         className={`w-4 h-4 transition-transform duration-200 ${
                                                             isNestedOpen ? "rotate-180" : ""
@@ -458,7 +480,7 @@ const AppSidebar: React.FC = () => {
                                                                         : "menu-dropdown-item-inactive"
                                                                     }`}
                                                                 >
-                                                                    {nestedItem.name}
+                                                                    {langField(nestedItem.name)}
                                                                 </Link>
                                                             </li>
                                                         )})}
@@ -474,7 +496,7 @@ const AppSidebar: React.FC = () => {
                                                     : "menu-dropdown-item-inactive"
                                                 }`}
                                             >
-                                                {subItem.name}
+                                                {langField(subItem.name)}
                                             </Link>
                                         ) : null}
                                     </li>
@@ -483,7 +505,8 @@ const AppSidebar: React.FC = () => {
                             </div>
                         ) : null}
                     </li>
-            )})}
+                )
+            })}
         </ul>
     )};
 

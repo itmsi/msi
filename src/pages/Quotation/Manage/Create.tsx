@@ -41,11 +41,10 @@ import { FaEye } from 'react-icons/fa6';
 import { IslandSelectOption, useIslandSelect } from '@/hooks/useIslandSelect';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from './language/quotationLabels';
-import LanguageSwitcher from '@/components/lang/LanguageSwitcher';
 
 export default function CreateQuotation() {
     const navigate = useNavigate();
-    const { lang, langField, setLang } = useLanguage(quotationLabels);
+    const { langField } = useLanguage(quotationLabels);
     const { isCreating, validationErrors, clearFieldError, createQuotation } = useCreateQuotation();
 
     // Use useEmployees hook
@@ -1069,7 +1068,6 @@ export default function CreateQuotation() {
                             <div className="border-l border-gray-300 h-6 mx-3"></div>
                             <h1 className="ms-2 font-primary-bold font-normal text-xl">{langField('createQuotation')}</h1>
                         </div>
-                        <LanguageSwitcher currentLang={lang} onChangeLang={setLang} />
                     </div>
 
                     {/* Form */}

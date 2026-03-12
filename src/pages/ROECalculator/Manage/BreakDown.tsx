@@ -27,7 +27,6 @@ import Alert from '@/components/ui/alert/Alert';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { roeCalculatorLabels } from '../language/roeCalculatorLabels';
-import LanguageSwitcher from '@/components/lang/LanguageSwitcher';
 
 echarts.use([
     BarChart,
@@ -37,7 +36,7 @@ echarts.use([
 
 
 export default function BreakdownROECalculator() {
-    const { lang, langField, setLang } = useLanguage(roeCalculatorLabels);
+    const { lang, langField } = useLanguage(roeCalculatorLabels);
     const navigate = useNavigate();
     const { calculatorId } = useParams<{ calculatorId: string }>();
     const [breakdownData, setBreakdownData] = useState<ManageROEBreakdownData | null>(null);
@@ -697,7 +696,6 @@ export default function BreakdownROECalculator() {
                         </div>
                         
                         <div className='flex gap-3'>
-                            <LanguageSwitcher currentLang={lang} onChangeLang={setLang} />
                             <Button
                                 className="group rounded-lg w-full flex items-center justify-center gap-2 font-secondary py-2"
                                 onClick={() => navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=4&lang=${lang}`)}

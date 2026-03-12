@@ -24,6 +24,10 @@ export const SUPPORTED_LANGS: LangOption[] = [
 export function useLanguage(labels?: TranslationMap, defaultLang: LangCode = 'en') {
     const [searchParams, setSearchParams] = useSearchParams();
 
+    const hasLangParam = useMemo(() => {
+        return searchParams.has('lang');
+    }, [searchParams]);
+
     const lang = useMemo<LangCode>(() => {
         const paramLang = searchParams.get('lang') as LangCode | null;
         if (paramLang && ['id', 'en', 'zh'].includes(paramLang)) return paramLang;
@@ -51,5 +55,5 @@ export function useLanguage(labels?: TranslationMap, defaultLang: LangCode = 'en
         [setSearchParams]
     );
 
-    return { lang, langField, setLang, supportedLangs: SUPPORTED_LANGS };
+    return { lang, langField, setLang, supportedLangs: SUPPORTED_LANGS, hasLangParam };
 }

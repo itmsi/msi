@@ -42,12 +42,11 @@ import { QuotationService } from './services/quotationService';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from './language/quotationLabels';
-import LanguageSwitcher from '@/components/lang/LanguageSwitcher';
 
 export default function EditQuotation() {
     const navigate = useNavigate();
     const { quotationId } = useParams<{ quotationId: string }>();
-    const { lang, langField, setLang } = useLanguage(quotationLabels);
+    const { lang, langField } = useLanguage(quotationLabels);
     const { loading, quotationData, validationErrors, fetchQuotation, updateQuotation, clearFieldError } = useEditQuotation();
     const [isUpdating, setIsUpdating] = useState(false);
 
@@ -1251,7 +1250,6 @@ export default function EditQuotation() {
                                 )}
                             </div>
                         </div>
-                        <LanguageSwitcher currentLang={lang} onChangeLang={setLang} />
                     </div>
 
                     {/* Form */}
