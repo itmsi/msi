@@ -4,8 +4,11 @@ import { useNavigate } from 'react-router';
 import { ROECalculatorFormData, ROECalculatorValidationErrors, CalculationResponse, QuoteDefaults } from '../types/roeCalculator';
 import { ROECalculatorService } from '../services/roeCalculatorService';
 
-export const useROECalculatorForm = (calculatorId?: string, lang: string = 'id') => {
-    const navigate = useNavigate();
+export const useROECalculatorForm = (calculatorId?: string, buildPath?: (basePath: string) => string) => {
+    const navigate = useNavigate();    
+    // Default buildPath function if not provided
+    const defaultBuildPath = useCallback((basePath: string) => basePath, []);
+    const finalBuildPath = buildPath || defaultBuildPath;    
     const [loading, setLoading] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
     const [calculationResults, setCalculationResults] = useState<CalculationResponse | null>(null);
@@ -85,15 +88,15 @@ export const useROECalculatorForm = (calculatorId?: string, lang: string = 'id')
                 setCurrentStep(response.data.current_step || 1);
             } else {
                 toast.error(response.message || 'Failed to load calculator');
-                navigate('/roe-roa-calculator/manage');
+                navigate(finalBuildPath('/roe-roa-calculator/manage'));
             }
         } catch (error) {
             toast.error('Failed to load calculator data');
-            navigate('/roe-roa-calculator/manage');
+            navigate(finalBuildPath('/roe-roa-calculator/manage'));
         } finally {
             setLoading(false);
         }
-    }, [calculatorId, navigate]);
+    }, [calculatorId, navigate, finalBuildPath]);
 
     const loadQuoteDefaults = useCallback(async () => {
         try {
@@ -244,6 +247,7 @@ export const useROECalculatorForm = (calculatorId?: string, lang: string = 'id')
             }
         }
 
+
         setLoading(true);
         try {
             let response: any;
@@ -254,7 +258,14 @@ export const useROECalculatorForm = (calculatorId?: string, lang: string = 'id')
                 if (response.success && response.data) {
                     const newId = response.data.roe_calculator_id;
                     const nextStep = goNext && step < 4 ? step + 1 : step;
-                    navigate(`/roe-roa-calculator/manage/edit/${newId}?step=${nextStep}&lang=${lang}`, { replace: true });
+                    
+                    // Build URL properly for bilingual system
+                    const basePath = `/roe-roa-calculator/manage/edit/${newId}`;
+                    const baseUrl = finalBuildPath(basePath); 
+                    const separator = baseUrl.includes('?') ? '&' : '?';
+                    const newUrl = `${baseUrl}${separator}step=${nextStep}`;
+                    
+                    navigate(newUrl, { replace: true });
                     // toast.success('Calculator created successfully');
                     return true;
                 }
@@ -317,11 +328,19 @@ export const useROECalculatorForm = (calculatorId?: string, lang: string = 'id')
                             setCurrentStep(nextStep);
                         }
                         
+                        
                         const idToUse = step === 2 && response.data?.data?.quote_id ? response.data.data.quote_id : calculatorId;
-                        navigate(`/roe-roa-calculator/manage/edit/${idToUse}?step=${nextStep}&lang=${lang}`, { replace: true });
+                        
+                        // Build URL properly for bilingual system
+                        const basePath = `/roe-roa-calculator/manage/edit/${idToUse}`;
+                        const baseUrl = finalBuildPath(basePath);
+                        const separator = baseUrl.includes('?') ? '&' : '?';
+                        const newUrl = `${baseUrl}${separator}step=${nextStep}`;
+                        
+                        navigate(newUrl);
                     }
                     if (goNext && step === 4) {
-                    navigate(`/roe-roa-calculator/manage?lang=${lang}`);
+                        navigate(finalBuildPath('/roe-roa-calculator/manage'));
                     }
                     return true;
                 }
@@ -335,7 +354,7 @@ export const useROECalculatorForm = (calculatorId?: string, lang: string = 'id')
         } finally {
             setLoading(false);
         }
-    }, [calculatorId, formData, validateStep, navigate, loadCalculatorData, cleanNumericValue]);
+    }, [calculatorId, formData, validateStep, navigate, loadCalculatorData, cleanNumericValue, finalBuildPath]);
 
     const calculateStep2 = useCallback(async (): Promise<boolean> => {
         if (!calculatorId) {
@@ -386,12 +405,22 @@ export const useROECalculatorForm = (calculatorId?: string, lang: string = 'id')
             setCurrentStep(step);
             
             if (calculatorId) {
-                navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${step}&lang=${lang}`, { replace: true });
+                // Build URL for edit case
+                const basePath = `/roe-roa-calculator/manage/edit/${calculatorId}`;
+                const baseUrl = finalBuildPath(basePath);
+                const separator = baseUrl.includes('?') ? '&' : '?';
+                const newUrl = `${baseUrl}${separator}step=${step}`;
+                navigate(newUrl);
             } else {
-                navigate(`/roe-roa-calculator/manage/create?step=${step}&lang=${lang}`, { replace: true });
+                // Build URL for create case
+                const basePath = '/roe-roa-calculator/manage/create';
+                const baseUrl = finalBuildPath(basePath);
+                const separator = baseUrl.includes('?') ? '&' : '?';
+                const newUrl = `${baseUrl}${separator}step=${step}`;
+                navigate(newUrl);
             }
         }
-    }, [calculatorId, navigate, lang]);
+    }, [calculatorId, navigate, finalBuildPath]);
 
     return {
         // State

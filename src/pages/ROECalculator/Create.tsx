@@ -7,7 +7,6 @@ import Button from '@/components/ui/button/Button';
 import { useROECalculatorForm } from './hooks/useROECalculatorForm';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { roeCalculatorLabels } from './language/roeCalculatorLabels';
-import LanguageSwitcher from '@/components/lang/LanguageSwitcher';
 
 // Step Components
 import Step1BasicInfo from './components/Step1BasicInfo';
@@ -17,7 +16,7 @@ import Step4MonthlyCosts from './components/Step4MonthlyCosts';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 
 export default function CreateROECalculator() {
-    const { lang, langField, setLang } = useLanguage(roeCalculatorLabels);
+    const { lang, langField, buildPath } = useLanguage(roeCalculatorLabels);
     const navigate = useNavigate();
     const { calculatorId } = useParams<{ calculatorId: string }>();
     const [searchParams] = useSearchParams();
@@ -43,8 +42,9 @@ export default function CreateROECalculator() {
         goToStep,
         loadCalculatorData,
         loadQuoteDefaults,
-    } = useROECalculatorForm(calculatorId, lang);
+    } = useROECalculatorForm(calculatorId, buildPath);
 
+    // Initialize data (load calculator and defaults)
     useEffect(() => {
         const initializeData = async () => {
             try {
@@ -52,14 +52,6 @@ export default function CreateROECalculator() {
                     await loadCalculatorData();
                 }
                 await loadQuoteDefaults();
-                
-                const stepParam = searchParams.get('step');
-                if (stepParam) {
-                    const stepNumber = parseInt(stepParam);
-                    if (stepNumber >= 1 && stepNumber <= 4) {
-                        goToStep(stepNumber);
-                    }
-                }
             } catch (error) {
                 console.error('Failed to initialize data:', error);
             }
@@ -109,6 +101,8 @@ export default function CreateROECalculator() {
                     calculateStep2={calculateStep2}
                     loading={loading}
                     calculatorId={calculatorId}
+                    langField={langField}
+                    buildPath={buildPath}
                 />
             );
             
@@ -120,6 +114,7 @@ export default function CreateROECalculator() {
                     quoteDefaults={quoteDefaults}
                     onLoadDefaults={loadQuoteDefaults}
                     calculatorId={calculatorId}
+                    buildPath={buildPath}
                 />
             );
             
@@ -129,6 +124,8 @@ export default function CreateROECalculator() {
                         loading={loading} 
                         calculatorId={calculatorId}
                         saveStep={saveStep}
+                        langField={langField}
+                        buildPath={buildPath}
                     />;
         default:
             return null;
@@ -203,7 +200,7 @@ export default function CreateROECalculator() {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate(`/roe-roa-calculator/manage?lang=${lang}`)}
+                                onClick={() => navigate(buildPath(`/roe-roa-calculator/manage`))}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -217,7 +214,6 @@ export default function CreateROECalculator() {
                                 </p>
                             </div>
                         </div>
-                        <LanguageSwitcher currentLang={lang} onChangeLang={setLang} />
                     </div>
 
                     {/* Step Indicator */}

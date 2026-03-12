@@ -40,17 +40,12 @@ const AppSidebar: React.FC = () => {
     const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
     const location = useLocation();
     const { menu: authMenu } = useAuth();
-    const { lang, langField, hasLangParam } = useLanguage(menuTranslations);
+    const { lang, langField, buildPath } = useLanguage(menuTranslations);
     
     const allowedMenuNames = useMemo(
         () => authMenu?.map(menu => menu.name) || [],
         [authMenu]
     );
-
-    // Helper function untuk membuat path dengan conditional lang parameter
-    const buildPath = useCallback((basePath: string): string => {
-        return hasLangParam ? `${basePath}?lang=${lang}` : basePath;
-    }, [hasLangParam, lang]);
 
     const navItems: NavItem[] = useMemo(() => [
         {

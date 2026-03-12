@@ -16,6 +16,7 @@ interface Step4Props {
     calculatorId?: string;
     saveStep: (step: number, validate: boolean) => Promise<boolean>;
     langField: (key: string) => string;
+    buildPath: (basePath: string) => string;
 }
 
 export default function Step4MonthlyCosts({ 
@@ -25,16 +26,21 @@ export default function Step4MonthlyCosts({
     loading,
     calculatorId,
     saveStep,
-    langField
+    langField,
+    buildPath
 }: Step4Props) {
     const navigate = useNavigate();
     const [calculating, setCalculating] = useState(false);
 
     useEffect(() => {
         if (calculatorId && formData.step && formData.step < 4) {
-            navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`, { replace: true });
+            const basePath = `/roe-roa-calculator/manage/edit/${calculatorId}`;
+            const baseUrl = buildPath(basePath); 
+            const separator = baseUrl.includes('?') ? '&' : '?';
+            const newUrl = `${baseUrl}${separator}step=4`;
+            navigate(newUrl, { replace: true });
         }
-    }, [formData.step, calculatorId, navigate]);
+    }, [formData.step, calculatorId, navigate, buildPath]);
 
     if (loading) {
         return (

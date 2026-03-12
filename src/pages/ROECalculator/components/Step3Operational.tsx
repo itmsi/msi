@@ -16,6 +16,7 @@ interface Step3Props {
     onLoadDefaults: () => Promise<void>;
     calculatorId?: string;
     langField: (key: string) => string;
+    buildPath: (basePath: string) => string;
 }
 
 export default function Step3Operational({ 
@@ -24,16 +25,23 @@ export default function Step3Operational({
     handleInputChange,
     loading,
     calculatorId,
-    langField
+    langField,
+    buildPath
 }: Step3Props) {
     
     const navigate = useNavigate();
     
     useEffect(() => {
         if (calculatorId && formData.step && formData.step < 3) {
-            navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`, { replace: true });
+            
+            const basePath = `/roe-roa-calculator/manage/edit/${calculatorId}`;
+            const baseUrl = buildPath(basePath); 
+            const separator = baseUrl.includes('?') ? '&' : '?';
+            const newUrl = `${baseUrl}${separator}step=3`;
+            navigate(newUrl, { replace: true });
+
         }
-    }, [formData.step, calculatorId, navigate]);
+    }, [formData.step, calculatorId, navigate, buildPath]);
     const STATUS_OPTIONS = [
         { value: 'L/km', label: langField('fuelConsumptionPerKm') },
         { value: 'L/km/ton', label: langField('fuelConsumptionPerKmTon') }

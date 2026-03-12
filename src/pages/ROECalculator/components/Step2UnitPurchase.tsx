@@ -18,6 +18,7 @@ interface Step2Props {
     loading?: boolean;
     calculatorId?: string;
     langField: (key: string) => string;
+    buildPath: (basePath: string) => string;
 }
 
 export default function Step2UnitPurchase({ 
@@ -28,14 +29,19 @@ export default function Step2UnitPurchase({
     calculateStep2,
     loading,
     calculatorId,
-    langField
+    langField,
+    buildPath
 }: Step2Props) {
     const navigate = useNavigate();
     const [calculating, setCalculating] = useState(false);
     
     useEffect(() => {
         if (calculatorId && formData.step && formData.step < 2) {
-            navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`, { replace: true });
+            const basePath = `/roe-roa-calculator/manage/edit/${calculatorId}`;
+            const baseUrl = buildPath(basePath); 
+            const separator = baseUrl.includes('?') ? '&' : '?';
+            const newUrl = `${baseUrl}${separator}step=2`;
+            navigate(newUrl, { replace: true });
         }
     }, [formData.step, calculatorId, navigate]);
 

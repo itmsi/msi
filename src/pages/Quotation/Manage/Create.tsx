@@ -44,7 +44,7 @@ import { quotationLabels } from './language/quotationLabels';
 
 export default function CreateQuotation() {
     const navigate = useNavigate();
-    const { langField } = useLanguage(quotationLabels);
+    const { langField, buildPath } = useLanguage(quotationLabels);
     const { isCreating, validationErrors, clearFieldError, createQuotation } = useCreateQuotation();
 
     // Use useEmployees hook
@@ -1034,7 +1034,7 @@ export default function CreateQuotation() {
 
             if (response.success) {
                 toast.success(`Quotation ${status === 'submit' ? 'submitted' : 'saved as draft'} successfully`);
-                navigate('/quotations/manage');
+                navigate(buildPath(`/quotations/manage`));
             } else {
                 toast.error(response.message || 'Failed to save quotation');
             }
@@ -1060,7 +1060,7 @@ export default function CreateQuotation() {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/quotations/manage')}
+                                onClick={() => navigate(buildPath(`/quotations/manage`))}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -1870,7 +1870,7 @@ export default function CreateQuotation() {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => navigate('/quotations/manage')}
+                                onClick={() => navigate(buildPath(`/quotations/manage`))}
                                 className="px-6 rounded-full"
                                 disabled={isCreating}
                             >

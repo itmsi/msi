@@ -46,7 +46,7 @@ import { quotationLabels } from './language/quotationLabels';
 export default function EditQuotation() {
     const navigate = useNavigate();
     const { quotationId } = useParams<{ quotationId: string }>();
-    const { lang, langField } = useLanguage(quotationLabels);
+    const { langField, buildPath } = useLanguage(quotationLabels);
     const { loading, quotationData, validationErrors, fetchQuotation, updateQuotation, clearFieldError } = useEditQuotation();
     const [isUpdating, setIsUpdating] = useState(false);
 
@@ -343,7 +343,7 @@ export default function EditQuotation() {
             }
         } catch (err: any) {
             toast.error(err.message || 'Failed to load quotation');
-            navigate('/quotations/manage');
+            navigate(buildPath(`/quotations/manage`));
         }
     }, [quotationId, fetchQuotation, navigate, QuotationService]);
 
@@ -1198,7 +1198,7 @@ export default function EditQuotation() {
             const response = await updateQuotation(quotationId!, finalPayload);
             if (response.success) {
                 toast.success(`Quotation ${status === 'submit' ? 'updated' : 'saved as draft'} successfully`);
-                navigate('/quotations/manage');
+                navigate(buildPath(`/quotations/manage`));
             } else {
                 toast.error(response.message || 'Failed to update quotation');
             }
@@ -1237,7 +1237,7 @@ export default function EditQuotation() {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate(`/quotations/manage?lang=${lang}`)}
+                                onClick={() => navigate(buildPath(`/quotations/manage`))}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -2062,7 +2062,7 @@ export default function EditQuotation() {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => navigate(`/quotations/manage?lang=${lang}`)}
+                                onClick={() => navigate(buildPath(`/quotations/manage`))}
                                 className="px-6 rounded-full"
                                 disabled={isUpdating}
                             >

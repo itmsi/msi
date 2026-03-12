@@ -36,7 +36,7 @@ echarts.use([
 
 
 export default function BreakdownROECalculator() {
-    const { lang, langField } = useLanguage(roeCalculatorLabels);
+    const { lang, langField, buildPath } = useLanguage(roeCalculatorLabels);
     const navigate = useNavigate();
     const { calculatorId } = useParams<{ calculatorId: string }>();
     const [breakdownData, setBreakdownData] = useState<ManageROEBreakdownData | null>(null);
@@ -698,7 +698,7 @@ export default function BreakdownROECalculator() {
                         <div className='flex gap-3'>
                             <Button
                                 className="group rounded-lg w-full flex items-center justify-center gap-2 font-secondary py-2"
-                                onClick={() => navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=4&lang=${lang}`)}
+                                onClick={() => navigate(buildPath(`/roe-roa-calculator/manage/edit/${calculatorId}?step=4`))}
                             >
                                 <MdEdit size={20} className="group-hover:text-white" /> {langField('edit')}
                             </Button>

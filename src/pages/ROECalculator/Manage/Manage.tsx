@@ -17,7 +17,7 @@ import { useLanguage } from "@/components/lang/useLanguage";
 import { roeCalculatorLabels } from "../language/roeCalculatorLabels";
 
 export default function ManageRor() {
-    const { lang, langField } = useLanguage(roeCalculatorLabels);
+    const { lang, langField, buildPath } = useLanguage(roeCalculatorLabels);
     const navigate = useNavigate();
     const {
         searchTerm,
@@ -265,7 +265,7 @@ export default function ManageRor() {
                         <div className="flex items-center gap-3">
                             <PermissionGate permission="create">
                                 <Button
-                                    onClick={() => navigate(`/roe-roa-calculator/manage/create?lang=${lang}`)}
+                                    onClick={() => navigate(buildPath(`/roe-roa-calculator/manage/create`))}
                                     className="flex items-center gap-2 lg:w-[220px]"
                                     size="sm"
                                 >

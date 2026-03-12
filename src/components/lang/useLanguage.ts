@@ -55,5 +55,10 @@ export function useLanguage(labels?: TranslationMap, defaultLang: LangCode = 'en
         [setSearchParams]
     );
 
-    return { lang, langField, setLang, supportedLangs: SUPPORTED_LANGS, hasLangParam };
+    // Helper function untuk membuat path dengan conditional lang parameter
+    const buildPath = useCallback((basePath: string): string => {
+        return hasLangParam ? `${basePath}?lang=${lang}` : basePath;
+    }, [hasLangParam, lang]);
+
+    return { lang, langField, setLang, supportedLangs: SUPPORTED_LANGS, hasLangParam, buildPath };
 }

@@ -20,7 +20,8 @@ export default function Step1BasicInfo({
     validationErrors, 
     loading,
     handleInputChange,
-    langField }: Step1Props) {
+    langField 
+}: Step1Props) {
 
     const { getIupById } = useIupSelect();
 
