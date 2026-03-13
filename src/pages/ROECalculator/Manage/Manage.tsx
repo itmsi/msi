@@ -40,7 +40,6 @@ export default function ManageRor() {
         handleClearFilters,
         handleFilterChange,
         handleBreakdown,
-        handleEdit,
         handleDelete,
         confirmdeleteRorCalculator,
         cancelDelete,
@@ -49,18 +48,21 @@ export default function ManageRor() {
 
     // Conditional row click handler based on step
     const handleRowClick = (row: any) => {
-        if (row.step === 4) {
-            handleBreakdown(row);
-        } else {
-            handleEdit(row);
-        }
+        const basePath = row.step === 4 ? `/roe-roa-calculator/manage/breakdown/${row.id}` : `/roe-roa-calculator/manage/edit/${row.id}`;
+        const baseUrl = buildPath(basePath); 
+        const separator = baseUrl.includes('?') ? '&' : '?';
+        const newUrl = row.step === 4 ? baseUrl : `${baseUrl}${separator}step=${row.step || 1}`;
+        navigate(newUrl, { replace: true });
     };
 
     const columns: TableColumn<RorEntity>[] = [
         {
             name: langField('customer'),
             selector: row => row.customer_name || '-',
-            cell: (row) => (
+            cell: (row) => {
+                
+                return (
+                <>
                 <div className=" items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">
                         {row.customer_name}
@@ -68,7 +70,8 @@ export default function ManageRor() {
                     <div className={`block text-sm text-gray-500 ${parseFloat(String(row?.roe_individual_percentage || '0')) < 0 ? 'text-red-500' : 'text-green-600'}`}>ROE : {row.roe_individual_percentage || '0'}%</div>
                     <div className={`block text-sm text-gray-500 ${parseFloat(String(row?.roa_individual_percentage || '0')) < 0 ? 'text-red-500' : 'text-green-600'}`}>ROA : {row.roa_individual_percentage || '0'}%</div>
                 </div>
-            ),
+                </>
+            )},
         },
         {
             name: langField('commodity'),
@@ -134,7 +137,13 @@ export default function ManageRor() {
                     
                     <PermissionButton 
                         permission="update"
-                        onClick={() => handleEdit(row)}
+                        onClick={() => {
+                            const basePath = `/roe-roa-calculator/manage/edit/${row.id}`;
+                            const baseUrl = buildPath(basePath); 
+                            const separator = baseUrl.includes('?') ? '&' : '?';
+                            const newUrl = `${baseUrl}${separator}step=${row.step || 1}`;
+                            navigate(newUrl, { replace: true });
+                        }}
                         className={`p-2 rounded-md text-sm font-medium transition-colors relative text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-0`}
                         title={langField('edit')}
                     >
