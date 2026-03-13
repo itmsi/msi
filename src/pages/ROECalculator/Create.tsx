@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { MdKeyboardArrowLeft, MdSave, MdArrowForward, MdArrowBack, MdEdit, MdAdd } from 'react-icons/md';
 
 import PageMeta from '@/components/common/PageMeta';
@@ -19,7 +19,6 @@ export default function CreateROECalculator() {
     const { lang, langField, buildPath } = useLanguage(roeCalculatorLabels);
     const navigate = useNavigate();
     const { calculatorId } = useParams<{ calculatorId: string }>();
-    const [searchParams] = useSearchParams();
     const isEditMode = Boolean(calculatorId);
 
     const STEPS = [
