@@ -1,7 +1,7 @@
 ﻿import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-hot-toast';
-import { MdSave, MdKeyboardArrowLeft, MdAdd, MdDelete } from 'react-icons/md';
+import { MdKeyboardArrowLeft, MdAdd, MdDelete } from 'react-icons/md';
 import { Calendar } from 'react-date-range';
 import { TableColumn } from "react-data-table-component";
 
@@ -36,7 +36,6 @@ import ProductDetailDrawer from './components/ProductDetailDrawer';
 import { BankSelectOption, useBankSelect } from '../hooks/useBankSelect';
 import { useEmployeeSelect } from '../hooks/useEmployeeSelect';
 import { useCustomerSelect } from '../hooks/useCustomerSelect';
-import Checkbox from '@/components/form/input/Checkbox';
 import { FaEye } from 'react-icons/fa6';
 import { IslandSelectOption, useIslandSelect } from '@/hooks/useIslandSelect';
 import { useLanguage } from '@/components/lang/useLanguage';
