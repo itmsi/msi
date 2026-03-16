@@ -1,9 +1,3 @@
-/**
- * Label terjemahan untuk form Quotation (Create & Edit).
- * Bahasa: Indonesia (id), English (en), Chinese (zh)
- * Ganti bahasa via URL param ?lang=id|en|zh
- */
-
 import type { TranslationMap } from '@/components/lang/useLanguage';
 
 export const quotationLabels: TranslationMap = {
@@ -17,6 +11,11 @@ export const quotationLabels: TranslationMap = {
         id: 'Edit Quotation',
         en: 'Edit Quotation',
         zh: '编辑报价单',
+    },
+    loadingQuotationData: {
+        id: 'Memuat data quotation...',
+        en: 'Loading quotation data...',
+        zh: '正在加载报价单数据...',
     },
 
     // Section: Quotation Detail
@@ -339,5 +338,269 @@ export const quotationLabels: TranslationMap = {
         id: 'Dipilih',
         en: 'Selected',
         zh: '已选择',
+    },
+
+    // ProductDetailOffcanvas labels
+    close: {
+        id: 'Tutup',
+        en: 'Close',
+        zh: '关闭',
+    },
+    productDataNotFound: {
+        id: 'Data produk tidak ditemukan',
+        en: 'Product data not found',
+        zh: '未找到产品数据',
+    },
+    specifications: {
+        id: 'Spesifikasi',
+        en: 'Specifications',
+        zh: '规格',
+    },
+    accessories: {
+        id: 'Accessories',
+        en: 'Accessories',
+        zh: '配件',
+    },
+    clickToEnlarge: {
+        id: 'Klik untuk memperbesar',
+        en: 'Click to enlarge',
+        zh: '点击放大',
+    },
+    imageNotValid: {
+        id: 'Gambar tidak valid',
+        en: 'Image not valid',
+        zh: '图片无效',
+    },
+    noImage: {
+        id: 'Tidak ada gambar',
+        en: 'No image',
+        zh: '无图片',
+    },
+    basicInformation: {
+        id: 'Informasi Dasar',
+        en: 'Basic Information',
+        zh: '基本信息',
+    },
+    productName: {
+        id: 'Nama Produk',
+        en: 'Product Name',
+        zh: '产品名称',
+    },
+    uniqueCode: {
+        id: 'Kode Unique',
+        en: 'Unique Code',
+        zh: '唯一编码',
+    },
+    segment: {
+        id: 'Segment',
+        en: 'Segment',
+        zh: '细分市场',
+    },
+    product_type: {
+        id: 'Tipe Produk',
+        en: 'Product Type',
+        zh: '产品类型',
+    },
+    msiModel: {
+        id: 'MSI Model',
+        en: 'MSI Model',
+        zh: 'MSI 型号',
+    },
+    msiProduct: {
+        id: 'MSI Product',
+        en: 'MSI Product',
+        zh: 'MSI 产品',
+    },
+    wheelNo: {
+        id: 'Wheel No',
+        en: 'Wheel No',
+        zh: '轮数',
+    },
+    volume: {
+        id: 'Volume',
+        en: 'Volume',
+        zh: '体积',
+    },
+    horsePower: {
+        id: 'Horse Power',
+        en: 'Horse Power',
+        zh: '马力',
+    },
+    priceInformation: {
+        id: 'Informasi Harga',
+        en: 'Price Information',
+        zh: '价格信息',
+    },
+    marketPrice: {
+        id: 'Harga Pasar',
+        en: 'Market Price',
+        zh: '市场价格',
+    },
+    priceStar1: {
+        id: 'Harga Star 1',
+        en: 'Star 1 Price',
+        zh: '一星级价格',
+    },
+    priceStar2: {
+        id: 'Harga Star 2',
+        en: 'Star 2 Price',
+        zh: '二星级价格',
+    },
+    priceStar3: {
+        id: 'Harga Star 3',
+        en: 'Star 3 Price',
+        zh: '三星级价格',
+    },
+    priceStar4: {
+        id: 'Harga Star 4',
+        en: 'Star 4 Price',
+        zh: '四星级价格',
+    },
+    priceStar5: {
+        id: 'Harga Star 5',
+        en: 'Star 5 Price',
+        zh: '五星级价格',
+    },
+    selectAccessoryToAdd: {
+        id: 'Select accessory to add...',
+        en: 'Select accessory to add...',
+        zh: '选择要添加的配件...',
+    },
+    addAccessory: {
+        id: 'Add Accessory',
+        en: 'Add Accessory',
+        zh: '添加配件',
+    },
+    noAccessoriesAdded: {
+        id: 'No accessories added yet',
+        en: 'No accessories added yet',
+        zh: '尚未添加配件',
+    },
+    accessoryName: {
+        id: 'Accessory Name',
+        en: 'Accessory Name',
+        zh: '配件名称',
+    },
+    quantity: {
+        id: 'Quantity',
+        en: 'Quantity',
+        zh: '数量',
+    },
+    delete: {
+        id: 'Delete',
+        en: 'Delete',
+        zh: '删除',
+    },
+    enterProductName: {
+        id: 'Masukkan nama produk',
+        en: 'Enter product name',
+        zh: '输入产品名称',
+    },
+    enterUniqueCode: {
+        id: 'Masukkan kode unique',
+        en: 'Enter unique code',
+        zh: '输入唯一编码',
+    },
+    enterSegment: {
+        id: 'Masukkan segment',
+        en: 'Enter segment',
+        zh: '输入细分市场',
+    },
+    enterMsiModel: {
+        id: 'Masukkan MSI model',
+        en: 'Enter MSI model',
+        zh: '输入 MSI 型号',
+    },
+    enterMsiProduct: {
+        id: 'Masukkan MSI product',
+        en: 'Enter MSI product',
+        zh: '输入 MSI 产品',
+    },
+    enterWheelNo: {
+        id: 'Masukkan wheel no',
+        en: 'Enter wheel no',
+        zh: '输入轮数',
+    },
+    enterVolume: {
+        id: 'Masukkan volume',
+        en: 'Enter volume',
+        zh: '输入体积',
+    },
+    enterHorsePower: {
+        id: 'Masukkan horse power',
+        en: 'Enter horse power',
+        zh: '输入马力',
+    },
+    enterMarketPrice: {
+        id: 'Masukkan harga pasar',
+        en: 'Enter market price',
+        zh: '输入市场价格',
+    },
+    enterProductType: {
+        id: 'Masukkan tipe produk',
+        en: 'Enter product type',
+        zh: '输入产品类型',
+    },
+    pricePlaceholderStar1: {
+        id: 'Harga star 1',
+        en: 'Star 1 price',
+        zh: '一星级价格',
+    },
+    pricePlaceholderStar2: {
+        id: 'Harga star 2',
+        en: 'Star 2 price',
+        zh: '二星级价格',
+    },
+    pricePlaceholderStar3: {
+        id: 'Harga star 3',
+        en: 'Star 3 price',
+        zh: '三星级价格',
+    },
+    pricePlaceholderStar4: {
+        id: 'Harga star 4',
+        en: 'Star 4 price',
+        zh: '四星级价格',
+    },
+    pricePlaceholderStar5: {
+        id: 'Harga star 5',
+        en: 'Star 5 price',
+        zh: '五星级价格',
+    },
+    
+    // Additional ProductDetailOffcanvas labels
+    pleaseSelectAccessory: {
+        id: 'Silakan pilih aksesoris',
+        en: 'Please select an accessory',
+        zh: '请选择配件',
+    },
+    accessoryAlreadyAdded: {
+        id: 'Aksesoris ini sudah ditambahkan',
+        en: 'This accessory is already added',
+        zh: '此配件已添加',
+    },
+    accessoryAddedSuccess: {
+        id: 'Aksesoris berhasil ditambahkan',
+        en: 'Accessory added successfully',
+        zh: '配件添加成功',
+    },
+    accessoryRemovedSuccess: {
+        id: 'Aksesoris berhasil dihapus',
+        en: 'Accessory removed successfully',
+        zh: '配件删除成功',
+    },
+    noAccessoriesFound: {
+        id: 'Tidak ada aksesoris ditemukan',
+        en: 'No accessories found',
+        zh: '未找到配件',
+    },
+    loadingAccessories: {
+        id: 'Memuat aksesoris...',
+        en: 'Loading accessories...',
+        zh: '加载配件中...',
+    },
+    enter: {
+        id: 'Masukkan',
+        en: 'Enter',
+        zh: '输入',
     },
 };

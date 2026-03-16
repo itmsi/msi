@@ -1022,5 +1022,10 @@ export const quotationLabelPDF: TranslationMap = {
         id: 'Ukuran Kotak Kargo',
         en: 'Cargo Box Size',
         zh: '货箱尺寸'
-    }
+    },
+    spec_remark: {
+        id: 'Catatan',
+        en: 'Remark',
+        zh: '备注'
+    },
 };

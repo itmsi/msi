@@ -5,8 +5,8 @@ import { MdSave, MdKeyboardArrowLeft, MdAdd, MdDelete } from 'react-icons/md';
 import { Calendar } from 'react-date-range';
 import { TableColumn } from "react-data-table-component";
 
-import 'react-date-range/dist/styles.css'; // main css file
-import 'react-date-range/dist/theme/default.css'; // theme css file
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 
 // Components
 import PageMeta from '@/components/common/PageMeta';
@@ -31,7 +31,7 @@ import { useTermConditionSelect, TermConditionSelectOption } from '../hooks/useT
 import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalInput, handleDecimalInputComma, formatNumberInputwithComma, handlePercentageInputComma, getCompanyName } from '@/helpers/generalHelper';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { ItemProductService } from '../Product/services/productService';
-import ProductDetailDrawer from '@/pages/Quotation/Manage/components/ProductDetailDrawer';
+import ProductDetailDrawer from './components/ProductDetailDrawer';
 import { BankSelectOption, useBankSelect } from '../hooks/useBankSelect';
 import { useEmployeeSelect } from '../hooks/useEmployeeSelect';
 import { useCustomerSelect } from '../hooks/useCustomerSelect';
@@ -42,12 +42,12 @@ import { QuotationService } from './services/quotationService';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from './language/quotationLabels';
-import LanguageSwitcher from '@/components/lang/LanguageSwitcher';
+import FormActions from '@/components/form/FormActions';
 
 export default function EditQuotation() {
     const navigate = useNavigate();
     const { quotationId } = useParams<{ quotationId: string }>();
-    const { lang, langField, setLang } = useLanguage(quotationLabels);
+    const { langField, buildPath } = useLanguage(quotationLabels);
     const { loading, quotationData, validationErrors, fetchQuotation, updateQuotation, clearFieldError } = useEditQuotation();
     const [isUpdating, setIsUpdating] = useState(false);
 
@@ -137,12 +137,12 @@ export default function EditQuotation() {
         manage_quotation_shipping_term: '',
         manage_quotation_franco: '',
         manage_quotation_lead_time: '',
-        quotation_for: 'customer',  // New field with default value
-        star: '',                    // New field
+        quotation_for: 'customer',
+        star: '',
         term_content_id: '',
         term_content_directory: '',
-        include_aftersales_page: true,  // Added for API payload
-        include_msf_page: false,        // Added for API payload
+        include_aftersales_page: false,
+        include_msf_page: false,
         status: 'draft',
         manage_quotation_items: [],
         manage_quotation_item_accessories: [],
@@ -190,7 +190,6 @@ export default function EditQuotation() {
         if (!quotationId) return;
         try {
             const data = await fetchQuotation(quotationId);
-            // Transform API response to form data
             const transformedData: QuotationFormData = {
                 customer_id: data.customer_id || '',
                 employee_id: data.employee_id || '',
@@ -236,6 +235,7 @@ export default function EditQuotation() {
                     market_price: item.cp_market_price || '',
                     product_type: item.product_type || '',
                     image: item.images || [],
+                    componen_type: item.cp_componen_type || item.componen_type || 1,
                     componen_product_unit_model: '',
                     selling_price_star_1: '',
                     selling_price_star_2: '',
@@ -276,14 +276,10 @@ export default function EditQuotation() {
             if (transformedData.manage_quotation_valid_date) {
                 setDueDate(new Date(transformedData.manage_quotation_valid_date));
             }
-
-            // Set term condition content
             if (transformedData.term_content_directory) {
                 setTermConditionContent(transformedData.term_content_directory);
             }
-
-            // Set selected values for dropdowns from loaded data
-            const apiData = data as any; // API might return more fields than typed
+            const apiData = data as any;
 
             if (data.customer_id) {
                 setSelectedCustomer({
@@ -348,7 +344,7 @@ export default function EditQuotation() {
             }
         } catch (err: any) {
             toast.error(err.message || 'Failed to load quotation');
-            navigate('/quotations-iti/manage');
+            navigate(buildPath(`/quotations-iti/manage`));
         }
     }, [quotationId, fetchQuotation, navigate, QuotationService]);
 
@@ -407,7 +403,6 @@ export default function EditQuotation() {
         }
     }, [quotationData, bankOptions, bankInitialized]);
 
-    // Sync individual dates with form data (but don't override on initial load)
     useEffect(() => {
         if (formData.manage_quotation_date && !loading) {
             const newDateString = invoiceDate.toISOString().split('T')[0];
@@ -463,15 +458,6 @@ export default function EditQuotation() {
     };
 
     const resetQuotationFormattedNumbers = (formData: any): any => {
-        // const quotationNumericFields = [
-        //     'manage_quotation_delivery_fee',
-        //     'manage_quotation_other',
-        //     'manage_quotation_payment_presentase',
-        //     'manage_quotation_ppn',
-        //     'manage_quotation_grand_total',
-        //     'manage_quotation_payment_nominal'
-        // ];
-        // return resetFormatNumbers(formData, quotationNumericFields);
         return formData;
     };
 
@@ -565,45 +551,9 @@ export default function EditQuotation() {
         handleInputChange(field, numberic);
     };
 
-    // const handleDecimalInputChange = (field: keyof QuotationFormData, inputValue: string) => {
-    //     // Allow digits, comma, and dot
-    //     const cleaned = inputValue.replace(/[^\d,.]/g, '');
-    //     handleInputChange(field, cleaned);
-    // };
-
     const handleNumericCleanInput = (field: keyof QuotationFormData, inputValue: string) => {
         handleInputChange(field, inputValue);
     };
-
-    // Format decimal for display - preserves decimal separator and trailing digits
-    // const formatDecimalDisplayInput = (value: string | undefined | null): string => {
-    //     if (!value) return '';
-
-    //     const str = value.toString();
-
-    //     // Check if there's a decimal separator (comma or dot)
-    //     const hasComma = str.includes(',');
-    //     const hasDot = str.includes('.');
-
-    //     if (!hasComma && !hasDot) {
-    //         // No decimal - just format as integer with thousand separators
-    //         const cleaned = str.replace(/[^\d]/g, '');
-    //         if (!cleaned) return '';
-    //         return new Intl.NumberFormat('id-ID').format(parseInt(cleaned));
-    //     }
-
-    //     // Has decimal separator - preserve it
-    //     const separator = hasComma ? ',' : '.';
-    //     const parts = str.split(separator);
-    //     const integerPart = parts[0].replace(/[^\d]/g, '') || '0';
-    //     const decimalPart = parts[1] || '';
-
-    //     // Format integer part with thousand separators
-    //     const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart));
-
-    //     // Return with comma as decimal separator (Indonesian format)
-    //     return `${formattedInteger},${decimalPart}`;
-    // };
 
     const handlePercentageInputChange = (field: keyof QuotationFormData, inputValue: string) => {
         handleInputChange(field, handlePercentageInput(inputValue));
@@ -780,6 +730,7 @@ export default function EditQuotation() {
                     selling_price_star_4: apiProductData.selling_price_star_4 || '0',
                     selling_price_star_5: apiProductData.selling_price_star_5 || '0',
                     description: apiProductData.componen_product_description || '',
+                    componen_type: apiProductData.componen_type || 1,
                     manage_quotation_item_accessories: islandAccessories,
                     manage_quotation_item_specifications: apiProductData.componen_product_specifications?.map((spec: any) => ({
                         manage_quotation_item_specification_label: spec.componen_product_specification_label || spec.specification_label_name || '',
@@ -892,7 +843,7 @@ export default function EditQuotation() {
                     images: existingItem.image ? [existingItem.image] : null,
                     componen_product_description: existingItem.description || '',
                     is_delete: false,
-                    componen_type: 1,
+                    componen_type: (existingItem as any).componen_type || 1,
                     componen_product_unit_model: existingItem.componen_product_unit_model || '',
                     componen_product_specifications: existingItem.manage_quotation_item_specifications?.map((spec: any) => ({
                         componen_product_specification_label: spec.manage_quotation_item_specification_label || spec.specification_label_name || '',
@@ -1248,7 +1199,7 @@ export default function EditQuotation() {
             const response = await updateQuotation(quotationId!, finalPayload);
             if (response.success) {
                 toast.success(`Quotation ${status === 'submit' ? 'updated' : 'saved as draft'} successfully`);
-                navigate('/quotations-iti/manage');
+                navigate(buildPath('/quotations-iti/manage'));
             } else {
                 toast.error(response.message || 'Failed to update quotation');
             }
@@ -1262,15 +1213,10 @@ export default function EditQuotation() {
     if (loading && !formData.customer_id) {
         return (
             <>
-                <PageMeta
-                    title="Loading... - MSI Dashboard"
-                    description="Loading quotation data"
-                    image="/motor-sights-international.png"
-                />
                 <div className="flex items-center justify-center min-h-[400px]">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Loading quotation data...</p>
+                        <p className="text-gray-600">{langField('loadingQuotationData')}</p>
                     </div>
                 </div>
             </>
@@ -1292,7 +1238,7 @@ export default function EditQuotation() {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/quotations-iti/manage')}
+                                onClick={() => navigate(buildPath(`/quotations-iti/manage`))}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -1305,11 +1251,10 @@ export default function EditQuotation() {
                                 )}
                             </div>
                         </div>
-                        <LanguageSwitcher currentLang={lang} onChangeLang={setLang} />
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+                    <form className="space-y-6">
                         <div className='md:grid-cols-5 grid gap-6'>
                             <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-3">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('quotationDetail')}</h2>
@@ -1413,7 +1358,7 @@ export default function EditQuotation() {
                                                             date={dueDate}
                                                             onChange={handleDueDateChange}
                                                             color="#3b82f6"
-                                                            minDate={invoiceDate} // Due date cannot be before invoice date
+                                                            minDate={invoiceDate}
                                                         />
                                                     </div>
                                                 )}
@@ -1526,7 +1471,6 @@ export default function EditQuotation() {
                                                     handleInputChange('island_id', option?.value || '');
 
                                                     if (option?.value) {
-                                                        // Fetch new accessories for the selected island
                                                         try {
                                                             const response = await QuotationService.getQuotationAccessories(option.value);
 
@@ -1547,10 +1491,7 @@ export default function EditQuotation() {
                                                                     accessory_region: accessory.accessory_region || ''
                                                                 }));
 
-                                                                // Store accessories in separate state for new items
                                                                 setCurrentIslandAccessories(transformedAccessories);
-
-                                                                // Update accessories in all existing quotation items
                                                                 setFormData(prev => ({
                                                                     ...prev,
                                                                     manage_quotation_item_accessories: transformedAccessories,
@@ -1559,13 +1500,10 @@ export default function EditQuotation() {
                                                                         manage_quotation_item_accessories: transformedAccessories
                                                                     }))
                                                                 }));
-
-                                                                // Clear unsaved product changes to force refresh of ProductDetailDrawer with new accessories
                                                                 setUnsavedProductChanges({});
 
                                                                 toast.success(`Accessories updated for ${transformedAccessories.length} items based on selected island`);
                                                             } else {
-                                                                // Clear accessories if no data
                                                                 setCurrentIslandAccessories([]);
                                                                 setFormData(prev => ({
                                                                     ...prev,
@@ -1575,8 +1513,6 @@ export default function EditQuotation() {
                                                                         manage_quotation_item_accessories: []
                                                                     }))
                                                                 }));
-
-                                                                // Clear unsaved product changes to force refresh
                                                                 setUnsavedProductChanges({});
 
                                                                 toast.success('No accessories found for selected island');
@@ -1584,7 +1520,6 @@ export default function EditQuotation() {
                                                         } catch (error: any) {
                                                             console.error('Error fetching accessories by island:', error);
                                                             toast.error('Failed to load accessories for selected island');
-                                                            // Clear accessories on error
                                                             setCurrentIslandAccessories([]);
                                                             setFormData(prev => ({
                                                                 ...prev,
@@ -1594,12 +1529,9 @@ export default function EditQuotation() {
                                                                     manage_quotation_item_accessories: []
                                                                 }))
                                                             }));
-
-                                                            // Clear unsaved product changes to force refresh
                                                             setUnsavedProductChanges({});
                                                         }
                                                     } else {
-                                                        // Clear accessories when no island selected
                                                         setCurrentIslandAccessories([]);
                                                         setFormData(prev => ({
                                                             ...prev,
@@ -1609,8 +1541,6 @@ export default function EditQuotation() {
                                                                 manage_quotation_item_accessories: []
                                                             }))
                                                         }));
-
-                                                        // Clear unsaved product changes to force refresh
                                                         setUnsavedProductChanges({});
                                                     }
                                                 }}
@@ -1658,7 +1588,6 @@ export default function EditQuotation() {
                                         onChange={(option: any) => {
                                             setSelectedBank(option);
                                             if (option) {
-                                                // Update all bank-related fields when bank is selected
                                                 setFormData(prev => ({
                                                     ...prev,
                                                     bank_account_id: option.value || '',
@@ -1668,7 +1597,6 @@ export default function EditQuotation() {
                                                     bank_account_bank_name: option.data?.bank_account_type || ''
                                                 }));
                                             } else {
-                                                // Clear all bank-related fields when no bank selected
                                                 setFormData(prev => ({
                                                     ...prev,
                                                     bank_account_id: '',
@@ -2068,7 +1996,7 @@ export default function EditQuotation() {
                             </div>
                         </div>
 
-                        <div className='md:grid-cols-5 grid gap-6'>
+                        <div className='md:grid-cols-5 grid gap-6 hidden'>
                             <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-3 space-y-6">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('shippingTC')}</h2>
                                 <div className='md:grid-cols-3 grid gap-6'>
@@ -2109,67 +2037,17 @@ export default function EditQuotation() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('additionalPages')}</h2>
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3">
-                                        <Checkbox
-                                            checked={formData.include_aftersales_page ?? true}
-                                            onChange={(checked) => handleInputChange('include_aftersales_page', checked)}
-                                            label={langField('includeAftersalesPage')}
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Checkbox
-                                            checked={formData.include_msf_page ?? false}
-                                            onChange={(checked) => handleInputChange('include_msf_page', checked)}
-                                            label={langField('includeMsfPage')}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         {/* Form Actions */}
-                        <div className="flex justify-end gap-4 p-6 bg-white rounded-2xl shadow-sm">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => navigate('/quotations-iti/manage')}
-                                className="px-6 rounded-full"
-                                disabled={isUpdating}
-                            >
-                                {langField('cancel')}
-                            </Button>
-                            {/* <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => {
-                                    const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
-                                    handleSubmit(fakeEvent, 'draft');
-                                }}
-                                disabled={isUpdating}
-                                className="px-6 flex items-center gap-2 rounded-full"
-                            >
-                                <MdSave size={16} />
-                                Save as Draft
-                            </Button> */}
-
-                            <PermissionGate permission={["create", "update"]}>
-                                <Button
-                                    type="button"
-                                    onClick={() => {
-                                        const tipu = { preventDefault: () => { } } as React.FormEvent;
-                                        handleSubmit(tipu, 'submit');
-                                    }}
-                                    disabled={isUpdating || loading}
-                                    className="px-6 flex items-center gap-2 rounded-full"
-                                >
-                                    <MdSave size={16} />
-                                    {isUpdating ? langField('updating') : langField('updateQuotation')}
-                                </Button>
-                            </PermissionGate>
-                        </div>
+                        <FormActions
+                            onSubmit={() => handleSubmit(new Event('submit') as any, 'submit')}
+                            isSubmitting={isUpdating}
+                            cancelText={langField('cancel')}
+                            cancelRoute={buildPath('/quotations-iti/manage')}
+                            submitText={langField('updateQuotation')}
+                            submittingText={langField('updating')}
+                        />
                     </form>
                 </div>
             </div>
