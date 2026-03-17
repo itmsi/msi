@@ -971,7 +971,19 @@ export default function EditQuotation() {
                 </>
             ),
             wrap: true,
-            width: '500px',
+            width: '400px',
+        },
+        {
+            name: 'Type',
+            selector: (row) => row.product_type || '',
+            cell: (row) => (
+                <>
+                    <div className="font-medium capitalize">
+                        {row.product_type}
+                    </div>
+                </>
+            ),
+            wrap: true,
         },
         {
             name: 'Quantity',
