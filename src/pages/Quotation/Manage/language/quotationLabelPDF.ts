@@ -76,6 +76,11 @@ export const quotationLabelPDF: TranslationMap = {
         en: 'Type Model',
         zh: '型号类型'
     },
+    tableHeaders_typeITI: {
+        id: 'Tipe',
+        en: 'Type',
+        zh: '型号'
+    },
     tableHeaders_model: {
         id: 'Model',
         en: 'Model',
@@ -85,6 +90,11 @@ export const quotationLabelPDF: TranslationMap = {
         id: 'Harga/Unit',
         en: 'Price/Unit',
         zh: '单价'
+    },
+    tableHeaders_priceITI: {
+        id: 'Harga',
+        en: 'Price',
+        zh: '价格'
     },
     tableHeaders_qty: {
         id: 'Qty',

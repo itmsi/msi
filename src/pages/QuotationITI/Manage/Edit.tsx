@@ -1,7 +1,7 @@
 ﻿import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { toast } from 'react-hot-toast';
-import { MdSave, MdKeyboardArrowLeft, MdAdd, MdDelete } from 'react-icons/md';
+import { MdKeyboardArrowLeft, MdAdd, MdDelete } from 'react-icons/md';
 import { Calendar } from 'react-date-range';
 import { TableColumn } from "react-data-table-component";
 
@@ -35,11 +35,9 @@ import ProductDetailDrawer from './components/ProductDetailDrawer';
 import { BankSelectOption, useBankSelect } from '../hooks/useBankSelect';
 import { useEmployeeSelect } from '../hooks/useEmployeeSelect';
 import { useCustomerSelect } from '../hooks/useCustomerSelect';
-import Checkbox from '@/components/form/input/Checkbox';
 import { FaEye } from 'react-icons/fa6';
 import { IslandSelectOption, useIslandSelect } from '@/hooks/useIslandSelect';
 import { QuotationService } from './services/quotationService';
-import { PermissionGate } from '@/components/common/PermissionComponents';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from './language/quotationLabels';
 import FormActions from '@/components/form/FormActions';
@@ -973,7 +971,19 @@ export default function EditQuotation() {
                 </>
             ),
             wrap: true,
-            width: '500px',
+            width: '400px',
+        },
+        {
+            name: 'Type',
+            selector: (row) => row.product_type || '',
+            cell: (row) => (
+                <>
+                    <div className="font-medium capitalize">
+                        {row.product_type}
+                    </div>
+                </>
+            ),
+            wrap: true,
         },
         {
             name: 'Quantity',

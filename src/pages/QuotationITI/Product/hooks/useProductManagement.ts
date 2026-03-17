@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { useProduct } from './useProduct';
 import { getCompanyName } from '@/helpers/generalHelper';

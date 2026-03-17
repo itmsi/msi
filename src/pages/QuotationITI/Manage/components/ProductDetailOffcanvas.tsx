@@ -1,12 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { toast } from 'react-hot-toast';
-import { MdDeleteOutline } from 'react-icons/md';
 import { ItemProduct } from '../../Product/types/product';
-import { QuotationAccessory } from '../types/quotation';
-import Input from '../../../../components/form/input/InputField';
-import { TableColumn } from "react-data-table-component";
-import { useAsyncSelect, SelectOption } from '../../hooks/useAsyncSelect';
-import { createActionsColumn } from '@/components/ui/table';
+import Input from '../../../../components/form/input/InputField'
 import { getDefaultSpecs } from '../../Product/hooks/useProductCreate';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from '../language/quotationLabels';
@@ -46,26 +40,8 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-    const [activeTab, setActiveTab] = useState<'specifications' | 'accessories'>('specifications');
-    const [accessories, setAccessories] = useState<QuotationAccessory[]>([]);
-    const [selectedAccessory, setSelectedAccessory] = useState<SelectOption | null>(null);
-    const [accessorySelectError, setAccessorySelectError] = useState<string>('');
+    const [activeTab] = useState<'specifications' | 'accessories'>('specifications');
 
-    const {
-        accessoryOptions,
-        accessoryInputValue,
-        accessoryPagination,
-        handleAccessoryInputChange,
-        handleAccessoryMenuScrollToBottom,
-        initializeAccessoryOptions
-    } = useAsyncSelect();
-
-    // Load accessories saat tab accessories dibuka
-    useEffect(() => {
-        if (activeTab === 'accessories' && isOpen) {
-            initializeAccessoryOptions();
-        }
-    }, [activeTab, isOpen, initializeAccessoryOptions]);
 
     // Default specifications template - dinamis berdasarkan componen_type produk
     const defaultSpecifications = React.useMemo(() => {
@@ -85,20 +61,6 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
             setError('Product data not available');
         } else {
             setError(null);
-            
-            // Initialize accessories from initialData
-            const accessoriesSource = initialData.manage_quotation_item_accessories || initialData.accessories || [];
-            const initializedAccessories = accessoriesSource.map((acc: any, index: number) => ({
-                accessory_id: acc.id || acc.accessory_id || `acc_${index}`,
-                accessory_part_name: acc.componen_product_name || acc.accessory_part_name || '',
-                accessory_part_number: acc.code_unique || acc.accessory_part_number || '',
-                accessory_brand: acc.brand || acc.accessory_brand || '',
-                accessory_specification: acc.specification || acc.accessory_specification || '',
-                quantity: acc.quantity || 1,
-                description: acc.description || ''
-            }));
-            
-            setAccessories(initializedAccessories);
         }
     }, [productId, isOpen, initialData]);
 
@@ -173,103 +135,6 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         
         return editableSpecs;
     }, [initialData?.componen_product_specifications, defaultSpecifications]);
-
-    const addAccessoryItem = useCallback(() => {
-        if (!selectedAccessory) {
-            const errorMessage = langField('pleaseSelectAccessory');
-            setAccessorySelectError(errorMessage);
-            toast.error(errorMessage);
-            return;
-        }
-
-        const isDuplicate = accessories.some(item => 
-            item.accessory_id === selectedAccessory.value
-        );
-
-        if (isDuplicate) {
-            const errorMessage = langField('accessoryAlreadyAdded');
-            setAccessorySelectError(errorMessage);
-            toast.error(errorMessage);
-            return;
-        }
-
-        const newAccessory: QuotationAccessory = {
-            accessory_id: selectedAccessory.value,
-            accessory_part_name: selectedAccessory.accessory_part_name || selectedAccessory.label || '',
-            accessory_part_number: selectedAccessory.accessory_part_number || '',
-            accessory_brand: selectedAccessory.accessory_brand || '',
-            accessory_specification: selectedAccessory.accessory_specification || '',
-            quantity: 1,
-            description: selectedAccessory.description || ''
-        };
-
-        const updatedAccessories = [...accessories, newAccessory];
-        setAccessories(updatedAccessories);
-        
-        if (initialData && onChange) {
-            onChange({
-                ...initialData,
-                manage_quotation_item_accessories: updatedAccessories,
-                accessories: updatedAccessories
-            });
-        }
-        
-        setSelectedAccessory(null);
-        setAccessorySelectError('');
-        toast.success(langField('accessoryAddedSuccess'));
-    }, [selectedAccessory, accessories, initialData, onChange]);
-
-    const removeAccessoryItem = useCallback((index: number) => {
-        const updatedAccessories = accessories.filter((_, i) => i !== index);
-        setAccessories(updatedAccessories);
-        
-        if (initialData && onChange) {
-            onChange({
-                ...initialData,
-                manage_quotation_item_accessories: updatedAccessories,
-                accessories: updatedAccessories
-            });
-        }
-        
-        toast.success(langField('accessoryRemovedSuccess'));
-    }, [accessories, initialData, onChange]);
-
-    const accessoryColumns: TableColumn<QuotationAccessory>[] = React.useMemo(() => [
-        {
-            name: langField('accessoryName'),
-            selector: (row: QuotationAccessory) => row.accessory_part_name,
-            cell: (row) => (
-                <div className=" items-center gap-3 py-2">
-                    <div className="font-medium text-gray-900">
-                        {row.accessory_part_name}
-                    </div>
-                    <div className="block text-sm text-gray-500">{row.accessory_part_number}</div>
-                    <div className="block text-sm text-gray-500">{row.accessory_brand ? ` - ${row.accessory_brand}` : ''}</div>
-                </div>
-            ),
-            wrap: true,
-        },
-        {
-            name: langField('quantity'),
-            selector: (row: QuotationAccessory) => row.quantity,
-            width: '100px',
-            center: true,
-        },
-        createActionsColumn([
-            {
-                icon: MdDeleteOutline,
-                onClick: (row: QuotationAccessory) => {
-                    const index = accessories.findIndex(acc => acc.accessory_id === row.accessory_id);
-                    if (index !== -1) {
-                        removeAccessoryItem(index);
-                    }
-                },
-                className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
-                tooltip: langField('delete'),
-                permission: 'delete'
-            }
-        ]),
-    ], [accessories, removeAccessoryItem]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
