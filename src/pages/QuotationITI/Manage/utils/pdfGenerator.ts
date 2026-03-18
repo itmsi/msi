@@ -300,28 +300,6 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             console.error('Error processing HTML content:', error);
         }
     };
-    // Helper function untuk safely get image URL
-    const getImageUrl = (imageData: any): string => {
-        try {
-            if (!imageData) return '';
-            if (typeof imageData === 'string' && (imageData.startsWith('http') || imageData.startsWith('/'))) {
-                return imageData;   
-            }
-            if (typeof imageData === 'object' && imageData.image_url) {
-                return imageData.image_url;
-            }
-            if (typeof imageData === 'string') {
-                const parsedImages = JSON.parse(imageData);
-                if (Array.isArray(parsedImages) && parsedImages.length > 0 && parsedImages[0]?.image_url) {
-                    return parsedImages[0].image_url;
-                }
-            }
-            return '';
-        } catch (error) {
-            console.error('Error parsing image data:', error);
-            return '';
-        }
-    };
     
     await loadCustomFonts(doc);
     
