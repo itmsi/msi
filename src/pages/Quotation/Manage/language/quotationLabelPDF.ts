@@ -191,10 +191,20 @@ export const quotationLabelPDF: TranslationMap = {
         en: 'PT Indonesia Equipment Centre',
         zh: 'PT Indonesia Equipment Centre'
     },
+    companySignatureITI: {
+        id: 'PT Inline Technology International',
+        en: 'PT Inline Technology International',
+        zh: 'PT Inline Technology International'
+    },
     jobTitle: {
         id: 'Commercial Control Manager',
         en: 'Commercial Control Manager',
         zh: '商业控制经理'
+    },
+    jobTitleITI: {
+        id: 'Chief Technology Officer',
+        en: 'Chief Technology Officer',
+        zh: '首席技术官'
     },
     specifications: {
         id: 'Specifications',

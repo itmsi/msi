@@ -25,8 +25,6 @@ const formatCurrency = (value: string | number): string => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
-        // minimumFractionDigits: 0,
-        // maximumFractionDigits: 0
     }).format(numValue);
 };
 
@@ -534,8 +532,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             textColor: [0, 0, 0]
         },
         headStyles: { 
-            fillColor: [0, 48, 97], 
-            textColor: [255, 255, 255],
+            fillColor: [228, 231, 236], 
+            textColor: [0, 0, 0],
             font: language === 'zh' ? 'NotoSansSC' : 'OpenSans',
             fontStyle: 'bold',
             cellPadding: 3
@@ -886,33 +884,36 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         doc.setTextColor(0, 48, 97);
         setFontByLanguage(doc, langField('productSpecificationsITI'), 'Futura', 'bold', language);
         doc.text(langField('productSpecificationsITI'), pageWidth / 2, yPos, { align: 'center' });
-        yPos += 10;
+        yPos += 7;
         
-        // Prepare table data with enhanced structure for styling
-        const tableData: any[] = [];
-        const productTypeRowSpans: { [key: number]: number } = {}; // Track rowSpan for each row
-        const groupEndRows: Set<number> = new Set(); // Track which rows end a group
-        const groupFirstRows: Set<number> = new Set(); // Track which rows start a group
-
-        let currentRowIndex = 0;
-        
-        Object.entries(groupedItems).forEach(([productType, items]: [string, any]) => {
-            let groupRowCount = 0;
-            const groupStartRowIndex = currentRowIndex;
+        // Render specifications dengan multiple tables approach
+        Object.entries(groupedItems).forEach(([productType, items]: [string, any], groupIndex) => {
+            // Add spacing between groups
+            if (groupIndex > 0) {
+                yPos += 5;
+            }
             
-            items.forEach((item: any, itemIndex: number) => {
+            // Product Type Header
+            doc.setFontSize(12);
+            doc.setTextColor(255, 255, 255);
+            doc.setFillColor(0, 48, 97);
+            doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 8, 2, 2, 'F');
+            setFontByLanguage(doc, productType.toUpperCase(), 'Futura', 'bold', language);
+            doc.text(productType.toUpperCase() || 'OTHER', pageWidth / 2, yPos + 5.5, { align: 'center' });
+            yPos += 12;
+            
+            // Process each item in this product type
+            items.forEach((item: any) => {
                 if (item.manage_quotation_item_specifications && item.manage_quotation_item_specifications.length > 0) {
                     
-                    // Add product name as a separate row with special styling
-                    tableData.push([
-                        itemIndex === 0 ? productType.toUpperCase() || 'OTHER' : '',
-                        item.componen_product_name,
-                        'product-name-row' // Marker for styling
-                    ]);
-                    groupRowCount++;
-                    currentRowIndex++;
+                    // Product name header
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 48, 97);
+                    setFontSafe(doc, 'OpenSans', 'bold');
+                    doc.text(`█ ${item.componen_product_name}`, margin + 3, yPos + 4);
+                    yPos += 5;
                     
-                    // Add specifications
+                    // Prepare specifications data for table
                     const filteredSpecs = item.manage_quotation_item_specifications
                         .map((spec: any) => ({
                             label: spec.manage_quotation_item_specification_label,
@@ -929,190 +930,45 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                             return orderA - orderB;
                         });
                     
-                    // Group specifications into one string for easier handling
-                    let specsContent = '';
-                    filteredSpecs.forEach((spec: any) => {
-                        const plainValue = convertHtmlToPlainText(spec.value);
-                        specsContent += `${plainValue}\n`;
-                    });
+                    // Create specifications table data 
+                    const specTableData = filteredSpecs.map((spec: any) => [
+                        convertHtmlToPlainText(spec.value)
+                    ]);
                     
-                    if (specsContent.trim()) {
-                        tableData.push([
-                            '',
-                            specsContent.trim(),
-                            'specifications-row' // Marker for styling
-                        ]);
-                        groupRowCount++;
-                        currentRowIndex++;
+                    // Render specifications table
+                    if (specTableData.length > 0) {
+                        autoTable(doc, {
+                            startY: yPos,
+                            body: specTableData,
+                            margin: { left: margin + 2, right: margin },
+                            styles: {
+                                fontSize: 8,
+                                cellPadding: 2,
+                                font: language === 'zh' ? 'NotoSansSC' : 'OpenSans',
+                                fontStyle: 'normal',
+                                valign: 'middle',
+                                textColor: [0, 0, 0]
+                            },
+                            alternateRowStyles: { fillColor: [255, 255, 255] },
+                            willDrawCell: (data) => {
+                                const cellText = data.cell.text?.join('') || '';
+                                if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
+                                    const isBold = data.cell.styles.fontStyle === 'bold';
+                                    try {
+                                        doc.setFont('NotoSansSC', isBold ? 'bold' : 'normal');
+                                    } catch (error) {
+                                        doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+                                    }
+                                }
+                            }
+                        });
+                        
+                        yPos = doc.lastAutoTable?.finalY || yPos;
+                        yPos += 2;
                     }
                 }
             });
-            
-            // Set rowSpan for the first row of this group
-            if (groupRowCount > 0) {
-                productTypeRowSpans[groupStartRowIndex] = groupRowCount;
-                groupFirstRows.add(groupStartRowIndex);
-                groupEndRows.add(currentRowIndex - 1);
-            }
         });
-        
-        // Render specifications table with 2 columns
-        if (tableData.length > 0) {
-            const firstGroupStartRow = Math.min(...Array.from(groupFirstRows));
-            const lastGroupEndRow = Math.max(...Array.from(groupEndRows));
-            
-            
-            autoTable(doc, {
-                startY: yPos,
-                head: [[langField('productType'), langField('specifications')]],
-                body: tableData.map(row => [row[0], row[1]]),
-                margin: { left: margin, right: margin },
-                tableWidth: pageWidth - 2 * margin,
-                styles: {
-                    fontSize: 9,
-                    cellPadding: 2,
-                    font: language === 'zh' ? 'NotoSansSC' : 'OpenSans',
-                    fontStyle: 'normal',
-                    valign: 'top',
-                    textColor: [0, 0, 0],
-                    lineColor: [200, 200, 200]
-                },
-                headStyles: {
-                    fillColor: [0, 48, 97],
-                    textColor: [255, 255, 255],
-                    font: language === 'zh' ? 'NotoSansSC' : 'Futura',
-                    fontStyle: 'bold',
-                    cellPadding: [3, 0],
-                    fontSize: 10,
-                },
-                alternateRowStyles: { 
-                    fillColor: [255, 255, 255] 
-                },
-                columnStyles: {
-                    0: { 
-                        cellWidth: 40,
-                        halign: 'center',
-                        valign: 'middle',
-                        textColor: [0, 48, 97],
-                        fontStyle: 'bold'
-                    },
-                    1: { 
-                        cellWidth: 'auto',
-                        textColor: [23, 26, 31],
-                    }
-                },
-                didParseCell: (data) => {
-                    if (data.section === 'head' && data.column.index === 0) {
-                        data.cell.styles.halign = 'center';
-                    }
-                    
-                    // Handle rowSpan for productType column to center it vertically
-                    if (data.section === 'body' && data.column.index === 0) {
-                        data.cell.styles.halign = 'center';
-                        data.cell.styles.valign = 'middle';
-                        
-                        if (productTypeRowSpans[data.row.index]) {
-                            data.cell.rowSpan = productTypeRowSpans[data.row.index];
-                            
-                            const groupEndRow = data.row.index + productTypeRowSpans[data.row.index] - 1;
-                            const isLastGroup = groupEndRow === lastGroupEndRow;
-                            const isFirstGroup = data.row.index === firstGroupStartRow;
-                            
-                            if (isFirstGroup) {
-                                data.cell.styles.lineWidth = {
-                                    top: 0.8,
-                                    right: 0,
-                                    bottom: 0.8,
-                                    left: 0
-                                };
-                                data.cell.styles.lineColor = [228, 230, 251];
-                            } else if (!isLastGroup) {
-                                data.cell.styles.lineWidth = {
-                                    top: 0,
-                                    right: 0,
-                                    bottom: 0.8,
-                                    left: 0
-                                };
-                                data.cell.styles.lineColor = [228, 230, 251];
-                            }
-                        }
-                    }
-                    
-                    // Apply special styling for product name rows
-                    if (data.section === 'body') {
-                        const originalRowData = tableData[data.row.index];
-                        const rowType = originalRowData[2]; // Get the marker
-                        
-                        if (rowType === 'product-name-row' && data.column.index === 1) {
-                            // Style for product name
-                            data.cell.styles.fillColor = [228, 230, 251]; // Dark blue background
-                            data.cell.styles.textColor = [23, 26, 31]; // kareWhite text
-                            data.cell.styles.fontStyle = 'bold';
-                            data.cell.styles.fontSize = 9;
-                            data.cell.styles.lineWidth = {
-                                top: 0.8,
-                                right: 0,
-                                bottom: 0,
-                                left: 0
-                            };
-                            data.cell.styles.lineColor = [228, 230, 251];
-                        } else if (rowType === 'specifications-row' && data.column.index === 1) {
-                            // Style for specifications
-                            data.cell.styles.fillColor = [255, 255, 255]; // White background
-                            data.cell.styles.textColor = [23, 26, 31]; // Dark text
-                            data.cell.styles.fontStyle = 'normal';
-                            data.cell.styles.fontSize = 9;
-                        }
-                    }
-                },
-                willDrawCell: (data) => {
-                    // Check if cell contains Chinese characters and apply appropriate font
-                    const cellText = data.cell.text?.join('') || '';
-                    if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
-                        const isFirstColumn = data.column.index === 0;
-                        const isBold = data.cell.styles.fontStyle === 'bold';
-                        try {
-                            if (isFirstColumn) {
-                                doc.setFont('NotoSansSC', 'bold');
-                            } else if (isBold) {
-                                doc.setFont('NotoSansSC', 'bold');
-                            } else {
-                                doc.setFont('NotoSansSC', 'normal');
-                            }
-                        } catch (error) {
-                            doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
-                        }
-                    } else {
-                        // For non-Chinese text, use appropriate font
-                        const originalRowData = tableData[data.row.index];
-                        const rowType = originalRowData[2];
-                        
-                        if (rowType === 'product-name-row' && data.column.index === 1) {
-                            try {
-                                doc.setFont('OpenSans', 'bold');
-                            } catch (error) {
-                                doc.setFont('helvetica', 'bold');
-                            }
-                        } else {
-                            try {
-                                doc.setFont('OpenSans', data.cell.styles.fontStyle || 'normal');
-                            } catch (error) {
-                                doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
-                            }
-                        }
-                    }
-                }
-            });
-            
-            const tableStartY = yPos;
-            yPos = doc.lastAutoTable?.finalY || yPos;
-            yPos += 5;
-            const tableHeight = yPos - tableStartY - 5;
-            const tableWidth = pageWidth - 2 * margin;
-            doc.setDrawColor(228, 231, 236);
-            doc.setLineWidth(0.1);
-            doc.roundedRect(margin, tableStartY, tableWidth, tableHeight, boxRadius, boxRadius);
-        }
     }
 
     const totalPages = (doc as any).internal.getNumberOfPages();

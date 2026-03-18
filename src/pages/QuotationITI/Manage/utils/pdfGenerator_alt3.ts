@@ -25,8 +25,6 @@ const formatCurrency = (value: string | number): string => {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
-        // minimumFractionDigits: 0,
-        // maximumFractionDigits: 0
     }).format(numValue);
 };
 
@@ -184,7 +182,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                                 doc.text(line, startXpos, specYPos);
                                 specYPos += 2;
                             });
-                            specYPos += 2; // Extra spacing after headers
+                            specYPos += 2;
                         }
                     } else if (element.tagName.toLowerCase() === 'ol') {
                         // Process ordered lists
@@ -890,9 +888,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         
         // Prepare table data with enhanced structure for styling
         const tableData: any[] = [];
-        const productTypeRowSpans: { [key: number]: number } = {}; // Track rowSpan for each row
-        const groupEndRows: Set<number> = new Set(); // Track which rows end a group
-        const groupFirstRows: Set<number> = new Set(); // Track which rows start a group
+        const productTypeRowSpans: { [key: number]: number } = {};
+        const groupEndRows: Set<number> = new Set();
+        const groupFirstRows: Set<number> = new Set();
 
         let currentRowIndex = 0;
         
@@ -905,7 +903,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     
                     // Add product name as a separate row with special styling
                     tableData.push([
-                        itemIndex === 0 ? productType.toUpperCase() || 'OTHER' : '',
+                        itemIndex === 0 ? (productType.charAt(0).toUpperCase() + productType.slice(1).toLowerCase()) || 'Other' : '',
                         item.componen_product_name,
                         'product-name-row' // Marker for styling
                     ]);
@@ -958,10 +956,6 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         
         // Render specifications table with 2 columns
         if (tableData.length > 0) {
-            const firstGroupStartRow = Math.min(...Array.from(groupFirstRows));
-            const lastGroupEndRow = Math.max(...Array.from(groupEndRows));
-            
-            
             autoTable(doc, {
                 startY: yPos,
                 head: [[langField('productType'), langField('specifications')]],
@@ -1005,68 +999,79 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     if (data.section === 'head' && data.column.index === 0) {
                         data.cell.styles.halign = 'center';
                     }
-                    
                     // Handle rowSpan for productType column to center it vertically
                     if (data.section === 'body' && data.column.index === 0) {
                         data.cell.styles.halign = 'center';
                         data.cell.styles.valign = 'middle';
-                        
                         if (productTypeRowSpans[data.row.index]) {
                             data.cell.rowSpan = productTypeRowSpans[data.row.index];
-                            
-                            const groupEndRow = data.row.index + productTypeRowSpans[data.row.index] - 1;
-                            const isLastGroup = groupEndRow === lastGroupEndRow;
-                            const isFirstGroup = data.row.index === firstGroupStartRow;
-                            
-                            if (isFirstGroup) {
-                                data.cell.styles.lineWidth = {
-                                    top: 0.8,
-                                    right: 0,
-                                    bottom: 0.8,
-                                    left: 0
-                                };
-                                data.cell.styles.lineColor = [228, 230, 251];
-                            } else if (!isLastGroup) {
-                                data.cell.styles.lineWidth = {
-                                    top: 0,
-                                    right: 0,
-                                    bottom: 0.8,
-                                    left: 0
-                                };
-                                data.cell.styles.lineColor = [228, 230, 251];
-                            }
                         }
                     }
                     
                     // Apply special styling for product name rows
                     if (data.section === 'body') {
                         const originalRowData = tableData[data.row.index];
-                        const rowType = originalRowData[2]; // Get the marker
+                        const rowType = originalRowData[2];
                         
-                        if (rowType === 'product-name-row' && data.column.index === 1) {
-                            // Style for product name
-                            data.cell.styles.fillColor = [228, 230, 251]; // Dark blue background
-                            data.cell.styles.textColor = [23, 26, 31]; // kareWhite text
-                            data.cell.styles.fontStyle = 'bold';
-                            data.cell.styles.fontSize = 9;
+                        if (groupFirstRows.has(data.row.index) || groupEndRows.has(data.row.index)) {
                             data.cell.styles.lineWidth = {
-                                top: 0.8,
+                                top: 0,
                                 right: 0,
-                                bottom: 0,
+                                bottom: 0.8,
                                 left: 0
                             };
                             data.cell.styles.lineColor = [228, 230, 251];
+                        }
+                        
+                        if (rowType === 'product-name-row' && data.column.index === 1) {
+                            data.cell.styles.textColor = [23, 26, 31];
+                            data.cell.styles.fontStyle = 'bold';
+                            data.cell.styles.fontSize = 9;
+                            data.cell.styles.lineWidth = {
+                                top: 0,
+                                right: 0,
+                                bottom: 0.3,
+                                left: 0
+                            };
+                            data.cell.styles.lineColor = [255, 255, 255];
                         } else if (rowType === 'specifications-row' && data.column.index === 1) {
                             // Style for specifications
-                            data.cell.styles.fillColor = [255, 255, 255]; // White background
-                            data.cell.styles.textColor = [23, 26, 31]; // Dark text
+                            data.cell.styles.fillColor = [255, 255, 255];
+                            data.cell.styles.textColor = [23, 26, 31];
                             data.cell.styles.fontStyle = 'normal';
                             data.cell.styles.fontSize = 9;
                         }
                     }
                 },
+                didDrawCell: (data) => {
+                    // Handle underline for product name rows  
+                    if (data.section === 'body') {
+                        const originalRowData = tableData[data.row.index];
+                        const rowType = originalRowData[2];
+                        
+                        if (rowType === 'product-name-row' && data.column.index === 1) {
+                            const cellText = Array.isArray(data.cell.text) 
+                                ? data.cell.text.join(' ') 
+                                : (data.cell.text || '');
+                            
+                            if (cellText.trim()) {
+                                const textWidth = doc.getTextWidth(cellText);
+                                const padding = data.cell.styles.cellPadding;
+                                const leftPad = Array.isArray(padding) ? (padding[3] ?? padding[0] ?? 2) : (typeof padding === 'number' ? padding : 2);
+                                const bottomPad = Array.isArray(padding) ? (padding[2] ?? padding[0] ?? 2) : (typeof padding === 'number' ? padding : 2);
+                                
+                                // Draw underline
+                                const x = data.cell.x + leftPad;
+                                const y = data.cell.y + data.cell.height - bottomPad * 0.5 - 0.5;
+                                
+                                doc.setDrawColor(0, 0, 0);
+                                doc.setLineWidth(0.3);
+                                doc.line(x, y, x + textWidth, y);
+                            }
+                        }
+                    }
+                },
                 willDrawCell: (data) => {
-                    // Check if cell contains Chinese characters and apply appropriate font
                     const cellText = data.cell.text?.join('') || '';
                     if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
                         const isFirstColumn = data.column.index === 0;
