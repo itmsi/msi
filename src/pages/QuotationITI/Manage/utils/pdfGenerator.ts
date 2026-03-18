@@ -51,6 +51,65 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     let specYPos = 0;
     let specEndPage = 0;
     
+    // Helper function to convert HTML to plain text using advanced parsing logic
+    const convertHtmlToPlainText = (htmlContent: string): string => {
+        if (!htmlContent) return '';
+        
+        let result = '';
+        
+        try {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(htmlContent, 'text/html');
+            
+            const processNodeToText = (node: Node): void => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const text = node.textContent?.trim();
+                    if (text && text.length > 0) {
+                        result += text + ' ';
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    const element = node as Element;
+                    
+                    if (element.tagName.toLowerCase() === 'b' || 
+                        element.tagName.toLowerCase() === 'u' || 
+                        element.tagName.toLowerCase() === 'i') {
+                        const text = element.textContent?.trim();
+                        if (text) {
+                            result += text + '\n';
+                        }
+                    } else if (element.tagName.toLowerCase() === 'ol') {
+                        const listItems = element.querySelectorAll('li');
+                        listItems.forEach((li, index) => {
+                            const text = li.textContent?.trim() || '';
+                            if (text) {
+                                result += `${index + 1}. ${text}\n`;
+                            }
+                        });
+                    } else if (element.tagName.toLowerCase() === 'ul') {
+                        const listItems = element.querySelectorAll('li');
+                        listItems.forEach((li) => {
+                            const text = li.textContent?.trim() || '';
+                            if (text) {
+                                result += `• ${text}\n`;
+                            }
+                        });
+                    } else if (element.tagName.toLowerCase() === 'br') {
+                        result += '\n';
+                    } else {
+                        Array.from(element.childNodes).forEach(child => processNodeToText(child));
+                    }
+                }
+            };
+            
+            Array.from(htmlDoc.body.childNodes).forEach(node => processNodeToText(node));
+            
+            return result.trim();
+        } catch (error) {
+            console.error('Error converting HTML to text:', error);
+            return htmlContent;
+        }
+    };
+
     const processHtmlToTextAdvanced = (htmlContent: string, maxWidth: number, startXpos: number, startYPos: number): void => {
         if (!htmlContent) return;
         
@@ -123,9 +182,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                                     specEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
                                 }
                                 doc.text(line, startXpos, specYPos);
-                                specYPos += 1.5;
+                                specYPos += 2;
                             });
-                            specYPos += 1; // Extra spacing after headers
+                            specYPos += 2; // Extra spacing after headers
                         }
                     } else if (element.tagName.toLowerCase() === 'ol') {
                         // Process ordered lists
@@ -466,7 +525,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     doc.text(langField('greetings'), margin, yPos + 4);
     yPos += 6;
     
-    const openingText = langField('openingText');
+    const openingText = langField('openingTextITI');
     const splitText = doc.splitTextToSize(openingText, pageWidth - 2 * margin);
     const lineHeight = 4.2;
     setFontByLanguage(doc, openingText, 'Futura', 'normal', language);
@@ -491,7 +550,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         styles: {
             fontSize: 9, 
             cellPadding: 2,
-            font: language === 'zh' ? 'NotoSansSC' : 'Futura',
+            font: language === 'zh' ? 'NotoSansSC' : 'OpenSans',
             fontStyle: 'normal',
             valign: 'middle',
             textColor: [0, 0, 0]
@@ -499,7 +558,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         headStyles: { 
             fillColor: [228, 231, 236], 
             textColor: [0, 0, 0],
-            font: language === 'zh' ? 'NotoSansSC' : 'Futura',
+            font: language === 'zh' ? 'NotoSansSC' : 'OpenSans',
             fontStyle: 'bold',
             cellPadding: 3
         },
@@ -838,226 +897,39 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     }, {});
 
     if (Object.keys(groupedItems).length > 0) {
-        // Process each product type group
+        // Add new page for specifications table
+        doc.addPage();
+        addHeaderMSF();
+        addFooter();
+        yPos = margin + headerHeight + 2;
+        
+        // Add specifications table header
+        doc.setFontSize(14);
+        doc.setTextColor(0, 48, 97);
+        setFontByLanguage(doc, langField('productSpecificationsITI'), 'Futura', 'bold', language);
+        doc.text(langField('productSpecificationsITI'), pageWidth / 2, yPos, { align: 'center' });
+        yPos += 10;
+        
+        // Prepare table data
+        const tableData: any[] = [];
+        
         Object.entries(groupedItems).forEach(([productType, items]: [string, any]) => {
-            // Add header for product type group
-            doc.addPage();
-            addHeaderMSF();
-            addFooter();
-            yPos = margin + headerHeight + 5;
+            // Combine all items content in this product type group
+            let groupContent = '';
             
-            // Add product type title
-            doc.setFontSize(14);
-            doc.setTextColor(0, 48, 97);
-            setFontSafe(doc, 'Futura', 'bold');
-            const productTypeTitle = productType.toUpperCase() || 'OTHER';
-            doc.text(productTypeTitle, pageWidth / 2, yPos, { align: 'center' });
-            yPos += 10;
-            
-            // Process items in this group (max 2 per page)
-            for (let i = 0; i < items.length; i += 2) {
-                const item1 = items[i];
-                const item2 = items[i + 1] || null;
-                const hasOnlyOne = !item2;
-                
-                // Add new page for items if not the first iteration
-                if (i > 0) {
-                    doc.addPage();
-                    addHeaderMSF();
-                    addFooter();
-                    yPos = margin + headerHeight + 5;
-                }
-
-            // Calculate widths based on number of items
-            const itemWidth = hasOnlyOne ? (pageWidth - 2 * margin) * 0.6 : (pageWidth - 2 * margin) * 0.5 - 2.5;
-            const item1StartX = hasOnlyOne ? margin + (pageWidth - 2 * margin) * 0.2 : margin;
-            const item2StartX = margin + itemWidth + 5;
-
-            // Variables to track border positions for both items
-            let specTableStartY = 0;
-            let specTableStartY2 = 0;
-            let item1EndYPos = yPos;
-            let item2EndYPos = yPos;
-
-            // Render first item
-            let item1YPos = yPos;
-            
-            // Specifications for item 1
-            if (item1.manage_quotation_item_specifications && item1.manage_quotation_item_specifications.length > 0) {
-                setFontSafe(doc, 'Futura', 'bold');
-                doc.setFontSize(10);
-                doc.setTextColor(52, 64, 84);
-                
-                // Add product image if available
-                if (item1.images && item1.images.length > 0) {
-                    const imageUrl = getImageUrl(item1.images[0]);
-                    const imageUrl2 = getImageUrl(item1.images[1]);
-                    let panjang = item1.images.length > 1 && item1.images.length < 3 ? true : false;
+            items.forEach((item: any, itemIndex: number) => {
+                if (item.manage_quotation_item_specifications && item.manage_quotation_item_specifications.length > 0) {
+                    // Add product name
+                    if (itemIndex > 0) groupContent += '\n\n';
+                    groupContent += `${item.componen_product_name}\n`;
+                    groupContent += '─'.repeat(50) + '\n';
                     
-                    if (imageUrl) {
-                        try {
-                            let imageFormat = 'JPEG';
-                            const imageSrc = imageUrl.toLowerCase();
-                            if (imageSrc.includes('.png') || imageSrc.includes('image/png')) {
-                                imageFormat = 'PNG';
-                            } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
-                                imageFormat = 'JPEG';
-                            }
-                            
-                            let imageFormat2 = 'JPEG';
-                            if (imageUrl2) {
-                                const imageSrc2 = imageUrl2.toLowerCase();
-                                if (imageSrc2.includes('.png') || imageSrc2.includes('image/png')) {
-                                    imageFormat2 = 'PNG';
-                                } else if (imageSrc2.includes('.jpg') || imageSrc2.includes('.jpeg') || imageSrc2.includes('image/jpeg')) {
-                                    imageFormat2 = 'JPEG';
-                                }
-                            }
-                            
-                            if (panjang) {
-                                doc.addImage(imageUrl, imageFormat, item1StartX + (itemWidth / 2) - 38, item1YPos - 10, 37, 50);
-                                if (imageUrl2) {
-                                    doc.addImage(imageUrl2, imageFormat2, item1StartX + (itemWidth / 2) + 2, item1YPos - 10, 37, 50);
-                                }
-                            } else {
-                                doc.addImage(imageUrl, imageFormat, item1StartX + (itemWidth / 2) - 21, item1YPos - 10, 37, 50);
-                            }
-                            
-                            item1YPos += 50;
-                        } catch (error) {
-                            console.warn('Failed to load product image for item 1:', error);
-                        }
-                    }
-                }
-                
-                doc.setFontSize(9);
-                doc.setTextColor(0, 0, 0);
-                setFontSafe(doc, 'Futura', 'normal');
-                
-                const productName1 = doc.splitTextToSize(item1.componen_product_name, itemWidth - 10);
-                const limitedProductName1 = productName1.slice(0, 2);
-                for (let i = 0; i < 2; i++) {
-                    const line = limitedProductName1[i] || '';
-                    doc.text(line, item1StartX + itemWidth / 2, item1YPos, { align: 'center' });
-                    item1YPos += 4;
-                }
-                item1YPos += 8;
-
-                specTableStartY = item1YPos; // Mark start position for border
-
-                // Process specifications with direct PDF rendering instead of table
-                const filteredSpecs = item1.manage_quotation_item_specifications
-                    .map((spec: any) => ({
-                        label: spec.manage_quotation_item_specification_label,
-                        value: spec.manage_quotation_item_specification_value || '-'
-                    }))
-                    .filter((spec: any, index: number, self: any[]) => 
-                        index === self.findIndex((s) => s.label === spec.label && s.value === spec.value)
-                    )
-                    .sort((a: any, b: any) => {
-                        const indexA = specOrder.indexOf(a.label);
-                        const indexB = specOrder.indexOf(b.label);
-                        const orderA = indexA === -1 ? 999 : indexA;
-                        const orderB = indexB === -1 ? 999 : indexB;
-                        return orderA - orderB;
-                    });
-                
-                // Render specifications directly to PDF
-                filteredSpecs.forEach((spec: any) => {
-                    // Check if need new page
-                    if (item1YPos + 8 > pageHeight - footerHeight - margin) {
-                        doc.addPage();
-                        addHeaderMSF();
-                        addFooter();
-                        item1YPos = margin + headerHeight + 5;
-                    }
-                    
-                    processHtmlToTextAdvanced(spec.value, itemWidth - 10, item1StartX + 2, item1YPos - 2);
-                    item1YPos = specYPos + 3;
-                });
-                
-                // Save end position for item1 (border will be drawn later)
-                item1EndYPos = item1YPos + 7;
-                item1YPos += 7;
-            }
-            
-
-            // Render second item (if exists)
-            if (!hasOnlyOne && item2) {
-                let item2YPos = yPos;
-                
-                // Specifications for item 2
-                if (item2.manage_quotation_item_specifications && item2.manage_quotation_item_specifications.length > 0) {
-                    setFontSafe(doc, 'Futura', 'bold');
-                    doc.setFontSize(10);
-                    doc.setTextColor(52, 64, 84);
-                    
-                    // Add product image if available
-                    if (item2.images && item2.images.length > 0) {
-                        const imageUrl = getImageUrl(item2.images[0]);
-                        const imageUrl2 = getImageUrl(item2.images[1]);
-                        let panjang = item2.images.length > 1 && item2.images.length < 3 ? true : false;
-                        
-                        if (imageUrl) {
-                            try {
-                                let imageFormat = 'JPEG';
-                                const imageSrc = imageUrl.toLowerCase();
-                                if (imageSrc.includes('.png') || imageSrc.includes('image/png')) {
-                                    imageFormat = 'PNG';
-                                } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
-                                    imageFormat = 'JPEG';
-                                }
-
-                                let imageFormat2 = 'JPEG';
-                                if (imageUrl2) {
-                                    const imageSrc2 = imageUrl2.toLowerCase();
-                                    if (imageSrc2.includes('.png') || imageSrc2.includes('image/png')) {
-                                        imageFormat2 = 'PNG';
-                                    } else if (imageSrc2.includes('.jpg') || imageSrc2.includes('.jpeg') || imageSrc2.includes('image/jpeg')) {
-                                        imageFormat2 = 'JPEG';
-                                    }
-                                }
-                                
-                                if (panjang) {
-                                    doc.addImage(imageUrl, imageFormat, item2StartX + (itemWidth / 2) - 38, item2YPos - 10, 37, 50);
-                                    if (imageUrl2) {
-                                        doc.addImage(imageUrl2, imageFormat2, item2StartX + (itemWidth / 2) + 2, item2YPos - 10, 37, 50);
-                                    }
-                                } else {
-                                    doc.addImage(imageUrl, imageFormat, item2StartX + (itemWidth / 2) - 21, item2YPos - 10, 37, 50);
-                                }
-                                
-                                // doc.addImage(imageUrl, imageFormat, item2StartX + (itemWidth / 2) - 21, item2YPos - 10, 37, 50);
-                                item2YPos += 50;
-                            } catch (error) {
-                                console.warn('Failed to load product image for item 2:', error);
-                            }
-                        }
-                    }
-                    
-                    doc.setFontSize(9);
-                    doc.setTextColor(0, 0, 0);
-                    setFontSafe(doc, 'Futura', 'normal');
-                    const productName2 = doc.splitTextToSize(item2.componen_product_name, itemWidth - 10);
-                    // Limit to maximum 2 lines
-                    const limitedProductName2 = productName2.slice(0, 2);
-                    // Always render exactly 2 lines for consistent height
-                    for (let i = 0; i < 2; i++) {
-                        const line = limitedProductName2[i] || '';
-                        doc.text(line, item2StartX + itemWidth / 2, item2YPos, { align: 'center' });
-                        item2YPos += 4;
-                    }
-                    item2YPos += 8;
-
-                    specTableStartY2 = item2YPos; // Mark start position for border
-
-                    // Process specifications with direct PDF rendering for item2
-                    const filteredSpecs2 = item2.manage_quotation_item_specifications
+                    // Add specifications
+                    const filteredSpecs = item.manage_quotation_item_specifications
                         .map((spec: any) => ({
                             label: spec.manage_quotation_item_specification_label,
                             value: spec.manage_quotation_item_specification_value || '-'
                         }))
-                        // Remove duplicate rows based on label+value combination
                         .filter((spec: any, index: number, self: any[]) => 
                             index === self.findIndex((s) => s.label === spec.label && s.value === spec.value)
                         )
@@ -1069,60 +941,93 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                             return orderA - orderB;
                         });
                     
-                    // Render specifications directly to PDF for item2
-                    filteredSpecs2.forEach((spec: any) => {
-                        // Check if need new page
-                        if (item2YPos + 8 > pageHeight - footerHeight - margin) {
-                            doc.addPage();
-                            addHeaderMSF();
-                            addFooter();
-                            item2YPos = margin + headerHeight + 5;
-                        }
-                        
-                        // Process and render value using our advanced HTML processor
-                        processHtmlToTextAdvanced(spec.value, itemWidth - 10, item2StartX + 2, item2YPos - 2);
-                        item2YPos = specYPos + 3;
+                    filteredSpecs.forEach((spec: any) => {
+                        // Convert HTML to plain text for table display using advanced parsing logic
+                        const plainValue = convertHtmlToPlainText(spec.value);
+                        groupContent += `• ${spec.label}: ${plainValue}\n`;
                     });
-
-                    // Save end position for item2 (border will be drawn later)
-                    item2EndYPos = item2YPos + 7;
-                    item2YPos += 7;
                 }
-            }
+            });
             
-            // Draw borders with equal height for both items
-            if (item1.manage_quotation_item_specifications && item1.manage_quotation_item_specifications.length > 0 && 
-                (!hasOnlyOne && item2?.manage_quotation_item_specifications && item2.manage_quotation_item_specifications.length > 0)) {
-                // Both items have specifications - use max height for both borders
-                const maxHeight = Math.max(
-                    item1EndYPos - specTableStartY + 10,
-                    item2EndYPos - specTableStartY2 + 10
-                );
-                
-                doc.setDrawColor(200, 200, 200);
-                doc.setLineWidth(0.1);
-                
-                // Draw item1 border with max height
-                doc.roundedRect(item1StartX, specTableStartY - 10, itemWidth, maxHeight, 2, 2);
-                
-                // Draw item2 border with max height  
-                doc.roundedRect(item2StartX, specTableStartY2 - 10, itemWidth, maxHeight, 2, 2);
-            } else if (item1.manage_quotation_item_specifications && item1.manage_quotation_item_specifications.length > 0) {
-                // Only item1 has specifications
-                const specSectionHeight = item1EndYPos - specTableStartY + 10;
-                doc.setDrawColor(200, 200, 200);
-                doc.setLineWidth(0.1);
-                doc.roundedRect(item1StartX, specTableStartY - 10, itemWidth, specSectionHeight, 2, 2);
-            } else if (!hasOnlyOne && item2?.manage_quotation_item_specifications && item2.manage_quotation_item_specifications.length > 0) {
-                // Only item2 has specifications
-                const specSectionHeight2 = item2EndYPos - specTableStartY2 + 10;
-                doc.setDrawColor(200, 200, 200);
-                doc.setLineWidth(0.1);
-                doc.roundedRect(item2StartX, specTableStartY2 - 10, itemWidth, specSectionHeight2, 2, 2);
-            }
-            
+            if (groupContent.trim()) {
+                tableData.push([
+                    productType.toUpperCase() || 'OTHER',
+                    groupContent.trim()
+                ]);
             }
         });
+        
+        // Render specifications table with 2 columns
+        if (tableData.length > 0) {
+            autoTable(doc, {
+                startY: yPos,
+                head: [[langField('productType'), langField('specifications')]],
+                body: tableData,
+                margin: { left: margin, right: margin },
+                tableWidth: pageWidth - 2 * margin,
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 2,
+                    font: language === 'zh' ? 'NotoSansSC' : 'OpenSans',
+                    fontStyle: 'normal',
+                    valign: 'top',
+                    textColor: [0, 0, 0],
+                    lineColor: [200, 200, 200]
+                },
+                headStyles: {
+                    fillColor: [228, 231, 236],
+                    textColor: [0, 0, 0],
+                    font: language === 'zh' ? 'NotoSansSC' : 'Futura',
+                    fontStyle: 'bold',
+                    cellPadding: 6,
+                },
+                alternateRowStyles: { 
+                    fillColor: [248, 250, 252] 
+                },
+                columnStyles: {
+                    0: { 
+                        cellWidth: 40,
+                        halign: 'center',
+                        valign: 'middle',
+                        textColor: [0, 48, 97],
+                        fontStyle: 'bold'
+                    },
+                    1: { 
+                        cellWidth: 'auto',
+                        textColor: [23, 26, 31],
+                        // lineHeight: 1.4
+                    }
+                },
+                willDrawCell: (data) => {
+                    // Check if cell contains Chinese characters and apply appropriate font
+                    const cellText = data.cell.text?.join('') || '';
+                    if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
+                        const isFirstColumn = data.column.index === 0;
+                        const isBold = data.cell.styles.fontStyle === 'bold';
+                        try {
+                            if (isFirstColumn) {
+                                doc.setFont('NotoSansSC', 'bold');
+                            } else if (isBold) {
+                                doc.setFont('NotoSansSC', 'bold');
+                            } else {
+                                doc.setFont('NotoSansSC', 'normal');
+                            }
+                        } catch (error) {
+                            doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
+                        }
+                    }
+                }
+            });
+            
+            const tableStartY = yPos;
+            yPos = doc.lastAutoTable?.finalY || yPos;
+            yPos += 5;
+            const tableHeight = yPos - tableStartY - 5;
+            const tableWidth = pageWidth - 2 * margin;
+            doc.setDrawColor(228, 231, 236);
+            doc.setLineWidth(0.1);
+            doc.roundedRect(margin, tableStartY, tableWidth, tableHeight, boxRadius, boxRadius);
+        }
     }
 
     const totalPages = (doc as any).internal.getNumberOfPages();

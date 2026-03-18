@@ -66,6 +66,11 @@ export const quotationLabelPDF: TranslationMap = {
         en: 'Hereby PT Indonesia Equipment Centre, as the Authorized dealer of MOTOR SIGHTS trucks in Indonesia, would like to provide the following vehicle quotation :',
         zh: '特此，PT Indonesia Equipment Centre作为印度尼西亚MOTOR SIGHTS卡车的授权经销商，提供以下车辆报价：'
     },
+    openingTextITI: {
+        id: 'PT Inline Technology International dengan senang hati menyampaikan penawaran solusi berikut untuk Anda tinjau dan pertimbangkan.',
+        en: 'PT Inline Technology International is pleased to submit the following solution quotation for your review and consideration.',
+        zh: 'PT Inline Technology International 很高兴向您提交以下解决方案报价，供您审阅和考虑。'
+    },
     tableHeaders_no: {
         id: 'No',
         en: 'No',
@@ -195,6 +200,21 @@ export const quotationLabelPDF: TranslationMap = {
         id: 'Specifications',
         en: 'Specifications',
         zh: '规格'
+    },
+    productSpecifications: {
+        id: 'Spesifikasi Produk',
+        en: 'Product Specifications',
+        zh: '产品规格'
+    },
+    productSpecificationsITI: {
+        id: 'Product & Deliverables Details',
+        en: 'Product & Deliverables Details',
+        zh: '产品及交付详情'
+    },
+    productType: {
+        id: 'Tipe Produk',
+        en: 'Product Type',
+        zh: '产品类型'
     },
     accessories: {
         id: 'Accessories',
