@@ -1348,12 +1348,26 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     }
 
     if(data.include_aftersales_page) {
+        // Periksa produk EV terlebih dahulu (lebih spesifik)
+        const hasOffRoadEVProduct = data.manage_quotation_items.some((item: any) => 
+            item.componen_type && item.componen_type.toLowerCase().includes('off road regular ev')
+        );
+        
+        const hasOnRoadEVProduct = data.manage_quotation_items.some((item: any) => 
+            item.componen_type && item.componen_type.toLowerCase().includes('on road regular ev')
+        );
+
+        // Periksa produk regular (exclude yang sudah EV)
         const hasOffRoadProduct = data.manage_quotation_items.some((item: any) => 
-            item.componen_type && item.componen_type.toLowerCase().includes('off road')
+            item.componen_type && 
+            item.componen_type.toLowerCase().includes('off road regular') &&
+            !item.componen_type.toLowerCase().includes('ev')
         );
         
         const hasOnRoadProduct = data.manage_quotation_items.some((item: any) => 
-            item.componen_type && item.componen_type.toLowerCase().includes('on road')
+            item.componen_type && 
+            item.componen_type.toLowerCase().includes('on road regular') &&
+            !item.componen_type.toLowerCase().includes('ev')
         );
         
         const headerProduct = (varYPos: number): number => {
@@ -1469,7 +1483,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             return varYPos + cardHeight;
         }
 
-        const bagianWarranty = (varYPos: number): number => {         
+        const bagianWarranty = (varYPos: number, warrantyItems: any[], warrantyNote: string): number => {         
             // =================================
             // BAGIAN 3 - BOX KANAN "HIGH LEVEL WARRANTY COMPONENT"
             // =================================
@@ -1493,24 +1507,6 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 warrantyY += 4;
             });
             
-            const warrantyItems = [
-                {
-                    title: langField('warranty_engine'),
-                    icon: '/pdf/icon-engine.png'
-                },
-                {
-                    title: langField('warranty_transmission'),
-                    icon: '/pdf/icon-transmission.png'
-                },
-                {
-                    title: langField('warranty_chassis'),
-                    icon: '/pdf/icon-truck.png'
-                },
-                {
-                    title: langField('warranty_electrical'),
-                    icon: '/pdf/icon-electric.png'
-                },
-            ];
             doc.setFontSize(8);
             doc.setTextColor(23, 26, 31);
             
@@ -1522,11 +1518,11 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     if (item.icon) {
                         doc.addImage(item.icon, 'PNG', iconX, warrantyY, iconSize, iconSize);
                     } else {
-                        doc.setFillColor(220, 220, 220);
+                        doc.setFillColor(243, 244, 246);
                         doc.circle(iconX + iconSize/2, warrantyY + iconSize/2, iconSize/2, 'F');
                     }
                 } catch (error) {
-                    doc.setFillColor(220, 220, 220);
+                    doc.setFillColor(243, 244, 246);
                     doc.circle(iconX + iconSize/2, warrantyY + iconSize/2, iconSize/2, 'F');
                 }
                 
@@ -1539,9 +1535,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             
             doc.setFontSize(7);
             doc.setTextColor(100, 100, 100);
-            const warrantyNote = langField('warranty_note');
-            const notesWaranty = doc.splitTextToSize(warrantyNote, warrantyWidth - 8);
-            setFontByLanguage(doc, warrantyNote, 'Futura', 'normal', language);
+            const warrantyNoteText = langField(warrantyNote);
+            const notesWaranty = doc.splitTextToSize(warrantyNoteText, warrantyWidth - 8);
+            setFontByLanguage(doc, warrantyNoteText, 'Futura', 'normal', language);
             notesWaranty.forEach((line: string) => {
                 doc.text(line, warrantyBoxX + warrantyWidth/2, warrantyY, { align: 'center' });
                 warrantyY += 4;
@@ -1772,6 +1768,43 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             // =================================
             return workshopY 
         }
+        const warrantyItems = [
+            {
+                title: langField('warranty_engine'),
+                icon: '/pdf/icon-engine.png'
+            },
+            {
+                title: langField('warranty_transmission'),
+                icon: '/pdf/icon-transmission.png'
+            },
+            {
+                title: langField('warranty_chassis'),
+                icon: '/pdf/icon-truck.png'
+            },
+            {
+                title: langField('warranty_electrical'),
+                icon: '/pdf/icon-electric.png'
+            },
+        ];
+        const warrantyEVItems = [
+            {
+                title: langField('warranty_ev_battery'),
+                icon: '/pdf/battery.png'
+            },
+            {
+                title: langField('warranty_ev_motors'),
+                icon: '/pdf/ev-engine.png'
+            },
+            {
+                title: langField('warranty_ev_electronicControlSystem'),
+                icon: '/pdf/ev-control.png'
+            },
+            {
+                title: '',
+                icon: ''
+            }
+        ];
+        
         if (hasOnRoadProduct) {      
             doc.addPage();
             addHeaderIEL();
@@ -1828,8 +1861,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     ]
                 }
             ];
+
             yPos = bagianGratis(yPos, gratisCards, 5);
-            yPos = bagianWarranty(yPos + 5);
+            yPos = bagianWarranty(yPos + 5, warrantyItems, 'warranty_note');
             yPos += 3;
             const kontrakItems = [
                 {
@@ -1922,8 +1956,207 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     ]
                 }
             ];
+            
             yPos = bagianGratis(yPos, gratisCards, 4);
-            yPos = bagianWarranty(yPos + 5);
+            yPos = bagianWarranty(yPos + 5, warrantyItems, 'warranty_note');
+            yPos += 3;
+            
+            const kontrakItems = [
+                {
+                    title: langField('afterSales_standByMechanic'),
+                    icon: '/pdf/training-mechanic.png',
+                    notes: [
+                        langField('afterSales_standByMechanicDesc')
+                    ]
+                },
+                {
+                    title: langField('afterSales_konser'),
+                    icon: '/pdf/icontruck.png',
+                    notes: [
+                        langField('afterSales_konserDesc')
+                    ],
+                    notesBold : [
+                        langField('afterSales_konserOptions')
+                    ]
+                }
+            ];
+            yPos = bagianInvestasi(yPos, kontrakItems);
+            
+            const manfaatItems = [
+                langField('benefit_technicianAvailability') + '.',
+                langField('benefit_sparePartsAvailability'),
+                langField('benefit_noLogisticsCost'),
+                langField('benefit_readyUnit'),
+                langField('benefit_noWorryStock')
+            ];
+            const syaratItems = [
+                langField('requirement_noDeposit'),
+                langField('requirement_withDeposit'),
+                langField('requirement_customerProvides')
+            ];
+            const notesItems = [
+                langField('notes_label'),
+                langField('notes_vhsPackage'),
+                langField('notes_depositDetails')
+            ];
+
+            yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, notesItems, true, language);
+            yPos += 5;
+        }
+        
+        if (hasOnRoadEVProduct) {      
+            doc.addPage();
+            addHeaderIEL();
+            addFooter();
+            yPos = margin + headerHeight;
+
+            yPos = headerProduct(yPos);
+            yPos += 2;
+            
+            const gratisCards = [
+                {
+                    title: langField('afterSales_maintenancePackage'),
+                    icon: '/pdf/maintenance-service.png',
+                    items: [
+                        langField('afterSales_maintenanceIncluded'),
+                        langField('afterSales_maintenanceService_onroad')
+                    ]
+                },
+                {
+                    title: langField('afterSales_partsDelivery'),
+                    icon: '/pdf/pre-delivery-inspection.png',
+                    items: [
+                        langField('afterSales_delivery24h'),
+                        langField('afterSales_delivery72h')
+                    ]
+                },
+                {
+                    title: langField('afterSales_unitWarranty'),
+                    icon: '/pdf/warranty-service.png',
+                    items: [
+                        langField('afterSales_warranty2years')
+                    ],
+                    notes: [
+                        langField('afterSales_warrantyNote1'),
+                        langField('afterSales_warrantyNote2')
+                    ]
+                },
+                {
+                    title: langField('afterSales_driverTraining'),
+                    icon: '/pdf/training.png',
+                    items: [
+                        langField('afterSales_trainPersons'),
+                        langField('afterSales_trainDays'),
+                        langField('afterSales_trainContent')
+                    ]
+                },
+                {
+                    title: langField('afterSales_mechanicTraining'),
+                    icon: '/pdf/training-mechanic.png',
+                    items: [
+                        langField('afterSales_trainPersons_mechanic'),
+                        langField('afterSales_trainDays'),
+                        langField('afterSales_trainContent')
+                    ]
+                }
+            ];
+
+            yPos = bagianGratis(yPos, gratisCards, 5);
+            yPos = bagianWarranty(yPos + 5, warrantyEVItems, 'warranty_ev_note');
+            yPos += 3;
+            const kontrakItems = [
+                {
+                    title: langField('afterSales_contractService'),
+                    icon: '/pdf/on-call-service.png',
+                    notes: [
+                        langField('afterSales_contractServiceDesc')
+                    ],
+                    notesBold : [
+                        langField('afterSales_contractServiceOptions')
+                    ]
+                },
+                {
+                    title: langField('afterSales_mobileService'),
+                    icon: '/pdf/icontruck.png',
+                    notes: [
+                        langField('afterSales_mobileServiceDesc')
+                    ]
+                }
+            ];
+            yPos = bagianInvestasi(yPos, kontrakItems);
+            
+            const manfaatItems = [
+                langField('benefit_technicianAvailability'),
+                langField('benefit_sparePartsAvailability'),
+                langField('benefit_noLogisticsCost'),
+                langField('benefit_readyUnit'),
+                langField('benefit_noWorryStock')
+            ];
+            const syaratItems = [
+                langField('requirement_noDeposit'),
+                langField('requirement_withDeposit'),
+                langField('requirement_customerProvides')
+            ];
+            const notesItems = [
+                langField('notes_label'),
+                langField('notes_customerStock'),
+                langField('notes_ihwPackage'),
+                langField('notes_depositDetails')
+            ];
+            yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, notesItems, false, language);
+            yPos += 5;
+        }
+
+        if (hasOffRoadEVProduct) {
+            doc.addPage();
+            addHeaderIEL();
+            addFooter();
+            yPos = margin + headerHeight;
+
+            yPos = headerProduct(yPos);
+            yPos += 2;
+            const gratisCards = [
+                {
+                    title: langField('afterSales_maintenancePackage'),
+                    icon: '/pdf/maintenance-service.png',
+                    items: [
+                        langField('afterSales_maintenanceIncluded'),
+                        langField('afterSales_maintenanceService_offroad')
+                    ]
+                },
+                {
+                    title: langField('afterSales_unitWarranty'),
+                    icon: '/pdf/warranty-service.png',
+                    items: [
+                        langField('afterSales_warranty1year')
+                    ],
+                    notes: [
+                        langField('afterSales_warrantyNote1_offroad'),
+                        langField('afterSales_warrantyNote2')
+                    ]
+                },
+                {
+                    title: langField('afterSales_driverTraining'),
+                    icon: '/pdf/training.png',
+                    items: [
+                        langField('afterSales_trainPersons'),
+                        langField('afterSales_trainDays'),
+                        langField('afterSales_trainContent')
+                    ]
+                },
+                {
+                    title: langField('afterSales_mechanicTraining'),
+                    icon: '/pdf/training-mechanic.png',
+                    items: [
+                        langField('afterSales_trainPersons_mechanic'),
+                        langField('afterSales_trainDays'),
+                        langField('afterSales_trainContent')
+                    ]
+                }
+            ];
+            
+            yPos = bagianGratis(yPos, gratisCards, 4);
+            yPos = bagianWarranty(yPos + 5, warrantyEVItems, 'warranty_ev_note');
             yPos += 3;
             
             const kontrakItems = [
