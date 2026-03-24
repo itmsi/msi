@@ -392,10 +392,11 @@ export const quotationLabelPDF: TranslationMap = {
         en: '*Up to 2 years. Terms and conditions apply.',
         zh: '*最长2年。适用条款和条件。'
     },
+
     warranty_ev_note: {
-        id: '*Up to 5 years or 600,000 kilometers. Terms and conditions apply.',
-        en: 'The three-electric system has a warranty of 5 years or 600,000 kilometers.',
-        zh: '三电动系统保修期为 5 年或 60 万公里。'
+        id: '*Sampai dengan 5 tahun atau 600.000 kilometer. Syarat dan ketentuan berlaku.',
+        en: '*Up to 5 years or 600,000 kilometers. Terms and conditions apply.',
+        zh: '*三电动系统保修期为 5 年或 60 万公里。'
     },
 
     warranty_ev_battery: {
