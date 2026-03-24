@@ -1687,7 +1687,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             } else {
                 doc.text('IN-HOUSE WORKSHOP &', workshopBoxX + 5, workshopY);
                 workshopY += 5;
-                doc.text('SPARE PARTS OFF-ROAD', workshopBoxX + 5, workshopY);
+                doc.text('SPARE PARTS', workshopBoxX + 5, workshopY);
 
                 workshopY += 5;
                 doc.setFontSize(7);
