@@ -394,9 +394,9 @@ export const quotationLabelPDF: TranslationMap = {
     },
 
     warranty_ev_note: {
-        id: '*Sampai dengan 5 tahun atau 600.000 kilometer. Syarat dan ketentuan berlaku.',
-        en: '*Up to 5 years or 600,000 kilometers. Terms and conditions apply.',
-        zh: '*三电动系统保修期为 5 年或 60 万公里。'
+        id: '*Sampai dengan 5 tahun atau 200.000 kilometer. Syarat dan ketentuan berlaku.',
+        en: '*Up to 5 years or 200,000 kilometers. Terms and conditions apply.',
+        zh: '*三电动系统保修期为 5 年或 20 万公里。'
     },
 
     warranty_ev_battery: {
