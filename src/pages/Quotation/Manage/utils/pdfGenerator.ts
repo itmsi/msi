@@ -2018,7 +2018,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     title: langField('afterSales_maintenancePackage'),
                     icon: '/pdf/maintenance-service.png',
                     items: [
-                        langField('afterSales_maintenanceIncluded'),
+                        langField('afterSales_maintenanceIncludedEV'),
                         langField('afterSales_maintenanceService_onroad')
                     ]
                 },
@@ -2120,7 +2120,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     title: langField('afterSales_maintenancePackage'),
                     icon: '/pdf/maintenance-service.png',
                     items: [
-                        langField('afterSales_maintenanceIncluded'),
+                        langField('afterSales_maintenanceIncludedEV'),
                         langField('afterSales_maintenanceService_offroad')
                     ]
                 },

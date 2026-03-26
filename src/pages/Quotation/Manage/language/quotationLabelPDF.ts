@@ -228,6 +228,11 @@ export const quotationLabelPDF: TranslationMap = {
         en: 'Including Spare Parts & Engine Oil',
         zh: '包含备件和机油'
     },
+    afterSales_maintenanceIncludedEV: {
+        id: 'Termasuk Spare Part & Oli',
+        en: 'Including Spare Parts & Oil',
+        zh: '包括备件和润滑油'
+    },
     afterSales_maintenanceService_onroad: {
         id: 'Servis untuk PM 1 - PM 3 (5.000KM, 10.000KM, dan 20.000KM)',
         en: 'Service for PM 1 - PM 3 (5,000KM, 10,000KM, and 20,000KM)',
