@@ -21,6 +21,8 @@ const CustomAsyncSelect: React.FC<CustomAsyncSelectProps> = ({
     noOptionsMessage,
     loadingMessage,
     id,
+    menuPortalTarget,
+    menuPosition = 'absolute',
     ...props 
 }) => {
 
@@ -87,6 +89,8 @@ const CustomAsyncSelect: React.FC<CustomAsyncSelectProps> = ({
             loadingMessage={loadingMessage}
             cacheOptions
             filterOption={null}
+            menuPortalTarget={menuPortalTarget}
+            menuPosition={menuPosition}
         />
     );
 };
