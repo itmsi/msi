@@ -165,35 +165,9 @@ export default function Manage() {
                         className="w-full"
                     />
                 </div>
-                <div className="flex items-center gap-2">
-                    <CustomSelect
-                        id="status_filter"
-                        name="status_filter"
-                        value={statusFilter ? {
-                            value: statusFilter,
-                            label: statusFilter
-                        } : null}
-                        onChange={(opt) => handleFilterChange('status', opt?.value || '')}
-                        options={[
-                            { value: 'Not Started', label: 'Not Started' },
-                            { value: 'Find', label: 'Find' },
-                            { value: 'Pull', label: 'Pull' },
-                            { value: 'Survey', label: 'Survey' },
-                            { value: 'BAST', label: 'BAST' },
-                        ]}
-                        placeholder="Filter by status"
-                        isClearable={true}
-                        isSearchable={false}
-                        className="w-44"
-                    />
-                </div>
             </div>
         );
     }, [searchValue, sortOrder, statusFilter, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange]);
-
-console.log({
-    purchaseOrders
-});
 
     return (
         <>
