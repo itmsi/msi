@@ -20,6 +20,7 @@ interface InputProps {
     success?: boolean;
     error?: boolean;
     onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
     hint?: string;
     readonly?: boolean;
 }
@@ -41,6 +42,7 @@ const Input: FC<InputProps> = ({
     success = false,
     error = false,
     onKeyPress,
+    onFocus,
     hint,
     readonly = false,
 }) => {
@@ -81,6 +83,7 @@ const Input: FC<InputProps> = ({
                     ),
                 )}
                 onKeyDown={onKeyPress}
+                onFocus={onFocus}
             />
 
             {hint && (

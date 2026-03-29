@@ -394,6 +394,28 @@ export const formatCurrency = (value: number | string): string => {
         // maximumFractionDigits: 2,
     }).format(numValue);
 };
+export const formatCurrencyID = (value: number | string): string => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numValue)) return 'Rp 0';
+    
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        // minimumFractionDigits: 2,
+        // maximumFractionDigits: 2,
+    }).format(numValue);
+};
+export const formatCurrencyZH = (value: number | string): string => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numValue)) return '￥0';
+    
+    return new Intl.NumberFormat('zh-CN', {
+        style: 'currency',
+        currency: 'CNY',
+        // minimumFractionDigits: 2,
+        // maximumFractionDigits: 2,
+    }).format(numValue);
+};
 
 export const tableDateFormat = {
     day: '2-digit' as const,
@@ -456,6 +478,13 @@ export const formatDateToYMD = (date: Date): string => {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+};
+
+export const formatDateToDMYmiring = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${day}/${month}/${year}`;
 };
 
 export const formatDecimalValue = (value: string | number): string => {

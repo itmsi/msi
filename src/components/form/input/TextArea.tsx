@@ -4,6 +4,7 @@ import { twMerge } from "tailwind-merge";
 
 interface TextareaProps {
     placeholder?: string;
+    name?: string;
     rows?: number;
     value?: string;
     onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -16,6 +17,7 @@ interface TextareaProps {
 
 const TextArea: React.FC<TextareaProps> = ({
     placeholder = "Enter your message",
+    name,
     rows = 3,
     value = "",
     onChange,
@@ -42,6 +44,7 @@ const TextArea: React.FC<TextareaProps> = ({
         <div className="relative">
             <textarea
                 placeholder={placeholder}
+                name={name}
                 rows={rows}
                 value={value}
                 onChange={onChange}

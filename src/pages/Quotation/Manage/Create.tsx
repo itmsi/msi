@@ -1463,14 +1463,11 @@ export default function CreateQuotation() {
                             </div>
                         </div>
 
-
                         <div className='md:grid-cols-5 grid gap-6'>
-
                             {/* Products Section */}
                             <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5 col-span-1">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 pb-6 relative">
                                     {langField('products')}
-
                                     {!formData.island_id && (
                                         <span className="text-sm text-orange-500 font-primary italic mt-1 block absolute bottom-0">{langField('selectIslandFirst')}</span>
                                     )}

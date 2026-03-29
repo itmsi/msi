@@ -14,7 +14,7 @@ import {
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "@/hooks/useAuth";
 import GridShape from "@/components/common/GridShape";
-import { TbTopologyStar3 } from "react-icons/tb";
+import { TbTopologyStar3, TbReport } from "react-icons/tb";
 
 type SubNavItem = {
     name: string;
@@ -143,6 +143,16 @@ const navItems: NavItem[] = [
             { name: "Projects", path: "/crm/project", allowedRoles: ['Project CRM'] },
             { name: "User Management", path: "/crm/user-management", allowedRoles: ['User Management CRM'] },
             { name: "Division", path: "/crm/manage-division", allowedRoles: ['Division CRM'] }
+        ],
+    },
+    {
+        name: "NetSuite",
+        icon: <TbReport />,
+        allowedRoles: [
+            'Purchase Orders Netsuite', 
+        ],
+        subItems: [
+            { name: "Purchase Orders", path: "/netsuite/purchase-order", allowedRoles: ['Purchase Orders Netsuite'] },
         ],
     }
 ];
