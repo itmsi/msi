@@ -2,7 +2,6 @@ import { useCallback, useMemo, useState } from 'react'
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { usePurchaseOrder } from './hooks/usePurchaseOrder';
-import Badge from '@/components/ui/badge/Badge';
 import { formatCurrencyID, formatCurrencyZH, formatDateTime } from '@/helpers/generalHelper';
 import { MdAdd, MdClear, MdSearch, MdVerified } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
