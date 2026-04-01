@@ -9,6 +9,7 @@ import PurchaseOrderItemFields from './components/purchaseOrderItemsFields';
 import FormActions from '@/components/form/FormActions';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOVendorSelect } from '@/hooks/usePOVendorSelect';
+import { LoadingCard, LoadingOverlay } from '@/components/common/Loading';
 
 export default function Create() {
     const navigate = useNavigate();
@@ -69,6 +70,15 @@ export default function Create() {
                 image="/motor-sights-international.png"
             />
             
+            {loadingMasterData ? (
+                <div className="flex justify-center items-center py-12">
+                    <div className="text-center">
+                        <LoadingOverlay
+                            message="Loading master data..."
+                        />
+                    </div>
+                </div>
+            ) : (
             <div className="bg-gray-50 overflow-auto">
                 <div className="mx-auto px-4 sm:px-3">
                     {/* Header */}
@@ -181,6 +191,7 @@ export default function Create() {
                     </div>
                 </div>
             </div>
+            )}
         </>
     )
 }

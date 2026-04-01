@@ -1,5 +1,6 @@
 import React from 'react';
-import { MdCheckCircle, MdCancel } from 'react-icons/md';
+import { MdCheckCircle, MdCancel, MdAccessTime } from 'react-icons/md';
+import Badge from './Badge';
 
 interface ActiveStatusBadgeProps {
     status: 'active' | 'inactive';
@@ -183,5 +184,39 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({
         </span>
     );
 };
+interface StatusTypeBadgeProps {
+    type: 1 | 2 | 3;
+}
+export const StatusTypeBadge: React.FC<StatusTypeBadgeProps> = ({ type }) => {
+    const typeConfig = {
+        1: { 
+            variant: 'outline' as const, 
+            color: 'info' as const, 
+            label: 'Pending Approval' 
+        },
+        2: { 
+            variant: 'solid' as const, 
+            color: 'success' as const, 
+            label: 'Approved' 
+        },
+        3: { 
+            variant: 'solid' as const, 
+            color: 'warning' as const, 
+            label: 'Rejected' 
+        },
+    };
 
+    const config = typeConfig[type];
+
+    return (
+        <Badge 
+            variant={config.variant} 
+            color={config.color} 
+            size='lg'
+            endIcon={type === 1 ? <MdAccessTime className="w-4 h-4" /> : type === 2 ? <MdCheckCircle className="w-4 h-4" /> : <MdCancel className="w-4 h-4" />}
+        >
+            {config.label}
+        </Badge>
+    );
+};
 export default ActiveStatusBadge;
