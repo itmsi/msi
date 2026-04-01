@@ -1,5 +1,5 @@
 import { apiGet, apiPost, apiPut, apiDelete, ApiResponse } from '@/helpers/apiHelper';
-import { CustomerResponse, CustomerRequest, Customer, CustomerFormData, DuplicateCustomerResponse, CheckDuplicateCustomerPayload } from '../types/customer';
+import { CustomerResponse, CustomerRequest, Customer, CustomerFormData, DuplicateCustomerResponse, CheckDuplicateCustomerPayload, TaxBuyerTypeOption, ReferenceRequest } from '../types/customer';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export class CustomerService {
@@ -47,5 +47,20 @@ export class CustomerService {
     static async deleteCustomer(customerId: string): Promise<{ status: number }> {
         return await apiDelete(`${API_BASE_URL}/customers/${customerId}`);
     }
-    
+
+    static async getTaxBuyerTypes(params: Partial<ReferenceRequest> = {}): Promise<TaxBuyerTypeOption[]> {
+        const payload: ReferenceRequest = {
+            page: 1,
+            limit: 10,
+            search: "",
+            sort_by: "created_at",
+            sort_order: "desc",
+            type: "Jenis ID Pembeli",
+            ...params
+        };
+
+        const response = await apiPost<any>(`${API_BASE_URL}/netsuite/reference/get`, payload as Record<string, any>);
+        
+        return response.data?.data?.items || [];
+    }
 }
