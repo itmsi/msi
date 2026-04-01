@@ -107,6 +107,7 @@ const TNCEditITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Edit'))
 // PURCHASE ORDER NETSUITE
 const ManagePurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Manage'));
 const CreatePurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Create'));
+const ManageInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOrders/Manage'));
 // ========================================
 
 // DIVISION
@@ -872,6 +873,14 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Purchase Orders Netsuite'],
         component: CreatePurchaseOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/invoice-sales-order',
+        name: 'Purchase Orders Netsuite',
+        isProtected: true,
+        roles: ['Purchase Orders Netsuite'],
+        component: ManageInvoiceSalesOrder,
         layout: AppLayout,
     }
 ];

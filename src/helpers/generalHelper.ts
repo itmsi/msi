@@ -487,6 +487,23 @@ export const formatDateToDMYmiring = (date: Date): string => {
     return `${day}/${month}/${year}`;
 };
 
+
+// NetSuite returns dates in DD/M/YYYY format — parse before using
+export const parseNetsuiteDate = (dateStr: string | null | undefined): string => {
+    if (!dateStr) return '-';
+    // Already ISO format
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) return dateStr;
+    // DD/M/YYYY or D/M/YYYY
+    const m = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) {
+        const day   = m[1].padStart(2, '0');
+        const month = m[2].padStart(2, '0');
+        const year  = m[3];
+        return `${year}-${month}-${day}T00:00:00`;
+    }
+    return dateStr;
+};
+
 export const formatDecimalValue = (value: string | number): string => {
     if (!value) return '';
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
