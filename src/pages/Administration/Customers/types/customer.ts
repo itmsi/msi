@@ -11,6 +11,9 @@ export interface Customer {
     customer_country?: string;
     contact_person?: string;
     job_title?: string;
+    name_tax_buyer?: string;
+    no_tax_buyer?: string;
+    type_tax_buyer?: string;
     created_at?: string;
     created_by?: string;
     updated_at?: string | null;
@@ -45,6 +48,15 @@ export interface CustomerRequest {
     search: string;
 }
 
+export interface ReferenceRequest {
+    page: number;
+    limit: number;
+    search: string;
+    sort_by: string;
+    sort_order: 'asc' | 'desc';
+    type: string;
+}
+
 export interface ContactPerson {
     contact_person_name?: string;
     contact_person_email?: string;
@@ -64,6 +76,9 @@ export interface CustomerFormData {
     customer_zip: string;
     customer_country: string;
     job_title?: string;
+    name_tax_buyer?: string;
+    no_tax_buyer?: string;
+    type_tax_buyer?: string;
     contact_person?: string;
     contact_persons?: ContactPerson[];
 }
@@ -80,6 +95,9 @@ export interface CustomerValidationErrors {
     customer_zip?: string;
     customer_country?: string;
     job_title?: string;
+    name_tax_buyer?: string;
+    no_tax_buyer?: string;
+    type_tax_buyer?: string;
     contact_person?: string;
 }
 
@@ -104,4 +122,9 @@ export interface DuplicateCustomerResponse {
 }
 export interface CheckDuplicateCustomerPayload {
   customer_name: string[];
+}
+
+export interface TaxBuyerTypeOption {
+    code: string;
+    description: string;
 }

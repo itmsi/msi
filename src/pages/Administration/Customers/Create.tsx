@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
@@ -11,7 +11,9 @@ import { useCreateCustomer } from "./hooks/useCustomerCreate";
 import { handleKeyPress } from "@/helpers/generalHelper";
 import CustomerPersonsSection from "./components/CustomerPersonsSection";
 import { CustomerUtilityService } from "./services/customerUtilityService";
+import { CustomerService } from "./services/customerService";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
+import CustomSelect from "@/components/form/select/CustomSelect";
 
 interface CreateCustomerFormData {
     customer_code: string;
@@ -24,12 +26,28 @@ interface CreateCustomerFormData {
     customer_zip: string;
     customer_country: string;
     job_title: string;
+    name_tax_buyer: string;
+    no_tax_buyer: string;
+    type_tax_buyer: string;
     contact_person: string;
     contact_persons: ContactPerson[];
 }
 
 export default function CreateCustomer() {
     const navigate = useNavigate();
+    const [taxBuyerTypes, setTaxBuyerTypes] = useState<{value: string, label: string}[]>([]);
+
+    useEffect(() => {
+        const fetchTaxTypes = async () => {
+            try {
+                const types = await CustomerService.getTaxBuyerTypes();
+                setTaxBuyerTypes(types.map(t => ({ value: t.code, label: t.description })));
+            } catch (error) {
+                console.error("Error fetching tax buyer types:", error);
+            }
+        };
+        fetchTaxTypes();
+    }, []);
 
     // Hook for creating customer
     const { 
@@ -58,6 +76,9 @@ export default function CreateCustomer() {
         customer_zip: '',
         customer_country: '',
         job_title: '',
+        name_tax_buyer: '',
+        no_tax_buyer: '',
+        type_tax_buyer: '',
         contact_person: '',
         contact_persons: []
     });
@@ -478,6 +499,47 @@ export default function CreateCustomer() {
                         onRemoveContact={handleRemoveContact}
                         onContactChange={handleContactChange}
                     />
+
+                    {/* Coretax Information */}
+                    <div className="bg-white rounded-2xl shadow-sm mb-8 p-8">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-4">Coretax</h2>
+
+                            <div className="md:col-span-2">
+                                <Label htmlFor="name_tax_buyer">Nama</Label>
+                                <Input
+                                    id="name_tax_buyer"
+                                    type="text"
+                                    value={formData.name_tax_buyer}
+                                    onChange={(e) => handleInputChange('name_tax_buyer', e.target.value)}
+                                    placeholder="Enter tax buyer name"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <Label htmlFor="no_tax_buyer">Nomor</Label>
+                                <Input
+                                    id="no_tax_buyer"
+                                    type="text"
+                                    value={formData.no_tax_buyer}
+                                    onChange={(e) => handleInputChange('no_tax_buyer', e.target.value)}
+                                    placeholder="Enter tax buyer no"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <Label htmlFor="type_tax_buyer">Type</Label>
+                                <CustomSelect
+                                    id="type_tax_buyer"
+                                    options={taxBuyerTypes}
+                                    value={taxBuyerTypes.find(opt => opt.value === formData.type_tax_buyer) || null}
+                                    onChange={(selectedOption) => handleInputChange('type_tax_buyer', selectedOption?.value || '')}
+                                    placeholder="Select type tax buyer"
+                                    isClearable
+                                />
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Form Actions */}
                     <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
