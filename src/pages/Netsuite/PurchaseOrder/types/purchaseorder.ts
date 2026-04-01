@@ -25,12 +25,16 @@ export interface PurchaseOrderItem {
     po_number: string;
     po_date: string;
     po_status: string;
+    approvalstatus: string;
     po_status_label: string;
     memo: string | null;
     vendor_id: number;
     vendor_name: string;
     currency_id: number;
     currency_symbol: string;
+    pr_number: string | null;
+    foreigntotal: number;
+    total: number;
     lines: POLine[];
     created_at: string;
     updated_at: string;
@@ -58,6 +62,7 @@ export interface PurchaseOrderForm {
     vendorid: number | null;
     purchasedate: string | null;
     subsidiary: number | null;
+    subsidiary_display?: string | null;
     location: number | null;
     memo: string;
     currency: number | null;
@@ -69,8 +74,10 @@ export interface PurchaseOrderForm {
     custbody_me_pr_number: string | null;
     class: number | null;
     department: number | null;
-    description: string | null;
-    note: string | null;
+    custbody_msi_createdby_api?: string | null;
+    approvalstatus?: number | null;
+    // description: string | null;
+    // note: string | null;
     items: TablePOItem[];
 }
 
@@ -176,11 +183,11 @@ export interface TablePOItem {
     rate: number;
     amount: number;
     total: number;
-    department: number;
+    department: number | string;
     department_name?: string;
-    class: number;
+    class: number | string;
     class_name?: string;
-    location: number;
+    location: number | string;
     location_name?: string;
     taxcode: number;
     taxcode_name?: string;
@@ -237,4 +244,92 @@ export interface VendorItem {
     phone: string;
     lastModifiedDate: string;
     lastModifiedDateRaw: string;
+}
+
+// APPROVAL
+export interface POApprovalRequest {
+    id: number;
+    recordType: string;
+    custbody_msi_submit_app_api: boolean;
+    custbody_msi_reopen_api: boolean;
+    custbody_msi_resubmit_api: boolean;
+    note: string;
+}
+
+export interface POApprovalResponse {
+    success: boolean;
+    message: string;
+    data: any;
+}
+
+// PURCHASE ORDER DETAILS
+export interface PODetailData {
+    po_id: string;
+    po_number: string;
+    po_date: string;
+    po_status: string;
+    po_status_label: string;
+    location: number | string;
+    location_display: string;
+    subsidiary: number;
+    subsidiary_display: string;
+    memo: string;
+    vendor_id: number;
+    vendor_name: string;
+    currency_id: number;
+    currency_symbol: string;
+    foreigntotal: number;
+    total: number;
+    last_modified: string;
+    approvalstatus_label: string;
+    approvalstatus: number;
+    custbody_me_wf_created_by: number;
+    custbody_me_wf_in_delegation: string;
+    custbody_me_delegate_approver: number | null;
+    custbody_msi_createdby_api: string;
+    custbody_me_pr_date: string;
+    custbody_me_project_location: number;
+    custbody_me_pr_type: number;
+    custbody_me_saving_type: number;
+    custbody_me_pr_number: string;
+    custbody_me_description: string | null;
+    intercotransaction: any | null;
+    lines: PODetailLine[];
+}
+
+export interface PODetailLine {
+    item: number;
+    memo?: string | null;
+    rate?: number;
+    class?: number;
+    units?: number | null;
+    tax1amt?: number | null;
+    taxcode?: number;
+    grossamt?: number;
+    isclosed?: string;
+    itemtype?: string;
+    location?: number;
+    quantity?: number;
+    taxrate1?: number | null;
+    netamount?: number;
+    department?: number;
+    isbillable?: string;
+    transaction?: number;
+    item_display?: string;
+    class_display?: string;
+    units_display?: string | null;
+    quantitybilled?: number;
+    taxcode_display?: string;
+    location_display?: string;
+    department_display?: string;
+    linesequencenumber?: number;
+    matchbilltoreceipt?: string;
+    expectedreceiptdate?: string | null;
+    custcol_4601_witaxapplies?: string | null;
+}
+
+export interface PODetailResponse {
+    success: boolean;
+    data: PODetailData[];
+    message: string;
 }

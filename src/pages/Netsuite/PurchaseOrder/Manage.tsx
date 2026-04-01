@@ -1,17 +1,19 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { usePurchaseOrder } from './hooks/usePurchaseOrder';
 import Badge from '@/components/ui/badge/Badge';
 import { formatCurrencyID, formatCurrencyZH, formatDateTime } from '@/helpers/generalHelper';
-import { MdAdd, MdClear, MdSearch } from 'react-icons/md';
+import { MdAdd, MdClear, MdSearch, MdVerified } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
-import CustomDataTable from '@/components/ui/table';
+import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { PurchaseOrderItem } from './types/purchaseorder';
+import ModalApproval from './components/ModalApproval';
+import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -45,13 +47,21 @@ export default function Manage() {
         handleRowsPerPageChange(limitBaru, halamanBaru);
     }, [pagination?.page, pagination?.limit, handleRowsPerPageChange]);
 
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedPoId, setSelectedPoId] = useState<number | null>(null);
+
+    const handleApproval = (row: PurchaseOrderItem) => {
+        setSelectedPoId(row.id);
+        setIsOpen(true);
+    };
+
     const columns: TableColumn<PurchaseOrderItem>[] = [
         {
             name: 'Date',
             selector: row => row.po_number || '-',
             cell: row => (<>
                 <a
-                    href={`/netsuite/purchase-order/view/${row.id}`}
+                    href={`/netsuite/purchase-order/edit/${row.po_id}`}
                     className="absolute inset-0"
                 />
                 
@@ -71,15 +81,11 @@ export default function Manage() {
             name: 'Status',
             selector: row => row.po_status || '-',
             cell: row => (
-                
-            <div className="items-center capitalize">
-                <Badge
-                    color={'info'}
-                    variant='light'
-                >
-                    {row.po_status}
-                </Badge>
-            </div>
+                <div className="items-center capitalize">
+                    <StatusTypeBadge 
+                        type={Number(row.approvalstatus) as 1 | 2 | 3} 
+                    />
+                </div>
             ),
         },
         {
@@ -105,6 +111,15 @@ export default function Manage() {
             </>),
             wrap: true,
         },
+        createActionsColumn([
+            {
+                icon: MdVerified,
+                onClick: handleApproval,
+                className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                tooltip: 'Approve',
+                permission: 'update'
+            }
+        ])
         // {
         //     name: 'Updated By',
         //     selector: row => row.updated_by_name || '-',
@@ -240,6 +255,16 @@ export default function Manage() {
                         />
                     </div>
                 </div>
+
+                <ModalApproval
+                    isOpen={isOpen}
+                    onClose={() => setIsOpen(false)}
+                    poId={selectedPoId}
+                    onSuccess={() => handleFilterChange('sort_order', sortOrder)}
+                    submit={true}
+                    titleModal="Submit Approval"
+                    descriptionModal="Masukkan catatan untuk proses approval"
+                />
             </div>
         </>
 

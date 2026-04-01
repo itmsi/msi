@@ -1,5 +1,5 @@
 import { apiPost, apiGet, ApiResponse } from '@/helpers/apiHelper';
-import { LocationDataResponse, MasterDataFormFieldItems, POItemResponse, POItemsRequest, PurchaseOrderRequest, PurchaseOrderResponse, VendorResponse } from '../types/purchaseorder';
+import { LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, POItemResponse, POItemsRequest, PurchaseOrderRequest, PurchaseOrderResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -52,6 +52,7 @@ export class PurchaseOrderService {
         const response = await apiPost(`${API_BASE_URL}/netsuite/locations/get-list`, requestData as Record<string, any>);
         return response.data as LocationDataResponse;
     }
+
     static async getPOVendor(params: Partial<POItemsRequest> = {}): Promise<VendorResponse> {
         const requestData: POItemsRequest = {
             page: 1,
@@ -66,14 +67,18 @@ export class PurchaseOrderService {
         return response.data as VendorResponse;
     }
 
-    // static async getProjectById(id: string): Promise<ApiResponse<{ success: boolean; message: string; data: ProjectItemDetails }>> {
-    //     return await apiGet<{ success: boolean; message: string; data: ProjectItemDetails }>(
-    //         `${API_BASE_URL}/bridge/purchase-orders/${id}`
-    //     );
-    // }
-
     static async createPurchaseOrder(requestData: any): Promise<any> {
         const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/create`, requestData);
+        return response.data;
+    }
+
+    static async submitApproval(params: POApprovalRequest): Promise<POApprovalResponse> {
+        const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/approval`, params as Record<string, any>);
+        return response.data as POApprovalResponse;
+    }
+    
+    static async getPOById(id: string): Promise<PODetailResponse> {
+        const response = await apiGet<PODetailResponse>(`${API_BASE_URL}/netsuite/purchasing-orders/${id}`);
         return response.data;
     }
 

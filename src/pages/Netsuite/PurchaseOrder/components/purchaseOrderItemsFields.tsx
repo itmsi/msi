@@ -334,7 +334,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     <CustomSelect
                         options={masterData?.departments?.map(dept => ({
                             label: dept.name,
-                            value: dept.id.toString()
+                            value: dept.id
                         })) || []}
                         value={row.department ? {
                             label: row.department_name || '',
@@ -364,7 +364,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     <CustomSelect
                         options={masterData?.class?.map(cls => ({
                             label: cls.name,
-                            value: cls.id.toString()
+                            value: cls.id
                         })) || []}
                         value={row.class ? {
                             label: row.class_name || '',

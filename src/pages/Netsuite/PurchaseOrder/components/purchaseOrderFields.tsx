@@ -17,9 +17,11 @@ import {
 } from './FieldForm';
 import { POVendorSelectOption, POVendorPaginationState } from '@/hooks/usePOVendorSelect';
 import { POLocationSelectOption, POLocationPaginationState } from '@/hooks/usePOLocationSelect';
+import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 
 interface POFormFieldsProps {
     formData: PurchaseOrderForm;
+    modeEdit?: boolean;
     errors: Record<string, string>;
     masterData?: MasterDataFormFieldItems | null;
     loadingMasterData?: boolean;
@@ -48,9 +50,9 @@ interface POFormFieldsProps {
 
 const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     formData,
+    modeEdit = false,
     errors,
     masterData,
-    loadingMasterData,
     onInputChange,
     onSelectChange,
     onDateChange,
@@ -329,63 +331,70 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 );
         }
     };
-    
+
     return (
         <div className="space-y-6">
-            {loadingMasterData ? (
-                <div className="flex justify-center items-center py-12">
-                    <div className="text-center">
-                        {/* <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                        <p className="text-gray-500">Loading master data...</p> */}
+            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Primary Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {primaryFields.map((field) => (
+                            <div key={field.name}>
+                                {renderField(field)}
+                            </div>
+                        ))}
+                </div>
+            </div>
+            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Additional Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {additionalFields.map((field) => (
+                            <div key={field.name}>
+                                {renderField(field)}
+                            </div>
+                        ))}
+                </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Classification</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {classificationFields.map((field) => (
+                            <div key={field.name}>
+                                {renderField(field)}
+                            </div>
+                        ))}
+                </div>
+            </div>
+            {modeEdit && (
+            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Approval</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <p className='mb-1.5 block text-sm text-gray-700'>Approval Status</p>
+                        <StatusTypeBadge
+                            type={Number(formData.approvalstatus) as 1 | 2 | 3} 
+                        />
+                    </div>
+                    <div>
+                        <p className='mb-1.5 block text-sm text-gray-700'>Created By</p>
+                        <p>{formData.custbody_msi_createdby_api}</p>
                     </div>
                 </div>
-            ) : (
-                <>
-                    <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                        <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Primary Information</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {primaryFields.map((field) => (
-                                    <div key={field.name}>
-                                        {renderField(field)}
-                                    </div>
-                                ))}
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                        <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Additional Information</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {additionalFields.map((field) => (
-                                    <div key={field.name}>
-                                        {renderField(field)}
-                                    </div>
-                                ))}
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                        <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Classification</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {classificationFields.map((field) => (
-                                    <div key={field.name}>
-                                        {renderField(field)}
-                                    </div>
-                                ))}
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                        <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Intercompany Management</h3>
-                        <div className="grid grid-cols-1 gap-4">
-
-                                {interCompanyFields.map((field) => (
-                                    <div key={field.name}>
-                                        {renderField(field)}
-                                    </div>
-                                ))}
-                        </div>
-                    
-                    </div>
-                </>
+            </div>
             )}
+
+            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Intercompany Management</h3>
+                <div className="grid grid-cols-1 gap-4">
+
+                        {interCompanyFields.map((field) => (
+                            <div key={field.name}>
+                                {renderField(field)}
+                            </div>
+                        ))}
+                </div>
+            
+            </div>
         </div>
     )
 }
