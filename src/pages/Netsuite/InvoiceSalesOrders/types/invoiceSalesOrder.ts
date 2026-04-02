@@ -57,13 +57,19 @@ export interface InvoiceSalesOrder {
     custbody_me_wf_next_approver_blank: string | null;
     saleseffectivedate: string;
     createdfrom: string;
+    createdfrom_display: string | null;
     subsidiary: string;
+    subsidiary_display?: string | null;
     department: string;
+    department_display?: string | null;
     class: string;
+    class_display?: string | null;
     location: string;
+    location_display?: string | null;
     custbody_cseg_cn_cfi: string;
     custbody_me_description: string | null;
     lines: InvoiceSalesOrderLine[];
+    fakture_id: string;
 }
 
 export interface InvoiceSalesOrderPagination {

@@ -183,5 +183,115 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({
         </span>
     );
 };
+interface StatusTypeBadgeProps {
+    type: 1 | 2 | 3;
+    variant?: 'default' | 'with-icon' | 'icon-only';
+    size?: 'sm' | 'md' | 'lg';
+    className?: string;
+}
+export const StatusTypeBadge: React.FC<StatusTypeBadgeProps> = ({ 
+    type,
+    variant = 'default',
+    size = 'md',
+    className = '' 
+}) => {
+    const getStatusStyles = (type: 1 | 2 | 3) => {
+        switch (type) {
+            case 2:
+                return {
+                    bgColor: 'bg-green-100',
+                    textColor: 'text-green-800',
+                    borderColor: 'border-green-200',
+                    icon: <MdCheckCircle className={getSizeClasses().iconSize} />,
+                    label: 'Approved' 
+                };
+            case 1:
+                return {
+                    bgColor: 'bg-gray-100',
+                    textColor: 'text-gray-800',
+                    borderColor: 'border-gray-200',
+                    icon: <MdCancel className={getSizeClasses().iconSize} />,
+                    label: 'Pending Approval' 
+                };
+            case 3:
+                return {
+                    bgColor: 'bg-red-100',
+                    textColor: 'text-red-800',
+                    borderColor: 'border-red-200',
+                    icon: <MdCancel className={getSizeClasses().iconSize} />,
+                    label: 'Rejected' 
+                };
+            default:
+                return {
+                    bgColor: 'bg-gray-100',
+                    textColor: 'text-gray-800',
+                    borderColor: 'border-gray-200',
+                    icon: <MdCancel className={getSizeClasses().iconSize} />
+                };
+        }
+    };
 
+    const getSizeClasses = () => {
+        switch (size) {
+            case 'sm':
+                return {
+                    padding: 'px-2 py-0.5',
+                    textSize: 'text-xs',
+                    iconSize: 'w-3 h-3'
+                };
+            case 'lg':
+                return {
+                    padding: 'px-4 py-2',
+                    textSize: 'text-sm',
+                    iconSize: 'w-5 h-5'
+                };
+            default: // md
+                return {
+                    padding: 'px-3 py-1',
+                    textSize: 'text-xs',
+                    iconSize: 'w-4 h-4'
+                };
+        }
+    };
+
+    const statusStyles = getStatusStyles(type);
+    const sizeClasses = getSizeClasses();
+    
+    const getDisplayText = () => {
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    };
+
+    const renderContent = () => {
+        switch (variant) {
+            case 'with-icon':
+                return (
+                    <>
+                        {statusStyles.icon}
+                        <span>{getDisplayText()}</span>
+                    </>
+                );
+            case 'icon-only':
+                return statusStyles.icon;
+            default:
+                return <span>{statusStyles.label}</span>;
+        }
+    };
+
+    return (
+        <span 
+            className={`
+                inline-flex items-center justify-center gap-1 
+                ${sizeClasses.padding} 
+                ${sizeClasses.textSize} 
+                ${statusStyles.bgColor} 
+                ${statusStyles.textColor} 
+                ${statusStyles.borderColor} 
+                border rounded-full font-medium
+                ${className}
+            `.trim().replace(/\s+/g, ' ')}
+        >
+            {renderContent()}
+        </span>
+    );
+};
 export default ActiveStatusBadge;

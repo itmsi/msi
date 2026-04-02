@@ -1,17 +1,76 @@
 import { useState, useEffect } from 'react';
-import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
+import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldItems, TablePOItem, PODetailData } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import toast from 'react-hot-toast';
 import { formatDateToDMYmiring } from '@/helpers/generalHelper';
 
-export const usePurchaseOrderCreate = () => {
+// Mapping response API (PODetailData) ke format form (PurchaseOrderForm)
+const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
+    const firstLine = detail.lines?.[0];
+
+    // Filter hanya item bukan TaxItem
+    const productLines = (detail.lines || []).filter(line => line.itemtype !== 'TaxItem');
+
+    const items: TablePOItem[] = productLines.map((line, idx) => ({
+        id: `${line.item}-${idx}`,
+        product_id: String(line.item),
+        product_name: line.item_display || '',
+        itemId: line.item,
+        qty: line.quantity ?? 0,
+        rate: line.rate ?? 0,
+        amount: line.netamount ?? 0,
+        total: line.grossamt ?? 0,
+        department: line.department ?? 0,
+        department_name: line.department_display || '',
+        class: line.class ?? 0,
+        class_name: line.class_display || '',
+        location: line.location ?? 0,
+        location_name: line.location_display || '',
+        taxcode: line.taxcode ?? 0,
+        taxcode_name: line.taxcode_display || '',
+        tax_rate: line.taxrate1 != null ? String(line.taxrate1) : '',
+        gross_amount: line.grossamt ?? 0,
+        tax_amount: line.tax1amt ?? 0,
+    }));
+
+    return {
+        customform: detail.customform,
+        customform_display: detail.customform_display || '',
+        vendorid: detail.vendor_id,
+        purchasedate: detail.po_date,
+        subsidiary: detail.subsidiary ?? 0,
+        subsidiary_display: detail.subsidiary_display || '',
+        location: firstLine?.location ?? null,
+        memo: detail.memo || '',
+        currency: detail.currency_id,
+        terms: null,
+        custbody_me_pr_date: detail.custbody_me_pr_date || null,
+        custbody_me_project_location: detail.custbody_me_project_location ?? null,
+        custbody_me_pr_type: detail.custbody_me_pr_type ?? null,
+        custbody_me_saving_type: detail.custbody_me_saving_type ?? null,
+        custbody_me_pr_number: detail.custbody_me_pr_number || '',
+        class: firstLine?.class ?? null,
+        department: firstLine?.department ?? null,
+        approvalstatus: detail.approvalstatus,
+        custbody_msi_createdby_api: detail.custbody_msi_createdby_api,
+        // description: detail.custbody_me_description || null,
+        items,
+    };
+};
+
+export const usePurchaseOrderEdit = () => {
     const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
+    const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [validationErrors, setValidationErrors] = useState<PurchaseOrderValidationErrors>({});
     const [masterData, setMasterData] = useState<MasterDataFormFieldItems | null>(null);
     const [loadingMasterData, setLoadingMasterData] = useState(true);
+
+    // Detail data dari API (untuk info read-only seperti status, po_number)
+    const [poDetail, setPODetail] = useState<PODetailData | null>(null);
 
     const [formData, setFormData] = useState<PurchaseOrderForm>({
         customform: null,
@@ -28,49 +87,74 @@ export const usePurchaseOrderCreate = () => {
         custbody_me_saving_type: null,
         custbody_me_pr_number: '',
         class: null,
-        class_name: '',
         // description: null,
         department: null,
-        department_name: '',
         items: []
     });
 
-    // Load Master Data saat component mount
+    // Load master data + detail PO secara paralel
     useEffect(() => {
-        const loadMasterData = async () => {
+        const loadData = async () => {
+            if (!id) {
+                toast.error('Purchase Order ID tidak ditemukan');
+                navigate('/netsuite/purchase-order');
+                return;
+            }
+
             try {
+                setIsLoading(true);
                 setLoadingMasterData(true);
-                const response = await PurchaseOrderService.getFieldComponentById();
-                if (response.data.success) {
-                    setMasterData(response.data.data);
+
+                const [masterRes, detailRes] = await Promise.all([
+                    PurchaseOrderService.getFieldComponentById(),
+                    PurchaseOrderService.getPOById(id),
+                ]);
+
+                // Set master data
+                if (masterRes.data.success) {
+                    setMasterData(masterRes.data.data);
                 } else {
-                    toast.error('Failed to load master data');
+                    toast.error('Gagal memuat master data');
+                }
+
+                // Set detail PO
+                if (detailRes.success && detailRes.data?.length > 0) {
+                    const detail = detailRes.data[0];
+                    setPODetail(detail);
+                    console.log({
+                        detail
+                    });
+                    
+                    setFormData(mapPODetailToForm(detail));
+                } else {
+                    toast.error(detailRes.message || 'Data Purchase Order tidak ditemukan');
+                    navigate('/netsuite/purchase-order');
                 }
             } catch (error) {
-                console.error('Error loading master data:', error);
-                toast.error('Error loading master data');
+                console.error('Error loading data:', error);
+                toast.error('Gagal memuat data');
             } finally {
+                setIsLoading(false);
                 setLoadingMasterData(false);
             }
         };
 
-        loadMasterData();
-    }, []);
-
+        loadData();
+    }, [id]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        
+
         if (errors[name]) {
             setErrors(prev => {
                 const { [name]: _, ...rest } = prev;
                 return rest;
             });
         }
-        
+
         setFormData(prev => ({
             ...prev,
-            [name]: name === 'area_size_ha' ? value : value
+            [name]: value
         }));
     };
 
@@ -81,7 +165,7 @@ export const usePurchaseOrderCreate = () => {
                 return rest;
             });
         }
-        
+
         setFormData(prev => ({
             ...prev,
             [fieldName]: value
@@ -95,14 +179,13 @@ export const usePurchaseOrderCreate = () => {
                 return rest;
             });
         }
-        
+
         setFormData(prev => ({
             ...prev,
             [fieldName]: value
         }));
     };
 
-    // Validasi field yang required sebelum submit
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
 
@@ -138,13 +221,14 @@ export const usePurchaseOrderCreate = () => {
         if (!validateForm()) return;
 
         if (Object.keys(validationErrors).length > 0) {
-            toast.error('Please fix the validation errors');
+            toast.error('Perbaiki error validasi terlebih dahulu');
             return;
         }
+
         setIsSubmitting(true);
         try {
-            // Create JSON request body instead of FormData
             const requestData = {
+                // id: poDetail?.po_id || id,
                 customform: formData.customform || null,
                 vendorid: formData.vendorid || null,
                 purchasedate: formData.purchasedate ? formatDateToDMYmiring(new Date(formData.purchasedate)) : null,
@@ -172,40 +256,27 @@ export const usePurchaseOrderCreate = () => {
                 }))
             };
 
+            // TODO: ganti ke updatePurchaseOrder kalau endpoint sudah ada
             const response = await PurchaseOrderService.createPurchaseOrder(requestData);
             if (response.success) {
-                toast.success('Purchase Order berhasil dibuat');
+                toast.success('Purchase Order berhasil diupdate');
                 navigate('/netsuite/purchase-order');
             } else {
-                toast.error(response.message || 'Purchase Order tidak berhasil dibuat');
+                toast.error(response.message || 'Gagal mengupdate Purchase Order');
             }
         } catch (error: any) {
             if (error.errors && typeof error.errors === 'object') {
                 setValidationErrors(error.errors);
             }
-            console.error('Error creating purchase order:', error);
-            toast.error(error.message || 'Gagal membuat purchase order');
+            console.error('Error updating purchase order:', error);
+            toast.error(error.message || 'Gagal mengupdate purchase order');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // Product handlers - now handled by usePOItemsSelect hook
     const handleAddProductItem = (selectedProduct: any) => {
-        if (!selectedProduct) {
-            return;
-        }
-console.log({
-    formData,
-    masterData
-});
-
-        const deptName = formData?.department_name
-            || masterData?.departments?.find(d => d.id === formData?.department)?.name
-            || '';
-        const className = formData?.class_name
-            || masterData?.class?.find(c => c.id === formData?.class)?.name
-            || '';
+        if (!selectedProduct) return;
 
         const newItem: TablePOItem = {
             id: `${selectedProduct.value}-${Date.now()}`,
@@ -216,19 +287,18 @@ console.log({
             rate: 0,
             amount: 0,
             total: 0,
-            department: formData?.department || 0,
-            department_name: deptName,
-            class: formData?.class || 0,
-            class_name: className,
-            location:  0,
-            // location_name: formData?.location_name || '',
-            taxcode: masterData?.taxcodes?.[0]?.id || 0,
-            taxcode_name: masterData?.taxcodes?.[0]?.name || '',
+            department: formData?.items?.[0]?.department || 0,
+            department_name: formData?.items?.[0]?.department_name || '',
+            class: formData?.items?.[0]?.class || 0,
+            class_name: formData?.items?.[0]?.class_name || '',
+            location: formData?.items?.[0]?.location || 0,
+            location_name: formData?.items?.[0]?.location_name || '',
+            taxcode: formData?.items?.[0]?.taxcode || 0,
+            taxcode_name: formData?.items?.[0]?.taxcode_name || '',
             tax_rate: '',
             gross_amount: 0,
             tax_amount: 0
         };
-        
 
         setFormData(prev => ({
             ...prev,
@@ -261,10 +331,12 @@ console.log({
 
     return {
         isSubmitting,
+        isLoading,
         formData,
         errors,
         masterData,
         loadingMasterData,
+        poDetail,
         // Handlers
         handleInputChange,
         handleSelectChange,

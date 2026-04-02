@@ -116,10 +116,37 @@ export const getInterCompanyManageFields = () => [
         type: "textarea",
         required: true,
     },
-    {
-        name: "note",
-        label: "Note",
-        type: "textarea",
-        required: true,
-    }
+    // {
+    //     name: "note",
+    //     label: "Note",
+    //     type: "textarea",
+    //     required: true,
+    // }
 ];
+
+export const getApprovalFields = () => [
+    {
+        name: "approvalstatus",
+        label: "Approval Status",
+        type: "text",
+        readOnly: true,
+    },
+    // {
+    //     name: "created_by",
+    //     label: "Created By",
+    //     type: "text",
+    //     readOnly: true,
+    // },
+    {
+        name: "custbody_me_wf_next_approver_blank_display",
+        label: "Next Approver",
+        type: "text",
+        readOnly: true,
+    },
+    {
+        name: "custbody_msi_createdby_api",
+        label: "Created By API",
+        type: "text",
+        readOnly: true,
+    },
+]

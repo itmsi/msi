@@ -9,6 +9,7 @@ import PurchaseOrderItemFields from './components/purchaseOrderItemsFields';
 import FormActions from '@/components/form/FormActions';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOVendorSelect } from '@/hooks/usePOVendorSelect';
+import { LoadingOverlay } from '@/components/common/Loading';
 
 export default function Create() {
     const navigate = useNavigate();
@@ -28,7 +29,7 @@ export default function Create() {
         handleUpdateProductItem,
     } = usePurchaseOrderCreate();
 
-    // Use POILocationSelect hook for location management
+    // Location select untuk header (is_parent = true)
     const {
         POLocationOptions,
         pagination,
@@ -36,14 +37,25 @@ export default function Create() {
         handleInputChange: handleLocationInputChange,
         handleMenuScrollToBottom,
         initializeOptions
-    } = usePOLocationSelect();
+    } = usePOLocationSelect(30, true);
+
+    // Location select untuk items (is_parent = false)
+    const {
+        POLocationOptions: itemLocationOptions,
+        pagination: itemLocationPagination,
+        inputValue: itemLocationInputValue,
+        handleInputChange: handleItemLocationInputChange,
+        handleMenuScrollToBottom: handleItemLocationScrollToBottom,
+        initializeOptions: initializeItemLocationOptions
+    } = usePOLocationSelect(30, false);
     
     const [selectedLocation, setSelectedLocation] = useState<any>(null);
     const [locationSelectError, setLocationSelectError] = useState<string>('');
 
     useEffect(() => {
         initializeOptions();
-    }, [initializeOptions]);
+        initializeItemLocationOptions();
+    }, [initializeOptions, initializeItemLocationOptions]);
     
     const {
         POVendorOptions,
@@ -69,6 +81,15 @@ export default function Create() {
                 image="/motor-sights-international.png"
             />
             
+            {loadingMasterData ? (
+                <div className="flex justify-center items-center py-12">
+                    <div className="text-center">
+                        <LoadingOverlay
+                            message="Loading master data..."
+                        />
+                    </div>
+                </div>
+            ) : (
             <div className="bg-gray-50 overflow-auto">
                 <div className="mx-auto px-4 sm:px-3">
                     {/* Header */}
@@ -149,12 +170,12 @@ export default function Create() {
                             onProductDelete={handleProductDelete}
                             onUpdateProductItem={handleUpdateProductItem}
 
-                            // Location props  
-                            locationOptions={POLocationOptions}
-                            locationPagination={pagination}
-                            locationInputValue={inputValue}
-                            onLocationInputChange={handleLocationInputChange}
-                            onLocationMenuScrollToBottom={handleMenuScrollToBottom}
+                            // Location props (is_parent = false)
+                            locationOptions={itemLocationOptions}
+                            locationPagination={itemLocationPagination}
+                            locationInputValue={itemLocationInputValue}
+                            onLocationInputChange={handleItemLocationInputChange}
+                            onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
                             selectedLocation={selectedLocation}
                             onLocationChange={(option) => {
                                 setSelectedLocation(option);
@@ -181,6 +202,7 @@ export default function Create() {
                     </div>
                 </div>
             </div>
+            )}
         </>
     )
 }

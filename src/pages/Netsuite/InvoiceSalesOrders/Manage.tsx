@@ -1,16 +1,73 @@
 import { useCallback, useMemo } from 'react';
 import { TableColumn } from 'react-data-table-component';
+import { useNavigate } from 'react-router-dom';
 import { useInvoiceSalesOrder } from './hooks/useInvoiceSalesOrder';
 import Badge from '@/components/ui/badge/Badge';
 import { formatCurrencyID, formatCurrencyZH, parseNetsuiteDate, formatDateTime} from '@/helpers/generalHelper';
-import { MdClear, MdSearch } from 'react-icons/md';
+import { MdClear, MdSearch, MdVisibility, MdEdit, MdFileDownload } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
-import CustomDataTable from '@/components/ui/table';
+import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { InvoiceSalesOrder } from './types/invoiceSalesOrder';
 
+// Helper: export single invoice row as CSV
+const exportRowAsCSV = (row: InvoiceSalesOrder) => {
+    const totalForeign = row.lines && row.lines.length > 0
+        ? row.lines.reduce((sum, line) => sum + (line.grossamt || 0), 0)
+        : 0;
+    const exRate = Number(row.exchangerate) || 1;
+    const totalBase = totalForeign * exRate;
+
+    const headers = [
+        'ID', 'Document Number', 'Date', 'Name', 'Account', 'PO/Check Number',
+        'Status', 'Memo', 'Currency', 'Exchange Rate',
+        'Amount (Foreign Currency)', 'Amount (IDR)',
+        'ME - Related Invoice', 'MSI - Bank Payment', 'Created By'
+    ];
+
+    const statusMap: Record<string, string> = {
+        '1': 'Paid In Full',
+        '2': 'Pending Approval / Open',
+        '3': 'Rejected',
+    };
+
+    const values = [
+        row.id,
+        row.tranid,
+        row.trandate,
+        row.entityid || row.entity || '',
+        row.account_display || row.account || '',
+        row.otherrefnum || '',
+        statusMap[row.approvalstatus] || row.approvalstatus || '',
+        row.memo || '',
+        row.currency_display || row.currency || '',
+        row.exchangerate || '',
+        totalForeign.toFixed(2),
+        totalBase.toFixed(2),
+        row.custbody_me_related_fulfillment || '',
+        row.custbody_msi_bank_payment_so_display || row.custbody_msi_bank_payment_so || '',
+        row.custbody_me_wf_created_by_display || row.custbody_me_wf_created_by || ''
+    ];
+
+    const csvContent = [
+        headers.join(','),
+        values.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `invoice_${row.tranid || row.id}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+};
+
 export default function Manage() {
+    const navigate = useNavigate();
     const {
         invoiceSalesOrders,
         loading,
@@ -176,7 +233,30 @@ export default function Manage() {
             selector: row => row.custbody_me_wf_created_by_display || row.custbody_me_wf_created_by || '-',
             wrap: true,
             width: '150px',
-        }
+        },
+        createActionsColumn([
+            {
+                icon: MdVisibility,
+                onClick: (row: InvoiceSalesOrder) => navigate(`/netsuite/invoice-sales-order/view/${row.tranid}`),
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                tooltip: 'View Detail',
+                permission: 'read',
+            },
+            {
+                icon: MdEdit,
+                onClick: (row: InvoiceSalesOrder) => navigate(`/netsuite/invoice-sales-order/edit/${row.fakture_id}`),
+                className: 'text-amber-600 hover:text-amber-700 hover:bg-amber-50',
+                tooltip: 'Edit',
+                permission: 'update',
+            },
+            {
+                icon: MdFileDownload,
+                onClick: (row: InvoiceSalesOrder) => exportRowAsCSV(row),
+                className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                tooltip: 'Export CSV',
+                permission: 'read',
+            },
+        ])
     ];
     
     const SearchAndFilters = useMemo(() => {

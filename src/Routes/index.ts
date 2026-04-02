@@ -108,6 +108,9 @@ const TNCEditITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Edit'))
 const ManagePurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Manage'));
 const CreatePurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Create'));
 const ManageInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOrders/Manage'));
+const EditPurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Edit'));
+const ViewInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOrders/View'));
+const EditInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOrders/Edit'));
 // ========================================
 
 // DIVISION
@@ -881,6 +884,31 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Purchase Orders Netsuite'],
         component: ManageInvoiceSalesOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/purchase-order/edit/:id',
+        name: 'Purchase Orders Netsuite',
+        isProtected: true,
+        roles: ['Purchase Orders Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: EditPurchaseOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/invoice-sales-order/view/:tranid',
+        name: 'Purchase Orders Netsuite',
+        isProtected: true,
+        roles: ['Purchase Orders Netsuite'],
+        component: ViewInvoiceSalesOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/invoice-sales-order/edit/:id',
+        name: 'Purchase Orders Netsuite',
+        isProtected: true,
+        roles: ['Purchase Orders Netsuite'],
+        component: EditInvoiceSalesOrder,
         layout: AppLayout,
     }
 ];
