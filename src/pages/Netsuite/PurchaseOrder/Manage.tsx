@@ -10,7 +10,7 @@ import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import CustomDataTable from '@/components/ui/table';
-// import { PurchaseOrderItem } from './types/purchaseorder';
+import { PurchaseOrderItem } from './types/purchaseorder';
 // import ModalApproval from './components/ModalApproval';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 
