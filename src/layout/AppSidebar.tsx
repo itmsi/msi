@@ -163,9 +163,11 @@ const AppSidebar: React.FC = () => {
             icon: <TbReport />,
             allowedRoles: [
                 'Purchase Orders Netsuite', 
+                'Invoice Sales Orders Netsuite' // Add this or just use same role
             ],
             subItems: [
                 { name: "Purchase Orders", path: "/netsuite/purchase-order", allowedRoles: ['Purchase Orders Netsuite'] },
+                { name: "Invoice Sales Orders", path: "/netsuite/invoice-sales-order", allowedRoles: ['Purchase Orders Netsuite'] },
             ],
         }
     ], [buildPath]);
