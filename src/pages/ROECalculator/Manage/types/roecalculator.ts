@@ -34,6 +34,7 @@ export interface RorEntity {
    profit_margin: string | null;
    roa_aggregate_percentage: string | null;
    roe_aggregate_percentage: string | null;
+   step: number;
 
    ritase_per_hari: string | null;
    ritase_per_bulan: string | null;

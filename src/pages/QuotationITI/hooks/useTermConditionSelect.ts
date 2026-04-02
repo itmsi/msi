@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { TermCondition } from '../TermCondition/types/termcondition';
 import { AuthService } from '@/services/authService';
@@ -30,6 +30,10 @@ export const useTermConditionSelect = () => {
         loading: false
     });
     const [inputValue, setInputValue] = useState('');
+    
+    // Add ref to prevent multiple initializations
+    const isInitialized = useRef(false);
+    const isLoadingRef = useRef(false);
 
     // Load term conditions for async select
     const loadTermConditions = useCallback(async (
@@ -39,8 +43,8 @@ export const useTermConditionSelect = () => {
         reset: boolean = false
     ) => {
         try {
-            if (pagination.loading && !reset) return loadedOptions;
-
+            if (isLoadingRef.current && !reset) return loadedOptions;
+            isLoadingRef.current = true;
             setPagination(prev => ({ ...prev, loading: true }));
 
             const response = await TermConditionService.getTermConditions({
@@ -74,10 +78,12 @@ export const useTermConditionSelect = () => {
         } catch (error) {
             console.error('Error loading term conditions:', error);
             setPagination(prev => ({ ...prev, loading: false }));
+        } finally {
+            isLoadingRef.current = false;
         }
 
         return loadedOptions;
-    }, [pagination.loading, companyName]);
+    }, [companyName]);
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -90,17 +96,18 @@ export const useTermConditionSelect = () => {
 
     // Handle scroll to bottom - load next page
     const handleMenuScrollToBottom = useCallback(() => {
-        if (pagination.hasMore && !pagination.loading) {
+        if (pagination.hasMore && !isLoadingRef.current) {
             loadTermConditions(inputValue, termConditionOptions, pagination.page + 1, false);
         }
-    }, [pagination, termConditionOptions, inputValue, loadTermConditions]);
+    }, [pagination.hasMore, pagination.page, inputValue, termConditionOptions, loadTermConditions]);
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
-        if (termConditionOptions.length === 0) {
-            await loadTermConditions('', [], 1, true);
-        }
-    }, [termConditionOptions.length, loadTermConditions]);
+        if (isInitialized.current || isLoadingRef.current) return;
+        
+        isInitialized.current = true;
+        await loadTermConditions('', [], 1, true);
+    }, [loadTermConditions]);
 
     return {
         termConditionOptions,

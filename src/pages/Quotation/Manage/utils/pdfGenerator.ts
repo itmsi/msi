@@ -3,7 +3,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { formatDate } from '@/helpers/generalHelper';
 import { ManageQuotationDataPDF } from '../types/quotation';
-import { loadCustomFonts, setFontSafe, setFontByLanguage } from './fontLoader';
+import { loadCustomFonts, setFontSafe, setFontByLanguage } from '@/utils/fontLoader';
 import { quotationLabelPDF } from '@/pages/Quotation/Manage/language/quotationLabelPDF';
 import type { LangCode } from '../../../../components/lang/useLanguage';
 

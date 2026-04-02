@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuotation } from './useQuotation';
 
-export const useQuotationManagement = () => {
+export const useQuotationManagement = (lang?: string) => {
     const navigate = useNavigate();
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -99,19 +99,14 @@ export const useQuotationManagement = () => {
         navigate(`/quotations-iti/manage/edit/${quotation.manage_quotation_id}`);
     }, [navigate]);
 
-    const handleView = useCallback((quotation: any) => {
-        navigate(`/quotations-iti/detail/${quotation.manage_quotation_id}`);
-    }, [navigate]);
-
     const handleDelete = useCallback((quotation: any) => {
         const quotationId = typeof quotation === 'string' ? quotation : quotation.manage_quotation_id;
         setConfirmDelete({ show: true, quotationId: quotationId });
     }, []);
 
     const handleDownload = useCallback((quotation: any) => {
-        downloadQuotation(quotation.manage_quotation_id);
-    }, []);
-
+        downloadQuotation(quotation.manage_quotation_id, lang);
+    }, [downloadQuotation, lang]);
     const confirmDeleteQuotations = useCallback(async () => {
         if (!confirmDelete.quotationId) return;
 
@@ -177,7 +172,6 @@ export const useQuotationManagement = () => {
         handleFilterChange,
         handleStatusChange,
         handleEdit,
-        handleView,
         applyFilters,
         handleKeyPress
     };

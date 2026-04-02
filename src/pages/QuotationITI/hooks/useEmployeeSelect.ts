@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Employee } from '@/types/administration';
 import { employeesService } from '@/services/administrationService';
 
@@ -23,6 +23,9 @@ export const useEmployeeSelect = () => {
     });
     const [activeSales, setActiveSales] = useState(false);
     const [inputValue, setInputValue] = useState('');
+    
+    const isInitialized = useRef(false);
+    const isLoadingRef = useRef(false);
 
     const loadEmployeeOptions = useCallback(async (
         inputValue: string = '', 
@@ -32,14 +35,15 @@ export const useEmployeeSelect = () => {
         activeSales: boolean = false
     ) => {
         try {
-            if (pagination.loading && !reset) return loadedOptions;
-
+            if (isLoadingRef.current && !reset) return loadedOptions;
+            
+            isLoadingRef.current = true;
             setPagination(prev => ({ ...prev, loading: true }));
 
             const response = await employeesService.getEmployees({
                 search: inputValue,
                 page: page,
-                limit: 20,
+                limit: 25,
                 sort_order: 'desc',
                 is_sales_quotation: activeSales
             });
@@ -65,12 +69,14 @@ export const useEmployeeSelect = () => {
                 return updatedOptions;
             }
         } catch (error) {
-            console.error('Error loading term conditions:', error);
+            console.error('Error loading employees:', error);
             setPagination(prev => ({ ...prev, loading: false }));
+        } finally {
+            isLoadingRef.current = false;
         }
 
         return loadedOptions;
-    }, [pagination.loading]);
+    }, []);
 
         // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -83,17 +89,19 @@ export const useEmployeeSelect = () => {
 
     // Handle scroll to bottom - load next page
     const handleMenuScrollToBottom = useCallback(() => {
-        if (pagination.hasMore && !pagination.loading) {
+        if (pagination.hasMore && !isLoadingRef.current) {
             loadEmployeeOptions(inputValue, employeeOptions, pagination.page + 1, false, activeSales);
         }
-    }, [pagination, employeeOptions, inputValue, loadEmployeeOptions, activeSales]);
+    }, [pagination.hasMore, pagination.page, inputValue, employeeOptions, loadEmployeeOptions, activeSales]);
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
-        if (employeeOptions.length === 0) {
-            await loadEmployeeOptions('', [], 1, true, activeSales);
-        }
-    }, [employeeOptions.length, loadEmployeeOptions, activeSales]);
+        // Prevent multiple initializations
+        if (isInitialized.current || isLoadingRef.current) return;
+        
+        isInitialized.current = true;
+        await loadEmployeeOptions('', [], 1, true, activeSales);
+    }, [loadEmployeeOptions, activeSales]);
 
     return {
         employeeOptions,

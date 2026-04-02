@@ -64,7 +64,7 @@ const WysiwygEditor: React.FC<WysiwygEditorProps> = ({
     return (
         <div className={`wysiwyg-editor-wrapper ${className}`}>
             {label && (
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
                     {label}
                 </label>
             )}

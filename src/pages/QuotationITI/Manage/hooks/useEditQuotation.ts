@@ -4,7 +4,7 @@ import { ManageQuotationData, QuotationValidationErrors } from '../types/quotati
 import toast from 'react-hot-toast';
 
 export const useEditQuotation = () => {
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [quotationData, setQuotationData] = useState<ManageQuotationData | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<QuotationValidationErrors>({});

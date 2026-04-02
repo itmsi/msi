@@ -13,6 +13,8 @@ import { ItemProductValidationErrors, ProductSpecification } from "./types/produ
 import { handleKeyPress, formatNumberInput } from "@/helpers/generalHelper";
 import CustomSelect from "@/components/form/select/CustomSelect";
 import { PermissionGate } from "@/components/common/PermissionComponents";
+import { getDefaultSpecs } from "./hooks/useProductCreate";
+import WysiwygEditor from "@/components/form/editor/WysiwygEditor";
 
 interface EditProductFormData {
     code_unique: string;
@@ -69,99 +71,7 @@ export default function EditProduct() {
         volume: '',
         componen_product_unit_model: '',
         msi_product: '',
-        componen_product_specifications: [
-            {
-                componen_product_specification_label: 'GVW',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'GVW',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Unit Model',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Unit Model',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Horse Power',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Horse Power',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Cargobox/Vessel',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Cargobox/Vessel',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Wheelbase',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Wheelbase',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Engine Brand Model',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Engine Brand Model',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Max Torque',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Max Torque',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Displacement',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Displacement',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Emission Standard',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Emission Standard',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Engine Guard',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Engine Guard',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Gearbox Transmission',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Gearbox Transmission',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Fuel Tank',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Fuel Tank',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Tyre',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Tyre',
-                specification_value_name: ''
-            }
-        ],
+        componen_product_specifications: getDefaultSpecs(1),
     });
     
     const [specifications, setSpecifications] = useState<any[]>([]);
@@ -182,99 +92,7 @@ export default function EditProduct() {
             const product = await loadProduct(productId);
             
             if (product) {
-                const defaultSpecifications = [
-                    {
-                        componen_product_specification_label: 'GVW',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'GVW',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Unit Model',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Unit Model',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Horse Power',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Horse Power',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Cargobox/Vessel',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Cargobox/Vessel',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Wheelbase',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Wheelbase',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Engine Brand Model',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Engine Brand Model',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Max Torque',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Max Torque',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Displacement',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Displacement',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Emission Standard',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Emission Standard',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Engine Guard',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Engine Guard',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Gearbox Transmission',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Gearbox Transmission',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Fuel Tank',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Fuel Tank',
-                        specification_value_name: ''
-                    },
-                    {
-                        componen_product_specification_label: 'Tyre',
-                        componen_product_specification_value: '',
-                        componen_product_specification_description: '',
-                        specification_label_name: 'Tyre',
-                        specification_value_name: ''
-                    }
-                ];
+                const defaultSpecifications = getDefaultSpecs(product.componen_type || 1);
 
                 const specificationsData = defaultSpecifications.map(defaultSpec => {
                     const apiSpec = product.componen_product_specifications?.find(spec => 
@@ -428,25 +246,6 @@ export default function EditProduct() {
             let volumeValue = formData.volume;
             let unitModelValue = formData.componen_product_unit_model;
 
-            if (formData.product_type !== 'unit') {
-                segmentValue = '';
-                msiModelValue = '';
-                msiProductValue = '';
-                componentTypeValue = 1;
-                wheelNoValue = '';
-                engineValue = '';
-                horsePowerValue = '';
-                volumeValue = '';
-                unitModelValue = '';
-                
-                const currentSpecs = specifications.length > 0 ? specifications : formData.componen_product_specifications;
-                specificationsData = currentSpecs.map(spec => ({
-                    ...spec,
-                    componen_product_specification_value: '',
-                    specification_value_name: ''
-                }));
-            }
-            
             formDataToSend.append('code_unique', formData.code_unique);
             formDataToSend.append('product_type', formData.product_type);
             formDataToSend.append('componen_product_description', formData.componen_product_description);
@@ -533,15 +332,10 @@ export default function EditProduct() {
         );
     }
 
-    const companyOptions = [
-        { value: 1, label: 'OFF ROAD REGULAR' },
-        { value: 2, label: 'ON ROAD REGULAR' },
-        { value: 3, label: 'OFF ROAD IRREGULAR' },
-    ];
-
     const productOptions = [
-        { value: 'unit', label: 'Unit' },
-        { value: 'non_unit', label: 'Non Unit' }
+        { value: 'hardware', label: 'Hardware' },
+        { value: 'implementation', label: 'Implementation' },
+        { value: 'application', label: 'Application' }
     ];
 
     return (
@@ -628,6 +422,31 @@ export default function EditProduct() {
                                         placeholder="Masukkan deskripsi produk..."
                                     />
                                 </div>
+                                
+                                {specifications.map((spec, index) => (
+                                    <div key={`${spec.specification_label_name}-${index}`} className="md:col-span-2">
+                                        <WysiwygEditor
+                                            label={spec.specification_label_name || spec.componen_product_specification_label}
+                                            value={spec.specification_value_name || spec.componen_product_specification_value || ''}
+                                            onChange={(content) => {
+                                                const newSpecs = [...formData.componen_product_specifications];
+                                                newSpecs[index] = {
+                                                    ...newSpecs[index],
+                                                    specification_value_name: spec.specification_value_name,
+                                                    componen_product_specification_value: content
+                                                };
+                                                setSpecifications(newSpecs);
+                                            }}
+                                            placeholder="Enter terms and conditions content..."
+                                            minHeight="300px"
+                                        />
+                                        {spec.componen_product_specification_description && (
+                                            <p className="mt-1 text-xs text-gray-500">
+                                                {spec.componen_product_specification_description}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
@@ -727,171 +546,6 @@ export default function EditProduct() {
                             </div>
                         </div>
 
-                        {/* Pricing Section */}
-                        
-                    {formData.product_type === 'unit' && <>
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
-                                Spesifikasi Unit 
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <Label htmlFor="segment">
-                                        Segment
-                                    </Label>
-                                    <Input
-                                        id="segment"
-                                        name="segment"
-                                        type="text"
-                                        value={formData.segment}
-                                        onChange={(e) => handleInputChange('segment', e.target.value)}
-                                        placeholder="Masukkan segment"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="msi_model">
-                                        Model
-                                    </Label>
-                                    <Input
-                                        id="msi_model"
-                                        name="msi_model"
-                                        type="text"
-                                        value={formData.msi_model}
-                                        onChange={(e) => handleInputChange('msi_model', e.target.value)}
-                                        error={!!validationErrors.msi_model}
-                                        placeholder="Masukkan MSI model"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="msi_product">
-                                        Product
-                                    </Label>
-                                    <Input
-                                        id="msi_product"
-                                        name="msi_product"
-                                        type="text"
-                                        value={formData.msi_product}
-                                        onChange={(e) => handleInputChange('msi_product', e.target.value)}
-                                        error={!!validationErrors.msi_product}
-                                        placeholder="Masukkan MSI model"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="componen_type">Product Type</Label>
-                                    <CustomSelect
-                                        options={companyOptions}
-                                        value={companyOptions.find(option => option.value === formData.componen_type) || null}
-                                        onChange={(option) => {
-                                            setFormData(prev => ({
-                                                ...prev,
-                                                componen_type: Number(option?.value) || 1
-                                            }));
-                                        }}
-                                        placeholder="Select Company"
-                                        isClearable={false}
-                                        isSearchable={true}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="wheel_no">Wheel No</Label>
-                                    <Input
-                                        id="wheel_no"
-                                        name="wheel_no"
-                                        type="text"
-                                        value={formData.wheel_no}
-                                        onChange={(e) => handleInputChange('wheel_no', e.target.value)}
-                                        placeholder="Masukkan wheel number"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="engine">Engine</Label>
-                                    <Input
-                                        id="engine"
-                                        name="engine"
-                                        type="text"
-                                        value={formData.engine}
-                                        onChange={(e) => handleInputChange('engine', e.target.value)}
-                                        placeholder="Masukkan engine"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="horse_power">Horse Power</Label>
-                                    <Input
-                                        id="horse_power"
-                                        name="horse_power"
-                                        type="text"
-                                        value={formData.horse_power}
-                                        onChange={(e) => handleInputChange('horse_power', e.target.value)}
-                                        placeholder="Masukkan horse power"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="volume">Volume</Label>
-                                    <Input
-                                        id="volume"
-                                        name="volume"
-                                        type="text"
-                                        value={formData.volume}
-                                        onChange={(e) => handleInputChange('volume', e.target.value)}
-                                        placeholder="Masukkan volume"
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="componen_product_unit_model">Unit Model</Label>
-                                    <Input
-                                        id="componen_product_unit_model"
-                                        name="componen_product_unit_model"
-                                        type="text"
-                                        value={formData.componen_product_unit_model}
-                                        onChange={(e) => handleInputChange('componen_product_unit_model', e.target.value)}
-                                        placeholder="Masukkan unit model"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
-                                Spesifikasi Produk 
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {specifications.map((spec, index) => (
-                                    <div key={`${spec.specification_label_name}-${index}`}>
-                                        <Label htmlFor={`spec_${index}`}>
-                                            {spec.specification_label_name || spec.componen_product_specification_label}
-                                        </Label>
-                                        <Input
-                                            id={`spec_${index}`}
-                                            type="text"
-                                            value={spec.specification_value_name || spec.componen_product_specification_value || ''}
-                                            onChange={(e) => {
-                                                const newSpecs = [...specifications];
-                                                newSpecs[index] = {
-                                                    ...newSpecs[index],
-                                                    specification_value_name: e.target.value,
-                                                    componen_product_specification_value: e.target.value
-                                                };
-                                                setSpecifications(newSpecs);
-                                            }}
-                                            placeholder="Masukkan nilai spesifikasi"
-                                        />
-                                        {spec.componen_product_specification_description && (
-                                            <p className="mt-1 text-xs text-gray-500">
-                                                {spec.componen_product_specification_description}
-                                            </p>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </>}
 
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <FileUpload

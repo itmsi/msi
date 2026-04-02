@@ -17,6 +17,8 @@ interface Step2Props {
     calculateStep2: () => Promise<boolean>;
     loading?: boolean;
     calculatorId?: string;
+    langField: (key: string) => string;
+    buildPath: (basePath: string) => string;
 }
 
 export default function Step2UnitPurchase({ 
@@ -26,14 +28,20 @@ export default function Step2UnitPurchase({
     calculationResults,
     calculateStep2,
     loading,
-    calculatorId
+    calculatorId,
+    langField,
+    buildPath
 }: Step2Props) {
     const navigate = useNavigate();
     const [calculating, setCalculating] = useState(false);
     
     useEffect(() => {
         if (calculatorId && formData.step && formData.step < 2) {
-            navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=${formData.step}`, { replace: true });
+            const basePath = `/roe-roa-calculator/manage/edit/${calculatorId}`;
+            const baseUrl = buildPath(basePath); 
+            const separator = baseUrl.includes('?') ? '&' : '?';
+            const newUrl = `${baseUrl}${separator}step=2`;
+            navigate(newUrl, { replace: true });
         }
     }, [formData.step, calculatorId, navigate]);
 
@@ -65,7 +73,7 @@ export default function Step2UnitPurchase({
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
                     <LoadingSpinner />
-                    <p className="text-gray-600">Please wait while we fetch your purchase data...</p>
+                    <p className="text-gray-600">{langField('waitFetchPurchaseData')}</p>
                 </div>
             </div>
         );
@@ -75,16 +83,16 @@ export default function Step2UnitPurchase({
         
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Data Pembelian Unit</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">{langField('unitPurchaseData')}</h3>
                 <p className="text-sm text-gray-600 mb-6">
-                    Input data pembelian unit dan struktur pembiayaan
+                    {langField('unitPurchaseDescription')}
                 </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
                 {/* Harga Per Unit */}
                 <div className="md:col-span-3">
-                    <Label htmlFor="harga_per_unit">Harga Per Unit (Rp)</Label>
+                    <Label htmlFor="harga_per_unit">{langField('pricePerUnit')}</Label>
                     <Input
                         id="harga_per_unit"
                         type="text"
@@ -102,7 +110,7 @@ export default function Step2UnitPurchase({
 
                 {/* Jumlah Unit */}
                 <div className="md:col-span-3">
-                    <Label htmlFor="jumlah_unit">Jumlah Unit (Qty)</Label>
+                    <Label htmlFor="jumlah_unit">{langField('unitQuantity')}</Label>
                     <Input
                         id="jumlah_unit"
                         value={formData.jumlah_unit}
@@ -116,20 +124,9 @@ export default function Step2UnitPurchase({
                     )}
                 </div>
 
-                {/* Total Asset Display */}
-                {/* {(formData.financial_structure?.asset || (calculationResults?.financial_structure?.asset != null && calculationResults.financial_structure.asset !== 0)) && (
-                    <div className="md:col-span-6 p-4 bg-blue-50 rounded-lg">
-                        <Label>Total Asset</Label>
-                        <p className="text-xl font-bold text-blue-900">
-                            {formatCurrency(formData.financial_structure?.asset ?? calculationResults?.financial_structure?.asset ?? 0)}
-                        </p>
-                    </div>
-                )} */}
-
-
                 <div className="md:col-span-6 grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div>
-                        <Label htmlFor="down_payment_pct">Down Payment (%)</Label>
+                        <Label htmlFor="down_payment_pct">{langField('downPaymentPct')}</Label>
                         <div className="space-y-2">
                             <Input
                                 id="down_payment_pct"
@@ -142,8 +139,8 @@ export default function Step2UnitPurchase({
                                         (validValue) => handleInputChange('down_payment_pct', validValue),
                                         () => handleInputChange('down_payment_pct', null),
                                         true,
-                                        3, // maxIntegerDigits
-                                        4 // maxDecimalDigits
+                                        3,
+                                        4 
                                     );
                                 }}
                             />
@@ -151,7 +148,7 @@ export default function Step2UnitPurchase({
                     </div>
                     {/* Tenor Pembiayaan */}
                     <div>
-                        <Label htmlFor="tenor_pembiayaan">Tenor Pembiayaan (Bulan)</Label>
+                        <Label htmlFor="tenor_pembiayaan">{langField('financingTenor')}</Label>
                         <Input
                             id="tenor_pembiayaan"
                             value={formData.tenor_pembiayaan}
@@ -163,14 +160,14 @@ export default function Step2UnitPurchase({
                                     (validValue) => handleInputChange('tenor_pembiayaan', validValue),
                                     () => handleInputChange('tenor_pembiayaan', null),
                                     true,
-                                    3, // maxIntegerDigits
-                                    4 // maxDecimalDigits
+                                    3,
+                                    4 
                                 );
                             }}
                             error={!!validationErrors.tenor_pembiayaan}
                         />
                         <p className="text-xs text-gray-500 mt-1 inline-flex">
-                            {Math.round((parseFloat(String(formData.tenor_pembiayaan || '0')) / 12) * 10) / 10} tahun
+                            {Math.round((parseFloat(String(formData.tenor_pembiayaan || '0')) / 12) * 10) / 10} {langField('financingTenorYears')}
                         </p>
                         {validationErrors.tenor_pembiayaan && (
                             <span className="text-sm text-red-500 ms-1">{validationErrors.tenor_pembiayaan}</span>
@@ -179,7 +176,7 @@ export default function Step2UnitPurchase({
 
                     {/* Interest Rate */}
                     <div>
-                        <Label htmlFor="interest_rate">Interest Rate Flat per Tahun (%)</Label>
+                        <Label htmlFor="interest_rate">{langField('interestRateFlat')}</Label>
                         <Input
                             id="interest_rate"
                             value={formData.interest_rate === null ? 0 : formData.interest_rate || 0}
@@ -191,8 +188,8 @@ export default function Step2UnitPurchase({
                                     (validValue) => handleInputChange('interest_rate', validValue),
                                     () => handleInputChange('interest_rate', null),
                                     true,
-                                    3, // maxIntegerDigits
-                                    4 // maxDecimalDigits
+                                    3,
+                                    4 
                                 );
                             }}
                             error={!!validationErrors.interest_rate}
@@ -204,7 +201,7 @@ export default function Step2UnitPurchase({
 
                     {/* Periode Depresiasi */}
                     <div>
-                        <Label htmlFor="periode_depresiasi">Periode Depresiasi (Bulan)</Label>
+                        <Label htmlFor="periode_depresiasi">{langField('depreciationPeriod')}</Label>
                         <Input
                             id="periode_depresiasi"
                             value={formData.periode_depresiasi}
@@ -216,8 +213,8 @@ export default function Step2UnitPurchase({
                                     (validValue) => handleInputChange('periode_depresiasi', validValue),
                                     () => handleInputChange('periode_depresiasi', null),
                                     true,
-                                    4, // maxIntegerDigits
-                                    4 // maxDecimalDigits
+                                    4,
+                                    4 
                                 );
                             }}
                             error={!!validationErrors.periode_depresiasi}
@@ -238,7 +235,7 @@ export default function Step2UnitPurchase({
                     className="flex items-center gap-2"
                 >
                 <MdCalculate size={16} />
-                    {calculating ? 'Calculating...' : 'Simpan & Hitung'}
+                    {calculating ? langField('calculating') : langField('saveAndCalculate')}
                 </Button>
             </div>
                 
@@ -246,50 +243,50 @@ export default function Step2UnitPurchase({
                 <div className="mt-8 space-y-6">
                     {/* Financial Structure */}
                     <div>
-                        <h4 className="font-medium text-gray-900 mb-4">Struktur Financial</h4>
+                        <h4 className="font-medium text-gray-900 mb-4">{langField('financialStructure')}</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="bg-green-50 p-4 rounded-lg">
-                                <Label>Aset</Label>
+                                <Label>{langField('asset')}</Label>
                                 <p className="text-lg font-bold text-green-900">
                                     {formatCurrency(formData.financial_structure?.asset ?? calculationResults?.financial_structure?.asset ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-blue-50 p-4 rounded-lg">
-                                <Label>Ekuitas</Label>
+                                <Label>{langField('equity')}</Label>
                                 <p className="text-lg font-bold text-blue-900">
                                     {formatCurrency(formData.financial_structure?.equity ?? calculationResults?.financial_structure?.equity ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-orange-50 p-4 rounded-lg">
-                                <Label>Liabilitas</Label>
+                                <Label>{langField('liability')}</Label>
                                 <p className="text-lg font-bold text-orange-900">
                                     {formatCurrency(formData.financial_structure?.liability ?? calculationResults?.financial_structure?.liability ?? 0)}
                                 </p>
                             </div>
                         </div>
                         <p className="text-xs text-gray-600 mt-2">
-                            Catatan: ROE dihitung dari Profit/Equity dihitung dari Profit/Asset
+                            {langField('financialStructureNote')}
                         </p>
                     </div>
 
                     {/* Monthly Summary */}
                     <div>
-                        <h4 className="font-medium text-gray-900 mb-4">Ringkasan Cicilan Bulanan</h4>
+                        <h4 className="font-medium text-gray-900 mb-4">{langField('monhtlySummaryTitle')}</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="bg-gray-50 p-4 rounded-lg">
-                                <Label>Cicilan Pokok</Label>
+                                <Label>{langField('principalPayment')}</Label>
                                 <p className="text-lg font-bold text-gray-900">
                                     {formatCurrency(formData.monthly_summary?.cicilan_pokok ?? calculationResults?.monthly_summary?.cicilan_pokok ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-gray-50 p-4 rounded-lg">
-                                <Label>Bunga per Bulan</Label>
+                                <Label>{langField('monthlyInterest')}</Label>
                                 <p className="text-lg font-bold text-gray-900">
                                     {formatCurrency(formData.monthly_summary?.bunga_per_bulan ?? calculationResults?.monthly_summary?.bunga_per_bulan ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-gray-50 p-4 rounded-lg">
-                                <Label>Total Cicilan/Bulan</Label>
+                                <Label>{langField('totalMonthlyPayment')}</Label>
                                 <p className="text-lg font-bold text-gray-900">
                                     {formatCurrency(formData.monthly_summary?.total_cicilan_bulan ?? calculationResults?.monthly_summary?.total_cicilan_bulan ?? 0)}
                                 </p>
@@ -299,29 +296,29 @@ export default function Step2UnitPurchase({
 
                     {/* Expense Impact */}
                     <div>
-                        <h4 className="font-medium text-gray-900 mb-4">Impact ke Total Expense</h4>
+                        <h4 className="font-medium text-gray-900 mb-4">{langField('expenseImpactTitle')}</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="bg-red-50 p-4 rounded-lg">
-                                <Label>Penyusutan/Bulan</Label>
+                                <Label>{langField('depreciationPerMonth')}</Label>
                                 <p className="text-lg font-bold text-red-900">
                                     {formatCurrency(formData.expense_impact?.depreciation_bulan ?? calculationResults?.expense_impact?.depreciation_bulan ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-red-50 p-4 rounded-lg">
-                                <Label>Bunga/Bulan</Label>
+                                <Label>{langField('interestExpensePerMonth')}</Label>
                                 <p className="text-lg font-bold text-red-900">
                                     {formatCurrency(formData.expense_impact?.interest_expense_bulan ?? calculationResults?.expense_impact?.interest_expense_bulan ?? 0)}
                                 </p>
                             </div>
                             <div className="bg-red-50 p-4 rounded-lg">
-                                <Label>Total Biaya Tetap dari Unit</Label>
+                                <Label>{langField('totalFixedCostUnit')}</Label>
                                 <p className="text-lg font-bold text-red-900">
                                     {formatCurrency(calculationResults?.expense_impact?.total_fixed_cost_unit ?? formData.expense_impact?.total_fixed_cost_unit ?? 0)}
                                 </p>
                             </div>
                         </div>
                         <p className="text-xs text-gray-600 mt-2">
-                            Nilai ini otomatis masuk ke Total Expense dan mempengaruhi Net Profit, ROE, dan ROA
+                            {langField('expenseImpactNote')}
                         </p>
                     </div>
                 </div>

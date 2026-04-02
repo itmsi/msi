@@ -3,9 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
 import UserDropdown from "../components/header/UserDropdown";
+import LanguageSwitcher from "@/components/lang/LanguageSwitcher";
+import { useLanguage } from "@/components/lang/useLanguage";
 
 const AppHeader: React.FC = () => {
     const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
+    const { lang, setLang } = useLanguage();
 
     const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
@@ -117,11 +120,13 @@ const AppHeader: React.FC = () => {
                         <UserDropdown />
                     </div>
                 </div>
+                
                 <div
                     className={`${
                         isApplicationMenuOpen ? "flex" : "hidden"
                     } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
                 >
+                    <LanguageSwitcher currentLang={lang} onChangeLang={setLang} />
                     <UserDropdown />
                 </div>
             </div>

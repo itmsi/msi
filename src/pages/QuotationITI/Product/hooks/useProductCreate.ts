@@ -1,10 +1,34 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { ItemProductValidationErrors, ProductSpecification } from "../types/product";
 import { useNavigate } from "react-router";
-import { formatNumberInput } from "@/helpers/generalHelper";
+import { getCompanyName, formatNumberInput } from "@/helpers/generalHelper";
 import { ItemProductService } from "../services/productService";
-import { AuthService } from "@/services/authService";
+
+const makeSpec = (label: string): ProductSpecification => ({
+    componen_product_specification_label: label,
+    componen_product_specification_value: '',
+    componen_product_specification_description: '',
+    specification_label_name: label,
+    specification_value_name: ''
+});
+
+export const REGULAR_SPECS: ProductSpecification[] = [
+    'remark'
+].map(makeSpec);
+
+export const EV_SPECS: ProductSpecification[] = [
+    'Overall Length', 'Wheelbase', 'Curb Weight',
+    'Gross Vehicle Weight (GVW)', 'Rated Power / Torque', 'Peak Power / Torque',
+    'Battery Capacity', 'Battery Protection', 'Charging Ports',
+    'Input Socket Power', 'Frame', 'Rear Axles',
+    'Tires', 'Structure Thickness', 'Cargo Box Size'
+].map(makeSpec);
+
+export const EV_COMPONENT_TYPES = [4, 5];
+
+export const getDefaultSpecs = (componentType: number): ProductSpecification[] =>
+    EV_COMPONENT_TYPES.includes(componentType) ? EV_SPECS.map(s => ({ ...s })) : REGULAR_SPECS.map(s => ({ ...s }));
 
 // Form data type for creating
 interface CreateProductFormData {
@@ -33,12 +57,6 @@ interface CreateProductFormData {
 export const useCreateProduct = () => {
     const navigate = useNavigate();
     
-    // Get company_name from logged in user
-    const companyName = useMemo(() => {
-        const user = AuthService.getCurrentUser();
-        return (user as any)?.company_name || '';
-    }, []);
-    
     const [isCreating, setIsCreating] = useState(false);
     const [validationErrors, setValidationErrors] = useState<ItemProductValidationErrors>({});
     const [productImage, setProductImage] = useState<File[]>([]);
@@ -62,100 +80,8 @@ export const useCreateProduct = () => {
         componen_type: 1,
         volume: '',
         componen_product_unit_model: '',
-        company_name: companyName,
-        componen_product_specifications: [
-            {
-                componen_product_specification_label: 'GVW',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'GVW',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Unit Model',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Unit Model',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Horse Power',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Horse Power',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Cargobox/Vessel',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Cargobox/Vessel',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Wheelbase',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Wheelbase',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Engine Brand Model',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Engine Brand Model',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Max Torque',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Max Torque',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Displacement',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Displacement',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Emission Standard',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Emission Standard',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Engine Guard',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Engine Guard',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Gearbox Transmission',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Gearbox Transmission',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Fuel Tank',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Fuel Tank',
-                specification_value_name: ''
-            },
-            {
-                componen_product_specification_label: 'Tyre',
-                componen_product_specification_value: '',
-                componen_product_specification_description: '',
-                specification_label_name: 'Tyre',
-                specification_value_name: ''
-            }
-        ],
+        company_name: getCompanyName(),
+        componen_product_specifications: REGULAR_SPECS.map(s => ({ ...s })),
     });
     
 
@@ -246,24 +172,6 @@ export const useCreateProduct = () => {
             let horsePowerValue = formData.horse_power;
             let volumeValue = formData.volume;
             let unitModelValue = formData.componen_product_unit_model;
-
-            if (formData.product_type !== 'unit') {
-                // For non_unit type, clear unit-specific fields
-                segmentValue = '';
-                msiModelValue = '';
-                msiProductValue = '';
-                componentTypeValue = 1;
-                wheelNoValue = '';
-                engineValue = '';
-                horsePowerValue = '';
-                volumeValue = '';
-                unitModelValue = '';
-                specificationsData = formData.componen_product_specifications.map(spec => ({
-                    ...spec,
-                    componen_product_specification_value: '',
-                    specification_value_name: ''
-                }));
-            }
             
             // Append all form fields
             formDataToSend.append('code_unique', formData.code_unique);
@@ -319,15 +227,10 @@ export const useCreateProduct = () => {
         navigate('/quotations-iti/products');
     };
 
-    const companyOptions = [
-        { value: 1, label: 'OFF ROAD REGULAR' },
-        { value: 2, label: 'ON ROAD REGULAR' },
-        { value: 3, label: 'OFF ROAD IRREGULAR' },
-    ];
-
     const productOptions = [
-        { value: 'unit', label: 'Unit' },
-        { value: 'non_unit', label: 'Non Unit' }
+        { value: 'hardware', label: 'Hardware' },
+        { value: 'implementation', label: 'Implementation' },
+        { value: 'application', label: 'Application' }
     ];
 
     return {
@@ -340,7 +243,6 @@ export const useCreateProduct = () => {
         productImage,
         handleSubmit,
         handleBack,
-        companyOptions,
         productOptions,
         setFormData
     };

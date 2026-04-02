@@ -78,7 +78,7 @@ export const useRoeCalculator = () => {
         }
     }, []);
 
-    const downloadRoe = useCallback(async (roeCalculatorId: string) => {
+    const downloadRoe = useCallback(async (roeCalculatorId: string, lang: string = 'en') => {
         setLoading(true);
         setError(null);
         
@@ -87,7 +87,7 @@ export const useRoeCalculator = () => {
             
             if (response.data?.success && response.data?.data) {
                 try {
-                    await generateROEPDF(response.data.data);
+                    await generateROEPDF(response.data.data, lang || 'en');
                     toast.success('PDF downloaded successfully');
                     return true;
                 } catch (pdfError) {

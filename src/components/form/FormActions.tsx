@@ -7,6 +7,7 @@ import { PermissionGate } from '../common/PermissionComponents';
 interface FormActionsProps {
     onSubmit: () => void;
     isSubmitting?: boolean;
+    cancelText?: string;
     cancelRoute?: string;
     submitText?: string;
     submittingText?: string;
@@ -17,6 +18,7 @@ const FormActions: React.FC<FormActionsProps> = ({
     isSubmitting = false,
     cancelRoute = '/home',
     submitText = 'Create',
+    cancelText = 'Cancel',
     submittingText = 'Creating...'
 }) => {
     const navigate = useNavigate();
@@ -34,7 +36,7 @@ const FormActions: React.FC<FormActionsProps> = ({
                 className="px-6 rounded-full"
                 disabled={isSubmitting}
             >
-                Cancel
+                {cancelText}
             </Button>
             
             <PermissionGate permission={["create", "update"]}>

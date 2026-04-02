@@ -13,8 +13,11 @@ import CustomSelect from "@/components/form/select/CustomSelect";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 import { formatCurrency, formatDateTime } from "@/helpers/generalHelper";
 import { FaRegFilePdf } from "react-icons/fa6";
+import { useLanguage } from "@/components/lang/useLanguage";
+import { roeCalculatorLabels } from "../language/roeCalculatorLabels";
 
 export default function ManageRor() {
+    const { lang, langField, buildPath } = useLanguage(roeCalculatorLabels);
     const navigate = useNavigate();
     const {
         searchTerm,
@@ -37,27 +40,29 @@ export default function ManageRor() {
         handleClearFilters,
         handleFilterChange,
         handleBreakdown,
-        handleEdit,
         handleDelete,
         confirmdeleteRorCalculator,
         cancelDelete,
         handleDownload,
-    } = useRoeCalculatorManagement({ iup_customer_id: '' });
+    } = useRoeCalculatorManagement({ iup_customer_id: '', lang });
 
     // Conditional row click handler based on step
     const handleRowClick = (row: any) => {
-        if (row.step === 4) {
-            handleBreakdown(row);
-        } else {
-            handleEdit(row);
-        }
+        const basePath = row.step === 4 ? `/roe-roa-calculator/manage/breakdown/${row.id}` : `/roe-roa-calculator/manage/edit/${row.id}`;
+        const baseUrl = buildPath(basePath); 
+        const separator = baseUrl.includes('?') ? '&' : '?';
+        const newUrl = row.step === 4 ? baseUrl : `${baseUrl}${separator}step=${row.step || 1}`;
+        navigate(newUrl, { replace: true });
     };
 
     const columns: TableColumn<RorEntity>[] = [
         {
-            name: 'Customer',
+            name: langField('customer'),
             selector: row => row.customer_name || '-',
-            cell: (row) => (
+            cell: (row) => {
+                
+                return (
+                <>
                 <div className=" items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">
                         {row.customer_name}
@@ -65,14 +70,15 @@ export default function ManageRor() {
                     <div className={`block text-sm text-gray-500 ${parseFloat(String(row?.roe_individual_percentage || '0')) < 0 ? 'text-red-500' : 'text-green-600'}`}>ROE : {row.roe_individual_percentage || '0'}%</div>
                     <div className={`block text-sm text-gray-500 ${parseFloat(String(row?.roa_individual_percentage || '0')) < 0 ? 'text-red-500' : 'text-green-600'}`}>ROA : {row.roa_individual_percentage || '0'}%</div>
                 </div>
-            ),
+                </>
+            )},
         },
         {
-            name: 'Commodity',
+            name: langField('commodity'),
             selector: row => row.commodity || '-',
         },
         {
-            name: 'Revenue',
+            name: langField('revenue'),
             selector: row => row.revenue_monthly || '-',
             cell: (row) => (
                 <div className=" items-center gap-3 py-2">
@@ -84,7 +90,7 @@ export default function ManageRor() {
             )
         },
         {
-            name: 'Updated By',
+            name: langField('updatedBy'),
             selector: row => row.updated_at || '',
             sortable: false,
             cell: (row) => (
@@ -100,7 +106,7 @@ export default function ManageRor() {
             width: '200px'
         },
         {
-            name: 'Actions',
+            name: langField('action'),
             cell: (row: any) => (
                 <div className="flex justify-end gap-1">
                     {/* Conditional breakdown action - only show when step is 4 */}
@@ -111,7 +117,7 @@ export default function ManageRor() {
                                 handleBreakdown(row);
                             }}
                             className={`p-2 rounded-md text-sm font-medium transition-colors relative text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-0`}
-                            title="Breakdown"
+                            title={langField('breakdown')}
                         >
                             <MdOutlineAutoGraph size={16} />
                         </PermissionButton>
@@ -123,7 +129,7 @@ export default function ManageRor() {
                                 handleDownload(row);
                             }}
                             className={`p-2 rounded-md text-sm font-medium transition-colors relative text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-0`}
-                            title="Download"
+                            title={langField('download')}
                         >
                             <FaRegFilePdf size={16} />
                         </PermissionButton>
@@ -131,9 +137,15 @@ export default function ManageRor() {
                     
                     <PermissionButton 
                         permission="update"
-                        onClick={() => handleEdit(row)}
+                        onClick={() => {
+                            const basePath = `/roe-roa-calculator/manage/edit/${row.id}`;
+                            const baseUrl = buildPath(basePath); 
+                            const separator = baseUrl.includes('?') ? '&' : '?';
+                            const newUrl = `${baseUrl}${separator}step=${row.step || 1}`;
+                            navigate(newUrl, { replace: true });
+                        }}
                         className={`p-2 rounded-md text-sm font-medium transition-colors relative text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-0`}
-                        title="Edit"
+                        title={langField('edit')}
                     >
                         <MdEdit size={16} />
                     </PermissionButton>
@@ -144,7 +156,7 @@ export default function ManageRor() {
                             handleDelete(row);
                         }}
                         className="!p-2 !rounded-lg !text-red-600 hover:!text-red-700 hover:!bg-red-50 !transition-colors !border-0"
-                        title="Delete"
+                        title={langField('delete')}
                     >
                         <MdDeleteOutline size={16} />
                     </PermissionButton>
@@ -163,7 +175,7 @@ export default function ManageRor() {
                         <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                         <Input
                             type="text"
-                            placeholder="Search by quotation number, customer ID..."
+                            placeholder={langField('searchCalculator')}
                             value={searchTerm}
                             onChange={(e) => handleSearchChange(e.target.value)}
                             onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -172,7 +184,7 @@ export default function ManageRor() {
                                     handleManualSearch();
                                 }
                             }}
-                            className={`pl-10 py-2 w-full rounded-r-none ${searchTerm ? 'pr-10' : 'pr-4'}`}
+                            className={`pl-10 py-2 w-full ${searchTerm ? 'pr-10' : 'pr-4'}`}
                         />
                         {searchTerm && (
                             <button
@@ -184,13 +196,13 @@ export default function ManageRor() {
                             </button>
                         )}
                     </div>
-                    <Button
+                    {/* <Button
                         onClick={handleManualSearch}
                         className="rounded-l-none px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 border-l-0"
                         size="sm"
                     >
                         <MdSearch className="w-4 h-4" />
-                    </Button>
+                    </Button> */}
                 </div>
             </div>
             
@@ -200,16 +212,16 @@ export default function ManageRor() {
                     name="sort_status"
                     value={sortCommodity ? { 
                         value: sortCommodity, 
-                        label: sortCommodity === 'batu bara' ? 'batu bara' : sortCommodity === 'nikel' ? 'Nikel' : ''
+                        label: sortCommodity === 'batu bara' ? langField('coalCommodity') : sortCommodity === 'nikel' ? langField('nickelCommodity') : ''
                     } : null}
                     onChange={(selectedOption) => 
                         handleFilterChange('commodity', selectedOption?.value || '')
                     }
                     options={[
-                        { value: 'batu bara', label: 'batu bara' },
-                        { value: 'nikel', label: 'Nikel' }
+                        { value: 'batu bara', label: langField('coalCommodity') },
+                        { value: 'nikel', label: langField('nickelCommodity') }
                     ]}
-                    placeholder="Status"
+                    placeholder={langField('filterByCommodity')}
                     isClearable={false}
                     isSearchable={false}
                     className="w-60"
@@ -223,16 +235,16 @@ export default function ManageRor() {
                     name="sort_order"
                     value={sortOrder ? { 
                         value: sortOrder, 
-                        label: sortOrder === 'asc' ? 'Ascending' : 'Descending' 
+                        label: sortOrder === 'asc' ? langField('oldest') : langField('newest') 
                     } : null}
                     onChange={(selectedOption) => 
                         handleFilterChange('sort_order', selectedOption?.value || '')
                     }
                     options={[
-                        { value: 'asc', label: 'Ascending' },
-                        { value: 'desc', label: 'Descending' }
+                        { value: 'asc', label: langField('oldest') },
+                        { value: 'desc', label: langField('newest') }
                     ]}
-                    placeholder="Order by"
+                    placeholder={langField('sortBy')}
                     isClearable={false}
                     isSearchable={false}
                     className="w-40"
@@ -245,8 +257,8 @@ export default function ManageRor() {
     return (
         <>
             <PageMeta
-                title="Manage ROE & ROA Calculator - Motor Sights International" 
-                description="Manage ROE & ROA Calculator - Motor Sights International"
+                title={`${langField('manageCalculators')} - Motor Sights International`} 
+                description={langField('manageCalculators')}
                 image="/motor-sights-international.png"
             />
             
@@ -256,19 +268,21 @@ export default function ManageRor() {
                 <div className="px-6 py-4 border-b border-gray-200">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h3 className="text-lg leading-6 font-primary-bold text-gray-900">Manage ROE & ROA Calculator</h3>
-                            <p className="mt-1 text-sm text-gray-500">Manage and organize your ROE & ROA Calculator database</p>
+                            <h3 className="text-lg leading-6 font-primary-bold text-gray-900">{langField('manageCalculators')}</h3>
+                            <p className="mt-1 text-sm text-gray-500">{langField('manageCalculators')}</p>
                         </div>
-                        <PermissionGate permission="create">
-                            <Button
-                                onClick={() => navigate('/roe-roa-calculator/manage/create')}
-                                className="flex items-center gap-2"
-                                size="sm"
-                            >
-                                <MdAdd className="h-4 w-4" />
-                                Create ROE & ROA Calculator
-                            </Button>
-                        </PermissionGate>
+                        <div className="flex items-center gap-3">
+                            <PermissionGate permission="create">
+                                <Button
+                                    onClick={() => navigate(buildPath(`/roe-roa-calculator/manage/create`))}
+                                    className="flex items-center gap-2 lg:w-[220px]"
+                                    size="sm"
+                                >
+                                    <MdAdd className="h-4 w-4" />
+                                    {langField('createCalculator')}
+                                </Button>
+                            </PermissionGate>
+                        </div>
                     </div>
                 </div>
                 
@@ -308,10 +322,10 @@ export default function ManageRor() {
                 isOpen={confirmDelete.show}
                 onClose={cancelDelete}
                 onConfirm={confirmdeleteRorCalculator}
-                title="Delete ROE & ROA Calculator"
-                message="Are you sure you want to delete this ROE & ROA Calculator? This action cannot be undone."
-                confirmText="Delete"
-                cancelText="Cancel"
+                title={langField('deleteConfirmTitle')}
+                message={langField('deleteConfirmMessage')}
+                confirmText={langField('yes')}
+                cancelText={langField('no')}
                 type="danger"
                 loading={loading}
             />

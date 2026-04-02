@@ -12,29 +12,28 @@ interface Step1Props {
     validationErrors: ROECalculatorValidationErrors;
     loading: boolean;
     handleInputChange: (field: keyof ROECalculatorFormData, value: any) => void;
+    langField: (key: string) => string;
 }
-
-const KOMODITAS_OPTIONS = [
-    { value: 'batu_bara', label: 'Batu Bara' },
-    { value: 'nikel', label: 'Nikel' }
-];
-
-const STATUS_OPTIONS = [
-    { value: 'draft', label: 'Draft' },
-    // { value: 'presented', label: 'Presented' },
-    // { value: 'won', label: 'Won' },
-    // { value: 'lost', label: 'Lost' }
-];
 
 export default function Step1BasicInfo({ 
     formData, 
     validationErrors, 
     loading,
-    handleInputChange }: Step1Props) {
+    handleInputChange,
+    langField 
+}: Step1Props) {
 
     const { getIupById } = useIupSelect();
 
-    // In edit mode: if iup_id is set but iup_name is empty, look it up
+    const KOMODITAS_OPTIONS = [
+        { value: 'batu_bara', label: langField('coalCommodity') },
+        { value: 'nikel', label: langField('nickelCommodity') }
+    ];
+
+    const STATUS_OPTIONS = [
+        { value: 'draft', label: langField('draft') }
+    ];
+
     useEffect(() => {
         if (formData.iup_id && !formData.iup_name) {
             getIupById(formData.iup_id).then((iup) => {
@@ -70,7 +69,7 @@ export default function Step1BasicInfo({
         }
     }, [handleInputChange]);
 
-    // Memoized IUP value for IupContractorSelect
+    // IUP value for IupContractorSelect
     const iupValue = useMemo(() => {
         return formData.iup_id && formData.iup_name
             ? { value: formData.iup_id, label: formData.iup_name }
@@ -89,7 +88,7 @@ export default function Step1BasicInfo({
             <div className="flex items-center justify-center min-h-[400px]">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading calculator data...</p>
+                    <p className="text-gray-600">{langField('loadingCalculatorData')}</p>
                 </div>
             </div>
         );
@@ -98,9 +97,9 @@ export default function Step1BasicInfo({
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Informasi Dasar</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">{langField('basicInformation')}</h3>
                 <p className="text-sm text-gray-600 mb-6">
-                    Masukkan informasi dasar untuk kalkulasi ROE/ROA
+                    {langField('basicInfoDescription')}
                 </p>
             </div>
 
@@ -111,10 +110,10 @@ export default function Step1BasicInfo({
                     layout="horizontal"
                     gridCols="grid-cols-1 md:grid-cols-2"
                     iupValue={iupValue}
-                    iupLabel="IUP Selection"
+                    iupLabel={langField('iupSelection')}
                     iupRequired={true}
                     contractorValue={contractorValue}
-                    contractorLabel="Contractor"
+                    contractorLabel={langField('contractor')}
                     contractorRequired={true}
                     contractorError={validationErrors.iup_customer_id}
                     onIupChange={handleIupChange}
@@ -123,14 +122,14 @@ export default function Step1BasicInfo({
 
                 {/* Komoditas */}
                 <div>
-                    <Label htmlFor="komoditas">Komoditas</Label>
+                    <Label htmlFor="komoditas">{langField('commodity')}</Label>
                     <CustomSelect
                         id="komoditas"
                         value={KOMODITAS_OPTIONS.find(option => option.value === formData.komoditas) || null}
                         onChange={(option) => handleInputChange('komoditas', option?.value || '')}
                         options={KOMODITAS_OPTIONS}
                         className="w-full"
-                        placeholder="Select Komoditas"
+                        placeholder={langField('selectCommodity')}
                         isClearable={false}
                         isSearchable={false}
                         error={validationErrors.komoditas}
@@ -142,7 +141,7 @@ export default function Step1BasicInfo({
 
                 {/* Status */}
                 <div className='hidden'>
-                    <Label htmlFor="status">Status</Label>
+                    <Label htmlFor="status">{langField('status')}</Label>
                     <CustomSelect
                         id="status"
                         value={STATUS_OPTIONS.find(option => option.value === formData.status) || null}
@@ -161,7 +160,7 @@ export default function Step1BasicInfo({
 
                 {/* Tonase per Ritase */}
                 <div>
-                    <Label htmlFor="tonase_per_ritase">Tonase per Unit (ton)</Label>
+                    <Label htmlFor="tonase_per_ritase">{langField('tonnagePerUnit')}</Label>
                     <Input
                         id="tonase_per_ritase"
                         value={formData.tonase_per_ritase}
@@ -186,7 +185,7 @@ export default function Step1BasicInfo({
 
                 {/* Jarak Haul */}
                 <div>
-                    <Label htmlFor="jarak_haul">Jarak Haul (km PP)</Label>
+                    <Label htmlFor="jarak_haul">{langField('haulDistance')}</Label>
                     <Input
                         id="jarak_haul"
                         value={formData.jarak_haul}
@@ -211,7 +210,7 @@ export default function Step1BasicInfo({
 
                 {/* Harga Jual per Ton */}
                 <div>
-                    <Label htmlFor="harga_jual_per_ton">Harga Jual per Ton (Rp)</Label>
+                    <Label htmlFor="harga_jual_per_ton">{langField('sellingPricePerTon')}</Label>
                     <Input
                         id="harga_jual_per_ton"
                         onKeyPress={handleKeyPress}

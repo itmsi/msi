@@ -25,6 +25,8 @@ import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import Alert from '@/components/ui/alert/Alert';
 import CustomSelect from '@/components/form/select/CustomSelect';
+import { useLanguage } from '@/components/lang/useLanguage';
+import { roeCalculatorLabels } from '../language/roeCalculatorLabels';
 
 echarts.use([
     BarChart,
@@ -34,11 +36,26 @@ echarts.use([
 
 
 export default function BreakdownROECalculator() {
+    const { lang, langField, buildPath } = useLanguage(roeCalculatorLabels);
     const navigate = useNavigate();
     const { calculatorId } = useParams<{ calculatorId: string }>();
     const [breakdownData, setBreakdownData] = useState<ManageROEBreakdownData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
+
+    // Function to translate cost breakdown titles
+    const translateCostTitle = (title: string): string => {
+        const titleMap: { [key: string]: string } = {
+            'BBM': langField('costBBM'),
+            'Ban': langField('costBan'),
+            'Sparepart': langField('costSparepart'),
+            'Gaji Operator': langField('costGajiOperator'),
+            'Depresiasi': langField('costDepresiasi'),
+            'Bunga': langField('costBunga'),
+            'Overhead': langField('costOverhead')
+        };
+        return titleMap[title] || title;
+    };
 
     
     const [compareBreakDown, setCompareBreakDown] = useState<ManageROECompareData[]>([]);
@@ -155,10 +172,10 @@ export default function BreakdownROECalculator() {
         let isValid = true;
 
         if (!compareFormData.brand.trim()) {
-            errors.brand = 'Brand is required';
+            errors.brand = langField('brandRequired');
             isValid = false;
         } else if (compareFormData.brand.trim().length < 2) {
-            errors.brand = 'Brand must be at least 2 characters';
+            errors.brand = langField('brandMinLength');
             isValid = false;
         }
 
@@ -169,12 +186,12 @@ export default function BreakdownROECalculator() {
     // Handle add new comparison
     const handleAddComparison = async () => {
         if (!validateCompareForm()) {
-            toast.error('Please correct the validation errors');
+            toast.error(langField('correctValidationErrors'));
             return;
         }
 
         if (!calculatorId) {
-            toast.error('Calculator ID is required');
+            toast.error(langField('calculatorIdRequired'));
             return;
         }
 
@@ -193,7 +210,7 @@ export default function BreakdownROECalculator() {
             const response = await RoecalculatorService.addCompare(payload);
             
             if (response.success) {
-                toast.success('Comparison added successfully');
+                toast.success(langField('comparisonAddedSuccess'));
                 setIsAddModalOpen(false);
                 setCompareFormData({
                     brand: '',
@@ -213,11 +230,11 @@ export default function BreakdownROECalculator() {
                     limit: pagination.limit
                 });
             } else {
-                toast.error(response.message || 'Failed to add comparison');
+                toast.error(response.message || langField('failedToAddComparison'));
             }
         } catch (error) {
             console.error('Add comparison error:', error);
-            toast.error('An error occurred while adding comparison');
+            toast.error(langField('errorOccurredAdding'));
         } finally {
             setIsAddingCompare(false);
         }
@@ -226,7 +243,7 @@ export default function BreakdownROECalculator() {
 
     const handleDeleteComparison = async (row: string) => {
         if (!calculatorId) {
-            setError('Calculator ID is required');
+            setError(langField('calculatorIdRequired'));
             return false;
         }
 
@@ -240,7 +257,7 @@ export default function BreakdownROECalculator() {
             await RoecalculatorService.deleteCompare(row, requestBody);
             return true;
         } catch (err) {
-            setError('Failed to delete competitor');
+            setError(langField('failedToDeleteCompetitor'));
             console.error('Delete competitor error:', err);
             throw err;
         } finally {
@@ -261,7 +278,7 @@ export default function BreakdownROECalculator() {
         
         try {
             await handleDeleteComparison(confirmDelete.id);
-            toast.success('Competitor deleted successfully');
+            toast.success(langField('competitorDeletedSuccess'));
             const compareParams = {
                 quote_id: calculatorId,
                 page: 1,
@@ -270,22 +287,22 @@ export default function BreakdownROECalculator() {
             await fetchCompareData(compareParams);
             cancelDelete();
         } catch (err) {
-            toast.error('Failed to delete competitor');
+            toast.error(langField('failedToDeleteCompetitor'));
         }
     };
-    // Define columns for comparison table - optimized for 1440px screens
+
     const compareColumns: TableColumn<ManageROECompareData>[] = [
         {
-            name: 'Calculator Info',
+            name: langField('calculatorInfo'),
             cell: (row) => (
                 <div className="py-2">
                     <div className="font-medium text-gray-900 text-sm">{row.brand}</div>
                     <div className="text-xs text-gray-500 mt-1">
-                        Tonase: {row.tonase}
+                        {langField('tonase')}: {row.tonase}
                     </div>
                     {row.fuel_consumption && 
                     <div className="text-xs text-gray-500 mt-1">
-                        Fuel Consumption ({breakdownData?.fuel_consumption_type || 'L/km'}): {row.fuel_consumption}
+                        {langField('fuelConsumption')} ({breakdownData?.fuel_consumption_type || 'L/km'}): {row.fuel_consumption}
                     </div>
                     }
                 </div>
@@ -293,7 +310,7 @@ export default function BreakdownROECalculator() {
             wrap: true
         },
         {
-            name: 'Qty',
+            name: langField('qty'),
             selector: (row) => row.qty || 0,
             cell: (row) => (
                 <div className="py-2 text-right">
@@ -305,15 +322,14 @@ export default function BreakdownROECalculator() {
             width: '80px',
         },
         {
-            name: 'ROE',
+            name: langField('roe'),
             cell: (row) => (
                 <div className="py-2 text-center">
-                    {/* <div className="font-semibold text-green-600 text-sm">{row.roe_nominal}</div> */}
                     <div className="flex justify-around items-center w-[200px]">
-                        <Tooltip content={`${row.brand} - ROE Percentage`} position="top">
+                        <Tooltip content={`${row.brand} - ${langField('roe')} ${langField('roaPercentage')}`} position="top">
                             <span className="text-purple-600 font-medium">{row.roe_percentage}%</span>
                         </Tooltip>
-                        <Tooltip content={`${row.brand} - ROE Difference`} position="top">
+                        <Tooltip content={`${row.brand} - ${langField('roeDifferenceTooltip')}`} position="top">
                             <span className={"font-medium "+clsx(
                                 twMerge(
                                 "text-gray-900 ",
@@ -331,16 +347,16 @@ export default function BreakdownROECalculator() {
             wrap: true
         },
         {
-            name: 'ROA',
+            name: langField('roa'),
             cell: (row) => (
                 <div className="py-2 text-center">
                     {/* <div className="font-semibold text-blue-600 text-sm">{row.roa_nominal}</div> */}
                     <div className="flex justify-around items-center w-[200px]">
                         
-                        <Tooltip content={`${row.brand} - ROA Percentage`} position="top">
+                        <Tooltip content={`${row.brand} - ${langField('roaPercentageTooltip')}`} position="top">
                             <span className="text-blue-600 font-medium">{row.roa_percentage}%</span>
                         </Tooltip>
-                        <Tooltip content={`${row.brand} - ROA Difference`} position="top">
+                        <Tooltip content={`${row.brand} - ${langField('roaDifferenceTooltip')}`} position="top">
                             <span className={"font-medium "+clsx(
                                 twMerge(
                                 "text-gray-900 ",
@@ -358,7 +374,7 @@ export default function BreakdownROECalculator() {
             wrap: true
         },
         {
-            name: 'Revenue',
+            name: langField('revenue'),
             selector: (row) => row.revenue || 0,
             cell: (row) => (
                 <div className="py-2 text-right">
@@ -371,7 +387,7 @@ export default function BreakdownROECalculator() {
             wrap: true
         },
         {
-            name: 'Actions',
+            name: langField('actions'),
             cell: (row: any) => (
                 <div className="flex justify-end gap-1">
                     {row.properties_list_compare_id !== null && (
@@ -385,7 +401,7 @@ export default function BreakdownROECalculator() {
                             });
                         }}
                         className="!p-2 !rounded-lg !text-red-600 hover:!text-red-700 hover:!bg-red-50 !transition-colors !border-0"
-                        title="Delete"
+                        title={langField('delete')}
                     >
                         <MdDeleteOutline size={16} />
                     </PermissionButton>
@@ -418,32 +434,32 @@ export default function BreakdownROECalculator() {
     // Compare section component
     const CompareBreakdownSection = () => {
         const sortOptions = [
-            { value: 'created_at', label: 'Created At' },
-            { value: 'brand', label: 'Brand' },
-            { value: 'qty', label: 'Quantity' },
-            { value: 'roe_percentage', label: 'ROE %' },
-            { value: 'roa_percentage', label: 'ROA %' },
-            { value: 'revenue', label: 'Revenue' }
+            { value: 'created_at', label: langField('createdAt') },
+            { value: 'brand', label: langField('brand') },
+            { value: 'qty', label: langField('quantity') },
+            { value: 'roe_percentage', label: langField('roe') + ' %' },
+            { value: 'roa_percentage', label: langField('roa') + ' %' },
+            { value: 'revenue', label: langField('revenue') }
         ];
 
         return (
             <div className="bg-white rounded-xl shadow-sm p-6 mt-8">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900">Bandingkan dengan Perhitungan Lain</h2>
+                    <h2 className="text-xl font-primary-bold font-normal text-gray-900">{langField('compareWithOtherCalculations')}</h2>
                     
                     <PermissionGate permission="create">
                         <Button
                             onClick={() => setIsAddModalOpen(true)}
                             className="flex items-center gap-2 font-secondary"
                         >
-                            <MdAdd size={16} /> Tambah Perbandingan
+                            <MdAdd size={16} /> {langField('addComparison')}
                         </Button>
                     </PermissionGate>
                 </div>
                 
                 {/* Sort Controls */}
                 <div className="mb-6 flex flex-wrap items-center gap-4 p-4 bg-gray-50 rounded-lg hidden">
-                    <span className="text-sm font-medium text-gray-700">Sort by:</span>
+                    <span className="text-sm font-medium text-gray-700">{langField('sortBy')}</span>
                     <div className="w-40 flex-none">
                         <CustomSelect
                             options={sortOptions}
@@ -461,16 +477,16 @@ export default function BreakdownROECalculator() {
                             name="sort_order"
                             value={sortDirection ? { 
                                 value: sortDirection, 
-                                label: sortDirection === 'asc' ? 'Ascending' : 'Descending' 
+                                label: sortDirection === 'asc' ? langField('ascending') : langField('descending') 
                             } : null}
                             onChange={(selectedOption) => 
                                 handleSortChange(sortField, selectedOption?.value as 'asc' | 'desc' || 'asc')
                             }
                             options={[
-                                { value: 'asc', label: 'Ascending' },
-                                { value: 'desc', label: 'Descending' }
+                                { value: 'asc', label: langField('ascending') },
+                                { value: 'desc', label: langField('descending') }
                             ]}
-                            placeholder="Order by"
+                            placeholder={langField('orderBy')}
                             isClearable={false}
                             isSearchable={false}
                             className="w-40"
@@ -500,7 +516,7 @@ export default function BreakdownROECalculator() {
     const RevenueExpenseProfitChart = ({ data }: { data: RevenueExpenseProfit[] }) => {
         const option = {
             title: {
-                text: 'Revenue vs Expense vs Profit',
+                text: langField('revenueVsExpenseVsProfit'),
                 left: 'center'
             },
             tooltip: {
@@ -523,7 +539,7 @@ export default function BreakdownROECalculator() {
                 }
             },
             legend: {
-                data: ['Revenue', 'Expense', 'Profit'],
+                data: [langField('revenue'), langField('totalExpense'), langField('netProfitPerMonth')],
                 bottom: '5%'
             },
             xAxis: {
@@ -540,7 +556,7 @@ export default function BreakdownROECalculator() {
             },
             series: [
                 {
-                    name: 'Revenue',
+                    name: langField('revenue'),
                     type: 'bar',
                     data: data.map(item => item.revenue),
                     itemStyle: {
@@ -548,7 +564,7 @@ export default function BreakdownROECalculator() {
                     }
                 },
                 {
-                    name: 'Expense',
+                    name: langField('totalExpense'),
                     type: 'bar',
                     data: data.map(item => item.expense),
                     itemStyle: {
@@ -556,7 +572,7 @@ export default function BreakdownROECalculator() {
                     }
                 },
                 {
-                    name: 'Profit',
+                    name: langField('netProfitPerMonth'),
                     type: 'bar',
                     data: data.map(item => item.profit),
                     itemStyle: {
@@ -573,7 +589,7 @@ export default function BreakdownROECalculator() {
     const BreakdownBiayaChart = ({ data }: { data: BreakdownBiayaChart[] }) => {
         const option = {
             title: {
-                text: 'Breakdown Biaya Bulanan',
+                text: langField('breakdownMonthlyCosts'),
                 left: 'center'
             },
             tooltip: {
@@ -591,7 +607,7 @@ export default function BreakdownROECalculator() {
             legend: {
                 orient: 'vertical',
                 left: 'left',
-                data: data.map(item => item.title)
+                data: data.map(item => translateCostTitle(item.title))
             },
             series: [
                 {
@@ -621,7 +637,7 @@ export default function BreakdownROECalculator() {
                     },
                     data: data.map((item, index) => ({
                         value: item.nominal,
-                        name: item.title,
+                        name: translateCostTitle(item.title),
                         itemStyle: {
                             color: [
                                 '#ef4444', '#f97316', '#eab308', '#22c55e', 
@@ -655,8 +671,8 @@ export default function BreakdownROECalculator() {
     return (
         <>
             <PageMeta
-                title={`Breakdown ROE Calculator - MSI Dashboard`}
-                description={`ROE ROA Calculator`}
+                title={`${langField('breakdownTitle')} - MSI Dashboard`}
+                description={langField('breakdownTitle')}
                 image="/motor-sights-international.png"
             />
 
@@ -667,7 +683,7 @@ export default function BreakdownROECalculator() {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/roe-roa-calculator/manage')}
+                                onClick={() => navigate(`/roe-roa-calculator/manage?lang=${lang}`)}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -675,46 +691,46 @@ export default function BreakdownROECalculator() {
                             <div className="border-l border-gray-300 h-6 mx-3"></div>
                             <MdAdd size={20} className="text-green-600" />
                             <div className='ms-2'>
-                                <h1 className="font-primary-bold font-normal text-xl">Breakdown ROE Calculator</h1>
+                                <h1 className="font-primary-bold font-normal text-xl">{langField('breakdownTitle')}</h1>
                             </div>
                         </div>
                         
                         <div className='flex gap-3'>
                             <Button
                                 className="group rounded-lg w-full flex items-center justify-center gap-2 font-secondary py-2"
-                                onClick={() => navigate(`/roe-roa-calculator/manage/edit/${calculatorId}?step=4}`)}
+                                onClick={() => navigate(buildPath(`/roe-roa-calculator/manage/edit/${calculatorId}?step=4`))}
                             >
-                                <MdEdit size={20} className="group-hover:text-white" /> Edit
+                                <MdEdit size={20} className="group-hover:text-white" /> {langField('edit')}
                             </Button>
                         </div>
                     </div>
 
                     <Alert
                         variant='warning'
-                        title='Attention'
-                        message='The ROE (Return on Equity) and ROA (Return on Assets) shown in this application are calculated using unit-level data only (revenue, expenses, and assets). Company-wide items such as overhead, other liabilities, and additional operating expenses are excluded. As a result, these figures are indicative and intended solely for unit performance analysis, not for assessing overall company performance.'
+                        title={langField('attentionTitle')}
+                        message={langField('attentionDisclaimer')}
                     />
 
                     {breakdownData && (
                         <div className="space-y-6 mt-6">
                             {/* Key Financial Metrics */}
                             <div className="bg-white rounded-xl shadow-sm p-6">
-                                <h2 className="text-xl font-semibold text-gray-900 mb-4">Key Financial Metrics</h2>
+                                <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('keyFinancialMetrics')}</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                     <div className="bg-emerald-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Revenue per Bulan</p>
+                                        <p className="text-sm text-gray-600">{langField('revenuePerMonth')}</p>
                                         <p className="text-xl font-bold text-emerald-600">{formatCurrency(breakdownData.key_financial_metrics.revenue_per_bulan)}</p>
                                     </div>
                                     <div className="bg-red-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Total Expense per Bulan</p>
+                                        <p className="text-sm text-gray-600">{langField('totalExpensePerMonth')}</p>
                                         <p className="text-xl font-bold text-red-600">{formatCurrency(breakdownData.key_financial_metrics.total_expense_per_bulan)}</p>
                                     </div>
                                     <div className="bg-blue-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Net Profit per Bulan</p>
+                                        <p className="text-sm text-gray-600">{langField('netProfitPerMonth')}</p>
                                         <p className="text-xl font-bold text-blue-600">{formatCurrency(breakdownData.key_financial_metrics.net_profit_per_bulan)}</p>
                                     </div>
                                     <div className="bg-purple-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Profit Margin</p>
+                                        <p className="text-sm text-gray-600">{langField('profitMargin')}</p>
                                         <p className="text-xl font-bold text-purple-600">{breakdownData.key_financial_metrics.profit_margin.toFixed(2)}%</p>
                                     </div>
                                 </div>
@@ -722,19 +738,23 @@ export default function BreakdownROECalculator() {
 
                             {/* ROE ROA Metrics */}
                             <div className="bg-white rounded-xl shadow-sm p-6">
-                                <h2 className="text-xl font-semibold text-gray-900 mb-4">ROE & ROA Analysis</h2>
+                                <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('roeRoaAnalysis')}</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {/* ROE */}
                                     <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
                                         <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-lg font-semibold text-green-800">Return on Equity (ROE)</h3>
+                                            <h3 className="text-lg font-primary-bold font-normal text-green-800">{langField('returnOnEquity')}</h3>
                                             <span className="text-3xl font-bold text-green-600">{breakdownData.roe_roa_metrics.roe.percentage}%</span>
                                         </div>
                                         <div className="space-y-2">
-                                            <p className="text-sm text-green-700">{breakdownData.roe_roa_metrics.roe.description}</p>
+                                            <p className="text-sm text-green-700">{langField('roeDescription')}</p>
                                             <div className="bg-white/50 p-3 rounded border">
-                                                <p className="text-xs text-gray-600 mb-1">Formula:</p>
-                                                <p className="text-sm font-mono text-green-800">{breakdownData.roe_roa_metrics.roe.calculation.formula}</p>
+                                                <p className="text-xs text-gray-600 mb-1">{langField('formula')} (Net Profit/Equity) :</p>
+                                                <p className="text-sm font-mono text-green-800">
+                                                    {formatCurrency(breakdownData.roe_roa_metrics.roe.calculation.net_profit)} 
+                                                    / 
+                                                    {formatCurrency(breakdownData.roe_roa_metrics.roe.calculation.equity)}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -742,14 +762,18 @@ export default function BreakdownROECalculator() {
                                     {/* ROA */}
                                     <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200">
                                         <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-lg font-semibold text-blue-800">Return on Assets (ROA)</h3>
+                                            <h3 className="text-lg font-primary-bold font-normal text-blue-800">{langField('returnOnAssets')}</h3>
                                             <span className="text-3xl font-bold text-blue-600">{breakdownData.roe_roa_metrics.roa.percentage}%</span>
                                         </div>
                                         <div className="space-y-2">
-                                            <p className="text-sm text-blue-700">{breakdownData.roe_roa_metrics.roa.description}</p>
+                                            <p className="text-sm text-blue-700">{langField('roaDescription')}</p>
                                             <div className="bg-white/50 p-3 rounded border">
-                                                <p className="text-xs text-gray-600 mb-1">Formula:</p>
-                                                <p className="text-sm font-mono text-blue-800">{breakdownData.roe_roa_metrics.roa.calculation.formula}</p>
+                                                <p className="text-xs text-gray-600 mb-1">{langField('formula')} (Net Profit/Total Assets) :</p>
+                                                <p className="text-sm font-mono text-blue-800">
+                                                    {formatCurrency(breakdownData.roe_roa_metrics.roa.calculation.net_profit)} 
+                                                    / 
+                                                    {formatCurrency(breakdownData.roe_roa_metrics.roa.calculation.total_assets)}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -771,18 +795,18 @@ export default function BreakdownROECalculator() {
 
                             {/* Operational Metrics */}
                             <div className="bg-white rounded-xl shadow-sm p-6">
-                                <h2 className="text-xl font-semibold text-gray-900 mb-4">Metrik Operasional</h2>
+                                <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('operationalMetrics')}</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="bg-blue-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Ritase per Hari</p>
+                                        <p className="text-sm text-gray-600">{langField('tripsPerDay')}</p>
                                         <p className="text-2xl font-bold text-blue-600">{breakdownData.metrik_operasional.ritase_per_hari}</p>
                                     </div>
                                     <div className="bg-green-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Ritase per Bulan</p>
+                                        <p className="text-sm text-gray-600">{langField('tripsPerMonth')}</p>
                                         <p className="text-2xl font-bold text-green-600">{breakdownData.metrik_operasional.ritase_per_bulan}</p>
                                     </div>
                                     <div className="bg-purple-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Tonnage per Bulan</p>
+                                        <p className="text-sm text-gray-600">{langField('tonnagePerMonth')}</p>
                                         <p className="text-2xl font-bold text-purple-600">{breakdownData.metrik_operasional.tonnage_per_bulan.toLocaleString()}</p>
                                     </div>
                                 </div>
@@ -790,18 +814,18 @@ export default function BreakdownROECalculator() {
 
                             {/* Revenue Multiple Unit */}
                             <div className="bg-white rounded-xl shadow-sm p-6">
-                                <h2 className="text-xl font-semibold text-gray-900 mb-4">Revenue Multiple Unit</h2>
+                                <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('revenueMultipleUnit')}</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                     <div className="bg-gray-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Jumlah Unit</p>
+                                        <p className="text-sm text-gray-600">{langField('unitQuantityBreakdown')}</p>
                                         <p className="text-xl font-bold text-gray-800">{breakdownData.revenue_multiple_unit.jumlah_unit}</p>
                                     </div>
                                     <div className="bg-gray-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Revenue per Unit</p>
+                                        <p className="text-sm text-gray-600">{langField('revenuePerUnit')}</p>
                                         <p className="text-xl font-bold text-gray-800">{formatCurrency(breakdownData.revenue_multiple_unit.revenue_per_unit)}</p>
                                     </div>
                                     <div className="bg-emerald-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Total Revenue</p>
+                                        <p className="text-sm text-gray-600">{langField('totalRevenue')}</p>
                                         <p className="text-xl font-bold text-emerald-600">{formatCurrency(breakdownData.revenue_multiple_unit.total_revenue)}</p>
                                     </div>
                                 </div>
@@ -813,18 +837,18 @@ export default function BreakdownROECalculator() {
 
                             {/* BBM Metrics */}
                             <div className="bg-white rounded-xl shadow-sm p-6">
-                                <h2 className="text-xl font-semibold text-gray-900 mb-4">Metrik BBM</h2>
+                                <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('fuelMetrics')}</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="bg-orange-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">BBM per Ritase (L)</p>
+                                        <p className="text-sm text-gray-600">{langField('fuelPerTrip')}</p>
                                         <p className="text-2xl font-bold text-orange-600">{breakdownData.metrik_bbm.bbm_per_ritase}</p>
                                     </div>
                                     <div className="bg-red-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Biaya BBM per Ritase</p>
+                                        <p className="text-sm text-gray-600">{langField('fuelCostPerTrip')}</p>
                                         <p className="text-xl font-bold text-red-600">{formatCurrency(breakdownData.metrik_bbm.biaya_bbm_per_ritase)}</p>
                                     </div>
                                     <div className="bg-yellow-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">Efisiensi L/KM/Ton</p>
+                                        <p className="text-sm text-gray-600">{langField('fuelEfficiency')}</p>
                                         <p className="text-2xl font-bold text-yellow-600">{breakdownData.metrik_bbm.efisiensi_l_km_ton}</p>
                                     </div>
                                 </div>
@@ -832,7 +856,7 @@ export default function BreakdownROECalculator() {
 
                             {/* Monthly Cost Breakdown */}
                             <div className="bg-white rounded-xl shadow-sm p-6">
-                                <h2 className="text-xl font-semibold text-gray-900 mb-4">Detail Biaya Bulanan</h2>
+                                <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('monthlyExpenseDetail')}</h2>
                                 <div className="space-y-4">
                                     {breakdownData.charts_data.breakdown_biaya.map((item, index) => {
                                         const colors = [
@@ -849,7 +873,7 @@ export default function BreakdownROECalculator() {
                                             <div key={item.title} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                                 <div className="flex items-center gap-4">
                                                     <div className={`w-4 h-4 rounded-full ${colors[index % colors.length]}`}></div>
-                                                    <span className="font-medium text-gray-900">{item.title}</span>
+                                                    <span className="font-medium text-gray-900">{translateCostTitle(item.title)}</span>
                                                 </div>
                                                 <div className="flex items-center gap-4">
                                                     <span className="text-sm text-gray-600">{item.persentase}%</span>
@@ -863,7 +887,7 @@ export default function BreakdownROECalculator() {
                                 {/* Total Expense */}
                                 <div className="mt-6 p-4 bg-red-50 rounded-lg border-2 border-red-200">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-lg font-bold text-red-800">Total Expense</span>
+                                        <span className="text-lg font-bold text-red-800">{langField('totalExpense')}</span>
                                         <span className="text-2xl font-bold text-red-600">{formatCurrency(breakdownData?.charts_data?.revenue_expense_profit?.[0]?.expense || '0')}</span>
                                     </div>
                                 </div>
@@ -878,13 +902,13 @@ export default function BreakdownROECalculator() {
                     <Modal
                         isOpen={isAddModalOpen}
                         onClose={() => setIsAddModalOpen(false)}
-                        title="Add New Comparison"
+                        title={langField('addNewComparison')}
                         className="max-w-xl"
                     >
                         <div className="p-6">
                             <div className="space-y-4">
                                 <div>
-                                    <Label htmlFor="brand">Brand *</Label>
+                                    <Label htmlFor="brand">{langField('brand')} *</Label>
                                     <Input
                                         id="brand"
                                         name="brand"
@@ -902,7 +926,7 @@ export default function BreakdownROECalculator() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <Label htmlFor="tonase">Tonase per Unit (ton)</Label>
+                                        <Label htmlFor="tonase">{langField('tonnagePerUnit')}</Label>
                                         <Input
                                             id="tonase"
                                             value={compareFormData.tonase}
@@ -922,7 +946,7 @@ export default function BreakdownROECalculator() {
                                     </div>
 
                                     <div>
-                                        <Label htmlFor="ritase">Ritase per Shift</Label>
+                                        <Label htmlFor="ritase">{langField('tripsPerShift')}</Label>
                                         <Input
                                             id="ritase"
                                             value={compareFormData.ritase}
@@ -944,7 +968,7 @@ export default function BreakdownROECalculator() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <Label htmlFor="qty">Jumlah Unit (Qty)</Label>
+                                        <Label htmlFor="qty">{langField('unitQuantityQty')}</Label>
                                         <Input
                                             id="qty"
                                             value={compareFormData.qty}
@@ -956,7 +980,7 @@ export default function BreakdownROECalculator() {
                                     </div>
 
                                     <div>
-                                        <Label htmlFor="price_per_unit">Harga Per Unit (Rp)</Label>
+                                        <Label htmlFor="price_per_unit">{langField('pricePerUnit')}</Label>
                                         <Input
                                             id="price_per_unit"
                                             type="text"
@@ -970,7 +994,7 @@ export default function BreakdownROECalculator() {
                                     </div>
 
                                     <div>
-                                        <Label htmlFor="fuel_consumption">Konsumsi BBM {breakdownData?.fuel_consumption_type || 'L/km'}</Label>
+                                        <Label htmlFor="fuel_consumption">{langField('fuelConsumption')} {breakdownData?.fuel_consumption_type || 'L/km'}</Label>
                                         <Input
                                             id="fuel_consumption"
                                             placeholder="0.00"
@@ -996,13 +1020,13 @@ export default function BreakdownROECalculator() {
                                         onClick={() => setIsAddModalOpen(false)}
                                         disabled={isAddingCompare}
                                     >
-                                        Cancel
+                                        {langField('cancel')}
                                     </Button>
                                     <Button
                                         onClick={handleAddComparison}
                                         disabled={isAddingCompare}
                                     >
-                                        {isAddingCompare ? 'Adding...' : 'Add Comparison'}
+                                        {isAddingCompare ? langField('adding') : langField('addComparison')}
                                     </Button>
                                 </div>
                             </div>
@@ -1015,10 +1039,10 @@ export default function BreakdownROECalculator() {
                         isOpen={confirmDelete.show}
                         onClose={cancelDelete}
                         onConfirm={confirmdeleteCompetitor}
-                        title={`Delete Competitor: ${confirmDelete.name}`}
-                        message="Are you sure you want to delete this Competitor? This action cannot be undone."
-                        confirmText="Delete"
-                        cancelText="Cancel"
+                        title={`${langField('deleteCompetitor')}: ${confirmDelete.name}`}
+                        message={langField('deleteCompetitorConfirm')}
+                        confirmText={langField('delete')}
+                        cancelText={langField('cancel')}
                         type="danger"
                         loading={isDeletingCompare}
                     />

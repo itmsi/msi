@@ -1,32 +1,32 @@
 import { useEffect } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { MdKeyboardArrowLeft, MdSave, MdArrowForward, MdArrowBack, MdEdit, MdAdd } from 'react-icons/md';
 
 import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
 import { useROECalculatorForm } from './hooks/useROECalculatorForm';
+import { useLanguage } from '@/components/lang/useLanguage';
+import { roeCalculatorLabels } from './language/roeCalculatorLabels';
 
 // Step Components
 import Step1BasicInfo from './components/Step1BasicInfo';
 import Step2UnitPurchase from './components/Step2UnitPurchase';
 import Step3Operational from './components/Step3Operational';
 import Step4MonthlyCosts from './components/Step4MonthlyCosts';
-import Step5FinancialData from './components/Step5FinancialData';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 
-const STEPS = [
-    { number: 1, title: 'Informasi Dasar', component: Step1BasicInfo },
-    { number: 2, title: 'Data Pembelian Unit', component: Step2UnitPurchase },
-    { number: 3, title: 'Operasional', component: Step3Operational },
-    { number: 4, title: 'Biaya Bulanan', component: Step4MonthlyCosts },
-    // { number: 5, title: 'Data Financial', component: Step5FinancialData }
-];
-
 export default function CreateROECalculator() {
+    const { lang, langField, buildPath } = useLanguage(roeCalculatorLabels);
     const navigate = useNavigate();
     const { calculatorId } = useParams<{ calculatorId: string }>();
-    const [searchParams] = useSearchParams();
     const isEditMode = Boolean(calculatorId);
+
+    const STEPS = [
+        { number: 1, title: langField('step1'), component: Step1BasicInfo },
+        { number: 2, title: langField('step2'), component: Step2UnitPurchase },
+        { number: 3, title: langField('step3'), component: Step3Operational },
+        { number: 4, title: langField('step4'), component: Step4MonthlyCosts }
+    ];
 
     const {
         formData,
@@ -38,12 +38,12 @@ export default function CreateROECalculator() {
         handleInputChange,
         saveStep,
         calculateStep2,
-        // calculateFinancials,
         goToStep,
         loadCalculatorData,
         loadQuoteDefaults,
-    } = useROECalculatorForm(calculatorId);
+    } = useROECalculatorForm(calculatorId, buildPath);
 
+    // Initialize data (load calculator and defaults)
     useEffect(() => {
         const initializeData = async () => {
             try {
@@ -51,14 +51,6 @@ export default function CreateROECalculator() {
                     await loadCalculatorData();
                 }
                 await loadQuoteDefaults();
-                
-                const stepParam = searchParams.get('step');
-                if (stepParam) {
-                    const stepNumber = parseInt(stepParam);
-                    if (stepNumber >= 1 && stepNumber <= 4) {
-                        goToStep(stepNumber);
-                    }
-                }
             } catch (error) {
                 console.error('Failed to initialize data:', error);
             }
@@ -91,7 +83,9 @@ export default function CreateROECalculator() {
         const commonProps = {
             formData,
             validationErrors,
-            handleInputChange
+            handleInputChange,
+            lang,
+            langField
         };
 
         switch (currentStep) {
@@ -106,6 +100,8 @@ export default function CreateROECalculator() {
                     calculateStep2={calculateStep2}
                     loading={loading}
                     calculatorId={calculatorId}
+                    langField={langField}
+                    buildPath={buildPath}
                 />
             );
             
@@ -117,6 +113,7 @@ export default function CreateROECalculator() {
                     quoteDefaults={quoteDefaults}
                     onLoadDefaults={loadQuoteDefaults}
                     calculatorId={calculatorId}
+                    buildPath={buildPath}
                 />
             );
             
@@ -126,17 +123,9 @@ export default function CreateROECalculator() {
                         loading={loading} 
                         calculatorId={calculatorId}
                         saveStep={saveStep}
+                        langField={langField}
+                        buildPath={buildPath}
                     />;
-            
-        case 5:
-            return (
-                <Step5FinancialData
-                    formData={formData}
-                    calculationResults={calculationResults}
-                    calculatorId={calculatorId}
-                />
-            );
-            
         default:
             return null;
         }
@@ -175,7 +164,7 @@ export default function CreateROECalculator() {
                         }}
                     >
                         <div className={`text-sm font-medium ${currentStep >= step.number ? 'text-gray-900' : 'text-gray-500'} ${currentStep > step.number ? 'hover:text-green-700 transition-colors' : ''}`}>
-                            Step {step.number}
+                            {langField('step')} {step.number}
                         </div>
                         <div className={`text-xs ${currentStep >= step.number ? 'text-gray-600' : 'text-gray-400'} ${currentStep > step.number ? 'hover:text-green-600 transition-colors' : ''}`}>
                             {step.title}
@@ -195,22 +184,11 @@ export default function CreateROECalculator() {
         </div>
     );
 
-    // if (loading && isEditMode) {
-    //     return (
-    //         <div className="flex items-center justify-center min-h-[400px]">
-    //             <div className="text-center">
-    //                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-    //                 <p className="text-gray-600">Loading calculator data...</p>
-    //             </div>
-    //         </div>
-    //     );
-    // }
-
     return (
         <>
             <PageMeta
-                title={`${isEditMode ? 'Edit' : 'Create'} ROE Calculator - MSI Dashboard`}
-                description={`${isEditMode ? 'Edit' : 'Create'} ROE ROA Calculator`}
+                title={`${isEditMode ? langField('editCalculator') : langField('createCalculator')} - MSI Dashboard`}
+                description={`${isEditMode ? langField('editCalculator') : langField('createCalculator')}`}
                 image="/motor-sights-international.png"
             />
 
@@ -221,7 +199,7 @@ export default function CreateROECalculator() {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/roe-roa-calculator/manage')}
+                                onClick={() => navigate(buildPath(`/roe-roa-calculator/manage`))}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -229,9 +207,9 @@ export default function CreateROECalculator() {
                             <div className="border-l border-gray-300 h-6 mx-3"></div>
                             {isEditMode ? <MdEdit size={20} className="text-primary" /> : <MdAdd size={20} className="text-green-600" />}
                             <div className='ms-2'>
-                                <h1 className="font-primary-bold font-normal text-xl">{isEditMode ? 'Edit' : 'Create'} ROE Calculator</h1>
+                                <h1 className="font-primary-bold font-normal text-xl">{isEditMode ? langField('editCalculator') : langField('createCalculator')}</h1>
                                 <p className="text-gray-600 text-sm">
-                                    Step {currentStep} of {STEPS.length}: {STEPS[currentStep - 1]?.title}
+                                    {langField('step')} {currentStep} {langField('of')} {STEPS.length}: {STEPS[currentStep - 1]?.title}
                                 </p>
                             </div>
                         </div>
@@ -259,7 +237,7 @@ export default function CreateROECalculator() {
                                         className="px-6 rounded-full"
                                     >
                                         <MdArrowBack size={16} />
-                                        Previous
+                                        {langField('previous')}
                                     </Button>
                                 )}
                             </div>
@@ -274,7 +252,7 @@ export default function CreateROECalculator() {
                                         className="px-6 rounded-full"
                                     >
                                         <MdSave size={16} />
-                                        Save
+                                        {langField('saveOnly')}
                                     </Button>
                                 </PermissionGate>
 
@@ -286,7 +264,7 @@ export default function CreateROECalculator() {
                                             disabled={loading}
                                             className="px-6 rounded-full"
                                         >
-                                            {loading ? 'Saving...' : 'Save & Next'}
+                                            {loading ? langField('savingData') : langField('saveAndNext')}
                                             <MdArrowForward size={16} />
                                         </Button>
                                     </PermissionGate>

@@ -4,9 +4,10 @@ import { useRoeCalculator } from './useRoeCalculator';
 
 interface UseRoeCalculatorManagementProps {
     iup_customer_id: string;
+    lang?: string;
 }
 
-export const useRoeCalculatorManagement = ({ iup_customer_id }: UseRoeCalculatorManagementProps) => {
+export const useRoeCalculatorManagement = ({ iup_customer_id, lang = 'id' }: UseRoeCalculatorManagementProps) => {
     const navigate = useNavigate();
     
     const [searchTerm, setSearchTerm] = useState('');
@@ -91,8 +92,8 @@ export const useRoeCalculatorManagement = ({ iup_customer_id }: UseRoeCalculator
     }, [navigate]);
 
     const handleBreakdown = useCallback((roeCalculator: any) => {
-        navigate(`/roe-roa-calculator/manage/breakdown/${roeCalculator.id}`);
-    }, [navigate]);
+        navigate(`/roe-roa-calculator/manage/breakdown/${roeCalculator.id}?lang=${lang}`);
+    }, [navigate, lang]);
 
     const handleDelete = useCallback((roeCalculator: any) => {
         const roeCalculatorId = typeof roeCalculator === 'string' ? roeCalculator : roeCalculator.id;
@@ -102,11 +103,11 @@ export const useRoeCalculatorManagement = ({ iup_customer_id }: UseRoeCalculator
     const handleDownload = useCallback((roe: any) => {
         const roeId = roe.id || roe.roeCalculatorId || roe.ror_id;
         if (roeId) {
-            downloadRoe(roeId);
+            downloadRoe(roeId, lang);
         } else {
             console.error('ROE Calculator ID not found for download');
         }
-    }, [downloadRoe]);
+    }, [downloadRoe, lang]);
 
     const confirmdeleteRorCalculator = useCallback(async () => {
         if (!confirmDelete.roeCalculatorId) return;

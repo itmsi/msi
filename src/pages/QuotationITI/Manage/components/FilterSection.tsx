@@ -8,6 +8,8 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { MdDateRange, MdClear } from 'react-icons/md';
 import { formatDateToYMD } from '@/helpers/generalHelper';
+import { useLanguage } from '@/components/lang/useLanguage';
+import { quotationLabelPDF } from '@/pages/Quotation/Manage/language/quotationLabelPDF';
 
 interface FilterSectionProps {
     quotationFor?: string;
@@ -21,23 +23,24 @@ interface FilterOption {
     label: string;
 }
 
-const filterConfigs = [
-    {
-        id: 'quotation_for',
-        label: 'Quotation For',
-        options: [
-            { value: 'customer', label: 'Customer' },
-            { value: 'leasing', label: 'Leasing' }
-        ],
-        placeholder: 'All Types'
-    }
-];
-
 const FilterSection: React.FC<FilterSectionProps> = ({
     quotationFor,
     onFilterChange,
     onClearFilters
 }) => {
+    const { langField } = useLanguage(quotationLabelPDF);
+
+    const filterConfigs = [
+        {
+            id: 'quotation_for',
+            label: langField('quotationFor'),
+            options: [
+                { value: 'customer', label: langField('customer') },
+                { value: 'leasing', label: langField('leasing') }
+            ],
+            placeholder: langField('allTypes')
+        }
+    ];
     const {
         islandOptions,
         pagination: islandPagination,
@@ -75,7 +78,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             case 'quotation_for':
                 return quotationFor ? {
                     value: quotationFor,
-                    label: quotationFor === 'customer' ? 'Customer' : 'Leasing'
+                    label: quotationFor === 'customer' ? langField('customer') : langField('leasing')
                 } : null;
             default:
                 return null;
@@ -84,7 +87,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
     const handleFilterChange = (filterId: string, selectedOption: FilterOption | null) => {
         if (filterId === 'status' || filterId === 'date_range') {
-            console.log(`${filterId} filter:`, selectedOption?.value);
             return;
         }
         
@@ -151,20 +153,20 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         if (selectedDateRange.startDate && selectedDateRange.endDate) {
             return `${selectedDateRange.startDate} - ${selectedDateRange.endDate}`;
         }
-        return 'Select Date Range';
+        return langField('selectDateRange');
     };
     return (
         <div className="mt-4 pt-4 border-t border-gray-200 flex-1">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <CustomAsyncSelect
-                    placeholder="Select Island..."
+                    placeholder={langField('selectIsland')}
                     value={selectedIsland}
                     defaultOptions={islandOptions}
                     loadOptions={handleIslandInputChange}
                     onMenuScrollToBottom={handleIslandMenuScrollToBottom}
                     isLoading={islandPagination.loading}
-                    noOptionsMessage={() => "No islands found"}
-                    loadingMessage={() => "Loading islands"}
+                    noOptionsMessage={() => langField('noIslandsFound')}
+                    loadingMessage={() => langField('loadingIslands')}
                     isSearchable={true}
                     isClearable={true}
                     inputValue={islandInputValue}
@@ -243,7 +245,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     className="px-4 py-2 bg-transparent hover:bg-gray-100 text-gray-600 border border-gray-300"
                     size="sm"
                 >
-                    Clear All
+                    {langField('clearAll')}
                 </Button>
             </div>
         </div>

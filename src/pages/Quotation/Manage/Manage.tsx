@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { useQuotationManagement } from './hooks/useQuotationManagement';
 import { ManageQuotationItem } from './types/quotation';
 import { useLanguage } from '@/components/lang/useLanguage';
-import LanguageSwitcher from '@/components/lang/LanguageSwitcher';
 import { quotationManage } from './language/quotationManage';
 import CustomDataTable from '../../../components/ui/table/CustomDataTable';
 import Input from '../../../components/form/input/InputField';
@@ -22,7 +21,7 @@ import FilterSection from './components/FilterSection';
 const ManageQuotations: React.FC = () => {
     const navigate = useNavigate();
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-    const { lang, langField, setLang } = useLanguage(quotationManage);
+    const { lang, langField, buildPath } = useLanguage(quotationManage);
 
     const {
         searchTerm,
@@ -39,7 +38,6 @@ const ManageQuotations: React.FC = () => {
         handleClearFilters,
         handleFilterChange,
         handleEdit,
-        handleView,
         handleDelete,
         handleDownload,
         handleDuplicate,
@@ -65,7 +63,7 @@ const ManageQuotations: React.FC = () => {
                 cell: (row) => (
                 <>
                     <a
-                        href={`/quotations/manage/edit/${row.manage_quotation_id}?lang=${lang}`}
+                        href={buildPath(`/quotations/manage/edit/${row.manage_quotation_id}`)}
                         className="absolute inset-0"
                     />
                     <div className=" items-center gap-3 py-2">
@@ -158,7 +156,7 @@ const ManageQuotations: React.FC = () => {
                 }
             ]),
         ],
-        [lang, langField, handleView, handleEdit, handleDelete, handleDuplicate]
+        [lang, langField, handleEdit, handleDelete, handleDuplicate]
     );
 
     const SearchAndFilters = useMemo(() => (
@@ -252,10 +250,9 @@ const ManageQuotations: React.FC = () => {
                             <p className="mt-1 text-sm text-gray-500">{langField('manageDescription')}</p>
                         </div>
                         <div className="flex items-center gap-4">
-                            <LanguageSwitcher currentLang={lang} onChangeLang={setLang} />
                             <PermissionGate permission="create">
                                 <Button
-                                    onClick={() => navigate(`/quotations/manage/create?lang=${lang}`)}
+                                    onClick={() => navigate(buildPath(`/quotations/manage/create`))}
                                     className="flex items-center gap-2"
                                     size="sm"
                                 >

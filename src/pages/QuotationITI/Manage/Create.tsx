@@ -1,7 +1,7 @@
 ﻿import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-hot-toast';
-import { MdSave, MdKeyboardArrowLeft, MdAdd, MdDelete } from 'react-icons/md';
+import { MdKeyboardArrowLeft, MdAdd, MdDelete } from 'react-icons/md';
 import { Calendar } from 'react-date-range';
 import { TableColumn } from "react-data-table-component";
 
@@ -32,20 +32,19 @@ import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalI
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { ItemProductService } from '../Product/services/productService';
 import { QuotationService } from './services/quotationService';
-import ProductDetailDrawer from '@/pages/Quotation/Manage/components/ProductDetailDrawer';
+import ProductDetailDrawer from './components/ProductDetailDrawer';
 import { BankSelectOption, useBankSelect } from '../hooks/useBankSelect';
 import { useEmployeeSelect } from '../hooks/useEmployeeSelect';
 import { useCustomerSelect } from '../hooks/useCustomerSelect';
-import Checkbox from '@/components/form/input/Checkbox';
 import { FaEye } from 'react-icons/fa6';
 import { IslandSelectOption, useIslandSelect } from '@/hooks/useIslandSelect';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from './language/quotationLabels';
-import LanguageSwitcher from '@/components/lang/LanguageSwitcher';
+import FormActions from '@/components/form/FormActions';
 
 export default function CreateQuotation() {
     const navigate = useNavigate();
-    const { lang, langField, setLang } = useLanguage(quotationLabels);
+        const { langField, buildPath } = useLanguage(quotationLabels);
     const { isCreating, validationErrors, clearFieldError, createQuotation } = useCreateQuotation();
 
     // Use useEmployees hook
@@ -138,7 +137,7 @@ export default function CreateQuotation() {
         star: '',                    // New field
         term_content_id: '',
         term_content_directory: '',
-        include_aftersales_page: true,  // Added for API payload
+        include_aftersales_page: false,  // Added for API payload
         include_msf_page: false,        // Added for API payload
         status: 'draft',
         manage_quotation_items: [],
@@ -507,13 +506,6 @@ export default function CreateQuotation() {
     const addProductItem = async () => {
         setProductSelectError('');
 
-        if (!formData.island_id) {
-            const errorMessage = 'Please select an island first before adding products';
-            setProductSelectError(errorMessage);
-            toast.error(errorMessage);
-            return;
-        }
-
         if (!selectedProduct) {
             const errorMessage = 'Please select a product first';
             setProductSelectError(errorMessage);
@@ -564,6 +556,7 @@ export default function CreateQuotation() {
                     selling_price_star_4: apiProductData.selling_price_star_4 || '0',
                     selling_price_star_5: apiProductData.selling_price_star_5 || '0',
                     description: apiProductData.componen_product_description || '',
+                    componen_type: apiProductData.componen_type || 1,
                     manage_quotation_item_accessories: islandAccessories,
                     manage_quotation_item_specifications: apiProductData.componen_product_specifications?.map((spec: any) => ({
                         manage_quotation_item_specification_label: spec.componen_product_specification_label || spec.specification_label_name || '',
@@ -677,7 +670,7 @@ export default function CreateQuotation() {
                 images: existingItem.image ? [existingItem.image] : null,
                 componen_product_description: existingItem.description || '',
                 is_delete: false,
-                componen_type: 1,
+                componen_type: (existingItem as any).componen_type || 1,
                 componen_product_unit_model: existingItem.componen_product_unit_model || '',
                 componen_product_specifications: existingItem.manage_quotation_item_specifications?.map((spec: any) => ({
                     componen_product_specification_label: spec.manage_quotation_item_specification_label || spec.specification_label_name || '',
@@ -798,7 +791,19 @@ export default function CreateQuotation() {
                 />
             ),
             wrap: true,
-            width: '500px',
+            width: '400px',
+        },
+        {
+            name: 'Type',
+            selector: (row) => row.product_type || '',
+            cell: (row) => (
+                <>
+                    <div className="font-medium capitalize">
+                        {row.product_type}
+                    </div>
+                </>
+            ),
+            wrap: true,
         },
         {
             name: 'Quantity',
@@ -856,23 +861,10 @@ export default function CreateQuotation() {
             // right: true,
             width: '250px',
         },
-        // {
-        //     name: 'Description',
-        //     selector: (row) => row.description,
-        //     cell: (row, index) => (
-        //         <Input
-        //             value={row.description}
-        //             onChange={(e) => updateItem(index as number, 'description', e.target.value)}
-        //             className="border-0 border-b-1 rounded-none p-1 px-3 w-full"
-        //         />
-        //     ),
-        //     wrap: true,
-        // },
         {
             name: 'Detail',
             cell: (row) => (
                 <>
-                {row.product_type !== 'non_unit' &&
                 <Button
                     type="button"
                     variant="outline"
@@ -883,7 +875,6 @@ export default function CreateQuotation() {
                 >
                     {showProductDetail && selectedProductId === row.componen_product_id ? <FaEye /> : <FaEye />}
                 </Button>
-                }
                 </>
             ),
             width: '100px',
@@ -1034,7 +1025,7 @@ export default function CreateQuotation() {
 
             if (response.success) {
                 toast.success(`Quotation ${status === 'submit' ? 'submitted' : 'saved as draft'} successfully`);
-                navigate('/quotations-iti/manage');
+                navigate(buildPath('/quotations-iti/manage'));
             } else {
                 toast.error(response.message || 'Failed to save quotation');
             }
@@ -1060,7 +1051,7 @@ export default function CreateQuotation() {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/quotations-iti/manage')}
+                                onClick={() => navigate(buildPath('/quotations-iti/manage'))}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -1068,11 +1059,10 @@ export default function CreateQuotation() {
                             <div className="border-l border-gray-300 h-6 mx-3"></div>
                             <h1 className="ms-2 font-primary-bold font-normal text-xl">{langField('createQuotation')}</h1>
                         </div>
-                        <LanguageSwitcher currentLang={lang} onChangeLang={setLang} />
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={(e) => handleSubmit(e, 'submit')} className="space-y-6">
+                    <form className="space-y-6">
                         <div className='md:grid-cols-5 grid gap-6'>
                             <div className="bg-white rounded-2xl shadow-sm p-6 lg:col-span-3">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('quotationDetail')}</h2>
@@ -1467,12 +1457,8 @@ export default function CreateQuotation() {
 
                             {/* Products Section */}
                             <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5 col-span-1">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 pb-6 relative">
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 pb-3 relative">
                                     {langField('products')}
-
-                                    {!formData.island_id && (
-                                        <span className="text-sm text-orange-500 font-primary italic mt-1 block absolute bottom-0">{langField('selectIslandFirst')}</span>
-                                    )}
                                 </h2>
 
                                 {/* Add Product */}
@@ -1515,7 +1501,6 @@ export default function CreateQuotation() {
                                         type="button"
                                         onClick={addProductItem}
                                         className="flex items-center gap-2"
-                                        disabled={!selectedProduct || !formData.island_id}
                                     >
                                         <MdAdd size={16} />
                                         {langField('addProduct')}
@@ -1804,7 +1789,7 @@ export default function CreateQuotation() {
                             </div>
                         </div>
 
-                        <div className='md:grid-cols-5 grid gap-6'>
+                        <div className='md:grid-cols-5 grid gap-6 hidden'>
                             <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-3 space-y-6">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('shippingTC')}</h2>
                                 <div className='md:grid-cols-3 grid gap-6'>
@@ -1845,60 +1830,17 @@ export default function CreateQuotation() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('additionalPages')}</h2>
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3">
-                                        <Checkbox
-                                            checked={formData.include_aftersales_page ?? true}
-                                            onChange={(checked) => handleInputChange('include_aftersales_page', checked)}
-                                            label={langField('includeAftersalesPage')}
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Checkbox
-                                            checked={formData.include_msf_page ?? false}
-                                            onChange={(checked) => handleInputChange('include_msf_page', checked)}
-                                            label={langField('includeMsfPage')}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         {/* Form Actions */}
-                        <div className="flex justify-end gap-4 p-6 bg-white rounded-2xl shadow-sm">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => navigate('/quotations-iti/manage')}
-                                className="px-6 rounded-full"
-                                disabled={isCreating}
-                            >
-                                {langField('cancel')}
-                            </Button>
-                            {/* <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => {
-                                    const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
-                                    handleSubmit(fakeEvent, 'draft');
-                                }}
-                                disabled={isCreating}
-                                className="flex items-center gap-2"
-                            >
-                                <MdSave size={16} />
-                                Save as Draft
-                            </Button> */}
-                            <Button
-                                type="submit"
-                                disabled={isCreating}
-                                className="px-6 flex items-center gap-2 rounded-full"
-                            >
-                                <MdSave size={16} />
-                                {isCreating ? langField('submitting') : langField('submitQuotation')}
-                            </Button>
-                        </div>
+                        <FormActions
+                            onSubmit={() => handleSubmit(new Event('submit') as any, 'submit')}
+                            isSubmitting={isCreating}
+                            cancelText={langField('cancel')}
+                            cancelRoute={buildPath('/quotations-iti/manage')}
+                            submitText={langField('submitQuotation')}
+                            submittingText={langField('submitting')}
+                        />
                     </form>
                 </div>
             </div>

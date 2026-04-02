@@ -99,10 +99,6 @@ export const useQuotationManagement = (lang?: string) => {
         navigate(`/quotations/manage/edit/${quotation.manage_quotation_id}`);
     }, [navigate]);
 
-    const handleView = useCallback((quotation: any) => {
-        navigate(`/quotations/detail/${quotation.manage_quotation_id}`);
-    }, [navigate]);
-
     const handleDelete = useCallback((quotation: any) => {
         const quotationId = typeof quotation === 'string' ? quotation : quotation.manage_quotation_id;
         setConfirmDelete({ show: true, quotationId: quotationId });
@@ -176,7 +172,6 @@ export const useQuotationManagement = (lang?: string) => {
         handleFilterChange,
         handleStatusChange,
         handleEdit,
-        handleView,
         applyFilters,
         handleKeyPress
     };

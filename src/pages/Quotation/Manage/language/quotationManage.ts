@@ -7,6 +7,11 @@ export const quotationManage: TranslationMap = {
         en: 'Manage Quotations',
         zh: '管理报价'
     },
+    manageQuotationsITI: {
+        id: 'Kelola Quotation ITI',
+        en: 'Manage Quotations ITI',
+        zh: '管理报价 ITI'
+    },
     manageDescription: {
         id: 'Kelola dan organisir database quotation Anda',
         en: 'Manage and organize your quotation database',
