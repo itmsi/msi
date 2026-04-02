@@ -33,7 +33,7 @@ export default function Edit() {
         handleUpdateProductItem,
     } = usePurchaseOrderEdit();
 
-    // Use POILocationSelect hook for location management
+    // Location select untuk header (is_parent = true)
     const {
         POLocationOptions,
         pagination,
@@ -41,14 +41,25 @@ export default function Edit() {
         handleInputChange: handleLocationInputChange,
         handleMenuScrollToBottom,
         initializeOptions
-    } = usePOLocationSelect();
+    } = usePOLocationSelect(30, true);
+
+    // Location select untuk items (is_parent = false)
+    const {
+        POLocationOptions: itemLocationOptions,
+        pagination: itemLocationPagination,
+        inputValue: itemLocationInputValue,
+        handleInputChange: handleItemLocationInputChange,
+        handleMenuScrollToBottom: handleItemLocationScrollToBottom,
+        initializeOptions: initializeItemLocationOptions
+    } = usePOLocationSelect(30, false);
     
     const [selectedLocation, setSelectedLocation] = useState<any>(null);
     const [locationSelectError, setLocationSelectError] = useState<string>('');
 
     useEffect(() => {
         initializeOptions();
-    }, [initializeOptions]);
+        initializeItemLocationOptions();
+    }, [initializeOptions, initializeItemLocationOptions]);
     
     const {
         POVendorOptions,
@@ -87,9 +98,14 @@ export default function Edit() {
     const handleCancel = () => {
         navigate('/netsuite/purchase-order');
     }
-console.log({
-    formData
-});
+
+    const [isOpenApproval, setIsOpenApproval] = useState(false);
+    const [selectedPoIdApproval, setSelectedPoIdApproval] = useState<string | null>(null);
+
+    const handleApprovalOpen = (poId: string) => {
+        setSelectedPoIdApproval(poId || null);
+        setIsOpenApproval(true);
+    };
 
     const [isOpen, setIsOpen] = useState(false);
     const [selectedPoId, setSelectedPoId] = useState<string | null>(null);
@@ -133,31 +149,7 @@ console.log({
                                     <MdKeyboardArrowLeft size={20} />
                                 </Button>
                                 <div className="border-l border-gray-300 h-6 mx-3"></div>
-                                <div className='flex justify-between items-center w-full'>
-                                    <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit Purchase Order {poDetail?.po_number ? `- ${poDetail.po_number}` : ''}</h1>
-                                    {poDetail?.approvalstatus === 2 && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => handleApproval(poDetail.po_id)}
-                                            className="group px-6 rounded-5 ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-green-600 hover:text-white hover:ring-green-600"
-                                            disabled={isSubmitting}
-                                        >
-                                            Re-Approval <MdVerified className="w-4 h-4 text-green-600  group-hover:text-white" />
-                                        </Button>
-                                    )}
-                                    {poDetail?.approvalstatus === 3 && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => handleOpenRejected(poDetail.po_id)}
-                                            className="group px-6 rounded-5 ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
-                                            disabled={isSubmitting}
-                                        >
-                                            Re-Open <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
-                                        </Button>
-                                    )}
-                                </div>
+                                <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit Purchase Order {poDetail?.po_number ? `- ${poDetail.po_number}` : ''}</h1>
                             </div>
                         </div>
 
@@ -225,12 +217,12 @@ console.log({
                                 onProductDelete={handleProductDelete}
                                 onUpdateProductItem={handleUpdateProductItem}
 
-                                // Location props  
-                                locationOptions={POLocationOptions}
-                                locationPagination={pagination}
-                                locationInputValue={inputValue}
-                                onLocationInputChange={handleLocationInputChange}
-                                onLocationMenuScrollToBottom={handleMenuScrollToBottom}
+                                // Location props (is_parent = false)
+                                locationOptions={itemLocationOptions}
+                                locationPagination={itemLocationPagination}
+                                locationInputValue={itemLocationInputValue}
+                                onLocationInputChange={handleItemLocationInputChange}
+                                onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
                                 selectedLocation={selectedLocation}
                                 onLocationChange={(option) => {
                                     setSelectedLocation(option);
@@ -257,25 +249,68 @@ console.log({
                                 >
                                     Cancel
                                 </Button>
+                                {poDetail?.approvalstatus === 1 && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handleApprovalOpen(poDetail.po_id)}
+                                        className="group px-6 rounded-full ring-1 ring-inset ring-green-600 text-green-600 hover:bg-green-600 hover:text-white hover:ring-green-600"
+                                        disabled={isSubmitting}
+                                    >
+                                        Submit Approval
+                                    </Button>
+                                )}
+                                {poDetail?.approvalstatus === 2 && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handleApproval(poDetail.po_id)}
+                                        className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
+                                        disabled={isSubmitting}
+                                    >
+                                        Re-Approval <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
+                                    </Button>
+                                )}
+                                {poDetail?.approvalstatus === 3 && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handleOpenRejected(poDetail.po_id)}
+                                        className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
+                                        disabled={isSubmitting}
+                                    >
+                                        Re-Open <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
+                                    </Button>
+                                )}
                                 {
                                     (poDetail?.approvalstatus !== 2 && 
                                     poDetail?.approvalstatus !== 3) && (
-                                <PermissionGate permission={["create", "update"]}>
-                                    <Button
-                                        onClick={handleSubmit}
-                                        className="px-6 flex items-center gap-2 rounded-full"
-                                        disabled={isSubmitting}
-                                    >
-                                        <FaSave className={`mr-2 h-4 w-4 ${isSubmitting ? 'animate-spin' : ''}`} />
-                                        {isSubmitting ? 'Updating...' : 'Update Purchase Order'}
-                                    </Button>
-                                </PermissionGate>
+                                        <PermissionGate permission={["create", "update"]}>
+                                            <Button
+                                                onClick={handleSubmit}
+                                                className="px-6 flex items-center gap-2 rounded-full"
+                                                disabled={isSubmitting}
+                                            >
+                                                <FaSave className={`mr-2 h-4 w-4 ${isSubmitting ? 'animate-spin' : ''}`} />
+                                                {isSubmitting ? 'Updating...' : 'Update Purchase Order'}
+                                            </Button>
+                                        </PermissionGate>
                                     )
                                 }
                             </div>
                         </div> 
                     </>)}
 
+                    {/* // MODAL REOPEN SAAT STATUS APPROVAL = APPROVED */}
+                    <ModalApproval
+                        isOpen={isOpenApproval}
+                        onClose={() => setIsOpenApproval(false)}
+                        poId={selectedPoIdApproval ? parseInt(selectedPoIdApproval) : null}
+                        onSuccess={() => navigate('/netsuite/purchase-order')}
+                        submit={true}
+                        titleModal="Submit Approval"
+                        descriptionModal="Masukkan catatan untuk proses approval"
+                    />
                     {/* // MODAL REOPEN SAAT STATUS APPROVAL = APPROVED */}
                     <ModalApproval
                         isOpen={isOpen}

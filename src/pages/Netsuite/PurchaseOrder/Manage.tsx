@@ -2,7 +2,8 @@ import { useCallback, useMemo } from 'react'
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { usePurchaseOrder } from './hooks/usePurchaseOrder';
-import { formatCurrencyID, formatCurrencyZH, formatDateTime } from '@/helpers/generalHelper';
+// import Badge from '@/components/ui/badge/Badge';
+import { formatCurrencyID, formatDateTime } from '@/helpers/generalHelper';
 import { MdAdd, MdClear, MdSearch } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -70,10 +71,17 @@ export default function Manage() {
                 </div>
             </>),
             wrap: true,
+            width: '250px'
         },
         {
             name: 'Name',
             selector: row => row.vendor_name || '-',
+            wrap: true,
+            width: '350px'
+        },
+        {
+            name: 'PO ID',
+            selector: row => row.po_id || '-',
             wrap: true,
         },
         {
@@ -86,16 +94,27 @@ export default function Manage() {
                     />
                 </div>
             ),
+            center: true,
+            width: '200px'
+        },
+        {
+            name: 'Approver',
+            selector: row => row.custbody_me_wf_next_approver_blank_display || '-',
+            wrap: true,
+            width: '300px'
         },
         {
             name: 'Memo',
             selector: row => row.memo || '-',
             wrap: true,
+            width: '300px'
         },
         {
             name: 'Currency',
             selector: row => row.currency_symbol || '-',
             wrap: true,
+            center: true,
+            width: '150px'
         },
         {
             name: 'Ammount',
@@ -103,12 +122,14 @@ export default function Manage() {
             cell: row => (<>
                 <div className="items-center gap-3 py-2">
                     <div className="block text-sm text-gray-500">
-                        {row.currency_symbol === 'CNY' ? formatCurrencyZH(377233500.00) : formatCurrencyID(377233500.00)}
+                        {/* {row.currency_symbol === 'CNY' ? formatCurrencyZH(377233500.00) : formatCurrencyID(377233500.00)} */}
+                        {formatCurrencyID(row.total)}
                     </div>
-                    <div className="font-medium text-gray-900">{925693285650.00}</div>
+                    {/* <div className="font-medium text-gray-900">{formatCurrencyID(row.total)}</div> */}
                 </div>
             </>),
             wrap: true,
+            width: '250px'
         },
         // createActionsColumn([
         //     {

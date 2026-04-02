@@ -27,6 +27,7 @@ export interface PurchaseOrderItem {
     po_status: string;
     approvalstatus: string;
     po_status_label: string;
+    custbody_me_wf_next_approver_blank_display: string | null;
     memo: string | null;
     vendor_id: number;
     vendor_name: string;
@@ -58,12 +59,14 @@ export interface POLine {
 }
 
 export interface PurchaseOrderForm {
-    customform: number | null;
+    customform?: number | null;
+    customform_display?: string | null;
     vendorid: number | null;
     purchasedate: string | null;
     subsidiary: number | null;
     subsidiary_display?: string | null;
     location: number | null;
+    location_name?: string | null;
     memo: string;
     currency: number | null;
     terms: number | null;
@@ -73,8 +76,11 @@ export interface PurchaseOrderForm {
     custbody_me_saving_type: number | null;
     custbody_me_pr_number: string | null;
     class: number | null;
+    class_name?: string | null;
     department: number | null;
+    department_name?: string | null;
     custbody_msi_createdby_api?: string | null;
+    custbody_me_wf_next_approver_blank_display?: string | null;
     approvalstatus?: number | null;
     // description: string | null;
     // note: string | null;
@@ -123,6 +129,7 @@ export interface POItemsRequest {
     sort_by: string;
     sort_order: string;
     search: string;
+    is_parent?: boolean;
 }
 export interface FormFieldItemsResponse {
     success: boolean;
@@ -294,6 +301,8 @@ export interface PODetailData {
     custbody_me_pr_number: string;
     custbody_me_description: string | null;
     intercotransaction: any | null;
+    customform?: number | null;
+    customform_display?: string | null;
     lines: PODetailLine[];
 }
 
