@@ -1,5 +1,5 @@
 type BadgeVariant = "light" | "solid" | "outline" | "dot";
-type BadgeSize = "sm" | "md";
+type BadgeSize = "sm" | "md" | "lg";
 type BadgeColor =
     | "primary"
     | "secondary"
@@ -35,6 +35,7 @@ const Badge: React.FC<BadgeProps> = ({
     const sizeStyles = {
         sm: "text-theme-xs",
         md: "text-sm",
+        lg: "px-4 py-2 text-sm",
     };
 
     // Define color styles for variants

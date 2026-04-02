@@ -31,6 +31,8 @@ export interface AsyncSelectData {
 export interface CustomAsyncSelectProps extends AsyncSelectConfig, AsyncSelectCallbacks, AsyncSelectData {
     name?: string;
     value?: SelectOption | null;
+    menuPortalTarget?: HTMLElement | null;
+    menuPosition?: 'absolute' | 'fixed';
     noOptionsMessage?: () => string;
     loadingMessage?: () => string;
 }

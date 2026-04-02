@@ -14,9 +14,9 @@ import {
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "@/hooks/useAuth";
 import GridShape from "@/components/common/GridShape";
-import { TbTopologyStar3 } from "react-icons/tb";
 import { useLanguage } from "@/components/lang/useLanguage";
 import { menuTranslations } from "@/components/lang/menuTranslations";
+import { TbTopologyStar3, TbReport } from "react-icons/tb";
 
 type SubNavItem = {
     name: string;
@@ -156,6 +156,16 @@ const AppSidebar: React.FC = () => {
                 { name: "Projects", path: buildPath("/crm/project"), allowedRoles: ['Project CRM'] },
                 { name: "User Management", path: buildPath("/crm/user-management"), allowedRoles: ['User Management CRM'] },
                 { name: "Division", path: buildPath("/crm/manage-division"), allowedRoles: ['Division CRM'] }
+            ],
+        },
+        {
+            name: "NetSuite",
+            icon: <TbReport />,
+            allowedRoles: [
+                'Purchase Orders Netsuite', 
+            ],
+            subItems: [
+                { name: "Purchase Orders", path: "/netsuite/purchase-order", allowedRoles: ['Purchase Orders Netsuite'] },
             ],
         }
     ], [buildPath]);

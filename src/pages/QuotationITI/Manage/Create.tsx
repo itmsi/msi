@@ -781,15 +781,19 @@ export default function CreateQuotation() {
         {
             name: 'Product Name',
             selector: (row) => row.componen_product_name,
-            cell: (row, index) => (
+            cell: (row, index) => (<>
                 <Input
                     value={row.componen_product_name}
                     onChange={(e) => updateItemById(index as number, 'componen_product_name', e.target.value)}
                     className="border-0 border-b-1 rounded-none p-1 px-3 w-full w-[480px]"
                     placeholder="Product name"
                     readonly
+                    type='hidden'
                 />
-            ),
+                <div className="font-medium capitalize">
+                        {row.componen_product_name}
+                    </div>
+            </>),
             wrap: true,
             width: '400px',
         },
@@ -1074,7 +1078,7 @@ export default function CreateQuotation() {
                                             <Input
                                                 id="quotation_number"
                                                 type="text"
-                                                value={`###/IEC-MSI/${monthRoman}/${new Date().getFullYear()}`}
+                                                value={`###/ITI/${monthRoman}/${new Date().getFullYear()}`}
                                                 disabled={true}
                                             />
                                         </div>

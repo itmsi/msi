@@ -506,18 +506,6 @@ export default function CreateCustomer() {
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-4">Coretax</h2>
 
                             <div className="md:col-span-2">
-                                <Label htmlFor="type_tax_buyer">Type</Label>
-                                <CustomSelect
-                                    id="type_tax_buyer"
-                                    options={taxBuyerTypes}
-                                    value={taxBuyerTypes.find(opt => opt.value === formData.type_tax_buyer) || null}
-                                    onChange={(selectedOption) => handleInputChange('type_tax_buyer', selectedOption?.value || '')}
-                                    placeholder="Select type tax buyer"
-                                    isClearable
-                                />
-                            </div>
-
-                            <div className="md:col-span-2">
                                 <Label htmlFor="name_tax_buyer">Nama</Label>
                                 <Input
                                     id="name_tax_buyer"
@@ -536,6 +524,18 @@ export default function CreateCustomer() {
                                     value={formData.no_tax_buyer}
                                     onChange={(e) => handleInputChange('no_tax_buyer', e.target.value)}
                                     placeholder="Enter tax buyer no"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <Label htmlFor="type_tax_buyer">Type</Label>
+                                <CustomSelect
+                                    id="type_tax_buyer"
+                                    options={taxBuyerTypes}
+                                    value={taxBuyerTypes.find(opt => opt.value === formData.type_tax_buyer) || null}
+                                    onChange={(selectedOption) => handleInputChange('type_tax_buyer', selectedOption?.value || '')}
+                                    placeholder="Select type tax buyer"
+                                    isClearable
                                 />
                             </div>
                         </div>

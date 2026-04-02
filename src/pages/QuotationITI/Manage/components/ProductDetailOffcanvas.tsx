@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ItemProduct } from '../../Product/types/product';
-import Input from '../../../../components/form/input/InputField'
+import Input from '../../../../components/form/input/InputField';
 import { getDefaultSpecs } from '../../Product/hooks/useProductCreate';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from '../language/quotationLabels';

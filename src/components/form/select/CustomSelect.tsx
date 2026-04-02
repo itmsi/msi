@@ -13,6 +13,8 @@ interface CustomSelectProps extends Omit<SelectProps<Option>, 'styles' | 'onChan
     success?: boolean;
     disabled?: boolean;
     className?: string;
+    menuPortalTarget?: HTMLElement | null;
+    menuPosition?: 'absolute' | 'fixed';
     onChange?: (selectedOption: { value: string; label: string; } | null) => void;
 }
 
@@ -23,6 +25,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
     success, 
     disabled, 
     className = '', 
+    menuPortalTarget,
+    menuPosition = 'absolute',
     onChange,
     ...props 
 }) => {
@@ -237,7 +241,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             onChange={handleChange}
             isSearchable={isSearchable}
             isClearable={isClearable}
-            
+            menuPortalTarget={menuPortalTarget}
+            menuPosition={menuPosition}
         />
     );
 };
