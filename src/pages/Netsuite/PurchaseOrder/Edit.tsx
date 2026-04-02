@@ -2,23 +2,19 @@ import PageMeta from '@/components/common/PageMeta'
 import Button from '@/components/ui/button/Button'
 import { useEffect, useState } from 'react'
 import { MdKeyboardArrowLeft, MdVerified } from 'react-icons/md'
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { usePurchaseOrderEdit } from './hooks/usePurchaseOrderEdit';
 import PurchaseOrderFields from './components/purchaseOrderFields';
 import PurchaseOrderItemFields from './components/purchaseOrderItemsFields';
-import FormActions from '@/components/form/FormActions';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOVendorSelect } from '@/hooks/usePOVendorSelect';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import { FaSave } from 'react-icons/fa';
-import { PurchaseOrderItem } from './types/purchaseorder';
 import ModalApproval from './components/ModalApproval';
 
 export default function Edit() {
     const navigate = useNavigate();
-    
-    const { id } = useParams<{ id: string }>();
     
     const {
         isSubmitting,

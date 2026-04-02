@@ -9,7 +9,7 @@ import PurchaseOrderItemFields from './components/purchaseOrderItemsFields';
 import FormActions from '@/components/form/FormActions';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOVendorSelect } from '@/hooks/usePOVendorSelect';
-import { LoadingCard, LoadingOverlay } from '@/components/common/Loading';
+import { LoadingOverlay } from '@/components/common/Loading';
 
 export default function Create() {
     const navigate = useNavigate();

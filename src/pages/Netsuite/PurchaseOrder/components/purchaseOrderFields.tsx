@@ -201,7 +201,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                                 date={currentDate || new Date()}
                                 onChange={handleDateChange}
                                 color="#3b82f6"
-                                minDate={field.minDate || new Date()}
+                                // minDate={field.minDate || new Date()}
                             />
                         </div>
                     )}

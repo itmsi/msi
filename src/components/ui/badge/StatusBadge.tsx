@@ -190,7 +190,7 @@ interface StatusTypeBadgeProps {
 export const StatusTypeBadge: React.FC<StatusTypeBadgeProps> = ({ type }) => {
     const typeConfig = {
         1: { 
-            variant: 'outline' as const, 
+            variant: 'solid' as const, 
             color: 'info' as const, 
             label: 'Pending Approval' 
         },
@@ -213,7 +213,6 @@ export const StatusTypeBadge: React.FC<StatusTypeBadgeProps> = ({ type }) => {
             variant={config.variant} 
             color={config.color} 
             size='lg'
-            endIcon={type === 1 ? <MdAccessTime className="w-4 h-4" /> : type === 2 ? <MdCheckCircle className="w-4 h-4" /> : <MdCancel className="w-4 h-4" />}
         >
             {config.label}
         </Badge>
