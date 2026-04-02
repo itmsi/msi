@@ -14,7 +14,7 @@ export interface POLocationPaginationState {
     loading: boolean;
 }
 
-export const usePOLocationSelect = (limit: number = 30) => {
+export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean) => {
     const [POLocationOptions, setPOLocationOptions] = useState<POLocationSelectOption[]>([]);
     const [pagination, setPagination] = useState<POLocationPaginationState>({
         page: 1,
@@ -36,7 +36,8 @@ export const usePOLocationSelect = (limit: number = 30) => {
                 search: inputValue,
                 page: page,
                 limit: limit,
-                sort_order: 'desc'
+                sort_order: 'desc',
+                ...(is_parent !== undefined ? { is_parent } : {})
             });
 
             if (response.success) {
@@ -66,7 +67,7 @@ export const usePOLocationSelect = (limit: number = 30) => {
 
         setPagination(prev => ({ ...prev, loading: false }));
         return loadedOptions;
-    }, [limit]);
+    }, [limit, is_parent]);
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -91,9 +92,9 @@ export const usePOLocationSelect = (limit: number = 30) => {
     }, [POLocationOptions.length, loadPOLocationOptions]);
 
     // Get PO item by ID
-    const getPOItemById = useCallback(async (poItemId: string): Promise<POLocationSelectOption | null> => {
+    const getPOItemById = useCallback(async (poItemId: string, is_parent: boolean = true): Promise<POLocationSelectOption | null> => {
         try {
-            const response = await PurchaseOrderService.getPOLocation({ search: poItemId });
+            const response = await PurchaseOrderService.getPOLocation({ search: poItemId, is_parent: is_parent });
             if (response.success && response.data.items.length > 0) {
                 const poItem = response.data.items[0];
                 return {

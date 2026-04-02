@@ -137,12 +137,12 @@ export const getApprovalFields = () => [
     //     type: "text",
     //     readOnly: true,
     // },
-    // {
-    //     name: "next_approver",
-    //     label: "Next Approver",
-    //     type: "text",
-    //     readOnly: true,
-    // },
+    {
+        name: "custbody_me_wf_next_approver_blank_display",
+        label: "Next Approver",
+        type: "text",
+        readOnly: true,
+    },
     {
         name: "custbody_msi_createdby_api",
         label: "Created By API",

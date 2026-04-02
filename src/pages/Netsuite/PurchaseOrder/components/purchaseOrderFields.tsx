@@ -92,21 +92,27 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 <Label>
                     {label} {required && <span className="text-red-500">*</span>}
                 </Label>
-                <Input
-                    type={'text'}
-                    name={name}
-                    value={String(formData[name]) ?? ''}
-                    onKeyPress={type === 'number' ? handleKeyPress : undefined}
-                    onChange={onInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors[name] ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder={placeholder || `Enter ${label.toLowerCase()}`}
-                    min={type === 'number' ? "1" : undefined}
-                />
-                {errors[name] && (
-                    <p className="text-red-500 text-sm mt-1">{errors[name]}</p>
-                )}
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                        String(formData[name]) ?? '-'
+                    }</p>
+                ) : <>
+                    <Input
+                        type={'text'}
+                        name={name}
+                        value={String(formData[name]) ?? ''}
+                        onKeyPress={type === 'number' ? handleKeyPress : undefined}
+                        onChange={onInputChange}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors[name] ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        placeholder={placeholder || `Enter ${label.toLowerCase()}`}
+                        min={type === 'number' ? "1" : undefined}
+                    />
+                    {errors[name] && (
+                        <p className="text-red-500 text-sm mt-1">{errors[name]}</p>
+                    )}
+                </>}
             </div>
         );
     };
@@ -124,6 +130,11 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 <Label>
                     {label} {required && <span className="text-red-500">*</span>}
                 </Label>
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                        options.find(option => String(option.value) === String(formData[name] ?? ''))?.label || '-'
+                    }</p>
+                ) : <>
                 <CustomSelect
                     options={options}
                     value={options.find(option => String(option.value) === String(formData[name] ?? '')) || null}
@@ -137,6 +148,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 {errors[name] && (
                     <p className="text-red-500 text-sm mt-1">{errors[name]}</p>
                 )}
+                </>}
             </div>
         );
     };
@@ -181,6 +193,11 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 <Label>
                     {field.label} {field.required && <span className="text-red-500">*</span>}
                 </Label>
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                        currentDate ? formatDate(currentDate.toISOString()) : (field.placeholder || `Pilih ${field.label.toLowerCase()}`)
+                    }</p>
+                ) : <>
                 <div className="relative" ref={datePickerRef}>
                     <div 
                         className={`flex items-center justify-between w-full px-3 py-2 border rounded-lg cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 ${
@@ -209,6 +226,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 {errors[field.name as keyof PurchaseOrderForm] && (
                     <p className="text-red-500 text-sm mt-1">{errors[field.name as keyof PurchaseOrderForm]}</p>
                 )}
+                </>}
             </div>
         );
     };
@@ -229,6 +247,11 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             {field.label} {field.required && <span className="text-red-500">*</span>}
                         </Label>
+                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[100px] flex items-start">{
+                                String(formData[field.name as keyof PurchaseOrderForm] || '-')
+                            }</p>
+                        ) : (<>
                         <TextArea 
                             name={field.name}
                             value={String(formData[field.name as keyof PurchaseOrderForm] || '')}
@@ -250,6 +273,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         {errors[field.name as keyof PurchaseOrderForm] && (
                             <p className="text-red-500 text-sm mt-1">{errors[field.name as keyof PurchaseOrderForm]}</p>
                         )}
+                        </>)}
                     </div>
                 );
 
@@ -272,6 +296,11 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             Location <span className="text-red-500">*</span>
                         </Label>
+                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                                locationOptions.find(option => String(option.value) === String(formData.location ?? ''))?.label || '-'
+                            }</p>
+                        ) : (<>
                         <CustomAsyncSelect
                             name="location"
                             placeholder="Select location..."
@@ -291,6 +320,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         {locationError && (
                             <span className="text-sm text-red-500 mt-1 block">{locationError}</span>
                         )}
+                        </>)}
                     </div>
                 );
             case "select-vendor":
@@ -299,6 +329,11 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             Vendor <span className="text-red-500">*</span>
                         </Label>
+                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                                vendorOptions.find(option => String(option.value) === String(formData.vendorid ?? ''))?.label || '-'
+                            }</p>
+                        ) : (<>
                         <CustomAsyncSelect
                             name="vendorid"
                             placeholder="Select vendor..."
@@ -318,6 +353,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         {vendorError && (
                             <span className="text-sm text-red-500 mt-1 block">{vendorError}</span>
                         )}
+                        </>)}
                     </div>
                 );
 
@@ -335,7 +371,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     return (
         <div className="space-y-6">
             <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Primary Information</h3>
+                <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Primary Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {primaryFields.map((field) => (
                             <div key={field.name}>
@@ -345,7 +381,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 </div>
             </div>
             <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Additional Information</h3>
+                <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Additional Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {additionalFields.map((field) => (
                             <div key={field.name}>
@@ -356,7 +392,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Classification</h3>
+                <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Classification</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {classificationFields.map((field) => (
                             <div key={field.name}>
@@ -367,7 +403,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
             </div>
             {modeEdit && (
             <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Approval</h3>
+                <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Approval</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <p className='mb-1.5 block text-sm text-gray-700'>Approval Status</p>
@@ -376,15 +412,19 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         />
                     </div>
                     <div>
+                        <p className='mb-1.5 block text-sm text-gray-700'>Next Approver</p>
+                        <p>{formData.custbody_me_wf_next_approver_blank_display || '-'}</p>
+                    </div>
+                    <div>
                         <p className='mb-1.5 block text-sm text-gray-700'>Created By</p>
-                        <p>{formData.custbody_msi_createdby_api}</p>
+                        <p>{formData.custbody_msi_createdby_api || '-'}</p>
                     </div>
                 </div>
             </div>
             )}
 
             <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Intercompany Management</h3>
+                <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Intercompany Management</h3>
                 <div className="grid grid-cols-1 gap-4">
 
                         {interCompanyFields.map((field) => (

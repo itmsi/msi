@@ -43,7 +43,7 @@ export class PurchaseOrderService {
         const requestData: POItemsRequest = {
             page: 1,
             limit: 10,
-            sort_by: 'updated_at',
+            sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
             ...params
@@ -57,7 +57,7 @@ export class PurchaseOrderService {
         const requestData: POItemsRequest = {
             page: 1,
             limit: 10,
-            sort_by: 'updated_at',
+            sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
             ...params

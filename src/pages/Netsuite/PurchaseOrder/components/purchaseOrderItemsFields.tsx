@@ -127,61 +127,72 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         {
             name: 'Quantity',
             selector: (row: TablePOItem) => row.qty || 0,
-            cell: (row, index) => (
-                <Input
-                    type="text"
-                    maxLength={3}
-                    min='0'
-                    value={row.qty && row.qty > 0 ? row.qty.toString() : ''}
-                    onKeyPress={handleKeyPress}
-                    onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        updateItemById(index as number, 'qty', val);
-                        
-                        // Auto-calculate amount and total when quantity changes
-                        if (row.rate && row.rate > 0) {
-                            const calculatedAmount = val * row.rate;
-                            updateItemById(index as number, 'amount', calculatedAmount);
-                            updateItemById(index as number, 'total', calculatedAmount);
-                            
-                            // Recalculate tax amounts if tax code is selected
-                            if (row.taxcode_name) {
-                                const { taxAmount, grossAmount } = calculateTaxAmounts(calculatedAmount, row.taxcode_name);
-                                updateItemById(index as number, 'tax_amount', taxAmount);
-                                updateItemById(index as number, 'gross_amount', grossAmount);
-                            }
-                        }
-                    }}
-                    onBlur={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        if (val === 0) {
-                            updateItemById(index as number, 'qty', 1);
-                            // Recalculate with qty = 1
-                            if (row.rate && row.rate > 0) {
-                                const calculatedAmount = 1 * row.rate;
-                                updateItemById(index as number, 'amount', calculatedAmount);
-                                updateItemById(index as number, 'total', calculatedAmount);
+            cell: (row, index) => (<>
+                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                        <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                            row.qty && row.qty > 0 ? row.qty.toString() : '-'
+                        }</p>
+                    ) : (
+                        <Input
+                            type="text"
+                            maxLength={3}
+                            min='0'
+                            value={row.qty && row.qty > 0 ? row.qty.toString() : ''}
+                            onKeyPress={handleKeyPress}
+                            onChange={(e) => {
+                                const val = parseInt(e.target.value) || 0;
+                                updateItemById(index as number, 'qty', val);
                                 
-                                // Recalculate tax amounts if tax code is selected
-                                if (row.taxcode_name) {
-                                    const { taxAmount, grossAmount } = calculateTaxAmounts(calculatedAmount, row.taxcode_name);
-                                    updateItemById(index as number, 'tax_amount', taxAmount);
-                                    updateItemById(index as number, 'gross_amount', grossAmount);
+                                // Auto-calculate amount and total when quantity changes
+                                if (row.rate && row.rate > 0) {
+                                    const calculatedAmount = val * row.rate;
+                                    updateItemById(index as number, 'amount', calculatedAmount);
+                                    updateItemById(index as number, 'total', calculatedAmount);
+                                    
+                                    // Recalculate tax amounts if tax code is selected
+                                    if (row.taxcode_name) {
+                                        const { taxAmount, grossAmount } = calculateTaxAmounts(calculatedAmount, row.taxcode_name);
+                                        updateItemById(index as number, 'tax_amount', taxAmount);
+                                        updateItemById(index as number, 'gross_amount', grossAmount);
+                                    }
                                 }
-                            }
-                        }
-                    }}
-                    onFocus={(e) => e.target.select()}
-                    className="border-0 border-b-1 rounded-none p-1 px-3 w-[80px] text-center"
-                />
-            ),
+                            }}
+                            onBlur={(e) => {
+                                const val = parseInt(e.target.value) || 0;
+                                if (val === 0) {
+                                    updateItemById(index as number, 'qty', 1);
+                                    // Recalculate with qty = 1
+                                    if (row.rate && row.rate > 0) {
+                                        const calculatedAmount = 1 * row.rate;
+                                        updateItemById(index as number, 'amount', calculatedAmount);
+                                        updateItemById(index as number, 'total', calculatedAmount);
+                                        
+                                        // Recalculate tax amounts if tax code is selected
+                                        if (row.taxcode_name) {
+                                            const { taxAmount, grossAmount } = calculateTaxAmounts(calculatedAmount, row.taxcode_name);
+                                            updateItemById(index as number, 'tax_amount', taxAmount);
+                                            updateItemById(index as number, 'gross_amount', grossAmount);
+                                        }
+                                    }
+                                }
+                            }}
+                            onFocus={(e) => e.target.select()}
+                            className="border-0 border-b-1 rounded-none p-1 px-3 w-[80px] text-center"
+                        />
+                    )}
+            </>),
             wrap: true,
             width: '130px',
         },
         {
             name: 'Rate',
             selector: (row: TablePOItem) => row.rate || 0,
-            cell: (row, index) => (
+            cell: (row, index) => (<>
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                        row.rate && row.rate > 0 ? formatNumberInput(row.rate) : '-'
+                    }</p>
+                ) : (
                 <Input
                     type="text"
                     value={row.rate && row.rate > 0 ? formatNumberInput(row.rate) : ''}
@@ -219,14 +230,21 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 //     className="border-1 rounded p-1 px-3 w-full text-center"
                 //     placeholder="0"
                 // />
-            ),
+                )}
+            </>),
             center: true,
             width: '300px',
+            sortable: false
         },
         {
             name: 'Amount',
             selector: (row: TablePOItem) => row.amount || 0,
-            cell: (row, index) => (
+            cell: (row, index) => (<>
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                        row.amount && row.amount > 0 ? formatNumberInput(row.amount) : '-'
+                    }</p>
+                ) : (
                 <Input
                     type="text"
                     value={row.amount && row.amount > 0 ? formatNumberInput(row.amount) : ''}
@@ -250,14 +268,21 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     className="border-1 rounded p-1 px-3 w-[285px] text-center"
                     placeholder="0"
                 />
-            ),
+                )}
+            </>),
             center: true,
             width: '300px',
+            sortable: false
         },
         {
             name: 'Tax Code',
             selector: (row: TablePOItem) => row.taxcode_name || 'N/A',
-            cell: (row, index) => (
+            cell: (row, index) => (<>
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                         row.taxcode_name || '-'
+                    }</p>
+                ) : (
                 <div className="w-[285px]">
                     <CustomSelect
                         options={masterData?.taxcodes?.map(tax => ({
@@ -289,9 +314,11 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         menuPosition="fixed"
                     />
                 </div>
-            ),
+                )}
+            </>),
             center: true,
             width: '250px',
+            sortable: false
         },
         {
             name: 'Tax Rate',
@@ -303,6 +330,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             ),
             center: true,
             width: '150px',
+            sortable: false
         },
         {
             name: 'Gross Amt',
@@ -313,7 +341,8 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 </div>
             ),
             center: true,
-            width: '150px',
+            width: '300px',
+            sortable: false
         },
         {
             name: 'Tax Amt',
@@ -324,13 +353,19 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 </div>
             ),
             center: true,
-            width: '150px',
+            width: '300px',
+            sortable: false
         },
         {
             name: 'Department',
             selector: (row: TablePOItem) => row.department_name || 'N/A',
             cell: (row, index) => (
                 <div className="w-[285px]">
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                         row.department_name || '-'
+                    }</p>
+                ) : (
                     <CustomSelect
                         options={masterData?.departments?.map(dept => ({
                             label: dept.name,
@@ -352,15 +387,22 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         menuPortalTarget={document.body}
                         menuPosition="fixed"
                     />
+                )}
                 </div>
             ),
             width: '300px',
+            sortable: false
         },
         {
             name: 'Class',
             selector: (row: TablePOItem) => row.class_name || 'N/A',
             cell: (row, index) => (
                 <div className="w-full">
+                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                        <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                            row.class_name || '-'
+                        }</p>
+                    ) : (
                     <CustomSelect
                         options={masterData?.class?.map(cls => ({
                             label: cls.name,
@@ -382,49 +424,65 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         menuPortalTarget={document.body}
                         menuPosition="fixed"
                     />
+                    )}
                 </div>
             ),
             width: '300px',
+            sortable: false
         },
         {
             name: 'Location',
             selector: (row: TablePOItem) => row.location_name || 'N/A',
             cell: (row, index) => (
                 <div className="w-[285px]">
-                    <CustomAsyncSelect
-                        name={`location_${index}`}
-                        placeholder="Select location..."
-                        value={row.location ? {
-                            label: row.location_name || '',
-                            value: row.location.toString()
-                        } : null}
-                        defaultOptions={locationOptions}
-                        loadOptions={onLocationInputChange}
-                        onMenuScrollToBottom={onLocationMenuScrollToBottom}
-                        isLoading={locationPagination.loading}
-                        noOptionsMessage={() => "No locations found"}
-                        loadingMessage={() => "Loading locations..."}
-                        isSearchable={true}
-                        inputValue={locationInputValue}
-                        onInputChange={onLocationInputChange}
-                        onChange={(option) => {
-                            if (option) {
-                                updateItemById(index as number, 'location', parseInt(option.value));
-                                updateItemById(index as number, 'location_name', option.label);
-                            }
-                        }}
-                        className="text-xs"
-                        menuPortalTarget={document.body}
-                        menuPosition="fixed"
-                    />
+                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                        <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                            row.location_name || '-'
+                        }</p>
+                    ) : (
+                        <>
+                        <CustomAsyncSelect
+                            name={`location_${index}`}
+                            placeholder="Select location..."
+                            value={row.location ? {
+                                label: row.location_name || '',
+                                value: row.location.toString()
+                            } : null}
+                            defaultOptions={locationOptions}
+                            loadOptions={onLocationInputChange}
+                            onMenuScrollToBottom={onLocationMenuScrollToBottom}
+                            isLoading={locationPagination.loading}
+                            noOptionsMessage={() => "No locations found"}
+                            loadingMessage={() => "Loading locations..."}
+                            isSearchable={true}
+                            inputValue={locationInputValue}
+                            onInputChange={onLocationInputChange}
+                            onChange={(option) => {
+                                if (option) {
+                                    updateItemById(index as number, 'location', parseInt(option.value));
+                                    updateItemById(index as number, 'location_name', option.label);
+                                }
+                            }}
+                            error={!row.location && errors?.items_location ? errors.items_location : undefined}
+                            className="text-xs"
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                        />
+                        {!row.location && errors?.items_location && (
+                            <span className="text-xs text-red-500 mt-1 block">Location wajib dipilih</span>
+                        )}
+                        </>
+                    )}
                 </div>
             ),
             width: '300px',
+            sortable: false
         },
         {
             name: 'Actions',
             cell: (row: TablePOItem, index: number) => (
                 <div className="flex gap-2">
+                    {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
                     <Button
                         size="sm"
                         variant="outline"
@@ -433,10 +491,12 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     >
                         <MdDelete size={14} />
                     </Button>
+                    )}
                 </div>
             ),
             width: '100px',
-            center: true
+            center: true,
+            sortable: false
         }
     ];
     
@@ -457,6 +517,8 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Purchase Order Items</h3>
                 
                 {/* Add Product Section */}
+                
+                {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
                 <div className="flex gap-4 mb-6">
                     <div className="flex-1">
                         <Label>Select Product to Add</Label>
@@ -480,6 +542,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             <span className="text-sm text-red-500 mt-1 block">{productSelectError}</span>
                         )}
                     </div>
+                    
                     <div className="flex flex-col justify-end">
                         <Button
                             type="button"
@@ -492,16 +555,19 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         </Button>
                     </div>
                 </div>
+                )}
 
-                {!isFormComplete && (
-                    <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
-                        Lengkapi field Custom Form, Purchase Date, Vendor, Currency, Subsidiary, Location, Class, dan Department terlebih dahulu sebelum menambahkan item.
-                    </p>
+                {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
+                    !isFormComplete && (
+                        <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
+                            Lengkapi field Custom Form, Purchase Date, Vendor, Currency, Subsidiary, Location, Class, dan Department terlebih dahulu sebelum menambahkan item.
+                        </p>
+                    )
                 )}
 
                 {/* Products Table */}
                 {formData.items && formData.items.length > 0 ? (
-                    <div className="mt-6">
+                    <div className="mt-6 font-secondary">
                         <CustomDataTable
                             columns={productColumns}
                             data={formData.items}
@@ -524,9 +590,9 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     </div>
                 )}
 
-                {errors?.items && (
+                {/* {errors?.items && (
                     <span className="text-sm text-red-500">{errors.items}</span>
-                )}
+                )} */}
             </div>
         </div>
     )

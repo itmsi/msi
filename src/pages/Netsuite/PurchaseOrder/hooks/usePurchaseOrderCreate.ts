@@ -28,8 +28,10 @@ export const usePurchaseOrderCreate = () => {
         custbody_me_saving_type: null,
         custbody_me_pr_number: '',
         class: null,
+        class_name: '',
         // description: null,
         department: null,
+        department_name: '',
         items: []
     });
 
@@ -115,6 +117,11 @@ export const usePurchaseOrderCreate = () => {
         // if (!formData.description) newErrors.description = 'Description wajib diisi';
         if (!formData.items || formData.items.length === 0) {
             newErrors.items = 'Minimal 1 item harus ditambahkan';
+        } else {
+            const itemsWithoutLocation = formData.items.some(item => !item.location);
+            if (itemsWithoutLocation) {
+                newErrors.items_location = 'Location wajib dipilih untuk setiap item';
+            }
         }
 
         setErrors(newErrors);
@@ -188,9 +195,20 @@ export const usePurchaseOrderCreate = () => {
         if (!selectedProduct) {
             return;
         }
+console.log({
+    formData,
+    masterData
+});
+
+        const deptName = formData?.department_name
+            || masterData?.departments?.find(d => d.id === formData?.department)?.name
+            || '';
+        const className = formData?.class_name
+            || masterData?.class?.find(c => c.id === formData?.class)?.name
+            || '';
 
         const newItem: TablePOItem = {
-            id: `${selectedProduct.value}-${Date.now()}`, // Generate a temporary ID for the frontend
+            id: `${selectedProduct.value}-${Date.now()}`,
             product_id: selectedProduct.value,
             product_name: selectedProduct.data?.displayName || selectedProduct.label,
             itemId: parseInt(selectedProduct.data?.itemId) || parseInt(selectedProduct.value),
@@ -198,12 +216,12 @@ export const usePurchaseOrderCreate = () => {
             rate: 0,
             amount: 0,
             total: 0,
-            department: masterData?.departments?.[0]?.id || 0,
-            department_name: masterData?.departments?.[0]?.name || '',
+            department: formData?.department || 0,
+            department_name: deptName,
             class: formData?.class || 0,
-            class_name: formData?.class ? masterData?.class?.find(cls => cls.id === formData.class)?.name || '' : '',
-            location: formData?.location || 0,
-            location_name: formData?.location ? masterData?.subsidiarys?.find(sub => sub.id === formData.location)?.name || '' : '',
+            class_name: className,
+            location:  0,
+            // location_name: formData?.location_name || '',
             taxcode: masterData?.taxcodes?.[0]?.id || 0,
             taxcode_name: masterData?.taxcodes?.[0]?.name || '',
             tax_rate: '',

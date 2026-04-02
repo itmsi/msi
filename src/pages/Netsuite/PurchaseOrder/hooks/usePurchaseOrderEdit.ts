@@ -35,7 +35,8 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
     }));
 
     return {
-        customform: null,
+        customform: detail.customform,
+        customform_display: detail.customform_display || '',
         vendorid: detail.vendor_id,
         purchasedate: detail.po_date,
         subsidiary: detail.subsidiary ?? 0,
@@ -199,6 +200,11 @@ export const usePurchaseOrderEdit = () => {
         // if (!formData.description) newErrors.description = 'Description wajib diisi';
         if (!formData.items || formData.items.length === 0) {
             newErrors.items = 'Minimal 1 item harus ditambahkan';
+        } else {
+            const itemsWithoutLocation = formData.items.some(item => !item.location);
+            if (itemsWithoutLocation) {
+                newErrors.items_location = 'Location wajib dipilih untuk setiap item';
+            }
         }
 
         setErrors(newErrors);
