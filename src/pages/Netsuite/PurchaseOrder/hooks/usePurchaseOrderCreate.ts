@@ -149,7 +149,7 @@ export const usePurchaseOrderCreate = () => {
                 vendorid: formData.vendorid || null,
                 purchasedate: formData.purchasedate ? formatDateToDMYmiring(new Date(formData.purchasedate)) : null,
                 subsidiary: formData.subsidiary || null,
-                location: formData.location || null,
+                location: Number(formData.location) || null,
                 memo: formData.memo || '',
                 currency: formData.currency || null,
                 terms: formData.terms || null,
@@ -167,7 +167,7 @@ export const usePurchaseOrderCreate = () => {
                     rate: item.rate,
                     department: item.department,
                     class: item.class,
-                    location: item.location,
+                    location: parseInt(item.location as string) || 0,
                     taxcode: item.taxcode,
                 }))
             };
@@ -195,11 +195,7 @@ export const usePurchaseOrderCreate = () => {
         if (!selectedProduct) {
             return;
         }
-console.log({
-    formData,
-    masterData
-});
-
+        
         const deptName = formData?.department_name
             || masterData?.departments?.find(d => d.id === formData?.department)?.name
             || '';
@@ -211,7 +207,7 @@ console.log({
             id: `${selectedProduct.value}-${Date.now()}`,
             product_id: selectedProduct.value,
             product_name: selectedProduct.data?.displayName || selectedProduct.label,
-            itemId: parseInt(selectedProduct.data?.itemId) || parseInt(selectedProduct.value),
+            itemId: Number(selectedProduct.data?.itemId) || Number(selectedProduct.value),
             qty: 1,
             rate: 0,
             amount: 0,
@@ -220,8 +216,8 @@ console.log({
             department_name: deptName,
             class: formData?.class || 0,
             class_name: className,
-            location:  0,
-            // location_name: formData?.location_name || '',
+            location:  Number(formData.location) || 0,
+            location_name: formData?.location_name || '',
             taxcode: masterData?.taxcodes?.[0]?.id || 0,
             taxcode_name: masterData?.taxcodes?.[0]?.name || '',
             tax_rate: '',
