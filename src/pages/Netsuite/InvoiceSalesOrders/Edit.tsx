@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdArrowBack, MdSave } from 'react-icons/md';
+import { MdArrowBack, MdSave, MdFileDownload } from 'react-icons/md';
+import { generateFakturXML } from './utils/fakturExportUtils';
 import Button from '@/components/ui/button/Button';
 import PageMeta from '@/components/common/PageMeta';
 import InputField from '@/components/form/input/InputField';
@@ -32,6 +33,23 @@ export default function EditFaktur() {
         const success = await handleSubmit(e);
         if (success) {
             navigate('/netsuite/invoice-sales-order');
+        }
+    };
+
+    const handleExportXML = () => {
+        try {
+            const xmlContent = generateFakturXML([{ faktur: formData, row: {} }]);
+            const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `faktur_edit_${id || 'new'}.xml`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Export XML failed:', error);
         }
     };
 
@@ -91,6 +109,18 @@ export default function EditFaktur() {
                                 </p>
                             </div>
                         </div>
+
+                        {!loading && (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleExportXML}
+                                className="flex items-center gap-2 border-green-200 text-green-700 hover:bg-green-50"
+                            >
+                                <MdFileDownload size={20} />
+                                Export XML
+                            </Button>
+                        )}
                     </div>
                 </div>
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdArrowBack, MdDownload } from 'react-icons/md';
+import { MdArrowBack } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
 import { InvoiceSalesOrderService } from './services/invoiceSalesOrderService';
 import { InvoiceSalesOrder } from './types/invoiceSalesOrder';
@@ -53,67 +53,12 @@ export default function View() {
     const getStatusInfo = (status: string) => {
         switch (status) {
             case '1': return { label: 'Paid In Full', color: 'success' as const };
-            case '2': return { label: 'Pending Approval / Open', color: 'warning' as const };
+            case '2': return { label: 'Pending Approval', color: 'warning' as const };
             case '3': return { label: 'Rejected', color: 'error' as const };
             default: return { label: status || 'Unknown', color: 'info' as const };
         }
     };
 
-    const handleExportCSV = () => {
-        if (!invoiceData) return;
-        
-        const totalForeign = invoiceData.lines && invoiceData.lines.length > 0
-            ? invoiceData.lines.reduce((sum, line) => sum + (line.grossamt || 0), 0)
-            : 0;
-        const exRate = Number(invoiceData.exchangerate) || 1;
-        const totalBase = totalForeign * exRate;
-    
-        const headers = [
-            'ID', 'Document Number', 'Date', 'Name', 'Account', 'PO/Check Number',
-            'Status', 'Memo', 'Currency', 'Exchange Rate',
-            'Amount (Foreign Currency)', 'Amount (IDR)',
-            'ME - Related Invoice', 'MSI - Bank Payment', 'Created By'
-        ];
-    
-        const statusMap: Record<string, string> = {
-            '1': 'Paid In Full',
-            '2': 'Pending Approval / Open',
-            '3': 'Rejected',
-        };
-    
-        const values = [
-            invoiceData.id,
-            invoiceData.tranid,
-            invoiceData.trandate,
-            invoiceData.entityid || invoiceData.entity || '',
-            invoiceData.account_display || invoiceData.account || '',
-            invoiceData.otherrefnum || '',
-            statusMap[invoiceData.approvalstatus] || invoiceData.approvalstatus || '',
-            invoiceData.memo || '',
-            invoiceData.currency_display || invoiceData.currency || '',
-            invoiceData.exchangerate || '',
-            totalForeign.toFixed(2),
-            totalBase.toFixed(2),
-            invoiceData.custbody_me_related_fulfillment || '',
-            invoiceData.custbody_msi_bank_payment_so_display || invoiceData.custbody_msi_bank_payment_so || '',
-            invoiceData.custbody_me_wf_created_by_display || invoiceData.custbody_me_wf_created_by || ''
-        ];
-    
-        const csvContent = [
-            headers.join(','),
-            values.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')
-        ].join('\n');
-    
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `invoice_${invoiceData.tranid || invoiceData.id}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    };
 
     if (loading) {
         return (
@@ -179,14 +124,6 @@ export default function View() {
                                 </div>
                             </div>
                             <div className="flex gap-3">
-                                <Button
-                                    onClick={handleExportCSV}
-                                    className="flex items-center gap-2"
-                                    variant="outline"
-                                >
-                                    <MdDownload size={18} />
-                                    <span>Export CSV</span>
-                                </Button>
                                 {/* Edit functionality can be added later if needed */}
                                 {/* <Button
                                     onClick={() => navigate(`/netsuite/invoice-sales-order/edit/${invoiceData.id}`)}

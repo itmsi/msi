@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useInvoiceSalesOrder } from './hooks/useInvoiceSalesOrder';
@@ -10,64 +10,47 @@ import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { InvoiceSalesOrder } from './types/invoiceSalesOrder';
+import { FakturService } from './services/fakturService';
+import toast from 'react-hot-toast';
+import Button from '@/components/ui/button/Button';
 
-// Helper: export single invoice row as CSV
-const exportRowAsCSV = (row: InvoiceSalesOrder) => {
-    const totalForeign = row.lines && row.lines.length > 0
-        ? row.lines.reduce((sum, line) => sum + (line.grossamt || 0), 0)
-        : 0;
-    const exRate = Number(row.exchangerate) || 1;
-    const totalBase = totalForeign * exRate;
+import { generateFakturXML } from './utils/fakturExportUtils';
 
-    const headers = [
-        'ID', 'Document Number', 'Date', 'Name', 'Account', 'PO/Check Number',
-        'Status', 'Memo', 'Currency', 'Exchange Rate',
-        'Amount (Foreign Currency)', 'Amount (IDR)',
-        'ME - Related Invoice', 'MSI - Bank Payment', 'Created By'
-    ];
+// Helper: export single invoice row as XML
+const exportRowAsXML = async (row: InvoiceSalesOrder) => {
+    if (!row.fakture_id) {
+        toast.error('Data Faktur tidak ditemukan untuk invoice ini');
+        return;
+    }
 
-    const statusMap: Record<string, string> = {
-        '1': 'Paid In Full',
-        '2': 'Pending Approval / Open',
-        '3': 'Rejected',
-    };
+    const toastId = toast.loading('Sedang menyiapkan data faktur...');
+    try {
+        const response = await FakturService.getFakturById(row.fakture_id);
+        if (!response.success || !response.data) {
+            throw new Error(response.message || 'Gagal mengambil data faktur');
+        }
 
-    const values = [
-        row.id,
-        row.tranid,
-        row.trandate,
-        row.entityid || row.entity || '',
-        row.account_display || row.account || '',
-        row.otherrefnum || '',
-        statusMap[row.approvalstatus] || row.approvalstatus || '',
-        row.memo || '',
-        row.currency_display || row.currency || '',
-        row.exchangerate || '',
-        totalForeign.toFixed(2),
-        totalBase.toFixed(2),
-        row.custbody_me_related_fulfillment || '',
-        row.custbody_msi_bank_payment_so_display || row.custbody_msi_bank_payment_so || '',
-        row.custbody_me_wf_created_by_display || row.custbody_me_wf_created_by || ''
-    ];
-
-    const csvContent = [
-        headers.join(','),
-        values.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `invoice_${row.tranid || row.id}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+        const xmlContent = generateFakturXML([{ faktur: response.data, row }]);
+        const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `faktur_${row.tranid || row.id}.xml`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success(`Faktur ${row.tranid} berhasil diekspor ke XML`, { id: toastId });
+    } catch (error: any) {
+        console.error('Export XML failed:', error);
+        toast.error(`Gagal ekspor XML: ${error.message}`, { id: toastId });
+    }
 };
 
 export default function Manage() {
     const navigate = useNavigate();
+    const [selectedRows, setSelectedRows] = useState<InvoiceSalesOrder[]>([]);
+    const [clearSelectedRows, setClearSelectedRows] = useState(false);
     const {
         invoiceSalesOrders,
         loading,
@@ -82,6 +65,55 @@ export default function Manage() {
         handleKeyPress,
         handleClearSearch,
     } = useInvoiceSalesOrder();
+
+    const handleExportSelected = async () => {
+        if (!selectedRows || selectedRows.length === 0) {
+            toast.error('Tidak ada data terpilih untuk diekspor');
+            return;
+        }
+
+        const invoicesWithFaktur = selectedRows.filter((row: InvoiceSalesOrder) => row.fakture_id);
+        if (invoicesWithFaktur.length === 0) {
+            toast.error('Tidak ada data Faktur yang valid dari pilihan Anda');
+            return;
+        }
+
+        const toastId = toast.loading(`Mengekspor ${invoicesWithFaktur.length} data faktur ke XML...`);
+        try {
+            const fakturPromises = invoicesWithFaktur.map((row: InvoiceSalesOrder) => 
+                FakturService.getFakturById(row.fakture_id).then(res => ({ res, row }))
+            );
+            
+            const results = await Promise.all(fakturPromises);
+            const successfulFakturs = results
+                .filter(({ res }: { res: any }) => res.success && res.data)
+                .map(({ res, row }: { res: any, row: InvoiceSalesOrder }) => ({ faktur: res.data, row }));
+
+            if (successfulFakturs.length === 0) {
+                throw new Error('Gagal mengambil data faktur untuk semua invoice terpilih');
+            }
+
+            const xmlContent = generateFakturXML(successfulFakturs);
+            const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `faktur_bulk_${new Date().getTime()}.xml`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            // Clear selection after successful export
+            setClearSelectedRows(!clearSelectedRows);
+            setSelectedRows([]);
+            
+            toast.success(`${successfulFakturs.length} Faktur berhasil diekspor ke XML`, { id: toastId });
+        } catch (error: any) {
+            console.error('Export selected XML failed:', error);
+            toast.error(`Gagal ekspor XML terpilih: ${error.message}`, { id: toastId });
+        }
+    };
     
     const handlePageChangeSafe = useCallback((newPage: number) => {
         const currentPage = pagination?.page || 1;
@@ -140,7 +172,7 @@ export default function Manage() {
                 let color: 'info' | 'success' | 'warning'| 'error' | 'ghost' = 'info';
                 
                 if (row.approvalstatus === '1') { statusLabel = 'Paid In Full'; color = 'success'; }
-                if (row.approvalstatus === '2') { statusLabel = 'Pending Approval / Open'; color = 'warning'; }
+                if (row.approvalstatus === '2') { statusLabel = 'Pending Approval'; color = 'warning'; }
                 if (row.approvalstatus === '3') { statusLabel = 'Rejected'; color = 'error'; }
 
                 return (
@@ -251,9 +283,9 @@ export default function Manage() {
             },
             {
                 icon: MdFileDownload,
-                onClick: (row: InvoiceSalesOrder) => exportRowAsCSV(row),
+                onClick: (row: InvoiceSalesOrder) => exportRowAsXML(row),
                 className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
-                tooltip: 'Export CSV',
+                tooltip: 'Export XML',
                 permission: 'read',
             },
         ])
@@ -343,6 +375,15 @@ export default function Manage() {
                                     Manage Invoice Sales Orders and related information
                                 </p>
                             </div>
+                            <Button
+                                onClick={handleExportSelected}
+                                variant="outline"
+                                className="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-50"
+                                disabled={loading || selectedRows.length === 0}
+                            >
+                                <MdFileDownload size={20} />
+                                Export Selected (XML)
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -375,6 +416,9 @@ export default function Manage() {
                             onChangeRowsPerPage={handleRowsPerPageSafe}
                             fixedHeader={true}
                             fixedHeaderScrollHeight="625px"
+                            selectableRows={true}
+                            onSelectedRowsChange={(state) => setSelectedRows(state.selectedRows)}
+                            clearSelectedRows={clearSelectedRows}
                             responsive
                             highlightOnHover
                             striped={false}
