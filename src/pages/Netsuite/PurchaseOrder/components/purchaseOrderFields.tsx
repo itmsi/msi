@@ -18,6 +18,7 @@ import {
 import { POVendorSelectOption, POVendorPaginationState } from '@/hooks/usePOVendorSelect';
 import { POLocationSelectOption, POLocationPaginationState } from '@/hooks/usePOLocationSelect';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
+import { InvoiceSummary } from './purchaseOrderItemsFields';
 
 interface POFormFieldsProps {
     formData: PurchaseOrderForm;
@@ -368,75 +369,87 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
         }
     };
 
-    return (
-        <div className="space-y-6">
-            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Primary Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {primaryFields.map((field) => (
-                            <div key={field.name}>
-                                {renderField(field)}
-                            </div>
-                        ))}
+    return (<>
+        <div className="grid grid-cols-1 md:grid-cols-3">
+            <div className={`space-y-6 gap-2 ${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? 'md:col-span-2' : 'md:col-span-3'}`}>
+                <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                    <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Primary Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {primaryFields.map((field) => (
+                                <div key={field.name}>
+                                    {renderField(field)}
+                                </div>
+                            ))}
+                    </div>
                 </div>
-            </div>
-            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Additional Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {additionalFields.map((field) => (
-                            <div key={field.name}>
-                                {renderField(field)}
-                            </div>
-                        ))}
+                <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                    <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Additional Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {additionalFields.map((field) => (
+                                <div key={field.name}>
+                                    {renderField(field)}
+                                </div>
+                            ))}
+                    </div>
                 </div>
-            </div>
 
-            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Classification</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {classificationFields.map((field) => (
-                            <div key={field.name}>
-                                {renderField(field)}
+                <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                    <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Classification</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {classificationFields.map((field) => (
+                                <div key={field.name}>
+                                    {renderField(field)}
+                                </div>
+                            ))}
+                    </div>
+                </div>
+                {modeEdit && (
+                    <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                        <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Approval</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <p className='mb-1.5 block text-sm text-gray-700'>Approval Status</p>
+                                <StatusTypeBadge
+                                    type={Number(formData.approvalstatus) as 1 | 2 | 3} 
+                                />
                             </div>
-                        ))}
+                            <div>
+                                <p className='mb-1.5 block text-sm text-gray-700'>Next Approver</p>
+                                <p>{formData.custbody_me_wf_next_approver_blank_display || '-'}</p>
+                            </div>
+                            <div>
+                                <p className='mb-1.5 block text-sm text-gray-700'>Created By</p>
+                                <p>{formData.custbody_msi_createdby_api || '-'}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                    <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Intercompany Management</h3>
+                    <div className="grid grid-cols-1 gap-4">
+
+                            {interCompanyFields.map((field) => (
+                                <div key={field.name}>
+                                    {renderField(field)}
+                                </div>
+                            ))}
+                    </div>
+                
                 </div>
             </div>
             {modeEdit && (
-            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Approval</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <p className='mb-1.5 block text-sm text-gray-700'>Approval Status</p>
-                        <StatusTypeBadge
-                            type={Number(formData.approvalstatus) as 1 | 2 | 3} 
-                        />
+                (formData.approvalstatus === 2 || formData.approvalstatus === 3) &&
+                formData.items && formData.items.length > 0 && (
+                    <div className="sticky top-0 self-start px-4">
+                        <div className='bg-white rounded-2xl shadow-sm p-6'>
+                            <InvoiceSummary items={formData.items} />
+                        </div>
                     </div>
-                    <div>
-                        <p className='mb-1.5 block text-sm text-gray-700'>Next Approver</p>
-                        <p>{formData.custbody_me_wf_next_approver_blank_display || '-'}</p>
-                    </div>
-                    <div>
-                        <p className='mb-1.5 block text-sm text-gray-700'>Created By</p>
-                        <p>{formData.custbody_msi_createdby_api || '-'}</p>
-                    </div>
-                </div>
-            </div>
+                )
             )}
-
-            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Intercompany Management</h3>
-                <div className="grid grid-cols-1 gap-4">
-
-                        {interCompanyFields.map((field) => (
-                            <div key={field.name}>
-                                {renderField(field)}
-                            </div>
-                        ))}
-                </div>
-            
-            </div>
         </div>
-    )
+    </>);
 }
 
 export default purchaseOrderFields
