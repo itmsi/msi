@@ -174,7 +174,7 @@ export default function View() {
                                         </div>
                                     </h3>
                                     <p className="mt-1 text-sm text-gray-500">
-                                        Internal ID: {invoiceData.id} • Last Updated: {invoiceData.trandate ? formatDateTime(parseNetsuiteDate(invoiceData.trandate)) : '-'}
+                                        Last Updated: {invoiceData.trandate ? formatDateTime(parseNetsuiteDate(invoiceData.trandate)) : '-'}
                                     </p>
                                 </div>
                             </div>
