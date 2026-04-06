@@ -37,7 +37,7 @@ export default function Create() {
         handleInputChange: handleLocationInputChange,
         handleMenuScrollToBottom,
         initializeOptions
-    } = usePOLocationSelect(30, true);
+    } = usePOLocationSelect(30, false);
 
     // Location select untuk items (is_parent = false)
     const {

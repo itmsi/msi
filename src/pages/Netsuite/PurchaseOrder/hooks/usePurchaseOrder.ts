@@ -5,7 +5,7 @@ import { PurchaseOrderService } from '../services/purchaseOrderService';
 export const usePurchaseOrder = () => {
     const [searchValue, setSearchValue] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
-    const [sortModify, setSortModify] = useState<'updated_at' | 'created_at' | ''>('updated_at');
+    const [sortModify, setSortModify] = useState<'updated_at' | 'created_at' | ''>('created_at');
     const [statusFilter, setStatusFilter] = useState('');
 
     const [loading, setLoading] = useState(false);

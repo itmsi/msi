@@ -1,7 +1,7 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import { formatCurrency, formatNumberInput, handleKeyPress } from '@/helpers/generalHelper';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import 'react-date-range/dist/styles.css';
@@ -218,18 +218,6 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     className="border-1 rounded p-1 px-3 w-[285px] text-center"
                     placeholder="0"
                 />
-                // <Input
-                //     type="text"
-                //     value={row.rate && row.rate > 0 ? formatNumberInput(row.rate) : ''}
-                //     onKeyPress={handleKeyPress}
-                //     onChange={(e) => {
-                //         const val = e.target.value.replace(/[^\d]/g, '');
-                //         updateItemById(index as number, 'rate', val);
-                //     }}
-                //     onFocus={(e) => e.target.select()}
-                //     className="border-1 rounded p-1 px-3 w-full text-center"
-                //     placeholder="0"
-                // />
                 )}
             </>),
             center: true,
@@ -513,7 +501,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 
     return (
         <div className="space-y-6">
-            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6 min-h-[500px]">
+            <div className={`bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6 ${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? '' : 'min-h-[500px]'}`}>
                 <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Purchase Order Items</h3>
                 
                 {/* Add Product Section */}
@@ -575,7 +563,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             responsive
                             striped={false}
                             highlightOnHover
-                            className='min-h-[500px]'
+                            className={`${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? '' : 'min-h-[300px] '}`}
                             noDataComponent={
                                 <div className="text-center py-8 text-gray-500">
                                     No products added yet
@@ -590,6 +578,16 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     </div>
                 )}
 
+                {/* Invoice Summary */}
+                {
+                 (formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
+                    formData.items && formData.items.length > 0 && (<>
+                    {/* <div className="grid grid-cols-1 md:grid-cols-3">
+                        <div className=" md:col-span-2"></div> */}
+                        <InvoiceSummary items={formData.items} />
+                    {/* </div> */}
+                    </>)
+                )}
                 {/* {errors?.items && (
                     <span className="text-sm text-red-500">{errors.items}</span>
                 )} */}
@@ -597,5 +595,40 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         </div>
     )
 }
+
+// Summary invoice dari items
+export const InvoiceSummary: React.FC<{ items: TablePOItem[] }> = ({ items }) => {
+    const summary = useMemo(() => {
+        const subtotal = items.reduce((sum, item) => sum + (item.amount || 0), 0);
+        const totalTax = items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
+        const grandTotal = items.reduce((sum, item) => sum + (item.gross_amount || item.amount || 0), 0);
+        const totalQty = items.reduce((sum, item) => sum + (item.qty || 0), 0);
+
+        return { subtotal, totalTax, grandTotal, totalQty };
+    }, [items]);
+
+    return (
+            <div className="w-full px-0 space-y-3">
+                <div className="space-y-6">
+                    <div className="flex justify-between text-sm text-gray-600">
+                        <span>Total Items</span>
+                        <span className="font-medium text-gray-800">{items.length} item ({summary.totalQty} qty)</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-600">
+                        <span>Subtotal</span>
+                        <span className="font-medium text-gray-800">{formatCurrency(summary.subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-600">
+                        <span>Tax</span>
+                        <span className="font-medium text-gray-800">{formatCurrency(summary.totalTax)}</span>
+                    </div>
+                    <div className="border-t border-gray-300 pt-3 flex justify-between text-sm font-primary-bold">
+                        <span>Grand Total</span>
+                        <span className="text-blue-700">{formatCurrency(summary.grandTotal)}</span>
+                    </div>
+                </div>
+            </div>
+    );
+};
 
 export default purchaseOrderItemFields

@@ -12,6 +12,7 @@ import { LoadingOverlay } from '@/components/common/Loading';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import { FaSave } from 'react-icons/fa';
 import ModalApproval from './components/ModalApproval';
+import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 
 export default function Edit() {
     const navigate = useNavigate();
@@ -41,7 +42,7 @@ export default function Edit() {
         handleInputChange: handleLocationInputChange,
         handleMenuScrollToBottom,
         initializeOptions
-    } = usePOLocationSelect(30, true);
+    } = usePOLocationSelect(30, false);
 
     // Location select untuk items (is_parent = false)
     const {
@@ -131,7 +132,7 @@ export default function Edit() {
                 image="/motor-sights-international.png"
             />
             
-            <div className="bg-gray-50 overflow-auto">
+            <div className="bg-gray-50">
                 <div className="mx-auto px-4 sm:px-3">
                     {(isLoading || loadingMasterData) ? (
                         <LoadingOverlay
@@ -149,7 +150,19 @@ export default function Edit() {
                                     <MdKeyboardArrowLeft size={20} />
                                 </Button>
                                 <div className="border-l border-gray-300 h-6 mx-3"></div>
-                                <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit Purchase Order {poDetail?.po_number ? `- ${poDetail.po_number}` : ''}</h1>
+                                <div className='flex items-center gap-4 justify-between w-full'>
+                                    <div>
+                                        <h1 className="ms-2 font-primary-bold font-normal text-xl">
+                                            Edit Purchase Order
+                                        </h1>
+                                        <p className="ms-2 text-sm text-gray-600">{poDetail?.po_number || '-'}</p>
+                                    </div>
+                                    <div className="capitalize ms-2">
+                                        <StatusTypeBadge
+                                            type={Number(formData.approvalstatus) as 1 | 2 | 3} 
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
