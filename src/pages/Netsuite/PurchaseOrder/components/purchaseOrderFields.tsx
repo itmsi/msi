@@ -1,6 +1,6 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { formatDate, handleKeyPress } from '@/helpers/generalHelper';
+import { formatDate, formatTanggal, handleKeyPress, parseTanggalToDate, convertDateToTanggal } from '@/helpers/generalHelper';
 import React from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -13,7 +13,7 @@ import {
     getPrimaryInfoFields, 
     getAdditionalInfoFields, 
     getClassificationInfoFields, 
-    getInterCompanyManageFields 
+    // getInterCompanyManageFields 
 } from './FieldForm';
 import { POVendorSelectOption, POVendorPaginationState } from '@/hooks/usePOVendorSelect';
 import { POLocationSelectOption, POLocationPaginationState } from '@/hooks/usePOLocationSelect';
@@ -80,7 +80,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     const primaryFields = getPrimaryInfoFields(masterData || undefined);
     const additionalFields = getAdditionalInfoFields(masterData || undefined);
     const classificationFields = getClassificationInfoFields(masterData || undefined);
-    const interCompanyFields = getInterCompanyManageFields();
+    // const interCompanyFields = getInterCompanyManageFields();
     const renderInput = (
         name: keyof PurchaseOrderForm,
         label: string,
@@ -159,19 +159,17 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
         const datePickerRef = React.useRef<HTMLDivElement>(null);
         
         const fieldValue = formData[field.name as keyof PurchaseOrderForm];
-        // Type guard to ensure we only pass date-compatible values to Date constructor
-        const isValidDateValue = (value: any): value is string | number | null => {
-            return value === null || value === undefined || typeof value === 'string' || typeof value === 'number';
-        };
-        
-        const currentDate = (fieldValue && isValidDateValue(fieldValue)) ? new Date(fieldValue) : null;
+        // Safe date parsing untuk format DD/M/YYYY
+        const currentDate = fieldValue ? parseTanggalToDate(String(fieldValue)) : null;
 
         const handleDateChange = (date: Date | any) => {
             setShowDatePicker(false);
             // Calendar dari react-date-range mengirim Date object langsung
             const selectedDate = date instanceof Date ? date : new Date(date);
             if (onDateChange) {
-                onDateChange(field.name, selectedDate.toISOString());
+                // Konversi ke format DD/M/YYYY yang konsisten dengan sistem
+                const tanggalFormatted = convertDateToTanggal(selectedDate);
+                onDateChange(field.name, tanggalFormatted);
             }
         };
 
@@ -207,7 +205,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         onClick={() => setShowDatePicker(!showDatePicker)}
                     >
                         <span className={currentDate ? "text-gray-700" : "text-gray-400"}>
-                            {currentDate ? formatDate(currentDate.toISOString()) : (field.placeholder || `Pilih ${field.label.toLowerCase()}`)}
+                            {currentDate ? formatTanggal(String(fieldValue)) : (field.placeholder || `Pilih ${field.label.toLowerCase()}`)}
                         </span>
                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -370,7 +368,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     };
 
     return (<>
-        <div className="grid grid-cols-1 md:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 mb-0">
             <div className={`space-y-6 gap-2 ${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? 'md:col-span-2' : 'md:col-span-3'}`}>
                 <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
                     <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Primary Information</h3>
@@ -425,7 +423,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                     </div>
                 )}
 
-                <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                {/* <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
                     <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Intercompany Management</h3>
                     <div className="grid grid-cols-1 gap-4">
 
@@ -436,7 +434,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             ))}
                     </div>
                 
-                </div>
+                </div> */}
             </div>
             {modeEdit && (
                 (formData.approvalstatus === 2 || formData.approvalstatus === 3) &&

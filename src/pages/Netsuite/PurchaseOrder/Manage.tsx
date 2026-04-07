@@ -3,7 +3,6 @@ import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { usePurchaseOrder } from './hooks/usePurchaseOrder';
 // import Badge from '@/components/ui/badge/Badge';
-import { formatCurrencyID, formatDateTime } from '@/helpers/generalHelper';
 import { MdAdd, MdClear, MdSearch } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -14,6 +13,7 @@ import CustomDataTable from '@/components/ui/table';
 import { PurchaseOrderItem } from './types/purchaseorder';
 // import ModalApproval from './components/ModalApproval';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
+import { formatCurrencyID, formatTanggal } from '@/helpers';
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -57,7 +57,19 @@ export default function Manage() {
 
     const columns: TableColumn<PurchaseOrderItem>[] = [
         {
-            name: 'Date',
+            name: 'PO ID',
+            selector: row => row.po_id || '-',
+            wrap: true,
+            width: '100px'
+        },
+        {
+            name: 'Subsidiary',
+            selector: row => row.subsidiary_display || '-',
+            wrap: true,
+            width: '280px'
+        },
+        {
+            name: 'Document Number',
             selector: row => row.po_number || '-',
             cell: row => (<>
                 <a
@@ -66,23 +78,39 @@ export default function Manage() {
                 />
                 
                 <div className="items-center gap-3 py-2">
-                    <div className="block text-sm text-gray-500">{formatDateTime(row.po_date)}</div>
+                    <div className="block text-sm text-gray-500">{formatTanggal(row.po_date)}</div>
                     <div className="font-medium text-gray-900">{row.po_number || '-'}</div>
                 </div>
             </>),
             wrap: true,
-            width: '250px'
+            width: '230px'
         },
         {
-            name: 'Name',
+            name: 'Vendor Name',
             selector: row => row.vendor_name || '-',
             wrap: true,
             width: '350px'
         },
         {
-            name: 'PO ID',
-            selector: row => row.po_id || '-',
+            name: 'PR Number',
+            selector: row => row.custbody_me_pr_number || '-',
             wrap: true,
+            width: '120px',
+            center: true
+        },
+        {
+            name: 'Location',
+            selector: row => row.location_display || '-',
+            wrap: true,
+            width: '220px',
+            center: true
+        },
+        {
+            name: 'Next Approval',
+            selector: row => row.nextapprover || '-',
+            wrap: true,
+            width: '220px',
+            center: true
         },
         {
             name: 'Status',
@@ -98,10 +126,10 @@ export default function Manage() {
             width: '200px'
         },
         {
-            name: 'Approver',
-            selector: row => row.custbody_me_wf_next_approver_blank_display || '-',
+            name: 'Total Amount',
+            selector: row => formatCurrencyID(row.total) || '-',
             wrap: true,
-            width: '300px'
+            width: '240px'
         },
         {
             name: 'Memo',
@@ -110,26 +138,20 @@ export default function Manage() {
             width: '300px'
         },
         {
-            name: 'Currency',
-            selector: row => row.currency_symbol || '-',
-            wrap: true,
-            center: true,
-            width: '150px'
-        },
-        {
-            name: 'Ammount',
-            selector: row => row.po_number || '-',
-            cell: row => (<>
-                <div className="items-center gap-3 py-2">
-                    <div className="block text-sm text-gray-500">
-                        {/* {row.currency_symbol === 'CNY' ? formatCurrencyZH(377233500.00) : formatCurrencyID(377233500.00)} */}
-                        {formatCurrencyID(row.total)}
-                    </div>
-                    {/* <div className="font-medium text-gray-900">{formatCurrencyID(row.total)}</div> */}
+            name: 'Updated By',
+            selector: row => row.updated_at || '',
+            sortable: false,
+            cell: (row) => (
+                <div className="flex flex-col py-2">
+                    <span className="font-medium text-gray-900">
+                        {row.custbody_msi_createdby_api || '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        {row.lastmodified ? formatTanggal(row.lastmodified) || '-' : '-' }
+                    </span>
                 </div>
-            </>),
-            wrap: true,
-            width: '250px'
+            ),
+            width: '300px'
         },
         // createActionsColumn([
         //     {

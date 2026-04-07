@@ -26,11 +26,14 @@ export interface PurchaseOrderItem {
     po_date: string;
     po_status: string;
     approvalstatus: string;
+    subsidiary_display?: string;
     po_status_label: string;
-    custbody_me_wf_next_approver_blank_display: string | null;
+    nextapprover?: string | null;
     memo: string | null;
     vendor_id: number;
     vendor_name: string;
+    custbody_me_pr_number?: string;
+    location_display?: string;
     currency_id: number;
     currency_symbol: string;
     pr_number: string | null;
@@ -39,7 +42,8 @@ export interface PurchaseOrderItem {
     lines: POLine[];
     created_at: string;
     updated_at: string;
-    last_modified: string;
+    custbody_msi_createdby_api?: string;
+    lastmodified?: string ;
 }
 
 export interface POLine {
