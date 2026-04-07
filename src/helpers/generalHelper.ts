@@ -83,6 +83,61 @@ export const parseDecimalInput = (value: string | number | undefined | null, def
     return isNaN(result) ? defaultVal : result;
 };
 
+// Format tanggal dari "24/3/2026" menjadi "24 March 2026" 
+export const formatTanggal = (dateString?: string): string => {
+    if (!dateString) return '-';
+
+    // Split string berdasarkan "/" 
+    const parts = dateString.trim().split('/');
+    if (parts.length !== 3) return dateString; // return original jika format tidak valid
+
+    const [hari, bulanNum, tahun] = parts;
+    
+    // Cari nama bulan dari ENUM_MONTH
+    const namaBulan = ENUM_MONTH.find(m => m.value === bulanNum.padStart(2, '0'));
+    
+    // Jika bulan tidak ditemukan, return original
+    if (!namaBulan) return dateString;
+    
+    return `${hari} ${namaBulan.label} ${tahun}`;
+};
+
+// Parse tanggal dari format "25/3/2026"
+export const parseTanggalToDate = (dateString?: string): Date | null => {
+    if (!dateString) return null;
+
+    // Split string berdasarkan "/"
+    const parts = dateString.trim().split('/');
+    if (parts.length !== 3) return null;
+
+    const [hari, bulan, tahun] = parts;
+    
+    // Validasi apakah semua parts adalah angka
+    if (isNaN(Number(hari)) || isNaN(Number(bulan)) || isNaN(Number(tahun))) {
+        return null;
+    }
+
+    // JavaScript Date constructor menggunakan format (year, monthIndex, day)
+    // monthIndex dimulai dari 0 (Januari = 0)
+    const dateObj = new Date(Number(tahun), Number(bulan) - 1, Number(hari));
+    
+    // Validasi apakah date yang dibuat valid
+    if (isNaN(dateObj.getTime())) return null;
+    
+    return dateObj;
+};
+
+// Konversi Date object ke format DD/M/YYYY
+export const convertDateToTanggal = (date: Date): string => {
+    if (!date || isNaN(date.getTime())) return '';
+    
+    const hari = date.getDate();
+    const bulan = date.getMonth() + 1; // getMonth() returns 0-based month
+    const tahun = date.getFullYear();
+    
+    return `${hari}/${bulan}/${tahun}`;
+};
+
 //CODE ORIGINAL
 export const formatNumberInput = (value: string | number | undefined | null): string => {
     if (!value && value !== 0) return '';
