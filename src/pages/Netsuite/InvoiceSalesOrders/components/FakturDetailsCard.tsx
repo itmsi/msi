@@ -61,8 +61,6 @@ export default function FakturDetailsCard({
                         id={`${errorPrefix}kode_barang_jasa`}
                         type="text"
                         value={detail.kode_barang_jasa || ''}
-                        disabled={true}
-                        className="bg-gray-100"
                     />
                 </div>
                 <div className="md:col-span-2">
