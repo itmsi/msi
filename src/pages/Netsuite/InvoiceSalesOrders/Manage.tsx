@@ -3,7 +3,7 @@ import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useInvoiceSalesOrder } from './hooks/useInvoiceSalesOrder';
 import Badge from '@/components/ui/badge/Badge';
-import { formatCurrencyID, formatCurrencyZH, parseNetsuiteDate, formatDateTime} from '@/helpers/generalHelper';
+import { formatCurrencyID } from '@/helpers/generalHelper';
 import { MdClear, MdSearch, MdVisibility, MdEdit, MdFileDownload } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -130,15 +130,16 @@ export default function Manage() {
 
     const columns: TableColumn<InvoiceSalesOrder>[] = [
         {
-            name: 'Date',
-            selector: row => row.trandate || '-',
-            cell: row => (
-                <div className="items-center py-2">
-                    <div className="block text-sm text-gray-500">{formatDateTime(parseNetsuiteDate(row.trandate))}</div>
-                </div>
-            ),
+            name: 'SiId',
+            selector: row => row.id || '-',
             wrap: true,
-            width: '120px',
+            width: '100px',
+        },
+        {
+            name: 'Subsidiary',
+            selector: row => row.subsidiary_display || row.subsidiary || '-',
+            wrap: true,
+            width: '180px',
         },
         {
             name: 'Document Number',
@@ -147,22 +148,10 @@ export default function Manage() {
             width: '180px',
         },
         {
-            name: 'Name',
+            name: 'Customer Name',
             selector: row => row.entityid || row.entity || '-',
             wrap: true,
             width: '200px',
-        },
-        {
-            name: 'Account',
-            selector: row => row.account_display || row.account || '-',
-            wrap: true,
-            width: '150px',
-        },
-        {
-            name: 'PO/Check Number',
-            selector: row => row.otherrefnum || '-',
-            wrap: true,
-            width: '180px',
         },
         {
             name: 'Status',
@@ -186,52 +175,28 @@ export default function Manage() {
             width: '160px',
         },
         {
-            name: 'Memo',
-            selector: row => row.memo || '-',
+            name: 'Invoice Date',
+            selector: row => row.trandate || '-',
+            cell: row => (
+                <div className="items-center py-2">
+                    <div className="block text-sm text-gray-500">{row.trandate || '-'}</div>
+                </div>
+            ),
             wrap: true,
-            width: '200px',
+            width: '120px',
         },
         {
-            name: 'Currency',
-            selector: row => row.currency_display || row.currency || '-',
-            wrap: true,
-            width: '100px',
-        },
-        {
-            name: 'Amount (Foreign Currency)',
+            name: 'Total Amount',
             selector: row => {
                 const amount = row.lines && row.lines.length > 0
-                    ? row.lines.reduce((sum, line) => sum + (line.grossamt || 0), 0)
+                    ? row.lines.reduce((sum, line) => sum + (Number(line.netamount) || 0) + (Number(line.taxamount) || 0), 0)
                     : 0;
-                return amount.toString();
+                const exRate = Number(row.exchangerate) || 1;
+                return (amount * exRate).toString();
             },
             cell: row => {
                 const amount = row.lines && row.lines.length > 0
-                    ? row.lines.reduce((sum, line) => sum + (line.grossamt || 0), 0)
-                    : 0;
-
-                return (
-                    <div className="items-center py-2">
-                        <div className="block text-sm text-gray-500 max-w-full">
-                            {row.currency === 'CNY' || row.currency === 'Yuan' || row.currency_display === 'CNY' || row.currency_display === 'Yuan' ? formatCurrencyZH(amount) : formatCurrencyID(amount)}
-                        </div>
-                    </div>
-                );
-            },
-            wrap: true,
-            width: '220px',
-        },
-        {
-            name: 'Amount',
-            selector: row => {
-                const amount = row.lines && row.lines.length > 0
-                    ? row.lines.reduce((sum, line) => sum + (line.grossamt || 0), 0)
-                    : 0;
-                return amount.toString();
-            },
-            cell: row => {
-                const amount = row.lines && row.lines.length > 0
-                    ? row.lines.reduce((sum, line) => sum + (line.grossamt || 0), 0)
+                    ? row.lines.reduce((sum, line) => sum + (Number(line.netamount) || 0) + (Number(line.taxamount) || 0), 0)
                     : 0;
 
                 const exRate = Number(row.exchangerate) || 1;
@@ -246,25 +211,32 @@ export default function Manage() {
                 );
             },
             wrap: true,
-            width: '200px',
+            width: '180px',
         },
         {
-            name: 'ME - Related Invoice',
-            selector: row => row.custbody_me_related_fulfillment || '-',
+            name: 'Memo',
+            selector: row => row.memo || '-',
             wrap: true,
             width: '200px',
         },
         {
-            name: 'MSI - Bank Payment',
-            selector: row => row.custbody_msi_bank_payment_so_display || row.custbody_msi_bank_payment_so || '-',
+            name: 'Modified Date',
+            selector: row => row.lastmodifieddate || '-',
+            cell: row => (
+                <div className="items-center py-2">
+                    <div className="block text-sm text-gray-500">
+                        {row.lastmodifieddate || '-'}
+                    </div>
+                </div>
+            ),
             wrap: true,
-            width: '200px',
+            width: '180px',
         },
         {
-            name: 'Created By',
-            selector: row => row.custbody_me_wf_created_by_display || row.custbody_me_wf_created_by || '-',
+            name: 'Modified By',
+            selector: row => row.lastmodifiedby_display || row.lastmodifiedby || '-',
             wrap: true,
-            width: '150px',
+            width: '180px',
         },
         createActionsColumn([
             {

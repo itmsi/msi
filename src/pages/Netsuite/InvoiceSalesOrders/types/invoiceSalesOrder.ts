@@ -17,18 +17,22 @@ export interface InvoiceSalesOrderLine {
     item: string;
     line: number;
     memo: string | null;
-    rate: number;
+    rate: string | number;
     price: string;
-    tax1amt: number;
+    taxamount: string | number;
     taxcode: string;
-    grossamt: number;
+    grossamt: string | number;
     itemtype: string;
-    quantity: number;
-    taxrate1: number;
-    netamount: number;
+    quantity: string | number;
+    taxrate: string | number;
+    netamount: string | number;
     item_display: string;
     price_display: string;
     custcol_me_tier_price: string | null;
+    custitem_me_product_category: string | null;
+    custitem_me_product_category_display?: string | null;
+    custitem_me_unit_type: string | null;
+    custitem_me_unit_type_display?: string | null;
 }
 
 export interface InvoiceSalesOrder {
@@ -40,6 +44,7 @@ export interface InvoiceSalesOrder {
     startdate: string;
     enddate: string;
     postingperiod: string;
+    postingperiod_display?: string | null;
     otherrefnum: string | null;
     memo: string | null;
     custbody_me_related_fulfillment: string | null;
@@ -67,7 +72,11 @@ export interface InvoiceSalesOrder {
     location: string;
     location_display?: string | null;
     custbody_cseg_cn_cfi: string;
+    custbody_cseg_cn_cfi_display?: string | null;
     custbody_me_description: string | null;
+    lastmodifieddate?: string | null;
+    lastmodifiedby?: string | null;
+    lastmodifiedby_display?: string | null;
     lines: InvoiceSalesOrderLine[];
     fakture_id: string;
 }

@@ -6,7 +6,7 @@ import { InvoiceSalesOrderService } from './services/invoiceSalesOrderService';
 import { InvoiceSalesOrder } from './types/invoiceSalesOrder';
 import Badge from '@/components/ui/badge/Badge';
 import Button from '@/components/ui/button/Button';
-import { formatCurrencyID, formatCurrencyZH, parseNetsuiteDate, formatDateTime } from '@/helpers/generalHelper';
+import { formatCurrencyID, parseNetsuiteDate, formatDateTime } from '@/helpers/generalHelper';
 
 export default function View() {
     const { tranid } = useParams<{ tranid: string }>();
@@ -81,12 +81,31 @@ export default function View() {
 
     const statusInfo = getStatusInfo(invoiceData.approvalstatus);
     
-    // Calculate Totals
-    const totalForeign = invoiceData.lines && invoiceData.lines.length > 0
-        ? invoiceData.lines.reduce((sum, line) => sum + (line.grossamt || 0), 0)
-        : 0;
+    // Calculate Totals using NetSuite logic
+    const subtotal = invoiceData.lines?.reduce((sum, line) => {
+        const amt = Number(line.netamount) || 0;
+        return amt > 0 ? sum + amt : sum;
+    }, 0) || 0;
+
+    const discountTotal = invoiceData.lines?.reduce((sum, line) => {
+        const amt = Number(line.netamount) || 0;
+        return amt < 0 ? sum + Math.abs(amt) : sum;
+    }, 0) || 0;
+
+    const taxTotal = invoiceData.lines?.reduce((sum, line) => sum + (Number(line.taxamount) || 0), 0) || 0;
+    
+    const totalForeign = subtotal - discountTotal + taxTotal;
     const exRate = Number(invoiceData.exchangerate) || 1;
     const totalBase = totalForeign * exRate;
+    const amountDue = totalForeign;
+
+    // NetSuite Style Formatter (US Format as per screenshot)
+    const formatNSCurrency = (value: number) => {
+        return new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(value);
+    };
 
     return (
         <>
@@ -119,7 +138,7 @@ export default function View() {
                                         </div>
                                     </h3>
                                     <p className="mt-1 text-sm text-gray-500">
-                                        Last Updated: {invoiceData.trandate ? formatDateTime(parseNetsuiteDate(invoiceData.trandate)) : '-'}
+                                        Last Updated: {invoiceData.lastmodifieddate || (invoiceData.trandate ? formatDateTime(parseNetsuiteDate(invoiceData.trandate)) : '-')}
                                     </p>
                                 </div>
                             </div>
@@ -172,6 +191,26 @@ export default function View() {
                                         <dt className="text-sm font-medium text-gray-500">Created From</dt>
                                         <dd className="mt-1 text-sm text-gray-900">{invoiceData.createdfrom_display || '-'}</dd>
                                     </div>
+                                    <div>
+                                        <dt className="text-sm font-medium text-gray-500">Sales Effective Date</dt>
+                                        <dd className="mt-1 text-sm text-gray-900">{invoiceData.saleseffectivedate || '-'}</dd>
+                                    </div>
+                                    <div>
+                                        <dt className="text-sm font-medium text-gray-500">Payment Terms</dt>
+                                        <dd className="mt-1 text-sm text-gray-900">{invoiceData.terms || '-'}</dd>
+                                    </div>
+                                    {(invoiceData.startdate || invoiceData.enddate) && (
+                                        <>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Start Date</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{invoiceData.startdate || '-'}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">End Date</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{invoiceData.enddate || '-'}</dd>
+                                            </div>
+                                        </>
+                                    )}
                                     <div className="sm:col-span-2">
                                         <dt className="text-sm font-medium text-gray-500">Memo</dt>
                                         <dd className="mt-1 text-sm text-gray-900">{invoiceData.memo || '-'}</dd>
@@ -215,47 +254,79 @@ export default function View() {
                                         <dt className="text-sm font-medium text-gray-500">Created By</dt>
                                         <dd className="mt-1 text-sm text-gray-900">{invoiceData.custbody_me_wf_created_by_display || invoiceData.custbody_me_wf_created_by || '-'}</dd>
                                     </div>
+                                    <div>
+                                        <dt className="text-sm font-medium text-gray-500">Next Approver</dt>
+                                        <dd className="mt-1 text-sm text-gray-900">{invoiceData.custbody_me_wf_next_approver_blank || '-'}</dd>
+                                    </div>
+                                    <div>
+                                        <dt className="text-sm font-medium text-gray-500">China Cash Flow Item</dt>
+                                        <dd className="mt-1 text-sm text-gray-900">{invoiceData.custbody_cseg_cn_cfi_display || '-'}</dd>
+                                    </div>
+                                    <div className="sm:col-span-2">
+                                        <dt className="text-sm font-medium text-gray-500">ME Description</dt>
+                                        <dd className="mt-1 text-sm text-gray-900">{invoiceData.custbody_me_description || '-'}</dd>
+                                    </div>
                                 </dl>
                             </div>
                         </div>
                     </div>
 
-                    {/* Financial Information */}
+                    {/* Summary Information */}
                     <div className="space-y-6">
-                        <div className="bg-white shadow rounded-lg overflow-hidden">
-                            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                <h4 className="text-base font-semibold text-gray-900">Financial Summary</h4>
+                        <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-100">
+                            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
+                                <h4 className="text-lg font-bold text-gray-900">Financial Summary</h4>
                             </div>
                             <div className="p-6">
-                                <dl className="space-y-6">
-                                    <div className="flex justify-between items-center border-b pb-4">
-                                        <dt className="text-sm font-medium text-gray-500">Currency</dt>
-                                        <dd className="text-sm text-gray-900 font-medium">{invoiceData.currency_display || invoiceData.currency || '-'}</dd>
+                                <dl className="space-y-4">
+                                    <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                                        <dt className="text-sm text-gray-600">Subtotal</dt>
+                                        <dd className="text-sm font-bold text-gray-900">{formatNSCurrency(subtotal)}</dd>
                                     </div>
-                                    <div className="flex justify-between items-center border-b pb-4">
-                                        <dt className="text-sm font-medium text-gray-500">Exchange Rate</dt>
-                                        <dd className="text-sm text-gray-900">{invoiceData.exchangerate || '1.00'}</dd>
+                                    <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                                        <dt className="text-sm text-gray-600">Discount Item</dt>
+                                        <dd className="text-sm font-bold text-gray-900">
+                                            {discountTotal > 0 ? `(${formatNSCurrency(discountTotal)})` : '-'}
+                                        </dd>
                                     </div>
-                                    <div className="flex justify-between items-center border-b pb-4">
-                                        <dt className="text-sm font-medium text-gray-500">Amount (Foreign)</dt>
-                                        <dd className="text-base text-gray-900 font-semibold">
-                                            {invoiceData.currency === 'CNY' || invoiceData.currency === 'Yuan' || invoiceData.currency_display === 'CNY' || invoiceData.currency_display === 'Yuan' 
-                                                ? formatCurrencyZH(totalForeign) 
-                                                : formatCurrencyID(totalForeign)}
+                                    <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                                        <dt className="text-sm text-gray-600">Tax Total</dt>
+                                        <dd className="text-sm font-bold text-gray-900">{formatNSCurrency(taxTotal)}</dd>
+                                    </div>
+                                    <div className="flex justify-between items-center pt-2">
+                                        <dt className="text-lg font-bold text-gray-900">Total</dt>
+                                        <dd className="text-xl font-bold text-gray-900">
+                                            {formatNSCurrency(totalForeign)}
                                         </dd>
                                     </div>
                                     <div className="flex justify-between items-center pt-2">
-                                        <dt className="text-base font-bold text-gray-700">Amount (IDR Base)</dt>
-                                        <dd className="text-lg text-blue-700 font-bold">
-                                            {formatCurrencyID(totalBase)}
-                                        </dd>
+                                        <dt className="text-sm text-gray-600 font-medium">Amount Due</dt>
+                                        <dd className="text-sm font-bold text-gray-900">{formatNSCurrency(amountDue)}</dd>
                                     </div>
-                                    {invoiceData.postingperiod && (
-                                        <div className="flex justify-between items-center pt-2 text-sm">
-                                            <dt className="text-gray-500">Posting Period</dt>
-                                            <dd className="text-gray-900">{invoiceData.postingperiod}</dd>
+
+                                    {/* Currency Info (Moved below summary or integrated) */}
+                                    <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
+                                        <div className="flex justify-between items-center text-xs">
+                                            <dt className="text-gray-500">Currency</dt>
+                                            <dd className="text-gray-900 font-medium">{invoiceData.currency_display || invoiceData.currency || '-'}</dd>
                                         </div>
-                                    )}
+                                        <div className="flex justify-between items-center text-xs">
+                                            <dt className="text-gray-500">Exchange Rate</dt>
+                                            <dd className="text-gray-900">{invoiceData.exchangerate || '1.00'}</dd>
+                                        </div>
+                                        <div className="flex justify-between items-center pt-1 text-xs">
+                                            <dt className="text-gray-500 font-medium">Amount (IDR Base)</dt>
+                                            <dd className="text-gray-900 font-bold">
+                                                {formatCurrencyID(totalBase)}
+                                            </dd>
+                                        </div>
+                                        {(invoiceData.postingperiod_display || invoiceData.postingperiod) && (
+                                            <div className="flex justify-between items-center pt-1 text-xs">
+                                                <dt className="text-gray-500">Posting Period</dt>
+                                                <dd className="text-gray-900">{invoiceData.postingperiod_display || invoiceData.postingperiod}</dd>
+                                            </div>
+                                        )}
+                                    </div>
                                 </dl>
                             </div>
                         </div>
@@ -272,6 +343,7 @@ export default function View() {
                             <thead className="bg-white">
                                 <tr>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category / Unit Type</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-2">Price Level</th>
                                     <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
@@ -290,6 +362,10 @@ export default function View() {
                                                 <div className="text-sm font-medium text-gray-900">{line.item_display || line.item}</div>
                                                 <div className="text-xs text-gray-500">{line.itemtype}</div>
                                             </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                <div className="text-sm text-gray-900">{line.custitem_me_product_category_display || line.custitem_me_product_category || '-'}</div>
+                                                <div className="text-xs text-blue-600 font-medium">{line.custitem_me_unit_type || '-'}</div>
+                                            </td>
                                             <td className="px-6 py-4 min-w-[200px]">
                                                 <div className="text-sm text-gray-900 line-clamp-2" title={line.memo || ''}>{line.memo || '-'}</div>
                                             </td>
@@ -303,21 +379,20 @@ export default function View() {
                                                 {line.quantity}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">
-                                                {formatCurrencyID(line.rate)}
+                                                {formatNSCurrency(Number(line.rate))}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">
-                                                {formatCurrencyID(line.netamount)}
+                                                {formatNSCurrency(Number(line.netamount))}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right">
                                                 <div className="text-sm text-gray-900">{line.taxcode || '-'}</div>
-                                                <div className="text-xs text-gray-500">{(line.taxrate1 * 100).toFixed(1)}%</div>
+                                                <div className="text-xs text-gray-500">{line.taxrate}%</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">
-                                                {formatCurrencyID(Math.abs(line.tax1amt))} 
-                                                {/* Some API versions might return negative values like -1474000, so we use absolute */}
+                                                {formatNSCurrency(Math.abs(Number(line.taxamount)))} 
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
-                                                {formatCurrencyID(line.grossamt)}
+                                                {formatNSCurrency(Number(line.grossamt))}
                                             </td>
                                         </tr>
                                     ))
