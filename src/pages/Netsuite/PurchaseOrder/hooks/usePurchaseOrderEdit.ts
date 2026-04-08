@@ -29,7 +29,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         location_name: line.location_display || '',
         taxcode: line.taxcode ?? 0,
         taxcode_name: line.taxcode_display || '',
-        tax_rate: line.taxrate1 != null ? String(line.taxrate1) : '',
+        tax_rate: line.taxrate1 != null ? String(line.taxrate1) || '' : String(line.taxcode_display) || '',
         gross_amount: line.grossamt ?? 0,
         tax_amount: line.tax1amt ?? 0,
     }));
@@ -44,7 +44,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         location: firstLine?.location ?? null,
         memo: detail.memo || '',
         currency: detail.currency_id,
-        terms: null,
+        terms: Number(detail.terms) || null,
         custbody_me_pr_date: detail.custbody_me_pr_date || null,
         custbody_me_project_location: detail.custbody_me_project_location ?? null,
         custbody_me_pr_type: detail.custbody_me_pr_type ?? null,
@@ -53,6 +53,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         class: firstLine?.class ?? null,
         department: firstLine?.department ?? null,
         approvalstatus: detail.approvalstatus,
+        nextapprover: detail.nextapprover || null,
         custbody_msi_createdby_api: detail.custbody_msi_createdby_api,
         // description: detail.custbody_me_description || null,
         items,
@@ -121,9 +122,6 @@ export const usePurchaseOrderEdit = () => {
                 if (detailRes.success && detailRes.data?.length > 0) {
                     const detail = detailRes.data[0];
                     setPODetail(detail);
-                    console.log({
-                        detail
-                    });
                     
                     setFormData(mapPODetailToForm(detail));
                 } else {

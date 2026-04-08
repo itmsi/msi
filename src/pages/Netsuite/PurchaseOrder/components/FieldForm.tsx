@@ -79,7 +79,7 @@ export const getAdditionalInfoFields = (masterData?: MasterDataFormFieldItems) =
     }
 ];
 
-export const getClassificationInfoFields = (masterData?: MasterDataFormFieldItems) => [
+export const getClassificationInfoFields = (masterData?: MasterDataFormFieldItems, subsidiaryId?: number) => [
     {
         name: "subsidiary",
         label: "Subsidiary",
@@ -92,6 +92,7 @@ export const getClassificationInfoFields = (masterData?: MasterDataFormFieldItem
         label: "Location",
         type: "select-location",
         required: true,
+        subsidiaryId: subsidiaryId, // Pass subsidiary_id untuk filtering location
     },
     {
         name: "class",
@@ -138,7 +139,7 @@ export const getApprovalFields = () => [
     //     readOnly: true,
     // },
     {
-        name: "custbody_me_wf_next_approver_blank_display",
+        name: "nextapprover",
         label: "Next Approver",
         type: "text",
         readOnly: true,

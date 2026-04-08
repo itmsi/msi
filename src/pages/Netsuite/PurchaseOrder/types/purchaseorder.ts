@@ -84,7 +84,7 @@ export interface PurchaseOrderForm {
     department: number | null;
     department_name?: string | null;
     custbody_msi_createdby_api?: string | null;
-    custbody_me_wf_next_approver_blank_display?: string | null;
+    nextapprover?: string | null;
     approvalstatus?: number | null;
     // description: string | null;
     // note: string | null;
@@ -203,6 +203,7 @@ export interface TablePOItem {
     taxcode: number;
     taxcode_name?: string;
     tax_rate?: string;
+    taxcode_display?: string;
     gross_amount?: number;
     tax_amount?: number;
 }
@@ -289,11 +290,13 @@ export interface PODetailData {
     vendor_name: string;
     currency_id: number;
     currency_symbol: string;
+    terms?: number | string;
     foreigntotal: number;
     total: number;
     last_modified: string;
     approvalstatus_label: string;
     approvalstatus: number;
+    nextapprover?: string | null;
     custbody_me_wf_created_by: number;
     custbody_me_wf_in_delegation: string;
     custbody_me_delegate_approver: number | null;

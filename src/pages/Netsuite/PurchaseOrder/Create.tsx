@@ -29,6 +29,9 @@ export default function Create() {
         handleUpdateProductItem,
     } = usePurchaseOrderCreate();
 
+    // Get subsidiary_id dari form data
+    const subsidiaryId = formData.subsidiary ? Number(formData.subsidiary) : undefined;
+
     // Location select untuk header (is_parent = true)
     const {
         POLocationOptions,
@@ -36,8 +39,9 @@ export default function Create() {
         inputValue,
         handleInputChange: handleLocationInputChange,
         handleMenuScrollToBottom,
-        initializeOptions
-    } = usePOLocationSelect(30, false);
+        initializeOptions,
+        resetLocationOptions
+    } = usePOLocationSelect(30, false, subsidiaryId);
 
     // Location select untuk items (is_parent = false)
     const {
@@ -46,8 +50,9 @@ export default function Create() {
         inputValue: itemLocationInputValue,
         handleInputChange: handleItemLocationInputChange,
         handleMenuScrollToBottom: handleItemLocationScrollToBottom,
-        initializeOptions: initializeItemLocationOptions
-    } = usePOLocationSelect(30, false);
+        initializeOptions: initializeItemLocationOptions,
+        resetLocationOptions: resetItemLocationOptions
+    } = usePOLocationSelect(30, false, subsidiaryId);
     
     const [selectedLocation, setSelectedLocation] = useState<any>(null);
     const [locationSelectError, setLocationSelectError] = useState<string>('');
@@ -56,6 +61,16 @@ export default function Create() {
         initializeOptions();
         initializeItemLocationOptions();
     }, [initializeOptions, initializeItemLocationOptions]);
+    
+    // Reset location options ketika subsidiary berubah
+    useEffect(() => {
+        if (subsidiaryId) {
+            resetLocationOptions();
+            resetItemLocationOptions();
+            // Reset selected location karena subsidiary berubah
+            setSelectedLocation(null);
+        }
+    }, [subsidiaryId, resetLocationOptions, resetItemLocationOptions]);
     
     const {
         POVendorOptions,
@@ -114,6 +129,7 @@ export default function Create() {
                             errors={errors}
                             masterData={masterData}
                             loadingMasterData={loadingMasterData}
+                            subsidiaryId={formData.subsidiary}
                             onInputChange={handleInputChange}
                             onSelectChange={handleSelectChange}
                             onDateChange={handleDateChange}

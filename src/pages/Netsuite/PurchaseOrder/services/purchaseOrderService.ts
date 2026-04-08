@@ -8,7 +8,7 @@ export class PurchaseOrderService {
         const requestData: PurchaseOrderRequest = {
             page: 1,
             limit: 10,
-            sort_by: 'updated_at',
+            sort_by: 'last_modified',
             sort_order: 'desc',
             search: '',
             status: '',
