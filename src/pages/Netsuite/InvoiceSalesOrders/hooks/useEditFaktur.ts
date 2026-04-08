@@ -110,7 +110,7 @@ export const useEditFaktur = (id?: string) => {
             const newDetails = prev.details.map((item, i) => {
                 if (i === index) {
                     const updatedItem = { ...item, [field]: value };
-                    
+
                     // Logic: kode_barang_jasa ikuti kode dari pilihan barang_or_jasa
                     if (field === 'barang_or_jasa') {
                         const selectedOption = barangJasaSelect.referenceOptions.find(opt => opt.value === value);
@@ -119,7 +119,21 @@ export const useEditFaktur = (id?: string) => {
                             updatedItem.nama_barang_or_jasa = selectedOption.data.description;
                         }
                     }
-                    
+
+                    // Auto-calculate DPP and PPN when related fields change
+                    if (['harga_satuan', 'jumlah_barang_jasa', 'total_diskon', 'tarif_ppn'].includes(field)) {
+                        const price    = Number(field === 'harga_satuan'       ? value : updatedItem.harga_satuan)       || 0;
+                        const qty      = Number(field === 'jumlah_barang_jasa' ? value : updatedItem.jumlah_barang_jasa) || 0;
+                        const discount = Number(field === 'total_diskon'       ? value : updatedItem.total_diskon)       || 0;
+                        const rate     = Number(field === 'tarif_ppn'          ? value : updatedItem.tarif_ppn)          || 0;
+
+                        const dpp = Math.max(0, (price * qty) - discount);
+                        const ppn = Math.round(dpp * rate / 100);
+
+                        updatedItem.dpp = dpp;
+                        updatedItem.ppn = ppn;
+                    }
+
                     return updatedItem;
                 }
                 return item;

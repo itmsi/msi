@@ -79,6 +79,8 @@ export interface InvoiceSalesOrder {
     lastmodifiedby_display?: string | null;
     lines: InvoiceSalesOrderLine[];
     fakture_id: string;
+    faktur_updated_at?: string | null;
+    faktur_updated_by_name?: string | null;
 }
 
 export interface InvoiceSalesOrderPagination {

@@ -1,148 +1,232 @@
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import InputField from '@/components/form/input/InputField';
-import Label from '@/components/form/Label';
 import Button from '@/components/ui/button/Button';
 import { MdDelete } from 'react-icons/md';
 import { FakturDetail } from '../types/faktur';
 import { useFakturReferenceSelect } from '../hooks/useFakturReferenceSelect';
+import { TableColumn } from 'react-data-table-component';
 
-interface FakturDetailsCardProps {
+interface FakturDetailRowProps {
     detail: FakturDetail;
     index: number;
     errors: Record<string, string>;
-    onChange: (field: keyof FakturDetail, value: string | number | null) => void;
-    onRemove: () => void;
+    onChange: (index: number, field: keyof FakturDetail, value: string | number | null) => void;
+    onRemove: (index: number) => void;
     barangJasaSelect: ReturnType<typeof useFakturReferenceSelect>;
     satuanUkurSelect: ReturnType<typeof useFakturReferenceSelect>;
 }
 
-export default function FakturDetailsCard({ 
-    detail, 
-    index, 
-    errors, 
-    onChange, 
-    onRemove,   
-    barangJasaSelect,
-    satuanUkurSelect
-}: FakturDetailsCardProps) {
-    const errorPrefix = `detail_${index}_`;
-
-    return (
-        <div className="border border-gray-200 rounded-lg p-5 mb-4 shadow-sm bg-gray-50">
-            <div className="flex justify-between items-center mb-4">
-                <h4 className="text-md font-semibold text-gray-700">Detail Item #{index + 1}</h4>
-                <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={onRemove}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200"
-                >
-                    <MdDelete size={18} className="mr-1" /> Remove
-                </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div>
-                    <Label htmlFor={`${errorPrefix}barang_or_jasa`}>Barang/Jasa</Label>
+// Helper to build column definitions for the FakturDetail table
+export function buildFakturDetailColumns(
+    errors: Record<string, string>,
+    onChange: (index: number, field: keyof FakturDetail, value: string | number | null) => void,
+    onRemove: (index: number) => void,
+    barangJasaSelect: ReturnType<typeof useFakturReferenceSelect>,
+    satuanUkurSelect: ReturnType<typeof useFakturReferenceSelect>,
+): TableColumn<FakturDetail & { _index: number }>[] {
+    return [
+        {
+            name: 'Goods/Services',
+            cell: (row) => (
                     <CustomAsyncSelect
                         defaultOptions={barangJasaSelect.referenceOptions}
-                        value={barangJasaSelect.referenceOptions.find(o => o.value === detail.barang_or_jasa) || null}
-                        onChange={(val) => onChange('barang_or_jasa', val?.value || '')}
+                        value={barangJasaSelect.referenceOptions.find(o => o.value === row.barang_or_jasa) || null}
+                        onChange={(val) => onChange(row._index, 'barang_or_jasa', val?.value || '')}
                         onInputChange={barangJasaSelect.handleInputChange}
                         onMenuScrollToBottom={barangJasaSelect.handleMenuScrollToBottom}
                         isLoading={barangJasaSelect.pagination.loading}
-                        placeholder="Pilih Barang/Jasa"
+                        placeholder="Select"
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed" className='w-full'
                     />
-                </div>
-                <div>
-                    <Label htmlFor={`${errorPrefix}kode_barang_jasa`}>Kode Produk</Label>
+            ),
+            minWidth: '280px',
+            sortable: false,
+        },
+        {
+            name: 'Product Code',
+            cell: (row) => (
+                <div className="w-full">
                     <InputField
-                        id={`${errorPrefix}kode_barang_jasa`}
                         type="text"
-                        value={detail.kode_barang_jasa || ''}
+                        value={row.kode_barang_jasa || ''}
+                        className="w-full border-1 rounded p-1 px-2 text-sm"
                     />
                 </div>
-                <div className="md:col-span-2">
-                    <Label htmlFor={`${errorPrefix}nama_barang_or_jasa`}>Nama Item <span className="text-red-500">*</span></Label>
+            ),
+            minWidth: '280px',
+            sortable: false,
+        },
+        {
+            name: 'Item Name',
+            cell: (row) => (
+                <div className="w-full">
                     <InputField
-                        id={`${errorPrefix}nama_barang_or_jasa`}
                         type="text"
-                        value={detail.nama_barang_or_jasa || ''}
-                        onChange={(e) => onChange('nama_barang_or_jasa', e.target.value)}
-                        className={errors[`${errorPrefix}nama_barang_or_jasa`] ? 'border-red-500' : ''}
+                        value={row.nama_barang_or_jasa || ''}
+                        onChange={(e) => onChange(row._index, 'nama_barang_or_jasa', e.target.value)}
+                        className={`border-1 rounded p-1 px-2 w-full text-sm ${errors[`detail_${row._index}_nama_barang_or_jasa`] ? 'border-red-500' : ''}`}
+                        placeholder="Item name"
                     />
-                    {errors[`${errorPrefix}nama_barang_or_jasa`] && <span className="text-red-500 text-xs mt-1 block">{errors[`${errorPrefix}nama_barang_or_jasa`]}</span>}
+                    {errors[`detail_${row._index}_nama_barang_or_jasa`] && (
+                        <span className="text-red-500 text-xs mt-1 block">
+                            {errors[`detail_${row._index}_nama_barang_or_jasa`]}
+                        </span>
+                    )}
                 </div>
-
-                <div>
-                    <Label htmlFor={`${errorPrefix}nama_satuan_ukur`}>Satuan Ukur</Label>
+            ),
+            minWidth: '400px',
+            sortable: false,
+        },
+        {
+            name: 'Unit of Measure',
+            cell: (row) => (
+                <div className="w-full">
                     <CustomAsyncSelect
                         defaultOptions={satuanUkurSelect.referenceOptions}
-                        value={satuanUkurSelect.referenceOptions.find(o => o.value === detail.nama_satuan_ukur) || null}
-                        onChange={(val) => onChange('nama_satuan_ukur', val?.value || '')}
+                        value={satuanUkurSelect.referenceOptions.find(o => o.value === row.nama_satuan_ukur) || null}
+                        onChange={(val) => onChange(row._index, 'nama_satuan_ukur', val?.value || '')}
                         onInputChange={satuanUkurSelect.handleInputChange}
                         onMenuScrollToBottom={satuanUkurSelect.handleMenuScrollToBottom}
                         isLoading={satuanUkurSelect.pagination.loading}
-                        placeholder="Pilih Satuan"
+                        placeholder="Select"
+                        menuPortalTarget={document.body}
+                        menuPosition="fixed"
                     />
                 </div>
-                <div>
-                    <Label htmlFor={`${errorPrefix}jumlah_barang_jasa`}>Jumlah Qty</Label>
+            ),
+            minWidth: '280px',
+            sortable: false,
+        },
+        {
+            name: 'Quantity',
+            cell: (row) => (
+                <div className="w-full">
                     <InputField
-                        id={`${errorPrefix}jumlah_barang_jasa`}
                         type="number"
-                        value={detail.jumlah_barang_jasa || ''}
-                        onChange={(e) => onChange('jumlah_barang_jasa', Number(e.target.value))}
+                        value={row.jumlah_barang_jasa ?? ''}
+                        onChange={(e) => onChange(row._index, 'jumlah_barang_jasa', Number(e.target.value))}
+                        onFocus={(e) => e.target.select()}
+                        className="border-1 rounded p-1 px-2 text-center text-sm"
+                        placeholder="0"
                     />
                 </div>
-                <div>
-                    <Label htmlFor={`${errorPrefix}harga_satuan`}>Harga Satuan</Label>
+            ),
+            minWidth: '150px',
+            center: true,
+            sortable: false,
+        },
+        {
+            name: 'Unit Price',
+            cell: (row) => (
+                <div className="w-full">
+                <InputField
+                    type="number"
+                    value={row.harga_satuan ?? ''}
+                    onChange={(e) => onChange(row._index, 'harga_satuan', Number(e.target.value))}
+                    onFocus={(e) => e.target.select()}
+                    className="border-1 rounded p-1 px-2 text-center text-sm"
+                    placeholder="0"
+                />
+                </div>
+            ),
+            minWidth: '280px',
+            center: true,
+            sortable: false,
+        },
+        {
+            name: 'Total Discount',
+            cell: (row) => (
+                <div className="w-full">
                     <InputField
-                        id={`${errorPrefix}harga_satuan`}
                         type="number"
-                        value={detail.harga_satuan || ''}
-                        onChange={(e) => onChange('harga_satuan', Number(e.target.value))}
+                        value={row.total_diskon ?? ''}
+                        onChange={(e) => onChange(row._index, 'total_diskon', Number(e.target.value))}
+                        onFocus={(e) => e.target.select()}
+                        className="border-1 rounded p-1 px-2 text-center text-sm"
+                        placeholder="0"
                     />
                 </div>
-                <div>
-                    <Label htmlFor={`${errorPrefix}total_diskon`}>Total Diskon</Label>
+            ),
+            minWidth: '280px',
+            center: true,
+            sortable: false,
+        },
+        {
+            name: 'DPP',
+            cell: (row) => (
+                <div className="w-full">
                     <InputField
-                        id={`${errorPrefix}total_diskon`}
                         type="number"
-                        value={detail.total_diskon || ''}
-                        onChange={(e) => onChange('total_diskon', Number(e.target.value))}
+                        value={row.dpp ?? ''}
+                        onChange={(e) => onChange(row._index, 'dpp', Number(e.target.value))}
+                        onFocus={(e) => e.target.select()}
+                        className="border-1 rounded p-1 px-2 text-center text-sm"
+                        placeholder="0"
                     />
                 </div>
+            ),
+            minWidth: '280px',
+            center: true,
+            sortable: false,
+        },
+        {
+            name: 'VAT Rate (%)',
+            cell: (row) => (
+                <div className="w-full">
+                    <InputField
+                            type="number"
+                            value={row.tarif_ppn ?? ''}
+                            onChange={(e) => onChange(row._index, 'tarif_ppn', Number(e.target.value))}
+                            onFocus={(e) => e.target.select()}
+                            className="border-1 rounded p-1 px-2 text-center text-sm"
+                            placeholder="0"
+                        />
+                </div>
+            ),
+            minWidth: '150px',
+            center: true,
+            sortable: false,
+        },
+        {
+            name: 'VAT Amount',
+            cell: (row) => (
+                <div className="w-full">
+                    <InputField
+                        type="number"
+                        value={row.ppn ?? ''}
+                        onChange={(e) => onChange(row._index, 'ppn', Number(e.target.value))}
+                        onFocus={(e) => e.target.select()}
+                        className="border-1 rounded p-1 px-2 text-center text-sm"
+                        placeholder="0"
+                    />
+                </div>
+            ),
+            minWidth: '280px',
+            center: true,
+            sortable: false,
+        },
+        {
+            name: 'Actions',
+            cell: (row) => (
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onRemove(row._index)}
+                    className="p-1 text-red-600 hover:text-red-800 border-red-200 hover:bg-red-50"
+                >
+                    <MdDelete size={16} />
+                </Button>
+            ),
+            width: '80px',
+            center: true,
+            sortable: false,
+        },
+    ];
+}
 
-                <div>
-                    <Label htmlFor={`${errorPrefix}dpp`}>DPP</Label>
-                    <InputField
-                        id={`${errorPrefix}dpp`}
-                        type="number"
-                        value={detail.dpp || ''}
-                        onChange={(e) => onChange('dpp', Number(e.target.value))}
-                    />
-                </div>
-                <div>
-                    <Label htmlFor={`${errorPrefix}tarif_ppn`}>Tarif PPN (%)</Label>
-                    <InputField
-                        id={`${errorPrefix}tarif_ppn`}
-                        type="number"
-                        value={detail.tarif_ppn || ''}
-                        onChange={(e) => onChange('tarif_ppn', Number(e.target.value))}
-                    />
-                </div>
-                <div>
-                    <Label htmlFor={`${errorPrefix}ppn`}>Nilai PPN</Label>
-                    <InputField
-                        id={`${errorPrefix}ppn`}
-                        type="number"
-                        value={detail.ppn || ''}
-                        onChange={(e) => onChange('ppn', Number(e.target.value))}
-                    />
-                </div>
-            </div>
-        </div>
-    );
+// Legacy card component — kept as named export for any residual imports
+export default function FakturDetailsCard(_props: FakturDetailRowProps) {
+    return null;
 }
