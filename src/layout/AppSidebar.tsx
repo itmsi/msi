@@ -167,7 +167,7 @@ const AppSidebar: React.FC = () => {
             ],
             subItems: [
                 { name: "Purchase Orders", path: "/netsuite/purchase-order", allowedRoles: ['Purchase Orders Netsuite'] },
-                { name: "Sales Invoice", path: "/netsuite/invoice-sales-order", allowedRoles: ['Sales Invoice Netsuite'] },
+                { name: "Sales Invoice", path: "/netsuite/invoice-sales-order", allowedRoles: ['Purchase Orders Netsuite'] },
             ],
         }
     ], [buildPath]);

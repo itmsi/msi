@@ -74,11 +74,13 @@ export interface InvoiceSalesOrder {
     custbody_cseg_cn_cfi: string;
     custbody_cseg_cn_cfi_display?: string | null;
     custbody_me_description: string | null;
-    lastmodifieddate?: string | null;
+    last_modified?: string | null;
     lastmodifiedby?: string | null;
     lastmodifiedby_display?: string | null;
     lines: InvoiceSalesOrderLine[];
     fakture_id: string;
+    faktur_updated_at?: string | null;
+    faktur_updated_by_name?: string | null;
 }
 
 export interface InvoiceSalesOrderPagination {

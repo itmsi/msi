@@ -138,7 +138,7 @@ export default function View() {
                                         </div>
                                     </h3>
                                     <p className="mt-1 text-sm text-gray-500">
-                                        Last Updated: {invoiceData.lastmodifieddate || (invoiceData.trandate ? formatDateTime(parseNetsuiteDate(invoiceData.trandate)) : '-')}
+                                        Last Updated: {invoiceData.last_modified || (invoiceData.trandate ? formatDateTime(parseNetsuiteDate(invoiceData.trandate)) : '-')}
                                     </p>
                                 </div>
                             </div>

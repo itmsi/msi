@@ -36,6 +36,11 @@ export default function EditFaktur() {
         }
     };
 
+    const summaryTotalQty   = formData.details.reduce((s, d) => s + (Number(d.jumlah_barang_jasa) || 0), 0);
+    const summarySubtotal   = formData.details.reduce((s, d) => s + (Number(d.dpp)               || 0), 0);
+    const summaryTax        = formData.details.reduce((s, d) => s + (Number(d.ppn)               || 0), 0);
+    const summaryGrandTotal = summarySubtotal + summaryTax;
+
     const handleExportXML = () => {
         try {
             const xmlContent = generateFakturXML([{ faktur: formData, row: {} }]);
@@ -104,9 +109,6 @@ export default function EditFaktur() {
                                 <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
                                     Edit Faktur Pajak
                                 </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    {id ? `Memperbarui data faktur ID ${id}` : 'Memuat data...'}
-                                </p>
                             </div>
                         </div>
 
@@ -134,7 +136,7 @@ export default function EditFaktur() {
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                 {renderInput('tanggal_faktur', 'Tanggal Faktur', 'date', true)}
                                 
                                 <div>
@@ -228,6 +230,10 @@ export default function EditFaktur() {
                         onChangeDetail={handleDetailChange}
                         barangJasaSelect={barangJasaSelect}
                         satuanUkurSelect={satuanUkurSelect}
+                        summaryTotalQty={summaryTotalQty}
+                        summarySubtotal={summarySubtotal}
+                        summaryTax={summaryTax}
+                        summaryGrandTotal={summaryGrandTotal}
                     />
 
                     {/* Submit footer */}

@@ -16,6 +16,41 @@ import Button from '@/components/ui/button/Button';
 
 import { generateFakturXML } from './utils/fakturExportUtils';
 
+const formatDateTimeID = (dateString: string) => {
+    if (!dateString || dateString === '-') return '-';
+
+    let date: Date;
+    let isDateOnly = false;
+
+    // Handle NetSuite format: "DD/M/YYYY" or "DD/MM/YYYY"
+    const slashDateMatch = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (slashDateMatch) {
+        const [, d, m, y] = slashDateMatch;
+        date = new Date(Number(y), Number(m) - 1, Number(d));
+        isDateOnly = true;
+    } else {
+        date = new Date(dateString);
+        // Treat as date-only if the string has no time component
+        isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateString);
+    }
+
+    if (isNaN(date.getTime())) return dateString;
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleString('id-ID', { month: 'short' });
+    const year = date.getFullYear();
+
+    if (isDateOnly) {
+        return `${day} ${month} ${year}`;
+    }
+
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${day} ${month} ${year}, ${hours}:${minutes}:${seconds}`;
+};
+
 // Helper: export single invoice row as XML
 const exportRowAsXML = async (row: InvoiceSalesOrder) => {
     if (!row.fakture_id) {
@@ -133,25 +168,25 @@ export default function Manage() {
             name: 'SiId',
             selector: row => row.id || '-',
             wrap: true,
-            width: '100px',
+            minWidth: '100px',
         },
         {
             name: 'Subsidiary',
             selector: row => row.subsidiary_display || row.subsidiary || '-',
             wrap: true,
-            width: '180px',
+            minWidth: '180px',
         },
         {
             name: 'Document Number',
             selector: row => row.tranid || '-',
             wrap: true,
-            width: '180px',
+            minWidth: '180px',
         },
         {
             name: 'Customer Name',
             selector: row => row.entityid || row.entity || '-',
             wrap: true,
-            width: '200px',
+            minWidth: '200px',
         },
         {
             name: 'Status',
@@ -172,18 +207,18 @@ export default function Manage() {
                     </div>
                 );
             },
-            width: '160px',
+            minWidth: '160px',
         },
         {
             name: 'Invoice Date',
             selector: row => row.trandate || '-',
             cell: row => (
                 <div className="items-center py-2">
-                    <div className="block text-sm text-gray-500">{row.trandate || '-'}</div>
+                    <div className="block text-sm text-gray-500">{formatDateTimeID(row.trandate || '-')}</div>
                 </div>
             ),
             wrap: true,
-            width: '120px',
+            minWidth: '120px',
         },
         {
             name: 'Total Amount',
@@ -211,32 +246,32 @@ export default function Manage() {
                 );
             },
             wrap: true,
-            width: '180px',
+            minWidth: '180px',
         },
         {
             name: 'Memo',
             selector: row => row.memo || '-',
             wrap: true,
-            width: '200px',
+            minWidth: '200px',
         },
         {
             name: 'Modified Date',
-            selector: row => row.lastmodifieddate || '-',
+            selector: row => row.faktur_updated_at || '-',
             cell: row => (
                 <div className="items-center py-2">
                     <div className="block text-sm text-gray-500">
-                        {row.lastmodifieddate || '-'}
+                        {formatDateTimeID(row.faktur_updated_at || '-')}
                     </div>
                 </div>
             ),
             wrap: true,
-            width: '180px',
+            minWidth: '180px',
         },
         {
             name: 'Modified By',
-            selector: row => row.lastmodifiedby_display || row.lastmodifiedby || '-',
+            selector: row => row.faktur_updated_by_name || '-',
             wrap: true,
-            width: '180px',
+            minWidth: '180px',
         },
         createActionsColumn([
             {
