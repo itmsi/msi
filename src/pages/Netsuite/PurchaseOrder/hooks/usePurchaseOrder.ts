@@ -5,7 +5,7 @@ import { PurchaseOrderService } from '../services/purchaseOrderService';
 export const usePurchaseOrder = () => {
     const [searchValue, setSearchValue] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
-    const [sortModify, setSortModify] = useState<'updated_at' | 'created_at' | ''>('created_at');
+    const [sortModify, setSortModify] = useState<'updated_at' | 'last_modified' | ''>('last_modified');
     const [statusFilter, setStatusFilter] = useState('');
 
     const [loading, setLoading] = useState(false);
@@ -62,7 +62,7 @@ export const usePurchaseOrder = () => {
         if (filterType === 'status') {
             setStatusFilter(value);
         } else if (filterType === 'sort_by') {
-            setSortModify(value as 'updated_at' | 'created_at' | '');
+            setSortModify(value as 'updated_at' | 'last_modified' | '');
         } else if (filterType === 'sort_order') {
             setSortOrder(value as 'asc' | 'desc' | '');
         }

@@ -14,7 +14,7 @@ export interface POLocationPaginationState {
     loading: boolean;
 }
 
-export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean) => {
+export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, subsidiary_id?: number) => {
     const [POLocationOptions, setPOLocationOptions] = useState<POLocationSelectOption[]>([]);
     const [pagination, setPagination] = useState<POLocationPaginationState>({
         page: 1,
@@ -37,6 +37,7 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean) => 
                 page: page,
                 limit: limit,
                 sort_order: 'desc',
+                ...(subsidiary_id !== undefined ? { subsidiary_id } : {}),
                 ...(is_parent !== undefined ? { is_parent } : {})
             });
 
@@ -67,7 +68,7 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean) => 
 
         setPagination(prev => ({ ...prev, loading: false }));
         return loadedOptions;
-    }, [limit, is_parent]);
+    }, [limit, is_parent, subsidiary_id]); // Tambahkan subsidiary_id sebagai dependency
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -109,6 +110,16 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean) => 
         return null;
     }, []);
 
+    // Reset location options ketika subsidiary_id berubah
+    const resetLocationOptions = useCallback(async () => {
+        setPOLocationOptions([]);
+        setInputValue('');
+        setPagination({ page: 1, hasMore: true, loading: false });
+        if (subsidiary_id) {
+            await loadPOLocationOptions('', [], 1, true);
+        }
+    }, [subsidiary_id, loadPOLocationOptions]);
+
     return {
         POLocationOptions,
         pagination,
@@ -117,6 +128,7 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean) => 
         handleMenuScrollToBottom,
         initializeOptions,
         loadPOLocationOptions,
-        getPOItemById
+        getPOItemById,
+        resetLocationOptions, // Export function untuk reset
     };
 };

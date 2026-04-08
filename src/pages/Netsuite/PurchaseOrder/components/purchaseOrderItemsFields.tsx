@@ -1,6 +1,6 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { formatCurrency, formatNumberInput, handleKeyPress } from '@/helpers/generalHelper';
+import { formatCurrency, formatNumberPriceKoma, handleKeyPress } from '@/helpers/generalHelper';
 import React, { useEffect, useMemo, useState } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -128,12 +128,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             name: 'Quantity',
             selector: (row: TablePOItem) => row.qty || 0,
             cell: (row, index) => (<>
-                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                         <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
                             row.qty && row.qty > 0 ? row.qty.toString() : '-'
                         }</p>
                     ) : (
                         <Input
+                            name={`qty_${index}`}
                             type="text"
                             maxLength={3}
                             min='0'
@@ -188,14 +189,15 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             name: 'Rate',
             selector: (row: TablePOItem) => row.rate || 0,
             cell: (row, index) => (<>
-                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        row.rate && row.rate > 0 ? formatNumberInput(row.rate) : '-'
+                        row.rate && row.rate > 0 ? formatNumberPriceKoma(row.rate) : '-'
                     }</p>
                 ) : (
                 <Input
+                    name={`rate_${index}`}
                     type="text"
-                    value={row.rate && row.rate > 0 ? formatNumberInput(row.rate) : ''}
+                    value={row.rate && row.rate > 0 ? formatNumberPriceKoma(row.rate) : ''}
                     onKeyPress={handleKeyPress}
                     onChange={(e) => {
                         const val = e.target.value.replace(/[^\d]/g, '');
@@ -228,14 +230,15 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             name: 'Amount',
             selector: (row: TablePOItem) => row.amount || 0,
             cell: (row, index) => (<>
-                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        row.amount && row.amount > 0 ? formatNumberInput(row.amount) : '-'
+                        row.amount && row.amount > 0 ? formatNumberPriceKoma(row.amount) : '-'
                     }</p>
                 ) : (
                 <Input
+                    name={`amount_${index}`}
                     type="text"
-                    value={row.amount && row.amount > 0 ? formatNumberInput(row.amount) : ''}
+                    value={row.amount && row.amount > 0 ? formatNumberPriceKoma(row.amount) : ''}
                     onKeyPress={handleKeyPress}
                     onChange={(e) => {
                         const val = e.target.value.replace(/[^\d]/g, '');
@@ -266,7 +269,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             name: 'Tax Code',
             selector: (row: TablePOItem) => row.taxcode_name || 'N/A',
             cell: (row, index) => (<>
-                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
                          row.taxcode_name || '-'
                     }</p>
@@ -349,7 +352,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             selector: (row: TablePOItem) => row.department_name || 'N/A',
             cell: (row, index) => (
                 <div className="w-[285px]">
-                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
                          row.department_name || '-'
                     }</p>
@@ -386,7 +389,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             selector: (row: TablePOItem) => row.class_name || 'N/A',
             cell: (row, index) => (
                 <div className="w-full">
-                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                         <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
                             row.class_name || '-'
                         }</p>
@@ -423,7 +426,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             selector: (row: TablePOItem) => row.location_name || 'N/A',
             cell: (row, index) => (
                 <div className="w-[285px]">
-                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                         <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
                             row.location_name || '-'
                         }</p>
@@ -506,7 +509,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 
                 {/* Add Product Section */}
                 
-                {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
+                {(formData.nextapprover === "" && formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
                 <div className="flex gap-4 mb-6">
                     <div className="flex-1">
                         <Label>Select Product to Add</Label>

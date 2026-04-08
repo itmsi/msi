@@ -26,6 +26,7 @@ interface POFormFieldsProps {
     errors: Record<string, string>;
     masterData?: MasterDataFormFieldItems | null;
     loadingMasterData?: boolean;
+    subsidiaryId?: number | null; // Tambahan prop untuk subsidiary_id
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onSelectChange: (name: string, value: string) => void;
     onDateChange?: (name: string, value: string) => void; // Add date change handler
@@ -54,6 +55,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     modeEdit = false,
     errors,
     masterData,
+    subsidiaryId,
     onInputChange,
     onSelectChange,
     onDateChange,
@@ -79,7 +81,10 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     // Get computed field configurations
     const primaryFields = getPrimaryInfoFields(masterData || undefined);
     const additionalFields = getAdditionalInfoFields(masterData || undefined);
-    const classificationFields = getClassificationInfoFields(masterData || undefined);
+    const classificationFields = getClassificationInfoFields(
+        masterData || undefined, 
+        subsidiaryId ? Number(subsidiaryId) : undefined
+    );
     // const interCompanyFields = getInterCompanyManageFields();
     const renderInput = (
         name: keyof PurchaseOrderForm,
@@ -93,7 +98,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 <Label>
                     {label} {required && <span className="text-red-500">*</span>}
                 </Label>
-                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
                         String(formData[name]) ?? '-'
                     }</p>
@@ -131,7 +136,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 <Label>
                     {label} {required && <span className="text-red-500">*</span>}
                 </Label>
-                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
                         options.find(option => String(option.value) === String(formData[name] ?? ''))?.label || '-'
                     }</p>
@@ -192,7 +197,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 <Label>
                     {field.label} {field.required && <span className="text-red-500">*</span>}
                 </Label>
-                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
                         currentDate ? formatDate(currentDate.toISOString()) : (field.placeholder || `Pilih ${field.label.toLowerCase()}`)
                     }</p>
@@ -246,7 +251,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             {field.label} {field.required && <span className="text-red-500">*</span>}
                         </Label>
-                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[100px] flex items-start">{
                                 String(formData[field.name as keyof PurchaseOrderForm] || '-')
                             }</p>
@@ -295,7 +300,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             Location <span className="text-red-500">*</span>
                         </Label>
-                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
                                 locationOptions.find(option => String(option.value) === String(formData.location ?? ''))?.label || '-'
                             }</p>
@@ -328,7 +333,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             Vendor <span className="text-red-500">*</span>
                         </Label>
-                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) ? (
+                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
                                 vendorOptions.find(option => String(option.value) === String(formData.vendorid ?? ''))?.label || '-'
                             }</p>
@@ -369,7 +374,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
 
     return (<>
         <div className="grid grid-cols-1 md:grid-cols-3 mb-0">
-            <div className={`space-y-6 gap-2 ${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? 'md:col-span-2' : 'md:col-span-3'}`}>
+            <div className={`space-y-6 gap-2 ${(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? 'md:col-span-2' : 'md:col-span-3'}`}>
                 <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
                     <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Primary Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -413,7 +418,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             </div>
                             <div>
                                 <p className='mb-1.5 block text-sm text-gray-700'>Next Approver</p>
-                                <p>{formData.custbody_me_wf_next_approver_blank_display || '-'}</p>
+                                <p>{formData.nextapprover || '-'}</p>
                             </div>
                             <div>
                                 <p className='mb-1.5 block text-sm text-gray-700'>Created By</p>
@@ -437,7 +442,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 </div> */}
             </div>
             {modeEdit && (
-                (formData.approvalstatus === 2 || formData.approvalstatus === 3) &&
+                (formData.approvalstatus === 2 || formData.approvalstatus === 3 || (formData.approvalstatus === 1 && formData.nextapprover !== null)) &&
                 formData.items && formData.items.length > 0 && (
                     <div className="sticky top-0 self-start px-4">
                         <div className='bg-white rounded-2xl shadow-sm p-6'>
