@@ -13,6 +13,8 @@ import { PermissionGate } from '@/components/common/PermissionComponents';
 import { FaSave } from 'react-icons/fa';
 import ModalApproval from './components/ModalApproval';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
+import { usePOClassSelect } from '@/hooks/usePOClassSelect';
+import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
 
 export default function Edit() {
     const navigate = useNavigate();
@@ -67,15 +69,55 @@ export default function Edit() {
         initializeItemLocationOptions();
     }, [initializeOptions, initializeItemLocationOptions]);
     
+    // Class select untuk items
+    const {
+        POClassOptions,
+        pagination: itemClassPagination,
+        inputValue: itemClassInputValue,
+        handleInputChange: handleItemClassInputChange,
+        handleMenuScrollToBottom: handleItemClassScrollToBottom,
+        initializeOptions: initializeItemClassOptions,
+        resetClassOptions
+    } = usePOClassSelect(30, subsidiaryId);
+    
+    const [selectedClass, setSelectedClass] = useState<any>(null);
+    const [classSelectError, setClassSelectError] = useState<string>('');
+
+    useEffect(() => {
+        initializeItemClassOptions();
+    }, [initializeItemClassOptions]);
+    
+    // Department select untuk items
+    const {
+        PODepartmentOptions,
+        pagination: itemDepartmentPagination,
+        inputValue: itemDepartmentInputValue,
+        handleInputChange: handleItemDepartmentInputChange,
+        handleMenuScrollToBottom: handleItemDepartmentScrollToBottom,
+        initializeOptions: initializeItemDepartmentOptions,
+        resetDepartmentOptions
+    } = usePODepartmentSelect(30, subsidiaryId);
+    
+    const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
+    const [departmentSelectError, setDepartmentSelectError] = useState<string>('');
+
+    useEffect(() => {
+        initializeItemDepartmentOptions();
+    }, [initializeItemDepartmentOptions]);
+
     // Reset location options ketika subsidiary berubah
     useEffect(() => {
         if (subsidiaryId) {
             resetLocationOptions();
             resetItemLocationOptions();
-            // Reset selected location karena subsidiary berubah
+            resetClassOptions();
+            resetDepartmentOptions();
+            // Reset selected location, class, dan department karena subsidiary berubah
             setSelectedLocation(null);
+            setSelectedClass(null);
+            setSelectedDepartment(null);
         }
-    }, [subsidiaryId, resetLocationOptions, resetItemLocationOptions]);
+    }, [subsidiaryId, resetLocationOptions, resetItemLocationOptions, resetClassOptions, resetDepartmentOptions]);
     
     const {
         POVendorOptions,
@@ -193,6 +235,7 @@ export default function Edit() {
                                 onInputChange={handleInputChange}
                                 onSelectChange={handleSelectChange}
                                 onDateChange={handleDateChange}
+
                                 // Vendor props
                                 vendorOptions={POVendorOptions}
                                 vendorPagination={vendorPagination}
@@ -212,6 +255,7 @@ export default function Edit() {
                                     }
                                 }}
                                 vendorError={errors.vendorid || VendorSelectError}
+                                
                                 // Location props  
                                 locationOptions={POLocationOptions}
                                 locationPagination={pagination}
@@ -231,6 +275,46 @@ export default function Edit() {
                                     }
                                 }}
                                 locationError={errors.location || locationSelectError}
+                                
+                                // Class props  
+                                classOptions={POClassOptions}
+                                classPagination={itemClassPagination}
+                                classInputValue={itemClassInputValue}
+                                onClassInputChange={handleItemClassInputChange}
+                                onClassMenuScrollToBottom={handleItemClassScrollToBottom}
+                                selectedClass={selectedClass}
+                                onClassChange={(option) => {
+                                    setSelectedClass(option);
+                                    if (option && option.data) {
+                                        // Update formData dengan data class yang dipilih
+                                        handleSelectChange('class', option.value);
+                                        handleSelectChange('class_name', option.data.name);
+                                    }
+                                    if (classSelectError) {
+                                        setClassSelectError('');
+                                    }
+                                }}
+                                classError={errors.class || classSelectError}
+                                
+                                // Department props  
+                                departmentOptions={PODepartmentOptions}
+                                departmentPagination={itemDepartmentPagination}
+                                departmentInputValue={itemDepartmentInputValue}
+                                onDepartmentInputChange={handleItemDepartmentInputChange}
+                                onDepartmentMenuScrollToBottom={handleItemDepartmentScrollToBottom}
+                                selectedDepartment={selectedDepartment}
+                                onDepartmentChange={(option) => {
+                                    setSelectedDepartment(option);
+                                    if (option && option.data) {
+                                        // Update formData dengan data department yang dipilih
+                                        handleSelectChange('department', option.value);
+                                        handleSelectChange('department_name', option.data.name);
+                                    }
+                                    if (departmentSelectError) {
+                                        setDepartmentSelectError('');
+                                    }
+                                }}
+                                departmentError={errors.department || departmentSelectError}
                             />
 
                             {/* Purchase Order Items */}
@@ -265,6 +349,46 @@ export default function Edit() {
                                     }
                                 }}
                                 locationError={locationSelectError}
+
+                                // Class props  
+                                classOptions={POClassOptions}
+                                classPagination={itemClassPagination}
+                                classInputValue={itemClassInputValue}
+                                onClassInputChange={handleItemClassInputChange}
+                                onClassMenuScrollToBottom={handleItemClassScrollToBottom}
+                                selectedClass={selectedClass}
+                                onClassChange={(option) => {
+                                    setSelectedClass(option);
+                                    if (option && option.data) {
+                                        // Update formData dengan data class yang dipilih
+                                        handleSelectChange('class', option.value);
+                                        handleSelectChange('class_name', option.data.name);
+                                    }
+                                    if (classSelectError) {
+                                        setClassSelectError('');
+                                    }
+                                }}
+                                classError={errors.class || classSelectError}
+                                
+                                // Department props  
+                                departmentOptions={PODepartmentOptions}
+                                departmentPagination={itemDepartmentPagination}
+                                departmentInputValue={itemDepartmentInputValue}
+                                onDepartmentInputChange={handleItemDepartmentInputChange}
+                                onDepartmentMenuScrollToBottom={handleItemDepartmentScrollToBottom}
+                                selectedDepartment={selectedDepartment}
+                                onDepartmentChange={(option) => {
+                                    setSelectedDepartment(option);
+                                    if (option && option.data) {
+                                        // Update formData dengan data department yang dipilih
+                                        handleSelectChange('department', option.value);
+                                        handleSelectChange('department_name', option.data.name);
+                                    }
+                                    if (departmentSelectError) {
+                                        setDepartmentSelectError('');
+                                    }
+                                }}
+                                departmentError={errors.department || departmentSelectError}
                             />
 
                             {/* Form Actions */}

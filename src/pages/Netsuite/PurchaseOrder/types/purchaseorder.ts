@@ -310,6 +310,10 @@ export interface PODetailData {
     intercotransaction: any | null;
     customform?: number | null;
     customform_display?: string | null;
+    class?: number | string;
+    class_display?: string;
+    department?: number | string;
+    department_display?: string;
     lines: PODetailLine[];
 }
 
@@ -347,5 +351,26 @@ export interface PODetailLine {
 export interface PODetailResponse {
     success: boolean;
     data: PODetailData[];
+    message: string;
+}
+
+// CLASS SELECT
+export interface ComponentsItem {
+    id: string;
+    name: string;
+    is_inactive: boolean;
+    parent_id: string;
+    parent_name: string;
+    subsidiary_id: string;
+    subsidiary_name: string;
+    last_modified: string;
+}
+
+export interface ComponentsDataResponse {
+    success: boolean;
+    data: {
+        items: ComponentsItem[];
+        pagination: Pagination;
+    };
     message: string;
 }

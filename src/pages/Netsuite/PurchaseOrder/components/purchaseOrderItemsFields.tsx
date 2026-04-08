@@ -13,6 +13,8 @@ import { MdAdd, MdDelete } from 'react-icons/md';
 import { TableColumn } from 'react-data-table-component';
 import { usePOItemsSelect } from '@/hooks/usePOItemsSelect';
 import { POLocationPaginationState, POLocationSelectOption } from '@/hooks/usePOLocationSelect';
+import { POClassPaginationState, POClassSelectOption } from '@/hooks/usePOClassSelect';
+import { PODepartmentPaginationState, PODepartmentSelectOption } from '@/hooks/usePODepartmentSelect';
 
 
 interface POItemsFieldsProps {
@@ -36,6 +38,25 @@ interface POItemsFieldsProps {
     selectedLocation?: POLocationSelectOption | null;
     onLocationChange?: (option: POLocationSelectOption | null) => void;
     locationError?: string;
+
+    // Class Select Props
+    classOptions?: POClassSelectOption[]; // Tambahkan props untuk class options
+    classPagination?: POClassPaginationState;
+    classInputValue?: string;
+    onClassInputChange?: (inputValue: string) => Promise<POClassSelectOption[]>;
+    onClassMenuScrollToBottom?: () => void;
+    selectedClass?: POClassSelectOption | null;
+    onClassChange?: (option: POClassSelectOption | null) => void;
+    classError?: string;
+    // Department Select Props
+    departmentOptions?: PODepartmentSelectOption[]; // Tambahkan props untuk department options
+    departmentPagination?: PODepartmentPaginationState;
+    departmentInputValue?: string;
+    onDepartmentInputChange?: (inputValue: string) => Promise<PODepartmentSelectOption[]>;
+    onDepartmentMenuScrollToBottom?: () => void;
+    selectedDepartment?: PODepartmentSelectOption | null;
+    onDepartmentChange?: (option: PODepartmentSelectOption | null) => void;
+    departmentError?: string;
 }
 
 const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
@@ -53,6 +74,20 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
     locationInputValue = '',
     onLocationInputChange,
     onLocationMenuScrollToBottom,
+
+    // Class props
+    classOptions = [],
+    classPagination = { page: 1, hasMore: true, loading: false },
+    classInputValue = '',
+    onClassInputChange,
+    onClassMenuScrollToBottom,
+    
+    // Department props
+    departmentOptions = [],
+    departmentPagination = { page: 1, hasMore: true, loading: false },
+    departmentInputValue = '',
+    onDepartmentInputChange,
+    onDepartmentMenuScrollToBottom
 }) => {
     // Use POItemsSelect hook for product management
     const {
@@ -357,23 +392,29 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                          row.department_name || '-'
                     }</p>
                 ) : (
-                    <CustomSelect
-                        options={masterData?.departments?.map(dept => ({
-                            label: dept.name,
-                            value: dept.id
-                        })) || []}
+                    <CustomAsyncSelect
+                        name={`department_${index}`}
+                        placeholder="Select department..."
                         value={row.department ? {
                             label: row.department_name || '',
                             value: row.department.toString()
                         } : null}
+                        defaultOptions={departmentOptions}
+                        loadOptions={onDepartmentInputChange}
+                        onMenuScrollToBottom={onDepartmentMenuScrollToBottom}
+                        isLoading={departmentPagination.loading}
+                        noOptionsMessage={() => "No departments found"}
+                        loadingMessage={() => "Loading departments..."}
+                        isSearchable={true}
+                        inputValue={departmentInputValue}
+                        onInputChange={onDepartmentInputChange}
                         onChange={(option) => {
                             if (option) {
                                 updateItemById(index as number, 'department', parseInt(option.value));
                                 updateItemById(index as number, 'department_name', option.label);
                             }
                         }}
-                        placeholder="Select department"
-                        isSearchable
+                        error={!row.department && errors?.items_department ? errors.items_department : undefined}
                         className="text-xs"
                         menuPortalTarget={document.body}
                         menuPosition="fixed"
@@ -394,27 +435,33 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             row.class_name || '-'
                         }</p>
                     ) : (
-                    <CustomSelect
-                        options={masterData?.class?.map(cls => ({
-                            label: cls.name,
-                            value: cls.id
-                        })) || []}
-                        value={row.class ? {
-                            label: row.class_name || '',
-                            value: row.class.toString()
-                        } : null}
-                        onChange={(option) => {
-                            if (option) {
-                                updateItemById(index as number, 'class', parseInt(option.value));
-                                updateItemById(index as number, 'class_name', option.label);
-                            }
-                        }}
-                        placeholder="Select class"
-                        isSearchable
-                        className="text-xs"
-                        menuPortalTarget={document.body}
-                        menuPosition="fixed"
-                    />
+                        <CustomAsyncSelect
+                            name={`class_${index}`}
+                            placeholder="Select class..."
+                            value={row.class ? {
+                                label: row.class_name || '',
+                                value: row.class.toString()
+                            } : null}
+                            defaultOptions={classOptions}
+                            loadOptions={onClassInputChange}
+                            onMenuScrollToBottom={onClassMenuScrollToBottom}
+                            isLoading={classPagination.loading}
+                            noOptionsMessage={() => "No classes found"}
+                            loadingMessage={() => "Loading classes..."}
+                            isSearchable={true}
+                            inputValue={classInputValue}
+                            onInputChange={onClassInputChange}
+                            onChange={(option) => {
+                                if (option) {
+                                    updateItemById(index as number, 'class', parseInt(option.value));
+                                    updateItemById(index as number, 'class_name', option.label);
+                                }
+                            }}
+                            error={!row.class && errors?.items_class ? errors.items_class : undefined}
+                            className="text-xs"
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                        />
                     )}
                 </div>
             ),
@@ -509,7 +556,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 
                 {/* Add Product Section */}
                 
-                {(formData.nextapprover === "" && formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
+                {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
                 <div className="flex gap-4 mb-6">
                     <div className="flex-1">
                         <Label>Select Product to Add</Label>
