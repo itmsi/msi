@@ -1,53 +1,54 @@
 import { useState, useCallback } from 'react';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
-import { DataItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
+import { ComponentsItem } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
 
-export interface POItemsSelectOption {
+export interface PODepartmentSelectOption {
     value: string;
     label: string;
-    data?: DataItems;
+    data?: ComponentsItem;
 }
 
-export interface POItemsPaginationState {
+export interface PODepartmentPaginationState {
     page: number;
     hasMore: boolean;
     loading: boolean;
 }
 
-export const usePOItemsSelect = (limit: number = 10) => {
-    const [POItemsOptions, setPOItemsOptions] = useState<POItemsSelectOption[]>([]);
-    const [pagination, setPagination] = useState<POItemsPaginationState>({
+export const usePODepartmentSelect = (limit: number = 30, subsidiary_id?: number) => {
+    const [PODepartmentOptions, setPODepartmentOptions] = useState<PODepartmentSelectOption[]>([]);
+    const [pagination, setPagination] = useState<PODepartmentPaginationState>({
         page: 1,
         hasMore: true,
         loading: false
     });
     const [inputValue, setInputValue] = useState('');
 
-    const loadPOItemsOptions = useCallback(async (
+    const loadPODepartmentOptions = useCallback(async (
         inputValue: string = '', 
-        loadedOptions: POItemsSelectOption[] = [],
+        loadedOptions: PODepartmentSelectOption[] = [],
         page: number = 1,
         reset: boolean = false
     ) => {
         try {
             setPagination(prev => ({ ...prev, loading: true }));
 
-            const response = await PurchaseOrderService.getPOItems({
+            const response = await PurchaseOrderService.getPODepartment({
                 search: inputValue,
                 page: page,
                 limit: limit,
-                sort_order: 'desc'
+                sort_order: 'desc',
+                ...(subsidiary_id !== undefined ? { subsidiary_id } : {})
             });
 
             if (response.success) {
-                const newOptions: POItemsSelectOption[] = response.data.items.map((poItems: DataItems) => ({
-                    value: poItems.internalId,
-                    label: poItems.displayName !== '' ? poItems.displayName : poItems.itemId,
+                const newOptions: PODepartmentSelectOption[] = response.data.items.map((poItems: ComponentsItem) => ({
+                    value: poItems.id.toString(),
+                    label: poItems.name,
                     data: poItems
                 }));
 
                 const updatedOptions = reset ? newOptions : [...loadedOptions, ...newOptions];
-                setPOItemsOptions(updatedOptions);
+                setPODepartmentOptions(updatedOptions);
                 
                 const hasMoreData = response.data.pagination.page < response.data.pagination.totalPages;
                 
@@ -66,39 +67,39 @@ export const usePOItemsSelect = (limit: number = 10) => {
 
         setPagination(prev => ({ ...prev, loading: false }));
         return loadedOptions;
-    }, [limit]);
+    }, [limit, subsidiary_id]);
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
         setInputValue(inputValue);
-        setPOItemsOptions([]);
+        setPODepartmentOptions([]);
         setPagination({ page: 1, hasMore: true, loading: false });
         
-        return await loadPOItemsOptions(inputValue, [], 1, true);
-    }, [loadPOItemsOptions]);
+        return await loadPODepartmentOptions(inputValue, [], 1, true);
+    }, [loadPODepartmentOptions]);
 
     const handleMenuScrollToBottom = useCallback(async () => {
         if (pagination.hasMore && !pagination.loading) {
-            await loadPOItemsOptions(inputValue, POItemsOptions, pagination.page + 1, false);
+            await loadPODepartmentOptions(inputValue, PODepartmentOptions, pagination.page + 1, false);
         }
-    }, [pagination.hasMore, pagination.loading, pagination.page, inputValue, POItemsOptions, loadPOItemsOptions]);
+    }, [pagination.hasMore, pagination.loading, pagination.page, inputValue, PODepartmentOptions, loadPODepartmentOptions]);
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
-        if (POItemsOptions.length === 0) {
-            await loadPOItemsOptions('', [], 1, true);
+        if (PODepartmentOptions.length === 0) {
+            await loadPODepartmentOptions('', [], 1, true);
         }
-    }, [POItemsOptions.length, loadPOItemsOptions]);
+    }, [PODepartmentOptions.length, loadPODepartmentOptions]);
 
     // Get PO item by ID
-    const getPOItemById = useCallback(async (poItemId: string): Promise<POItemsSelectOption | null> => {
+    const getPOItemById = useCallback(async (poItemId: string,): Promise<PODepartmentSelectOption | null> => {
         try {
-            const response = await PurchaseOrderService.getPOItems({ search: poItemId });
+            const response = await PurchaseOrderService.getPODepartment({ search: poItemId });
             if (response.success && response.data.items.length > 0) {
                 const poItem = response.data.items[0];
                 return {
-                    value: poItem.internalId,
-                    label: poItem.displayName !== '' ? poItem.displayName : poItem.itemId,
+                    value: poItem.id.toString(),
+                    label: poItem.name,
                     data: poItem
                 };
             }
@@ -108,14 +109,25 @@ export const usePOItemsSelect = (limit: number = 10) => {
         return null;
     }, []);
 
+    // Reset department options ketika subsidiary_id berubah
+    const resetDepartmentOptions = useCallback(async () => {
+        setPODepartmentOptions([]);
+        setInputValue('');
+        setPagination({ page: 1, hasMore: true, loading: false });
+        if (subsidiary_id) {
+            await loadPODepartmentOptions('', [], 1, true);
+        }
+    }, [subsidiary_id, loadPODepartmentOptions]);
+
     return {
-        POItemsOptions,
+        PODepartmentOptions,
         pagination,
         inputValue,
         handleInputChange,
         handleMenuScrollToBottom,
         initializeOptions,
-        loadPOItemsOptions,
-        getPOItemById
+        loadPODepartmentOptions,
+        getPOItemById,
+        resetDepartmentOptions,
     };
 };

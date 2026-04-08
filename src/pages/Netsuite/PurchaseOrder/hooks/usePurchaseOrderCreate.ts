@@ -14,7 +14,7 @@ export const usePurchaseOrderCreate = () => {
     const [loadingMasterData, setLoadingMasterData] = useState(true);
 
     const [formData, setFormData] = useState<PurchaseOrderForm>({
-        customform: null,
+        customform: 102,
         vendorid: null,
         purchasedate: null,
         subsidiary: null,
@@ -85,7 +85,7 @@ export const usePurchaseOrderCreate = () => {
         setFormData(prev => ({
             ...prev,
             [fieldName]: value
-        }));
+        }));        
     };
 
     const handleDateChange = (fieldName: string, value: string) => {
