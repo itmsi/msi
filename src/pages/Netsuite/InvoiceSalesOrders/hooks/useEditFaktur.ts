@@ -192,7 +192,12 @@ export const useEditFaktur = (id?: string) => {
 
         setSubmitLoading(true);
         try {
-            const res = await FakturService.updateFakturById(id, formData);
+            const payloadToUpdate = { ...formData };
+            // Pastikan field nomor_id_penjual tidak dikirim ke backend
+            // @ts-ignore
+            delete payloadToUpdate.nomor_id_penjual;
+
+            const res = await FakturService.updateFakturById(id, payloadToUpdate);
             if (res) {
                 toast.success('Faktur berhasil diperbarui');
                 return true;

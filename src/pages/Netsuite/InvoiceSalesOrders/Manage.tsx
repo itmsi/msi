@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useInvoiceSalesOrder } from './hooks/useInvoiceSalesOrder';
 import Badge from '@/components/ui/badge/Badge';
 import { formatCurrencyID } from '@/helpers/generalHelper';
-import { MdClear, MdSearch, MdVisibility, MdEdit, MdFileDownload } from 'react-icons/md';
+import { MdClear, MdSearch, MdEdit, MdFileDownload } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
@@ -275,13 +275,6 @@ export default function Manage() {
         },
         createActionsColumn([
             {
-                icon: MdVisibility,
-                onClick: (row: InvoiceSalesOrder) => navigate(`/netsuite/invoice-sales-order/view/${row.tranid}`),
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'View Detail',
-                permission: 'read',
-            },
-            {
                 icon: MdEdit,
                 onClick: (row: InvoiceSalesOrder) => navigate(`/netsuite/invoice-sales-order/edit/${row.fakture_id}`),
                 className: 'text-amber-600 hover:text-amber-700 hover:bg-amber-50',
@@ -428,6 +421,7 @@ export default function Manage() {
                             clearSelectedRows={clearSelectedRows}
                             responsive
                             highlightOnHover
+                            onRowClicked={(row) => navigate(`/netsuite/invoice-sales-order/view/${row.tranid}`)}
                             striped={false}
                             persistTableHead
                             borderRadius="8px"
