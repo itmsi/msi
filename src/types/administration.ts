@@ -471,6 +471,8 @@ export interface Employee {
     title_name: string;
     department_name: string;
     company_name: string;
+    classes_id_netsuite?: number | null;
+    classes_name_netsuite?: string | null;
 }
 export interface UsersManage {
     id: string;
@@ -506,6 +508,8 @@ export interface UserDetail {
     employee_address?: string;
     is_sales_quotation?: boolean;
     customer_id?: string;
+    classes_id_netsuite?: number | null;
+    classes_name_netsuite?: string | null;
 }
 
 // User pagination for meta response
@@ -560,7 +564,9 @@ export interface EmployeeFormData {
     employee_phone?: string | null;
     gender_id?: string | null;
     island_id?: string;
-    permission_detail?: EmployeeSystemPermission[]; // Updated to new structure
+    permission_detail?: EmployeeSystemPermission[];
+    classes_id_netsuite?: number | null;
+    classes_name_netsuite?: string | null;
 }
 export interface UsersFormData {
   email: string,
@@ -597,6 +603,8 @@ export interface EmployeeValidationErrors {
     is_customer?: string;
     is_active?: string;
     customer_foto?: string;
+    classes_id_netsuite?: number | null;
+    classes_name_netsuite?: string | null;
 }
 
 // User edit form data (for edit page)

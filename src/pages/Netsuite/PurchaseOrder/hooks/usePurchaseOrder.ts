@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Pagination, PurchaseOrderItem, PurchaseOrderRequest } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 
-export const usePurchaseOrder = () => {
+export const usePurchaseOrder = (profileSSO?: number) => {
     const [searchValue, setSearchValue] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
     const [sortModify, setSortModify] = useState<'updated_at' | 'last_modified' | ''>('last_modified');
@@ -30,6 +30,7 @@ export const usePurchaseOrder = () => {
                 sort_order: params?.sort_order || sortOrder || 'desc',
                 search: params?.search !== undefined ? params.search : searchValue,
                 status: params?.status !== undefined ? params.status : statusFilter,
+                ...(profileSSO !== undefined ? { classes: profileSSO } : {}),
                 ...params
             });
 
