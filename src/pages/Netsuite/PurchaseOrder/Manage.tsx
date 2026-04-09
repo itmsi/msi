@@ -95,7 +95,7 @@ export default function Manage() {
             name: 'PR Number',
             selector: row => row.custbody_me_pr_number || '-',
             wrap: true,
-            width: '120px',
+            width: '150px',
             center: true
         },
         {
