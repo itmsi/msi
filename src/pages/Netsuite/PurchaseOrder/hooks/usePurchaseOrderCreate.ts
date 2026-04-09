@@ -3,10 +3,14 @@ import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldIt
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
-import { formatDateToDMYmiring } from '@/helpers/generalHelper';
+import { getProfile } from '@/helpers/generalHelper';
 
 export const usePurchaseOrderCreate = () => {
     const navigate = useNavigate();
+    
+    const profileSSO = getProfile() as any;
+    const profileSSOId = profileSSO?.email || null;
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [validationErrors, setValidationErrors] = useState<PurchaseOrderValidationErrors>({});
@@ -27,6 +31,7 @@ export const usePurchaseOrderCreate = () => {
         custbody_me_pr_type: null,
         custbody_me_saving_type: null,
         custbody_me_pr_number: '',
+        custbody_msi_createdby_api: profileSSOId,
         class: null,
         class_name: '',
         // description: null,
@@ -147,17 +152,18 @@ export const usePurchaseOrderCreate = () => {
             const requestData = {
                 customform: Number(formData.customform) || null,
                 vendorid: Number(formData.vendorid) || null,
-                purchasedate: formData.purchasedate ? formatDateToDMYmiring(new Date(formData.purchasedate)) : null,
+                purchasedate: formData.purchasedate ? formData.purchasedate : null,
                 subsidiary: Number(formData.subsidiary) || null,
                 location: Number(formData.location) || null,
                 memo: formData.memo || '',
                 currency: Number(formData.currency) || null,
                 terms: Number(formData.terms) || null,
-                custbody_me_pr_date: formData.custbody_me_pr_date ? formatDateToDMYmiring(new Date(formData.custbody_me_pr_date)) : null,
+                custbody_me_pr_date: formData.custbody_me_pr_date ? formData.custbody_me_pr_date : null,
                 custbody_me_project_location: Number(formData.custbody_me_project_location) || null,
                 custbody_me_pr_type: Number(formData.custbody_me_pr_type) || null,
                 custbody_me_saving_type: formData.custbody_me_saving_type || null,
                 custbody_me_pr_number: formData.custbody_me_pr_number || '',
+                custbody_msi_createdby_api: profileSSOId || '',
                 class: Number(formData.class) || null,
                 department: Number(formData.department) || null,
                 // description: formData.description || null,

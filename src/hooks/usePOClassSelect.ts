@@ -38,7 +38,7 @@ export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number, pro
                 limit: limit,
                 sort_order: 'desc',
                 ...(subsidiary_id !== undefined ? { subsidiary_id } : {}),
-                ...(profileSSOId !== undefined ? { profile_class: profileSSOId } : {})
+                ...(profileSSOId !== undefined ? { class_profile: profileSSOId } : {})
 
             });
 
@@ -96,7 +96,7 @@ export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number, pro
     // Get PO item by ID
     const getPOItemById = useCallback(async (poItemId: string,): Promise<POClassSelectOption | null> => {
         try {
-            const response = await PurchaseOrderService.getPOClass({ search: poItemId, ...(profileSSOId !== undefined ? { profile_class: profileSSOId } : {}) });
+            const response = await PurchaseOrderService.getPOClass({ search: poItemId, ...(profileSSOId !== undefined ? { class_profile: profileSSOId } : {}) });
             if (response.success && response.data.items.length > 0) {
                 const poItem = response.data.items[0];
                 return {
