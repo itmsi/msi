@@ -50,6 +50,7 @@ export function buildFakturDetailColumns(
                     <InputField
                         type="text"
                         value={row.kode_barang_jasa || ''}
+                        onChange={(e) => onChange(row._index, 'kode_barang_jasa', e.target.value)}
                         className="w-full border-1 rounded p-1 px-2 text-sm"
                     />
                 </div>
@@ -105,10 +106,11 @@ export function buildFakturDetailColumns(
                     <InputField
                         type="number"
                         value={row.jumlah_barang_jasa ?? ''}
-                        onChange={(e) => onChange(row._index, 'jumlah_barang_jasa', Number(e.target.value))}
-                        onFocus={(e) => e.target.select()}
-                        className="border-1 rounded p-1 px-2 text-center text-sm"
-                        placeholder="0"
+                        // onChange={(e) => onChange(row._index, 'jumlah_barang_jasa', Number(e.target.value))}
+                        // onFocus={(e) => e.target.select()}
+                        className="border-1 rounded p-1 px-2 text-center text-sm disabled:bg-gray-100"
+                        placeholder="0" 
+                        disabled
                     />
                 </div>
             ),
@@ -123,10 +125,11 @@ export function buildFakturDetailColumns(
                 <InputField
                     type="number"
                     value={row.harga_satuan ?? ''}
-                    onChange={(e) => onChange(row._index, 'harga_satuan', Number(e.target.value))}
-                    onFocus={(e) => e.target.select()}
-                    className="border-1 rounded p-1 px-2 text-center text-sm"
-                    placeholder="0"
+                    // onChange={(e) => onChange(row._index, 'harga_satuan', Number(e.target.value))}
+                    // onFocus={(e) => e.target.select()}
+                    className="border-1 rounded p-1 px-2 text-center text-sm disabled:bg-gray-100"
+                    placeholder="0" 
+                    disabled
                 />
                 </div>
             ),
@@ -141,10 +144,11 @@ export function buildFakturDetailColumns(
                     <InputField
                         type="number"
                         value={row.total_diskon ?? ''}
-                        onChange={(e) => onChange(row._index, 'total_diskon', Number(e.target.value))}
-                        onFocus={(e) => e.target.select()}
-                        className="border-1 rounded p-1 px-2 text-center text-sm"
-                        placeholder="0"
+                        // onChange={(e) => onChange(row._index, 'total_diskon', Number(e.target.value))}
+                        // onFocus={(e) => e.target.select()}
+                        className="border-1 rounded p-1 px-2 text-center text-sm disabled:bg-gray-100"
+                        placeholder="0" 
+                        disabled
                     />
                 </div>
             ),
@@ -159,10 +163,11 @@ export function buildFakturDetailColumns(
                     <InputField
                         type="number"
                         value={row.dpp ?? ''}
-                        onChange={(e) => onChange(row._index, 'dpp', Number(e.target.value))}
-                        onFocus={(e) => e.target.select()}
-                        className="border-1 rounded p-1 px-2 text-center text-sm"
-                        placeholder="0"
+                        // onChange={(e) => onChange(row._index, 'dpp', Number(e.target.value))}
+                        // onFocus={(e) => e.target.select()}
+                        className="border-1 rounded p-1 px-2 text-center text-sm disabled:bg-gray-100"
+                        placeholder="0" 
+                        disabled
                     />
                 </div>
             ),
@@ -177,10 +182,11 @@ export function buildFakturDetailColumns(
                     <InputField
                             type="number"
                             value={row.tarif_ppn ?? ''}
-                            onChange={(e) => onChange(row._index, 'tarif_ppn', Number(e.target.value))}
-                            onFocus={(e) => e.target.select()}
-                            className="border-1 rounded p-1 px-2 text-center text-sm"
-                            placeholder="0"
+                            // onChange={(e) => onChange(row._index, 'tarif_ppn', Number(e.target.value))}
+                            // onFocus={(e) => e.target.select()}
+                            className="border-1 rounded p-1 px-2 text-center text-sm disabled:bg-gray-100"
+                            placeholder="0" 
+                            disabled
                         />
                 </div>
             ),
@@ -195,10 +201,11 @@ export function buildFakturDetailColumns(
                     <InputField
                         type="number"
                         value={row.ppn ?? ''}
-                        onChange={(e) => onChange(row._index, 'ppn', Number(e.target.value))}
-                        onFocus={(e) => e.target.select()}
-                        className="border-1 rounded p-1 px-2 text-center text-sm"
-                        placeholder="0"
+                        // onChange={(e) => onChange(row._index, 'ppn', Number(e.target.value))}
+                        // onFocus={(e) => e.target.select()}
+                        className="border-1 rounded p-1 px-2 text-center text-sm disabled:bg-gray-100"
+                        placeholder="0" 
+                        disabled
                     />
                 </div>
             ),
