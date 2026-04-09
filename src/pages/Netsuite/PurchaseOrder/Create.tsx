@@ -12,10 +12,13 @@ import { usePOVendorSelect } from '@/hooks/usePOVendorSelect';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
+import { getProfile } from '@/helpers/generalHelper';
 
 export default function Create() {
     const navigate = useNavigate();
-    
+    const profileSSO = getProfile() as any;
+    const profileSSOId = profileSSO?.classes_id_netsuite || null;
+
     const {
         isSubmitting,
         formData,
@@ -73,7 +76,7 @@ export default function Create() {
         handleMenuScrollToBottom: handleItemClassScrollToBottom,
         initializeOptions: initializeItemClassOptions,
         resetClassOptions
-    } = usePOClassSelect(30, subsidiaryId);
+    } = usePOClassSelect(30, subsidiaryId, profileSSOId);
     
     const [selectedClass, setSelectedClass] = useState<any>(null);
     const [classSelectError, setClassSelectError] = useState<string>('');

@@ -14,9 +14,12 @@ import { PurchaseOrderItem } from './types/purchaseorder';
 // import ModalApproval from './components/ModalApproval';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 import { formatCurrencyID, formatTanggal } from '@/helpers';
+import { getProfile } from '@/helpers/generalHelper';
 
 export default function Manage() {
     const navigate = useNavigate();
+    const profileSSO = getProfile() as any;
+    const profileSSOId = profileSSO?.classes_id_netsuite || null;
     
     const {
         purchaseOrders,
@@ -32,7 +35,7 @@ export default function Manage() {
         handleFilterChange,
         handleKeyPress,
         handleClearSearch,
-    } = usePurchaseOrder();
+    } = usePurchaseOrder(profileSSOId);
     
     const handlePageChangeAman = useCallback((halamanBaru: number) => {
         const halamanSaatIni = pagination?.page || 1;
@@ -47,6 +50,7 @@ export default function Manage() {
         handleRowsPerPageChange(limitBaru, halamanBaru);
     }, [pagination?.page, pagination?.limit, handleRowsPerPageChange]);
 
+    
     // const [isOpen, setIsOpen] = useState(false);
     // const [selectedPoId, setSelectedPoId] = useState<number | null>(null);
 

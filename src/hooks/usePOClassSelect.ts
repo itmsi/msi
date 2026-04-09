@@ -14,7 +14,7 @@ export interface POClassPaginationState {
     loading: boolean;
 }
 
-export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number) => {
+export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number, profileSSOId?: number) => {
     const [POClassOptions, setPOClassOptions] = useState<POClassSelectOption[]>([]);
     const [pagination, setPagination] = useState<POClassPaginationState>({
         page: 1,
@@ -37,7 +37,9 @@ export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number) => 
                 page: page,
                 limit: limit,
                 sort_order: 'desc',
-                ...(subsidiary_id !== undefined ? { subsidiary_id } : {})
+                ...(subsidiary_id !== undefined ? { subsidiary_id } : {}),
+                ...(profileSSOId !== undefined ? { profile_class: profileSSOId } : {})
+
             });
 
             if (response.success) {
@@ -67,7 +69,7 @@ export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number) => 
 
         setPagination(prev => ({ ...prev, loading: false }));
         return loadedOptions;
-    }, [limit, subsidiary_id]);
+    }, [limit, subsidiary_id, profileSSOId]);
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -94,7 +96,7 @@ export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number) => 
     // Get PO item by ID
     const getPOItemById = useCallback(async (poItemId: string,): Promise<POClassSelectOption | null> => {
         try {
-            const response = await PurchaseOrderService.getPOClass({ search: poItemId });
+            const response = await PurchaseOrderService.getPOClass({ search: poItemId, ...(profileSSOId !== undefined ? { profile_class: profileSSOId } : {}) });
             if (response.success && response.data.items.length > 0) {
                 const poItem = response.data.items[0];
                 return {
@@ -107,7 +109,7 @@ export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number) => 
             console.error('Error getting Purchase Order item by ID:', error);
         }
         return null;
-    }, []);
+    }, [profileSSOId]);
 
     // Reset class options ketika subsidiary_id berubah
     const resetClassOptions = useCallback(async () => {

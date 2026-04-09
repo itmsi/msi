@@ -716,3 +716,8 @@ export const getCompanyName = (): string => {
     const user = AuthService.getCurrentUser();
     return (user as any)?.company_name || '';
 };
+// Get company_name from logged in user
+export const getProfile = (): string => {
+    const user = AuthService.getCurrentUser();
+    return (user as any) || '';
+};

@@ -15,9 +15,12 @@ import ModalApproval from './components/ModalApproval';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
+import { getProfile } from '@/helpers/generalHelper';
 
 export default function Edit() {
     const navigate = useNavigate();
+    const profileSSO = getProfile() as any;
+    const profileSSOId = profileSSO?.classes_id_netsuite || null;
     
     const {
         isSubmitting,
@@ -78,7 +81,7 @@ export default function Edit() {
         handleMenuScrollToBottom: handleItemClassScrollToBottom,
         initializeOptions: initializeItemClassOptions,
         resetClassOptions
-    } = usePOClassSelect(30, subsidiaryId);
+    } = usePOClassSelect(30, subsidiaryId, profileSSOId);
     
     const [selectedClass, setSelectedClass] = useState<any>(null);
     const [classSelectError, setClassSelectError] = useState<string>('');
