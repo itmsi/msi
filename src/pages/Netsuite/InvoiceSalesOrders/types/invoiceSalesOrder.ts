@@ -11,6 +11,7 @@ export interface InvoiceSalesOrderRequest {
     sort_by: string;
     sort_order: 'ASC' | 'DESC';
     filters?: InvoiceSalesOrderFilter;
+    subsidiary?: string;
 }
 
 export interface InvoiceSalesOrderLine {

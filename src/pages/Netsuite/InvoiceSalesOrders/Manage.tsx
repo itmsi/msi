@@ -2,9 +2,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useInvoiceSalesOrder } from './hooks/useInvoiceSalesOrder';
-import Badge from '@/components/ui/badge/Badge';
-import { formatCurrencyID } from '@/helpers/generalHelper';
-import { MdClear, MdSearch, MdEdit, MdFileDownload } from 'react-icons/md';
+import { formatCurrencyID, getStatusBadge } from '@/helpers/generalHelper';
+import { MdClear, MdSearch, MdEdit, MdFileDownload, MdFilterListAlt, MdExpandLess, MdExpandMore } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
@@ -13,8 +12,8 @@ import { InvoiceSalesOrder } from './types/invoiceSalesOrder';
 import { FakturService } from './services/fakturService';
 import toast from 'react-hot-toast';
 import Button from '@/components/ui/button/Button';
-
 import { generateFakturXML } from './utils/fakturExportUtils';
+import FilterSection from './components/FilterSection';
 
 const formatDateTimeID = (dateString: string) => {
     if (!dateString || dateString === '-') return '-';
@@ -86,6 +85,7 @@ export default function Manage() {
     const navigate = useNavigate();
     const [selectedRows, setSelectedRows] = useState<InvoiceSalesOrder[]>([]);
     const [clearSelectedRows, setClearSelectedRows] = useState(false);
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const {
         invoiceSalesOrders,
         loading,
@@ -93,12 +93,18 @@ export default function Manage() {
         pagination,
         searchValue,
         sortOrder,
+        filterApprovalStatus,
+        filterStartDate,
+        filterEndDate,
+        filterSubsidiary,
+        activeFilterCount,
         setSearchValue,
         handlePageChange,
         handleRowsPerPageChange,
         handleFilterChange,
         handleKeyPress,
         handleClearSearch,
+        handleClearAllFilters,
     } = useInvoiceSalesOrder();
 
     const handleExportSelected = async () => {
@@ -192,19 +198,18 @@ export default function Manage() {
             name: 'Status',
             selector: row => row.approvalstatus || '-',
             cell: row => {
-                let statusLabel = row.approvalstatus;
-                let color: 'info' | 'success' | 'warning'| 'error' | 'ghost' = 'info';
-                
-                if (row.approvalstatus === '1') { statusLabel = 'Paid In Full'; color = 'success'; }
-                if (row.approvalstatus === '2') { statusLabel = 'Pending Approval'; color = 'warning'; }
-                if (row.approvalstatus === '3') { statusLabel = 'Rejected'; color = 'error'; }
+                let statusKey = 'draft';
+                let statusLabel = row.approvalstatus || '-';
 
+                if (row.approvalstatus === '1') { statusKey = 'approved'; statusLabel = 'Paid In Full'; }
+                else if (row.approvalstatus === '2') { statusKey = 'pending'; statusLabel = 'Pending Approval'; }
+                else if (row.approvalstatus === '3') { statusKey = 'rejected'; statusLabel = 'Rejected'; }
+
+                const badge = getStatusBadge(statusKey);
                 return (
-                    <div className="items-center capitalize">
-                        <Badge color={color} variant="light">
-                            {statusLabel || '-'}
-                        </Badge>
-                    </div>
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>
+                        {statusLabel}
+                    </span>
                 );
             },
             minWidth: '160px',
@@ -291,8 +296,13 @@ export default function Manage() {
         ])
     ];
     
+    const handleToggleFilter = () => {
+        setShowAdvancedFilters(prev => !prev);
+    };
+
     const SearchAndFilters = useMemo(() => {
         return (
+            <>
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
                 <div className="flex-1">
                     <div className="relative flex">
@@ -320,17 +330,6 @@ export default function Manage() {
                 </div>
                 <div className="flex items-center gap-2">
                     <CustomSelect
-                        id="sort_by"
-                        name="sort_by"
-                        value={{ value: 'trandate', label: 'Date' }} // Static for now, can implement state similar to sortOrder
-                        onChange={(selectedOption) => handleFilterChange('sort_by', selectedOption?.value || '')}
-                        options={[{ value: 'trandate', label: 'Date' }, { value: 'tranid', label: 'Document ID' }]}
-                        placeholder="Sort column"
-                        isClearable={false}
-                        isSearchable={false}
-                        className="w-40"
-                    />
-                    <CustomSelect
                         id="sort_order"
                         name="sort_order"
                         value={sortOrder ? { 
@@ -350,9 +349,38 @@ export default function Manage() {
                         className="w-40"
                     />
                 </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        onClick={handleToggleFilter}
+                        className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
+                        size="sm"
+                    >
+                        <MdFilterListAlt className="w-4 h-4 mr-2" />
+                        Filter
+                        {activeFilterCount > 0 && (
+                            <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-blue-600 text-white">
+                                {activeFilterCount}
+                            </span>
+                        )}
+                        {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                    </Button>
+                </div>
             </div>
+
+            {/* Advanced Filters Collapse */}
+            {showAdvancedFilters && (
+                <FilterSection
+                    filterApprovalStatus={filterApprovalStatus}
+                    filterStartDate={filterStartDate}
+                    filterEndDate={filterEndDate}
+                    filterSubsidiary={filterSubsidiary}
+                    onFilterChange={handleFilterChange}
+                    onClearFilters={handleClearAllFilters}
+                />
+            )}
+            </>
         );
-    }, [searchValue, sortOrder, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange]);
+    }, [searchValue, sortOrder, filterApprovalStatus, filterStartDate, filterEndDate, activeFilterCount, showAdvancedFilters, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, handleToggleFilter, handleClearAllFilters]);
 
     return (
         <>
