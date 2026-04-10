@@ -111,18 +111,41 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         }
     };
     
-    // Helper function to extract tax percentage from tax code name
+    // Helper to ensure numeric value
+    const toNumber = (value: any): number => {
+        if (typeof value === 'string') return parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
+        return Number(value) || 0;
+    };
+    
+    // Extract tax percentage from tax code name
     const extractTaxPercentage = (taxCodeName: string): number => {
-        const match = taxCodeName.match(/([\d.]+)%/);
+        const match = taxCodeName.match(/([\d.]+)/);
         return match ? parseFloat(match[1]) : 0;
     };
     
-    // Function to calculate tax amounts
+    // Calculate tax amounts
     const calculateTaxAmounts = (amount: number, taxCodeName: string) => {
+        const numericAmount = toNumber(amount);
         const taxPercentage = extractTaxPercentage(taxCodeName);
-        const taxAmount = (amount * taxPercentage) / 100;
-        const grossAmount = amount + taxAmount;
-        return { taxAmount, grossAmount };
+        const taxAmount = (numericAmount * taxPercentage) / 100;
+        const grossAmount = numericAmount + taxAmount;
+        
+        return { 
+            taxAmount: Math.round(taxAmount), 
+            grossAmount: Math.round(grossAmount)
+        };
+    };
+    
+    // Update tax calculations for an item
+    const updateTaxCalculation = (index: number, amount: number, taxCodeName?: string) => {
+        if (taxCodeName && amount > 0) {
+            const { taxAmount, grossAmount } = calculateTaxAmounts(amount, taxCodeName);
+            updateItemById(index, 'tax_amount', taxAmount);
+            updateItemById(index, 'gross_amount', grossAmount);
+        } else {
+            updateItemById(index, 'tax_amount', 0);
+            updateItemById(index, 'gross_amount', toNumber(amount));
+        }
     };
 
     // Initialize options on mount
@@ -176,40 +199,27 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             value={row.qty && row.qty > 0 ? row.qty.toString() : ''}
                             onKeyPress={handleKeyPress}
                             onChange={(e) => {
-                                const val = parseInt(e.target.value) || 0;
-                                updateItemById(index as number, 'qty', val);
+                                const qty = toNumber(e.target.value);
+                                const rate = toNumber(row.rate);
+                                const amount = qty * rate;
                                 
-                                // Auto-calculate amount and total when quantity changes
-                                if (row.rate && row.rate > 0) {
-                                    const calculatedAmount = val * row.rate;
-                                    updateItemById(index as number, 'amount', calculatedAmount);
-                                    updateItemById(index as number, 'total', calculatedAmount);
-                                    
-                                    // Recalculate tax amounts if tax code is selected
-                                    if (row.taxcode_name) {
-                                        const { taxAmount, grossAmount } = calculateTaxAmounts(calculatedAmount, row.taxcode_name);
-                                        updateItemById(index as number, 'tax_amount', taxAmount);
-                                        updateItemById(index as number, 'gross_amount', grossAmount);
-                                    }
-                                }
+                                updateItemById(index as number, 'qty', qty);
+                                updateItemById(index as number, 'amount', amount);
+                                updateItemById(index as number, 'total', amount);
+                                
+                                updateTaxCalculation(index as number, amount, row.taxcode_name);
                             }}
                             onBlur={(e) => {
-                                const val = parseInt(e.target.value) || 0;
-                                if (val === 0) {
+                                const qty = toNumber(e.target.value);
+                                if (qty === 0) {
+                                    const rate = toNumber(row.rate);
+                                    const amount = rate; // qty = 1
+                                    
                                     updateItemById(index as number, 'qty', 1);
-                                    // Recalculate with qty = 1
-                                    if (row.rate && row.rate > 0) {
-                                        const calculatedAmount = 1 * row.rate;
-                                        updateItemById(index as number, 'amount', calculatedAmount);
-                                        updateItemById(index as number, 'total', calculatedAmount);
-                                        
-                                        // Recalculate tax amounts if tax code is selected
-                                        if (row.taxcode_name) {
-                                            const { taxAmount, grossAmount } = calculateTaxAmounts(calculatedAmount, row.taxcode_name);
-                                            updateItemById(index as number, 'tax_amount', taxAmount);
-                                            updateItemById(index as number, 'gross_amount', grossAmount);
-                                        }
-                                    }
+                                    updateItemById(index as number, 'amount', amount);
+                                    updateItemById(index as number, 'total', amount);
+                                    
+                                    updateTaxCalculation(index as number, amount, row.taxcode_name);
                                 }
                             }}
                             onFocus={(e) => e.target.select()}
@@ -235,26 +245,19 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     value={row.custcol_msi_fob && row.custcol_msi_fob > 0 ? formatNumberPriceKoma(row.custcol_msi_fob) : ''}
                     onKeyPress={handleKeyPress}
                     onChange={(e) => {
-                        const fobVal = parseFloat(e.target.value.replace(/[^\d]/g, '') || '0');
+                        const fobVal = toNumber(e.target.value);
+                        const landedCost = toNumber(row.custcol_me_landed_cost);
+                        const quantity = toNumber(row.qty) || 1;
+                        
+                        const rate = fobVal + landedCost;
+                        const amount = quantity * rate;
+                        
                         updateItemById(index as number, 'custcol_msi_fob', fobVal);
+                        updateItemById(index as number, 'rate', rate);
+                        updateItemById(index as number, 'amount', amount);
+                        updateItemById(index as number, 'total', amount);
                         
-                        // Calculate rate = FOB + Landed Cost
-                        const landedCost = row.custcol_me_landed_cost || 0;
-                        const calculatedRate = fobVal + landedCost;
-                        updateItemById(index as number, 'rate', calculatedRate);
-                        
-                        // Calculate amount = qty * rate
-                        const quantity = row.qty || 1;
-                        const calculatedAmount = quantity * calculatedRate;
-                        updateItemById(index as number, 'amount', calculatedAmount);
-                        updateItemById(index as number, 'total', calculatedAmount);
-                        
-                        // Recalculate tax amounts if tax code is selected
-                        if (row.taxcode_name && calculatedAmount > 0) {
-                            const { taxAmount, grossAmount } = calculateTaxAmounts(calculatedAmount, row.taxcode_name);
-                            updateItemById(index as number, 'tax_amount', taxAmount);
-                            updateItemById(index as number, 'gross_amount', grossAmount);
-                        }
+                        updateTaxCalculation(index as number, amount, row.taxcode_name);
                     }}
                     onFocus={(e) => e.target.select()}
                     className="border-1 rounded p-1 px-3 w-[285px] text-center"
@@ -281,26 +284,19 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     value={row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatNumberPriceKoma(row.custcol_me_landed_cost) : ''}
                     onKeyPress={handleKeyPress}
                     onChange={(e) => {
-                        const costVal = parseFloat(e.target.value.replace(/[^\d]/g, '') || '0');
+                        const costVal = toNumber(e.target.value);
+                        const fob = toNumber(row.custcol_msi_fob);
+                        const quantity = toNumber(row.qty) || 1;
+                        
+                        const rate = fob + costVal;
+                        const amount = quantity * rate;
+                        
                         updateItemById(index as number, 'custcol_me_landed_cost', costVal);
+                        updateItemById(index as number, 'rate', rate);
+                        updateItemById(index as number, 'amount', amount);
+                        updateItemById(index as number, 'total', amount);
                         
-                        // Calculate rate = FOB + Landed Cost
-                        const fob = row.custcol_msi_fob || 0;
-                        const calculatedRate = fob + costVal;
-                        updateItemById(index as number, 'rate', calculatedRate);
-                        
-                        // Calculate amount = qty * rate
-                        const quantity = row.qty || 1;
-                        const calculatedAmount = quantity * calculatedRate;
-                        updateItemById(index as number, 'amount', calculatedAmount);
-                        updateItemById(index as number, 'total', calculatedAmount);
-                        
-                        // Recalculate tax amounts if tax code is selected
-                        if (row.taxcode_name && calculatedAmount > 0) {
-                            const { taxAmount, grossAmount } = calculateTaxAmounts(calculatedAmount, row.taxcode_name);
-                            updateItemById(index as number, 'tax_amount', taxAmount);
-                            updateItemById(index as number, 'gross_amount', grossAmount);
-                        }
+                        updateTaxCalculation(index as number, amount, row.taxcode_name);
                     }}
                     onFocus={(e) => e.target.select()}
                     className="border-1 rounded p-1 px-3 w-[285px] text-center"
@@ -369,7 +365,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                          row.taxcode_name || '-'
                     }</p>
                 ) : (
-                <div className="w-[285px]">
+                <div className="w-[250px]">
                     <CustomSelect
                         options={masterData?.taxcodes?.map(tax => ({
                             label: tax.name,
@@ -385,13 +381,16 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                                 updateItemById(index as number, 'taxcode_name', option.label);
                                 updateItemById(index as number, 'tax_rate', option.label);
                                 
-                                // Calculate tax amounts when tax code is selected
-                                const currentAmount = row.amount || 0;
-                                if (currentAmount > 0) {
-                                    const { taxAmount, grossAmount } = calculateTaxAmounts(currentAmount, option.label);
-                                    updateItemById(index as number, 'tax_amount', taxAmount);
-                                    updateItemById(index as number, 'gross_amount', grossAmount);
-                                }
+                                const currentAmount = toNumber(row.amount);
+                                updateTaxCalculation(index as number, currentAmount, option.label);
+                            } else {
+                                // Clear tax code
+                                updateItemById(index as number, 'taxcode', 0);
+                                updateItemById(index as number, 'taxcode_name', '');
+                                updateItemById(index as number, 'tax_rate', '');
+                                
+                                const currentAmount = toNumber(row.amount);
+                                updateTaxCalculation(index as number, currentAmount);
                             }
                         }}
                         placeholder="Select tax code"
@@ -708,11 +707,17 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 
 // Summary invoice dari items
 export const InvoiceSummary: React.FC<{ items: TablePOItem[] }> = ({ items }) => {
+    // Helper to ensure numeric value  
+    const toNumber = (value: any): number => {
+        if (typeof value === 'string') return parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
+        return Number(value) || 0;
+    };
+
     const summary = useMemo(() => {
-        const subtotal = items.reduce((sum, item) => sum + (item.amount || 0), 0);
-        const totalTax = items.reduce((sum, item) => sum + (item.tax_amount || 0), 0);
-        const grandTotal = items.reduce((sum, item) => sum + (item.gross_amount || item.amount || 0), 0);
-        const totalQty = items.reduce((sum, item) => sum + (item.qty || 0), 0);
+        const subtotal = items.reduce((sum, item) => sum + toNumber(item.amount), 0);
+        const totalTax = items.reduce((sum, item) => sum + toNumber(item.tax_amount), 0);
+        const grandTotal = items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
+        const totalQty = items.reduce((sum, item) => sum + toNumber(item.qty), 0);
 
         return { subtotal, totalTax, grandTotal, totalQty };
     }, [items]);

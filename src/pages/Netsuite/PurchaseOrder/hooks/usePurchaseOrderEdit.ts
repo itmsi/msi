@@ -301,8 +301,8 @@ export const usePurchaseOrderEdit = () => {
             class_name: formData?.items?.[0]?.class_name || '',
             location: formData?.items?.[0]?.location || 0,
             location_name: formData?.items?.[0]?.location_name || '',
-            taxcode: formData?.items?.[0]?.taxcode || 0,
-            taxcode_name: formData?.items?.[0]?.taxcode_name || '',
+            taxcode: 5, // Default taxcode, bisa disesuaikan
+            taxcode_name: '',
             tax_rate: '',
             gross_amount: 0,
             tax_amount: 0
