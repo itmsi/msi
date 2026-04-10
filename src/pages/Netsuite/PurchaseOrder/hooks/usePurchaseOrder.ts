@@ -7,6 +7,8 @@ export const usePurchaseOrder = (profileSSO?: number) => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
     const [sortModify, setSortModify] = useState<'updated_at' | 'last_modified' | ''>('last_modified');
     const [statusFilter, setStatusFilter] = useState('');
+    const [subsidiaryFilter, setSubsidiaryFilter] = useState('');
+    const [locationFilter, setLocationFilter] = useState('');
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -30,6 +32,8 @@ export const usePurchaseOrder = (profileSSO?: number) => {
                 sort_order: params?.sort_order || sortOrder || 'desc',
                 search: params?.search !== undefined ? params.search : searchValue,
                 status: params?.status !== undefined ? params.status : statusFilter,
+                subsidiary: params?.subsidiary !== undefined ? params.subsidiary : subsidiaryFilter,
+                location: params?.location !== undefined ? params.location : locationFilter,
                 ...(profileSSO !== undefined ? { classes: profileSSO } : {}),
                 ...params
             });
@@ -42,7 +46,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, sortModify, statusFilter, pagination]);
+    }, [searchValue, sortOrder, sortModify, statusFilter, subsidiaryFilter, locationFilter, pagination.page, pagination.limit]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
@@ -66,6 +70,10 @@ export const usePurchaseOrder = (profileSSO?: number) => {
             setSortModify(value as 'updated_at' | 'last_modified' | '');
         } else if (filterType === 'sort_order') {
             setSortOrder(value as 'asc' | 'desc' | '');
+        } else if (filterType === 'subsidiary') {
+            setSubsidiaryFilter(value);
+        } else if (filterType === 'location') {
+            setLocationFilter(value);
         }
 
         setPagination(prev => ({ ...prev, page: 1 }));
@@ -74,6 +82,8 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         if (filterType === 'status') params.status = value;
         else if (filterType === 'sort_by') params.sort_by = value;
         else if (filterType === 'sort_order') params.sort_order = value;
+        else if (filterType === 'subsidiary') params.subsidiary = value;
+        else if (filterType === 'location') params.location = value;
 
         fetchPurchaseOrders(params);
     }, [fetchPurchaseOrders]);
@@ -98,6 +108,24 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         handleSearch('');
     }, [handleSearch]);
 
+    const handleClearFilters = useCallback(() => {
+        setStatusFilter('');
+        setSubsidiaryFilter('');
+        setLocationFilter('');
+        setSortOrder('desc');
+        setSortModify('last_modified');
+        
+        setPagination(prev => ({ ...prev, page: 1 }));
+        fetchPurchaseOrders({ 
+            page: 1, 
+            status: '', 
+            subsidiary: '', 
+            location: '',
+            sort_order: 'desc',
+            sort_by: 'last_modified'
+        });
+    }, [fetchPurchaseOrders]);
+
     return {
         purchaseOrders,
         loading,
@@ -107,6 +135,8 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         sortOrder,
         sortModify,
         statusFilter,
+        subsidiaryFilter,
+        locationFilter,
         setSearchValue,
         fetchPurchaseOrders,
         handlePageChange,
@@ -116,5 +146,6 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         executeSearch,
         handleKeyPress,
         handleClearSearch,
+        handleClearFilters,
     };
 };

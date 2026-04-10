@@ -1,9 +1,9 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { usePurchaseOrder } from './hooks/usePurchaseOrder';
 // import Badge from '@/components/ui/badge/Badge';
-import { MdAdd, MdClear, MdSearch } from 'react-icons/md';
+import { MdAdd, MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
@@ -14,6 +14,7 @@ import { PurchaseOrderItem } from './types/purchaseorder';
 // import ModalApproval from './components/ModalApproval';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 import { getProfile, formatCurrencyID, formatTanggal } from '@/helpers/generalHelper';
+import FilterSection from './components/FilterSection';
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -28,12 +29,15 @@ export default function Manage() {
         searchValue,
         sortOrder,
         statusFilter,
+        subsidiaryFilter,
+        locationFilter,
         setSearchValue,
         handlePageChange,
         handleRowsPerPageChange,
         handleFilterChange,
         handleKeyPress,
         handleClearSearch,
+        handleClearFilters,
     } = usePurchaseOrder(profileSSOId);
     
     const handlePageChangeAman = useCallback((halamanBaru: number) => {
@@ -98,7 +102,7 @@ export default function Manage() {
             name: 'PR Number',
             selector: row => row.custbody_me_pr_number || '-',
             wrap: true,
-            width: '150px',
+            width: '200px',
             center: true
         },
         {
@@ -177,8 +181,15 @@ export default function Manage() {
         // }
     ];
     
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const handleToggleFilter = () => {
+        setShowAdvancedFilters(prev => !prev);
+    };
+    
+    // Count active filters
+    const activeFiltersCount = [subsidiaryFilter, locationFilter].filter(Boolean).length;
     const SearchAndFilters = useMemo(() => {
-        return (
+        return (<>
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
                 <div className="flex-1">
                     <div className="relative flex">
@@ -225,9 +236,35 @@ export default function Manage() {
                         className="w-full"
                     />
                 </div>
+                
+                <div className="flex items-center gap-2">
+                    <Button
+                        onClick={handleToggleFilter}
+                        className={`h-[42px] px-4 py-2 ${activeFiltersCount > 0 ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-300' : 'bg-transparent hover:bg-gray-300 text-gray-700'} border border-gray-300 relative`}
+                        size="sm"
+                    >
+                        <MdFilterListAlt className="w-4 h-4 mr-2" />
+                        Filter
+                        {/* {activeFiltersCount > 0 && (
+                            <span className="ml-1 bg-blue-600 text-white text-xs rounded-full px-2 py-0.5">
+                                {activeFiltersCount}
+                            </span>
+                        )} */}
+                        {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                    </Button>
+                </div>
             </div>
-        );
-    }, [searchValue, sortOrder, statusFilter, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange]);
+            
+            {showAdvancedFilters && (
+                <FilterSection
+                    filterSubsidiary={subsidiaryFilter}
+                    filterLocation={locationFilter}
+                    onFilterChange={handleFilterChange}
+                    onClearFilters={handleClearFilters}
+                />
+            )}
+        </>);
+}, [searchValue, sortOrder, statusFilter, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, subsidiaryFilter, locationFilter, handleClearFilters, activeFiltersCount]);
 
     return (
         <>

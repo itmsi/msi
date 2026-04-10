@@ -17,6 +17,8 @@ export interface PurchaseOrderRequest {
     sort_by: string;
     sort_order: string;
     search: string;
+    subsidiary?: string;
+    location?: string;
     status: string;
 }
 export interface PurchaseOrderItem {
