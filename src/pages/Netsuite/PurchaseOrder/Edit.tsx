@@ -193,7 +193,7 @@ export default function Edit() {
             />
             
             <div className="bg-gray-50">
-                <div className="mx-auto px-4 sm:px-3">
+                <div className="mx-auto px-0">
                     {(isLoading || loadingMasterData) ? (
                         <LoadingOverlay
                             message="Loading data..."

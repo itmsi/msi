@@ -32,6 +32,7 @@ export const usePurchaseOrderCreate = () => {
         custbody_me_saving_type: null,
         custbody_me_pr_number: '',
         custbody_msi_createdby_api: profileSSOId,
+        custbody_me_validity_date: null,
         class: null,
         class_name: '',
         // description: null,
@@ -164,6 +165,7 @@ export const usePurchaseOrderCreate = () => {
                 custbody_me_saving_type: formData.custbody_me_saving_type || null,
                 custbody_me_pr_number: formData.custbody_me_pr_number || '',
                 custbody_msi_createdby_api: profileSSOId || '',
+                custbody_me_validity_date: formData?.custbody_me_validity_date || null,
                 class: Number(formData.class) || null,
                 department: Number(formData.department) || null,
                 // description: formData.description || null,
@@ -175,6 +177,8 @@ export const usePurchaseOrderCreate = () => {
                     class: Number(item.class) || null,
                     location: Number(item.location) || 0,
                     taxcode: Number(item.taxcode) || null,
+                    custcol_me_landed_cost: Number(item.custcol_me_landed_cost) || null,
+                    custcol_msi_fob: Number(item.custcol_msi_fob) || null,
                 }))
             };
 

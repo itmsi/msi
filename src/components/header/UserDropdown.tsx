@@ -33,7 +33,7 @@ export default function UserDropdown() {
     // Fallback data jika user tidak tersedia
     const userData = user || {
         employee_name: 'Guest User',
-        user_email: 'guest@example.com'
+        email: 'guest@example.com'
     };
     
     return (
@@ -79,7 +79,7 @@ export default function UserDropdown() {
                         {userData.employee_name || 'Guest User'}
                     </span>
                     <span className="mt-0.5 block text-theme-xs text-gray-500">
-                        {userData.user_email || 'guest@example.com'}
+                        {userData.email || 'guest@example.com'}
                     </span>
                 </div>
 

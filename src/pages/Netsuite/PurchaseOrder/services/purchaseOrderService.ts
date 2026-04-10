@@ -1,5 +1,5 @@
-import { apiPost, apiGet, ApiResponse } from '@/helpers/apiHelper';
-import { ComponentsDataResponse, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, POItemResponse, POItemsRequest, PurchaseOrderRequest, PurchaseOrderResponse, VendorResponse } from '../types/purchaseorder';
+import { apiPost, apiGet, ApiResponse, apiPut } from '@/helpers/apiHelper';
+import { ComponentsDataResponse, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, POItemResponse, POItemsRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -97,6 +97,11 @@ export class PurchaseOrderService {
 
     static async createPurchaseOrder(requestData: any): Promise<any> {
         const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/create`, requestData);
+        return response.data;
+    }
+
+    static async updatePurchaseOrder(data: PurchaseOrderFormUpdate): Promise<any> {
+        const response = await apiPut(`${API_BASE_URL}/netsuite/purchasing-orders/update`, data as Record<string, any>);
         return response.data;
     }
 
