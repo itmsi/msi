@@ -26,12 +26,10 @@ export default function View() {
                 
                 const response = await InvoiceSalesOrderService.getInvoiceSalesOrders({
                     page: 1,
-                    page_size: 20,
+                    limit: 20,
                     sort_by: 'trandate',
-                    sort_order: 'DESC',
-                    filters: {
-                        tranid: tranid
-                    }
+                    sort_order: 'desc',
+                    search: tranid
                 });
                 
                 if (response.success && response.data.items && response.data.items.length > 0) {
