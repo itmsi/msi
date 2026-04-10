@@ -84,6 +84,7 @@ export interface PurchaseOrderForm {
     department: number | null;
     department_name?: string | null;
     custbody_msi_createdby_api?: string | null;
+    custbody_me_validity_date?: string | null;
     nextapprover?: string | null;
     approvalstatus?: number | null;
     // description: string | null;
@@ -206,6 +207,8 @@ export interface TablePOItem {
     taxcode_display?: string;
     gross_amount?: number;
     tax_amount?: number;
+    custcol_msi_fob?: number;
+    custcol_me_landed_cost?: number;
 }
 
 
@@ -301,6 +304,7 @@ export interface PODetailData {
     custbody_me_wf_in_delegation: string;
     custbody_me_delegate_approver: number | null;
     custbody_msi_createdby_api: string;
+    custbody_me_validity_date: string | null;
     custbody_me_pr_date: string;
     custbody_me_project_location: number;
     custbody_me_pr_type: number;
@@ -346,6 +350,8 @@ export interface PODetailLine {
     matchbilltoreceipt?: string;
     expectedreceiptdate?: string | null;
     custcol_4601_witaxapplies?: string | null;
+    custcol_me_landed_cost?: number | null;
+    custcol_msi_fob?: number | null;
 }
 
 export interface PODetailResponse {
@@ -373,4 +379,42 @@ export interface ComponentsDataResponse {
         pagination: Pagination;
     };
     message: string;
+}
+
+export interface PurchaseOrderFormUpdate {
+    id: number;
+    customform?: number;
+    vendorid?: number;
+    purchasedate?: string;
+    subsidiary?: number;
+    location?: number;
+    memo?: string;
+    currency?: number;
+    terms?: number;
+    custbody_me_pr_date?: string;
+    custbody_me_project_location?: number;
+    custbody_me_pr_type?: number;
+    custbody_me_saving_type?: number;
+    custbody_me_pr_number?: string;
+    custbody_msi_createdby_api?: string;
+    class?: number;
+    department?: number;
+    custbody_me_validity_date?: string;
+    items?: PurchaseOrderUpdateItem[];
+}
+
+export interface PurchaseOrderUpdateItem {
+    itemId: number;
+    qty: number;
+    rate?: number;
+    department?: number;
+    class?: number;
+    location?: number;
+    taxcode?: number;
+    custcol_msi_fob?: number;
+    custcol_me_landed_cost?: number;
+    amount?: number;
+    total?: number;
+    tax_amount?: number;
+    gross_amount?: number;
 }

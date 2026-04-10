@@ -221,26 +221,31 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             width: '130px',
         },
         {
-            name: 'Rate',
-            selector: (row: TablePOItem) => row.rate || 0,
+            name: 'FOB',
+            selector: (row: TablePOItem) => row.custcol_msi_fob || 0,
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        row.rate && row.rate > 0 ? formatNumberPriceKoma(row.rate) : '-'
+                        row.custcol_msi_fob && row.custcol_msi_fob > 0 ? formatNumberPriceKoma(row.custcol_msi_fob) : '-'
                     }</p>
                 ) : (
                 <Input
-                    name={`rate_${index}`}
+                    name={`custcol_msi_fob_${index}`}
                     type="text"
-                    value={row.rate && row.rate > 0 ? formatNumberPriceKoma(row.rate) : ''}
+                    value={row.custcol_msi_fob && row.custcol_msi_fob > 0 ? formatNumberPriceKoma(row.custcol_msi_fob) : ''}
                     onKeyPress={handleKeyPress}
                     onChange={(e) => {
-                        const val = e.target.value.replace(/[^\d]/g, '');
-                        updateItemById(index as number, 'rate', val);
+                        const fobVal = parseFloat(e.target.value.replace(/[^\d]/g, '') || '0');
+                        updateItemById(index as number, 'custcol_msi_fob', fobVal);
                         
-                        // Auto-calculate amount and total when rate changes
+                        // Calculate rate = FOB + Landed Cost
+                        const landedCost = row.custcol_me_landed_cost || 0;
+                        const calculatedRate = fobVal + landedCost;
+                        updateItemById(index as number, 'rate', calculatedRate);
+                        
+                        // Calculate amount = qty * rate
                         const quantity = row.qty || 1;
-                        const calculatedAmount = quantity * parseFloat(val || '0');
+                        const calculatedAmount = quantity * calculatedRate;
                         updateItemById(index as number, 'amount', calculatedAmount);
                         updateItemById(index as number, 'total', calculatedAmount);
                         
@@ -262,30 +267,37 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             sortable: false
         },
         {
-            name: 'Amount',
-            selector: (row: TablePOItem) => row.amount || 0,
+            name: 'Cost',
+            selector: (row: TablePOItem) => row.custcol_me_landed_cost || 0,
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        row.amount && row.amount > 0 ? formatNumberPriceKoma(row.amount) : '-'
+                        row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatNumberPriceKoma(row.custcol_me_landed_cost) : '-'
                     }</p>
                 ) : (
                 <Input
-                    name={`amount_${index}`}
+                    name={`custcol_me_landed_cost_${index}`}
                     type="text"
-                    value={row.amount && row.amount > 0 ? formatNumberPriceKoma(row.amount) : ''}
+                    value={row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatNumberPriceKoma(row.custcol_me_landed_cost) : ''}
                     onKeyPress={handleKeyPress}
                     onChange={(e) => {
-                        const val = e.target.value.replace(/[^\d]/g, '');
-                        updateItemById(index as number, 'amount', val);
+                        const costVal = parseFloat(e.target.value.replace(/[^\d]/g, '') || '0');
+                        updateItemById(index as number, 'custcol_me_landed_cost', costVal);
                         
-                        // Update total based on quantity * amount (manual amount override)
-                        const total = (row.qty || 1) * parseFloat(val || '0');
-                        updateItemById(index as number, 'total', total);
+                        // Calculate rate = FOB + Landed Cost
+                        const fob = row.custcol_msi_fob || 0;
+                        const calculatedRate = fob + costVal;
+                        updateItemById(index as number, 'rate', calculatedRate);
+                        
+                        // Calculate amount = qty * rate
+                        const quantity = row.qty || 1;
+                        const calculatedAmount = quantity * calculatedRate;
+                        updateItemById(index as number, 'amount', calculatedAmount);
+                        updateItemById(index as number, 'total', calculatedAmount);
                         
                         // Recalculate tax amounts if tax code is selected
-                        if (row.taxcode_name && parseFloat(val || '0') > 0) {
-                            const { taxAmount, grossAmount } = calculateTaxAmounts(parseFloat(val || '0'), row.taxcode_name);
+                        if (row.taxcode_name && calculatedAmount > 0) {
+                            const { taxAmount, grossAmount } = calculateTaxAmounts(calculatedAmount, row.taxcode_name);
                             updateItemById(index as number, 'tax_amount', taxAmount);
                             updateItemById(index as number, 'gross_amount', grossAmount);
                         }
@@ -298,6 +310,54 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             </>),
             center: true,
             width: '300px',
+            sortable: false
+        },
+        {
+            name: 'Rate',
+            selector: (row: TablePOItem) => row.rate || 0,
+            cell: (row, index) => (<>
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                        row.rate && row.rate > 0 ? formatNumberPriceKoma(row.rate) : '-'
+                    }</p>
+                ) : (
+                <Input
+                    name={`rate_${index}`}
+                    type="text"
+                    value={row.rate && row.rate > 0 ? formatNumberPriceKoma(row.rate) : ''}
+                    disabled={true}
+                    readonly={true}
+                    className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
+                    placeholder="Auto calculated"
+                />
+                )}
+            </>),
+            center: true,
+            width: '250px',
+            sortable: false
+        },
+        {
+            name: 'Amount',
+            selector: (row: TablePOItem) => row.amount || 0,
+            cell: (row, index) => (<>
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                        row.amount && row.amount > 0 ? formatNumberPriceKoma(row.amount) : '-'
+                    }</p>
+                ) : (
+                <Input
+                    name={`amount_${index}`}
+                    type="text"
+                    value={row.amount && row.amount > 0 ? formatNumberPriceKoma(row.amount) : ''}
+                    disabled={true}
+                    readonly={true}
+                    className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
+                    placeholder="Auto calculated"
+                />
+                )}
+            </>),
+            center: true,
+            width: '250px',
             sortable: false
         },
         {
@@ -612,7 +672,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             pagination={false}
                             responsive
                             striped={false}
-                            highlightOnHover
+                            highlightOnHover={false}
                             className={`${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? '' : 'min-h-[300px] '}`}
                             noDataComponent={
                                 <div className="text-center py-8 text-gray-500">
