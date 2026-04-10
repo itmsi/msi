@@ -334,14 +334,14 @@ export default function Manage() {
                         name="sort_order"
                         value={sortOrder ? { 
                             value: sortOrder, 
-                            label: sortOrder === 'ASC' ? 'Ascending' : 'Descending' 
+                            label: sortOrder === 'asc' ? 'Ascending' : 'Descending' 
                         } : null}
                         onChange={(selectedOption) => 
                             handleFilterChange('sort_order', selectedOption?.value || '')
                         }
                         options={[
-                            { value: 'ASC', label: 'Ascending' },
-                            { value: 'DESC', label: 'Descending' }
+                            { value: 'asc', label: 'Ascending' },
+                            { value: 'desc', label: 'Descending' }
                         ]}
                         placeholder="Order by"
                         isClearable={false}
