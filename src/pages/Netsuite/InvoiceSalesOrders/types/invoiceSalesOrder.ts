@@ -1,17 +1,13 @@
-export interface InvoiceSalesOrderFilter {
-    tranid?: string;
-    approvalstatus?: string;
-    lastmodified?: string;
-    [key: string]: any;
-}
-
 export interface InvoiceSalesOrderRequest {
     page: number;
-    page_size: number;
+    limit: number;
     sort_by: string;
-    sort_order: 'ASC' | 'DESC';
-    filters?: InvoiceSalesOrderFilter;
+    sort_order: 'asc' | 'desc';
+    search?: string;
     subsidiary?: string;
+    approvalstatus?: string;
+    trandate_start?: string;
+    trandate_end?: string;
 }
 
 export interface InvoiceSalesOrderLine {

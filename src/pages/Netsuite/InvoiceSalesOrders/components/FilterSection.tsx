@@ -76,16 +76,16 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             const formattedStart = formatDateToYMD(selection.startDate);
             const formattedEnd = formatDateToYMD(selection.endDate);
             setSelectedDateRange({ startDate: formattedStart, endDate: formattedEnd });
-            onFilterChange('start_date', formattedStart);
-            onFilterChange('end_date', formattedEnd);
+            onFilterChange('trandate_start', formattedStart);
+            onFilterChange('trandate_end', formattedEnd);
         }
     };
 
     const handleClearDateRange = () => {
         setSelectedDateRange({ startDate: '', endDate: '' });
         setDateRangeState([{ startDate: new Date(), endDate: new Date(), key: 'selection' }]);
-        onFilterChange('start_date', '');
-        onFilterChange('end_date', '');
+        onFilterChange('trandate_start', '');
+        onFilterChange('trandate_end', '');
         setShowDatePicker(false);
     };
 
