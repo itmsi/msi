@@ -87,8 +87,8 @@ export default function EditFaktur() {
     return (
         <>
             <PageMeta
-                title="Edit Faktur Pajak - Motor Sights International"
-                description="Edit Faktur Pajak data"
+                title="Edit Tax Invoice - Motor Sights International"
+                description="Edit Tax Invoice data"
                 image="/motor-sights-international.png"
             />
             
@@ -107,7 +107,7 @@ export default function EditFaktur() {
                             </Button>
                             <div>
                                 <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Edit Faktur Pajak
+                                    Edit Tax Invoice
                                 </h3>
                             </div>
                         </div>
@@ -129,7 +129,7 @@ export default function EditFaktur() {
                 <form onSubmit={onSubmit}>
                     {/* Header Fields Section */}
                     <div className="bg-white rounded-lg shadow-sm mb-6 p-6">
-                        <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-4 border-b border-gray-100 pb-3">Informasi Utama</h2>
+                        <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-4 border-b border-gray-100 pb-3">Main Information</h2>
                         
                         {loading ? (
                             <div className="flex justify-center py-8">
@@ -137,10 +137,10 @@ export default function EditFaktur() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                                {renderInput('tanggal_faktur', 'Tanggal Faktur', 'date', true)}
+                                {renderInput('tanggal_faktur', 'Invoice Date', 'date', true)}
                                 
                                 <div>
-                                    <Label>Jenis Faktur</Label>
+                                    <Label>Invoice Type</Label>
                                     <InputField
                                         type="text"
                                         value="Normal"
@@ -150,7 +150,7 @@ export default function EditFaktur() {
                                 </div>
 
                                 <div>
-                                    <Label>Kode Transaksi</Label>
+                                    <Label>Transaction Code</Label>
                                     <CustomAsyncSelect
                                         defaultOptions={kodeTransaksiSelect.referenceOptions}
                                         value={kodeTransaksiSelect.referenceOptions.find(o => o.value === formData.kode_transaksi) || null}
@@ -158,15 +158,15 @@ export default function EditFaktur() {
                                         onInputChange={kodeTransaksiSelect.handleInputChange}
                                         onMenuScrollToBottom={kodeTransaksiSelect.handleMenuScrollToBottom}
                                         isLoading={kodeTransaksiSelect.pagination.loading}
-                                        placeholder="Pilih Kode Transaksi"
+                                        placeholder="Select Transaction Code"
                                         isSearchable={true}
                                     />
                                 </div>
 
-                                {renderInput('keterangan_tambahan', 'Keterangan Tambahan')}
-                                {renderInput('dokumen_pendukung', 'Dokumen Pendukung')}
-                                {renderInput('referensi', 'Referensi')}
-                                {renderInput('cap_fasilitas', 'Cap Fasilitas')}
+                                {renderInput('keterangan_tambahan', 'Additional Description')}
+                                {renderInput('dokumen_pendukung', 'Supporting Document')}
+                                {renderInput('referensi', 'Reference')}
+                                {renderInput('cap_fasilitas', 'Facility Stamp')}
                             </div>
                         )}
                     </div>
@@ -174,19 +174,19 @@ export default function EditFaktur() {
                     {/* Penjual & Pembeli Section */}
                     <div className="space-y-6 mb-6">
                         <div className="bg-white rounded-lg shadow-sm p-6">
-                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-4 border-b border-gray-100 pb-3">Data Penjual</h2>
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-4 border-b border-gray-100 pb-3">Seller Information</h2>
                             <div className="space-y-4">
-                                {renderInput('id_tku_Penjual', 'ID TKU Penjual')}
+                                {renderInput('id_tku_Penjual', 'Seller TKU ID')}
                             </div>
                         </div>
                         
                         <div className="bg-white rounded-lg shadow-sm p-6">
-                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-4 border-b border-gray-100 pb-3">Data Pembeli</h2>
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-4 border-b border-gray-100 pb-3">Buyer Information</h2>
                             <div className="space-y-4">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {renderInput('npwp_or_nik_pembeli', 'NPWP / NIK Pembeli')}
+                                    {renderInput('npwp_or_nik_pembeli', 'Buyer Tax ID / National ID')}
                                     <div>
-                                        <Label>Jenis ID Pembeli</Label>
+                                        <Label>Buyer ID Type</Label>
                                         <CustomAsyncSelect
                                             defaultOptions={jenisIdPembeliSelect.referenceOptions}
                                             value={jenisIdPembeliSelect.referenceOptions.find(o => o.value === formData.jenis_id_pembeli) || null}
@@ -194,16 +194,16 @@ export default function EditFaktur() {
                                             onInputChange={jenisIdPembeliSelect.handleInputChange}
                                             onMenuScrollToBottom={jenisIdPembeliSelect.handleMenuScrollToBottom}
                                             isLoading={jenisIdPembeliSelect.pagination.loading}
-                                            placeholder="Pilih Jenis ID"
+                                            placeholder="Select ID Type"
                                         />
                                     </div>
                                 </div>
-                                {renderInput('nama_pembeli', 'Nama Pembeli')}
-                                {renderInput('nomor_dokumen_pembeli', 'No. Dokumen Pembeli')}
-                                {renderInput('alamat_pembeli', 'Alamat Pembeli')}
+                                {renderInput('nama_pembeli', 'Buyer Name')}
+                                {renderInput('nomor_dokumen_pembeli', 'Buyer Document No.')}
+                                {renderInput('alamat_pembeli', 'Buyer Address')}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <Label>Negara</Label>
+                                        <Label>Country</Label>
                                         <CustomAsyncSelect
                                             defaultOptions={kodeNegaraSelect.referenceOptions}
                                             value={kodeNegaraSelect.referenceOptions.find(o => o.value === formData.negara_pembeli) || null}
@@ -211,12 +211,12 @@ export default function EditFaktur() {
                                             onInputChange={kodeNegaraSelect.handleInputChange}
                                             onMenuScrollToBottom={kodeNegaraSelect.handleMenuScrollToBottom}
                                             isLoading={kodeNegaraSelect.pagination.loading}
-                                            placeholder="Pilih Negara"
+                                            placeholder="Select Country"
                                         />
                                     </div>
                                     {renderInput('email_pembeli', 'Email', 'email')}
                                 </div>
-                                {renderInput('id_tku_pembeli', 'ID TKU Pembeli')}
+                                {renderInput('id_tku_pembeli', 'Buyer TKU ID')}
                             </div>
                         </div>
                     </div>
@@ -244,7 +244,7 @@ export default function EditFaktur() {
                             onClick={() => navigate('/netsuite/invoice-sales-order')}
                             disabled={submitLoading || loading}
                         >
-                            Batal
+                            Cancel
                         </Button>
                         <Button
                             type="submit"
@@ -256,7 +256,7 @@ export default function EditFaktur() {
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                             ) : (
                                 <>
-                                    <MdSave /> Simpan
+                                    <MdSave /> Save
                                 </>
                             )}
                         </Button>
