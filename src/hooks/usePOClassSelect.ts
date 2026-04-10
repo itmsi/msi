@@ -22,6 +22,8 @@ export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number, pro
         loading: false
     });
     const [inputValue, setInputValue] = useState('');
+    const [initialized, setInitialized] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const loadPOClassOptions = useCallback(async (
         inputValue: string = '', 
@@ -29,7 +31,11 @@ export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number, pro
         page: number = 1,
         reset: boolean = false
     ) => {
+        // Prevent multiple simultaneous calls
+        if (isLoading) return loadedOptions;
+        
         try {
+            setIsLoading(true);
             setPagination(prev => ({ ...prev, loading: true }));
 
             const response = await PurchaseOrderService.getPOClass({
@@ -59,17 +65,21 @@ export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number, pro
                     hasMore: hasMoreData,
                     loading: false
                 });
+                
+                if (reset) setInitialized(true);
 
                 return updatedOptions;
             }
         } catch (error) {
             console.error('Error loading Purchase Order items:', error);
             setPagination(prev => ({ ...prev, loading: false }));
+        } finally {
+            setIsLoading(false);
+            setPagination(prev => ({ ...prev, loading: false }));
         }
 
-        setPagination(prev => ({ ...prev, loading: false }));
         return loadedOptions;
-    }, [limit, subsidiary_id, profileSSOId]);
+    }, [limit, subsidiary_id, profileSSOId, isLoading]);
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -88,10 +98,10 @@ export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number, pro
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
-        if (POClassOptions.length === 0) {
+        if (!initialized && !isLoading && POClassOptions.length === 0) {
             await loadPOClassOptions('', [], 1, true);
         }
-    }, [POClassOptions.length, loadPOClassOptions]);
+    }, [initialized, isLoading, POClassOptions.length, loadPOClassOptions]);
 
     // Get PO item by ID
     const getPOItemById = useCallback(async (poItemId: string,): Promise<POClassSelectOption | null> => {
@@ -113,13 +123,17 @@ export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number, pro
 
     // Reset class options ketika subsidiary_id berubah
     const resetClassOptions = useCallback(async () => {
+        if (isLoading) return; // Prevent reset during loading
+        
         setPOClassOptions([]);
         setInputValue('');
+        setInitialized(false);
         setPagination({ page: 1, hasMore: true, loading: false });
+        
         if (subsidiary_id) {
             await loadPOClassOptions('', [], 1, true);
         }
-    }, [subsidiary_id, loadPOClassOptions]);
+    }, [subsidiary_id, loadPOClassOptions, isLoading]);
 
     return {
         POClassOptions,
@@ -131,5 +145,7 @@ export const usePOClassSelect = (limit: number = 30, subsidiary_id?: number, pro
         loadPOClassOptions,
         getPOItemById,
         resetClassOptions,
+        initialized, // Export initialized state
+        isLoading, // Export loading state
     };
 };
