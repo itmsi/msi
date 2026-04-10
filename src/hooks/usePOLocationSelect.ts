@@ -22,6 +22,8 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
         loading: false
     });
     const [inputValue, setInputValue] = useState('');
+    const [initialized, setInitialized] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const loadPOLocationOptions = useCallback(async (
         inputValue: string = '', 
@@ -29,7 +31,11 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
         page: number = 1,
         reset: boolean = false
     ) => {
+        // Prevent multiple simultaneous calls
+        if (isLoading) return loadedOptions;
+        
         try {
+            setIsLoading(true);
             setPagination(prev => ({ ...prev, loading: true }));
 
             const response = await PurchaseOrderService.getPOLocation({
@@ -58,17 +64,21 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
                     hasMore: hasMoreData,
                     loading: false
                 });
+                
+                if (reset) setInitialized(true);
 
                 return updatedOptions;
             }
         } catch (error) {
             console.error('Error loading Purchase Order items:', error);
             setPagination(prev => ({ ...prev, loading: false }));
+        } finally {
+            setIsLoading(false);
+            setPagination(prev => ({ ...prev, loading: false }));
         }
 
-        setPagination(prev => ({ ...prev, loading: false }));
         return loadedOptions;
-    }, [limit, is_parent, subsidiary_id]); // Tambahkan subsidiary_id sebagai dependency
+    }, [limit, is_parent, subsidiary_id, isLoading]); // Tambahkan subsidiary_id sebagai dependency
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -87,10 +97,10 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
-        if (POLocationOptions.length === 0) {
+        if (!initialized && !isLoading && POLocationOptions.length === 0) {
             await loadPOLocationOptions('', [], 1, true);
         }
-    }, [POLocationOptions.length, loadPOLocationOptions]);
+    }, [initialized, isLoading, POLocationOptions.length, loadPOLocationOptions]);
 
     // Get PO item by ID
     const getPOItemById = useCallback(async (poItemId: string, is_parent: boolean = true): Promise<POLocationSelectOption | null> => {
@@ -112,13 +122,17 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
 
     // Reset location options ketika subsidiary_id berubah
     const resetLocationOptions = useCallback(async () => {
+        if (isLoading) return; // Prevent reset during loading
+        
         setPOLocationOptions([]);
         setInputValue('');
+        setInitialized(false);
         setPagination({ page: 1, hasMore: true, loading: false });
+        
         if (subsidiary_id) {
             await loadPOLocationOptions('', [], 1, true);
         }
-    }, [subsidiary_id, loadPOLocationOptions]);
+    }, [subsidiary_id, loadPOLocationOptions, isLoading]);
 
     return {
         POLocationOptions,
@@ -129,6 +143,8 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
         initializeOptions,
         loadPOLocationOptions,
         getPOItemById,
-        resetLocationOptions, // Export function untuk reset
+        resetLocationOptions,
+        initialized, // Export initialized state
+        isLoading, // Export loading state
     };
 };

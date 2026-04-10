@@ -22,6 +22,8 @@ export const usePODepartmentSelect = (limit: number = 30, subsidiary_id?: number
         loading: false
     });
     const [inputValue, setInputValue] = useState('');
+    const [initialized, setInitialized] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const loadPODepartmentOptions = useCallback(async (
         inputValue: string = '', 
@@ -29,7 +31,11 @@ export const usePODepartmentSelect = (limit: number = 30, subsidiary_id?: number
         page: number = 1,
         reset: boolean = false
     ) => {
+        // Prevent multiple simultaneous calls
+        if (isLoading) return loadedOptions;
+        
         try {
+            setIsLoading(true);
             setPagination(prev => ({ ...prev, loading: true }));
 
             const response = await PurchaseOrderService.getPODepartment({
@@ -57,17 +63,21 @@ export const usePODepartmentSelect = (limit: number = 30, subsidiary_id?: number
                     hasMore: hasMoreData,
                     loading: false
                 });
+                
+                if (reset) setInitialized(true);
 
                 return updatedOptions;
             }
         } catch (error) {
             console.error('Error loading Purchase Order items:', error);
             setPagination(prev => ({ ...prev, loading: false }));
+        } finally {
+            setIsLoading(false);
+            setPagination(prev => ({ ...prev, loading: false }));
         }
 
-        setPagination(prev => ({ ...prev, loading: false }));
         return loadedOptions;
-    }, [limit, subsidiary_id]);
+    }, [limit, subsidiary_id, isLoading]);
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -86,10 +96,10 @@ export const usePODepartmentSelect = (limit: number = 30, subsidiary_id?: number
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
-        if (PODepartmentOptions.length === 0) {
+        if (!initialized && !isLoading && PODepartmentOptions.length === 0) {
             await loadPODepartmentOptions('', [], 1, true);
         }
-    }, [PODepartmentOptions.length, loadPODepartmentOptions]);
+    }, [initialized, isLoading, PODepartmentOptions.length, loadPODepartmentOptions]);
 
     // Get PO item by ID
     const getPOItemById = useCallback(async (poItemId: string,): Promise<PODepartmentSelectOption | null> => {
@@ -111,13 +121,17 @@ export const usePODepartmentSelect = (limit: number = 30, subsidiary_id?: number
 
     // Reset department options ketika subsidiary_id berubah
     const resetDepartmentOptions = useCallback(async () => {
+        if (isLoading) return; // Prevent reset during loading
+        
         setPODepartmentOptions([]);
         setInputValue('');
+        setInitialized(false);
         setPagination({ page: 1, hasMore: true, loading: false });
+        
         if (subsidiary_id) {
             await loadPODepartmentOptions('', [], 1, true);
         }
-    }, [subsidiary_id, loadPODepartmentOptions]);
+    }, [subsidiary_id, loadPODepartmentOptions, isLoading]);
 
     return {
         PODepartmentOptions,
@@ -129,5 +143,7 @@ export const usePODepartmentSelect = (limit: number = 30, subsidiary_id?: number
         loadPODepartmentOptions,
         getPOItemById,
         resetDepartmentOptions,
+        initialized, // Export initialized state
+        isLoading, // Export loading state
     };
 };

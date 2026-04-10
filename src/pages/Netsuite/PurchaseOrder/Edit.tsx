@@ -42,35 +42,28 @@ export default function Edit() {
     // Get subsidiary_id dari form data
     const subsidiaryId = formData.subsidiary ? Number(formData.subsidiary) : undefined;
 
-    // Location select untuk header (is_parent = true)
+    // Location select untuk header dan items (is_parent = false)
     const {
         POLocationOptions,
-        pagination,
-        inputValue,
+        pagination: locationPagination,
+        inputValue: locationInputValue,
         handleInputChange: handleLocationInputChange,
-        handleMenuScrollToBottom,
-        initializeOptions,
-        resetLocationOptions
-    } = usePOLocationSelect(30, false, subsidiaryId);
-
-    // Location select untuk items (is_parent = false)
-    const {
-        POLocationOptions: itemLocationOptions,
-        pagination: itemLocationPagination,
-        inputValue: itemLocationInputValue,
-        handleInputChange: handleItemLocationInputChange,
-        handleMenuScrollToBottom: handleItemLocationScrollToBottom,
-        initializeOptions: initializeItemLocationOptions,
-        resetLocationOptions: resetItemLocationOptions
+        handleMenuScrollToBottom: handleLocationMenuScrollToBottom,
+        initializeOptions: initializeLocationOptions,
+        resetLocationOptions,
+        initialized: locationInitialized,
+        isLoading: locationLoading
     } = usePOLocationSelect(30, false, subsidiaryId);
     
     const [selectedLocation, setSelectedLocation] = useState<any>(null);
     const [locationSelectError, setLocationSelectError] = useState<string>('');
 
+    // Initialize hooks only once when not yet initialized
     useEffect(() => {
-        initializeOptions();
-        initializeItemLocationOptions();
-    }, [initializeOptions, initializeItemLocationOptions]);
+        if (!locationInitialized && !locationLoading) {
+            initializeLocationOptions();
+        }
+    }, [locationInitialized, locationLoading, initializeLocationOptions]);
     
     // Class select untuk items
     const {
@@ -80,15 +73,15 @@ export default function Edit() {
         handleInputChange: handleItemClassInputChange,
         handleMenuScrollToBottom: handleItemClassScrollToBottom,
         initializeOptions: initializeItemClassOptions,
-        resetClassOptions
+        resetClassOptions,
+        initialized: classInitialized,
+        isLoading: classLoading
     } = usePOClassSelect(30, subsidiaryId, profileSSOId);
     
     const [selectedClass, setSelectedClass] = useState<any>(null);
     const [classSelectError, setClassSelectError] = useState<string>('');
 
-    useEffect(() => {
-        initializeItemClassOptions();
-    }, [initializeItemClassOptions]);
+
     
     // Department select untuk items
     const {
@@ -98,29 +91,44 @@ export default function Edit() {
         handleInputChange: handleItemDepartmentInputChange,
         handleMenuScrollToBottom: handleItemDepartmentScrollToBottom,
         initializeOptions: initializeItemDepartmentOptions,
-        resetDepartmentOptions
+        resetDepartmentOptions,
+        initialized: departmentInitialized,
+        isLoading: departmentLoading
     } = usePODepartmentSelect(30, subsidiaryId);
     
     const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
     const [departmentSelectError, setDepartmentSelectError] = useState<string>('');
 
-    useEffect(() => {
-        initializeItemDepartmentOptions();
-    }, [initializeItemDepartmentOptions]);
 
-    // Reset location options ketika subsidiary berubah
+
+    useEffect(() => {
+        if (!classInitialized && !classLoading) {
+            initializeItemClassOptions();
+        }
+    }, [classInitialized, classLoading, initializeItemClassOptions]);
+    
+    useEffect(() => {
+        if (!departmentInitialized && !departmentLoading) {
+            initializeItemDepartmentOptions();
+        }
+    }, [departmentInitialized, departmentLoading, initializeItemDepartmentOptions]);
+
+    // Reset hooks ketika subsidiary berubah (debounced)
     useEffect(() => {
         if (subsidiaryId) {
-            resetLocationOptions();
-            resetItemLocationOptions();
-            resetClassOptions();
-            resetDepartmentOptions();
-            // Reset selected location, class, dan department karena subsidiary berubah
-            setSelectedLocation(null);
-            setSelectedClass(null);
-            setSelectedDepartment(null);
+            const timeoutId = setTimeout(() => {
+                resetLocationOptions();
+                resetClassOptions();
+                resetDepartmentOptions();
+                // Reset selected values
+                setSelectedLocation(null);
+                setSelectedClass(null);
+                setSelectedDepartment(null);
+            }, 100); // Small delay to prevent rapid consecutive calls
+            
+            return () => clearTimeout(timeoutId);
         }
-    }, [subsidiaryId, resetLocationOptions, resetItemLocationOptions, resetClassOptions, resetDepartmentOptions]);
+    }, [subsidiaryId]);
     
     const {
         POVendorOptions,
@@ -261,10 +269,10 @@ export default function Edit() {
                                 
                                 // Location props  
                                 locationOptions={POLocationOptions}
-                                locationPagination={pagination}
-                                locationInputValue={inputValue}
+                                locationPagination={locationPagination}
+                                locationInputValue={locationInputValue}
                                 onLocationInputChange={handleLocationInputChange}
-                                onLocationMenuScrollToBottom={handleMenuScrollToBottom}
+                                onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
                                 selectedLocation={selectedLocation}
                                 onLocationChange={(option) => {
                                     setSelectedLocation(option);
@@ -333,12 +341,12 @@ export default function Edit() {
                                 onProductDelete={handleProductDelete}
                                 onUpdateProductItem={handleUpdateProductItem}
 
-                                // Location props (is_parent = false)
-                                locationOptions={itemLocationOptions}
-                                locationPagination={itemLocationPagination}
-                                locationInputValue={itemLocationInputValue}
-                                onLocationInputChange={handleItemLocationInputChange}
-                                onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
+                                // Location props (shared dengan header)
+                                locationOptions={POLocationOptions}
+                                locationPagination={locationPagination}
+                                locationInputValue={locationInputValue}
+                                onLocationInputChange={handleLocationInputChange}
+                                onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
                                 selectedLocation={selectedLocation}
                                 onLocationChange={(option) => {
                                     setSelectedLocation(option);
