@@ -39,8 +39,8 @@ export default function Edit() {
         handleUpdateProductItem,
     } = usePurchaseOrderEdit();
 
-    // Get subsidiary_id dari form data
-    const subsidiaryId = formData.subsidiary ? Number(formData.subsidiary) : undefined;
+    // Get subsidiary_id dari form data dengan defensive check
+    const subsidiaryId = formData?.subsidiary ? Number(formData.subsidiary) : undefined;
 
     // Location select untuk header dan items (is_parent = false)
     const {
@@ -57,13 +57,19 @@ export default function Edit() {
     const [selectedLocation, setSelectedLocation] = useState<any>(null);
     const [locationSelectError, setLocationSelectError] = useState<string>('');
     const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
+    const [hasAttemptedInitialization, setHasAttemptedInitialization] = useState(false);
 
-    // Initialize hooks only once when not yet initialized
+    // Initialize hooks only once when not yet initialized - PRODUCTION SAFE
     useEffect(() => {
-        if (!locationInitialized && !locationLoading && initializeLocationOptions) {
-            initializeLocationOptions();
+        if (!hasAttemptedInitialization && initializeLocationOptions && !locationInitialized && !locationLoading) {
+            try {
+                initializeLocationOptions();
+                setHasAttemptedInitialization(true);
+            } catch (error) {
+                console.error('Failed to initialize location options:', error);
+            }
         }
-    }, [locationInitialized, locationLoading]); // Remove function dependency untuk production build
+    }, [locationInitialized, locationLoading, hasAttemptedInitialization]);
     
     // Class select untuk items
     const {
@@ -100,32 +106,46 @@ export default function Edit() {
 
 
     useEffect(() => {
-        if (!classInitialized && !classLoading && initializeItemClassOptions) {
-            initializeItemClassOptions();
+        if (initializeItemClassOptions && !classInitialized && !classLoading) {
+            try {
+                initializeItemClassOptions();
+            } catch (error) {
+                console.error('Failed to initialize class options:', error);
+            }
         }
-    }, [classInitialized, classLoading]); // Remove function dependency
+    }, [classInitialized, classLoading, initializeItemClassOptions]);
     
     useEffect(() => {
-        if (!departmentInitialized && !departmentLoading && initializeItemDepartmentOptions) {
-            initializeItemDepartmentOptions();
+        if (initializeItemDepartmentOptions && !departmentInitialized && !departmentLoading) {
+            try {
+                initializeItemDepartmentOptions();
+            } catch (error) {
+                console.error('Failed to initialize department options:', error);
+            }
         }
-    }, [departmentInitialized, departmentLoading]); // Remove function dependency
+    }, [departmentInitialized, departmentLoading, initializeItemDepartmentOptions]);
 
-    // Reset selected values ketika subsidiary berubah (hanya untuk user interaction)
+    // Reset selected values ketika subsidiary berubah - PRODUCTION SAFE
     useEffect(() => {
         // Only reset if initial load is complete and this is user changing subsidiary
-        if (isInitialLoadComplete && subsidiaryId) {
-            setSelectedLocation(null);
-            setSelectedClass(null);
-            setSelectedDepartment(null);
+        // Add additional check to prevent reset during initial load
+        if (isInitialLoadComplete && subsidiaryId && formData?.subsidiary && poDetail) {
+            // Additional safety: only reset if subsidiary actually changed from initial value
+            const currentSubsidiary = Number(formData.subsidiary);
+            const initialSubsidiary = Number(poDetail.subsidiary);
+            
+            if (currentSubsidiary !== initialSubsidiary) {
+                try {
+                    setSelectedLocation(null);
+                    setSelectedClass(null);
+                    setSelectedDepartment(null);
+                } catch (error) {
+                    console.error('Failed to reset selected values:', error);
+                }
+            }
         }
-    }, [subsidiaryId, isInitialLoadComplete]); // Add missing dependency untuk production
+    }, [subsidiaryId, isInitialLoadComplete, formData?.subsidiary, poDetail]);
     
-    console.log({
-        selectedClass,
-        formData,
-        poDetail
-    });
     const {
         POVendorOptions,
         pagination : vendorPagination,
@@ -142,40 +162,63 @@ export default function Edit() {
         if (initializeVendorOptions) {
             initializeVendorOptions();
         }
-    }, []); // Initialize once dan remove function dependency
+    }, [initializeVendorOptions]); // Add function dependency back
 
-    // Set default selected vendor & location dari data PO
+    // Set default selected vendor & location dari data PO - SEQUENCED PROPERLY
     useEffect(() => {
-        if (poDetail) {
-            setSelectedVendor({
-                value: String(poDetail.vendor_id),
-                label: poDetail.vendor_name,
-                data: { companyName: poDetail.vendor_name }
-            });
+        // Only set values when:
+        // 1. poDetail is available
+        // 2. Hooks are initialized (options are loaded)
+        // 3. Not already set (prevent infinite loop)
+        if (poDetail && !isInitialLoadComplete) {
+            if (locationInitialized && classInitialized && departmentInitialized) {
+                try {
+                    // Set vendor with defensive checks
+                    if (poDetail.vendor_id && poDetail.vendor_name) {
+                        setSelectedVendor({
+                            value: String(poDetail.vendor_id),
+                            label: poDetail.vendor_name,
+                            data: { companyName: poDetail.vendor_name }
+                        });
+                    }
 
-            if (poDetail.location) {
-                setSelectedLocation({
-                    value: String(poDetail.location),
-                    label: poDetail.location_display,
-                });
+                    // Set location with defensive checks
+                    if (poDetail.location && poDetail.location_display) {
+                        const locationValue = {
+                            value: String(poDetail.location),
+                            label: poDetail.location_display,
+                        };
+                        setSelectedLocation(locationValue);
+                    }
+                    
+                    // Set class with defensive checks
+                    if (poDetail.class && poDetail.class_display) {
+                        const classValue = {
+                            value: String(poDetail.class),
+                            label: poDetail.class_display,
+                        };
+                        setSelectedClass(classValue);
+                    }
+                    
+                    // Set department with defensive checks
+                    if (poDetail.department && poDetail.department_display) {
+                        const departmentValue = {
+                            value: String(poDetail.department),
+                            label: poDetail.department_display,
+                        };
+                        setSelectedDepartment(departmentValue);
+                    }
+                    
+                    // Mark initial load as complete
+                    setIsInitialLoadComplete(true);
+                    
+                } catch (error) {
+                    console.error('Failed to set initial PO data:', error);
+                    setIsInitialLoadComplete(true);
+                }
             }
-            if (poDetail.class) {
-                setSelectedClass({
-                    value: String(poDetail.class),
-                    label: poDetail.class_display || '',
-                });
-            }
-            if (poDetail.department) {
-                setSelectedDepartment({
-                    value: String(poDetail.department),
-                    label: poDetail.department_display || '',
-                });
-            }
-            
-            // Mark initial load as complete
-            setIsInitialLoadComplete(true);
         }
-    }, [poDetail]);
+    }, [poDetail, locationInitialized, classInitialized, departmentInitialized, isInitialLoadComplete]);
 
     const handleCancel = () => {
         navigate('/netsuite/purchase-order');
