@@ -39,6 +39,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         customform: detail.customform,
         customform_display: detail.customform_display || '',
         vendorid: detail.vendor_id,
+        vendor_name: detail.vendor_name || '',
         purchasedate: detail.po_date,
         subsidiary: detail.subsidiary ?? 0,
         subsidiary_display: detail.subsidiary_display || '',
@@ -80,6 +81,7 @@ export const usePurchaseOrderEdit = () => {
     const [formData, setFormData] = useState<PurchaseOrderForm>({
         customform: null,
         vendorid: null,
+        vendor_name: null,
         purchasedate: null,
         subsidiary: null,
         location: null,

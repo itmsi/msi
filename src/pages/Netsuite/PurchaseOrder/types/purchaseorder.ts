@@ -69,6 +69,7 @@ export interface PurchaseOrderForm {
     customform?: number | null;
     customform_display?: string | null;
     vendorid: number | null;
+    vendor_name?: string | null;
     purchasedate: string | null;
     subsidiary: number | null;
     subsidiary_display?: string | null;

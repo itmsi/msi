@@ -175,11 +175,11 @@ export default function Edit() {
                 try {
                     // Set vendor with defensive checks
                     if (poDetail.vendor_id && poDetail.vendor_name) {
-                        setSelectedVendor({
+                        const vendorValue = {
                             value: String(poDetail.vendor_id),
                             label: poDetail.vendor_name,
-                            data: { companyName: poDetail.vendor_name }
-                        });
+                        };
+                        setSelectedVendor(vendorValue);
                     }
 
                     // Set location with defensive checks
@@ -503,8 +503,7 @@ export default function Edit() {
                                     </Button>
                                 )}
                                 {
-                                    (poDetail?.approvalstatus !== 2 && 
-                                    poDetail?.approvalstatus !== 3) && (
+                                    ((formData.approvalstatus === 1 && formData.nextapprover === null))  && (
                                         <PermissionGate permission={["create", "update"]}>
                                             <Button
                                                 onClick={handleSubmit}
