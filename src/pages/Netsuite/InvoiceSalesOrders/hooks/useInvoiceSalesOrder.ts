@@ -32,7 +32,7 @@ export const useInvoiceSalesOrder = () => {
             const requestBody: InvoiceSalesOrderRequest = {
                 page: overrides?.page ?? pagination.page,
                 limit: overrides?.limit ?? pagination.page_size,
-                sort_by: 'created_at',
+                sort_by: 'id',
                 sort_order: overrides?.sort_order ?? sortOrder,
                 ...(overrides?.search !== undefined
                     ? (overrides.search ? { search: overrides.search } : {})
