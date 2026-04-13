@@ -121,14 +121,16 @@ export default function Edit() {
                 resetClassOptions();
                 resetDepartmentOptions();
                 // Reset selected values
-                setSelectedLocation(null);
-                setSelectedClass(null);
-                setSelectedDepartment(null);
+                if(formData.subsidiary) {
+                    setSelectedLocation(null);
+                    setSelectedClass(null);
+                    setSelectedDepartment(null);
+                }
             }, 100); // Small delay to prevent rapid consecutive calls
             
             return () => clearTimeout(timeoutId);
         }
-    }, [subsidiaryId]);
+    }, [subsidiaryId, formData.subsidiary]);
     
     console.log({
         selectedClass,
