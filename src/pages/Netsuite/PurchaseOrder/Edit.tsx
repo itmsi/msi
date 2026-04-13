@@ -50,13 +50,13 @@ export default function Edit() {
         handleInputChange: handleLocationInputChange,
         handleMenuScrollToBottom: handleLocationMenuScrollToBottom,
         initializeOptions: initializeLocationOptions,
-        resetLocationOptions,
         initialized: locationInitialized,
         isLoading: locationLoading
     } = usePOLocationSelect(30, false, subsidiaryId);
     
     const [selectedLocation, setSelectedLocation] = useState<any>(null);
     const [locationSelectError, setLocationSelectError] = useState<string>('');
+    const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
 
     // Initialize hooks only once when not yet initialized
     useEffect(() => {
@@ -73,7 +73,6 @@ export default function Edit() {
         handleInputChange: handleItemClassInputChange,
         handleMenuScrollToBottom: handleItemClassScrollToBottom,
         initializeOptions: initializeItemClassOptions,
-        resetClassOptions,
         initialized: classInitialized,
         isLoading: classLoading
     } = usePOClassSelect(30, subsidiaryId, profileSSOId);
@@ -91,7 +90,6 @@ export default function Edit() {
         handleInputChange: handleItemDepartmentInputChange,
         handleMenuScrollToBottom: handleItemDepartmentScrollToBottom,
         initializeOptions: initializeItemDepartmentOptions,
-        resetDepartmentOptions,
         initialized: departmentInitialized,
         isLoading: departmentLoading
     } = usePODepartmentSelect(30, subsidiaryId);
@@ -105,32 +103,21 @@ export default function Edit() {
         if (!classInitialized && !classLoading) {
             initializeItemClassOptions();
         }
-    }, [classInitialized, classLoading]); // Remove function dari dependency
+    }, [classInitialized, classLoading]);
     
     useEffect(() => {
         if (!departmentInitialized && !departmentLoading) {
             initializeItemDepartmentOptions();
         }
-    }, [departmentInitialized, departmentLoading]); // Remove function dari dependency
+    }, [departmentInitialized, departmentLoading]);
 
-    // Reset hooks ketika subsidiary berubah (debounced)
     useEffect(() => {
-        if (subsidiaryId) {
-            const timeoutId = setTimeout(() => {
-                resetLocationOptions();
-                resetClassOptions();
-                resetDepartmentOptions();
-                // Reset selected values
-                if(formData.subsidiary) {
-                    setSelectedLocation(null);
-                    setSelectedClass(null);
-                    setSelectedDepartment(null);
-                }
-            }, 100); // Small delay to prevent rapid consecutive calls
-            
-            return () => clearTimeout(timeoutId);
+        if (isInitialLoadComplete && subsidiaryId) {
+            setSelectedLocation(null);
+            setSelectedClass(null);
+            setSelectedDepartment(null);
         }
-    }, [subsidiaryId, formData.subsidiary]);
+    }, [subsidiaryId, isInitialLoadComplete]);
     
     console.log({
         selectedClass,
@@ -180,6 +167,9 @@ export default function Edit() {
                     label: poDetail.department_display || '',
                 });
             }
+            
+            // Mark initial load as complete
+            setIsInitialLoadComplete(true);
         }
     }, [poDetail]);
 
