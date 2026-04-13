@@ -60,10 +60,10 @@ export default function Edit() {
 
     // Initialize hooks only once when not yet initialized
     useEffect(() => {
-        if (!locationInitialized && !locationLoading) {
+        if (!locationInitialized && !locationLoading && initializeLocationOptions) {
             initializeLocationOptions();
         }
-    }, [locationInitialized, locationLoading, initializeLocationOptions]);
+    }, [locationInitialized, locationLoading]); // Remove function dependency untuk production build
     
     // Class select untuk items
     const {
@@ -100,24 +100,26 @@ export default function Edit() {
 
 
     useEffect(() => {
-        if (!classInitialized && !classLoading) {
+        if (!classInitialized && !classLoading && initializeItemClassOptions) {
             initializeItemClassOptions();
         }
-    }, [classInitialized, classLoading]);
+    }, [classInitialized, classLoading]); // Remove function dependency
     
     useEffect(() => {
-        if (!departmentInitialized && !departmentLoading) {
+        if (!departmentInitialized && !departmentLoading && initializeItemDepartmentOptions) {
             initializeItemDepartmentOptions();
         }
-    }, [departmentInitialized, departmentLoading]);
+    }, [departmentInitialized, departmentLoading]); // Remove function dependency
 
+    // Reset selected values ketika subsidiary berubah (hanya untuk user interaction)
     useEffect(() => {
+        // Only reset if initial load is complete and this is user changing subsidiary
         if (isInitialLoadComplete && subsidiaryId) {
             setSelectedLocation(null);
             setSelectedClass(null);
             setSelectedDepartment(null);
         }
-    }, [subsidiaryId, isInitialLoadComplete]);
+    }, [subsidiaryId, isInitialLoadComplete]); // Add missing dependency untuk production
     
     console.log({
         selectedClass,
@@ -137,8 +139,10 @@ export default function Edit() {
     const [VendorSelectError, setVendorSelectError] = useState<string>('');
     
     useEffect(() => {
-        initializeVendorOptions();
-    }, [initializeVendorOptions]);
+        if (initializeVendorOptions) {
+            initializeVendorOptions();
+        }
+    }, []); // Initialize once dan remove function dependency
 
     // Set default selected vendor & location dari data PO
     useEffect(() => {
