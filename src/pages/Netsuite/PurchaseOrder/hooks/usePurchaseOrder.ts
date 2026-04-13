@@ -5,7 +5,7 @@ import { PurchaseOrderService } from '../services/purchaseOrderService';
 export const usePurchaseOrder = (profileSSO?: number) => {
     const [searchValue, setSearchValue] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
-    const [sortModify, setSortModify] = useState<'updated_at' | 'last_modified' | ''>('last_modified');
+    const [sortModify, setSortModify] = useState<'updated_at' | 'last_modified' | 'po_id' | ''>('po_id');
     const [statusFilter, setStatusFilter] = useState('');
     const [subsidiaryFilter, setSubsidiaryFilter] = useState('');
     const [locationFilter, setLocationFilter] = useState('');
@@ -28,7 +28,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
             const response = await PurchaseOrderService.getPurchaseOrders({
                 page: params?.page || pagination.page,
                 limit: params?.limit || pagination.limit,
-                sort_by: params?.sort_by || sortModify || 'updated_at',
+                sort_by: params?.sort_by || sortModify || 'po_id',
                 sort_order: params?.sort_order || sortOrder || 'desc',
                 search: params?.search !== undefined ? params.search : searchValue,
                 status: params?.status !== undefined ? params.status : statusFilter,

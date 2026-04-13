@@ -45,7 +45,7 @@ export interface PurchaseOrderItem {
     created_at: string;
     updated_at: string;
     custbody_msi_createdby_api?: string;
-    lastmodified?: string ;
+    last_modified?: string ;
 }
 
 export interface POLine {
