@@ -265,6 +265,7 @@ export default function Manage() {
                 <FilterSection
                     filterSubsidiary={subsidiaryFilter}
                     filterLocation={locationFilter}
+                    filterStatus={statusFilter}
                     onFilterChange={handleFilterChange}
                     onClearFilters={handleClearFilters}
                 />

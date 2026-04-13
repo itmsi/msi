@@ -19,6 +19,7 @@ export interface PurchaseOrderRequest {
     search: string;
     subsidiary?: string;
     location?: string;
+    approvalstatus?: number | null;
     status: string;
 }
 export interface PurchaseOrderItem {

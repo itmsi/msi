@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react'
 interface FilterSectionProps {
     filterSubsidiary?: string;
     filterLocation?: string;
+    filterStatus?: string;
     onFilterChange: (field: string, value: string) => void;
     onClearFilters: () => void;
 }
@@ -15,6 +16,7 @@ interface FilterSectionProps {
 const FilterSection: React.FC<FilterSectionProps> = ({
     filterSubsidiary,
     filterLocation,
+    filterStatus,
     onFilterChange,
     onClearFilters,
 }) => {
@@ -27,6 +29,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     
     const currentSubsidiaryValue = filterSubsidiary
         ? subsidiaryOptions.find(o => o.value === filterSubsidiary) || null
+        : null;
+    const currentStatusValue = filterStatus
+        ? [{ value: 1, label: 'Pending Approval' }, { value: 2, label: 'Approved' }, { value: 3, label: 'Rejected' }].find(o => o.value === Number(filterStatus)) || null
         : null;
 
     // Location select untuk header dan items (is_parent = false)
@@ -77,7 +82,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     };
     
     // Check if any filters are active
-    const hasActiveFilters = filterSubsidiary || filterLocation;
+    const hasActiveFilters = filterSubsidiary || filterLocation || filterStatus;
     return (
         <div className="mt-4 pt-4 border-t border-gray-200 flex-1">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -126,6 +131,25 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         }
                     />
                 </div>
+
+                {/* STATUS */}
+                {/* <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <CustomSelect
+                        id="approvalstatus"
+                        name="approvalstatus"
+                        value={currentStatusValue}
+                        onChange={(selected) => onFilterChange('approvalstatus', selected?.value || '')}
+                        options={[
+                            { value: 1, label: 'Pending Approval' },
+                            { value: 2, label: 'Approved' },
+                            { value: 3, label: 'Rejected' }
+                        ]}
+                        isClearable={true}
+                        isSearchable={true}
+                        className="w-full"
+                    />
+                </div> */}
             </div>
             
             {/* Filter actions */}

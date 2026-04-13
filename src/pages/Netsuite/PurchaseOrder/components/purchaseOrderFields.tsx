@@ -104,6 +104,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     classInputValue = '',
     onClassInputChange,
     onClassMenuScrollToBottom,
+    selectedClass,
     onClassChange,
     classError,
     // Department props
@@ -112,6 +113,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     departmentInputValue = '',
     onDepartmentInputChange,
     onDepartmentMenuScrollToBottom,
+    selectedDepartment,
     onDepartmentChange,
     departmentError
 }) => {
@@ -414,11 +416,11 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <CustomAsyncSelect
                             name="classid"
                             placeholder="Select class..."
-                            // value={selectedClass}
-                            value={formData.class ? {
-                                label: formData.class_name || '',
-                                value: formData.class.toString()
-                            } : null}
+                            value={selectedClass}
+                            // value={formData.class ? {
+                            //     label: formData.class_name || '',
+                            //     value: formData.class.toString()
+                            // } : null}
                             error={classError}
                             defaultOptions={classOptions}
                             loadOptions={onClassInputChange}
@@ -451,11 +453,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <CustomAsyncSelect
                             name="departmentid"
                             placeholder="Select department..."
-                            // value={selectedDepartment}
-                            value={formData.department ? {
-                                label: formData.department_name || '',
-                                value: formData.department.toString()
-                            } : null}
+                            value={selectedDepartment}
                             error={departmentError}
                             defaultOptions={departmentOptions}
                             loadOptions={onDepartmentInputChange}

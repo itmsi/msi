@@ -130,6 +130,11 @@ export default function Edit() {
         }
     }, [subsidiaryId]);
     
+    console.log({
+        selectedClass,
+        formData,
+        poDetail
+    });
     const {
         POVendorOptions,
         pagination : vendorPagination,
@@ -159,6 +164,18 @@ export default function Edit() {
                 setSelectedLocation({
                     value: String(poDetail.location),
                     label: poDetail.location_display,
+                });
+            }
+            if (poDetail.class) {
+                setSelectedClass({
+                    value: String(poDetail.class),
+                    label: poDetail.class_display || '',
+                });
+            }
+            if (poDetail.department) {
+                setSelectedDepartment({
+                    value: String(poDetail.department),
+                    label: poDetail.department_display || '',
                 });
             }
         }

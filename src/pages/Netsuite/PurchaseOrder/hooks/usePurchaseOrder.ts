@@ -9,6 +9,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
     const [statusFilter, setStatusFilter] = useState('');
     const [subsidiaryFilter, setSubsidiaryFilter] = useState('');
     const [locationFilter, setLocationFilter] = useState('');
+    const [approvalStatusFilter, setApprovalStatusFilter] = useState('');
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -34,6 +35,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
                 status: params?.status !== undefined ? params.status : statusFilter,
                 subsidiary: params?.subsidiary !== undefined ? params.subsidiary : subsidiaryFilter,
                 location: params?.location !== undefined ? params.location : locationFilter,
+                ...(params?.approvalstatus !== undefined ? { approvalstatus: Number(approvalStatusFilter) }  : {}),
                 ...(profileSSO !== undefined ? { classes: profileSSO } : {}),
                 ...params
             });
@@ -46,7 +48,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, sortModify, statusFilter, subsidiaryFilter, locationFilter, pagination.page, pagination.limit]);
+    }, [searchValue, sortOrder, sortModify, statusFilter, subsidiaryFilter, locationFilter, approvalStatusFilter, pagination.page, pagination.limit]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
@@ -74,6 +76,8 @@ export const usePurchaseOrder = (profileSSO?: number) => {
             setSubsidiaryFilter(value);
         } else if (filterType === 'location') {
             setLocationFilter(value);
+        } else if (filterType === 'approvalstatus') {
+            setApprovalStatusFilter(value);
         }
 
         setPagination(prev => ({ ...prev, page: 1 }));
@@ -84,6 +88,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         else if (filterType === 'sort_order') params.sort_order = value;
         else if (filterType === 'subsidiary') params.subsidiary = value;
         else if (filterType === 'location') params.location = value;
+        else if (filterType === 'approvalstatus') params.approvalstatus = Number(value);
 
         fetchPurchaseOrders(params);
     }, [fetchPurchaseOrders]);
@@ -112,6 +117,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         setStatusFilter('');
         setSubsidiaryFilter('');
         setLocationFilter('');
+        setApprovalStatusFilter('');
         setSortOrder('desc');
         setSortModify('last_modified');
         
@@ -137,6 +143,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         statusFilter,
         subsidiaryFilter,
         locationFilter,
+        approvalStatusFilter,
         setSearchValue,
         fetchPurchaseOrders,
         handlePageChange,
