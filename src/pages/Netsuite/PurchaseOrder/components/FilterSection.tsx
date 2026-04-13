@@ -30,9 +30,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     const currentSubsidiaryValue = filterSubsidiary
         ? subsidiaryOptions.find(o => o.value === filterSubsidiary) || null
         : null;
-    const currentStatusValue = filterStatus
-        ? [{ value: 1, label: 'Pending Approval' }, { value: 2, label: 'Approved' }, { value: 3, label: 'Rejected' }].find(o => o.value === Number(filterStatus)) || null
-        : null;
+    // const currentStatusValue = filterStatus
+    //     ? [{ value: 1, label: 'Pending Approval' }, { value: 2, label: 'Approved' }, { value: 3, label: 'Rejected' }].find(o => o.value === Number(filterStatus)) || null
+    //     : null;
 
     // Location select untuk header dan items (is_parent = false)
     const {
