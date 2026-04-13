@@ -270,7 +270,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             sortable: false
         },
         {
-            name: 'Cost',
+            name: 'Landed Cost',
             selector: (row: TablePOItem) => row.custcol_me_landed_cost || 0,
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (

@@ -15,6 +15,7 @@ import { PurchaseOrderItem } from './types/purchaseorder';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 import { getProfile, formatCurrencyID, formatTanggal } from '@/helpers/generalHelper';
 import FilterSection from './components/FilterSection';
+import { LoadingOverlay } from '@/components/common/Loading';
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -314,27 +315,37 @@ export default function Manage() {
                                 <p className="text-red-600">{error}</p>
                             </div>
                         )}
-
-                        <CustomDataTable
-                            columns={columns}
-                            data={purchaseOrders}
-                            loading={loading}
-                            pagination
-                            paginationServer
-                            paginationTotalRows={pagination?.total || 0}
-                            paginationPerPage={pagination?.limit || 10}
-                            paginationDefaultPage={pagination?.page || 1}
-                            paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
-                            onChangePage={handlePageChangeAman}
-                            onChangeRowsPerPage={handleRowsPerPageAman}
-                            fixedHeader={true}
-                            fixedHeaderScrollHeight="625px"
-                            responsive
-                            highlightOnHover
-                            striped={false}
-                            persistTableHead
-                            borderRadius="8px"
-                        />
+                        
+                        {loading ? (
+                            <div className="flex justify-center items-center py-12">
+                                <div className="text-center">
+                                    <LoadingOverlay
+                                        message="Loading data purchase order..."
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            <CustomDataTable
+                                columns={columns}
+                                data={purchaseOrders}
+                                loading={loading}
+                                pagination
+                                paginationServer
+                                paginationTotalRows={pagination?.total || 0}
+                                paginationPerPage={pagination?.limit || 10}
+                                paginationDefaultPage={pagination?.page || 1}
+                                paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
+                                onChangePage={handlePageChangeAman}
+                                onChangeRowsPerPage={handleRowsPerPageAman}
+                                fixedHeader={true}
+                                fixedHeaderScrollHeight="625px"
+                                responsive
+                                highlightOnHover
+                                striped={false}
+                                persistTableHead
+                                borderRadius="8px"
+                            />
+                        )}
                     </div>
                 </div>
 

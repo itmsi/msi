@@ -115,7 +115,7 @@ export default function Create() {
             setSelectedClass(null);
             setSelectedDepartment(null);
         }
-    }, [subsidiaryId, resetLocationOptions, resetItemLocationOptions, resetClassOptions, resetDepartmentOptions]);
+    }, [subsidiaryId]);
     
     const {
         POVendorOptions,

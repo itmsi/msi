@@ -105,13 +105,13 @@ export default function Edit() {
         if (!classInitialized && !classLoading) {
             initializeItemClassOptions();
         }
-    }, [classInitialized, classLoading, initializeItemClassOptions]);
+    }, [classInitialized, classLoading]); // Remove function dari dependency
     
     useEffect(() => {
         if (!departmentInitialized && !departmentLoading) {
             initializeItemDepartmentOptions();
         }
-    }, [departmentInitialized, departmentLoading, initializeItemDepartmentOptions]);
+    }, [departmentInitialized, departmentLoading]); // Remove function dari dependency
 
     // Reset hooks ketika subsidiary berubah (debounced)
     useEffect(() => {
