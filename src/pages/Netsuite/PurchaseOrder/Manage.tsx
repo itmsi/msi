@@ -111,7 +111,6 @@ export default function Manage() {
             selector: row => row.location_display || '-',
             wrap: true,
             width: '220px',
-            center: true
         },
         {
             name: 'Next Approval',

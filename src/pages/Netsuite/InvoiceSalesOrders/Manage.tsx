@@ -185,6 +185,12 @@ export default function Manage() {
         {
             name: 'Document Number',
             selector: row => row.tranid || '-',
+            cell: row => (
+                <div className="items-center py-2">
+                    <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
+                    <div className="block text-sm text-gray-500">{formatDateTimeID(row.trandate || '-')}</div>
+                </div>
+            ),
             wrap: true,
             minWidth: '180px',
         },
@@ -213,17 +219,6 @@ export default function Manage() {
                 );
             },
             minWidth: '160px',
-        },
-        {
-            name: 'Invoice Date',
-            selector: row => row.trandate || '-',
-            cell: row => (
-                <div className="items-center py-2">
-                    <div className="block text-sm text-gray-500">{formatDateTimeID(row.trandate || '-')}</div>
-                </div>
-            ),
-            wrap: true,
-            minWidth: '120px',
         },
         {
             name: 'Total Amount',
