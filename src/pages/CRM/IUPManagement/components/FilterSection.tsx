@@ -30,6 +30,16 @@ interface FilterOption {
 // Config filter - mudah untuk extend dengan field baru
 const filterConfigs = [
     {
+        id: 'is_contractor_count',
+        label: 'Filter by Contractor Status',
+        options: [
+            { value: '', label: 'All Contractor' },
+            { value: 'true', label: 'IUPs with Contractors' },
+            { value: 'false', label: 'IUPs without Contractors' }
+        ],
+        placeholder: 'Filter by Contractor Status'
+    },
+    {
         id: 'status',
         label: 'Filter by Status',
         options: [
@@ -379,8 +389,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     }
                 </div>
 
+            <div className="flex md:col-span-5 gap-4">
                 {filterConfigs.map((config) => (
-                    <div key={config.id}>
+                    <div key={config.id} className='flex-1'>
                         <CustomSelect
                             id={config.id}
                             name={config.id}
@@ -394,7 +405,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         />
                     </div>
                 ))}
-
+            </div>
             </div>
 
             {/* Filter actions */}
