@@ -13,7 +13,7 @@ import CustomDataTable from '@/components/ui/table';
 import { PurchaseOrderItem } from './types/purchaseorder';
 // import ModalApproval from './components/ModalApproval';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
-import { getProfile, formatCurrencyID, formatTanggal } from '@/helpers/generalHelper';
+import { getProfile, formatCurrencyID, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import FilterSection from './components/FilterSection';
 import { LoadingOverlay } from '@/components/common/Loading';
 
@@ -111,10 +111,16 @@ export default function Manage() {
             selector: row => row.location_display || '-',
             wrap: true,
             width: '220px',
+            center: true,
+            cell: row => (
+                <div className="items-start capitalize w-full">
+                    {row.location_display || '-'}
+                </div>
+            ),
         },
         {
             name: 'Next Approval',
-            selector: row => row.nextapprover || '-',
+            selector: row => Number(row.approvalstatus) === 1 ? row.nextapprover || '-' : '-',
             wrap: true,
             width: '220px',
             center: true
@@ -154,7 +160,7 @@ export default function Manage() {
                         {row.custbody_msi_createdby_api || '-'}
                     </span>
                     <span className="text-xs text-gray-500">
-                        {row.lastmodified ? formatTanggal(row.lastmodified) || '-' : '-' }
+                        {row.last_modified ? formatDateTime(row.last_modified) || '-' : '-' }
                     </span>
                 </div>
             ),
