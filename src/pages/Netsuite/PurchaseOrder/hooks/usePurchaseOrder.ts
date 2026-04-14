@@ -5,7 +5,7 @@ import { PurchaseOrderService } from '../services/purchaseOrderService';
 export const usePurchaseOrder = (profileSSO?: number) => {
     const [searchValue, setSearchValue] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
-    const [sortModify, setSortModify] = useState<'updated_at' | 'last_modified' | 'po_id' | ''>('po_id');
+    const [sortModify, setSortModify] = useState< 'created_at' | 'updated_at' | 'last_modified' | 'po_id' | ''>('created_at');
     const [statusFilter, setStatusFilter] = useState('');
     const [subsidiaryFilter, setSubsidiaryFilter] = useState('');
     const [locationFilter, setLocationFilter] = useState('');
@@ -69,7 +69,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         if (filterType === 'status') {
             setStatusFilter(value);
         } else if (filterType === 'sort_by') {
-            setSortModify(value as 'po_id' | 'updated_at' | 'last_modified' | '');
+            setSortModify(value as 'created_at' | 'updated_at' | 'last_modified' | 'po_id' | '');
         } else if (filterType === 'sort_order') {
             setSortOrder(value as 'asc' | 'desc' | '');
         } else if (filterType === 'subsidiary') {
@@ -119,7 +119,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         setLocationFilter('');
         setApprovalStatusFilter('');
         setSortOrder('desc');
-        setSortModify('last_modified');
+        setSortModify('created_at');
         
         setPagination(prev => ({ ...prev, page: 1 }));
         fetchPurchaseOrders({ 
@@ -128,7 +128,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
             subsidiary: '', 
             location: '',
             sort_order: 'desc',
-            sort_by: 'last_modified'
+            sort_by: 'created_at'
         });
     }, [fetchPurchaseOrders]);
 

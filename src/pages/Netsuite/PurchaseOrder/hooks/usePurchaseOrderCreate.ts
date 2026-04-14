@@ -179,13 +179,14 @@ export const usePurchaseOrderCreate = () => {
                     taxcode: Number(item.taxcode) || null,
                     custcol_me_landed_cost: Number(item.custcol_me_landed_cost) || null,
                     custcol_msi_fob: Number(item.custcol_msi_fob) || null,
+                    description: item.description || '',
                 }))
             };
 
             const response = await PurchaseOrderService.createPurchaseOrder(requestData);
             if (response.success) {
                 toast.success('Purchase Order berhasil dibuat');
-                navigate('/netsuite/purchase-order');
+                navigate('/netsuite/purchase-order/edit/' + response.data.poId);
             } else {
                 toast.error(response.message || 'Purchase Order tidak berhasil dibuat');
             }
@@ -232,7 +233,8 @@ export const usePurchaseOrderCreate = () => {
             taxcode_name: masterData?.taxcodes?.[0]?.name || '',
             tax_rate: '',
             gross_amount: 0,
-            tax_amount: 0
+            tax_amount: 0,
+            description: ''
         };
         
 

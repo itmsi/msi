@@ -213,6 +213,7 @@ export interface TablePOItem {
     tax_amount?: number;
     custcol_msi_fob?: number;
     custcol_me_landed_cost?: number;
+    description?: string;
 }
 
 
@@ -356,6 +357,7 @@ export interface PODetailLine {
     custcol_4601_witaxapplies?: string | null;
     custcol_me_landed_cost?: number | null;
     custcol_msi_fob?: number | null;
+    description?: string | null;
 }
 
 export interface PODetailResponse {
@@ -421,4 +423,5 @@ export interface PurchaseOrderUpdateItem {
     total?: number;
     tax_amount?: number;
     gross_amount?: number;
+    description?: string;
 }

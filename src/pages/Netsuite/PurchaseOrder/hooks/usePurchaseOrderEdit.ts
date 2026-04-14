@@ -33,6 +33,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         tax_amount: line.tax1amt ?? 0,
         custcol_me_landed_cost: line.custcol_me_landed_cost != null ? Number(line.custcol_me_landed_cost) : 0,
         custcol_msi_fob: line.custcol_msi_fob != null ? Number(line.custcol_msi_fob) : 0,
+        description: line.description || ''
     }));
 
     return {
@@ -263,14 +264,16 @@ export const usePurchaseOrderEdit = () => {
                     amount: Number(item.amount || 0),
                     total: Number(item.total || 0),
                     tax_amount: Number(item.tax_amount || 0),
-                    gross_amount: Number(item.gross_amount || 0)
+                    gross_amount: Number(item.gross_amount || 0),
+                    description: item.description || ''
                 }))
             };
 
             const response = await PurchaseOrderService.updatePurchaseOrder(requestData);
             if (response.success) {
                 toast.success('Purchase Order berhasil diupdate');
-                navigate('/netsuite/purchase-order');
+                window.location.href = '/netsuite/purchase-order/edit/' + id;
+                // navigate('/netsuite/purchase-order/edit/' + id);
             } else {
                 toast.error(response.message || 'Gagal mengupdate Purchase Order');
             }

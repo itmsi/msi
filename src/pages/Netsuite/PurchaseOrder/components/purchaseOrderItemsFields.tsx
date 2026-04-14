@@ -15,6 +15,7 @@ import { usePOItemsSelect } from '@/hooks/usePOItemsSelect';
 import { POLocationPaginationState, POLocationSelectOption } from '@/hooks/usePOLocationSelect';
 import { POClassPaginationState, POClassSelectOption } from '@/hooks/usePOClassSelect';
 import { PODepartmentPaginationState, PODepartmentSelectOption } from '@/hooks/usePODepartmentSelect';
+import TextArea from '@/components/form/input/TextArea';
 
 
 interface POItemsFieldsProps {
@@ -228,7 +229,33 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     )}
             </>),
             wrap: true,
-            width: '130px',
+            width: '120px',
+        },
+        {
+            name: 'Description',
+            selector: (row: TablePOItem) => row.description || 'N/A',
+            cell: (row, index) => (<>
+                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                        <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                            row.description  || '-'
+                        }</p>
+                    ) : (
+                        <TextArea 
+                            name={`description_${index}`}
+                            value={row.description || ''}
+                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {                                
+                                updateItemById(index as number, 'description', e.target.value);
+                            }}
+                            rows={2} 
+                            placeholder="Enter item description..."
+                            className={`w-full px-3 py-2 my-2 w-[220px] border-0 border-b-1 rounded-none focus:border-b-blue-500 ${
+                                errors[`description_${index}` as keyof PurchaseOrderForm] ? 'border-red-500 ' : 'border-gray-300'
+                            }`}
+                        />
+                    )}
+            </>),
+            wrap: true,
+            width: '250px',
         },
         {
             name: 'FOB',
