@@ -44,8 +44,8 @@ export const getPrimaryInfoFields = (masterData?: MasterDataFormFieldItems) => [
     {
         name: "terms",
         label: "Terms",
-        type: "select",
-        options: masterData ? formatMasterDataOptions(masterData.terms) : [],
+        type: "select-terms",
+        required: true,
     }
 ];
 

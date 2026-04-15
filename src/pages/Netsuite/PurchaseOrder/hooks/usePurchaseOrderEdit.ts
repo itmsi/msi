@@ -48,6 +48,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         memo: detail.memo || '',
         currency: detail.currency_id,
         terms: Number(detail.terms) || null,
+        terms_display: detail.terms_display || null,
         custbody_me_pr_date: detail.custbody_me_pr_date || null,
         custbody_me_project_location: detail.custbody_me_project_location ?? null,
         custbody_me_pr_type: detail.custbody_me_pr_type ?? null,
@@ -89,6 +90,7 @@ export const usePurchaseOrderEdit = () => {
         memo: '',
         currency: null,
         terms: null,
+        terms_display: null,
         custbody_me_pr_date: null,
         custbody_me_project_location: null,
         custbody_me_pr_type: null,
@@ -197,6 +199,7 @@ export const usePurchaseOrderEdit = () => {
         if (!formData.customform) newErrors.customform = 'Custom Form wajib dipilih';
         if (!formData.purchasedate) newErrors.purchasedate = 'Purchase Date wajib diisi';
         if (!formData.vendorid) newErrors.vendorid = 'Vendor wajib dipilih';
+        if (!formData.terms) newErrors.terms = 'Terms wajib dipilih';
         if (!formData.currency) newErrors.currency = 'Currency wajib dipilih';
         if (!formData.subsidiary) newErrors.subsidiary = 'Subsidiary wajib dipilih';
         if (!formData.location) newErrors.location = 'Location wajib dipilih';
@@ -242,6 +245,7 @@ export const usePurchaseOrderEdit = () => {
                 memo: formData.memo || undefined,
                 currency: formData.currency || undefined,
                 terms: formData.terms || undefined,
+                terms_display: formData.terms_display || undefined,
                 custbody_me_pr_date: formData.custbody_me_pr_date ? formData.custbody_me_pr_date : undefined,
                 custbody_me_project_location: formData.custbody_me_project_location || undefined,
                 custbody_me_pr_type: formData.custbody_me_pr_type || undefined,

@@ -22,6 +22,7 @@ import { InvoiceSummary } from './purchaseOrderItemsFields';
 import { POClassPaginationState, POClassSelectOption } from '@/hooks/usePOClassSelect';
 import { PODepartmentPaginationState } from '@/hooks/usePODepartmentSelect';
 import { PODepartmentSelectOption } from '@/hooks/usePODepartmentSelect';
+import { POTermSelectOption } from '@/hooks/usePOTermSelect';
 
 interface POFormFieldsProps {
     formData: PurchaseOrderForm;
@@ -42,6 +43,15 @@ interface POFormFieldsProps {
     selectedVendor?: POVendorSelectOption | null;
     onVendorChange?: (option: POVendorSelectOption | null) => void;
     vendorError?: string;
+    // Terms Select Props
+    termOptions?: POTermSelectOption[];
+    termPagination?: POVendorPaginationState;
+    termInputValue?: string;
+    onTermInputChange?: (inputValue: string) => Promise<POTermSelectOption[]>;
+    onTermMenuScrollToBottom?: () => void;
+    selectedTerm?: POTermSelectOption | null;
+    onTermChange?: (option: POTermSelectOption | null) => void;
+    termError?: string;
     // Location Select Props
     locationOptions?: POLocationSelectOption[];
     locationPagination?: POLocationPaginationState;
@@ -89,6 +99,15 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     selectedVendor,
     onVendorChange,
     vendorError,
+    // Terms props
+    termOptions = [],
+    termPagination = { page: 1, hasMore: true, loading: false },
+    termInputValue = '',
+    onTermInputChange,
+    onTermMenuScrollToBottom,
+    selectedTerm,
+    onTermChange,
+    termError,
     // Location props
     locationOptions = [],
     locationPagination = { page: 1, hasMore: true, loading: false },
@@ -398,6 +417,39 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         />
                         {vendorError && (
                             <span className="text-sm text-red-500 mt-1 block">{vendorError}</span>
+                        )}
+                        </>)}
+                    </div>
+                );
+            case "select-terms":
+                return (
+                    <div>
+                        <Label>
+                            Terms <span className="text-red-500">*</span>
+                        </Label>
+                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                                formData.terms_display  || '-'
+                            }</p>
+                        ) : (<>
+                        <CustomAsyncSelect
+                            name="termsid"
+                            placeholder="Select terms..."
+                            value={selectedTerm}
+                            error={termError}
+                            defaultOptions={termOptions}
+                            loadOptions={onTermInputChange}
+                            onMenuScrollToBottom={onTermMenuScrollToBottom}
+                            isLoading={termPagination.loading}
+                            noOptionsMessage={() => "No terms found"}
+                            loadingMessage={() => "Loading terms..."}
+                            isSearchable={true}
+                            inputValue={termInputValue}
+                            onInputChange={onTermInputChange}
+                            onChange={onTermChange}
+                        />
+                        {termError && (
+                            <span className="text-sm text-red-500 mt-1 block">{termError}</span>
                         )}
                         </>)}
                     </div>

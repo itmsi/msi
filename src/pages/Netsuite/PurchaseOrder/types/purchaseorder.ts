@@ -4,6 +4,12 @@ export interface PurchaseOrderResponse {
         items: PurchaseOrderItem[];
         pagination: Pagination;
     }
+    sync_info: SyncInfo;
+}
+export interface SyncInfo {
+    sync_status: boolean;
+    created_at: string;
+    created_by_name: string;
 }
 export interface Pagination {
     page: number;
@@ -78,6 +84,7 @@ export interface PurchaseOrderForm {
     memo: string;
     currency: number | null;
     terms: number | null;
+    terms_display?: string | null;
     custbody_me_pr_date: string | null;
     custbody_me_project_location: number | null;
     custbody_me_pr_type: number | null;
@@ -299,6 +306,7 @@ export interface PODetailData {
     currency_id: number;
     currency_symbol: string;
     terms?: number | string;
+    terms_display?: string | null;
     foreigntotal: number;
     total: number;
     last_modified: string;
@@ -397,6 +405,7 @@ export interface PurchaseOrderFormUpdate {
     memo?: string;
     currency?: number;
     terms?: number;
+    terms_display?: string;
     custbody_me_pr_date?: string;
     custbody_me_project_location?: number;
     custbody_me_pr_type?: number;
@@ -424,4 +433,19 @@ export interface PurchaseOrderUpdateItem {
     tax_amount?: number;
     gross_amount?: number;
     description?: string;
+}
+// TERM SELECT
+export interface TermsItem {
+    id: string;
+    name: string;
+    is_inactive: boolean;
+}
+
+export interface TermsDataResponse {
+    success: boolean;
+    data: {
+        items: TermsItem[];
+        pagination: Pagination;
+    };
+    message: string;
 }

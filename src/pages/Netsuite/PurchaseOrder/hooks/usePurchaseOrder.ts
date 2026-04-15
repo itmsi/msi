@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Pagination, PurchaseOrderItem, PurchaseOrderRequest } from '../types/purchaseorder';
+import toast from 'react-hot-toast';
+import { Pagination, PurchaseOrderItem, PurchaseOrderRequest, SyncInfo } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 
 export const usePurchaseOrder = (profileSSO?: number) => {
@@ -14,6 +15,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderItem[]>([]);
+    const [syncInfo, setSyncInfo] = useState<SyncInfo | null>(null);
     const [pagination, setPagination] = useState<Pagination>({
         page: 1,
         limit: 10,
@@ -42,6 +44,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
 
             setPurchaseOrders(response.data?.items || []);
             setPagination(response.data?.pagination || pagination);
+            setSyncInfo(response.sync_info || null);
         } catch (err: any) {
             setError(err?.message || 'Failed to fetch purchase order data');
             console.error('Error fetching purchase order data:', err);
@@ -113,6 +116,27 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         handleSearch('');
     }, [handleSearch]);
 
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    const handleSync = useCallback(async (_row?: PurchaseOrderItem) => {
+        if (isSyncing) return;
+        setIsSyncing(true);
+        const toastId = toast.loading('Sinkronisasi data purchase order...');
+        try {
+            const result = await PurchaseOrderService.syncPOItems();
+            if (result) {
+                toast.success('Sinkronisasi berhasil', { id: toastId });
+                fetchPurchaseOrders({ page: 1 });
+            } else {
+                toast.error('Sinkronisasi gagal', { id: toastId });
+            }
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, fetchPurchaseOrders]);
+
     const handleClearFilters = useCallback(() => {
         setStatusFilter('');
         setSubsidiaryFilter('');
@@ -134,6 +158,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
 
     return {
         purchaseOrders,
+        syncInfo,
         loading,
         error,
         pagination,
@@ -154,5 +179,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         handleKeyPress,
         handleClearSearch,
         handleClearFilters,
+        isSyncing,
+        handleSync,
     };
 };

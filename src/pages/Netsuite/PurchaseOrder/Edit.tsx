@@ -16,6 +16,7 @@ import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
 import { getProfile } from '@/helpers/generalHelper';
+import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 
 export default function Edit() {
     const navigate = useNavigate();
@@ -163,13 +164,28 @@ export default function Edit() {
             initializeVendorOptions();
         }
     }, [initializeVendorOptions]); // Add function dependency back
+    
+    // Term select
+    const {
+        POTermOptions,
+        pagination : termPagination,
+        inputValue : termInputValue,
+        handleInputChange: handleTermInputChange,
+        handleMenuScrollToBottom: handleTermMenuScrollToBottom,
+        initializeOptions: initializeTermOptions,
+    } = usePOTermSelect();
+    
+    const [selectedTerm, setSelectedTerm] = useState<any>(null);
+    const [TermSelectError, setTermSelectError] = useState<string>('');
+    
+    useEffect(() => {
+        if (initializeTermOptions) {
+            initializeTermOptions();
+        }
+    }, [initializeTermOptions]); // Add function dependency back
 
     // Set default selected vendor & location dari data PO - SEQUENCED PROPERLY
     useEffect(() => {
-        // Only set values when:
-        // 1. poDetail is available
-        // 2. Hooks are initialized (options are loaded)
-        // 3. Not already set (prevent infinite loop)
         if (poDetail && !isInitialLoadComplete) {
             if (locationInitialized && classInitialized && departmentInitialized) {
                 try {
@@ -180,6 +196,15 @@ export default function Edit() {
                             label: poDetail.vendor_name,
                         };
                         setSelectedVendor(vendorValue);
+                    }
+
+                    // Set term with defensive checks
+                    if (poDetail.terms && poDetail.terms_display) {
+                        const termValue = {
+                            value: String(poDetail.terms),
+                            label: poDetail.terms_display,
+                        };
+                        setSelectedTerm(termValue);
                     }
 
                     // Set location with defensive checks
@@ -322,6 +347,26 @@ export default function Edit() {
                                     }
                                 }}
                                 vendorError={errors.vendorid || VendorSelectError}
+
+                                // Term props
+                                termOptions={POTermOptions}
+                                termPagination={termPagination}
+                                termInputValue={termInputValue}
+                                onTermInputChange={handleTermInputChange}
+                                onTermMenuScrollToBottom={handleTermMenuScrollToBottom}
+                                selectedTerm={selectedTerm}
+                                onTermChange={(option) => {
+                                    setSelectedTerm(option);
+                                    if (option && option.data) {
+                                        // Update formData dengan data term yang dipilih
+                                        handleSelectChange('terms', option.value);
+                                        handleSelectChange('terms_name', option.data.name);
+                                    }
+                                    if (TermSelectError) {
+                                        setTermSelectError('');
+                                    }
+                                }}
+                                termError={errors.termid || TermSelectError}
                                 
                                 // Location props  
                                 locationOptions={POLocationOptions}

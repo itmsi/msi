@@ -1,5 +1,5 @@
 import { apiPost, apiGet, ApiResponse, apiPut } from '@/helpers/apiHelper';
-import { ComponentsDataResponse, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, POItemResponse, POItemsRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, VendorResponse } from '../types/purchaseorder';
+import { ComponentsDataResponse, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, POItemResponse, POItemsRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -16,7 +16,6 @@ export class PurchaseOrderService {
         };
 
         const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/get-list`, requestData as Record<string, any>);
-        // const response = await apiPost(`https://api-bridge-sb.motorsights.com/api/v1/bridge/purchase-orders/get-list`, requestData as Record<string, any>);
         return response.data as PurchaseOrderResponse;
     }
     static async getFieldComponentById(): Promise<ApiResponse<{ success: boolean; message: string; data: MasterDataFormFieldItems }>> {
@@ -95,6 +94,20 @@ export class PurchaseOrderService {
         return response.data as VendorResponse;
     }
 
+    static async getPOTerms(params: Partial<POItemsRequest> = {}): Promise<TermsDataResponse> {
+        const requestData: POItemsRequest = {
+            page: 1,
+            limit: 10,
+            sort_by: 'created_at',
+            sort_order: 'desc',
+            search: '',
+            ...params
+        };
+
+        const response = await apiPost(`${API_BASE_URL}/netsuite/terms/get-list`, requestData as Record<string, any>);
+        return response.data as TermsDataResponse;
+    }
+
     static async createPurchaseOrder(requestData: any): Promise<any> {
         const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/create`, requestData);
         return response.data;
@@ -115,4 +128,18 @@ export class PurchaseOrderService {
         return response.data;
     }
 
+    static async syncPOItems(params: Partial<PurchaseOrderRequest> = {}): Promise<PurchaseOrderResponse> {
+        const requestData: PurchaseOrderRequest = {
+            page: 1,
+            limit: 10,
+            sort_by: 'last_modified',
+            sort_order: 'desc',
+            search: '',
+            status: '',
+            ...params
+        };
+
+        const response = await apiPost(`${API_BASE_URL}/netsuite//purchasing-orders/sync`, requestData as Record<string, any>);
+        return response.data as PurchaseOrderResponse;
+    }
 }

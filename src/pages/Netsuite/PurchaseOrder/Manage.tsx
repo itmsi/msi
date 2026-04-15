@@ -3,19 +3,21 @@ import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { usePurchaseOrder } from './hooks/usePurchaseOrder';
 // import Badge from '@/components/ui/badge/Badge';
-import { MdAdd, MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch } from 'react-icons/md';
+import { MdAdd, MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch, MdOutlineSync } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
-import CustomDataTable from '@/components/ui/table';
+import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { PurchaseOrderItem } from './types/purchaseorder';
 // import ModalApproval from './components/ModalApproval';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 import { getProfile, formatCurrencyID, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import FilterSection from './components/FilterSection';
 import { LoadingOverlay } from '@/components/common/Loading';
+import { Tooltip } from '@/components/ui/tooltip';
+import { createByDateColumn } from '@/components/ui/table/columnUtils';
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -24,6 +26,7 @@ export default function Manage() {
     
     const {
         purchaseOrders,
+        syncInfo,
         loading,
         error,
         pagination,
@@ -39,6 +42,8 @@ export default function Manage() {
         handleKeyPress,
         handleClearSearch,
         handleClearFilters,
+        isSyncing,
+        handleSync,
     } = usePurchaseOrder(profileSSOId);
     
     const handlePageChangeAman = useCallback((halamanBaru: number) => {
@@ -150,41 +155,17 @@ export default function Manage() {
             wrap: true,
             width: '300px'
         },
-        {
-            name: 'Updated By',
-            selector: row => row.updated_at || '',
-            sortable: false,
-            cell: (row) => (
-                <div className="flex flex-col py-2">
-                    <span className="font-medium text-gray-900">
-                        {row.custbody_msi_createdby_api || '-'}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                        {row.last_modified ? formatDateTime(row.last_modified) || '-' : '-' }
-                    </span>
-                </div>
-            ),
-            width: '300px'
-        },
-        // createActionsColumn([
-        //     {
-        //         icon: MdVerified,
-        //         onClick: handleApproval,
-        //         className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
-        //         tooltip: 'Approve',
-        //         permission: 'update'
-        //     }
-        // ])
-        // {
-        //     name: 'Updated By',
-        //     selector: row => row.updated_by_name || '-',
-        //     cell: row => (
-        //         <div className="items-center gap-3 py-2">
-        //             <div className="font-medium text-gray-900">{row.updated_by_name || '-'}</div>
-        //             <div className="block text-sm text-gray-500">{formatDateTime(row.updated_at)}</div>
-        //         </div>
-        //     ),
-        // }
+        createByDateColumn('Updated By', 'last_modified', 'custbody_msi_createdby_api', '300px'),
+        createActionsColumn([
+            {
+                icon: MdOutlineSync,
+                onClick: handleSync,
+                className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                tooltip: 'Perbarui',
+                width: '120px',
+                title: 'Action',
+            }
+        ])
     ];
     
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -271,7 +252,7 @@ export default function Manage() {
                 />
             )}
         </>);
-}, [searchValue, sortOrder, statusFilter, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, subsidiaryFilter, locationFilter, handleClearFilters, activeFiltersCount]);
+    }, [searchValue, sortOrder, statusFilter, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, subsidiaryFilter, locationFilter, handleClearFilters, activeFiltersCount]);
 
     return (
         <>
@@ -283,7 +264,7 @@ export default function Manage() {
             
             <div className="space-y-6">
                 {/* Header */}
-                <div className="bg-white shadow rounded-lg">
+                <div className="bg-white shadow rounded-lg mb-3">
                     <div className="px-6 py-4 border-b border-gray-200">
                         <div className="flex justify-between items-center">
                             <div>
@@ -295,6 +276,20 @@ export default function Manage() {
                                 </p>
                             </div>
                             <div className="flex space-x-3">
+                                <PermissionGate permission="read">
+                                    <Button
+                                        onClick={() => handleSync()}
+                                        disabled={isSyncing}
+                                        className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                        variant='outline'
+                                    >
+                                        <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                        <div>
+                                        <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                        
+                                        </div>
+                                    </Button>
+                                </PermissionGate>
                                 <PermissionGate permission="create">
                                     <Button
                                         onClick={() => navigate('/netsuite/purchase-order/create')}
@@ -308,9 +303,14 @@ export default function Manage() {
                         </div>
                     </div>
                 </div>
+                {
+                    syncInfo && (<>
+                        <span className='block text-xs text-green-600 pe-6 text-end mb-0'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
+                    </>)
+                }
                 
                 {/* Search & Filter */}
-                <div className="bg-white shadow rounded-lg px-6 py-4">
+                <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
                     {SearchAndFilters}
                 </div>
                 {/* Table */}

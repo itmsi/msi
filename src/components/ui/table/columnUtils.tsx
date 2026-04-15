@@ -104,6 +104,7 @@ export const createByDateColumn = (
     name: string,
     dateField: string,
     createdByField: string,
+    width: string = '200px'
 ): TableColumn<any> => ({
     name,
     selector: (row: any) => row[dateField],
@@ -119,7 +120,7 @@ export const createByDateColumn = (
     ),
     center: true,
     wrap: true,
-    width: '180px',
+    width,
 });
 export const createActionsColumn = (actions: Array<{
     icon: React.ComponentType<any>;
@@ -128,10 +129,12 @@ export const createActionsColumn = (actions: Array<{
     className?: string;
     tooltip?: string;
     condition?: (row: any) => boolean;
+    width?: string;
+    title?: string;
 }>): TableColumn<any> => ({
-    name: 'Actions',
+    name: actions[0]?.title || 'Actions',
     cell: (row: any) => (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 z-3">
             {actions
                 .filter(action => !action.condition || action.condition(row))
                 .map((action, index) => {
@@ -152,7 +155,7 @@ export const createActionsColumn = (actions: Array<{
                 })}
         </div>
     ),
-    width: '200px',
+    width: actions[0]?.width || '200px',
     center: true, // This handles both header and cell centering
     ignoreRowClick: true,
     // allowOverflow: true, // Removed to prevent styled-components warning
