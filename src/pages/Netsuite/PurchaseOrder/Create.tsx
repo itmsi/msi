@@ -13,6 +13,7 @@ import { LoadingOverlay } from '@/components/common/Loading';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
 import { getProfile } from '@/helpers/generalHelper';
+import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 
 export default function Create() {
     const navigate = useNavigate();
@@ -133,6 +134,24 @@ export default function Create() {
         initializeVendorOptions();
     }, [initializeVendorOptions]);
 
+    // Term select
+    const {
+        POTermOptions,
+        pagination : termPagination,
+        inputValue : termInputValue,
+        handleInputChange: handleTermInputChange,
+        handleMenuScrollToBottom: handleTermMenuScrollToBottom,
+        initializeOptions: initializeTermOptions,
+    } = usePOTermSelect();
+    
+    const [selectedTerm, setSelectedTerm] = useState<any>(null);
+    const [TermSelectError, setTermSelectError] = useState<string>('');
+    
+    useEffect(() => {
+        if (initializeTermOptions) {
+            initializeTermOptions();
+        }
+    }, [initializeTermOptions]); // Add function dependency back
     return (
         <>
             <PageMeta
@@ -197,6 +216,27 @@ export default function Create() {
                                 }
                             }}
                             vendorError={errors.vendorid || VendorSelectError}
+
+                            // Term props
+                            termOptions={POTermOptions}
+                            termPagination={termPagination}
+                            termInputValue={termInputValue}
+                            onTermInputChange={handleTermInputChange}
+                            onTermMenuScrollToBottom={handleTermMenuScrollToBottom}
+                            selectedTerm={selectedTerm}
+                            onTermChange={(option) => {
+                                setSelectedTerm(option);
+                                if (option && option.data) {
+                                    // Update formData dengan data term yang dipilih
+                                    handleSelectChange('terms', option.value);
+                                    handleSelectChange('terms_name', option.data.name);
+                                }
+                                if (TermSelectError) {
+                                    setTermSelectError('');
+                                }
+                            }}
+                            termError={errors.termid || TermSelectError}
+
                             // Location props  
                             locationOptions={POLocationOptions}
                             locationPagination={pagination}
