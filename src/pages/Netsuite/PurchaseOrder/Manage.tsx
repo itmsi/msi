@@ -16,7 +16,6 @@ import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 import { getProfile, formatCurrencyID, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import FilterSection from './components/FilterSection';
 import { LoadingOverlay } from '@/components/common/Loading';
-import { Tooltip } from '@/components/ui/tooltip';
 import { createByDateColumn } from '@/components/ui/table/columnUtils';
 
 export default function Manage() {
