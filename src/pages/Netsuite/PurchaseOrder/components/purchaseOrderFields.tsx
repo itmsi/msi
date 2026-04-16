@@ -158,7 +158,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 </Label>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                        String(formData[name]) ?? '-'
+                        String(formData[name]) || '-'
                     }</p>
                 ) : <>
                     <Input
@@ -259,7 +259,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 </Label>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                        currentDate ? formatDate(currentDate.toISOString()) : (field.placeholder || `Pilih ${field.label.toLowerCase()}`)
+                        currentDate ? formatDate(currentDate.toISOString()) : (field.placeholder || `-`)
                     }</p>
                 ) : <>
                 <div className="relative" ref={datePickerRef}>
@@ -462,7 +462,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         </Label>
                         {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                                classOptions.find(option => String(option.value) === String(formData.class ?? ''))?.label || '-'
+                                formData.class_name  || '-'
                             }</p>
                         ) : (<>
                         <CustomAsyncSelect
