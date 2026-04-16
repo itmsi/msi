@@ -307,9 +307,11 @@ export default function Edit() {
                                         <p className="ms-2 text-sm text-gray-600">{poDetail?.po_number || '-'}</p>
                                     </div>
                                     <div className="capitalize ms-2">
-                                        <StatusTypeBadge
-                                            type={Number(formData.approvalstatus) as 1 | 2 | 3} 
-                                        />
+                                        <span 
+                                            className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
+                                        >
+                                            {formData.po_status_label}
+                                        </span>
                                     </div>
                                 </div>
                             </div>

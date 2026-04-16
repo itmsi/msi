@@ -99,6 +99,7 @@ export interface PurchaseOrderForm {
     custbody_me_validity_date?: string | null;
     nextapprover?: string | null;
     approvalstatus?: number | null;
+    po_status_label?: string | null;
     // description: string | null;
     // note: string | null;
     items: TablePOItem[];

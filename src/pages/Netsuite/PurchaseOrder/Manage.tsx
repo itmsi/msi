@@ -156,7 +156,6 @@ export default function Manage() {
                     >
                         {row.po_status_label}
                     </span>
-                    
                 </div>
             ),
             center: true,
