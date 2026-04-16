@@ -1,22 +1,22 @@
 import { useState, useCallback } from 'react';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
-import { LocationItem } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
+import { ComponentsItem } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
 
-export interface POLocationSelectOption {
+export interface PODepartmentSelectOption {
     value: string;
     label: string;
-    data?: LocationItem;
+    data?: ComponentsItem;
 }
 
-export interface POLocationPaginationState {
+export interface PODepartmentPaginationState {
     page: number;
     hasMore: boolean;
     loading: boolean;
 }
 
-export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, subsidiary_id?: number) => {
-    const [POLocationOptions, setPOLocationOptions] = useState<POLocationSelectOption[]>([]);
-    const [pagination, setPagination] = useState<POLocationPaginationState>({
+export const usePODepartmentSelect = (limit: number = 30, subsidiary_id?: number) => {
+    const [PODepartmentOptions, setPODepartmentOptions] = useState<PODepartmentSelectOption[]>([]);
+    const [pagination, setPagination] = useState<PODepartmentPaginationState>({
         page: 1,
         hasMore: true,
         loading: false
@@ -25,9 +25,9 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
     const [initialized, setInitialized] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    const loadPOLocationOptions = useCallback(async (
+    const loadPODepartmentOptions = useCallback(async (
         inputValue: string = '', 
-        loadedOptions: POLocationSelectOption[] = [],
+        loadedOptions: PODepartmentSelectOption[] = [],
         page: number = 1,
         reset: boolean = false
     ) => {
@@ -38,24 +38,23 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
             setIsLoading(true);
             setPagination(prev => ({ ...prev, loading: true }));
 
-            const response = await PurchaseOrderService.getPOLocation({
+            const response = await PurchaseOrderService.getPODepartment({
                 search: inputValue,
                 page: page,
                 limit: limit,
                 sort_order: 'desc',
-                ...(subsidiary_id !== undefined ? { subsidiary_id } : {}),
-                ...(is_parent !== undefined ? { is_parent } : {})
+                ...(subsidiary_id !== undefined ? { subsidiary_id } : {})
             });
 
             if (response.success) {
-                const newOptions: POLocationSelectOption[] = response.data.items.map((poItems: LocationItem) => ({
+                const newOptions: PODepartmentSelectOption[] = response.data.items.map((poItems: ComponentsItem) => ({
                     value: poItems.id.toString(),
                     label: poItems.name,
                     data: poItems
                 }));
 
                 const updatedOptions = reset ? newOptions : [...loadedOptions, ...newOptions];
-                setPOLocationOptions(updatedOptions);
+                setPODepartmentOptions(updatedOptions);
                 
                 const hasMoreData = response.data.pagination.page < response.data.pagination.totalPages;
                 
@@ -78,34 +77,34 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
         }
 
         return loadedOptions;
-    }, [limit, is_parent, subsidiary_id, isLoading]); // Tambahkan subsidiary_id sebagai dependency
+    }, [limit, subsidiary_id, isLoading]);
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
         setInputValue(inputValue);
-        setPOLocationOptions([]);
+        setPODepartmentOptions([]);
         setPagination({ page: 1, hasMore: true, loading: false });
         
-        return await loadPOLocationOptions(inputValue, [], 1, true);
-    }, [loadPOLocationOptions]);
+        return await loadPODepartmentOptions(inputValue, [], 1, true);
+    }, [loadPODepartmentOptions]);
 
     const handleMenuScrollToBottom = useCallback(async () => {
         if (pagination.hasMore && !pagination.loading) {
-            await loadPOLocationOptions(inputValue, POLocationOptions, pagination.page + 1, false);
+            await loadPODepartmentOptions(inputValue, PODepartmentOptions, pagination.page + 1, false);
         }
-    }, [pagination.hasMore, pagination.loading, pagination.page, inputValue, POLocationOptions, loadPOLocationOptions]);
+    }, [pagination.hasMore, pagination.loading, pagination.page, inputValue, PODepartmentOptions, loadPODepartmentOptions]);
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
-        if (!initialized && !isLoading && POLocationOptions.length === 0) {
-            await loadPOLocationOptions('', [], 1, true);
+        if (!initialized && !isLoading && PODepartmentOptions.length === 0) {
+            await loadPODepartmentOptions('', [], 1, true);
         }
-    }, [initialized, isLoading, POLocationOptions.length, loadPOLocationOptions]);
+    }, [initialized, isLoading, PODepartmentOptions.length, loadPODepartmentOptions]);
 
     // Get PO item by ID
-    const getPOItemById = useCallback(async (poItemId: string, is_parent: boolean = true): Promise<POLocationSelectOption | null> => {
+    const getPOItemById = useCallback(async (poItemId: string,): Promise<PODepartmentSelectOption | null> => {
         try {
-            const response = await PurchaseOrderService.getPOLocation({ search: poItemId, is_parent: is_parent });
+            const response = await PurchaseOrderService.getPODepartment({ search: poItemId });
             if (response.success && response.data.items.length > 0) {
                 const poItem = response.data.items[0];
                 return {
@@ -120,30 +119,30 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
         return null;
     }, []);
 
-    // Reset location options ketika subsidiary_id berubah
-    const resetLocationOptions = useCallback(async () => {
+    // Reset department options ketika subsidiary_id berubah
+    const resetDepartmentOptions = useCallback(async () => {
         if (isLoading) return; // Prevent reset during loading
         
-        setPOLocationOptions([]);
+        setPODepartmentOptions([]);
         setInputValue('');
         setInitialized(false);
         setPagination({ page: 1, hasMore: true, loading: false });
         
         if (subsidiary_id) {
-            await loadPOLocationOptions('', [], 1, true);
+            await loadPODepartmentOptions('', [], 1, true);
         }
-    }, [subsidiary_id, loadPOLocationOptions, isLoading]);
+    }, [subsidiary_id, loadPODepartmentOptions, isLoading]);
 
     return {
-        POLocationOptions,
+        PODepartmentOptions,
         pagination,
         inputValue,
         handleInputChange,
         handleMenuScrollToBottom,
         initializeOptions,
-        loadPOLocationOptions,
+        loadPODepartmentOptions,
         getPOItemById,
-        resetLocationOptions,
+        resetDepartmentOptions,
         initialized, // Export initialized state
         isLoading, // Export loading state
     };

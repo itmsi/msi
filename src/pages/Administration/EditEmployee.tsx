@@ -4,11 +4,13 @@ import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import CustomSelect from "@/components/form/select/CustomSelect";
+import CustomAsyncSelect from "@/components/form/select/CustomAsyncSelect";
 import { MdArrowBack, MdEdit, MdKeyboardArrowLeft, MdSave, MdExpandMore, MdExpandLess } from "react-icons/md";
 import LoadingSpinner from "@/components/common/Loading";
 import PageMeta from "@/components/common/PageMeta";
 import Avatar from "@/components/common/Avatar";
 import { useDropdownData, useEmployeeDetail } from "@/hooks/useAdministration";
+import { usePOClassSelect } from "@/hooks/usePOClassSelect";
 import { EmployeePermissionDetail, EmployeeMenuPermission, EmployeeSystemPermission } from "@/types/administration";
 import Switch from "@/components/form/switch/Switch";
 import TextArea from "@/components/form/input/TextArea";
@@ -41,6 +43,18 @@ export default function EditEmployee() {
         fetchPositionsByDepartment 
     } = useDropdownData();
 
+    // Hook for NetSuite Class
+    const {
+        POClassOptions,
+        pagination: itemClassPagination,
+        inputValue: itemClassInputValue,
+        handleInputChange: handleItemClassInputChange,
+        handleMenuScrollToBottom: handleItemClassScrollToBottom,
+        initializeOptions: initializeItemClassOptions
+    } = usePOClassSelect(30);
+    
+    const [selectedClass, setSelectedClass] = useState<any>(null);
+
     // State for dropdown options
     const [departmentOptions, setDepartmentOptions] = useState<Array<{value: string, label: string}>>([]);
     const [positionOptions, setPositionOptions] = useState<Array<{value: string, label: string}>>([]);
@@ -56,6 +70,23 @@ export default function EditEmployee() {
             fetchEmployee(id);
         }
     }, [id]);
+
+    // Initialize NetSuite Class options
+    useEffect(() => {
+        initializeItemClassOptions();
+    }, [initializeItemClassOptions]);
+
+    // Set initial NetSuite Class selection when employee data loads
+    useEffect(() => {
+        if (employee && employee.classes_id_netsuite && POClassOptions.length > 0) {
+            const initialClass = POClassOptions.find(option => 
+                option.value === employee.classes_id_netsuite?.toString()
+            );
+            if (initialClass) {
+                setSelectedClass(initialClass);
+            }
+        }
+    }, [employee?.classes_id_netsuite, POClassOptions]);
 
     // Auto-expand first system when employee data loads (only once)
     useEffect(() => {
@@ -564,6 +595,40 @@ export default function EditEmployee() {
                                             value={formData.employee_address || ''}
                                             onChange={(e) => handleInputChange('employee_address', e.target.value)}
                                             placeholder="Enter employee address"
+                                        />
+                                    </div>
+
+                                    {/* NetSuite Class */}
+                                    <div className="lg:col-span-2">
+                                        <Label>NetSuite Class</Label>
+                                        <CustomAsyncSelect
+                                            name="classes_id_netsuite"
+                                            placeholder="Select NetSuite class..."
+                                            value={selectedClass}
+                                            error={validationErrors.classes_id_netsuite ? String(validationErrors.classes_id_netsuite) : undefined}
+                                            defaultOptions={POClassOptions}
+                                            loadOptions={handleItemClassInputChange}
+                                            onMenuScrollToBottom={handleItemClassScrollToBottom}
+                                            isLoading={itemClassPagination.loading}
+                                            noOptionsMessage={() => "No classes found"}
+                                            loadingMessage={() => "Loading classes..."}
+                                            isSearchable={true}
+                                            inputValue={itemClassInputValue}
+                                            onInputChange={handleItemClassInputChange}
+                                            onChange={(option) => {
+                                                setSelectedClass(option);
+                                                // Update both netsuite class fields
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    classes_id_netsuite: option?.value ? Number(option.value) : null,
+                                                    classes_name_netsuite: option?.label || null
+                                                }));
+                                                
+                                                // Clear validation error if exists
+                                                if (validationErrors.classes_id_netsuite) {
+                                                    // setValidationErrors not available in EditEmployee, but that's okay
+                                                }
+                                            }}
                                         />
                                     </div>
 

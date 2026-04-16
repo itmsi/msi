@@ -3,10 +3,14 @@ import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldIt
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
-import { formatDateToDMYmiring } from '@/helpers/generalHelper';
+import { getProfile } from '@/helpers/generalHelper';
 
 export const usePurchaseOrderCreate = () => {
     const navigate = useNavigate();
+    
+    const profileSSO = getProfile() as any;
+    const profileSSOId = profileSSO?.email || null;
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [validationErrors, setValidationErrors] = useState<PurchaseOrderValidationErrors>({});
@@ -14,7 +18,7 @@ export const usePurchaseOrderCreate = () => {
     const [loadingMasterData, setLoadingMasterData] = useState(true);
 
     const [formData, setFormData] = useState<PurchaseOrderForm>({
-        customform: null,
+        customform: 102,
         vendorid: null,
         purchasedate: null,
         subsidiary: null,
@@ -27,9 +31,13 @@ export const usePurchaseOrderCreate = () => {
         custbody_me_pr_type: null,
         custbody_me_saving_type: null,
         custbody_me_pr_number: '',
+        custbody_msi_createdby_api: profileSSOId,
+        custbody_me_validity_date: null,
         class: null,
+        class_name: '',
         // description: null,
         department: null,
+        department_name: '',
         items: []
     });
 
@@ -83,7 +91,7 @@ export const usePurchaseOrderCreate = () => {
         setFormData(prev => ({
             ...prev,
             [fieldName]: value
-        }));
+        }));        
     };
 
     const handleDateChange = (fieldName: string, value: string) => {
@@ -115,6 +123,11 @@ export const usePurchaseOrderCreate = () => {
         // if (!formData.description) newErrors.description = 'Description wajib diisi';
         if (!formData.items || formData.items.length === 0) {
             newErrors.items = 'Minimal 1 item harus ditambahkan';
+        } else {
+            const itemsWithoutLocation = formData.items.some(item => !item.location);
+            if (itemsWithoutLocation) {
+                newErrors.items_location = 'Location wajib dipilih untuk setiap item';
+            }
         }
 
         setErrors(newErrors);
@@ -138,37 +151,42 @@ export const usePurchaseOrderCreate = () => {
         try {
             // Create JSON request body instead of FormData
             const requestData = {
-                customform: formData.customform || null,
-                vendorid: formData.vendorid || null,
-                purchasedate: formData.purchasedate ? formatDateToDMYmiring(new Date(formData.purchasedate)) : null,
-                subsidiary: formData.subsidiary || null,
-                location: formData.location || null,
+                customform: Number(formData.customform) || null,
+                vendorid: Number(formData.vendorid) || null,
+                purchasedate: formData.purchasedate ? formData.purchasedate : null,
+                subsidiary: Number(formData.subsidiary) || null,
+                location: Number(formData.location) || null,
                 memo: formData.memo || '',
-                currency: formData.currency || null,
-                terms: formData.terms || null,
-                custbody_me_pr_date: formData.custbody_me_pr_date ? formatDateToDMYmiring(new Date(formData.custbody_me_pr_date)) : null,
-                custbody_me_project_location: formData.custbody_me_project_location || null,
-                custbody_me_pr_type: formData.custbody_me_pr_type || null,
+                currency: Number(formData.currency) || null,
+                terms: Number(formData.terms) || null,
+                custbody_me_pr_date: formData.custbody_me_pr_date ? formData.custbody_me_pr_date : null,
+                custbody_me_project_location: Number(formData.custbody_me_project_location) || null,
+                custbody_me_pr_type: Number(formData.custbody_me_pr_type) || null,
                 custbody_me_saving_type: formData.custbody_me_saving_type || null,
                 custbody_me_pr_number: formData.custbody_me_pr_number || '',
-                class: formData.class || null,
-                department: formData.department || null,
+                custbody_msi_createdby_api: profileSSOId || '',
+                custbody_me_validity_date: formData?.custbody_me_validity_date || null,
+                class: Number(formData.class) || null,
+                department: Number(formData.department) || null,
                 // description: formData.description || null,
                 items: (formData.items || []).map(item => ({
-                    itemId: item.itemId,
-                    qty: item.qty,
+                    itemId: Number(item.itemId || 0),
+                    qty: Number(item.qty || 0),
                     rate: item.rate,
-                    department: item.department,
-                    class: item.class,
-                    location: item.location,
-                    taxcode: item.taxcode,
+                    department: Number(item.department) || null,
+                    class: Number(item.class) || null,
+                    location: Number(item.location) || 0,
+                    taxcode: Number(item.taxcode) || null,
+                    custcol_me_landed_cost: Number(item.custcol_me_landed_cost) || null,
+                    custcol_msi_fob: Number(item.custcol_msi_fob) || null,
+                    description: item.description || '',
                 }))
             };
 
             const response = await PurchaseOrderService.createPurchaseOrder(requestData);
             if (response.success) {
                 toast.success('Purchase Order berhasil dibuat');
-                navigate('/netsuite/purchase-order');
+                navigate('/netsuite/purchase-order/edit/' + response.data.poId);
             } else {
                 toast.error(response.message || 'Purchase Order tidak berhasil dibuat');
             }
@@ -188,27 +206,35 @@ export const usePurchaseOrderCreate = () => {
         if (!selectedProduct) {
             return;
         }
+        
+        const deptName = formData?.department_name
+            || masterData?.departments?.find(d => d.id === formData?.department)?.name
+            || '';
+        const className = formData?.class_name
+            || masterData?.class?.find(c => c.id === formData?.class)?.name
+            || '';
 
         const newItem: TablePOItem = {
-            id: `${selectedProduct.value}-${Date.now()}`, // Generate a temporary ID for the frontend
+            id: `${selectedProduct.value}-${Date.now()}`,
             product_id: selectedProduct.value,
             product_name: selectedProduct.data?.displayName || selectedProduct.label,
-            itemId: parseInt(selectedProduct.data?.itemId) || parseInt(selectedProduct.value),
+            itemId: Number(selectedProduct.data?.itemId) || Number(selectedProduct.value),
             qty: 1,
             rate: 0,
             amount: 0,
             total: 0,
-            department: masterData?.departments?.[0]?.id || 0,
-            department_name: masterData?.departments?.[0]?.name || '',
+            department: formData?.department || 0,
+            department_name: deptName,
             class: formData?.class || 0,
-            class_name: formData?.class ? masterData?.class?.find(cls => cls.id === formData.class)?.name || '' : '',
-            location: formData?.location || 0,
-            location_name: formData?.location ? masterData?.subsidiarys?.find(sub => sub.id === formData.location)?.name || '' : '',
+            class_name: className,
+            location:  Number(formData.location) || 0,
+            location_name: formData?.location_name || '',
             taxcode: masterData?.taxcodes?.[0]?.id || 0,
             taxcode_name: masterData?.taxcodes?.[0]?.name || '',
             tax_rate: '',
             gross_amount: 0,
-            tax_amount: 0
+            tax_amount: 0,
+            description: ''
         };
         
 

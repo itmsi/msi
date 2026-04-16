@@ -14,6 +14,7 @@ import { toast } from "react-hot-toast";
 import Switch from "@/components/form/switch/Switch";
 import { useCustomerSelect } from "@/hooks/useCustomerSelect";
 import CustomAsyncSelect from "@/components/form/select/CustomAsyncSelect";
+import { usePOClassSelect } from "@/hooks/usePOClassSelect";
 
 interface CreateEmployeeFormData {
     user_type: string;
@@ -38,6 +39,8 @@ interface CreateEmployeeFormData {
     is_customer: boolean;
     is_active: boolean;
     customer_foto?: File | null;
+    classes_id_netsuite?: number | null;
+    classes_name_netsuite?: string | null;
 }
 
 export default function CreateEmployee() {
@@ -60,7 +63,22 @@ export default function CreateEmployee() {
         setValidationErrors, 
         createEmployee 
     } = useCreateEmployee();
+
+    const {
+        POClassOptions,
+        pagination: itemClassPagination,
+        inputValue: itemClassInputValue,
+        handleInputChange: handleItemClassInputChange,
+        handleMenuScrollToBottom: handleItemClassScrollToBottom,
+        initializeOptions: initializeItemClassOptions
+    } = usePOClassSelect(30);
     
+    const [selectedClass, setSelectedClass] = useState<any>(null);
+
+    useEffect(() => {
+        initializeItemClassOptions();
+    }, [initializeItemClassOptions]);
+
     // Hook for creating employee
     // const { 
     //     isCreating : isCreatingUser, 
@@ -93,6 +111,8 @@ export default function CreateEmployee() {
         is_customer: true,
         is_active: true,
         customer_foto: null,
+        classes_id_netsuite: null,
+        classes_name_netsuite: null
     });
 
     // State for validation errors
@@ -210,6 +230,9 @@ export default function CreateEmployee() {
         if (field === 'user_type') {
             // Clear photo preview when switching user types
             setPhotoPreview(null);
+            // Reset selected options
+            setSelectedClass(null);
+            setSelectedCustomer(null);
             setFormData((prev) => ({
                 ...prev,
                 [field]: value,
@@ -232,6 +255,8 @@ export default function CreateEmployee() {
                 customer_password: '',
                 customer_id: '',
                 customer_foto: null,
+                classes_id_netsuite: null,
+                classes_name_netsuite: null
             }));
         }
 
@@ -392,6 +417,14 @@ export default function CreateEmployee() {
                     submitData.append('photo', formData.customer_foto);
                 }
                 
+                // Append NetSuite Class if selected
+                if (formData.classes_id_netsuite) {
+                    submitData.append('classes_id_netsuite', formData.classes_id_netsuite.toString());
+                }
+                if (formData.classes_name_netsuite) {
+                    submitData.append('classes_name_netsuite', formData.classes_name_netsuite);
+                }
+                
                 response = await usersService.createUsersWithPhoto(submitData);
                 // response = await usersService.createUser(submitData);
             } else {
@@ -420,6 +453,14 @@ export default function CreateEmployee() {
                 // Append photo if selected
                 if (formData.employee_foto) {
                     submitData.append('employee_foto', formData.employee_foto);
+                }
+                
+                // Append NetSuite Class if selected
+                if (formData.classes_id_netsuite) {
+                    submitData.append('classes_id_netsuite', formData.classes_id_netsuite.toString());
+                }
+                if (formData.classes_name_netsuite) {
+                    submitData.append('classes_name_netsuite', formData.classes_name_netsuite);
                 }
                 
                 response = await createEmployee(submitData);
@@ -755,6 +796,44 @@ export default function CreateEmployee() {
                                         />
                                     </div>
                                 )}
+                                
+                                <div className="md:col-span-2">
+                                    <Label>
+                                        NetSuite Class
+                                    </Label>
+                                    <CustomAsyncSelect
+                                        name="classes_id_netsuite"
+                                        placeholder="Select NetSuite class..."
+                                        value={selectedClass}
+                                        error={validationErrors.classes_id_netsuite ? String(validationErrors.classes_id_netsuite) : undefined}
+                                        defaultOptions={POClassOptions}
+                                        loadOptions={handleItemClassInputChange}
+                                        onMenuScrollToBottom={handleItemClassScrollToBottom}
+                                        isLoading={itemClassPagination.loading}
+                                        noOptionsMessage={() => "No classes found"}
+                                        loadingMessage={() => "Loading classes..."}
+                                        isSearchable={true}
+                                        inputValue={itemClassInputValue}
+                                        onInputChange={handleItemClassInputChange}
+                                        onChange={(option) => {
+                                            setSelectedClass(option);
+                                            // Update both netsuite class fields
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                classes_id_netsuite: option?.value ? Number(option.value) : null,
+                                                classes_name_netsuite: option?.label || null
+                                            }));
+                                            
+                                            // Clear validation error if exists
+                                            if (validationErrors.classes_id_netsuite) {
+                                                setValidationErrors(prev => ({
+                                                    ...prev,
+                                                    classes_id_netsuite: undefined
+                                                }));
+                                            }
+                                        }}
+                                    />
+                                </div>
 
                                 {/* Employee Status - Only show for Employee */}
                                 {formData.user_type === 'employee' && (

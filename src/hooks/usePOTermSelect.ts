@@ -1,38 +1,38 @@
 import { useState, useCallback } from 'react';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
-import { DataItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
+import { TermsItem } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
 
-export interface POItemsSelectOption {
+export interface POTermSelectOption {
     value: string;
     label: string;
-    data?: DataItems;
+    data?: TermsItem;
 }
 
-export interface POItemsPaginationState {
+export interface POTermPaginationState {
     page: number;
     hasMore: boolean;
     loading: boolean;
 }
 
-export const usePOItemsSelect = (limit: number = 10) => {
-    const [POItemsOptions, setPOItemsOptions] = useState<POItemsSelectOption[]>([]);
-    const [pagination, setPagination] = useState<POItemsPaginationState>({
+export const usePOTermSelect = (limit: number = 30) => {
+    const [POTermOptions, setPOTermOptions] = useState<POTermSelectOption[]>([]);
+    const [pagination, setPagination] = useState<POTermPaginationState>({
         page: 1,
         hasMore: true,
         loading: false
     });
     const [inputValue, setInputValue] = useState('');
 
-    const loadPOItemsOptions = useCallback(async (
+    const loadPOTermOptions = useCallback(async (
         inputValue: string = '', 
-        loadedOptions: POItemsSelectOption[] = [],
+        loadedOptions: POTermSelectOption[] = [],
         page: number = 1,
         reset: boolean = false
     ) => {
         try {
             setPagination(prev => ({ ...prev, loading: true }));
 
-            const response = await PurchaseOrderService.getPOItems({
+            const response = await PurchaseOrderService.getPOTerms({
                 search: inputValue,
                 page: page,
                 limit: limit,
@@ -40,14 +40,14 @@ export const usePOItemsSelect = (limit: number = 10) => {
             });
 
             if (response.success) {
-                const newOptions: POItemsSelectOption[] = response.data.items.map((poItems: DataItems) => ({
-                    value: poItems.internalId,
-                    label: poItems.displayName !== '' ? poItems.displayName : poItems.itemId,
+                const newOptions: POTermSelectOption[] = response.data.items.map((poItems: TermsItem) => ({
+                    value: poItems.id.toString(),
+                    label: poItems.name,
                     data: poItems
                 }));
 
                 const updatedOptions = reset ? newOptions : [...loadedOptions, ...newOptions];
-                setPOItemsOptions(updatedOptions);
+                setPOTermOptions(updatedOptions);
                 
                 const hasMoreData = response.data.pagination.page < response.data.pagination.totalPages;
                 
@@ -71,34 +71,34 @@ export const usePOItemsSelect = (limit: number = 10) => {
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
         setInputValue(inputValue);
-        setPOItemsOptions([]);
+        setPOTermOptions([]);
         setPagination({ page: 1, hasMore: true, loading: false });
         
-        return await loadPOItemsOptions(inputValue, [], 1, true);
-    }, [loadPOItemsOptions]);
+        return await loadPOTermOptions(inputValue, [], 1, true);
+    }, [loadPOTermOptions]);
 
     const handleMenuScrollToBottom = useCallback(async () => {
         if (pagination.hasMore && !pagination.loading) {
-            await loadPOItemsOptions(inputValue, POItemsOptions, pagination.page + 1, false);
+            await loadPOTermOptions(inputValue, POTermOptions, pagination.page + 1, false);
         }
-    }, [pagination.hasMore, pagination.loading, pagination.page, inputValue, POItemsOptions, loadPOItemsOptions]);
+    }, [pagination.hasMore, pagination.loading, pagination.page, inputValue, POTermOptions, loadPOTermOptions]);
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
-        if (POItemsOptions.length === 0) {
-            await loadPOItemsOptions('', [], 1, true);
+        if (POTermOptions.length === 0) {
+            await loadPOTermOptions('', [], 1, true);
         }
-    }, [POItemsOptions.length, loadPOItemsOptions]);
+    }, [POTermOptions.length, loadPOTermOptions]);
 
     // Get PO item by ID
-    const getPOItemById = useCallback(async (poItemId: string): Promise<POItemsSelectOption | null> => {
+    const getPOItemById = useCallback(async (poItemId: string): Promise<POTermSelectOption | null> => {
         try {
-            const response = await PurchaseOrderService.getPOItems({ search: poItemId });
+            const response = await PurchaseOrderService.getPOTerms({ search: poItemId });
             if (response.success && response.data.items.length > 0) {
                 const poItem = response.data.items[0];
                 return {
-                    value: poItem.internalId,
-                    label: poItem.displayName !== '' ? poItem.displayName : poItem.itemId,
+                    value: poItem.id.toString(),
+                    label: poItem.name,
                     data: poItem
                 };
             }
@@ -109,13 +109,13 @@ export const usePOItemsSelect = (limit: number = 10) => {
     }, []);
 
     return {
-        POItemsOptions,
+        POTermOptions,
         pagination,
         inputValue,
         handleInputChange,
         handleMenuScrollToBottom,
         initializeOptions,
-        loadPOItemsOptions,
+        loadPOTermOptions,
         getPOItemById
     };
 };

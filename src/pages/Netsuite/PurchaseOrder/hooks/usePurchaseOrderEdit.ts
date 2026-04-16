@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldItems, TablePOItem, PODetailData } from '../types/purchaseorder';
+import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldItems, TablePOItem, PODetailData, PurchaseOrderFormUpdate } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 import { useNavigate, useParams } from 'react-router';
 import toast from 'react-hot-toast';
-import { formatDateToDMYmiring } from '@/helpers/generalHelper';
 
 // Mapping response API (PODetailData) ke format form (PurchaseOrderForm)
 const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
@@ -29,30 +28,41 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         location_name: line.location_display || '',
         taxcode: line.taxcode ?? 0,
         taxcode_name: line.taxcode_display || '',
-        tax_rate: line.taxrate1 != null ? String(line.taxrate1) : '',
+        tax_rate: line.taxrate1 != null ? String(line.taxrate1) || '' : String(line.taxcode_display) || '',
         gross_amount: line.grossamt ?? 0,
         tax_amount: line.tax1amt ?? 0,
+        custcol_me_landed_cost: line.custcol_me_landed_cost != null ? Number(line.custcol_me_landed_cost) : 0,
+        custcol_msi_fob: line.custcol_msi_fob != null ? Number(line.custcol_msi_fob) : 0,
+        description: line.description || ''
     }));
 
     return {
-        customform: null,
+        customform: detail.customform,
+        customform_display: detail.customform_display || '',
         vendorid: detail.vendor_id,
+        vendor_name: detail.vendor_name || '',
         purchasedate: detail.po_date,
         subsidiary: detail.subsidiary ?? 0,
         subsidiary_display: detail.subsidiary_display || '',
         location: firstLine?.location ?? null,
         memo: detail.memo || '',
         currency: detail.currency_id,
-        terms: null,
+        terms: Number(detail.terms) || null,
+        terms_display: detail.terms_display || null,
         custbody_me_pr_date: detail.custbody_me_pr_date || null,
         custbody_me_project_location: detail.custbody_me_project_location ?? null,
         custbody_me_pr_type: detail.custbody_me_pr_type ?? null,
         custbody_me_saving_type: detail.custbody_me_saving_type ?? null,
         custbody_me_pr_number: detail.custbody_me_pr_number || '',
-        class: firstLine?.class ?? null,
-        department: firstLine?.department ?? null,
+        class: Number(items[0].class) ?? null,
+        class_name: items[0].class_name || '',
+        department: Number(items[0].department) ?? null,
+        department_name: items[0].department_name || '',
         approvalstatus: detail.approvalstatus,
+        po_status_label: detail.po_status_label || '',
+        nextapprover: detail.nextapprover || null,
         custbody_msi_createdby_api: detail.custbody_msi_createdby_api,
+        custbody_me_validity_date: detail.custbody_me_validity_date || null,
         // description: detail.custbody_me_description || null,
         items,
     };
@@ -74,12 +84,14 @@ export const usePurchaseOrderEdit = () => {
     const [formData, setFormData] = useState<PurchaseOrderForm>({
         customform: null,
         vendorid: null,
+        vendor_name: null,
         purchasedate: null,
         subsidiary: null,
         location: null,
         memo: '',
         currency: null,
         terms: null,
+        terms_display: null,
         custbody_me_pr_date: null,
         custbody_me_project_location: null,
         custbody_me_pr_type: null,
@@ -120,9 +132,6 @@ export const usePurchaseOrderEdit = () => {
                 if (detailRes.success && detailRes.data?.length > 0) {
                     const detail = detailRes.data[0];
                     setPODetail(detail);
-                    console.log({
-                        detail
-                    });
                     
                     setFormData(mapPODetailToForm(detail));
                 } else {
@@ -191,6 +200,7 @@ export const usePurchaseOrderEdit = () => {
         if (!formData.customform) newErrors.customform = 'Custom Form wajib dipilih';
         if (!formData.purchasedate) newErrors.purchasedate = 'Purchase Date wajib diisi';
         if (!formData.vendorid) newErrors.vendorid = 'Vendor wajib dipilih';
+        if (!formData.terms) newErrors.terms = 'Terms wajib dipilih';
         if (!formData.currency) newErrors.currency = 'Currency wajib dipilih';
         if (!formData.subsidiary) newErrors.subsidiary = 'Subsidiary wajib dipilih';
         if (!formData.location) newErrors.location = 'Location wajib dipilih';
@@ -199,6 +209,11 @@ export const usePurchaseOrderEdit = () => {
         // if (!formData.description) newErrors.description = 'Description wajib diisi';
         if (!formData.items || formData.items.length === 0) {
             newErrors.items = 'Minimal 1 item harus ditambahkan';
+        } else {
+            const itemsWithoutLocation = formData.items.some(item => !item.location);
+            if (itemsWithoutLocation) {
+                newErrors.items_location = 'Location wajib dipilih untuk setiap item';
+            }
         }
 
         setErrors(newErrors);
@@ -221,40 +236,49 @@ export const usePurchaseOrderEdit = () => {
 
         setIsSubmitting(true);
         try {
-            const requestData = {
-                // id: poDetail?.po_id || id,
-                customform: formData.customform || null,
-                vendorid: formData.vendorid || null,
-                purchasedate: formData.purchasedate ? formatDateToDMYmiring(new Date(formData.purchasedate)) : null,
-                subsidiary: formData.subsidiary || null,
-                location: formData.location || null,
-                memo: formData.memo || '',
-                currency: formData.currency || null,
-                terms: formData.terms || null,
-                custbody_me_pr_date: formData.custbody_me_pr_date ? formatDateToDMYmiring(new Date(formData.custbody_me_pr_date)) : null,
-                custbody_me_project_location: formData.custbody_me_project_location || null,
-                custbody_me_pr_type: formData.custbody_me_pr_type || null,
-                custbody_me_saving_type: formData.custbody_me_saving_type || null,
-                custbody_me_pr_number: formData.custbody_me_pr_number || '',
-                class: formData.class || null,
-                department: formData.department || null,
-                // description: formData.description || null,
+            const requestData: PurchaseOrderFormUpdate = {
+                id: Number(poDetail?.po_id || id),
+                customform: formData.customform || undefined,
+                vendorid: formData.vendorid || undefined,
+                purchasedate: formData.purchasedate ? formData.purchasedate : undefined,
+                subsidiary: formData.subsidiary || undefined,
+                location: formData.location || undefined,
+                memo: formData.memo || undefined,
+                currency: formData.currency || undefined,
+                terms: formData.terms || undefined,
+                terms_display: formData.terms_display || undefined,
+                custbody_me_pr_date: formData.custbody_me_pr_date ? formData.custbody_me_pr_date : undefined,
+                custbody_me_project_location: formData.custbody_me_project_location || undefined,
+                custbody_me_pr_type: formData.custbody_me_pr_type || undefined,
+                custbody_me_saving_type: formData.custbody_me_saving_type || undefined,
+                custbody_me_pr_number: formData.custbody_me_pr_number || undefined,
+                custbody_msi_createdby_api: formData.custbody_msi_createdby_api || undefined,
+                class: formData.class || undefined,
+                department: formData.department || undefined,
+                custbody_me_validity_date: formData.custbody_me_validity_date ? formData.custbody_me_validity_date : undefined,
                 items: (formData.items || []).map(item => ({
-                    itemId: item.itemId,
-                    qty: item.qty,
-                    rate: item.rate,
-                    department: item.department,
-                    class: item.class,
-                    location: item.location,
-                    taxcode: item.taxcode,
+                    itemId: Number(item.itemId),
+                    qty: Number(item.qty),
+                    rate: Number(item.rate || 0),
+                    department: Number(item.department || 0),
+                    class: Number(item.class || 0),
+                    location: Number(item.location || 0),
+                    taxcode: Number(item.taxcode || 0),
+                    custcol_msi_fob: Number(item.custcol_msi_fob || 0),
+                    custcol_me_landed_cost: Number(item.custcol_me_landed_cost || 0),
+                    amount: Number(item.amount || 0),
+                    total: Number(item.total || 0),
+                    tax_amount: Number(item.tax_amount || 0),
+                    gross_amount: Number(item.gross_amount || 0),
+                    description: item.description || ''
                 }))
             };
 
-            // TODO: ganti ke updatePurchaseOrder kalau endpoint sudah ada
-            const response = await PurchaseOrderService.createPurchaseOrder(requestData);
+            const response = await PurchaseOrderService.updatePurchaseOrder(requestData);
             if (response.success) {
                 toast.success('Purchase Order berhasil diupdate');
-                navigate('/netsuite/purchase-order');
+                window.location.href = '/netsuite/purchase-order/edit/' + id;
+                // navigate('/netsuite/purchase-order/edit/' + id);
             } else {
                 toast.error(response.message || 'Gagal mengupdate Purchase Order');
             }
@@ -287,8 +311,8 @@ export const usePurchaseOrderEdit = () => {
             class_name: formData?.items?.[0]?.class_name || '',
             location: formData?.items?.[0]?.location || 0,
             location_name: formData?.items?.[0]?.location_name || '',
-            taxcode: formData?.items?.[0]?.taxcode || 0,
-            taxcode_name: formData?.items?.[0]?.taxcode_name || '',
+            taxcode: 5, // Default taxcode, bisa disesuaikan
+            taxcode_name: '',
             tax_rate: '',
             gross_amount: 0,
             tax_amount: 0

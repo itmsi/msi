@@ -10,10 +10,16 @@ import FormActions from '@/components/form/FormActions';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOVendorSelect } from '@/hooks/usePOVendorSelect';
 import { LoadingOverlay } from '@/components/common/Loading';
+import { usePOClassSelect } from '@/hooks/usePOClassSelect';
+import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
+import { getProfile } from '@/helpers/generalHelper';
+import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 
 export default function Create() {
     const navigate = useNavigate();
-    
+    const profileSSO = getProfile() as any;
+    const profileSSOId = profileSSO?.classes_id_netsuite || null;
+
     const {
         isSubmitting,
         formData,
@@ -29,22 +35,88 @@ export default function Create() {
         handleUpdateProductItem,
     } = usePurchaseOrderCreate();
 
-    // Use POILocationSelect hook for location management
+    // Get subsidiary_id dari form data
+    const subsidiaryId = formData.subsidiary ? Number(formData.subsidiary) : undefined;
+
+    // Location select untuk header (is_parent = true)
     const {
         POLocationOptions,
         pagination,
         inputValue,
         handleInputChange: handleLocationInputChange,
         handleMenuScrollToBottom,
-        initializeOptions
-    } = usePOLocationSelect();
+        initializeOptions,
+        resetLocationOptions
+    } = usePOLocationSelect(30, false, subsidiaryId);
+
+    // Location select untuk items (is_parent = false)
+    const {
+        POLocationOptions: itemLocationOptions,
+        pagination: itemLocationPagination,
+        inputValue: itemLocationInputValue,
+        handleInputChange: handleItemLocationInputChange,
+        handleMenuScrollToBottom: handleItemLocationScrollToBottom,
+        initializeOptions: initializeItemLocationOptions,
+        resetLocationOptions: resetItemLocationOptions
+    } = usePOLocationSelect(30, false, subsidiaryId);
     
     const [selectedLocation, setSelectedLocation] = useState<any>(null);
     const [locationSelectError, setLocationSelectError] = useState<string>('');
 
     useEffect(() => {
         initializeOptions();
-    }, [initializeOptions]);
+        initializeItemLocationOptions();
+    }, [initializeOptions, initializeItemLocationOptions]);
+    
+    // Class select untuk items
+    const {
+        POClassOptions,
+        pagination: itemClassPagination,
+        inputValue: itemClassInputValue,
+        handleInputChange: handleItemClassInputChange,
+        handleMenuScrollToBottom: handleItemClassScrollToBottom,
+        initializeOptions: initializeItemClassOptions,
+        resetClassOptions
+    } = usePOClassSelect(30, subsidiaryId, profileSSOId);
+    
+    const [selectedClass, setSelectedClass] = useState<any>(null);
+    const [classSelectError, setClassSelectError] = useState<string>('');
+
+    useEffect(() => {
+        initializeItemClassOptions();
+    }, [initializeItemClassOptions]);
+    
+    // Department select untuk items
+    const {
+        PODepartmentOptions,
+        pagination: itemDepartmentPagination,
+        inputValue: itemDepartmentInputValue,
+        handleInputChange: handleItemDepartmentInputChange,
+        handleMenuScrollToBottom: handleItemDepartmentScrollToBottom,
+        initializeOptions: initializeItemDepartmentOptions,
+        resetDepartmentOptions
+    } = usePODepartmentSelect(30, subsidiaryId);
+    
+    const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
+    const [departmentSelectError, setDepartmentSelectError] = useState<string>('');
+
+    useEffect(() => {
+        initializeItemDepartmentOptions();
+    }, [initializeItemDepartmentOptions]);
+    
+    // Reset location options ketika subsidiary berubah
+    useEffect(() => {
+        if (subsidiaryId) {
+            resetLocationOptions();
+            resetItemLocationOptions();
+            resetClassOptions();
+            resetDepartmentOptions();
+            // Reset selected location, class, dan department karena subsidiary berubah
+            setSelectedLocation(null);
+            setSelectedClass(null);
+            setSelectedDepartment(null);
+        }
+    }, [subsidiaryId]);
     
     const {
         POVendorOptions,
@@ -62,6 +134,24 @@ export default function Create() {
         initializeVendorOptions();
     }, [initializeVendorOptions]);
 
+    // Term select
+    const {
+        POTermOptions,
+        pagination : termPagination,
+        inputValue : termInputValue,
+        handleInputChange: handleTermInputChange,
+        handleMenuScrollToBottom: handleTermMenuScrollToBottom,
+        initializeOptions: initializeTermOptions,
+    } = usePOTermSelect();
+    
+    const [selectedTerm, setSelectedTerm] = useState<any>(null);
+    const [TermSelectError, setTermSelectError] = useState<string>('');
+    
+    useEffect(() => {
+        if (initializeTermOptions) {
+            initializeTermOptions();
+        }
+    }, [initializeTermOptions]); // Add function dependency back
     return (
         <>
             <PageMeta
@@ -80,7 +170,7 @@ export default function Create() {
                 </div>
             ) : (
             <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-4 sm:px-3">
+                <div className="mx-auto px-0">
                     {/* Header */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
@@ -103,6 +193,7 @@ export default function Create() {
                             errors={errors}
                             masterData={masterData}
                             loadingMasterData={loadingMasterData}
+                            subsidiaryId={formData.subsidiary}
                             onInputChange={handleInputChange}
                             onSelectChange={handleSelectChange}
                             onDateChange={handleDateChange}
@@ -125,6 +216,27 @@ export default function Create() {
                                 }
                             }}
                             vendorError={errors.vendorid || VendorSelectError}
+
+                            // Term props
+                            termOptions={POTermOptions}
+                            termPagination={termPagination}
+                            termInputValue={termInputValue}
+                            onTermInputChange={handleTermInputChange}
+                            onTermMenuScrollToBottom={handleTermMenuScrollToBottom}
+                            selectedTerm={selectedTerm}
+                            onTermChange={(option) => {
+                                setSelectedTerm(option);
+                                if (option && option.data) {
+                                    // Update formData dengan data term yang dipilih
+                                    handleSelectChange('terms', option.value);
+                                    handleSelectChange('terms_name', option.data.name);
+                                }
+                                if (TermSelectError) {
+                                    setTermSelectError('');
+                                }
+                            }}
+                            termError={errors.termid || TermSelectError}
+
                             // Location props  
                             locationOptions={POLocationOptions}
                             locationPagination={pagination}
@@ -144,6 +256,46 @@ export default function Create() {
                                 }
                             }}
                             locationError={errors.location || locationSelectError}
+                            
+                            // Class props  
+                            classOptions={POClassOptions}
+                            classPagination={itemClassPagination}
+                            classInputValue={itemClassInputValue}
+                            onClassInputChange={handleItemClassInputChange}
+                            onClassMenuScrollToBottom={handleItemClassScrollToBottom}
+                            selectedClass={selectedClass}
+                            onClassChange={(option) => {
+                                setSelectedClass(option);
+                                if (option && option.data) {
+                                    // Update formData dengan data class yang dipilih
+                                    handleSelectChange('class', option.value);
+                                    handleSelectChange('class_name', option.data.name);
+                                }
+                                if (classSelectError) {
+                                    setClassSelectError('');
+                                }
+                            }}
+                            classError={errors.class || classSelectError}
+                            
+                            // Department props  
+                            departmentOptions={PODepartmentOptions}
+                            departmentPagination={itemDepartmentPagination}
+                            departmentInputValue={itemDepartmentInputValue}
+                            onDepartmentInputChange={handleItemDepartmentInputChange}
+                            onDepartmentMenuScrollToBottom={handleItemDepartmentScrollToBottom}
+                            selectedDepartment={selectedDepartment}
+                            onDepartmentChange={(option) => {
+                                setSelectedDepartment(option);
+                                if (option && option.data) {
+                                    // Update formData dengan data department yang dipilih
+                                    handleSelectChange('department', option.value);
+                                    handleSelectChange('department_name', option.data.name);
+                                }
+                                if (departmentSelectError) {
+                                    setDepartmentSelectError('');
+                                }
+                            }}
+                            departmentError={errors.department || departmentSelectError}
                         />
 
                         {/* Purchase Order Items */}
@@ -159,12 +311,12 @@ export default function Create() {
                             onProductDelete={handleProductDelete}
                             onUpdateProductItem={handleUpdateProductItem}
 
-                            // Location props  
-                            locationOptions={POLocationOptions}
-                            locationPagination={pagination}
-                            locationInputValue={inputValue}
-                            onLocationInputChange={handleLocationInputChange}
-                            onLocationMenuScrollToBottom={handleMenuScrollToBottom}
+                            // Location props (is_parent = false)
+                            locationOptions={itemLocationOptions}
+                            locationPagination={itemLocationPagination}
+                            locationInputValue={itemLocationInputValue}
+                            onLocationInputChange={handleItemLocationInputChange}
+                            onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
                             selectedLocation={selectedLocation}
                             onLocationChange={(option) => {
                                 setSelectedLocation(option);

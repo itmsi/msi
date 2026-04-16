@@ -1,6 +1,5 @@
 import React from 'react';
-import { MdCheckCircle, MdCancel, MdAccessTime } from 'react-icons/md';
-import Badge from './Badge';
+import { MdCheckCircle, MdCancel } from 'react-icons/md';
 
 interface ActiveStatusBadgeProps {
     status: 'active' | 'inactive';
@@ -186,37 +185,115 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({
 };
 interface StatusTypeBadgeProps {
     type: 1 | 2 | 3;
+    label?: string;
+    variant?: 'default' | 'with-icon' | 'icon-only';
+    size?: 'sm' | 'md' | 'lg';
+    className?: string;
 }
-export const StatusTypeBadge: React.FC<StatusTypeBadgeProps> = ({ type }) => {
-    const typeConfig = {
-        1: { 
-            variant: 'outline' as const, 
-            color: 'info' as const, 
-            label: 'Pending Approval' 
-        },
-        2: { 
-            variant: 'solid' as const, 
-            color: 'success' as const, 
-            label: 'Approved' 
-        },
-        3: { 
-            variant: 'solid' as const, 
-            color: 'warning' as const, 
-            label: 'Rejected' 
-        },
+export const StatusTypeBadge: React.FC<StatusTypeBadgeProps> = ({ 
+    type,
+    label,
+    variant = 'default',
+    size = 'md',
+    className = '' 
+}) => {
+    const getStatusStyles = (type: 1 | 2 | 3) => {
+        switch (type) {
+            case 2:
+                return {
+                    bgColor: 'bg-green-100',
+                    textColor: 'text-green-800',
+                    borderColor: 'border-green-200',
+                    icon: <MdCheckCircle className={getSizeClasses().iconSize} />,
+                    label: label || 'Approved' 
+                };
+            case 1:
+                return {
+                    bgColor: 'bg-gray-100',
+                    textColor: 'text-gray-800',
+                    borderColor: 'border-gray-200',
+                    icon: <MdCancel className={getSizeClasses().iconSize} />,
+                    label: label || 'Pending Approval'
+                };
+            case 3:
+                return {
+                    bgColor: 'bg-red-100',
+                    textColor: 'text-red-800',
+                    borderColor: 'border-red-200',
+                    icon: <MdCancel className={getSizeClasses().iconSize} />,
+                    label: label || 'Rejected'
+                };
+            default:
+                return {
+                    bgColor: 'bg-gray-100',
+                    textColor: 'text-gray-800',
+                    borderColor: 'border-gray-200',
+                    icon: <MdCancel className={getSizeClasses().iconSize} />
+                };
+        }
     };
 
-    const config = typeConfig[type];
+    const getSizeClasses = () => {
+        switch (size) {
+            case 'sm':
+                return {
+                    padding: 'px-2 py-0.5',
+                    textSize: 'text-xs',
+                    iconSize: 'w-3 h-3'
+                };
+            case 'lg':
+                return {
+                    padding: 'px-4 py-2',
+                    textSize: 'text-sm',
+                    iconSize: 'w-5 h-5'
+                };
+            default: // md
+                return {
+                    padding: 'px-3 py-1',
+                    textSize: 'text-xs',
+                    iconSize: 'w-4 h-4'
+                };
+        }
+    };
+
+    const statusStyles = getStatusStyles(type);
+    const sizeClasses = getSizeClasses();
+    
+    const getDisplayText = () => {
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    };
+
+    const renderContent = () => {
+        switch (variant) {
+            case 'with-icon':
+                return (
+                    <>
+                        {statusStyles.icon}
+                        <span>{getDisplayText()}</span>
+                    </>
+                );
+            case 'icon-only':
+                return statusStyles.icon;
+            default:
+                return <span>{statusStyles.label}</span>;
+        }
+    };
 
     return (
-        <Badge 
-            variant={config.variant} 
-            color={config.color} 
-            size='lg'
-            endIcon={type === 1 ? <MdAccessTime className="w-4 h-4" /> : type === 2 ? <MdCheckCircle className="w-4 h-4" /> : <MdCancel className="w-4 h-4" />}
+        <span 
+            className={`
+                inline-flex items-center justify-center gap-1 
+                ${sizeClasses.padding} 
+                ${sizeClasses.textSize} 
+                ${statusStyles.bgColor} 
+                ${statusStyles.textColor} 
+                ${statusStyles.borderColor} 
+                border rounded-full font-medium
+                ${className}
+            `.trim().replace(/\s+/g, ' ')}
         >
-            {config.label}
-        </Badge>
+            {renderContent()}
+        </span>
     );
 };
 export default ActiveStatusBadge;

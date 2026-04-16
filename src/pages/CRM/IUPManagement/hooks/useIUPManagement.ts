@@ -15,6 +15,7 @@ export const useIupManagement = () => {
     const [areaFilter, setAreaFilter] = useState('');
     const [iupZoneFilter, setIupZoneFilter] = useState('');
     const [iupSegmentFilter, setIupSegmentFilter] = useState('');
+    const [contractorCountFilter, setContractorCountFilter] = useState('');
     
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -51,6 +52,7 @@ export const useIupManagement = () => {
                 area_id: params?.area_id !== undefined ? params.area_id : areaFilter,
                 iup_zone_id: params?.iup_zone_id !== undefined ? params.iup_zone_id : iupZoneFilter,
                 iup_segment_id: params?.iup_segment_id !== undefined ? params.iup_segment_id : iupSegmentFilter,
+                is_contractor_count: params?.is_contractor_count !== undefined ? params.is_contractor_count : contractorCountFilter || null,
                 ...params
             });
             
@@ -63,7 +65,7 @@ export const useIupManagement = () => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, sortModify, statusFilter, segmentationFilter, islandFilter, groupFilter, areaFilter, iupZoneFilter, iupSegmentFilter, pagination.page, pagination.limit]);
+    }, [searchValue, sortOrder, sortModify, statusFilter, segmentationFilter, islandFilter, groupFilter, areaFilter, iupZoneFilter, iupSegmentFilter, contractorCountFilter, pagination.page, pagination.limit]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));        
@@ -101,6 +103,8 @@ export const useIupManagement = () => {
             setIupZoneFilter(value);
         } else if (filterType === 'iup_segment_id') {
             setIupSegmentFilter(value);
+        } else if (filterType === 'is_contractor_count') {
+            setContractorCountFilter(value);
         }
         
         setPagination(prev => ({ ...prev, page: 1 }));
@@ -125,6 +129,8 @@ export const useIupManagement = () => {
             params.iup_zone_id = value;
         } else if (filterType === 'iup_segment_id') {
             params.iup_segment_id = value;
+        } else if (filterType === 'is_contractor_count') {
+            params.is_contractor_count = value || null;
         }
         
         fetchIup(params);

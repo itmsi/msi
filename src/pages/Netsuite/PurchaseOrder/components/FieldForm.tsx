@@ -14,7 +14,8 @@ export const getPrimaryInfoFields = (masterData?: MasterDataFormFieldItems) => [
         label: "Custom Form",
         type: "select",
         options: masterData ? formatMasterDataOptions(masterData.customforms) : [],
-        required: true,
+        // required: true,
+        disabled: true
     },
     {
         name: "purchasedate",
@@ -43,12 +44,29 @@ export const getPrimaryInfoFields = (masterData?: MasterDataFormFieldItems) => [
     {
         name: "terms",
         label: "Terms",
-        type: "select",
-        options: masterData ? formatMasterDataOptions(masterData.terms) : [],
+        type: "select-terms",
+        required: true,
     }
 ];
 
 export const getAdditionalInfoFields = (masterData?: MasterDataFormFieldItems) => [
+    {
+        name: "custbody_me_validity_date",
+        label: "ME - Validity Date",
+        type: "date",
+    },
+    {
+        name: "custbody_me_project_location",
+        label: "ME - Project Location",
+        type: "select",
+        options: masterData ? formatMasterDataOptions(masterData.custbody_me_project_locations) : [],
+    },
+    {
+        name: "custbody_me_saving_type",
+        label: "ME - Saving Type",
+        type: "select",
+        options: masterData ? formatMasterDataOptions(masterData.custbody_me_saving_types) : [],
+    },
     {
         name: "custbody_me_pr_date",
         label: "ME - PR Date",
@@ -64,22 +82,10 @@ export const getAdditionalInfoFields = (masterData?: MasterDataFormFieldItems) =
         name: "custbody_me_pr_number",
         label: "ME - PR Number",
         type: "text",
-    },
-    {
-        name: "custbody_me_project_location",
-        label: "ME - Project Location",
-        type: "select",
-        options: masterData ? formatMasterDataOptions(masterData.custbody_me_project_locations) : [],
-    },
-    {
-        name: "custbody_me_saving_type",
-        label: "ME - Saving Type",
-        type: "select",
-        options: masterData ? formatMasterDataOptions(masterData.custbody_me_saving_types) : [],
     }
 ];
 
-export const getClassificationInfoFields = (masterData?: MasterDataFormFieldItems) => [
+export const getClassificationInfoFields = (masterData?: MasterDataFormFieldItems, subsidiaryId?: number) => [
     {
         name: "subsidiary",
         label: "Subsidiary",
@@ -92,20 +98,21 @@ export const getClassificationInfoFields = (masterData?: MasterDataFormFieldItem
         label: "Location",
         type: "select-location",
         required: true,
+        subsidiaryId: subsidiaryId, // Pass subsidiary_id untuk filtering location
     },
     {
         name: "class",
         label: "Class",
-        type: "select",
-        options: masterData ? formatMasterDataOptions(masterData.class) : [],
+        type: "select-class",
         required: true,
+        subsidiaryId: subsidiaryId, // Pass subsidiary_id untuk filtering class
     },
     {
         name: "department",
         label: "Department",
-        type: "select",
-        options: masterData ? formatMasterDataOptions(masterData.departments) : [],
+        type: "select-department",
         required: true,
+        subsidiaryId: subsidiaryId, // Pass subsidiary_id untuk filtering department
     },
 ];
 
@@ -137,12 +144,12 @@ export const getApprovalFields = () => [
     //     type: "text",
     //     readOnly: true,
     // },
-    // {
-    //     name: "next_approver",
-    //     label: "Next Approver",
-    //     type: "text",
-    //     readOnly: true,
-    // },
+    {
+        name: "nextapprover",
+        label: "Next Approver",
+        type: "text",
+        readOnly: true,
+    },
     {
         name: "custbody_msi_createdby_api",
         label: "Created By API",

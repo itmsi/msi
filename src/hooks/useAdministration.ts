@@ -1499,7 +1499,9 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
             employee_status: employee.employee_status,
             is_sales_quotation: employee.is_sales_quotation,
             company_id: employee.company_id.toString(),
-            department_id: employee.department_id.toString()
+            department_id: employee.department_id.toString(),
+            classes_id_netsuite: Number(employee.classes_id_netsuite) || null,
+            classes_name_netsuite: employee.classes_name_netsuite || null
         });
         setShowForm(true);
         setValidationErrors({});
@@ -2871,7 +2873,9 @@ export const useEmployeeDetail = () => {
         employee_address: '',
         employee_phone: '',
         gender_id: '',
-        island_id: ''
+        island_id: '',
+        classes_id_netsuite: null,
+        classes_name_netsuite: null
     });
 
     // Fetch employee by ID
@@ -2907,7 +2911,9 @@ export const useEmployeeDetail = () => {
                     employee_address: response.data.employee_address || '',
                     employee_phone: response.data.employee_phone || '',
                     gender_id: response.data.gender_id || '',
-                    island_id: response.data.island_id || ''
+                    island_id: response.data.island_id || '',
+                    classes_id_netsuite: response.data.classes_id_netsuite || null,
+                    classes_name_netsuite: response.data.classes_name_netsuite || null
                 });
             } else {
                 setError(response.message || 'Failed to fetch employee details');

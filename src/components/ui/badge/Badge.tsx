@@ -33,9 +33,9 @@ const Badge: React.FC<BadgeProps> = ({
 
     // Define size styles
     const sizeStyles = {
-        sm: "text-theme-xs",
-        md: "text-sm",
-        lg: "px-4 py-2 text-sm",
+        sm: "px-2 py-0.5 text-xs",
+        md: "px-3 py-1 text-sm",
+        lg: "px-4 py-2 text-lg",
     };
 
     // Define color styles for variants

@@ -4,6 +4,12 @@ export interface PurchaseOrderResponse {
         items: PurchaseOrderItem[];
         pagination: Pagination;
     }
+    sync_info: SyncInfo;
+}
+export interface SyncInfo {
+    sync_status: boolean;
+    created_at: string;
+    created_by_name: string;
 }
 export interface Pagination {
     page: number;
@@ -17,6 +23,9 @@ export interface PurchaseOrderRequest {
     sort_by: string;
     sort_order: string;
     search: string;
+    subsidiary?: string;
+    location?: string;
+    approvalstatus?: number | null;
     status: string;
 }
 export interface PurchaseOrderItem {
@@ -26,10 +35,15 @@ export interface PurchaseOrderItem {
     po_date: string;
     po_status: string;
     approvalstatus: string;
+    approvalstatus_display?: string;
+    subsidiary_display?: string;
     po_status_label: string;
+    nextapprover?: string | null;
     memo: string | null;
     vendor_id: number;
     vendor_name: string;
+    custbody_me_pr_number?: string;
+    location_display?: string;
     currency_id: number;
     currency_symbol: string;
     pr_number: string | null;
@@ -38,7 +52,8 @@ export interface PurchaseOrderItem {
     lines: POLine[];
     created_at: string;
     updated_at: string;
-    last_modified: string;
+    custbody_msi_createdby_api?: string;
+    last_modified?: string ;
 }
 
 export interface POLine {
@@ -58,24 +73,33 @@ export interface POLine {
 }
 
 export interface PurchaseOrderForm {
-    customform: number | null;
+    customform?: number | null;
+    customform_display?: string | null;
     vendorid: number | null;
+    vendor_name?: string | null;
     purchasedate: string | null;
     subsidiary: number | null;
     subsidiary_display?: string | null;
     location: number | null;
+    location_name?: string | null;
     memo: string;
     currency: number | null;
     terms: number | null;
+    terms_display?: string | null;
     custbody_me_pr_date: string | null;
     custbody_me_project_location: number | null;
     custbody_me_pr_type: number | null;
     custbody_me_saving_type: number | null;
     custbody_me_pr_number: string | null;
     class: number | null;
+    class_name?: string | null;
     department: number | null;
+    department_name?: string | null;
     custbody_msi_createdby_api?: string | null;
+    custbody_me_validity_date?: string | null;
+    nextapprover?: string | null;
     approvalstatus?: number | null;
+    po_status_label?: string | null;
     // description: string | null;
     // note: string | null;
     items: TablePOItem[];
@@ -123,6 +147,7 @@ export interface POItemsRequest {
     sort_by: string;
     sort_order: string;
     search: string;
+    is_parent?: boolean;
 }
 export interface FormFieldItemsResponse {
     success: boolean;
@@ -192,8 +217,12 @@ export interface TablePOItem {
     taxcode: number;
     taxcode_name?: string;
     tax_rate?: string;
+    taxcode_display?: string;
     gross_amount?: number;
     tax_amount?: number;
+    custcol_msi_fob?: number;
+    custcol_me_landed_cost?: number;
+    description?: string;
 }
 
 
@@ -278,15 +307,19 @@ export interface PODetailData {
     vendor_name: string;
     currency_id: number;
     currency_symbol: string;
+    terms?: number | string;
+    terms_display?: string | null;
     foreigntotal: number;
     total: number;
     last_modified: string;
     approvalstatus_label: string;
     approvalstatus: number;
+    nextapprover?: string | null;
     custbody_me_wf_created_by: number;
     custbody_me_wf_in_delegation: string;
     custbody_me_delegate_approver: number | null;
     custbody_msi_createdby_api: string;
+    custbody_me_validity_date: string | null;
     custbody_me_pr_date: string;
     custbody_me_project_location: number;
     custbody_me_pr_type: number;
@@ -294,6 +327,12 @@ export interface PODetailData {
     custbody_me_pr_number: string;
     custbody_me_description: string | null;
     intercotransaction: any | null;
+    customform?: number | null;
+    customform_display?: string | null;
+    class?: number | string;
+    class_display?: string;
+    department?: number | string;
+    department_display?: string;
     lines: PODetailLine[];
 }
 
@@ -326,10 +365,99 @@ export interface PODetailLine {
     matchbilltoreceipt?: string;
     expectedreceiptdate?: string | null;
     custcol_4601_witaxapplies?: string | null;
+    custcol_me_landed_cost?: number | null;
+    custcol_msi_fob?: number | null;
+    description?: string | null;
 }
 
 export interface PODetailResponse {
     success: boolean;
     data: PODetailData[];
     message: string;
+}
+
+// CLASS SELECT
+export interface ComponentsItem {
+    id: string;
+    name: string;
+    is_inactive: boolean;
+    parent_id: string;
+    parent_name: string;
+    subsidiary_id: string;
+    subsidiary_name: string;
+    last_modified: string;
+}
+
+export interface ComponentsDataResponse {
+    success: boolean;
+    data: {
+        items: ComponentsItem[];
+        pagination: Pagination;
+    };
+    message: string;
+}
+
+export interface PurchaseOrderFormUpdate {
+    id: number;
+    customform?: number;
+    vendorid?: number;
+    purchasedate?: string;
+    subsidiary?: number;
+    location?: number;
+    memo?: string;
+    currency?: number;
+    terms?: number;
+    terms_display?: string;
+    custbody_me_pr_date?: string;
+    custbody_me_project_location?: number;
+    custbody_me_pr_type?: number;
+    custbody_me_saving_type?: number;
+    custbody_me_pr_number?: string;
+    custbody_msi_createdby_api?: string;
+    class?: number;
+    department?: number;
+    custbody_me_validity_date?: string;
+    items?: PurchaseOrderUpdateItem[];
+}
+
+export interface PurchaseOrderUpdateItem {
+    itemId: number;
+    qty: number;
+    rate?: number;
+    department?: number;
+    class?: number;
+    location?: number;
+    taxcode?: number;
+    custcol_msi_fob?: number;
+    custcol_me_landed_cost?: number;
+    amount?: number;
+    total?: number;
+    tax_amount?: number;
+    gross_amount?: number;
+    description?: string;
+}
+// TERM SELECT
+export interface TermsItem {
+    id: string;
+    name: string;
+    is_inactive: boolean;
+}
+
+export interface TermsDataResponse {
+    success: boolean;
+    data: {
+        items: TermsItem[];
+        pagination: Pagination;
+    };
+    message: string;
+}
+export interface PODownloadRequest {
+    recId: number;
+}
+
+export interface PODownloadResponse {
+    success: boolean;
+    mimeType: string;
+    fileName: string;
+    fileContent: string;
 }
