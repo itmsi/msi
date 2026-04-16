@@ -185,12 +185,14 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({
 };
 interface StatusTypeBadgeProps {
     type: 1 | 2 | 3;
+    label?: string;
     variant?: 'default' | 'with-icon' | 'icon-only';
     size?: 'sm' | 'md' | 'lg';
     className?: string;
 }
 export const StatusTypeBadge: React.FC<StatusTypeBadgeProps> = ({ 
     type,
+    label,
     variant = 'default',
     size = 'md',
     className = '' 
@@ -203,7 +205,7 @@ export const StatusTypeBadge: React.FC<StatusTypeBadgeProps> = ({
                     textColor: 'text-green-800',
                     borderColor: 'border-green-200',
                     icon: <MdCheckCircle className={getSizeClasses().iconSize} />,
-                    label: 'Approved' 
+                    label: label || 'Approved' 
                 };
             case 1:
                 return {
@@ -211,7 +213,7 @@ export const StatusTypeBadge: React.FC<StatusTypeBadgeProps> = ({
                     textColor: 'text-gray-800',
                     borderColor: 'border-gray-200',
                     icon: <MdCancel className={getSizeClasses().iconSize} />,
-                    label: 'Pending Approval' 
+                    label: label || 'Pending Approval'
                 };
             case 3:
                 return {
@@ -219,7 +221,7 @@ export const StatusTypeBadge: React.FC<StatusTypeBadgeProps> = ({
                     textColor: 'text-red-800',
                     borderColor: 'border-red-200',
                     icon: <MdCancel className={getSizeClasses().iconSize} />,
-                    label: 'Rejected' 
+                    label: label || 'Rejected'
                 };
             default:
                 return {

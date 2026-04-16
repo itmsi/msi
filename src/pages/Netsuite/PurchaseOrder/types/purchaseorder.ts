@@ -35,6 +35,7 @@ export interface PurchaseOrderItem {
     po_date: string;
     po_status: string;
     approvalstatus: string;
+    approvalstatus_display?: string;
     subsidiary_display?: string;
     po_status_label: string;
     nextapprover?: string | null;
@@ -448,4 +449,14 @@ export interface TermsDataResponse {
         pagination: Pagination;
     };
     message: string;
+}
+export interface PODownloadRequest {
+    recId: number;
+}
+
+export interface PODownloadResponse {
+    success: boolean;
+    mimeType: string;
+    fileName: string;
+    fileContent: string;
 }

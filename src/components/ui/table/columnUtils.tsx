@@ -134,7 +134,7 @@ export const createActionsColumn = (actions: Array<{
 }>): TableColumn<any> => ({
     name: actions[0]?.title || 'Actions',
     cell: (row: any) => (
-        <div className="flex items-center gap-3 z-3">
+        <div className="flex items-center gap-3">
             {actions
                 .filter(action => !action.condition || action.condition(row))
                 .map((action, index) => {

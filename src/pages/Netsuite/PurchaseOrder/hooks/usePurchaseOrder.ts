@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { Pagination, PurchaseOrderItem, PurchaseOrderRequest, SyncInfo } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
@@ -22,6 +22,10 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         total: 0,
         totalPages: 0
     });
+    const paginationRef = useRef(pagination);
+    useEffect(() => {
+        paginationRef.current = pagination;
+    }, [pagination]);
 
     const fetchPurchaseOrders = useCallback(async (params?: Partial<PurchaseOrderRequest>) => {
         try {
@@ -137,6 +141,56 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         }
     }, [isSyncing, fetchPurchaseOrders]);
 
+    const handleSyncById = useCallback(async (row: PurchaseOrderItem) => {
+        if (isSyncing) return;
+        if (!row?.po_id) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi PO: ${row.po_number || row.po_id}...`);
+        try {
+            await PurchaseOrderService.syncPOById(String(row.po_id));
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            fetchPurchaseOrders({ page: paginationRef.current.page, limit: paginationRef.current.limit });
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, fetchPurchaseOrders]);
+
+    const handleDownloadInvoice = useCallback(async (row: PurchaseOrderItem) => {
+        if (!row?.po_id) return;
+        const toastId = toast.loading(`Mengunduh invoice PO: ${row.po_number || row.po_id}...`);
+        try {
+            const response = await PurchaseOrderService.downloadInvoice({
+                // recId: Number(row.po_id),
+                recId: 4152,
+            });
+
+            if (response?.fileContent && response?.fileName) {
+                const byteChars = atob(response.fileContent);
+                const byteArr = new Uint8Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) {
+                    byteArr[i] = byteChars.charCodeAt(i);
+                }
+                const blob = new Blob([byteArr], { type: response.mimeType || 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = response.fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                toast.success('Invoice berhasil diunduh', { id: toastId });
+            } else {
+                toast.error('Gagal mengunduh invoice', { id: toastId });
+            }
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal mengunduh invoice', { id: toastId });
+        }
+    }, []);
+
     const handleClearFilters = useCallback(() => {
         setStatusFilter('');
         setSubsidiaryFilter('');
@@ -181,5 +235,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         handleClearFilters,
         isSyncing,
         handleSync,
+        handleSyncById,
+        handleDownloadInvoice,
     };
 };

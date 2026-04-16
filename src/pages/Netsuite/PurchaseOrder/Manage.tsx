@@ -17,6 +17,7 @@ import { getProfile, formatCurrencyID, formatTanggal, formatDateTime } from '@/h
 import FilterSection from './components/FilterSection';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { createByDateColumn } from '@/components/ui/table/columnUtils';
+import { FaRegFilePdf } from 'react-icons/fa6';
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -43,6 +44,8 @@ export default function Manage() {
         handleClearFilters,
         isSyncing,
         handleSync,
+        handleSyncById,
+        handleDownloadInvoice,
     } = usePurchaseOrder(profileSSOId);
     
     const handlePageChangeAman = useCallback((halamanBaru: number) => {
@@ -130,17 +133,34 @@ export default function Manage() {
             center: true
         },
         {
-            name: 'Status',
+            name: 'Approval Status',
             selector: row => row.po_status || '-',
             cell: row => (
                 <div className="items-center capitalize">
                     <StatusTypeBadge 
                         type={Number(row.approvalstatus) as 1 | 2 | 3} 
+                        label={row.approvalstatus_display || undefined}
                     />
                 </div>
             ),
             center: true,
             width: '200px'
+        },
+        {
+            name: 'Status',
+            selector: row => row.po_status || '-',
+            cell: row => (
+                <div className="items-center capitalize">
+                    <span 
+                        className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
+                    >
+                        {row.po_status_label}
+                    </span>
+                    
+                </div>
+            ),
+            center: true,
+            width: '250px'
         },
         {
             name: 'Total Amount',
@@ -157,8 +177,15 @@ export default function Manage() {
         createByDateColumn('Updated By', 'last_modified', 'custbody_msi_createdby_api', '300px'),
         createActionsColumn([
             {
+                icon: FaRegFilePdf,
+                onClick: handleDownloadInvoice,
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                tooltip: 'Download Invoice',
+                permission: 'read',
+            },
+            {
                 icon: MdOutlineSync,
-                onClick: handleSync,
+                onClick: handleSyncById,
                 className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
                 tooltip: 'Perbarui',
                 width: '120px',

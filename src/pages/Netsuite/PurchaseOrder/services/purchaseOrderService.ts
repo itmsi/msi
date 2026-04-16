@@ -1,5 +1,5 @@
 import { apiPost, apiGet, ApiResponse, apiPut } from '@/helpers/apiHelper';
-import { ComponentsDataResponse, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, POItemResponse, POItemsRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
+import { ComponentsDataResponse, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -8,7 +8,7 @@ export class PurchaseOrderService {
         const requestData: PurchaseOrderRequest = {
             page: 1,
             limit: 10,
-            sort_by: 'last_modified',
+            sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
             status: '',
@@ -56,7 +56,7 @@ export class PurchaseOrderService {
         const requestData: POItemsRequest = {
             page: 1,
             limit: 10,
-            sort_by: 'last_modified',
+            sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
             ...params
@@ -70,7 +70,7 @@ export class PurchaseOrderService {
         const requestData: POItemsRequest = {
             page: 1,
             limit: 10,
-            sort_by: 'last_modified',
+            sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
             ...params
@@ -132,7 +132,7 @@ export class PurchaseOrderService {
         const requestData: PurchaseOrderRequest = {
             page: 1,
             limit: 10,
-            sort_by: 'last_modified',
+            sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
             status: '',
@@ -141,5 +141,15 @@ export class PurchaseOrderService {
 
         const response = await apiPost(`${API_BASE_URL}/netsuite//purchasing-orders/sync`, requestData as Record<string, any>);
         return response.data as PurchaseOrderResponse;
+    }
+
+    static async syncPOById(id: string): Promise<PODetailResponse> {
+        const response = await apiGet<PODetailResponse>(`${API_BASE_URL}/netsuite/purchasing-orders/sync/${id}`);
+        return response.data;
+    }
+
+    static async downloadInvoice(params: PODownloadRequest): Promise<PODownloadResponse> {
+        const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/print`, params as Record<string, any>);
+        return response.data as PODownloadResponse;
     }
 }
