@@ -12,7 +12,6 @@ import { LoadingOverlay } from '@/components/common/Loading';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import { FaSave } from 'react-icons/fa';
 import ModalApproval from './components/ModalApproval';
-import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
 import { getProfile } from '@/helpers/generalHelper';
