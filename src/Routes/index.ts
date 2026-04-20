@@ -111,6 +111,7 @@ const ManageInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSales
 const EditPurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Edit'));
 const ViewInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOrders/View'));
 const EditInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOrders/Edit'));
+const NetSuiteSync = lazy(() => import('@/pages/Netsuite/Sync/Manage'));
 // ========================================
 
 // DIVISION
@@ -912,5 +913,13 @@ export const routes: TAppRoute[] = [
         requiredPermissions: ['update', 'read'],
         component: EditInvoiceSalesOrder,
         layout: AppLayout,
-    }
+    },
+    {
+        path: '/netsuite/sync',
+        name: 'Admin Sync Netsuite',
+        isProtected: true,
+        roles: ['Admin Sync Netsuite'],
+        component: NetSuiteSync,
+        layout: AppLayout,
+    },
 ];
