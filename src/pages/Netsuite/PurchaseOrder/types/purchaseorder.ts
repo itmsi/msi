@@ -349,6 +349,7 @@ export interface PODetailLine {
     itemtype?: string;
     location?: number;
     quantity?: number;
+    on_hand?: number;
     taxrate1?: number | null;
     netamount?: number;
     department?: number;
@@ -460,4 +461,126 @@ export interface PODownloadResponse {
     mimeType: string;
     fileName: string;
     fileContent: string;
+}
+// RECEIVE FORM FIELD POSTS
+export interface ItemReceiptItem {
+    item: number;
+    item_display?: string;
+    on_hand?: number;
+    quantity: number;
+    location?: number;
+    location_display?: string;
+    department?: number;
+    department_display?: string;
+    class?: number;
+    class_display?: string;
+    rate?: number;
+    amount?: number;
+}
+
+export interface ItemReceiptPayload {
+    po_id: number | null;
+    memo?: string;
+    vendorid?: number | null;
+    vendor_name?: string | null;
+    customform?: number | string | null;
+    customform_display?: string;
+    trandate?: string;
+    subsidiary?: number;
+    subsidiary_display?: string;
+    class?: number;
+    class_display?: string;
+    location?: number;
+    location_display?: string;
+    department?: number;
+    department_display?: string;
+    items: ItemReceiptItem[];
+}
+
+export interface RequestFilters {
+   createdfrom?: number;
+}
+// RECEIVE REQUEST PARAMS
+export interface ReceiveRequest {
+    page: number;
+    page_size: number;
+    sort_by: string;
+    sort_order: string;
+    filters?: RequestFilters;
+}
+// RECEIVE RESPONSE SUB ITEMS
+export interface ReceiptLine {
+    item: string;
+    line: string;
+    memo: string;
+    rate: string;
+    class: string;
+    amount: string;
+    location: string;
+    quantity: string;
+    department: string;
+    item_display: string;
+    class_display: string;
+    inventorydetail: string;
+    location_display: string;
+    department_display: string;
+}
+
+// RECEIVE RESPONSE ITEMS
+export interface ReceiptItem {
+    receipt_id: string;
+    tranid: string;
+    trandate: string;
+    status: string;
+    status_display: string;
+    memo: string;
+    customform?: number | null;
+    customform_display?: string;
+    vendor_id: string;
+    vendor_name: string;
+    createdfrom: string;
+    createdfrom_display: string;
+    subsidiary: string;
+    subsidiary_display: string;
+    location: string;
+    location_display: string;
+    department: string;
+    department_display: string;
+    class: string;
+    class_display: string;
+    last_modified_netsuite: string;
+    datecreated_netsuite: string;
+    lines: ReceiptLine[];
+}
+
+export interface ReceiptResponse {
+    success: boolean;
+    data: {
+        items: ReceiptItem[];
+        pagination: Pagination;
+    };
+    sync_info: SyncInfo;
+    message: string;
+}
+
+export interface ReceiptValidationErrors {
+    memo?: string;
+    trandate?: string;
+    class?: number;
+    location?: number;
+    department?: number;
+}
+
+export interface GoodsReceipt {
+    id: number;
+    tranid: string;
+    trandate: string;
+    po_id: number;
+    po_number: string;
+}
+
+export interface PostReceiptResponse {
+    success: boolean;
+    purchase_order_id: number;
+    goods_receipts: GoodsReceipt[];
 }

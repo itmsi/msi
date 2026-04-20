@@ -1,8 +1,8 @@
-import Input from '@/components/form/input/InputField';
+﻿import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { formatDate, formatTanggal, handleKeyPress, parseTanggalToDate, convertDateToTanggal } from '@/helpers/generalHelper';
+import { formatTanggal, handleKeyPress, parseTanggalToDate, convertDateToTanggal } from '@/helpers/generalHelper';
 import React from 'react'
-import { PurchaseOrderForm, MasterDataFormFieldItems } from '../types/purchaseorder';
+import { ItemReceiptPayload, MasterDataFormFieldItems, PODetailData } from '../../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import TextArea from '@/components/form/input/TextArea';
@@ -11,21 +11,19 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { 
     getPrimaryInfoFields, 
-    getAdditionalInfoFields, 
     getClassificationInfoFields, 
     // getInterCompanyManageFields 
 } from './FieldForm';
 import { POVendorSelectOption, POVendorPaginationState } from '@/hooks/usePOVendorSelect';
 import { POLocationSelectOption, POLocationPaginationState } from '@/hooks/usePOLocationSelect';
-import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
-import { InvoiceSummary } from './purchaseOrderItemsFields';
 import { POClassPaginationState, POClassSelectOption } from '@/hooks/usePOClassSelect';
 import { PODepartmentPaginationState } from '@/hooks/usePODepartmentSelect';
 import { PODepartmentSelectOption } from '@/hooks/usePODepartmentSelect';
 import { POTermSelectOption } from '@/hooks/usePOTermSelect';
 
 interface POFormFieldsProps {
-    formData: PurchaseOrderForm;
+    formData: ItemReceiptPayload;
+    poDetail?: PODetailData | null;
     modeEdit?: boolean;
     errors: Record<string, string>;
     masterData?: MasterDataFormFieldItems | null;
@@ -83,35 +81,15 @@ interface POFormFieldsProps {
     departmentError?: string;
 }
 
-const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
+const receiveFields: React.FC<POFormFieldsProps> = ({
     formData,
-    modeEdit = false,
+    poDetail,
     errors,
     masterData,
     subsidiaryId,
     onInputChange,
     onSelectChange,
     onDateChange,
-    // Receive status edit
-    editReceive,
-    // Vendor props
-    vendorOptions = [],
-    vendorPagination = { page: 1, hasMore: true, loading: false },
-    vendorInputValue = '',
-    onVendorInputChange,
-    onVendorMenuScrollToBottom,
-    selectedVendor,
-    onVendorChange,
-    vendorError,
-    // Terms props
-    termOptions = [],
-    termPagination = { page: 1, hasMore: true, loading: false },
-    termInputValue = '',
-    onTermInputChange,
-    onTermMenuScrollToBottom,
-    selectedTerm,
-    onTermChange,
-    termError,
     // Location props
     locationOptions = [],
     locationPagination = { page: 1, hasMore: true, loading: false },
@@ -141,39 +119,51 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     departmentError
 }) => {
     // Get computed field configurations
+    // Gabungkan formData (editable) dengan data PO read-only dari poDetail
+    const mergedFormData: any = {
+        ...formData,
+        currency: poDetail?.currency_id,
+        subsidiary: poDetail?.subsidiary,
+        vendor_name: poDetail?.vendor_name,
+        terms_display: poDetail?.terms_display,
+        approvalstatus: poDetail?.approvalstatus,
+        nextapprover: poDetail?.nextapprover,
+        class_name: poDetail?.class_display,
+    };
+    console.log ({poDetail})
     const primaryFields = getPrimaryInfoFields(masterData || undefined);
-    const additionalFields = getAdditionalInfoFields(masterData || undefined);
     const classificationFields = getClassificationInfoFields(
         masterData || undefined, 
         subsidiaryId ? Number(subsidiaryId) : undefined
     );
     // const interCompanyFields = getInterCompanyManageFields();
     const renderInput = (
-        name: keyof PurchaseOrderForm,
+        name: string,
         label: string,
         type: string = 'text',
         placeholder?: string,
-        required: boolean = false
+        required: boolean = false,
+        disabled: boolean = false
     ) => {
         return (
             <div>
                 <Label>
-                    {label} {required && <span className="text-red-500">*</span>} {(editReceive && name === 'memo') && <span className="text-red-500">*</span>}
+                    {label} {required && <span className="text-red-500">*</span>}
                 </Label>
-                {((formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null)) && !(editReceive && name === 'memo') ? (
+                {(disabled) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                        String(formData[name]) || '-'
+                        String(mergedFormData[name]) || '-'
                     }</p>
                 ) : <>
                     <Input
-                        type={'text'}
+                        type={type}
                         name={name}
-                        value={String(formData[name]) ?? ''}
+                        value={String(mergedFormData[name]) ?? ''}
                         onKeyPress={type === 'number' ? handleKeyPress : undefined}
                         onChange={onInputChange}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        className={`w-full px-3 py-2 ${
                             errors[name] ? 'border-red-500' : 'border-gray-300'
-                        } ${(editReceive && name === 'memo') ? 'border-1 border-[#14B8A6]' : 'border-1 rounded'}`}
+                        }`}
                         placeholder={placeholder || `Enter ${label.toLowerCase()}`}
                         min={type === 'number' ? "1" : undefined}
                     />
@@ -185,7 +175,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
         );
     };
     const renderSelect = (
-        name: keyof PurchaseOrderForm,
+        name: string,
         label: string,
         options: Array<{label: string, value: string}>,
         placeholder?: string,
@@ -199,14 +189,14 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 <Label>
                     {label} {required && <span className="text-red-500">*</span>}
                 </Label>
-                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                {(disabled) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                        options.find(option => String(option.value) === String(formData[name] ?? ''))?.label || '-'
+                        options.find(option => String(option.value) === String(mergedFormData[name] ?? ''))?.label || '-'
                     }</p>
                 ) : <>
                 <CustomSelect
                     options={options}
-                    value={options.find(option => String(option.value) === String(formData[name] ?? '')) || null}
+                    value={options.find(option => String(option.value) === String(mergedFormData[name] ?? '')) || null}
                     onChange={(option) => onSelectChange(name, option?.value || '')}
                     placeholder={placeholder || `Pilih ${label.toLowerCase()}`}
                     isClearable={isClearable}
@@ -227,7 +217,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
         const [showDatePicker, setShowDatePicker] = React.useState(false);
         const datePickerRef = React.useRef<HTMLDivElement>(null);
         
-        const fieldValue = formData[field.name as keyof PurchaseOrderForm];
+        const fieldValue = mergedFormData[field.name];
         // Safe date parsing untuk format DD/M/YYYY
         const currentDate = fieldValue ? parseTanggalToDate(String(fieldValue)) : null;
 
@@ -261,15 +251,10 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 <Label>
                     {field.label} {field.required && <span className="text-red-500">*</span>}
                 </Label>
-                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                    <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                        currentDate ? formatDate(currentDate.toISOString()) : (field.placeholder || `-`)
-                    }</p>
-                ) : <>
                 <div className="relative" ref={datePickerRef}>
                     <div 
                         className={`flex items-center justify-between w-full px-3 py-2 border rounded-lg cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 ${
-                            errors[field.name as keyof PurchaseOrderForm] ? 'border-red-500' : 'border-gray-300'
+                            errors[field.name] ? 'border-red-500' : 'border-gray-300'
                         }`}
                         onClick={() => setShowDatePicker(!showDatePicker)}
                     >
@@ -291,14 +276,13 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         </div>
                     )}
                 </div>
-                {errors[field.name as keyof PurchaseOrderForm] && (
-                    <p className="text-red-500 text-sm mt-1">{errors[field.name as keyof PurchaseOrderForm]}</p>
+                {errors[field.name] && (
+                    <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>
                 )}
-                </>}
             </div>
         );
     };
-    const renderField = (field: any) => {
+    const renderField = (field: any, disabled: boolean = false) => {
         switch (field.type) {
             case "text":
                 return renderInput(
@@ -315,14 +299,14 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             {field.label} {field.required && <span className="text-red-500">*</span>}
                         </Label>
-                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                        {(mergedFormData.approvalstatus === 2 || mergedFormData.approvalstatus === 3) || (mergedFormData.approvalstatus === 1 && mergedFormData.nextapprover !== null) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[100px] flex items-start">{
-                                String(formData[field.name as keyof PurchaseOrderForm] || '-')
+                                String((mergedFormData as any)[field.name] || '-')
                             }</p>
                         ) : (<>
                         <TextArea 
                             name={field.name}
-                            value={String(formData[field.name as keyof PurchaseOrderForm] || '')}
+                            value={String((mergedFormData as any)[field.name] || '')}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                                 const syntheticEvent = {
                                     target: {
@@ -335,11 +319,11 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             rows={9} 
                             placeholder={field.placeholder || `Masukkan ${field.label.toLowerCase()}`}
                             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                                errors[field.name as keyof PurchaseOrderForm] ? 'border-red-500 ' : 'border-gray-300'
+                                errors[field.name] ? 'border-red-500 ' : 'border-gray-300'
                             }`}
                         />
-                        {errors[field.name as keyof PurchaseOrderForm] && (
-                            <p className="text-red-500 text-sm mt-1">{errors[field.name as keyof PurchaseOrderForm]}</p>
+                        {errors[field.name] && (
+                            <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>
                         )}
                         </>)}
                     </div>
@@ -365,7 +349,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             Location <span className="text-red-500">*</span>
                         </Label>
-                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                        {(disabled) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
                                 locationOptions.find(option => String(option.value) === String(formData.location ?? ''))?.label || '-'
                             }</p>
@@ -398,64 +382,9 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             Vendor <span className="text-red-500">*</span>
                         </Label>
-                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                            <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                                formData.vendor_name  || '-'
-                            }</p>
-                        ) : (<>
-                        <CustomAsyncSelect
-                            name="vendorid"
-                            placeholder="Select vendor..."
-                            value={selectedVendor}
-                            error={vendorError}
-                            defaultOptions={vendorOptions}
-                            loadOptions={onVendorInputChange}
-                            onMenuScrollToBottom={onVendorMenuScrollToBottom}
-                            isLoading={vendorPagination.loading}
-                            noOptionsMessage={() => "No vendors found"}
-                            loadingMessage={() => "Loading vendors..."}
-                            isSearchable={true}
-                            inputValue={vendorInputValue}
-                            onInputChange={onVendorInputChange}
-                            onChange={onVendorChange}
-                        />
-                        {vendorError && (
-                            <span className="text-sm text-red-500 mt-1 block">{vendorError}</span>
-                        )}
-                        </>)}
-                    </div>
-                );
-            case "select-terms":
-                return (
-                    <div>
-                        <Label>
-                            Terms <span className="text-red-500">*</span>
-                        </Label>
-                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                            <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                                formData.terms_display  || '-'
-                            }</p>
-                        ) : (<>
-                        <CustomAsyncSelect
-                            name="termsid"
-                            placeholder="Select terms..."
-                            value={selectedTerm}
-                            error={termError}
-                            defaultOptions={termOptions}
-                            loadOptions={onTermInputChange}
-                            onMenuScrollToBottom={onTermMenuScrollToBottom}
-                            isLoading={termPagination.loading}
-                            noOptionsMessage={() => "No terms found"}
-                            loadingMessage={() => "Loading terms..."}
-                            isSearchable={true}
-                            inputValue={termInputValue}
-                            onInputChange={onTermInputChange}
-                            onChange={onTermChange}
-                        />
-                        {termError && (
-                            <span className="text-sm text-red-500 mt-1 block">{termError}</span>
-                        )}
-                        </>)}
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                            mergedFormData.vendor_name  || '-'
+                        }</p>
                     </div>
                 );
             case "select-class":
@@ -464,19 +393,15 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             Class <span className="text-red-500">*</span>
                         </Label>
-                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                        {(disabled) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                                formData.class_name  || '-'
+                                mergedFormData.class_name  || '-'
                             }</p>
                         ) : (<>
                         <CustomAsyncSelect
                             name="classid"
                             placeholder="Select class..."
                             value={selectedClass}
-                            // value={formData.class ? {
-                            //     label: formData.class_name || '',
-                            //     value: formData.class.toString()
-                            // } : null}
                             error={classError}
                             defaultOptions={classOptions}
                             loadOptions={onClassInputChange}
@@ -501,7 +426,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             Department <span className="text-red-500">*</span>
                         </Label>
-                        {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                        {(disabled) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
                                 departmentOptions.find(option => String(option.value) === String(formData.department ?? ''))?.label || '-'
                             }</p>
@@ -541,21 +466,11 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
 
     return (<>
         <div className="grid grid-cols-1 md:grid-cols-3 mb-0">
-            <div className={`space-y-6 gap-2 ${(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? 'md:col-span-2' : 'md:col-span-3'}`}>
+            <div className={`space-y-6 gap-2 md:col-span-3`}>
                 <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
                     <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Primary Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {primaryFields.map((field) => (
-                                <div key={field.name}>
-                                    {renderField(field)}
-                                </div>
-                            ))}
-                    </div>
-                </div>
-                <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                    <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Additional Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {additionalFields.map((field) => (
                                 <div key={field.name}>
                                     {renderField(field)}
                                 </div>
@@ -573,53 +488,11 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             ))}
                     </div>
                 </div>
-                {modeEdit && (
-                    <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                        <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Approval</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <p className='mb-1.5 block text-sm text-gray-700'>Approval Status</p>
-                                <StatusTypeBadge
-                                    type={Number(formData.approvalstatus) as 1 | 2 | 3} 
-                                />
-                            </div>
-                            <div>
-                                <p className='mb-1.5 block text-sm text-gray-700'>Next Approver</p>
-                                <p>{formData.nextapprover || '-'}</p>
-                            </div>
-                            <div>
-                                <p className='mb-1.5 block text-sm text-gray-700'>Created By</p>
-                                <p>{formData.custbody_msi_createdby_api || '-'}</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
-                {/* <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                    <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Intercompany Management</h3>
-                    <div className="grid grid-cols-1 gap-4">
-
-                            {interCompanyFields.map((field) => (
-                                <div key={field.name}>
-                                    {renderField(field)}
-                                </div>
-                            ))}
-                    </div>
-                
-                </div> */}
             </div>
-            {modeEdit && (
-                (formData.approvalstatus === 2 || formData.approvalstatus === 3 || (formData.approvalstatus === 1 && formData.nextapprover !== null)) &&
-                formData.items && formData.items.length > 0 && (
-                    <div className="sticky top-0 self-start px-4">
-                        <div className='bg-white rounded-2xl shadow-sm p-6'>
-                            <InvoiceSummary items={formData.items} />
-                        </div>
-                    </div>
-                )
-            )}
         </div>
     </>);
 }
 
-export default purchaseOrderFields
+export default receiveFields
+

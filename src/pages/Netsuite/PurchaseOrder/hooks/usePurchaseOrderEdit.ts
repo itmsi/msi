@@ -140,6 +140,7 @@ export const usePurchaseOrderEdit = () => {
                 }
             } catch (error) {
                 console.error('Error loading data:', error);
+                navigate('/netsuite/purchase-order');
                 toast.error('Gagal memuat data');
             } finally {
                 setIsLoading(false);
@@ -363,6 +364,6 @@ export const usePurchaseOrderEdit = () => {
         // Product handlers
         handleAddProductItem,
         handleProductDelete,
-        handleUpdateProductItem,
+        handleUpdateProductItem
     };
 };

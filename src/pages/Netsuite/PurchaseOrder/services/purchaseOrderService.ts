@@ -1,5 +1,5 @@
 import { apiPost, apiGet, ApiResponse, apiPut } from '@/helpers/apiHelper';
-import { ComponentsDataResponse, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
+import { ComponentsDataResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, PostReceiptResponse, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -151,5 +151,28 @@ export class PurchaseOrderService {
     static async downloadInvoice(params: PODownloadRequest): Promise<PODownloadResponse> {
         const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/print`, params as Record<string, any>);
         return response.data as PODownloadResponse;
+    }
+
+    static async getReceiptById(params: Partial<ReceiveRequest> = {}): Promise<ReceiptResponse> {
+        const requestData: ReceiveRequest = {
+            page: 1,
+            page_size: 10,
+            sort_by: 'created_at',
+            sort_order: 'desc',
+            ...params
+        };
+
+        const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/receive-list`, requestData as Record<string, any>);
+        return response.data as ReceiptResponse;
+    }
+
+    static async syncPOByIdReceipt(id: string): Promise<ReceiptResponse> {
+        const response = await apiGet<ReceiptResponse>(`${API_BASE_URL}/netsuite/purchasing-orders/receive-list/${id}`);
+        return response.data;
+    }
+
+    static async submitReceipt(params: ItemReceiptPayload): Promise<PostReceiptResponse> {
+        const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/receive-item`, params as Record<string, any>);
+        return response.data as PostReceiptResponse;
     }
 }

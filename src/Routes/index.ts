@@ -111,6 +111,7 @@ const ManageInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSales
 const EditPurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Edit'));
 const ViewInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOrders/View'));
 const EditInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOrders/Edit'));
+const Receive = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Receive'));
 // ========================================
 
 // DIVISION
@@ -893,6 +894,24 @@ export const routes: TAppRoute[] = [
         roles: ['Purchase Orders Netsuite'],
         requiredPermissions: ['update', 'read'],
         component: EditPurchaseOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/purchase-order/:id/receive',
+        name: 'Purchase Orders Netsuite',
+        isProtected: true,
+        roles: ['Purchase Orders Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: Receive,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/purchase-order/:id/receive/:receipt_id',
+        name: 'Purchase Orders Netsuite',
+        isProtected: true,
+        roles: ['Purchase Orders Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: Receive,
         layout: AppLayout,
     },
     {
