@@ -30,6 +30,9 @@ interface POItemsFieldsProps {
     onProductDelete?: (productId: string) => void;
     onUpdateProductItem?: (index: number, field: string, value: any) => void;
     
+    // Receive status edit
+    editReceive?: boolean;
+    
     // Location Select Props
     locationOptions?: POLocationSelectOption[];
     locationPagination?: POLocationPaginationState;
@@ -68,6 +71,9 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
     onAddProductItem,
     onProductDelete,
     onUpdateProductItem,
+
+    // Receive status edit
+    editReceive,
     
     // Location props
     locationOptions = [],
@@ -187,7 +193,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             name: 'Quantity',
             selector: (row: TablePOItem) => row.qty || 0,
             cell: (row, index) => (<>
-                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                    {((formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null)) && !(editReceive) ? (
                         <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
                             row.qty && row.qty > 0 ? row.qty.toString() : '-'
                         }</p>
@@ -224,7 +230,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                                 }
                             }}
                             onFocus={(e) => e.target.select()}
-                            className="border-0 border-b-1 rounded-none p-1 px-3 w-[80px] text-center"
+                            className={`p-1 px-3 w-[80px] text-center ${editReceive ? 'border-1 border-[#14B8A6]' : 'border-1 rounded'}`}
                         />
                     )}
             </>),
@@ -639,7 +645,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 
     return (
         <div className="space-y-6">
-            <div className={`bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6 ${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? '' : 'min-h-[500px]'}`}>
+            <div className={`mb-6 space-y-6 p-6 ${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? '' : 'min-h-[500px]'}`}>
                 <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Purchase Order Items</h3>
                 
                 {/* Add Product Section */}

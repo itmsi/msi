@@ -16,6 +16,8 @@ import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
 import { getProfile } from '@/helpers/generalHelper';
 import { usePOTermSelect } from '@/hooks/usePOTermSelect';
+import { useReceiptTab } from './hooks/useReceiptTab';
+import ReceiptTab from './components/Receive/ReceiptTab';
 
 export default function Edit() {
     const navigate = useNavigate();
@@ -85,8 +87,6 @@ export default function Edit() {
     
     const [selectedClass, setSelectedClass] = useState<any>(null);
     const [classSelectError, setClassSelectError] = useState<string>('');
-
-
     
     // Department select untuk items
     const {
@@ -102,8 +102,6 @@ export default function Edit() {
     
     const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
     const [departmentSelectError, setDepartmentSelectError] = useState<string>('');
-
-
 
     useEffect(() => {
         if (initializeItemClassOptions && !classInitialized && !classLoading) {
@@ -127,10 +125,7 @@ export default function Edit() {
 
     // Reset selected values ketika subsidiary berubah - PRODUCTION SAFE
     useEffect(() => {
-        // Only reset if initial load is complete and this is user changing subsidiary
-        // Add additional check to prevent reset during initial load
         if (isInitialLoadComplete && subsidiaryId && formData?.subsidiary && poDetail) {
-            // Additional safety: only reset if subsidiary actually changed from initial value
             const currentSubsidiary = Number(formData.subsidiary);
             const initialSubsidiary = Number(poDetail.subsidiary);
             
@@ -272,6 +267,19 @@ export default function Edit() {
         setIsOpenRejected(true);
     };
     
+    const [editReceive] = useState<boolean>(false);
+    // const handleSubmitReceive = (poId: string) => {}
+    
+    const [activeTab, setActiveTab] = useState<'items' | 'files' | 'receipt'>('items');
+
+    const {
+        receiptList,
+        isLoading: receiptLoading,
+        pagination: receiptPagination,
+        fetchReceipts,
+    } = useReceiptTab(poDetail?.po_id);
+
+
     return (
         <>
             <PageMeta
@@ -328,6 +336,9 @@ export default function Edit() {
                                 onInputChange={handleInputChange}
                                 onSelectChange={handleSelectChange}
                                 onDateChange={handleDateChange}
+
+                                // EDIT RECIVE STATUS
+                                editReceive={editReceive}
 
                                 // Vendor props
                                 vendorOptions={POVendorOptions}
@@ -430,79 +441,140 @@ export default function Edit() {
                                 departmentError={errors.department || departmentSelectError}
                             />
 
-                            {/* Purchase Order Items */}
-                            <PurchaseOrderItemFields
-                                formData={formData}
-                                errors={errors}
-                                masterData={masterData}
-                                loadingMasterData={loadingMasterData}
-                                onInputChange={handleInputChange}
-                                onSelectChange={handleSelectChange}
-                                onDateChange={handleDateChange}
-                                onAddProductItem={handleAddProductItem}
-                                onProductDelete={handleProductDelete}
-                                onUpdateProductItem={handleUpdateProductItem}
+                            <div>
+                                {/* Tab Navigation */}
+                                <div className="border-b border-gray-200 px-6">
+                                    <nav className="flex space-x-8">
+                                        <button
+                                            onClick={() => setActiveTab('items')}
+                                            className={`py-2 px-1 border-b-2 font-medium tracking-wider text-md transition-colors ${
+                                                activeTab === 'items'
+                                                    ? 'border-blue-500 text-blue-600'
+                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            Items
+                                        </button>
+                                        <button
+                                            onClick={() => setActiveTab('files')}
+                                            className={`py-2 px-1 border-b-2 font-medium tracking-wider text-md transition-colors ${
+                                                activeTab === 'files'
+                                                    ? 'border-blue-500 text-blue-600'
+                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            Files
+                                        </button>
+                                        <button
+                                            onClick={() => setActiveTab('receipt')}
+                                            className={`py-2 px-1 border-b-2 font-medium tracking-wider text-md transition-colors ${
+                                                activeTab === 'receipt'
+                                                    ? 'border-blue-500 text-blue-600'
+                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            Receipt
+                                        </button>
+                                    </nav>
+                                </div>
+                                <div className='bg-white rounded-b-2xl shadow-sm'>
+                                    {/* Purchase Order Items */}
+                                    {activeTab === 'items' && (
+                                        <PurchaseOrderItemFields
+                                            formData={formData}
+                                            errors={errors}
+                                            masterData={masterData}
+                                            loadingMasterData={loadingMasterData}
+                                            onInputChange={handleInputChange}
+                                            onSelectChange={handleSelectChange}
+                                            onDateChange={handleDateChange}
+                                            onAddProductItem={handleAddProductItem}
+                                            onProductDelete={handleProductDelete}
+                                            onUpdateProductItem={handleUpdateProductItem}
+                                            
+                                            // EDIT RECIVE STATUS
+                                            editReceive={editReceive}
 
-                                // Location props (shared dengan header)
-                                locationOptions={POLocationOptions}
-                                locationPagination={locationPagination}
-                                locationInputValue={locationInputValue}
-                                onLocationInputChange={handleLocationInputChange}
-                                onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
-                                selectedLocation={selectedLocation}
-                                onLocationChange={(option) => {
-                                    setSelectedLocation(option);
-                                    if (option && option.data) {
-                                        // Update formData dengan data location yang dipilih
-                                        handleSelectChange('location', option.value);
-                                        handleSelectChange('location_name', option.data.name);
-                                    }
-                                    if (locationSelectError) {
-                                        setLocationSelectError('');
-                                    }
-                                }}
-                                locationError={locationSelectError}
+                                            // Location props (shared dengan header)
+                                            locationOptions={POLocationOptions}
+                                            locationPagination={locationPagination}
+                                            locationInputValue={locationInputValue}
+                                            onLocationInputChange={handleLocationInputChange}
+                                            onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
+                                            selectedLocation={selectedLocation}
+                                            onLocationChange={(option) => {
+                                                setSelectedLocation(option);
+                                                if (option && option.data) {
+                                                    // Update formData dengan data location yang dipilih
+                                                    handleSelectChange('location', option.value);
+                                                    handleSelectChange('location_name', option.data.name);
+                                                }
+                                                if (locationSelectError) {
+                                                    setLocationSelectError('');
+                                                }
+                                            }}
+                                            locationError={locationSelectError}
 
-                                // Class props  
-                                classOptions={POClassOptions}
-                                classPagination={itemClassPagination}
-                                classInputValue={itemClassInputValue}
-                                onClassInputChange={handleItemClassInputChange}
-                                onClassMenuScrollToBottom={handleItemClassScrollToBottom}
-                                selectedClass={selectedClass}
-                                onClassChange={(option) => {
-                                    setSelectedClass(option);
-                                    if (option && option.data) {
-                                        // Update formData dengan data class yang dipilih
-                                        handleSelectChange('class', option.value);
-                                        handleSelectChange('class_name', option.data.name);
-                                    }
-                                    if (classSelectError) {
-                                        setClassSelectError('');
-                                    }
-                                }}
-                                classError={errors.class || classSelectError}
-                                
-                                // Department props  
-                                departmentOptions={PODepartmentOptions}
-                                departmentPagination={itemDepartmentPagination}
-                                departmentInputValue={itemDepartmentInputValue}
-                                onDepartmentInputChange={handleItemDepartmentInputChange}
-                                onDepartmentMenuScrollToBottom={handleItemDepartmentScrollToBottom}
-                                selectedDepartment={selectedDepartment}
-                                onDepartmentChange={(option) => {
-                                    setSelectedDepartment(option);
-                                    if (option && option.data) {
-                                        // Update formData dengan data department yang dipilih
-                                        handleSelectChange('department', option.value);
-                                        handleSelectChange('department_name', option.data.name);
-                                    }
-                                    if (departmentSelectError) {
-                                        setDepartmentSelectError('');
-                                    }
-                                }}
-                                departmentError={errors.department || departmentSelectError}
-                            />
+                                            // Class props  
+                                            classOptions={POClassOptions}
+                                            classPagination={itemClassPagination}
+                                            classInputValue={itemClassInputValue}
+                                            onClassInputChange={handleItemClassInputChange}
+                                            onClassMenuScrollToBottom={handleItemClassScrollToBottom}
+                                            selectedClass={selectedClass}
+                                            onClassChange={(option) => {
+                                                setSelectedClass(option);
+                                                if (option && option.data) {
+                                                    // Update formData dengan data class yang dipilih
+                                                    handleSelectChange('class', option.value);
+                                                    handleSelectChange('class_name', option.data.name);
+                                                }
+                                                if (classSelectError) {
+                                                    setClassSelectError('');
+                                                }
+                                            }}
+                                            classError={errors.class || classSelectError}
+                                            
+                                            // Department props  
+                                            departmentOptions={PODepartmentOptions}
+                                            departmentPagination={itemDepartmentPagination}
+                                            departmentInputValue={itemDepartmentInputValue}
+                                            onDepartmentInputChange={handleItemDepartmentInputChange}
+                                            onDepartmentMenuScrollToBottom={handleItemDepartmentScrollToBottom}
+                                            selectedDepartment={selectedDepartment}
+                                            onDepartmentChange={(option) => {
+                                                setSelectedDepartment(option);
+                                                if (option && option.data) {
+                                                    // Update formData dengan data department yang dipilih
+                                                    handleSelectChange('department', option.value);
+                                                    handleSelectChange('department_name', option.data.name);
+                                                }
+                                                if (departmentSelectError) {
+                                                    setDepartmentSelectError('');
+                                                }
+                                            }}
+                                            departmentError={errors.department || departmentSelectError}
+                                        />
+                                    )}
+
+                                    {activeTab === 'files' && (
+                                        <div className="p-6">
+                                            <p className="text-gray-500">File management functionality will be implemented here.</p>
+                                        </div>
+                                    )}
+                                    {activeTab === 'receipt' && (
+                                        <ReceiptTab
+                                            poId={poDetail?.po_id}
+                                            receiptList={receiptList}
+                                            isLoading={receiptLoading}
+                                            pagination={receiptPagination}
+                                            onLoad={fetchReceipts}
+                                            onPageChange={(page) => fetchReceipts(page, receiptPagination.limit)}
+                                            onRowsPerPageChange={(rows, page) => fetchReceipts(page, rows)}
+                                        />
+                                    )}
+                                </div>
+                            </div>
 
                             {/* Form Actions */}
                             <div className="flex justify-end gap-4 p-4 bg-white rounded-2xl shadow-sm mb-8">
@@ -516,37 +588,43 @@ export default function Edit() {
                                     Cancel
                                 </Button>
                                 {(poDetail?.approvalstatus === 1 && poDetail.nextapprover === "" )&& (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => handleApprovalOpen(poDetail.po_id)}
-                                        className="group px-6 rounded-full ring-1 ring-inset ring-green-600 text-green-600 hover:bg-green-600 hover:text-white hover:ring-green-600"
-                                        disabled={isSubmitting}
-                                    >
-                                        Submit Approval
-                                    </Button>
+                                    <PermissionGate permission={["create", "update"]}>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => handleApprovalOpen(poDetail.po_id)}
+                                            className="group px-6 rounded-full ring-1 ring-inset ring-green-600 text-green-600 hover:bg-green-600 hover:text-white hover:ring-green-600"
+                                            disabled={isSubmitting}
+                                        >
+                                            Submit Approval
+                                        </Button>
+                                    </PermissionGate>
                                 )}
                                 {poDetail?.approvalstatus === 2 && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => handleApproval(poDetail.po_id)}
-                                        className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
-                                        disabled={isSubmitting}
-                                    >
-                                        Re-Approval <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
-                                    </Button>
+                                    <PermissionGate permission={["create", "update"]}>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => handleApproval(poDetail.po_id)}
+                                            className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
+                                            disabled={isSubmitting}
+                                        >
+                                            Re-Approval <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
+                                        </Button>
+                                    </PermissionGate>
                                 )}
                                 {poDetail?.approvalstatus === 3 && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => handleOpenRejected(poDetail.po_id)}
-                                        className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
-                                        disabled={isSubmitting}
-                                    >
-                                        Re-Open <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
-                                    </Button>
+                                    <PermissionGate permission={["create", "update"]}>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => handleOpenRejected(poDetail.po_id)}
+                                            className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
+                                            disabled={isSubmitting}
+                                        >
+                                            Re-Open <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
+                                        </Button>
+                                    </PermissionGate>
                                 )}
                                 {
                                     ((formData.approvalstatus === 1 && formData.nextapprover === null))  && (
@@ -573,6 +651,32 @@ export default function Edit() {
                                         </PermissionGate>
                                     )
                                 }
+                                
+                                {(poDetail?.po_status_label === 'Pending Receipt' && !editReceive) && (
+                                    <PermissionGate permission={["create", "update"]}>
+                                        <Button
+                                            type="button"
+                                            onClick={() => navigate(`/netsuite/purchase-order/${poDetail.po_id}/receive`)}
+                                            className="group px-6 rounded-full ring-1 bg-[#14B8A6] ring-inset ring-[#14B8A6] text-white hover:bg-[#0D9488] hover:ring-[#0D9488]"
+                                            disabled={isSubmitting}
+                                        >
+                                            Receive
+                                        </Button>
+                                    </PermissionGate>
+                                )}
+{/*                                 
+                                {(poDetail?.po_status_label === 'Pending Receipt' && editReceive) && (
+                                    <PermissionGate permission={["create", "update"]}>
+                                        <Button
+                                            type="button"
+                                            onClick={() => handleSubmitReceive()}
+                                            className="group px-6 rounded-full ring-1 bg-[#14B8A6] ring-inset ring-[#14B8A6] text-white hover:bg-[#0D9488] hover:ring-[#0D9488]"
+                                            disabled={isSubmitting}
+                                        >
+                                            Submit Receive
+                                        </Button>
+                                    </PermissionGate>
+                                )} */}
                             </div>
                         </div> 
                     </>)}
