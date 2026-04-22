@@ -324,7 +324,7 @@ export const useReceive = () => {
                 department: formData.department || 0,
                 items: itemsToSubmit.map((item: ItemReceiptItem) => ({
                     item: Number(item.item),
-                    quantity: Number(item.quantity),
+                    quantity: Number(item.quantitypending),
                     location: Number(item.location),
                     department: Number(item.department),
                     class: Number(item.class),
@@ -336,6 +336,7 @@ export const useReceive = () => {
             const response = await PurchaseOrderService.submitReceipt(requestData);
             if (response.success) {
                 toast.success('Receive berhasil disubmit');
+                navigate(`/netsuite/purchase-order/edit/${receiptDetail?.po_id || id}`);
                 // await fetchReceiptList();
             } else {
                 toast.error('Gagal mengsubmit receive');

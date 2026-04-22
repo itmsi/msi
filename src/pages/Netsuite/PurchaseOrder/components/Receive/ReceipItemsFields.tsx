@@ -112,7 +112,7 @@ const receiptItemFields: React.FC<POItemsFieldsProps> = ({
         {
             name: 'Remaining',
             selector: (row) => row.quantitypending || 0,
-            cell: (_row, index) => <span>{originalQtyRef.current.get(index as number) ?? 0}</span>,
+            cell: (_row, index) => <span>{originalQtyRef.current.get(index as number) ?? ''}</span>,
             width: '150px',
             center: true,
         },
@@ -122,7 +122,7 @@ const receiptItemFields: React.FC<POItemsFieldsProps> = ({
             cell: (row, index) => (<>
                 {(poDetail?.po_status_label === 'Pending Bill' || editReceive) ? (
                         <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">
-                            {row.quantitypending && row.quantitypending > 0 ? row.quantitypending.toString() : '-'}
+                            {row.quantity && row.quantity > 0 ? row.quantity.toString() : '-'}
                         </p>
                     ) : (
                     <Input
