@@ -298,39 +298,41 @@ export default function Create() {
                             departmentError={errors.department || departmentSelectError}
                         />
 
-                        {/* Purchase Order Items */}
-                        <PurchaseOrderItemFields
-                            formData={formData}
-                            errors={errors}
-                            masterData={masterData}
-                            loadingMasterData={loadingMasterData}
-                            onInputChange={handleInputChange}
-                            onSelectChange={handleSelectChange}
-                            onDateChange={handleDateChange}
-                            onAddProductItem={handleAddProductItem}
-                            onProductDelete={handleProductDelete}
-                            onUpdateProductItem={handleUpdateProductItem}
+                        <div className='bg-white rounded-2xl shadow-sm'>
+                            {/* Purchase Order Items */}
+                            <PurchaseOrderItemFields
+                                formData={formData}
+                                errors={errors}
+                                masterData={masterData}
+                                loadingMasterData={loadingMasterData}
+                                onInputChange={handleInputChange}
+                                onSelectChange={handleSelectChange}
+                                onDateChange={handleDateChange}
+                                onAddProductItem={handleAddProductItem}
+                                onProductDelete={handleProductDelete}
+                                onUpdateProductItem={handleUpdateProductItem}
 
-                            // Location props (is_parent = false)
-                            locationOptions={itemLocationOptions}
-                            locationPagination={itemLocationPagination}
-                            locationInputValue={itemLocationInputValue}
-                            onLocationInputChange={handleItemLocationInputChange}
-                            onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
-                            selectedLocation={selectedLocation}
-                            onLocationChange={(option) => {
-                                setSelectedLocation(option);
-                                if (option && option.data) {
-                                    // Update formData dengan data location yang dipilih
-                                    handleSelectChange('location', option.value);
-                                    handleSelectChange('location_name', option.data.name);
-                                }
-                                if (locationSelectError) {
-                                    setLocationSelectError('');
-                                }
-                            }}
-                            locationError={locationSelectError}
-                        />
+                                // Location props (is_parent = false)
+                                locationOptions={itemLocationOptions}
+                                locationPagination={itemLocationPagination}
+                                locationInputValue={itemLocationInputValue}
+                                onLocationInputChange={handleItemLocationInputChange}
+                                onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
+                                selectedLocation={selectedLocation}
+                                onLocationChange={(option) => {
+                                    setSelectedLocation(option);
+                                    if (option && option.data) {
+                                        // Update formData dengan data location yang dipilih
+                                        handleSelectChange('location', option.value);
+                                        handleSelectChange('location_name', option.data.name);
+                                    }
+                                    if (locationSelectError) {
+                                        setLocationSelectError('');
+                                    }
+                                }}
+                                locationError={locationSelectError}
+                            />
+                        </div>
 
                         {/* Form Actions */}
                         <FormActions

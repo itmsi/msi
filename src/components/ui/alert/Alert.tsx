@@ -1,21 +1,22 @@
+import { ReactNode } from "react";
 import { Link } from "react-router";
 
 interface AlertProps {
   variant: "success" | "error" | "warning" | "info"; // Alert type
   title: string; // Title of the alert
-  message: string; // Message of the alert
   showLink?: boolean; // Whether to show the "Learn More" link
   linkHref?: string; // Link URL
   linkText?: string; // Link text
+  children: ReactNode;
 }
 
 const Alert: React.FC<AlertProps> = ({
   variant,
   title,
-  message,
   showLink = false,
   linkHref = "#",
   linkText = "Learn more",
+  children
 }) => {
   // Tailwind classes for each variant
   const variantClasses = {
@@ -125,7 +126,7 @@ const Alert: React.FC<AlertProps> = ({
             {title}
           </h4>
 
-          <p className="text-sm text-gray-500">{message}</p>
+          {children}
 
           {showLink && (
             <Link

@@ -708,8 +708,9 @@ export default function BreakdownROECalculator() {
                     <Alert
                         variant='warning'
                         title={langField('attentionTitle')}
-                        message={langField('attentionDisclaimer')}
-                    />
+                     >
+                        <p className="text-sm text-gray-500">{langField('attentionDisclaimer')}</p>
+                    </Alert>
 
                     {breakdownData && (
                         <div className="space-y-6 mt-6">

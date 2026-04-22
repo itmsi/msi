@@ -1,6 +1,6 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { formatCurrency, handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress } from '@/helpers/generalHelper';
+import { formatCurrency, handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma } from '@/helpers/generalHelper';
 import React, { useEffect, useMemo, useState } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -349,13 +349,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        row.rate && row.rate > 0 ? formatCurrencyTyping(row.rate.toString()) : '-'
+                        formatCurrency(row.rate.toString())
                     }</p>
                 ) : (
                 <Input
                     name={`rate_${index}`}
                     type="text"
-                    value={row.rate && row.rate > 0 ? formatCurrencyTyping(row.rate.toString()) : ''}
+                    value={row.rate && row.rate > 0 ? formatNumberPriceKoma(row.rate.toString()) : ''}
                     disabled={true}
                     readonly={true}
                     className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
@@ -379,7 +379,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 <Input
                     name={`amount_${index}`}
                     type="text"
-                    value={row.amount && row.amount > 0 ? formatCurrencyTyping(row.amount.toString()) : ''}
+                    value={row.amount && row.amount > 0 ? formatNumberPriceKoma(row.amount.toString()) : ''}
                     disabled={true}
                     readonly={true}
                     className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"

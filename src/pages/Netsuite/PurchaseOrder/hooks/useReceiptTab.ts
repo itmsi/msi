@@ -18,7 +18,7 @@ export const useReceiptTab = (poId: string | undefined) => {
         try {
             const response = await PurchaseOrderService.getReceiptById({
                 page,
-                page_size: pageSize,
+                limit: pageSize,
                 sort_by: 'last_modified',
                 sort_order: 'desc',
                 filters: {

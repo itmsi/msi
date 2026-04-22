@@ -15,12 +15,13 @@ import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
 import { getProfile } from '@/helpers/generalHelper';
 import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 import { useReceive } from './hooks/useReceive';
+import useGoBack from '@/hooks/useGoBack';
 
 export default function Receive() {
     const navigate = useNavigate();
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
-    
+    const goBack = useGoBack();
     const {
         isSubmitting,
         isLoading,
@@ -35,6 +36,8 @@ export default function Receive() {
         handleDateChange,
         handleSubmitReceive,
         handleUpdateProductItem,
+        handleRowSelected,
+        selectedRows,
         isViewMode,
     } = useReceive();
 
@@ -240,9 +243,6 @@ export default function Receive() {
         navigate('/netsuite/purchase-order');
     }
 
-    const [editReceive] = useState<boolean>(false);
-
-
     return (
         <>
             <PageMeta
@@ -263,7 +263,7 @@ export default function Receive() {
                             <div className="flex items-center gap-1 w-full">
                                 <Button
                                     variant="outline"
-                                    onClick={() => navigate('/netsuite/purchase-order')}
+                                    onClick={goBack}
                                     className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                                 >
                                     <MdKeyboardArrowLeft size={20} />
@@ -282,6 +282,15 @@ export default function Receive() {
                                             </Link>
                                         </p>
                                     </div>
+                                    {!isViewMode && (
+                                    <div className="capitalize ms-2">
+                                        <span 
+                                            className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
+                                        >
+                                            {receiptDetail?.po_status_label || '-'}
+                                        </span>
+                                    </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -299,7 +308,7 @@ export default function Receive() {
                                 onDateChange={handleDateChange}
 
                                 // EDIT RECIVE STATUS
-                                editReceive={isViewMode ? true : editReceive}
+                                editReceive={isViewMode}
                                 poDetail={poDetail}
 
                                 // Vendor props
@@ -403,7 +412,7 @@ export default function Receive() {
                                 departmentError={errors.department || departmentSelectError}
                             />
 
-                            <div className='bg-white rounded-b-2xl shadow-sm'>
+                            <div className='bg-white rounded-2xl shadow-sm'>
                                 <ReceiptItemFields
                                     formData={formData}
                                     errors={errors}
@@ -413,7 +422,10 @@ export default function Receive() {
                                     onUpdateProductItem={handleUpdateProductItem}
                                     
                                     // EDIT RECIVE STATUS
-                                    editReceive={isViewMode ? true : editReceive}
+                                    editReceive={isViewMode ? true : false}
+                                    handleRowSelected={handleRowSelected}
+                                    selectedRows={selectedRows}
+                                    poDetail={poDetail}
 
                                     // Location props (shared dengan header)
                                     locationOptions={POLocationOptions}
@@ -502,7 +514,10 @@ export default function Receive() {
                                             </Button>
                                         </PermissionGate> */}
                                         
-                                        {/* {(receiptDetail?.po_status_label === 'Pending Receipt' && editReceive) && ( */}
+                                        {
+                                            !isViewMode &&
+                                            (receiptDetail?.po_status_label === 'Pending Receipt' || receiptDetail?.po_status_label === 'Pending Billing/Partially Received') 
+                                            && (
                                             <PermissionGate permission={["create", "update"]}>
                                                 <Button
                                                     type="button"
@@ -513,7 +528,7 @@ export default function Receive() {
                                                     Submit Receive
                                                 </Button>
                                             </PermissionGate>
-                                        {/* )} */}
+                                        )}
                                     {/* </>
                                 )} */}
                             </div>

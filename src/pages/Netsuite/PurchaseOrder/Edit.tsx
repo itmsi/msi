@@ -1,7 +1,7 @@
 import PageMeta from '@/components/common/PageMeta'
 import Button from '@/components/ui/button/Button'
 import { useEffect, useState } from 'react'
-import { MdKeyboardArrowLeft, MdVerified } from 'react-icons/md'
+import { MdKeyboardArrowLeft, MdOutlineSync, MdVerified } from 'react-icons/md'
 import { useNavigate } from 'react-router-dom';
 import { usePurchaseOrderEdit } from './hooks/usePurchaseOrderEdit';
 import PurchaseOrderFields from './components/purchaseOrderFields';
@@ -10,7 +10,7 @@ import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOVendorSelect } from '@/hooks/usePOVendorSelect';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { PermissionGate } from '@/components/common/PermissionComponents';
-import { FaSave } from 'react-icons/fa';
+import { FaReceipt, FaSave } from 'react-icons/fa';
 import ModalApproval from './components/ModalApproval';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
@@ -18,6 +18,7 @@ import { getProfile } from '@/helpers/generalHelper';
 import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 import { useReceiptTab } from './hooks/useReceiptTab';
 import ReceiptTab from './components/Receive/ReceiptTab';
+import Alert from '@/components/ui/alert/Alert';
 
 export default function Edit() {
     const navigate = useNavigate();
@@ -39,6 +40,7 @@ export default function Edit() {
         handleAddProductItem,
         handleProductDelete,
         handleUpdateProductItem,
+        loadData,
     } = usePurchaseOrderEdit();
 
     // Get subsidiary_id dari form data dengan defensive check
@@ -270,7 +272,7 @@ export default function Edit() {
     const [editReceive] = useState<boolean>(false);
     // const handleSubmitReceive = (poId: string) => {}
     
-    const [activeTab, setActiveTab] = useState<'items' | 'files' | 'receipt'>('items');
+    const [activeTab, setActiveTab] = useState<'items' | 'files' | 'usernotes' | 'receipt'>('items');
 
     const {
         receiptList,
@@ -279,7 +281,20 @@ export default function Edit() {
         fetchReceipts,
     } = useReceiptTab(poDetail?.po_id);
 
-
+    const ElemRefresh = () => (
+        <PermissionGate permission="read">
+            <Button
+                onClick={() => loadData()}
+                className="flex rounded-full items-center py-1 gap-2 text-green-600 bg-transparent hover:text-green-700 hover:bg-green-50 ring-green-600"
+                variant='outline'
+            >
+                <MdOutlineSync size={20} />
+                <div>
+                    <span>{'Refresh'}</span>
+                </div>
+            </Button>
+        </PermissionGate>
+    );
     return (
         <>
             <PageMeta
@@ -296,7 +311,7 @@ export default function Edit() {
                         />
                     ) : ( <>
                         {/* Header */}
-                        <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                        <div className="flex items-center justify-between lg:h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                             <div className="flex items-center gap-1 w-full">
                                 <Button
                                     variant="outline"
@@ -306,7 +321,7 @@ export default function Edit() {
                                     <MdKeyboardArrowLeft size={20} />
                                 </Button>
                                 <div className="border-l border-gray-300 h-6 mx-3"></div>
-                                <div className='flex items-center gap-4 justify-between w-full'>
+                                <div className='flex items-center gap-4 justify-between w-full lg:flex-row flex-col'>
                                     <div>
                                         <h1 className="ms-2 font-primary-bold font-normal text-xl">
                                             Edit Purchase Order
@@ -314,17 +329,43 @@ export default function Edit() {
                                         <p className="ms-2 text-sm text-gray-600">{poDetail?.po_number || '-'}</p>
                                     </div>
                                     <div className="capitalize ms-2">
-                                        <span 
-                                            className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
-                                        >
-                                            {formData.po_status_label}
-                                        </span>
+                                        {poDetail?.po_number !== null && (
+                                            <span 
+                                                className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
+                                            >
+                                                {formData.po_status_label}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div className="space-y-6">
+                            {poDetail?.po_status === 'pending' && (
+                                <Alert variant='warning' title='Purchase Order Is Being Processed'>
+                                    <div className="space-y-4">
+                                        <p className="text-sm text-gray-500">
+                                            Your purchase order is currently being generated. Please allow some time for the process to complete.
+                                        </p>
+                                        <p className="text-sm text-gray-500">
+                                            Click the refresh button below to check whether the data is already available.
+                                        </p>
+                                        <ElemRefresh />
+                                    </div>
+                                </Alert>
+                            )}
+
+                            {poDetail?.po_status === 'failed' && (
+                                <Alert variant='warning' title='Failed to Generate Purchase Order'>
+                                    <div className="space-y-4">
+                                        <p className="text-sm text-gray-500">
+                                            We were unable to generate your purchase order at this time. Please try again by clicking the refresh button below. If the issue persists, contact support for further assistance.
+                                        </p>
+                                        <ElemRefresh />
+                                    </div>
+                                </Alert>
+                            )}
                             {/* Purchase Order Fields */}
                             <PurchaseOrderFields
                                 formData={formData}
@@ -443,11 +484,11 @@ export default function Edit() {
 
                             <div>
                                 {/* Tab Navigation */}
-                                <div className="border-b border-gray-200 px-6">
-                                    <nav className="flex space-x-8">
+                                <div className="border-b border-gray-200 px-6 overflow-auto">
+                                    <nav className="flex space-x-8 overflow-auto">
                                         <button
                                             onClick={() => setActiveTab('items')}
-                                            className={`py-2 px-1 border-b-2 font-medium tracking-wider text-md transition-colors ${
+                                            className={`py-2 px-1 border-b-2 min-w-[100px] font-medium text-md transition-colors ${
                                                 activeTab === 'items'
                                                     ? 'border-blue-500 text-blue-600'
                                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -457,7 +498,7 @@ export default function Edit() {
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('files')}
-                                            className={`py-2 px-1 border-b-2 font-medium tracking-wider text-md transition-colors ${
+                                            className={`py-2 px-1 border-b-2 min-w-[100px] font-medium text-md transition-colors ${
                                                 activeTab === 'files'
                                                     ? 'border-blue-500 text-blue-600'
                                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -466,14 +507,24 @@ export default function Edit() {
                                             Files
                                         </button>
                                         <button
+                                            onClick={() => setActiveTab('usernotes')}
+                                            className={`py-2 px-1 border-b-2 min-w-[100px] font-medium text-md transition-colors ${
+                                                activeTab === 'usernotes'
+                                                    ? 'border-blue-500 text-blue-600'
+                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            User Notes
+                                        </button>
+                                        <button
                                             onClick={() => setActiveTab('receipt')}
-                                            className={`py-2 px-1 border-b-2 font-medium tracking-wider text-md transition-colors ${
+                                            className={`py-2 px-1 border-b-2 min-w-[100px] font-medium text-md transition-colors ${
                                                 activeTab === 'receipt'
                                                     ? 'border-blue-500 text-blue-600'
                                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                         >
-                                            Receipt
+                                            Receipt & Bill
                                         </button>
                                     </nav>
                                 </div>
@@ -562,6 +613,12 @@ export default function Edit() {
                                             <p className="text-gray-500">File management functionality will be implemented here.</p>
                                         </div>
                                     )}
+
+                                    {activeTab === 'usernotes' && (
+                                        <div className="p-6">
+                                            <p className="text-gray-500">User notes functionality will be implemented here.</p>
+                                        </div>
+                                    )}
                                     {activeTab === 'receipt' && (
                                         <ReceiptTab
                                             poId={poDetail?.po_id}
@@ -606,7 +663,7 @@ export default function Edit() {
                                             type="button"
                                             variant="outline"
                                             onClick={() => handleApproval(poDetail.po_id)}
-                                            className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
+                                            className="group rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
                                             disabled={isSubmitting}
                                         >
                                             Re-Approval <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
@@ -652,7 +709,7 @@ export default function Edit() {
                                     )
                                 }
                                 
-                                {(poDetail?.po_status_label === 'Pending Receipt' && !editReceive) && (
+                                {((poDetail?.po_status_label === 'Pending Receipt' || poDetail?.po_status_label === 'Pending Billing/Partially Received') && poDetail?.po_id !== null && !editReceive) && (
                                     <PermissionGate permission={["create", "update"]}>
                                         <Button
                                             type="button"
@@ -660,11 +717,15 @@ export default function Edit() {
                                             className="group px-6 rounded-full ring-1 bg-[#14B8A6] ring-inset ring-[#14B8A6] text-white hover:bg-[#0D9488] hover:ring-[#0D9488]"
                                             disabled={isSubmitting}
                                         >
-                                            Receive
+                                            Receive <FaReceipt className="mr-2 h-4 w-4" />
                                         </Button>
                                     </PermissionGate>
                                 )}
-{/*                                 
+                                
+                                    {(poDetail?.po_status === 'failed' || poDetail?.po_status === 'pending') && (
+                                        <ElemRefresh />
+                                    )}
+                                {/*
                                 {(poDetail?.po_status_label === 'Pending Receipt' && editReceive) && (
                                     <PermissionGate permission={["create", "update"]}>
                                         <Button

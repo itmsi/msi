@@ -1,7 +1,7 @@
 import Input from '@/components/form/input/InputField';
 import { formatCurrency, handleKeyPress } from '@/helpers/generalHelper';
-import React from 'react'
-import { ItemReceiptItem, ItemReceiptPayload, MasterDataFormFieldItems, ReceiptItem } from '../../types/purchaseorder';
+import React, { useCallback, useRef } from 'react'
+import { ItemReceiptItem, ItemReceiptPayload, MasterDataFormFieldItems, PODetailData, ReceiptItem } from '../../types/purchaseorder';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import CustomDataTable from '@/components/ui/table';
 import { TableColumn } from 'react-data-table-component';
@@ -19,13 +19,10 @@ interface POItemsFieldsProps {
     onProductDelete?: (itemId: number) => void;
     onUpdateProductItem?: (index: number, field: string, value: any) => void;
 
-    // Daftar receipt yang sudah dibuat dari PO ini
     receiptList?: ReceiptItem[];
-    
-    // Receive status edit
     editReceive?: boolean;
+    poDetail?: PODetailData | null;
     
-    // Location Select Props
     locationOptions?: POLocationSelectOption[];
     locationPagination?: POLocationPaginationState;
     locationInputValue?: string;
@@ -35,7 +32,6 @@ interface POItemsFieldsProps {
     onLocationChange?: (option: POLocationSelectOption | null) => void;
     locationError?: string;
 
-    // Class Select Props
     classOptions?: POClassSelectOption[];
     classPagination?: POClassPaginationState;
     classInputValue?: string;
@@ -45,7 +41,6 @@ interface POItemsFieldsProps {
     onClassChange?: (option: POClassSelectOption | null) => void;
     classError?: string;
 
-    // Department Select Props
     departmentOptions?: PODepartmentSelectOption[];
     departmentPagination?: PODepartmentPaginationState;
     departmentInputValue?: string;
@@ -54,12 +49,16 @@ interface POItemsFieldsProps {
     selectedDepartment?: PODepartmentSelectOption | null;
     onDepartmentChange?: (option: PODepartmentSelectOption | null) => void;
     departmentError?: string;
+    handleRowSelected?: (selected: { allSelected: boolean; selectedCount: number; selectedRows: ItemReceiptItem[] }) => void;
+    selectedRows?: ItemReceiptItem[];
 }
 
 const receiptItemFields: React.FC<POItemsFieldsProps> = ({
     formData,
     errors,
     loadingMasterData,
+    poDetail,
+    editReceive,
     onUpdateProductItem,
     locationOptions = [],
     locationPagination = { page: 1, hasMore: true, loading: false },
@@ -75,7 +74,9 @@ const receiptItemFields: React.FC<POItemsFieldsProps> = ({
     departmentPagination = { page: 1, hasMore: true, loading: false },
     departmentInputValue = '',
     onDepartmentInputChange,
-    onDepartmentMenuScrollToBottom
+    onDepartmentMenuScrollToBottom,
+    handleRowSelected,
+    selectedRows = []
 }) => {
     const toNumber = (value: any): number => {
         if (typeof value === 'string') return parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
@@ -85,55 +86,69 @@ const receiptItemFields: React.FC<POItemsFieldsProps> = ({
     const updateItemById = (index: number, field: string, value: any) => {
         onUpdateProductItem?.(index, field, value);
     };
-console.log({
-    formData
-});
 
-    // Kolom untuk tabel items yang akan di-receive (ItemReceiptItem)
+    // Simpan nilai original quantitypending sebagai max limit
+    const originalQtyRef = useRef<Map<number, number>>(new Map());
+    formData.items?.forEach((item, idx) => {
+        if (!originalQtyRef.current.has(idx)) {
+            originalQtyRef.current.set(idx, item.quantitypending ?? 0);
+        }
+    });
+
+    // Gunakan ref agar referensi isRowSelected tetap stabil
+    const selectedItemIdsRef = useRef<Set<number>>(new Set());
+    selectedItemIdsRef.current = new Set(selectedRows.map((r) => r.line_id).filter((id): id is number => id !== undefined));
+
+    const isRowSelected = useCallback(
+        (row: ItemReceiptItem) => row.line_id !== undefined && selectedItemIdsRef.current.has(row.line_id),
+        []
+    );
+
     const receiveItemColumns: TableColumn<ItemReceiptItem>[] = [
         {
             name: 'Item',
             selector: (row) => row.item_display || String(row.item),
         },
         {
-            name: 'On Hand',
-            selector: (row) => row.on_hand || 0,
-            // cell: (row) => <span>{row.amount ? formatCurrency(row.amount) : '-'}</span>,
-            width: '150px',
-        },
-        {
             name: 'Remaining',
-            selector: (row) => row.quantity || 0,
-            // cell: (row) => <span>{row.amount ? formatCurrency(row.amount) : '-'}</span>,
+            selector: (row) => row.quantitypending || 0,
+            cell: (_row, index) => <span>{originalQtyRef.current.get(index as number) ?? 0}</span>,
             width: '150px',
+            center: true,
         },
         {
-            name: 'Qty to Receive',
-            selector: (row) => row.quantity,
-            cell: (row, index) => (
+            name: 'Qty',
+            selector: (row) => row.quantitypending ?? 0,
+            cell: (row, index) => (<>
+                {(poDetail?.po_status_label === 'Pending Bill' || editReceive) ? (
+                        <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">
+                            {row.quantitypending && row.quantitypending > 0 ? row.quantitypending.toString() : '-'}
+                        </p>
+                    ) : (
                     <Input
                         name={`qty_${index}`}
                         type="text"
                         maxLength={6}
                         min='0'
-                        value={row.quantity > 0 ? row.quantity.toString() : ''}
+                        value={(row.quantitypending ?? 0) > 0 ? (row.quantitypending ?? 0).toString() : ''}
                         onKeyPress={handleKeyPress}
                         onChange={(e) => {
                             const qty = toNumber(e.target.value);
-                            updateItemById(index as number, 'quantity', qty);
-                            updateItemById(index as number, 'amount', qty * toNumber(row.rate));
+                            const max = originalQtyRef.current.get(index as number) ?? 0;
+                            updateItemById(index as number, 'quantitypending', Math.min(qty, max));
                         }}
                         onBlur={(e) => {
                             if (toNumber(e.target.value) === 0) {
-                                updateItemById(index as number, 'quantity', 1);
-                                updateItemById(index as number, 'amount', toNumber(row.rate));
+                                updateItemById(index as number, 'quantitypending', 1);
                             }
                         }}
                         onFocus={(e) => e.target.select()}
                         className="p-1 px-3 w-[80px] text-center"
                     />
-            ),
+                )}
+            </>),
             width: '140px',
+            center: true,
         },
         {
             name: 'Rate',
@@ -142,41 +157,14 @@ console.log({
             width: '150px',
         },
         {
-            name: 'Location',
-            selector: (row) => row.location_display || '-',
-            cell: (row, index) => (
-                    <div className="w-[220px]">
-                        <CustomAsyncSelect
-                            name={`location_${index}`}
-                            placeholder="Select location..."
-                            value={row.location ? { label: row.location_display || '', value: String(row.location) } : null}
-                            defaultOptions={locationOptions}
-                            loadOptions={onLocationInputChange}
-                            onMenuScrollToBottom={onLocationMenuScrollToBottom}
-                            isLoading={locationPagination.loading}
-                            isSearchable
-                            inputValue={locationInputValue}
-                            onInputChange={onLocationInputChange}
-                            onChange={(option) => {
-                                if (option) {
-                                    updateItemById(index as number, 'location', parseInt(option.value));
-                                    updateItemById(index as number, 'location_display', option.label);
-                                }
-                            }}
-                            noOptionsMessage={() => "No locations found"}
-                            loadingMessage={() => "Loading..."}
-                            className="text-xs"
-                            menuPortalTarget={document.body}
-                            menuPosition="fixed"
-                        />
-                    </div>
-            ),
-            width: '240px',
-        },
-        {
             name: 'Department',
             selector: (row) => row.department_display || '-',
             cell: (row, index) => (
+                (poDetail?.po_status_label === 'Pending Bill' || editReceive) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">
+                        {row.department_display || '-'}
+                    </p>
+                ) : (
                     <div className="w-[220px]">
                         <CustomAsyncSelect
                             name={`department_${index}`}
@@ -202,6 +190,7 @@ console.log({
                             menuPosition="fixed"
                         />
                     </div>
+                )
             ),
             width: '240px',
         },
@@ -209,6 +198,11 @@ console.log({
             name: 'Class',
             selector: (row) => row.class_display || '-',
             cell: (row, index) => (
+                (poDetail?.po_status_label === 'Pending Bill' || editReceive) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">
+                        {row.class_display || '-'}
+                    </p>
+                ) : (
                     <div className="w-[220px]">
                         <CustomAsyncSelect
                             name={`class_${index}`}
@@ -234,6 +228,45 @@ console.log({
                             menuPosition="fixed"
                         />
                     </div>
+                )
+            ),
+            width: '240px',
+        },
+        {
+            name: 'Location',
+            selector: (row) => row.location_display || '-',
+            cell: (row, index) => (
+                (poDetail?.po_status_label === 'Pending Bill' || editReceive) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">
+                        {row.location_display || '-'}
+                    </p>
+                ) : (
+                    <div className="w-[220px]">
+                        <CustomAsyncSelect
+                            name={`location_${index}`}
+                            placeholder="Select location..."
+                            value={row.location ? { label: row.location_display || '', value: String(row.location) } : null}
+                            defaultOptions={locationOptions}
+                            loadOptions={onLocationInputChange}
+                            onMenuScrollToBottom={onLocationMenuScrollToBottom}
+                            isLoading={locationPagination.loading}
+                            isSearchable
+                            inputValue={locationInputValue}
+                            onInputChange={onLocationInputChange}
+                            onChange={(option) => {
+                                if (option) {
+                                    updateItemById(index as number, 'location', parseInt(option.value));
+                                    updateItemById(index as number, 'location_display', option.label);
+                                }
+                            }}
+                            noOptionsMessage={() => "No locations found"}
+                            loadingMessage={() => "Loading..."}
+                            className="text-xs"
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                        />
+                    </div>
+                )
             ),
             width: '240px',
         }
@@ -263,6 +296,15 @@ console.log({
                             striped={false}
                             highlightOnHover={false}
                             noDataComponent={<p className="text-gray-400 py-4 text-sm">Tidak ada items</p>}
+                            {...(editReceive ? {
+                                selectableRows: false,
+                            } : {
+                                selectableRows: true
+                            })}
+                            
+                            selectableRowSelected={isRowSelected}
+                            onSelectedRowsChange={handleRowSelected}
+                            
                         />
                     </div>
                 ) : (

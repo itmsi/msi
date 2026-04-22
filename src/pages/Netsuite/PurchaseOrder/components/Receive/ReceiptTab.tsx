@@ -20,8 +20,8 @@ const ReceiptTab: React.FC<ReceiptTabProps> = ({
     isLoading,
     pagination,
     onLoad,
-    onPageChange,
-    onRowsPerPageChange,
+    // onPageChange,
+    // onRowsPerPageChange,
 }) => {
     useEffect(() => {
         if (poId) onLoad();
@@ -72,8 +72,8 @@ const ReceiptTab: React.FC<ReceiptTabProps> = ({
                 paginationPerPage={pagination.limit || 10}
                 paginationDefaultPage={pagination.page || 1}
                 paginationRowsPerPageOptions={[5, 10, 20, 50]}
-                onChangePage={onPageChange}
-                onChangeRowsPerPage={onRowsPerPageChange}
+                // onChangePage={onPageChange}
+                // onChangeRowsPerPage={onRowsPerPageChange}
                 fixedHeader
                 fixedHeaderScrollHeight="500px"
                 highlightOnHover

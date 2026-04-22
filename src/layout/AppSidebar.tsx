@@ -164,12 +164,15 @@ const AppSidebar: React.FC = () => {
             allowedRoles: [
                 'Purchase Orders Netsuite', 
                 'Invoice Sales Orders Netsuite', // Add this or just use same role
-                'Admin Sync Netsuite'
+                'Admin Sync Netsuite',
+                'Invoice Sales Orders Netsuite', 
+                'Manage Receipts Netsuite'
             ],
             subItems: [
                 { name: "Purchase Orders", path: "/netsuite/purchase-order", allowedRoles: ['Purchase Orders Netsuite'] },
                 { name: "Sales Invoice", path: "/netsuite/invoice-sales-order", allowedRoles: ['Sales Invoice Netsuite'] },
                 { name: "Admin Sync", path: "/netsuite/sync", allowedRoles: ['Admin Sync Netsuite'] },
+                { name: "Receipts", path: "/netsuite/receipts", allowedRoles: ['Manage Receipts Netsuite'] },
             ],
         }
     ], [buildPath]);
