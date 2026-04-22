@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldItems, TablePOItem, PODetailData, PurchaseOrderFormUpdate } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 import { useNavigate, useParams } from 'react-router';
@@ -104,29 +104,28 @@ export const usePurchaseOrderEdit = () => {
     });
 
     // Load master data + detail PO secara paralel
-    useEffect(() => {
-        const loadData = async () => {
-            if (!id) {
-                toast.error('Purchase Order ID tidak ditemukan');
-                navigate('/netsuite/purchase-order');
-                return;
+    const loadData = useCallback(async () => {
+        if (!id) {
+            toast.error('Purchase Order ID tidak ditemukan');
+            navigate('/netsuite/purchase-order');
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            setLoadingMasterData(true);
+
+            const [masterRes, detailRes] = await Promise.all([
+                PurchaseOrderService.getFieldComponentById(),
+                PurchaseOrderService.getPOById(id),
+            ]);
+
+            // Set master data
+            if (masterRes.data.success) {
+                setMasterData(masterRes.data.data);
+            } else {
+                toast.error('Gagal memuat master data');
             }
-
-            try {
-                setIsLoading(true);
-                setLoadingMasterData(true);
-
-                const [masterRes, detailRes] = await Promise.all([
-                    PurchaseOrderService.getFieldComponentById(),
-                    PurchaseOrderService.getPOById(id),
-                ]);
-
-                // Set master data
-                if (masterRes.data.success) {
-                    setMasterData(masterRes.data.data);
-                } else {
-                    toast.error('Gagal memuat master data');
-                }
 
                 // Set detail PO
                 if (detailRes.success && detailRes.data?.length > 0) {
@@ -146,10 +145,11 @@ export const usePurchaseOrderEdit = () => {
                 setIsLoading(false);
                 setLoadingMasterData(false);
             }
-        };
-
-        loadData();
     }, [id]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -256,6 +256,7 @@ export const usePurchaseOrderEdit = () => {
                 custbody_msi_createdby_api: formData.custbody_msi_createdby_api || undefined,
                 class: formData.class || undefined,
                 department: formData.department || undefined,
+                grossamt: Number(formData.grossamt) || undefined,
                 custbody_me_validity_date: formData.custbody_me_validity_date ? formData.custbody_me_validity_date : undefined,
                 items: (formData.items || []).map(item => ({
                     itemId: Number(item.itemId),
@@ -364,6 +365,7 @@ export const usePurchaseOrderEdit = () => {
         // Product handlers
         handleAddProductItem,
         handleProductDelete,
-        handleUpdateProductItem
+        handleUpdateProductItem,
+        loadData
     };
 };

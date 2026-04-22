@@ -103,6 +103,7 @@ export interface PurchaseOrderForm {
     // description: string | null;
     // note: string | null;
     items: TablePOItem[];
+    grossamt?: number;
 }
 
 export interface POLineItem {
@@ -337,6 +338,7 @@ export interface PODetailData {
 }
 
 export interface PODetailLine {
+    line_id: number;
     item: number;
     memo?: string | null;
     rate?: number;
@@ -349,6 +351,7 @@ export interface PODetailLine {
     itemtype?: string;
     location?: number;
     quantity?: number;
+    quantitypending?: number;
     on_hand?: number;
     taxrate1?: number | null;
     netamount?: number;
@@ -417,6 +420,7 @@ export interface PurchaseOrderFormUpdate {
     custbody_msi_createdby_api?: string;
     class?: number;
     department?: number;
+    grossamt?: number;
     custbody_me_validity_date?: string;
     items?: PurchaseOrderUpdateItem[];
 }
@@ -464,10 +468,14 @@ export interface PODownloadResponse {
 }
 // RECEIVE FORM FIELD POSTS
 export interface ItemReceiptItem {
+    linesequencenumber?: number;
+    line_sequence?: number;
+    line_id?: number;
     item: number;
     item_display?: string;
     on_hand?: number;
     quantity: number;
+    quantitypending?: number;
     location?: number;
     location_display?: string;
     department?: number;
@@ -476,6 +484,7 @@ export interface ItemReceiptItem {
     class_display?: string;
     rate?: number;
     amount?: number;
+    grossamt?: number;
 }
 
 export interface ItemReceiptPayload {
@@ -494,6 +503,7 @@ export interface ItemReceiptPayload {
     location_display?: string;
     department?: number;
     department_display?: string;
+    po_status_label?: string;
     items: ItemReceiptItem[];
 }
 
@@ -503,13 +513,17 @@ export interface RequestFilters {
 // RECEIVE REQUEST PARAMS
 export interface ReceiveRequest {
     page: number;
-    page_size: number;
+    limit: number;
     sort_by: string;
     sort_order: string;
+    search: string;
+    classes?: number;
     filters?: RequestFilters;
 }
 // RECEIVE RESPONSE SUB ITEMS
 export interface ReceiptLine {
+    linesequencenumber?: string;
+    line_id: string;
     item: string;
     line: string;
     memo: string;
@@ -518,6 +532,7 @@ export interface ReceiptLine {
     amount: string;
     location: string;
     quantity: string;
+    quantitypending: string;
     department: string;
     item_display: string;
     class_display: string;

@@ -8,9 +8,12 @@ import flatpickr from 'flatpickr';
 // Mapping PODetailData → ItemReceiptPayload untuk form receive
 const mapPODetailToForm = (detail: PODetailData): ItemReceiptPayload => {
     const items: ItemReceiptItem[] = (detail.lines || []).map((line) => ({
+        linesequencenumber: Number(line.linesequencenumber),
+        line_id: Number(line.line_id),
         item: line.item,
         item_display: line.item_display || '',
         quantity: line.quantity ?? 0,
+        quantitypending: line.quantitypending ?? 0,
         on_hand: line.on_hand ?? 0,
         location: line.location ?? 0,
         location_display: line.location_display || '',
@@ -20,6 +23,7 @@ const mapPODetailToForm = (detail: PODetailData): ItemReceiptPayload => {
         class_display: line.class_display || '',
         rate: line.rate ?? 0,
         amount: line.netamount ?? 0,
+        grossamt: line.grossamt ?? 0,
     }));
 
     return {
@@ -45,9 +49,12 @@ const mapPODetailToForm = (detail: PODetailData): ItemReceiptPayload => {
 // Mapping ReceiptItem (view) → ItemReceiptPayload untuk tampil di form
 const mapReceiptItemToForm = (receipt: ReceiptItem): ItemReceiptPayload => {
     const items = (receipt.lines || []).map((line) => ({
+        linesequencenumber: Number(line.linesequencenumber),
+        line_id: Number(line.line_id),
         item: Number(line.item),
         item_display: line.item_display || '',
         quantity: Number(line.quantity) || 0,
+        quantitypending: Number(line.quantitypending) || 0,
         location: Number(line.location) || 0,
         location_display: line.location_display || '',
         department: Number(line.department) || 0,
@@ -93,9 +100,13 @@ export const useReceive = () => {
     const [poDetail, setPoDetail] = useState<PODetailData | null>(null);
     const [receiptDetail, setReceiptDetail] = useState<PODetailData | null>(null);
     const [receiptViewData, setReceiptViewData] = useState<ReceiptItem | null>(null);
-    const [receiptList, setReceiptList] = useState<ReceiptItem[]>([]);
-    const [syncInfo, setSyncInfo] = useState<SyncInfo | null>(null);
-    const [pagination, setPagination] = useState<Pagination>({
+    const [selectedRows, setSelectedRows] = useState<ItemReceiptItem[]>([]);
+    const [receiptList] = useState<ReceiptItem[]>([]);
+    const [syncInfo] = useState<SyncInfo | null>(null);
+    const [pagination] = useState<Pagination>({
+    // const [receiptList, setReceiptList] = useState<ReceiptItem[]>([]);
+    // const [syncInfo, setSyncInfo] = useState<SyncInfo | null>(null);
+    // const [pagination, setPagination] = useState<Pagination>({
         page: 1,
         limit: 10,
         total: 0,
@@ -115,25 +126,25 @@ export const useReceive = () => {
         items: []
     });
 
-    const fetchReceiptList = useCallback(async () => {
-        if (!id) return;
-        try {
-            const response = await PurchaseOrderService.getReceiptById({
-                page: 1,
-                page_size: 20,
-                sort_by: 'last_modified',
-                sort_order: 'desc',
-                filters: {
-                    createdfrom: Number(id)
-                }
-            });
-            setReceiptList(response.data?.items || []);
-            setPagination(response.data?.pagination || pagination);
-            setSyncInfo(response.sync_info || null);
-        } catch (err: any) {
-            console.error('Error fetching receipts:', err);
-        }
-    }, [id]);
+    // const fetchReceiptList = useCallback(async () => {
+    //     if (!id) return;
+    //     try {
+    //         const response = await PurchaseOrderService.getReceiptById({
+    //             page: 1,
+    //             limit: 20,
+    //             sort_by: 'last_modified',
+    //             sort_order: 'desc',
+    //             filters: {
+    //                 createdfrom: Number(id)
+    //             }
+    //         });
+    //         setReceiptList(response.data?.items || []);
+    //         setPagination(response.data?.pagination || pagination);
+    //         setSyncInfo(response.sync_info || null);
+    //     } catch (err: any) {
+    //         console.error('Error fetching receipts:', err);
+    //     }
+    // }, [id]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -142,6 +153,10 @@ export const useReceive = () => {
                 navigate('/netsuite/purchase-order');
                 return;
             }
+            // if (poDetail?.po_status_label !== 'Pending Billing/Partially Received' && poDetail?.po_status_label !== 'Pending Receipt') {
+            //     navigate(`/netsuite/purchase-order/edit/${id}`);
+            //     return;
+            // }
 
             try {
                 setIsLoading(true);
@@ -174,16 +189,22 @@ export const useReceive = () => {
                             customform_display: detail.customform_display || '',
                         } : null;
                         if (receiptData) {
+                            const mapped = mapReceiptItemToForm(receiptData);
                             setReceiptViewData(receiptData);
-                            setFormData(mapReceiptItemToForm(receiptData));
+                            setFormData(mapped);
+                            setSelectedRows(mapped.items);
                         } else {
                             toast.error('Data receipt tidak ditemukan');
-                            setFormData(mapPODetailToForm(detail));
+                            const mapped = mapPODetailToForm(detail);
+                            setFormData(mapped);
+                            setSelectedRows(mapped.items);
                         }
                     } else {
                         // Mode create: prefill form dari PO detail
-                        setFormData(mapPODetailToForm(detail));
-                        await fetchReceiptList();
+                        const mapped = mapPODetailToForm(detail);
+                        setFormData(mapped);
+                        setSelectedRows(mapped.items);
+                        // await fetchReceiptList();
                     }
                 } else {
                     toast.error(detailRes.message || 'Data Purchase Order tidak ditemukan');
@@ -247,6 +268,10 @@ export const useReceive = () => {
         });
     };
 
+    const handleRowSelected = useCallback((state: { allSelected: boolean; selectedCount: number; selectedRows: ItemReceiptItem[] }) => {
+        setSelectedRows(state.selectedRows);
+    }, []);
+
     const validateReceiveForm = (): boolean => {
         const newErrors: Record<string, string> = {};
 
@@ -282,6 +307,12 @@ export const useReceive = () => {
         setIsSubmitting(true);
 
         try {
+            // Ambil item terbaru dari formData berdasarkan yang di-select
+            const selectedItemIds = new Set(selectedRows.map((r) => r.line_id));
+            const itemsToSubmit = selectedRows.length > 0
+                ? formData.items.filter((item) => selectedItemIds.has(item.line_id))
+                : formData.items;
+
             const requestData: ItemReceiptPayload = {
                 po_id: Number(receiptDetail?.po_id || id),
                 memo: formData.memo || '',
@@ -291,20 +322,21 @@ export const useReceive = () => {
                 class: formData.class || 0,
                 location: formData.location || 0,
                 department: formData.department || 0,
-                items: (formData.items || []).map((item: ItemReceiptItem) => ({
+                items: itemsToSubmit.map((item: ItemReceiptItem) => ({
                     item: Number(item.item),
                     quantity: Number(item.quantity),
                     location: Number(item.location),
                     department: Number(item.department),
                     class: Number(item.class),
-                    rate: Number(item.rate)
+                    rate: Number(item.rate),
+                    line_sequence: Number(item.linesequencenumber)
                 }))
             };
 
             const response = await PurchaseOrderService.submitReceipt(requestData);
             if (response.success) {
                 toast.success('Receive berhasil disubmit');
-                await fetchReceiptList();
+                // await fetchReceiptList();
             } else {
                 toast.error('Gagal mengsubmit receive');
             }
@@ -318,6 +350,7 @@ export const useReceive = () => {
             setIsSubmitting(false);
         }
     };
+
 
     return {
         isSubmitting,
@@ -333,6 +366,8 @@ export const useReceive = () => {
         syncInfo,
         pagination,
         isViewMode,
+        selectedRows,
+        handleRowSelected,
         handleInputChange,
         handleSelectChange,
         handleDateChange,

@@ -1,6 +1,6 @@
 ﻿import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { formatTanggal, handleKeyPress, parseTanggalToDate, convertDateToTanggal } from '@/helpers/generalHelper';
+import { formatTanggal, handleKeyPress, parseTanggalToDate, convertDateToTanggal, formatDate } from '@/helpers/generalHelper';
 import React from 'react'
 import { ItemReceiptPayload, MasterDataFormFieldItems, PODetailData } from '../../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -84,6 +84,7 @@ interface POFormFieldsProps {
 const receiveFields: React.FC<POFormFieldsProps> = ({
     formData,
     poDetail,
+    editReceive,
     errors,
     masterData,
     subsidiaryId,
@@ -129,8 +130,8 @@ const receiveFields: React.FC<POFormFieldsProps> = ({
         approvalstatus: poDetail?.approvalstatus,
         nextapprover: poDetail?.nextapprover,
         class_name: poDetail?.class_display,
+        po_status_label: poDetail?.po_status_label
     };
-    console.log ({poDetail})
     const primaryFields = getPrimaryInfoFields(masterData || undefined);
     const classificationFields = getClassificationInfoFields(
         masterData || undefined, 
@@ -150,7 +151,7 @@ const receiveFields: React.FC<POFormFieldsProps> = ({
                 <Label>
                     {label} {required && <span className="text-red-500">*</span>}
                 </Label>
-                {(disabled) ? (
+                {(mergedFormData.po_status_label === 'Pending Bill' || disabled || editReceive) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
                         String(mergedFormData[name]) || '-'
                     }</p>
@@ -251,34 +252,40 @@ const receiveFields: React.FC<POFormFieldsProps> = ({
                 <Label>
                     {field.label} {field.required && <span className="text-red-500">*</span>}
                 </Label>
-                <div className="relative" ref={datePickerRef}>
-                    <div 
-                        className={`flex items-center justify-between w-full px-3 py-2 border rounded-lg cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 ${
-                            errors[field.name] ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        onClick={() => setShowDatePicker(!showDatePicker)}
-                    >
-                        <span className={currentDate ? "text-gray-700" : "text-gray-400"}>
-                            {currentDate ? formatTanggal(String(fieldValue)) : (field.placeholder || `Pilih ${field.label.toLowerCase()}`)}
-                        </span>
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    {showDatePicker && (
-                        <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-                            <Calendar
-                                date={currentDate || new Date()}
-                                onChange={handleDateChange}
-                                color="#3b82f6"
-                                // minDate={field.minDate || new Date()}
-                            />
+                {(mergedFormData.po_status_label === 'Pending Bill' || editReceive) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                        currentDate ? formatDate(currentDate.toISOString()) : (field.placeholder || `-`)
+                    }</p>
+                ) : <>
+                    <div className="relative" ref={datePickerRef}>
+                        <div 
+                            className={`flex items-center justify-between w-full px-3 py-2 border rounded-lg cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 ${
+                                errors[field.name] ? 'border-red-500' : 'border-gray-300'
+                            }`}
+                            onClick={() => setShowDatePicker(!showDatePicker)}
+                        >
+                            <span className={currentDate ? "text-gray-700" : "text-gray-400"}>
+                                {currentDate ? formatTanggal(String(fieldValue)) : (field.placeholder || `Pilih ${field.label.toLowerCase()}`)}
+                            </span>
+                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
                         </div>
+                        {showDatePicker && (
+                            <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                                <Calendar
+                                    date={currentDate || new Date()}
+                                    onChange={handleDateChange}
+                                    color="#3b82f6"
+                                    // minDate={field.minDate || new Date()}
+                                />
+                            </div>
+                        )}
+                    </div>
+                    {errors[field.name] && (
+                        <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>
                     )}
-                </div>
-                {errors[field.name] && (
-                    <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>
-                )}
+                </>}
             </div>
         );
     };
@@ -349,7 +356,7 @@ const receiveFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             Location <span className="text-red-500">*</span>
                         </Label>
-                        {(disabled) ? (
+                        {(mergedFormData.po_status_label === 'Pending Bill' || disabled || editReceive) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
                                 locationOptions.find(option => String(option.value) === String(formData.location ?? ''))?.label || '-'
                             }</p>
@@ -393,7 +400,7 @@ const receiveFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             Class <span className="text-red-500">*</span>
                         </Label>
-                        {(disabled) ? (
+                        {(mergedFormData.po_status_label === 'Pending Bill' || disabled || editReceive) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
                                 mergedFormData.class_name  || '-'
                             }</p>
@@ -426,7 +433,8 @@ const receiveFields: React.FC<POFormFieldsProps> = ({
                         <Label>
                             Department <span className="text-red-500">*</span>
                         </Label>
-                        {(disabled) ? (
+                        
+                        {(mergedFormData.po_status_label === 'Pending Bill' || disabled || editReceive) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
                                 departmentOptions.find(option => String(option.value) === String(formData.department ?? ''))?.label || '-'
                             }</p>

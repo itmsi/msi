@@ -589,7 +589,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             </div>
                             <div>
                                 <p className='mb-1.5 block text-sm text-gray-700'>Created By</p>
-                                <p>{formData.custbody_msi_createdby_api || '-'}</p>
+                                <p className='break-words'>{formData.custbody_msi_createdby_api || '-'}</p>
                             </div>
                         </div>
                     </div>
@@ -611,7 +611,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
             {modeEdit && (
                 (formData.approvalstatus === 2 || formData.approvalstatus === 3 || (formData.approvalstatus === 1 && formData.nextapprover !== null)) &&
                 formData.items && formData.items.length > 0 && (
-                    <div className="sticky top-0 self-start px-4">
+                    <div className="sticky top-0 self-start lg:px-4">
                         <div className='bg-white rounded-2xl shadow-sm p-6'>
                             <InvoiceSummary items={formData.items} />
                         </div>
