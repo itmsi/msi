@@ -2,7 +2,7 @@ import { apiPost, ApiResponse } from '@/helpers/apiHelper';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export type SyncMasterDataKey = 'department' | 'location' | 'term' | 'class' | 'item' | 'vendor';
+export type SyncMasterDataKey = 'department' | 'location' | 'term' | 'class' | 'item' | 'vendor' | 'invoice_sales_orders' | 'purchasing_orders' | 'sales_orders';
 
 // ─── Sync List Types ──────────────────────────────────────────────────────────
 
@@ -45,6 +45,12 @@ export const SYNC_MODULE_KEY_MAP: Record<string, SyncMasterDataKey> = {
     items:              'item',
     vendor:             'vendor',
     vendors:            'vendor',
+    'invoice-sales-order':  'invoice_sales_orders',
+    'invoice-sales-orders': 'invoice_sales_orders',
+    'purchasing-order':     'purchasing_orders',
+    'purchasing-orders':    'purchasing_orders',
+    'sales-order':          'sales_orders',
+    'sales-orders':         'sales_orders',
 };
 
 const SYNC_BODY = {
@@ -80,6 +86,18 @@ export class NetSuiteSyncService {
         await apiPost(`${API_BASE_URL}/netsuite/vendor/sync`, SYNC_BODY);
     }
 
+    static async syncInvoiceSalesOrder(): Promise<void> {
+        await apiPost(`${API_BASE_URL}/netsuite/invoice-sales-orders/sync`, SYNC_BODY);
+    }
+
+    static async syncPurchasingOrder(): Promise<void> {
+        await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/sync`, SYNC_BODY);
+    }
+
+    static async syncSalesOrder(): Promise<void> {
+        await apiPost(`${API_BASE_URL}/netsuite/sales-orders/sync`, SYNC_BODY);
+    }
+
     /**
      * Dispatcher: success = no error thrown, failed = error thrown
      */
@@ -91,6 +109,9 @@ export class NetSuiteSyncService {
             case 'class':      return this.syncClass();
             case 'item':       return this.syncItem();
             case 'vendor':     return this.syncVendor();
+            case 'invoice_sales_orders': return this.syncInvoiceSalesOrder();
+            case 'purchasing_orders':    return this.syncPurchasingOrder();
+            case 'sales_orders':         return this.syncSalesOrder();
             default:
                 throw new Error(`Unknown sync key: ${key}`);
         }

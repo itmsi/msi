@@ -60,6 +60,24 @@ const INITIAL_ITEMS: Omit<MasterDataItem, 'status' | 'lastSync' | 'errorMessage'
         description: 'Sync vendor master data from NetSuite',
         icon: 'vendor',
     },
+    {
+        key: 'purchasing_orders',
+        label: 'Purchasing Orders',
+        description: 'Sync purchasing orders from NetSuite',
+        icon: 'purchasing_orders',
+    },
+    {
+        key: 'sales_orders',
+        label: 'Sales Orders',
+        description: 'Sync sales orders from NetSuite',
+        icon: 'sales_orders',
+    },
+    {
+        key: 'invoice_sales_orders',
+        label: 'Invoice Sales Orders',
+        description: 'Sync invoice sales orders from NetSuite',
+        icon: 'invoice_sales_orders',
+    },
 ];
 
 // ─── Hook ───────────────────────────────────────────────────────────────────

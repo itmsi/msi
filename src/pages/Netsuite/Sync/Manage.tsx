@@ -15,6 +15,9 @@ import {
     MdDoneAll,
     MdInventory2,
     MdStorefront,
+    MdReceipt,
+    MdShoppingCart,
+    MdListAlt,
 } from 'react-icons/md';
 
 // ─── Icon Map ─────────────────────────────────────────────────────────────────
@@ -26,6 +29,9 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     class:      <MdCategory size={28} />,
     item:       <MdInventory2 size={28} />,
     vendor:     <MdStorefront size={28} />,
+    purchasing_orders:    <MdShoppingCart size={28} />,
+    sales_orders:         <MdListAlt size={28} />,
+    invoice_sales_orders: <MdReceipt size={28} />,
 };
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
@@ -325,7 +331,7 @@ export default function NetSuiteSyncManage() {
                 <QueueIndicator items={items} />
 
                 {/* ── Master Data Grid ── */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 3xl:grid-cols-5 gap-5">
                     {items.map((item) => (
                         <SyncCard
                             key={item.key}
