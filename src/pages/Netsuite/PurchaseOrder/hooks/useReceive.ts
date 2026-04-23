@@ -1,9 +1,10 @@
 ﻿import { useState, useEffect, useCallback } from 'react';
-import { MasterDataFormFieldItems, PODetailData, ItemReceiptPayload, ItemReceiptItem, ReceiptItem, Pagination, SyncInfo, ReceiptValidationErrors } from '../types/purchaseorder';
+import { MasterDataFormFieldItems, PODetailData, ItemReceiptPayload, ItemReceiptItem, ReceiptItem, SyncInfo, ReceiptValidationErrors } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 import { useNavigate, useParams } from 'react-router';
 import toast from 'react-hot-toast';
 import flatpickr from 'flatpickr';
+import { getProfile } from '@/helpers/generalHelper';
 
 // Mapping PODetailData → ItemReceiptPayload untuk form receive
 const mapPODetailToForm = (detail: PODetailData): ItemReceiptPayload => {
@@ -14,6 +15,8 @@ const mapPODetailToForm = (detail: PODetailData): ItemReceiptPayload => {
         item_display: line.item_display || '',
         quantity: line.quantity ?? 0,
         quantitypending: line.quantitypending ?? 0,
+        quantityreceived: line.quantityreceived ?? 0,
+        has_inbound: line.has_inbound ?? false,
         on_hand: line.on_hand ?? 0,
         location: line.location ?? 0,
         location_display: line.location_display || '',
@@ -81,12 +84,16 @@ const mapReceiptItemToForm = (receipt: ReceiptItem): ItemReceiptPayload => {
         department_display: receipt.department_display || '',
         class: Number(receipt.class) || 0,
         class_display: receipt.class_display || '',
+        tranid: receipt.tranid,
         items,
     };
 };
 
 export const useReceive = () => {
     const navigate = useNavigate();
+    const profileSSO = getProfile() as any;
+    const profileSSOEmployeeName = profileSSO?.employee_name || null;
+    const profileSSOEmployeeId = profileSSO?.employee_id || null;
     const { id, receipt_id } = useParams<{ id: string; receipt_id: string }>();
     const isViewMode = Boolean(receipt_id);
 
@@ -103,15 +110,14 @@ export const useReceive = () => {
     const [selectedRows, setSelectedRows] = useState<ItemReceiptItem[]>([]);
     const [receiptList] = useState<ReceiptItem[]>([]);
     const [syncInfo] = useState<SyncInfo | null>(null);
-    const [pagination] = useState<Pagination>({
     // const [receiptList, setReceiptList] = useState<ReceiptItem[]>([]);
     // const [syncInfo, setSyncInfo] = useState<SyncInfo | null>(null);
     // const [pagination, setPagination] = useState<Pagination>({
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 0
-    });
+    //     page: 1,
+    //     limit: 10,
+    //     total: 0,
+    //     totalPages: 0
+    // });
 
     const [formData, setFormData] = useState<ItemReceiptPayload>({
         po_id: null,
@@ -202,8 +208,13 @@ export const useReceive = () => {
                     } else {
                         // Mode create: prefill form dari PO detail
                         const mapped = mapPODetailToForm(detail);
-                        setFormData(mapped);
-                        setSelectedRows(mapped.items);
+                        const filteredItems = mapped.items.filter(
+                            (item) => item.quantity !== item.quantityreceived || item.has_inbound === false
+                        );
+                        const mappedFiltered = { ...mapped, items: filteredItems };
+
+                        setFormData(mappedFiltered);
+                        setSelectedRows(mappedFiltered.items);
                         // await fetchReceiptList();
                     }
                 } else {
@@ -322,6 +333,8 @@ export const useReceive = () => {
                 class: formData.class || 0,
                 location: formData.location || 0,
                 department: formData.department || 0,
+                created_by_name: profileSSOEmployeeName,
+                created_by: profileSSOEmployeeId,
                 items: itemsToSubmit.map((item: ItemReceiptItem) => ({
                     item: Number(item.item),
                     quantity: Number(item.quantitypending),
@@ -365,7 +378,7 @@ export const useReceive = () => {
         receiptList,
         receiptViewData,
         syncInfo,
-        pagination,
+        // pagination,
         isViewMode,
         selectedRows,
         handleRowSelected,

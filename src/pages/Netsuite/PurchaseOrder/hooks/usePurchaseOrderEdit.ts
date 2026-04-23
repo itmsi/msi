@@ -80,6 +80,7 @@ export const usePurchaseOrderEdit = () => {
 
     // Detail data dari API (untuk info read-only seperti status, po_number)
     const [poDetail, setPODetail] = useState<PODetailData | null>(null);
+    const [isSyncing, setIsSyncing] = useState(false);
 
     const [formData, setFormData] = useState<PurchaseOrderForm>({
         customform: null,
@@ -349,6 +350,22 @@ export const usePurchaseOrderEdit = () => {
         });
     };
 
+    const handleSyncById = useCallback(async (poID: string | undefined) => {
+        if (isSyncing) return;
+        if (!poID) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi PO: ${poID}...`);
+        try {
+            await PurchaseOrderService.syncPOById(String(poID));
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            loadData();
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, loadData]);
+
     return {
         isSubmitting,
         isLoading,
@@ -357,6 +374,9 @@ export const usePurchaseOrderEdit = () => {
         masterData,
         loadingMasterData,
         poDetail,
+        isSyncing,
+        handleSyncById,
+
         // Handlers
         handleInputChange,
         handleSelectChange,

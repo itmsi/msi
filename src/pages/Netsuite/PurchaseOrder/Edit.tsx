@@ -17,8 +17,11 @@ import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
 import { getProfile } from '@/helpers/generalHelper';
 import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 import { useReceiptTab } from './hooks/useReceiptTab';
-import ReceiptTab from './components/Receive/ReceiptTab';
+import ReceiptTab from './components/tabs/ReceiptTab';
 import Alert from '@/components/ui/alert/Alert';
+import { useHistoryReceiptTab } from './hooks/useHistoryReceiptTab';
+import HistoryReceiptTab from './components/tabs/HistoryReceiptTab';
+import UserNoteTab from './components/tabs/UserNoteTab';
 
 export default function Edit() {
     const navigate = useNavigate();
@@ -41,6 +44,8 @@ export default function Edit() {
         handleProductDelete,
         handleUpdateProductItem,
         loadData,
+        handleSyncById,
+        isSyncing,
     } = usePurchaseOrderEdit();
 
     // Get subsidiary_id dari form data dengan defensive check
@@ -272,7 +277,7 @@ export default function Edit() {
     const [editReceive] = useState<boolean>(false);
     // const handleSubmitReceive = (poId: string) => {}
     
-    const [activeTab, setActiveTab] = useState<'items' | 'files' | 'usernotes' | 'receipt'>('items');
+    const [activeTab, setActiveTab] = useState<'items' | 'files' | 'usernotes' | 'receipt' | 'historyreceipt'>('items');
 
     const {
         receiptList,
@@ -280,6 +285,12 @@ export default function Edit() {
         pagination: receiptPagination,
         fetchReceipts,
     } = useReceiptTab(poDetail?.po_id);
+
+    const {
+        logList,
+        isLoading: historyLogLoading,
+        fetchHistoryReceipts
+    } = useHistoryReceiptTab(poDetail?.po_id);
 
     const ElemRefresh = () => (
         <PermissionGate permission="read">
@@ -328,7 +339,21 @@ export default function Edit() {
                                         </h1>
                                         <p className="ms-2 text-sm text-gray-600">{poDetail?.po_number || '-'}</p>
                                     </div>
-                                    <div className="capitalize ms-2">
+                                    <div className="capitalize ms-2 flex gap-2">
+                                        <PermissionGate permission="read">
+                                            <Button
+                                                onClick={() => handleSyncById(poDetail?.po_id)}
+                                                disabled={isSyncing}
+                                                className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600 py-2"
+                                                variant='outline'
+                                            >
+                                                <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                                <div>
+                                                <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                                
+                                                </div>
+                                            </Button>
+                                        </PermissionGate>
                                         {poDetail?.po_number !== null && (
                                             <span 
                                                 className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
@@ -366,6 +391,7 @@ export default function Edit() {
                                     </div>
                                 </Alert>
                             )}
+                            
                             {/* Purchase Order Fields */}
                             <PurchaseOrderFields
                                 formData={formData}
@@ -378,7 +404,7 @@ export default function Edit() {
                                 onSelectChange={handleSelectChange}
                                 onDateChange={handleDateChange}
 
-                                // EDIT RECIVE STATUS
+                                // EDIT RECEIVE STATUS
                                 editReceive={editReceive}
 
                                 // Vendor props
@@ -488,7 +514,7 @@ export default function Edit() {
                                     <nav className="flex space-x-8 overflow-auto">
                                         <button
                                             onClick={() => setActiveTab('items')}
-                                            className={`py-2 px-1 border-b-2 min-w-[100px] font-medium text-md transition-colors ${
+                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
                                                 activeTab === 'items'
                                                     ? 'border-blue-500 text-blue-600'
                                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -498,7 +524,7 @@ export default function Edit() {
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('files')}
-                                            className={`py-2 px-1 border-b-2 min-w-[100px] font-medium text-md transition-colors ${
+                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
                                                 activeTab === 'files'
                                                     ? 'border-blue-500 text-blue-600'
                                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -508,7 +534,7 @@ export default function Edit() {
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('usernotes')}
-                                            className={`py-2 px-1 border-b-2 min-w-[100px] font-medium text-md transition-colors ${
+                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
                                                 activeTab === 'usernotes'
                                                     ? 'border-blue-500 text-blue-600'
                                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -518,13 +544,23 @@ export default function Edit() {
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('receipt')}
-                                            className={`py-2 px-1 border-b-2 min-w-[100px] font-medium text-md transition-colors ${
+                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
                                                 activeTab === 'receipt'
                                                     ? 'border-blue-500 text-blue-600'
                                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                         >
                                             Receipt & Bill
+                                        </button>
+                                        <button
+                                            onClick={() => setActiveTab('historyreceipt')}
+                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                                activeTab === 'historyreceipt'
+                                                    ? 'border-blue-500 text-blue-600'
+                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            History Receipt
                                         </button>
                                     </nav>
                                 </div>
@@ -615,9 +651,10 @@ export default function Edit() {
                                     )}
 
                                     {activeTab === 'usernotes' && (
-                                        <div className="p-6">
-                                            <p className="text-gray-500">User notes functionality will be implemented here.</p>
-                                        </div>
+                                        <UserNoteTab
+                                            noteList={poDetail?.user_notes || []}
+                                            isLoading={historyLogLoading}
+                                        />
                                     )}
                                     {activeTab === 'receipt' && (
                                         <ReceiptTab
@@ -628,6 +665,14 @@ export default function Edit() {
                                             onLoad={fetchReceipts}
                                             onPageChange={(page) => fetchReceipts(page, receiptPagination.limit)}
                                             onRowsPerPageChange={(rows, page) => fetchReceipts(page, rows)}
+                                        />
+                                    )}
+                                    {activeTab === 'historyreceipt' && (
+                                        <HistoryReceiptTab
+                                            poId={poDetail?.po_id}
+                                            logList={logList}
+                                            isLoading={historyLogLoading}
+                                            onLoad={fetchHistoryReceipts}
                                         />
                                     )}
                                 </div>

@@ -16,6 +16,7 @@ import { getProfile } from '@/helpers/generalHelper';
 import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 import { useReceive } from './hooks/useReceive';
 import useGoBack from '@/hooks/useGoBack';
+import Alert from '@/components/ui/alert/Alert';
 
 export default function Receive() {
     const navigate = useNavigate();
@@ -240,7 +241,7 @@ export default function Receive() {
     }, [receiptDetail, locationInitialized, classInitialized, departmentInitialized, isInitialLoadComplete]);
 
     const handleCancel = () => {
-        navigate('/netsuite/purchase-order');
+        navigate(`/netsuite/purchase-order/edit/${receiptDetail?.po_id}`);
     }
 
     return (
@@ -263,7 +264,7 @@ export default function Receive() {
                             <div className="flex items-center gap-1 w-full">
                                 <Button
                                     variant="outline"
-                                    onClick={goBack}
+                                    onClick={() => goBack(`/netsuite/purchase-order/edit/${receiptDetail?.po_id}`)}
                                     className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                                 >
                                     <MdKeyboardArrowLeft size={20} />
@@ -274,12 +275,13 @@ export default function Receive() {
                                         <h1 className="ms-2 font-primary-bold font-normal text-xl">
                                             {isViewMode ? 'View Receipt' : 'Receipt Purchase Order'}
                                         </h1>
-                                        <p className="ms-2 text-sm text-gray-600">
+                                        <p className="ms-2 text-sm text-gray-600 flex ">
                                             <Link 
-                                                className='flex text-blue-400 hover:underline items-center gap-1'
+                                                className='flex text-blue-400 hover:underline items-center gap-1 me-1'
                                                 to={`/netsuite/purchase-order/edit/${receiptDetail?.po_id}`} target="_blank">
                                                 <FaExternalLinkAlt className='me-1'/> {receiptDetail?.po_number || '-'}
                                             </Link>
+                                            {isViewMode && (`${formData?.tranid ? ' - ' + formData?.tranid || '' :  ''}`)}
                                         </p>
                                     </div>
                                     {!isViewMode && (
@@ -296,6 +298,15 @@ export default function Receive() {
                         </div>
 
                         <div className="space-y-6">
+                            {(formData?.tranid === null || !formData?.receipt_id === null) && (
+                            <Alert variant='error' title='Failed to Initialize Item Receipt'>
+                                <div className="space-y-4">
+                                    <p className="text-sm text-gray-500">
+                                        The system was unable to create the item receipt. You are required to recreate the item receipt. <br />Please contact support for further assistance. We apologize for the inconvenience.
+                                    </p>
+                                </div>
+                            </Alert>
+                            )}
                             {/* Purchase Order Fields */}
                             <ReceiptFields
                                 formData={formData}

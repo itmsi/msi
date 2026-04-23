@@ -315,7 +315,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 <Input
                     name={`custcol_me_landed_cost_${index}`}
                     type="text"
-                    value={row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatCurrencyTyping(row.custcol_me_landed_cost.toString()) : ''}
+                    value={row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatCurrencyTyping(row.custcol_me_landed_cost.toString()) : '0'}
                     onKeyPress={handleCurrencyKeyPress}
                     onChange={(e) => {
                         const rawValue = e.target.value;
@@ -379,7 +379,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 <Input
                     name={`amount_${index}`}
                     type="text"
-                    value={row.amount && row.amount > 0 ? formatNumberPriceKoma(row.amount.toString()) : ''}
+                    value={row.amount && row.amount > 0 ? formatNumberPriceKoma(row.amount) : ''}
                     disabled={true}
                     readonly={true}
                     className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
@@ -752,7 +752,7 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[] }> = ({ items }) =>
     };
 
     const summary = useMemo(() => {
-        const subtotal = items.reduce((sum, item) => sum + toNumber(item.amount), 0);
+        const subtotal = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.amount)), 0);
         const totalTax = items.reduce((sum, item) => sum + toNumber(item.tax_amount), 0);
         const grandTotal = items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
         const totalQty = items.reduce((sum, item) => sum + toNumber(item.qty), 0);
@@ -783,5 +783,4 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[] }> = ({ items }) =>
             </div>
     );
 };
-
 export default purchaseOrderItemFields

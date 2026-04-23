@@ -1,5 +1,5 @@
 import { apiPost, apiGet, ApiResponse, apiPut } from '@/helpers/apiHelper';
-import { ComponentsDataResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, PostReceiptResponse, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
+import { ComponentsDataResponse, HistoryLogResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, PostReceiptResponse, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -192,5 +192,14 @@ export class PurchaseOrderService {
 
         const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/receive-list/sync`, requestData as Record<string, any>);
         return response.data as ReceiptResponse;
+    }
+
+    
+    static async getHistoryReceiptById(params: Partial<any> = {}): Promise<HistoryLogResponse> {
+        const requestData = {
+            ...params
+        };
+        const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/receive-list/history-logs`, requestData as Record<string, any>);
+        return response.data as HistoryLogResponse;
     }
 }

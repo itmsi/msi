@@ -335,6 +335,7 @@ export interface PODetailData {
     department?: number | string;
     department_display?: string;
     lines: PODetailLine[];
+    user_notes: UserNotesItem[];
 }
 
 export interface PODetailLine {
@@ -352,6 +353,8 @@ export interface PODetailLine {
     location?: number;
     quantity?: number;
     quantitypending?: number;
+    quantityreceived?: number;
+    has_inbound?: boolean;
     on_hand?: number;
     taxrate1?: number | null;
     netamount?: number;
@@ -476,6 +479,8 @@ export interface ItemReceiptItem {
     on_hand?: number;
     quantity: number;
     quantitypending?: number;
+    quantityreceived?: number;
+    has_inbound?: boolean;
     location?: number;
     location_display?: string;
     department?: number;
@@ -504,6 +509,10 @@ export interface ItemReceiptPayload {
     department?: number;
     department_display?: string;
     po_status_label?: string;
+    tranid?: string;
+    receipt_id?: string;
+    created_by_name?: string;
+    created_by?: string;
     items: ItemReceiptItem[];
 }
 
@@ -518,6 +527,7 @@ export interface ReceiveRequest {
     sort_order: string;
     search: string;
     classes?: number;
+    createdfrom?: number;
     filters?: RequestFilters;
 }
 // RECEIVE RESPONSE SUB ITEMS
@@ -598,4 +608,29 @@ export interface PostReceiptResponse {
     success: boolean;
     purchase_order_id: number;
     goods_receipts: GoodsReceipt[];
+}
+
+// HISTORY RECEIPT LOGS
+export interface HistoryLogItem {
+  id: string;
+  trandate?: string;
+  msg_error?: string;
+  created_at?: string;
+  created_by_name?: string;
+}
+
+export interface HistoryLogResponse {
+  success: boolean;
+  data?: HistoryLogItem[];
+  message?: string;
+}
+
+// USER NOTES
+export interface UserNotesItem {
+    date: string;
+    note: string;
+    type: string | null;
+    title: string;
+    author: string;
+    direction: string;
 }

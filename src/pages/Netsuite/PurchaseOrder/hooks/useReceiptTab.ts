@@ -21,9 +21,7 @@ export const useReceiptTab = (poId: string | undefined) => {
                 limit: pageSize,
                 sort_by: 'last_modified',
                 sort_order: 'desc',
-                filters: {
-                    createdfrom: Number(poId)
-                }
+                createdfrom: Number(poId)
             });
             setReceiptList(response.data?.items || []);
             setPagination(response.data?.pagination || pagination);
