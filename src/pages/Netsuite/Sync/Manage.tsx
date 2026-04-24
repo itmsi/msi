@@ -18,6 +18,7 @@ import {
     MdOutlineSync,
 } from 'react-icons/md';
 import Button from '@/components/ui/button/Button';
+import { formatDateTime } from '@/helpers/generalHelper';
 
 // ─── Icon Map ─────────────────────────────────────────────────────────────────
 
@@ -73,22 +74,6 @@ import Button from '@/components/ui/button/Button';
 //         </span>
 //     );
 // }
-
-// ─── Format Date ──────────────────────────────────────────────────────────────
-
-function formatSyncDate(isoString: string): string {
-    try {
-        return new Intl.DateTimeFormat('id-ID', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        }).format(new Date(isoString));
-    } catch {
-        return isoString;
-    }
-}
 
 // ─── Sync Card ────────────────────────────────────────────────────────────────
 
@@ -184,7 +169,7 @@ function SyncCard({ item, onSync, isLoadingHistory = false }: SyncCardProps) {
                             <div className="flex gap-2 items-center">
                                 <span className="text-xs text-gray-400">At</span>
                                 <p className="text-sm text-gray-600 leading-tight">
-                                    {formatSyncDate(item.lastSync.synced_at)}
+                                    {formatDateTime(item.lastSync.synced_at)}
                                 </p>
                             </div>
                         </div>

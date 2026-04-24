@@ -45,10 +45,13 @@ export const SYNC_MODULE_KEY_MAP: Record<string, SyncMasterDataKey> = {
     items:              'item',
     vendor:             'vendor',
     vendors:            'vendor',
+    'invoice_sales_orders':  'invoice_sales_orders',
     'invoice-sales-order':  'invoice_sales_orders',
     'invoice-sales-orders': 'invoice_sales_orders',
+    'purchasing_orders':     'purchasing_orders',
     'purchasing-order':     'purchasing_orders',
     'purchasing-orders':    'purchasing_orders',
+    'sales_orders':          'sales_orders',
     'sales-order':          'sales_orders',
     'sales-orders':         'sales_orders',
 };
