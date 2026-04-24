@@ -2,7 +2,7 @@ import { apiPost, ApiResponse } from '@/helpers/apiHelper';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export type SyncMasterDataKey = 'department' | 'location' | 'term' | 'class' | 'item' | 'vendor' | 'invoice_sales_orders' | 'purchasing_orders' | 'sales_orders';
+export type SyncMasterDataKey = 'departments' | 'locations' | 'terms' | 'classes' | 'items' | 'vendors' | 'invoice_sales_orders' | 'purchasing_orders' | 'sales_orders';
 
 // ─── Sync List Types ──────────────────────────────────────────────────────────
 
@@ -33,18 +33,18 @@ export interface SyncListResponse {
  * Add more entries as new modules are introduced.
  */
 export const SYNC_MODULE_KEY_MAP: Record<string, SyncMasterDataKey> = {
-    department:         'department',
-    departments:        'department',
-    location:           'location',
-    locations:          'location',
-    term:               'term',
-    terms:              'term',
-    class:              'class',
-    classes:            'class',
-    item:               'item',
-    items:              'item',
-    vendor:             'vendor',
-    vendors:            'vendor',
+    department:         'departments',
+    departments:        'departments',
+    location:           'locations',
+    locations:          'locations',
+    term:               'terms',
+    terms:              'terms',
+    class:              'classes',
+    classes:            'classes',
+    item:               'items',
+    items:              'items',
+    vendor:             'vendors',
+    vendors:            'vendors',
     'invoice_sales_orders':  'invoice_sales_orders',
     'invoice-sales-order':  'invoice_sales_orders',
     'invoice-sales-orders': 'invoice_sales_orders',

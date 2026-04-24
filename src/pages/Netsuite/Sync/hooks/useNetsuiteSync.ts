@@ -25,37 +25,37 @@ export interface MasterDataItem {
 
 const INITIAL_ITEMS: Omit<MasterDataItem, 'status' | 'lastSync' | 'errorMessage'>[] = [
     {
-        key: 'department',
+        key: 'departments',
         label: 'Department',
         description: 'Sync department master data from NetSuite',
         icon: 'department',
     },
     {
-        key: 'location',
+        key: 'locations',
         label: 'Location',
         description: 'Sync location master data from NetSuite',
         icon: 'location',
     },
     {
-        key: 'term',
+        key: 'terms',
         label: 'Term',
         description: 'Sync payment terms master data from NetSuite',
         icon: 'term',
     },
     {
-        key: 'class',
+        key: 'classes',
         label: 'Class',
         description: 'Sync class master data from NetSuite',
         icon: 'class',
     },
     {
-        key: 'item',
+        key: 'items',
         label: 'Items',
         description: 'Sync items master data from NetSuite',
         icon: 'item',
     },
     {
-        key: 'vendor',
+        key: 'vendors',
         label: 'Vendor',
         description: 'Sync vendor master data from NetSuite',
         icon: 'vendor',
