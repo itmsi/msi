@@ -1,7 +1,7 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import { formatDate, formatTanggal, handleKeyPress, parseTanggalToDate, convertDateToTanggal } from '@/helpers/generalHelper';
-import React from 'react'
+import React, { useEffect } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
@@ -222,28 +222,25 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
             </div>
         );
     };
-    // Simplified date picker untuk use di renderField  
+    // date picker untuk use di renderField  
     const renderSimpleDate = (field: any) => {
         const [showDatePicker, setShowDatePicker] = React.useState(false);
         const datePickerRef = React.useRef<HTMLDivElement>(null);
         
         const fieldValue = formData[field.name as keyof PurchaseOrderForm];
-        // Safe date parsing untuk format DD/M/YYYY
         const currentDate = fieldValue ? parseTanggalToDate(String(fieldValue)) : null;
 
         const handleDateChange = (date: Date | any) => {
             setShowDatePicker(false);
-            // Calendar dari react-date-range mengirim Date object langsung
             const selectedDate = date instanceof Date ? date : new Date(date);
             if (onDateChange) {
-                // Konversi ke format DD/M/YYYY yang konsisten dengan sistem
                 const tanggalFormatted = convertDateToTanggal(selectedDate);
                 onDateChange(field.name, tanggalFormatted);
             }
         };
 
         // Close date picker when clicking outside
-        React.useEffect(() => {
+        useEffect(() => {
             const handleClickOutside = (event: MouseEvent) => {
                 if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
                     setShowDatePicker(false);

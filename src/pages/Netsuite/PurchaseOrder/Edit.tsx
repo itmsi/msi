@@ -340,6 +340,7 @@ export default function Edit() {
                                         <p className="ms-2 text-sm text-gray-600">{poDetail?.po_number || '-'}</p>
                                     </div>
                                     <div className="capitalize ms-2 flex gap-2">
+                                        {(poDetail?.po_status !== 'pending' && poDetail?.po_status !== 'failed') && (
                                         <PermissionGate permission="read">
                                             <Button
                                                 onClick={() => handleSyncById(poDetail?.po_id)}
@@ -349,11 +350,11 @@ export default function Edit() {
                                             >
                                                 <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
                                                 <div>
-                                                <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
-                                                
+                                                    <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
                                                 </div>
                                             </Button>
                                         </PermissionGate>
+                                        )}
                                         {poDetail?.po_number !== null && (
                                             <span 
                                                 className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
@@ -371,9 +372,7 @@ export default function Edit() {
                                 <Alert variant='warning' title='Purchase Order Is Being Processed'>
                                     <div className="space-y-4">
                                         <p className="text-sm text-gray-500">
-                                            Your purchase order is currently being generated. Please allow some time for the process to complete.
-                                        </p>
-                                        <p className="text-sm text-gray-500">
+                                            Your purchase order is currently being generated. Please allow some time for the process to complete. <br />
                                             Click the refresh button below to check whether the data is already available.
                                         </p>
                                         <ElemRefresh />
@@ -702,7 +701,7 @@ export default function Edit() {
                                         </Button>
                                     </PermissionGate>
                                 )}
-                                {poDetail?.approvalstatus === 2 && (
+                                {poDetail?.approvalstatus === 2 && (poDetail?.po_status_label !== 'Pending Receipt') && (
                                     <PermissionGate permission={["create", "update"]}>
                                         <Button
                                             type="button"
