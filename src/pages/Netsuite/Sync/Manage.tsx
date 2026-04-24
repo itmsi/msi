@@ -235,16 +235,16 @@ function QueueIndicator({ items }: QueueIndicatorProps) {
     if (!processing && queued.length === 0) return null;
 
     return (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl px-5 py-4">
+        <div className="bg-green-50 border border-green-200 rounded-xl px-5 py-4">
             <div className="flex items-start gap-3">
-                <MdSync size={20} className="text-blue-600 animate-spin mt-0.5 flex-shrink-0" />
+                <MdSync size={20} className="text-green-600 animate-spin mt-0.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-blue-800">
+                    <p className="text-sm font-medium text-green-800">
                         Sync Queue Active
                     </p>
                     <div className="mt-1.5 flex flex-wrap gap-2">
                         {processing && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-xs font-medium">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-600 text-white text-xs font-medium">
                                 <MdSync size={11} className="animate-spin" />
                                 {processing.label} — Running
                             </span>
@@ -252,7 +252,7 @@ function QueueIndicator({ items }: QueueIndicatorProps) {
                         {queued.map((item, idx) => (
                             <span
                                 key={item.key}
-                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-medium"
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium"
                             >
                                 <MdSchedule size={11} />
                                 {item.label} — #{idx + 1} in queue
