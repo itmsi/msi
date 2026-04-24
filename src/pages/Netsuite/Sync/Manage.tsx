@@ -3,80 +3,76 @@ import { useNetsuiteSync, MasterDataItem, SyncStatus } from './hooks/useNetsuite
 import { SyncMasterDataKey } from './services/netSuiteSyncService';
 import {
     MdSync,
-    MdCheckCircle,
-    MdError,
+    // MdCheckCircle,
+    // MdError,
     MdSchedule,
-    MdBusiness,
-    MdLocationOn,
-    MdDescription,
-    MdCategory,
+    // MdBusiness,
+    // MdLocationOn,
+    // MdDescription,
+    // MdCategory,
     MdAccessTime,
     MdPerson,
-    MdDoneAll,
-    MdInventory2,
-    MdStorefront,
-    MdReceipt,
-    MdShoppingCart,
-    MdListAlt,
+    // MdDoneAll,
+    // MdInventory2,
+    // MdStorefront,
+    MdOutlineSync,
 } from 'react-icons/md';
+import Button from '@/components/ui/button/Button';
 
 // ─── Icon Map ─────────────────────────────────────────────────────────────────
 
-const ICON_MAP: Record<string, React.ReactNode> = {
-    department: <MdBusiness size={28} />,
-    location:   <MdLocationOn size={28} />,
-    term:       <MdDescription size={28} />,
-    class:      <MdCategory size={28} />,
-    item:       <MdInventory2 size={28} />,
-    vendor:     <MdStorefront size={28} />,
-    purchasing_orders:    <MdShoppingCart size={28} />,
-    sales_orders:         <MdListAlt size={28} />,
-    invoice_sales_orders: <MdReceipt size={28} />,
-};
+// const ICON_MAP: Record<string, React.ReactNode> = {
+//     department: <MdBusiness size={28} />,
+//     location:   <MdLocationOn size={28} />,
+//     term:       <MdDescription size={28} />,
+//     class:      <MdCategory size={28} />,
+//     item:       <MdInventory2 size={28} />,
+//     vendor:     <MdStorefront size={28} />,
+// };
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<SyncStatus, {
-    label: string;
-    className: string;
-    icon: React.ReactNode;
-}> = {
-    idle: {
-        label: 'Idle',
-        className: 'bg-gray-100 text-gray-600',
-        icon: null,
-    },
-    queued: {
-        label: 'Queued',
-        className: 'bg-amber-100 text-amber-700',
-        icon: <MdSchedule size={14} className="inline mr-1" />,
-    },
-    processing: {
-        label: 'Syncing...',
-        className: 'bg-blue-100 text-blue-700 animate-pulse',
-        icon: <MdSync size={14} className="inline mr-1 animate-spin" />,
-    },
-    success: {
-        label: 'Success',
-        className: 'bg-green-100 text-green-700',
-        icon: <MdCheckCircle size={14} className="inline mr-1" />,
-    },
-    failed: {
-        label: 'Failed',
-        className: 'bg-red-100 text-red-700',
-        icon: <MdError size={14} className="inline mr-1" />,
-    },
-};
+// const STATUS_CONFIG: Record<SyncStatus, {
+//     label: string;
+//     className: string;
+//     icon: React.ReactNode;
+// }> = {
+//     idle: {
+//         label: 'Idle',
+//         className: 'bg-gray-100 text-gray-600',
+//         icon: null,
+//     },
+//     queued: {
+//         label: 'Queued',
+//         className: 'bg-amber-100 text-amber-700',
+//         icon: <MdSchedule size={14} className="inline mr-1" />,
+//     },
+//     processing: {
+//         label: 'Syncing...',
+//         className: 'bg-blue-100 text-blue-700 animate-pulse',
+//         icon: <MdSync size={14} className="inline mr-1 animate-spin" />,
+//     },
+//     success: {
+//         label: 'Success',
+//         className: 'bg-green-100 text-green-700',
+//         icon: <MdCheckCircle size={14} className="inline mr-1" />,
+//     },
+//     failed: {
+//         label: 'Failed',
+//         className: 'bg-red-100 text-red-700',
+//         icon: <MdError size={14} className="inline mr-1" />,
+//     },
+// };
 
-function StatusBadge({ status }: { status: SyncStatus }) {
-    const config = STATUS_CONFIG[status];
-    return (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.className}`}>
-            {config.icon}
-            {config.label}
-        </span>
-    );
-}
+// function StatusBadge({ status }: { status: SyncStatus }) {
+//     const config = STATUS_CONFIG[status];
+//     return (
+//         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.className}`}>
+//             {config.icon}
+//             {config.label}
+//         </span>
+//     );
+// }
 
 // ─── Format Date ──────────────────────────────────────────────────────────────
 
@@ -107,7 +103,7 @@ function SyncCard({ item, onSync, isLoadingHistory = false }: SyncCardProps) {
 
     // Card border accent color based on status
     const cardAccent: Record<SyncStatus, string> = {
-        idle:       'border-t-gray-300',
+        idle:       'border-t-transparent',
         queued:     'border-t-amber-400',
         processing: 'border-t-blue-500',
         success:    'border-t-green-500',
@@ -115,18 +111,18 @@ function SyncCard({ item, onSync, isLoadingHistory = false }: SyncCardProps) {
     };
 
     // Icon background tint based on status
-    const iconBg: Record<SyncStatus, string> = {
-        idle:       'bg-indigo-50 text-indigo-600',
-        queued:     'bg-amber-50 text-amber-600',
-        processing: 'bg-blue-50 text-blue-600',
-        success:    'bg-green-50 text-green-600',
-        failed:     'bg-red-50 text-red-600',
-    };
+    // const iconBg: Record<SyncStatus, string> = {
+    //     idle:       'bg-indigo-50 text-indigo-600',
+    //     queued:     'bg-amber-50 text-amber-600',
+    //     processing: 'bg-blue-50 text-blue-600',
+    //     success:    'bg-green-50 text-green-600',
+    //     failed:     'bg-red-50 text-red-600',
+    // };
 
     return (
         <div
             className={`
-                bg-white rounded-xl shadow-sm border border-gray-200 border-t-4
+                bg-white rounded-xl shadow-sm border border-transparent border-t-4
                 ${cardAccent[item.status]}
                 p-6 flex flex-col gap-4
                 transition-all duration-300
@@ -134,16 +130,16 @@ function SyncCard({ item, onSync, isLoadingHistory = false }: SyncCardProps) {
             `}
         >
             {/* Top row: icon + status */}
-            <div className="flex items-start justify-between">
+            {/* <div className="flex items-start justify-between">
                 <div className={`p-3 rounded-xl ${iconBg[item.status]} transition-colors duration-300`}>
                     {ICON_MAP[item.icon] ?? <MdSync size={28} />}
                 </div>
                 <StatusBadge status={item.status} />
-            </div>
+            </div> */}
 
             {/* Title & description */}
             <div>
-                <h3 className="text-base font-semibold text-gray-900">{item.label}</h3>
+                <h3 className="text-base font-primary-bold font-medium text-gray-900">{item.label}</h3>
                 <p className="text-sm text-gray-500 mt-0.5">{item.description}</p>
             </div>
 
@@ -174,9 +170,9 @@ function SyncCard({ item, onSync, isLoadingHistory = false }: SyncCardProps) {
                     </div>
                 ) : item.lastSync ? (
                     <div className="space-y-1.5">
-                        <div className="flex items-start gap-1.5">
-                            <MdPerson size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
-                            <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                            <MdPerson size={14} className="text-gray-400 flex-shrink-0" />
+                            <div className="flex gap-2 items-center">
                                 <span className="text-xs text-gray-400">By</span>
                                 <p className="text-sm font-medium text-gray-700 truncate leading-tight">
                                     {item.lastSync.synced_by}
@@ -184,8 +180,8 @@ function SyncCard({ item, onSync, isLoadingHistory = false }: SyncCardProps) {
                             </div>
                         </div>
                         <div className="flex items-start gap-1.5">
-                            <MdAccessTime size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
-                            <div>
+                            <MdAccessTime size={14} className="text-gray-400 flex-shrink-0" />
+                            <div className="flex gap-2 items-center">
                                 <span className="text-xs text-gray-400">At</span>
                                 <p className="text-sm text-gray-600 leading-tight">
                                     {formatSyncDate(item.lastSync.synced_at)}
@@ -199,21 +195,20 @@ function SyncCard({ item, onSync, isLoadingHistory = false }: SyncCardProps) {
             </div>
 
             {/* Sync button */}
-            <button
-                id={`sync-btn-${item.key}`}
+            <Button
+                // id={`sync-btn-${item.key}`}
                 onClick={() => onSync(item.key)}
                 disabled={isDisabled}
+                variant='outline'
                 className={`
-                    w-full flex items-center justify-center gap-2
-                    px-4 py-2.5 rounded-lg text-sm font-medium
-                    border transition-all duration-200
+                    flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600 bg-transparent
                     ${isDisabled
                         ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
-                        : 'bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white border-transparent shadow-sm hover:shadow'
+                        : ''
                     }
                 `}
             >
-                <MdSync
+                <MdOutlineSync
                     size={16}
                     className={item.status === 'processing' ? 'animate-spin' : ''}
                 />
@@ -222,7 +217,7 @@ function SyncCard({ item, onSync, isLoadingHistory = false }: SyncCardProps) {
                 {item.status === 'idle'       && 'Sync Now'}
                 {item.status === 'success'    && 'Sync Again'}
                 {item.status === 'failed'     && 'Retry Sync'}
-            </button>
+            </Button>
         </div>
     );
 }
@@ -240,16 +235,16 @@ function QueueIndicator({ items }: QueueIndicatorProps) {
     if (!processing && queued.length === 0) return null;
 
     return (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl px-5 py-4">
+        <div className="bg-green-50 border border-green-200 rounded-xl px-5 py-4">
             <div className="flex items-start gap-3">
-                <MdSync size={20} className="text-blue-600 animate-spin mt-0.5 flex-shrink-0" />
+                <MdSync size={20} className="text-green-600 animate-spin mt-0.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-blue-800">
+                    <p className="text-sm font-medium text-green-800">
                         Sync Queue Active
                     </p>
                     <div className="mt-1.5 flex flex-wrap gap-2">
                         {processing && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-xs font-medium">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-600 text-white text-xs font-medium">
                                 <MdSync size={11} className="animate-spin" />
                                 {processing.label} — Running
                             </span>
@@ -257,7 +252,7 @@ function QueueIndicator({ items }: QueueIndicatorProps) {
                         {queued.map((item, idx) => (
                             <span
                                 key={item.key}
-                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-medium"
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium"
                             >
                                 <MdSchedule size={11} />
                                 {item.label} — #{idx + 1} in queue
@@ -286,43 +281,35 @@ export default function NetSuiteSyncManage() {
             <div className="space-y-6">
                 {/* ── Page Header ── */}
                 <div className="bg-white shadow rounded-xl">
-                    <div className="px-6 py-5 border-b border-gray-200">
+                    <div className="px-6 py-4 border-b border-gray-200">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div>
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2.5 bg-indigo-100 rounded-xl">
-                                        <MdSync size={22} className={`text-indigo-600 ${isAnyActive ? 'animate-spin' : ''}`} />
-                                    </div>
-                                    <div>
-                                        <h1 className="text-xl font-bold text-gray-900">
-                                            NetSuite Sync
-                                        </h1>
-                                        <p className="text-sm text-gray-500 mt-0.5">
-                                            Synchronize master data from NetSuite to this system
-                                        </p>
-                                    </div>
-                                </div>
+                                <h1 className="text-lg leading-6 font-primary-bold text-gray-900">
+                                    NetSuite Sync
+                                </h1>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Synchronize master data from NetSuite to this system
+                                </p>
                             </div>
 
                             {/* Sync All button */}
-                            <button
-                                id="sync-all-btn"
+                            <Button
                                 onClick={enqueueAll}
                                 disabled={isAnyActive}
+                                variant='outline'
                                 className={`
-                                    flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium
-                                    border transition-all duration-200
+                                    flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600
                                     ${isAnyActive
-                                        ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
-                                        : 'bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white border-transparent shadow-sm hover:shadow'
+                                        ? 'bg-green-50 text-green-700'
+                                        : ''
                                     }
                                 `}
                             >
-                                <MdDoneAll size={18} />
+                                <MdOutlineSync size={18} className={isAnyActive ? 'animate-spin' : ''} />
                                 <span className="whitespace-nowrap">
                                     {isAnyActive ? 'Sync Running...' : 'Sync All'}
                                 </span>
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

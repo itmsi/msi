@@ -53,68 +53,12 @@ export const SYNC_MODULE_KEY_MAP: Record<string, SyncMasterDataKey> = {
     'sales-orders':         'sales_orders',
 };
 
-const SYNC_BODY = {
-    page: 1,
-    limit: 10,
-    sort_by: 'created_at',
-    sort_order: 'desc',
-    search: '',
-};
-
 export class NetSuiteSyncService {
-    static async syncDepartment(): Promise<void> {
-        await apiPost(`${API_BASE_URL}/netsuite/departments/sync`, SYNC_BODY);
-    }
-
-    static async syncLocation(): Promise<void> {
-        await apiPost(`${API_BASE_URL}/netsuite/locations/sync`, SYNC_BODY);
-    }
-
-    static async syncTerm(): Promise<void> {
-        await apiPost(`${API_BASE_URL}/netsuite/terms/sync`, SYNC_BODY);
-    }
-
-    static async syncClass(): Promise<void> {
-        await apiPost(`${API_BASE_URL}/netsuite/classes/sync`, SYNC_BODY);
-    }
-
-    static async syncItem(): Promise<void> {
-        await apiPost(`${API_BASE_URL}/netsuite/items/sync`, SYNC_BODY);
-    }
-
-    static async syncVendor(): Promise<void> {
-        await apiPost(`${API_BASE_URL}/netsuite/vendor/sync`, SYNC_BODY);
-    }
-
-    static async syncInvoiceSalesOrder(): Promise<void> {
-        await apiPost(`${API_BASE_URL}/netsuite/invoice-sales-orders/sync`, SYNC_BODY);
-    }
-
-    static async syncPurchasingOrder(): Promise<void> {
-        await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/sync`, SYNC_BODY);
-    }
-
-    static async syncSalesOrder(): Promise<void> {
-        await apiPost(`${API_BASE_URL}/netsuite/sales-orders/sync`, SYNC_BODY);
-    }
-
     /**
-     * Dispatcher: success = no error thrown, failed = error thrown
+     * Dispatcher: trigger sync via unified endpoint berdasarkan key module.
      */
     static async sync(key: SyncMasterDataKey): Promise<void> {
-        switch (key) {
-            case 'department': return this.syncDepartment();
-            case 'location':   return this.syncLocation();
-            case 'term':       return this.syncTerm();
-            case 'class':      return this.syncClass();
-            case 'item':       return this.syncItem();
-            case 'vendor':     return this.syncVendor();
-            case 'invoice_sales_orders': return this.syncInvoiceSalesOrder();
-            case 'purchasing_orders':    return this.syncPurchasingOrder();
-            case 'sales_orders':         return this.syncSalesOrder();
-            default:
-                throw new Error(`Unknown sync key: ${key}`);
-        }
+        await this.getSyncModule(key);
     }
 
     /**
@@ -129,6 +73,13 @@ export class NetSuiteSyncService {
             search: '',
             sort_by: 'created_at',
             sort_order: 'desc',
+        });
+        return response.data;
+    }
+
+    static async getSyncModule(modulename: string): Promise<SyncListResponse> {
+        const response: ApiResponse<SyncListResponse> = await apiPost<SyncListResponse>(`${API_BASE_URL}/netsuite/sync/modules`, {
+            module: modulename,
         });
         return response.data;
     }
