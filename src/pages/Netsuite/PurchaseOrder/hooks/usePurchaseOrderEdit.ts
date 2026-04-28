@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldItems, TablePOItem, PODetailData, PurchaseOrderFormUpdate } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 import { useNavigate, useParams } from 'react-router';
@@ -80,6 +80,7 @@ export const usePurchaseOrderEdit = () => {
 
     // Detail data dari API (untuk info read-only seperti status, po_number)
     const [poDetail, setPODetail] = useState<PODetailData | null>(null);
+    const [isSyncing, setIsSyncing] = useState(false);
 
     const [formData, setFormData] = useState<PurchaseOrderForm>({
         customform: null,
@@ -104,29 +105,28 @@ export const usePurchaseOrderEdit = () => {
     });
 
     // Load master data + detail PO secara paralel
-    useEffect(() => {
-        const loadData = async () => {
-            if (!id) {
-                toast.error('Purchase Order ID tidak ditemukan');
-                navigate('/netsuite/purchase-order');
-                return;
+    const loadData = useCallback(async () => {
+        if (!id) {
+            toast.error('Purchase Order ID tidak ditemukan');
+            navigate('/netsuite/purchase-order');
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            setLoadingMasterData(true);
+
+            const [masterRes, detailRes] = await Promise.all([
+                PurchaseOrderService.getFieldComponentById(),
+                PurchaseOrderService.getPOById(id),
+            ]);
+
+            // Set master data
+            if (masterRes.data.success) {
+                setMasterData(masterRes.data.data);
+            } else {
+                toast.error('Gagal memuat master data');
             }
-
-            try {
-                setIsLoading(true);
-                setLoadingMasterData(true);
-
-                const [masterRes, detailRes] = await Promise.all([
-                    PurchaseOrderService.getFieldComponentById(),
-                    PurchaseOrderService.getPOById(id),
-                ]);
-
-                // Set master data
-                if (masterRes.data.success) {
-                    setMasterData(masterRes.data.data);
-                } else {
-                    toast.error('Gagal memuat master data');
-                }
 
                 // Set detail PO
                 if (detailRes.success && detailRes.data?.length > 0) {
@@ -140,15 +140,17 @@ export const usePurchaseOrderEdit = () => {
                 }
             } catch (error) {
                 console.error('Error loading data:', error);
+                navigate('/netsuite/purchase-order');
                 toast.error('Gagal memuat data');
             } finally {
                 setIsLoading(false);
                 setLoadingMasterData(false);
             }
-        };
-
-        loadData();
     }, [id]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -255,6 +257,7 @@ export const usePurchaseOrderEdit = () => {
                 custbody_msi_createdby_api: formData.custbody_msi_createdby_api || undefined,
                 class: formData.class || undefined,
                 department: formData.department || undefined,
+                grossamt: Number(formData.grossamt) || undefined,
                 custbody_me_validity_date: formData.custbody_me_validity_date ? formData.custbody_me_validity_date : undefined,
                 items: (formData.items || []).map(item => ({
                     itemId: Number(item.itemId),
@@ -347,6 +350,22 @@ export const usePurchaseOrderEdit = () => {
         });
     };
 
+    const handleSyncById = useCallback(async (poID: string | undefined) => {
+        if (isSyncing) return;
+        if (!poID) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi PO: ${poID}...`);
+        try {
+            await PurchaseOrderService.syncPOById(String(poID));
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            loadData();
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, loadData]);
+
     return {
         isSubmitting,
         isLoading,
@@ -355,6 +374,9 @@ export const usePurchaseOrderEdit = () => {
         masterData,
         loadingMasterData,
         poDetail,
+        isSyncing,
+        handleSyncById,
+
         // Handlers
         handleInputChange,
         handleSelectChange,
@@ -364,5 +386,6 @@ export const usePurchaseOrderEdit = () => {
         handleAddProductItem,
         handleProductDelete,
         handleUpdateProductItem,
+        loadData
     };
 };

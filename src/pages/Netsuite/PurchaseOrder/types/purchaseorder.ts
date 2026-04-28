@@ -103,6 +103,7 @@ export interface PurchaseOrderForm {
     // description: string | null;
     // note: string | null;
     items: TablePOItem[];
+    grossamt?: number;
 }
 
 export interface POLineItem {
@@ -334,9 +335,11 @@ export interface PODetailData {
     department?: number | string;
     department_display?: string;
     lines: PODetailLine[];
+    user_notes: UserNotesItem[];
 }
 
 export interface PODetailLine {
+    line_id: number;
     item: number;
     memo?: string | null;
     rate?: number;
@@ -349,6 +352,10 @@ export interface PODetailLine {
     itemtype?: string;
     location?: number;
     quantity?: number;
+    quantitypending?: number;
+    quantityreceived?: number;
+    has_inbound?: boolean;
+    on_hand?: number;
     taxrate1?: number | null;
     netamount?: number;
     department?: number;
@@ -416,6 +423,7 @@ export interface PurchaseOrderFormUpdate {
     custbody_msi_createdby_api?: string;
     class?: number;
     department?: number;
+    grossamt?: number;
     custbody_me_validity_date?: string;
     items?: PurchaseOrderUpdateItem[];
 }
@@ -460,4 +468,169 @@ export interface PODownloadResponse {
     mimeType: string;
     fileName: string;
     fileContent: string;
+}
+// RECEIVE FORM FIELD POSTS
+export interface ItemReceiptItem {
+    linesequencenumber?: number;
+    line_sequence?: number;
+    line_id?: number;
+    item: number;
+    item_display?: string;
+    on_hand?: number;
+    quantity: number;
+    quantitypending?: number;
+    quantityreceived?: number;
+    has_inbound?: boolean;
+    location?: number;
+    location_display?: string;
+    department?: number;
+    department_display?: string;
+    class?: number;
+    class_display?: string;
+    rate?: number;
+    amount?: number;
+    grossamt?: number;
+}
+
+export interface ItemReceiptPayload {
+    po_id: number | null;
+    memo?: string;
+    vendorid?: number | null;
+    vendor_name?: string | null;
+    customform?: number | string | null;
+    customform_display?: string;
+    trandate?: string;
+    subsidiary?: number;
+    subsidiary_display?: string;
+    class?: number;
+    class_display?: string;
+    location?: number;
+    location_display?: string;
+    department?: number;
+    department_display?: string;
+    po_status_label?: string;
+    tranid?: string;
+    receipt_id?: string;
+    created_by_name?: string;
+    created_by?: string;
+    items: ItemReceiptItem[];
+}
+
+export interface RequestFilters {
+   createdfrom?: number;
+}
+// RECEIVE REQUEST PARAMS
+export interface ReceiveRequest {
+    page: number;
+    limit: number;
+    sort_by: string;
+    sort_order: string;
+    search: string;
+    classes?: number;
+    createdfrom?: number;
+    filters?: RequestFilters;
+}
+// RECEIVE RESPONSE SUB ITEMS
+export interface ReceiptLine {
+    linesequencenumber?: string;
+    line_id: string;
+    item: string;
+    line: string;
+    memo: string;
+    rate: string;
+    class: string;
+    amount: string;
+    location: string;
+    quantity: string;
+    quantitypending: string;
+    department: string;
+    item_display: string;
+    class_display: string;
+    inventorydetail: string;
+    location_display: string;
+    department_display: string;
+}
+
+// RECEIVE RESPONSE ITEMS
+export interface ReceiptItem {
+    receipt_id: string;
+    tranid: string;
+    trandate: string;
+    status: string;
+    status_display: string;
+    memo: string;
+    customform?: number | null;
+    customform_display?: string;
+    vendor_id: string;
+    vendor_name: string;
+    createdfrom: string;
+    createdfrom_display: string;
+    subsidiary: string;
+    subsidiary_display: string;
+    location: string;
+    location_display: string;
+    department: string;
+    department_display: string;
+    class: string;
+    class_display: string;
+    last_modified_netsuite: string;
+    datecreated_netsuite: string;
+    lines: ReceiptLine[];
+}
+
+export interface ReceiptResponse {
+    success: boolean;
+    data: {
+        items: ReceiptItem[];
+        pagination: Pagination;
+    };
+    sync_info: SyncInfo;
+    message: string;
+}
+
+export interface ReceiptValidationErrors {
+    memo?: string;
+    trandate?: string;
+    class?: number;
+    location?: number;
+    department?: number;
+}
+
+export interface GoodsReceipt {
+    id: number;
+    tranid: string;
+    trandate: string;
+    po_id: number;
+    po_number: string;
+}
+
+export interface PostReceiptResponse {
+    success: boolean;
+    purchase_order_id: number;
+    goods_receipts: GoodsReceipt[];
+}
+
+// HISTORY RECEIPT LOGS
+export interface HistoryLogItem {
+  id: string;
+  trandate?: string;
+  msg_error?: string;
+  created_at?: string;
+  created_by_name?: string;
+}
+
+export interface HistoryLogResponse {
+  success: boolean;
+  data?: HistoryLogItem[];
+  message?: string;
+}
+
+// USER NOTES
+export interface UserNotesItem {
+    date: string;
+    note: string;
+    type: string | null;
+    title: string;
+    author: string;
+    direction: string;
 }

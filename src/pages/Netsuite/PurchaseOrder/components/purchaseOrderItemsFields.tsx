@@ -1,6 +1,6 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { formatCurrency, handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress } from '@/helpers/generalHelper';
+import { formatCurrency, handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma } from '@/helpers/generalHelper';
 import React, { useEffect, useMemo, useState } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -29,6 +29,9 @@ interface POItemsFieldsProps {
     onAddProductItem: (selectedProduct: any) => void;
     onProductDelete?: (productId: string) => void;
     onUpdateProductItem?: (index: number, field: string, value: any) => void;
+    
+    // Receive status edit
+    editReceive?: boolean;
     
     // Location Select Props
     locationOptions?: POLocationSelectOption[];
@@ -68,6 +71,9 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
     onAddProductItem,
     onProductDelete,
     onUpdateProductItem,
+
+    // Receive status edit
+    editReceive,
     
     // Location props
     locationOptions = [],
@@ -187,7 +193,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             name: 'Quantity',
             selector: (row: TablePOItem) => row.qty || 0,
             cell: (row, index) => (<>
-                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                    {((formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null)) && !(editReceive) ? (
                         <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
                             row.qty && row.qty > 0 ? row.qty.toString() : '-'
                         }</p>
@@ -224,7 +230,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                                 }
                             }}
                             onFocus={(e) => e.target.select()}
-                            className="border-0 border-b-1 rounded-none p-1 px-3 w-[80px] text-center"
+                            className={`p-1 px-3 w-[80px] text-center ${editReceive ? 'border-1 border-[#14B8A6]' : 'border-1 rounded'}`}
                         />
                     )}
             </>),
@@ -309,7 +315,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 <Input
                     name={`custcol_me_landed_cost_${index}`}
                     type="text"
-                    value={row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatCurrencyTyping(row.custcol_me_landed_cost.toString()) : ''}
+                    value={row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatCurrencyTyping(row.custcol_me_landed_cost.toString()) : '0'}
                     onKeyPress={handleCurrencyKeyPress}
                     onChange={(e) => {
                         const rawValue = e.target.value;
@@ -343,13 +349,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        row.rate && row.rate > 0 ? formatCurrencyTyping(row.rate.toString()) : '-'
+                        formatCurrency(row.rate.toString())
                     }</p>
                 ) : (
                 <Input
                     name={`rate_${index}`}
                     type="text"
-                    value={row.rate && row.rate > 0 ? formatCurrencyTyping(row.rate.toString()) : ''}
+                    value={row.rate && row.rate > 0 ? formatNumberPriceKoma(row.rate.toString()) : ''}
                     disabled={true}
                     readonly={true}
                     className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
@@ -373,7 +379,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 <Input
                     name={`amount_${index}`}
                     type="text"
-                    value={row.amount && row.amount > 0 ? formatCurrencyTyping(row.amount.toString()) : ''}
+                    value={row.amount && row.amount > 0 ? formatNumberPriceKoma(row.amount) : ''}
                     disabled={true}
                     readonly={true}
                     className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
@@ -639,7 +645,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 
     return (
         <div className="space-y-6">
-            <div className={`bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6 ${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? '' : 'min-h-[500px]'}`}>
+            <div className={`mb-6 space-y-6 p-6 ${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? '' : 'min-h-[500px]'}`}>
                 <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Purchase Order Items</h3>
                 
                 {/* Add Product Section */}
@@ -746,7 +752,7 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[] }> = ({ items }) =>
     };
 
     const summary = useMemo(() => {
-        const subtotal = items.reduce((sum, item) => sum + toNumber(item.amount), 0);
+        const subtotal = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.amount)), 0);
         const totalTax = items.reduce((sum, item) => sum + toNumber(item.tax_amount), 0);
         const grandTotal = items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
         const totalQty = items.reduce((sum, item) => sum + toNumber(item.qty), 0);
@@ -777,5 +783,4 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[] }> = ({ items }) =>
             </div>
     );
 };
-
 export default purchaseOrderItemFields

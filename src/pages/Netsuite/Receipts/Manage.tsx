@@ -1,31 +1,26 @@
 import { useCallback, useMemo, useState } from 'react'
 import { TableColumn } from 'react-data-table-component';
-import { useNavigate } from 'react-router-dom';
-import { usePurchaseOrder } from './hooks/usePurchaseOrder';
+import { Link } from 'react-router-dom';
 // import Badge from '@/components/ui/badge/Badge';
-import { MdAdd, MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch, MdOutlineSync } from 'react-icons/md';
+import { MdClear, MdSearch, MdOutlineSync } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
+import CustomDataTable from '@/components/ui/table';
+import { getProfile, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
+import { LoadingOverlay } from '@/components/common/Loading';
+import { useReceipt } from './hooks/useReceipt';
+import { ReceiptItem } from '../PurchaseOrder/types/purchaseorder';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
-import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
-import { PurchaseOrderItem } from './types/purchaseorder';
-// import ModalApproval from './components/ModalApproval';
-import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
-import { getProfile, formatCurrencyID, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
-import FilterSection from './components/FilterSection';
-import { LoadingOverlay } from '@/components/common/Loading';
-import { createByDateColumn } from '@/components/ui/table/columnUtils';
-import { FaRegFilePdf } from 'react-icons/fa6';
 
 export default function Manage() {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
     
     const {
-        purchaseOrders,
+        receipt,
         syncInfo,
         loading,
         error,
@@ -33,8 +28,6 @@ export default function Manage() {
         searchValue,
         sortOrder,
         statusFilter,
-        subsidiaryFilter,
-        locationFilter,
         setSearchValue,
         handlePageChange,
         handleRowsPerPageChange,
@@ -44,9 +37,9 @@ export default function Manage() {
         handleClearFilters,
         isSyncing,
         handleSync,
-        handleSyncById,
-        handleDownloadInvoice,
-    } = usePurchaseOrder(profileSSOId);
+        // handleSyncById,
+        // handleDownloadInvoice,
+    } = useReceipt(profileSSOId);
     
     const handlePageChangeAman = useCallback((halamanBaru: number) => {
         const halamanSaatIni = pagination?.page || 1;
@@ -61,136 +54,46 @@ export default function Manage() {
         handleRowsPerPageChange(limitBaru, halamanBaru);
     }, [pagination?.page, pagination?.limit, handleRowsPerPageChange]);
 
-    
-    // const [isOpen, setIsOpen] = useState(false);
-    // const [selectedPoId, setSelectedPoId] = useState<number | null>(null);
 
-    // const handleApproval = (row: PurchaseOrderItem) => {
-    //     setSelectedPoId(row.id);
-    //     setIsOpen(true);
-    // };
-
-    const columns: TableColumn<PurchaseOrderItem>[] = [
+    const columns: TableColumn<ReceiptItem>[] = [
         {
-            name: 'PO ID',
-            selector: row => row.po_id || '-',
+            name: 'Internal id',
+            selector: row => row.receipt_id || '-',
             wrap: true,
-            width: '100px'
+            width: '140px',
+            center: true,
         },
         {
-            name: 'Subsidiary',
-            selector: row => row.subsidiary_display || '-',
-            wrap: true,
-            width: '280px'
-        },
-        {
-            name: 'Document Number',
-            selector: row => row.po_number || '-',
+            name: 'Date',
+            selector: row => row.trandate || '-',
             cell: row => (<>
-                <a
-                    href={`/netsuite/purchase-order/edit/${row.po_id}`}
-                    className="absolute inset-0"
-                />
+                <Link to={`/netsuite/purchase-order/${row.createdfrom}/receive/${row.receipt_id}`} className="absolute inset-0" />
                 
                 <div className="items-center gap-3 py-2">
-                    <div className="block text-sm text-gray-500">{formatTanggal(row.po_date)}</div>
-                    <div className="font-medium text-gray-900">{row.po_number || '-'}</div>
+                    <div className="block text-sm text-gray-500">{formatTanggal(row.trandate)}</div>
                 </div>
             </>),
             wrap: true,
-            width: '230px'
+            width: '150px'
         },
         {
-            name: 'Vendor Name',
+            name: 'Document Number',
+            selector: row => row.tranid || '-',
+            wrap: true,
+            width: '180px'
+        },
+        {
+            name: 'Name',
             selector: row => row.vendor_name || '-',
             wrap: true,
             width: '350px'
         },
         {
-            name: 'PR Number',
-            selector: row => row.custbody_me_pr_number || '-',
-            wrap: true,
-            width: '200px',
-            center: true
-        },
-        {
-            name: 'Location',
-            selector: row => row.location_display || '-',
-            wrap: true,
-            width: '220px',
-            center: true,
-            cell: row => (
-                <div className="items-start capitalize w-full">
-                    {row.location_display || '-'}
-                </div>
-            ),
-        },
-        {
-            name: 'Next Approval',
-            selector: row => Number(row.approvalstatus) === 1 ? row.nextapprover || '-' : '-',
-            wrap: true,
-            width: '220px',
-            center: true
-        },
-        {
-            name: 'Approval Status',
-            selector: row => row.po_status || '-',
-            cell: row => (
-                <div className="items-center capitalize">
-                    <StatusTypeBadge 
-                        type={Number(row.approvalstatus) as 1 | 2 | 3} 
-                        label={row.approvalstatus_display || undefined}
-                    />
-                </div>
-            ),
-            center: true,
-            width: '200px'
-        },
-        {
-            name: 'Status',
-            selector: row => row.po_status || '-',
-            cell: row => (
-                <div className="items-center capitalize">
-                    <span 
-                        className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
-                    >
-                        {row.po_status_label}
-                    </span>
-                </div>
-            ),
-            center: true,
-            width: '250px'
-        },
-        {
-            name: 'Total Amount',
-            selector: row => formatCurrencyID(row.total) || '-',
-            wrap: true,
-            width: '240px'
-        },
-        {
             name: 'Memo',
             selector: row => row.memo || '-',
             wrap: true,
-            width: '300px'
-        },
-        createByDateColumn('Updated By', 'last_modified', 'custbody_msi_createdby_api', '320px'),
-        createActionsColumn([
-            {
-                icon: FaRegFilePdf,
-                onClick: handleDownloadInvoice,
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'Download Invoice',
-                permission: 'read',
-            },
-            {
-                icon: MdOutlineSync,
-                onClick: handleSyncById,
-                className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
-                tooltip: `Sync this PO`,
-                width: '120px',
-                title: 'Action',
-            }
-        ])
+            width: '280px'
+        }
     ];
     
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -198,8 +101,6 @@ export default function Manage() {
         setShowAdvancedFilters(prev => !prev);
     };
     
-    // Count active filters
-    const activeFiltersCount = [subsidiaryFilter, locationFilter].filter(Boolean).length;
     const SearchAndFilters = useMemo(() => {
         return (<>
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -248,36 +149,10 @@ export default function Manage() {
                         className="w-full"
                     />
                 </div>
-                
-                <div className="flex items-center gap-2">
-                    <Button
-                        onClick={handleToggleFilter}
-                        className={`h-[42px] px-4 py-2 ${activeFiltersCount > 0 ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-300' : 'bg-transparent hover:bg-gray-300 text-gray-700'} border border-gray-300 relative`}
-                        size="sm"
-                    >
-                        <MdFilterListAlt className="w-4 h-4 mr-2" />
-                        Filter
-                        {/* {activeFiltersCount > 0 && (
-                            <span className="ml-1 bg-blue-600 text-white text-xs rounded-full px-2 py-0.5">
-                                {activeFiltersCount}
-                            </span>
-                        )} */}
-                        {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
-                    </Button>
-                </div>
             </div>
             
-            {showAdvancedFilters && (
-                <FilterSection
-                    filterSubsidiary={subsidiaryFilter}
-                    filterLocation={locationFilter}
-                    filterStatus={statusFilter}
-                    onFilterChange={handleFilterChange}
-                    onClearFilters={handleClearFilters}
-                />
-            )}
         </>);
-    }, [searchValue, sortOrder, statusFilter, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, subsidiaryFilter, locationFilter, handleClearFilters, activeFiltersCount]);
+    }, [searchValue, sortOrder, statusFilter, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, handleClearFilters]);
 
     return (
         <>
@@ -294,10 +169,10 @@ export default function Manage() {
                         <div className="flex justify-between items-center">
                             <div>
                                 <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Purchase Orders
+                                    Item Receips
                                 </h3>
                                 <p className="mt-1 text-sm text-gray-500">
-                                    Manage Purchase Orders and related information
+                                    Manage Item Receipts and related information
                                 </p>
                             </div>
                             <div className="flex space-x-3">
@@ -313,15 +188,6 @@ export default function Manage() {
                                         <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
                                         
                                         </div>
-                                    </Button>
-                                </PermissionGate>
-                                <PermissionGate permission="create">
-                                    <Button
-                                        onClick={() => navigate('/netsuite/purchase-order/create')}
-                                        className="flex items-center gap-2"
-                                    >
-                                        <MdAdd size={20} />
-                                        <span>Create Purchase Order</span>
                                     </Button>
                                 </PermissionGate>
                             </div>
@@ -358,7 +224,7 @@ export default function Manage() {
                         ) : (
                             <CustomDataTable
                                 columns={columns}
-                                data={purchaseOrders}
+                                data={receipt}
                                 loading={loading}
                                 pagination
                                 paginationServer
@@ -379,16 +245,6 @@ export default function Manage() {
                         )}
                     </div>
                 </div>
-
-                {/* <ModalApproval
-                    isOpen={isOpen}
-                    onClose={() => setIsOpen(false)}
-                    poId={selectedPoId}
-                    onSuccess={() => handleFilterChange('sort_order', sortOrder)}
-                    submit={true}
-                    titleModal="Submit Approval"
-                    descriptionModal="Masukkan catatan untuk proses approval"
-                /> */}
             </div>
         </>
 

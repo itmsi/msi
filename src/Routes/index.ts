@@ -111,6 +111,9 @@ const ManageInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSales
 const EditPurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Edit'));
 const ViewInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOrders/View'));
 const EditInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOrders/Edit'));
+const NetSuiteSync = lazy(() => import('@/pages/Netsuite/Sync/Manage'));
+const Receive = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Receive'));
+const ManageReceive = lazy(() => import('@/pages/Netsuite/Receipts/Manage'));
 // ========================================
 
 // DIVISION
@@ -896,6 +899,24 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
+        path: '/netsuite/purchase-order/:id/receive',
+        name: 'Purchase Orders Netsuite',
+        isProtected: true,
+        roles: ['Purchase Orders Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: Receive,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/purchase-order/:id/receive/:receipt_id',
+        name: 'Purchase Orders Netsuite',
+        isProtected: true,
+        roles: ['Purchase Orders Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: Receive,
+        layout: AppLayout,
+    },
+    {
         path: '/netsuite/invoice-sales-order/view/:tranid',
         name: 'Sales Invoice Netsuite',
         isProtected: true,
@@ -911,6 +932,23 @@ export const routes: TAppRoute[] = [
         roles: ['Sales Invoice Netsuite'],
         requiredPermissions: ['update', 'read'],
         component: EditInvoiceSalesOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/sync',
+        name: 'Admin Sync Netsuite',
+        isProtected: true,
+        roles: ['Admin Sync Netsuite'],
+        component: NetSuiteSync,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/receipts',
+        name: 'Manage Receipts Netsuite',
+        isProtected: true,
+        roles: ['Manage Receipts Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: ManageReceive,
         layout: AppLayout,
     }
 ];

@@ -19,6 +19,7 @@ interface CustomDataTableProps<T> {
     
     // Selection props
     selectableRows?: boolean;
+    selectableRowSelected?: (row: T) => boolean;
     onSelectedRowsChange?: (state: { allSelected: boolean; selectedCount: number; selectedRows: T[] }) => void;
     clearSelectedRows?: boolean;
     
@@ -79,6 +80,7 @@ const CustomDataTable = <T extends Record<string, any>>({
     
     // Selection
     selectableRows = false,
+    selectableRowSelected,
     onSelectedRowsChange,
     clearSelectedRows = false,
     
@@ -297,6 +299,7 @@ const CustomDataTable = <T extends Record<string, any>>({
                     
                     // Selection
                     selectableRows={selectableRows}
+                    selectableRowSelected={selectableRowSelected}
                     onSelectedRowsChange={onSelectedRowsChange}
                     clearSelectedRows={clearSelectedRows}
                     

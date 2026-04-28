@@ -180,6 +180,7 @@ export const usePurchaseOrderCreate = () => {
                     custcol_me_landed_cost: Number(item.custcol_me_landed_cost) || null,
                     custcol_msi_fob: Number(item.custcol_msi_fob) || null,
                     description: item.description || '',
+                    grossamt: Number(item.amount) || null,
                 }))
             };
 

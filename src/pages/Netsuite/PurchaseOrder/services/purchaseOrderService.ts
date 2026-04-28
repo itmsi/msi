@@ -1,5 +1,5 @@
 import { apiPost, apiGet, ApiResponse, apiPut } from '@/helpers/apiHelper';
-import { ComponentsDataResponse, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
+import { ComponentsDataResponse, HistoryLogResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, PostReceiptResponse, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -125,6 +125,7 @@ export class PurchaseOrderService {
     
     static async getPOById(id: string): Promise<PODetailResponse> {
         const response = await apiGet<PODetailResponse>(`${API_BASE_URL}/netsuite/purchasing-orders/${id}`);
+        
         return response.data;
     }
 
@@ -139,7 +140,7 @@ export class PurchaseOrderService {
             ...params
         };
 
-        const response = await apiPost(`${API_BASE_URL}/netsuite//purchasing-orders/sync`, requestData as Record<string, any>);
+        const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/sync`, requestData as Record<string, any>);
         return response.data as PurchaseOrderResponse;
     }
 
@@ -151,5 +152,54 @@ export class PurchaseOrderService {
     static async downloadInvoice(params: PODownloadRequest): Promise<PODownloadResponse> {
         const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/print`, params as Record<string, any>);
         return response.data as PODownloadResponse;
+    }
+
+    static async getReceiptById(params: Partial<ReceiveRequest> = {}): Promise<ReceiptResponse> {
+        const requestData: ReceiveRequest = {
+            page: 1,
+            limit: 10,
+            sort_by: 'created_at',
+            sort_order: 'desc',
+            search: '',
+            ...params
+        };
+
+        const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/receive-list`, requestData as Record<string, any>);
+        return response.data as ReceiptResponse;
+    }
+
+    static async syncPOByIdReceipt(id: string): Promise<ReceiptResponse> {
+        const response = await apiGet<ReceiptResponse>(`${API_BASE_URL}/netsuite/purchasing-orders/receive-list/${id}`);
+        return response.data;
+    }
+
+    static async submitReceipt(params: ItemReceiptPayload): Promise<PostReceiptResponse> {
+        const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/receive-item`, params as Record<string, any>);
+        return response.data as PostReceiptResponse;
+    }
+
+    
+    static async syncReceiptItems(params: Partial<PurchaseOrderRequest> = {}): Promise<ReceiptResponse> {
+        const requestData: PurchaseOrderRequest = {
+            page: 1,
+            limit: 10,
+            sort_by: 'created_at',
+            sort_order: 'desc',
+            search: '',
+            status: '',
+            ...params
+        };
+
+        const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/receive-list/sync`, requestData as Record<string, any>);
+        return response.data as ReceiptResponse;
+    }
+
+    
+    static async getHistoryReceiptById(params: Partial<any> = {}): Promise<HistoryLogResponse> {
+        const requestData = {
+            ...params
+        };
+        const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/receive-list/history-logs`, requestData as Record<string, any>);
+        return response.data as HistoryLogResponse;
     }
 }
