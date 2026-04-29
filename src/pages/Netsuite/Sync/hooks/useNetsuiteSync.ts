@@ -142,7 +142,7 @@ export function useNetsuiteSync() {
 
                         const lastSync: LastSyncInfo = {
                             synced_by: record.created_by_name,
-                            synced_at: record.created_at,
+                            synced_at: record.updated_at,
                         };
 
                         return {
