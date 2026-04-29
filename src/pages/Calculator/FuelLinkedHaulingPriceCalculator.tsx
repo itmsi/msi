@@ -178,7 +178,7 @@ export default function FuelLinkedHaulingPriceCalculator() {
         setShowCalendar(false);
     }
 
-    function hitungHarga(silent = false) {
+    function hitungHarga(silent = false, metodeOverride?: MetodeAdjustment) {
         const haulingLama = parseRibuan(form.hargaHaulingLama);
         const solarLama = parseRibuan(form.hargaSolarLama);
         const solarBaru = parseRibuan(form.hargaSolarBaru);
@@ -202,7 +202,8 @@ export default function FuelLinkedHaulingPriceCalculator() {
         let komponenBBMLama: number | undefined;
         let komponenBBMBaru: number | undefined;
 
-        if (form.metode === 'share') {
+        const metode = metodeOverride ?? form.metode;
+        if (metode === 'share') {
             const porsi = parseDecimalInput(form.porsiBiayaBBM.replace(',', '.'));
             if (!porsi) {
                 if (!silent) toast.error('Porsi biaya BBM wajib diisi untuk metode ini.');
@@ -225,6 +226,7 @@ export default function FuelLinkedHaulingPriceCalculator() {
                 if (!silent) toast.error('Fuel L/km dan Tonase per Unit wajib diisi untuk metode Consumption.');
                 return;
             }
+
             const adjustment = parseRibuan(form.adjustment);
             komponenBBMLama = (fuelLKm * solarLama) / payload;
             komponenBBMBaru = (fuelLKm * solarBaru) / payload;
@@ -254,7 +256,7 @@ export default function FuelLinkedHaulingPriceCalculator() {
                 image="/motor-sights-international.png"
             />
             <div className="bg-gray-50 min-h-screen">
-                <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="mx-auto px-4 sm:px-3">
                 {/* HEADER */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
@@ -534,7 +536,7 @@ export default function FuelLinkedHaulingPriceCalculator() {
                                             onClick={
                                                 () => {
                                                     setForm(p => ({ ...p, metode: m }));
-                                                    hitungHarga(true);
+                                                    hitungHarga(true, m);
                                                 }
                                             }
                                             className={`rounded-lg border px-4 py-2 text-sm font-medium transition
@@ -788,7 +790,7 @@ export default function FuelLinkedHaulingPriceCalculator() {
                                             /> */}
 
                                             {/* Breakdown komponen – share method */}
-                                            {form.metode === 'share' && hasil.komponenNonBBM !== undefined && (
+                                            {form.metode === 'share' && (
                                                 <div className="rounded-lg bg-gray-50 border border-gray-100 p-3 space-y-1.5">
                                                     <p className="text-xs font-medium text-gray-500 mb-2">Breakdown Komponen</p>
                                                     <ResultRow 
