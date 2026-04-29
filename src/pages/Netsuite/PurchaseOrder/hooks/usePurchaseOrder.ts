@@ -162,8 +162,8 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         const toastId = toast.loading(`Mengunduh invoice PO: ${row.po_number || row.po_id}...`);
         try {
             const response = await PurchaseOrderService.downloadInvoice({
-                // recId: Number(row.po_id),
-                recId: 4152,
+                recId: Number(row.po_id),
+                // recId: 4152,
             });
 
             if (response?.fileContent && response?.fileName) {
