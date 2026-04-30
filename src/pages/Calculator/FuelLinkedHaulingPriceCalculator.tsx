@@ -911,7 +911,7 @@ export default function FuelLinkedHaulingPriceCalculator() {
                                                     <p className={`text-lg font-bold mb-2 ${hasil.persenPerubahanSolar >= 0 ? 'text-orange-600' : 'text-red-500'}`}>
                                                         {formatPersen(hasil.persenPerubahanSolar)}
                                                     </p>
-                                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                                    <div className="flex justify-between gap-2 text-xs">
                                                         <Tooltip content="Harga Solar Baru" position="top">
                                                             <div>
                                                                 <p className="text-gray-400">Baru</p>
@@ -939,7 +939,7 @@ export default function FuelLinkedHaulingPriceCalculator() {
                                                     <p className={`text-lg font-bold mb-2 ${pctHauling >= 0 ? 'text-blue-600' : 'text-red-500'}`}>
                                                         {formatPersen(pctHauling)}
                                                     </p>
-                                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                                    <div className="flex justify-between gap-2 text-xs">
                                                         <Tooltip content="Harga Hauling Baru" position="top">
                                                             <div>
                                                                 <p className="text-gray-400">Baru</p>
@@ -978,7 +978,7 @@ export default function FuelLinkedHaulingPriceCalculator() {
 
                                                     {hasRevData && (
                                                         <>
-                                                            <div className="grid grid-cols-2 gap-2 text-xs">
+                                                            <div className="flex justify-between gap-2 text-xs">
                                                                 <Tooltip content="Revenue Baru per hari" position="top">
                                                                     <div>
                                                                         <p className="text-gray-400">Baru</p>
