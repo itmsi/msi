@@ -83,7 +83,7 @@ export default function Manage() {
             ),
             width: '180px',
         },
-        createByDateColumn('Updated By', 'last_modified', 'update_by_name'),
+        createByDateColumn('Updated By', 'updated_at', 'updated_by_name'),
         {
             name: 'Aksi',
             width: '110px',
