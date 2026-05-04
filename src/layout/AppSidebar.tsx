@@ -8,8 +8,7 @@ import {
     ChevronDownIcon,
     GridIcon,
     HorizontaLDots,
-    PlugInIcon,
-    UserIcon,
+    UserIcon
 } from "@/icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,6 +16,7 @@ import GridShape from "@/components/common/GridShape";
 import { useLanguage } from "@/components/lang/useLanguage";
 import { menuTranslations } from "@/components/lang/menuTranslations";
 import { TbTopologyStar3, TbReport } from "react-icons/tb";
+import { MdCalculate } from "react-icons/md";
 
 type SubNavItem = {
     name: string;
@@ -137,6 +137,11 @@ const AppSidebar: React.FC = () => {
             // ],
         },
         {
+            name: "Hauling Calculator",
+            icon: <MdCalculate />,
+            path: buildPath("/hauling-calculator")
+        },
+        {
             name: "CRM",
             icon: <TbTopologyStar3 />,
             allowedRoles: [
@@ -178,15 +183,15 @@ const AppSidebar: React.FC = () => {
     ], [buildPath]);
 
     const othersItems: NavItem[] = useMemo(() => [
-        {
-            icon: <PlugInIcon />,
-            name: "Authentication",
-            allowedRoles: ['Sign In', 'Sign Up'], // Kosongkan karena tidak ada di auth_menu
-            subItems: [
-                { name: "Sign In", path: buildPath("/signin"), allowedRoles: ['Sign In'], },
-                { name: "Sign Up", path: buildPath("/signup"), allowedRoles: ['Sign Up'], },
-            ],
-        },
+        // {
+        //     icon: <PlugInIcon />,
+        //     name: "Authentication",
+        //     allowedRoles: ['Sign In', 'Sign Up'], // Kosongkan karena tidak ada di auth_menu
+        //     subItems: [
+        //         { name: "Sign In", path: buildPath("/signin"), allowedRoles: ['Sign In'], },
+        //         { name: "Sign Up", path: buildPath("/signup"), allowedRoles: ['Sign Up'], },
+        //     ],
+        // },
         {
             icon: <UserIcon />,
             name: "Employee",

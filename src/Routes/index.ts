@@ -119,6 +119,11 @@ const ManageReceive = lazy(() => import('@/pages/Netsuite/Receipts/Manage'));
 // DIVISION
 const ManageDivision = lazy(() => import('@/pages/CRM/Divisions/Manage'));
 
+// HAULING CALCULATOR
+const CreateHaulingCalculator = lazy(() => import('@/pages/Calculator/HaulingPriceCalculatorCreate'));
+const EditHaulingCalculator = lazy(() => import('@/pages/Calculator/HaulingPriceCalculatorEdit'));
+const ManageHaulingCalculator = lazy(() => import('@/pages/Calculator/Manage'));
+
 export type TAppRoute = {
     path: string;
     name: string;
@@ -950,5 +955,29 @@ export const routes: TAppRoute[] = [
         requiredPermissions: ['update', 'read'],
         component: ManageReceive,
         layout: AppLayout,
-    }
+    },
+    {
+        path: '/hauling-calculator',
+        name: 'Hauling Calculator',
+        isProtected: true,
+        roles: ['ADMIN'],
+        component: ManageHaulingCalculator,
+        layout: AppLayout,
+    },
+    {
+        path: '/hauling-calculator/create',
+        name: 'Hauling Calculator',
+        isProtected: true,
+        roles: ['ADMIN'],
+        component: CreateHaulingCalculator,
+        layout: AppLayout,
+    },
+    {
+        path: '/hauling-calculator/edit/:id',
+        name: 'Hauling Calculator',
+        isProtected: true,
+        roles: ['ADMIN'],
+        component: EditHaulingCalculator,
+        layout: AppLayout,
+    },
 ];
