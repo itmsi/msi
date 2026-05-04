@@ -2,7 +2,7 @@ import { apiPost, ApiResponse } from '@/helpers/apiHelper';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export type SyncMasterDataKey = 'departments' | 'locations' | 'terms' | 'classes' | 'items' | 'vendors' | 'invoice_sales_orders' | 'purchasing_orders' | 'sales_orders';
+export type SyncMasterDataKey = 'departments' | 'locations' | 'terms' | 'classes' | 'items' | 'vendors' | 'customers' | 'invoice_sales_orders' | 'purchasing_orders' | 'sales_orders';
 
 // ─── Sync List Types ──────────────────────────────────────────────────────────
 
@@ -45,6 +45,8 @@ export const SYNC_MODULE_KEY_MAP: Record<string, SyncMasterDataKey> = {
     items:              'items',
     vendor:             'vendors',
     vendors:            'vendors',
+    customer:           'customers',
+    customers:          'customers',
     'invoice_sales_orders':  'invoice_sales_orders',
     'invoice-sales-order':  'invoice_sales_orders',
     'invoice-sales-orders': 'invoice_sales_orders',
