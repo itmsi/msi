@@ -61,6 +61,12 @@ const INITIAL_ITEMS: Omit<MasterDataItem, 'status' | 'lastSync' | 'errorMessage'
         icon: 'vendor',
     },
     {
+        key: 'customers',
+        label: 'Customer',
+        description: 'Sync customer master data from NetSuite',
+        icon: 'customer',
+    },
+    {
         key: 'purchasing_orders',
         label: 'Purchasing Orders',
         description: 'Sync purchasing orders from NetSuite',
