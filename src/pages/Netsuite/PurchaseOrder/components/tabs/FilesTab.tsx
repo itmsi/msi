@@ -4,7 +4,6 @@ import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { TableColumn } from 'react-data-table-component';
 import { FaExternalLinkAlt, FaPaperclip, FaPlus } from 'react-icons/fa';
 import { Link } from 'react-router';
-import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { MdDeleteOutline, MdEdit } from 'react-icons/md';
 
