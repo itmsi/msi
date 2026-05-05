@@ -9,7 +9,7 @@ import 'react-date-range/dist/theme/default.css';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import CustomDataTable from '@/components/ui/table';
 import Button from '@/components/ui/button/Button';
-import { MdAdd, MdDelete } from 'react-icons/md';
+import { MdAdd, MdDeleteOutline } from 'react-icons/md';
 import { TableColumn } from 'react-data-table-component';
 import { usePOItemsSelect } from '@/hooks/usePOItemsSelect';
 import { POLocationPaginationState, POLocationSelectOption } from '@/hooks/usePOLocationSelect';
@@ -619,9 +619,9 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         size="sm"
                         variant="outline"
                         onClick={() => onProductDelete?.(row.id || index.toString())}
-                        className="p-1 text-red-600 hover:text-red-800"
+                        className="text-red-600 hover:text-red-800"
                     >
-                        <MdDelete size={14} />
+                        <MdDeleteOutline size={14} />
                     </Button>
                     )}
                 </div>

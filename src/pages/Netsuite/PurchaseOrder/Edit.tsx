@@ -22,6 +22,7 @@ import Alert from '@/components/ui/alert/Alert';
 import { useHistoryReceiptTab } from './hooks/useHistoryReceiptTab';
 import HistoryReceiptTab from './components/tabs/HistoryReceiptTab';
 import UserNoteTab from './components/tabs/UserNoteTab';
+import FilesTab from './components/tabs/FilesTab';
 
 export default function Edit() {
     const navigate = useNavigate();
@@ -46,6 +47,7 @@ export default function Edit() {
         loadData,
         handleSyncById,
         isSyncing,
+        handleAddFiles,
     } = usePurchaseOrderEdit();
 
     // Get subsidiary_id dari form data dengan defensive check
@@ -642,11 +644,25 @@ export default function Edit() {
                                             departmentError={errors.department || departmentSelectError}
                                         />
                                     )}
-
+                                    
                                     {activeTab === 'files' && (
-                                        <div className="p-6">
-                                            <p className="text-gray-500">File management functionality will be implemented here.</p>
-                                        </div>
+                                        <FilesTab
+                                            formData={formData}
+                                            fileList={poDetail?.files || []}
+                                            pendingFiles={(formData.files || []).filter(
+                                                file => !(poDetail?.files || []).some(
+                                                    pf => pf.fileUrl === file.fileUrl && pf.fileName === file.fileName
+                                                )
+                                            )}
+                                            deletedFileUrls={(poDetail?.files || [])
+                                                .filter(pf => !(formData.files || []).some(
+                                                    file => file.fileUrl === pf.fileUrl && file.fileName === pf.fileName
+                                                ))
+                                                .map(pf => pf.fileUrl)
+                                            }
+                                            isLoading={loadingMasterData}
+                                            onAddFiles={handleAddFiles}
+                                        />
                                     )}
 
                                     {activeTab === 'usernotes' && (
@@ -655,6 +671,7 @@ export default function Edit() {
                                             isLoading={historyLogLoading}
                                         />
                                     )}
+
                                     {activeTab === 'receipt' && (
                                         <ReceiptTab
                                             poId={poDetail?.po_id}
@@ -666,6 +683,7 @@ export default function Edit() {
                                             onRowsPerPageChange={(rows, page) => fetchReceipts(page, rows)}
                                         />
                                     )}
+
                                     {activeTab === 'historyreceipt' && (
                                         <HistoryReceiptTab
                                             poId={poDetail?.po_id}
