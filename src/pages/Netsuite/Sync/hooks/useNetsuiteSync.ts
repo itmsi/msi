@@ -80,8 +80,8 @@ const INITIAL_ITEMS: Omit<MasterDataItem, 'status' | 'lastSync' | 'errorMessage'
     },
     {
         key: 'invoice_sales_orders',
-        label: 'Invoice Sales Orders',
-        description: 'Sync invoice sales orders from NetSuite',
+        label: 'Sales Invoice',
+        description: 'Sync Sales Invoice from NetSuite',
         icon: 'invoice_sales_orders',
     },
 ];

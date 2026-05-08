@@ -114,6 +114,9 @@ const EditInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOr
 const NetSuiteSync = lazy(() => import('@/pages/Netsuite/Sync/Manage'));
 const Receive = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Receive'));
 const ManageReceive = lazy(() => import('@/pages/Netsuite/Receipts/Manage'));
+const ManageSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Manage'));
+const CreateSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Create'));
+const EditSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Edit'));
 // ========================================
 
 // DIVISION
@@ -954,6 +957,34 @@ export const routes: TAppRoute[] = [
         roles: ['Manage Receipts Netsuite'],
         requiredPermissions: ['update', 'read'],
         component: ManageReceive,
+        layout: AppLayout,
+    },
+    // SALES ORDER NETSUITE
+    {
+        path: '/netsuite/sales-orders',
+        name: 'Sales Order Netsuite',
+        isProtected: true,
+        roles: ['Sales Order Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: ManageSalesOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/sales-orders/create',
+        name: 'Sales Order Netsuite',
+        isProtected: true,
+        roles: ['Sales Order Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: CreateSalesOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/sales-orders/edit/:id',
+        name: 'Sales Order Netsuite',
+        isProtected: true,
+        roles: ['Sales Order Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: EditSalesOrder,
         layout: AppLayout,
     },
     {
