@@ -1,9 +1,10 @@
+import { useState, useEffect, useRef } from 'react';
 import PageMeta from '@/components/common/PageMeta';
 import { useNetsuiteSync, MasterDataItem, SyncStatus } from './hooks/useNetsuiteSync';
 import { SyncMasterDataKey } from './services/netSuiteSyncService';
 import {
     MdSync,
-    // MdCheckCircle,
+    MdCheckCircle,
     // MdError,
     MdSchedule,
     // MdBusiness,
@@ -216,20 +217,64 @@ interface QueueIndicatorProps {
 function QueueIndicator({ items }: QueueIndicatorProps) {
     const queued     = items.filter(i => i.status === 'queued');
     const processing = items.find(i => i.status === 'processing');
+    const activeCount = queued.length + (processing ? 1 : 0);
 
-    if (!processing && queued.length === 0) return null;
+    const [batchTotal, setBatchTotal] = useState(0);
+    const prevActiveCountRef = useRef(0);
+
+    useEffect(() => {
+        const prevActive = prevActiveCountRef.current;
+        if (activeCount > 0 && prevActive === 0) {
+            // New batch started
+            setBatchTotal(activeCount);
+        } else if (activeCount > batchTotal) {
+            // Added more to existing batch
+            setBatchTotal(activeCount);
+        } else if (activeCount === 0 && prevActive > 0) {
+            // Batch finished
+            const timer = setTimeout(() => setBatchTotal(0), 4000);
+            return () => clearTimeout(timer);
+        }
+        
+        prevActiveCountRef.current = activeCount;
+    }, [activeCount, batchTotal]);
+
+    if (!processing && queued.length === 0 && batchTotal === 0) return null;
+
+    const total = Math.max(batchTotal, activeCount);
+    const completed = total - activeCount;
+    const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const isFinished = total > 0 && activeCount === 0;
 
     return (
-        <div className="bg-green-50 border border-green-200 rounded-xl px-5 py-4">
+        <div className={`border rounded-xl px-5 py-4 transition-colors duration-500 ${isFinished ? 'bg-green-100 border-green-300' : 'bg-green-50 border-green-200'}`}>
             <div className="flex items-start gap-3">
-                <MdSync size={20} className="text-green-600 animate-spin mt-0.5 flex-shrink-0" />
+                {isFinished ? (
+                    <MdCheckCircle size={20} className="text-green-600 mt-0.5 flex-shrink-0" />
+                ) : (
+                    <MdSync size={20} className="text-green-600 animate-spin mt-0.5 flex-shrink-0" />
+                )}
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-green-800">
-                        Sync Queue Active
-                    </p>
+                    <div className="flex justify-between items-center mb-1.5">
+                        <p className="text-sm font-medium text-green-800">
+                            {isFinished ? 'Sync Completed' : 'Sync Queue Active'}
+                        </p>
+                        <span className="text-xs font-semibold text-green-700">
+                            {completed} / {total} ({progressPercent}%)
+                        </span>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="w-full bg-green-200 rounded-full h-2.5 mb-3 overflow-hidden">
+                        <div 
+                            className="bg-green-600 h-full rounded-full transition-all duration-500 ease-out"
+                            style={{ width: `${progressPercent}%` }}
+                        />
+                    </div>
+
                     <div className="mt-1.5 flex flex-wrap gap-2">
                         {processing && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-600 text-white text-xs font-medium">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-600 text-white text-xs font-medium shadow-sm">
                                 <MdSync size={11} className="animate-spin" />
                                 {processing.label} — Running
                             </span>
@@ -237,12 +282,17 @@ function QueueIndicator({ items }: QueueIndicatorProps) {
                         {queued.map((item, idx) => (
                             <span
                                 key={item.key}
-                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium"
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white border border-green-200 text-green-700 text-xs font-medium shadow-sm"
                             >
                                 <MdSchedule size={11} />
                                 {item.label} — #{idx + 1} in queue
                             </span>
                         ))}
+                        {isFinished && (
+                            <span className="text-xs text-green-700 font-medium">
+                                All queued items have been processed successfully.
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>

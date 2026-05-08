@@ -61,6 +61,12 @@ const INITIAL_ITEMS: Omit<MasterDataItem, 'status' | 'lastSync' | 'errorMessage'
         icon: 'vendor',
     },
     {
+        key: 'customers',
+        label: 'Customer',
+        description: 'Sync customer master data from NetSuite',
+        icon: 'customer',
+    },
+    {
         key: 'purchasing_orders',
         label: 'Purchasing Orders',
         description: 'Sync purchasing orders from NetSuite',
@@ -74,8 +80,8 @@ const INITIAL_ITEMS: Omit<MasterDataItem, 'status' | 'lastSync' | 'errorMessage'
     },
     {
         key: 'invoice_sales_orders',
-        label: 'Invoice Sales Orders',
-        description: 'Sync invoice sales orders from NetSuite',
+        label: 'Sales Invoice',
+        description: 'Sync Sales Invoice from NetSuite',
         icon: 'invoice_sales_orders',
     },
 ];
