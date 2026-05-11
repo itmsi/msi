@@ -2,11 +2,12 @@ import { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useInvoiceSalesOrder } from './hooks/useInvoiceSalesOrder';
-import { formatCurrencyID, getStatusBadge } from '@/helpers/generalHelper';
-import { MdClear, MdSearch, MdEdit, MdFileDownload, MdFilterListAlt, MdExpandLess, MdExpandMore } from 'react-icons/md';
+import { formatCurrencyID, getStatusBadge, formatDateTime } from '@/helpers/generalHelper';
+import { MdClear, MdSearch, MdEdit, MdFileDownload, MdFilterListAlt, MdExpandLess, MdExpandMore, MdOutlineSync } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { InvoiceSalesOrder } from './types/invoiceSalesOrder';
 import { FakturService } from './services/fakturService';
@@ -105,6 +106,9 @@ export default function Manage() {
         handleKeyPress,
         handleClearSearch,
         handleClearAllFilters,
+        isSyncing,
+        syncInfo,
+        handleSync,
     } = useInvoiceSalesOrder();
 
     const handleExportSelected = async () => {
@@ -387,7 +391,7 @@ export default function Manage() {
             
             <div className="space-y-6">
                 {/* Header */}
-                <div className="bg-white shadow rounded-lg">
+                <div className="bg-white shadow rounded-lg mb-3">
                     <div className="px-6 py-4 border-b border-gray-200">
                         <div className="flex justify-between items-center">
                             <div>
@@ -398,21 +402,42 @@ export default function Manage() {
                                     Manage Sales Invoice and related information
                                 </p>
                             </div>
-                            <Button
-                                onClick={handleExportSelected}
-                                variant="outline"
-                                className="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-50"
-                                disabled={loading || selectedRows.length === 0}
-                            >
-                                <MdFileDownload size={20} />
-                                Export Selected (XML)
-                            </Button>
+                            <div className="flex space-x-3">
+                                <PermissionGate permission="read">
+                                    <Button
+                                        onClick={() => handleSync()}
+                                        disabled={isSyncing}
+                                        className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                        variant="outline"
+                                    >
+                                        <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                        <div>
+                                            <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                        </div>
+                                    </Button>
+                                </PermissionGate>
+                                <Button
+                                    onClick={handleExportSelected}
+                                    variant="outline"
+                                    className="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-50"
+                                    disabled={loading || selectedRows.length === 0}
+                                >
+                                    <MdFileDownload size={20} />
+                                    Export Selected (XML)
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                {syncInfo && (
+                    <span className="block text-xs text-green-600 pe-6 text-end mb-0">
+                        Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}
+                    </span>
+                )}
                 
                 {/* Search & Filter */}
-                <div className="bg-white shadow rounded-lg px-6 py-4">
+                <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
                     {SearchAndFilters}
                 </div>
                 
