@@ -136,11 +136,11 @@ const AppSidebar: React.FC = () => {
             //     // { name: "Settings", path: "/roe-roa-calculator/settings", allowedRoles: ['Setting ROA ROE Calculate'] },
             // ],
         },
-        {
-            name: "Hauling Calculator",
-            icon: <MdCalculate />,
-            path: buildPath("/hauling-calculator")
-        },
+        // {
+        //     name: "Hauling Calculator",
+        //     icon: <MdCalculate />,
+        //     path: buildPath("/hauling-calculator")
+        // },
         {
             name: "CRM",
             icon: <TbTopologyStar3 />,
