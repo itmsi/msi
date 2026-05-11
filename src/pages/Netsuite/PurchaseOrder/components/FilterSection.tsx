@@ -1,11 +1,14 @@
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import Button from '@/components/ui/button/Button';
+import { useApprovalStatusSelect } from '@/hooks/useApprovalStatusSelect';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
+import { usePOStatusSelect } from '@/hooks/usePOStatusSelect';
 import { useSubsidiarySelect } from '@/hooks/useSubsidiarySelect';
 import React, { useEffect, useState } from 'react'
 
 interface FilterSectionProps {
+    filterApprovalStatus?: string;
     filterSubsidiary?: string;
     filterLocation?: string;
     filterStatus?: string;
@@ -14,6 +17,7 @@ interface FilterSectionProps {
 }
 
 const FilterSection: React.FC<FilterSectionProps> = ({
+    filterApprovalStatus,
     filterSubsidiary,
     filterLocation,
     filterStatus,
@@ -30,9 +34,29 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     const currentSubsidiaryValue = filterSubsidiary
         ? subsidiaryOptions.find(o => o.value === filterSubsidiary) || null
         : null;
-    // const currentStatusValue = filterStatus
-    //     ? [{ value: 1, label: 'Pending Approval' }, { value: 2, label: 'Approved' }, { value: 3, label: 'Rejected' }].find(o => o.value === Number(filterStatus)) || null
-    //     : null;
+
+    // Approval Status
+    const { approvalStatusOptions, loading: approvalStatusLoading, initializeOptions: initializeApprovalStatusOptions } = useApprovalStatusSelect();
+    
+    useEffect(() => {
+        initializeApprovalStatusOptions();
+    }, [initializeApprovalStatusOptions]);
+    
+    const currentApprovalStatusValue = filterApprovalStatus
+        ? approvalStatusOptions.find(o => o.value === filterApprovalStatus) || null
+        : null;
+
+    // Status
+    const { poStatusOptions, loading: statusLoading, initializeOptions: initializeStatusOptions } = usePOStatusSelect();
+    
+    useEffect(() => {
+        initializeStatusOptions();
+    }, [initializeStatusOptions]);
+    
+    const currentStatusValue = filterStatus
+        ? poStatusOptions.find(o => o.value === filterStatus) || null
+        : null;
+
 
     // Location select untuk header dan items (is_parent = false)
     const {
@@ -77,18 +101,52 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         }
     }, [filterLocation, POLocationOptions]);
     
+    
+    // const [selectedApprovalStatus, setSelectedApprovalStatus] = useState<any>(null);
+    // const [approvalStatusSelectError, setApprovalStatusSelectError] = useState<string>('');
+        
+    // const [selectedStatus, setSelectedStatus] = useState<any>(null);
+    // const [statusSelectError, setStatusSelectError] = useState<string>('');
+
+    // Initialize hooks only once when not yet initialized
+    // useEffect(() => {
+    //     if (!statusInitialized && !statusLoading) {
+    //         initializeStatusOptions();
+    //     }
+    // }, [statusInitialized, statusLoading, initializeStatusOptions]);
+    
+    // Sync internal state with filter props
+    // useEffect(() => {
+    //     if (filterStatus) {
+    //         const approvalStatusOption = statusOptions.approvalStatus.find(opt => opt.value === filterStatus);
+    //         const statusOption = statusOptions.status.find(opt => opt.value === filterStatus);
+    //         if (approvalStatusOption) {
+    //             if (!selectedApprovalStatus || selectedApprovalStatus.value !== filterStatus) {
+    //                 setSelectedApprovalStatus(approvalStatusOption);
+    //             }
+    //         } else if (selectedApprovalStatus?.value !== filterStatus) {
+    //             setSelectedApprovalStatus({ 
+    //                 value: filterStatus, 
+    //                 label: `Status ${filterStatus}` 
+    //             });
+    //         }
+    //     } else if (!filterStatus && selectedApprovalStatus) {
+    //         setSelectedApprovalStatus(null);
+    //     }
+    // }, [filterStatus, statusOptions]);
+
     const handleClearAll = () => {
         onClearFilters();
     };
     
     // Check if any filters are active
-    const hasActiveFilters = filterSubsidiary || filterLocation || filterStatus;
+    const hasActiveFilters = filterSubsidiary || filterLocation || filterApprovalStatus || filterStatus;
     return (
-        <div className="mt-4 pt-4 border-t border-gray-200 flex-1">
+        <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Subsidiary */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Subsidiary</label>
+                    <label htmlFor='subsidiary' className="block text-sm font-medium text-gray-700 mb-1">Subsidiary</label>
                     <CustomSelect
                         id="subsidiary"
                         name="subsidiary"
@@ -105,8 +163,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 
                 {/* Location */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <label htmlFor='location' className="block text-sm font-medium text-gray-700 mb-1">Location</label>
                     <CustomAsyncSelect
+                        id="location"
                         name="location"
                         placeholder="All Locations"
                         value={selectedLocation}
@@ -132,24 +191,42 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     />
                 </div>
 
-                {/* STATUS */}
-                {/* <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                {/* APPROVAL STATUS */}
+                <div>
+                    <label htmlFor='approvalstatus' className="block text-sm font-medium text-gray-700 mb-1">Approval Status</label>
                     <CustomSelect
                         id="approvalstatus"
                         name="approvalstatus"
-                        value={currentStatusValue}
+                        value={currentApprovalStatusValue}
                         onChange={(selected) => onFilterChange('approvalstatus', selected?.value || '')}
-                        options={[
-                            { value: 1, label: 'Pending Approval' },
-                            { value: 2, label: 'Approved' },
-                            { value: 3, label: 'Rejected' }
-                        ]}
+                        options={approvalStatusOptions}
+                        placeholder={approvalStatusLoading ? 'Loading...' : 'All Approval Statuses'}
                         isClearable={true}
                         isSearchable={true}
                         className="w-full"
+                        isLoading={approvalStatusLoading}
                     />
-                </div> */}
+                </div>
+                
+
+                {/* STATUS */}
+                <div>
+                    <label htmlFor='po_status' className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <CustomSelect
+                        id="po_status"
+                        name="po_status"
+                        value={currentStatusValue}
+                        onChange={(selected) => onFilterChange('po_status', selected?.value || '')}
+                        options={poStatusOptions}
+                        placeholder={statusLoading ? 'Loading...' : 'All Statuses'}
+                        isClearable={true}
+                        isSearchable={true}
+                        className="w-full"
+                        isLoading={statusLoading}
+                    />
+                </div>
+                
+                
             </div>
             
             {/* Filter actions */}

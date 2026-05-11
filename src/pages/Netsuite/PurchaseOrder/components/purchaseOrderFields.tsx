@@ -610,7 +610,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 formData.items && formData.items.length > 0 && (
                     <div className="sticky top-0 self-start lg:px-4">
                         <div className='bg-white rounded-2xl shadow-sm p-6'>
-                            <InvoiceSummary items={formData.items} />
+                            <InvoiceSummary items={formData.items} currency={formData.currency_symbol || ''} />
                         </div>
                     </div>
                 )
