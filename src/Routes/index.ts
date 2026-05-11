@@ -128,7 +128,7 @@ const EditHaulingCalculator = lazy(() => import('@/pages/Calculator/HaulingPrice
 const ManageHaulingCalculator = lazy(() => import('@/pages/Calculator/Manage'));
 
 // NANOGRID CALCULATOR
-const NanogridCalculator = lazy(() => import('@/pages/Nanogrid/Manage'));
+// const NanogridCalculator = lazy(() => import('@/pages/Nanogrid/Manage'));
 
 export type TAppRoute = {
     path: string;
