@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { GrDocumentVerified, GrLineChart } from "react-icons/gr";
-import { GiChart } from "react-icons/gi";
 
 // Assume these icons are imported from an icon library
 import {
@@ -126,21 +125,33 @@ const AppSidebar: React.FC = () => {
                 },
             ],
         },
+        
         {
-            name: "Return on Equity",
-            icon: <GiChart />,
-            allowedRoles: ['Manage ROA ROE Calculate', 'Setting ROA ROE Calculate'],
-            path: buildPath("/roe-roa-calculator/manage")
-            // subItems: [
-            //     { name: "Manage", path: "/roe-roa-calculator/manage", allowedRoles: ['Manage ROA ROE Calculate'] },
-            //     // { name: "Settings", path: "/roe-roa-calculator/settings", allowedRoles: ['Setting ROA ROE Calculate'] },
-            // ],
-        },
-        {
-            name: "Hauling Calculator",
+            name: "Calculator Tools",
             icon: <MdCalculate />,
-            path: buildPath("/hauling-calculator")
+            allowedRoles: ['Manage ROA ROE Calculate'],
+            subItems: [
+                { name: "Return on Equity", path: buildPath("/roe-roa-calculator/manage"), allowedRoles: ['Manage ROA ROE Calculate'], },
+                { name: "Hauling Calculator", path: buildPath("/hauling-calculator") },
+                { name: "Nanogrid Calculator", path: buildPath("/nanogrid-calculator") },
+            ],
         },
+
+        // {
+        //     name: "Return on Equity",
+        //     icon: <GiChart />,
+        //     allowedRoles: ['Manage ROA ROE Calculate', 'Setting ROA ROE Calculate'],
+        //     path: buildPath("/roe-roa-calculator/manage")
+        //     // subItems: [
+        //     //     { name: "Manage", path: "/roe-roa-calculator/manage", allowedRoles: ['Manage ROA ROE Calculate'] },
+        //     //     // { name: "Settings", path: "/roe-roa-calculator/settings", allowedRoles: ['Setting ROA ROE Calculate'] },
+        //     // ],
+        // },
+        // {
+        //     name: "Hauling Calculator",
+        //     icon: <MdCalculate />,
+        //     path: buildPath("/hauling-calculator")
+        // },
         {
             name: "CRM",
             icon: <TbTopologyStar3 />,
