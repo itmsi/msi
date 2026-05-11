@@ -460,6 +460,26 @@ export const formatCurrencyID = (value: number | string): string => {
         // maximumFractionDigits: 2,
     }).format(numValue);
 };
+
+const CURRENCY_LOCALE_MAP: Record<string, string> = {
+    IDR: 'id-ID',
+    CNY: 'zh-CN',
+    SGD: 'en-SG',
+    USD: 'en-US',
+};
+
+export const formatCurrencyDynamic = (value: number | string, currencySymbol: string): string => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numValue)) return '-';
+
+    const currency = currencySymbol?.toUpperCase() || 'IDR';
+    const locale = CURRENCY_LOCALE_MAP[currency] || 'en-US';
+
+    return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency,
+    }).format(numValue);
+};
 export const formatCurrencyZH = (value: number | string): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(numValue)) return '￥0';

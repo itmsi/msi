@@ -13,7 +13,7 @@ import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { PurchaseOrderItem } from './types/purchaseorder';
 // import ModalApproval from './components/ModalApproval';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
-import { getProfile, formatCurrencyID, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
+import { getProfile, formatCurrencyDynamic, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import FilterSection from './components/FilterSection';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { createByDateColumn } from '@/components/ui/table/columnUtils';
@@ -93,8 +93,8 @@ export default function Manage() {
                 />
                 
                 <div className="items-center gap-3 py-2">
-                    <div className="block text-sm text-gray-500">{formatTanggal(row.po_date)}</div>
                     <div className="font-medium text-gray-900">{row.po_number || '-'}</div>
+                    <div className="block text-sm text-gray-500">{formatTanggal(row.po_date)}</div>
                 </div>
             </>),
             wrap: true,
@@ -163,7 +163,7 @@ export default function Manage() {
         },
         {
             name: 'Total Amount',
-            selector: row => formatCurrencyID(row.total) || '-',
+            selector: row => formatCurrencyDynamic(row.total, row.currency_symbol),
             wrap: true,
             width: '240px'
         },
