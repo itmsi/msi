@@ -133,7 +133,7 @@ const AppSidebar: React.FC = () => {
             subItems: [
                 { name: "Return on Equity", path: buildPath("/roe-roa-calculator/manage"), allowedRoles: ['Manage ROA ROE Calculate'], },
                 { name: "Hauling Calculator", path: buildPath("/hauling-calculator") },
-                { name: "Nanogrid Calculator", path: buildPath("/nanogrid-calculator") },
+                // { name: "Nanogrid Calculator", path: buildPath("/nanogrid-calculator") },
             ],
         },
 

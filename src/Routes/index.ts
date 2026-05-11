@@ -1014,12 +1014,12 @@ export const routes: TAppRoute[] = [
         component: EditHaulingCalculator,
         layout: AppLayout,
     },
-    {
-        path: '/nanogrid-calculator',
-        name: 'Nanogrid Calculator',
-        isProtected: true,
-        roles: ['ADMIN'],
-        component: NanogridCalculator,
-        layout: AppLayout,
-    },
+    // {
+    //     path: '/nanogrid-calculator',
+    //     name: 'Nanogrid Calculator',
+    //     isProtected: true,
+    //     roles: ['ADMIN'],
+    //     component: NanogridCalculator,
+    //     layout: AppLayout,
+    // },
 ];
