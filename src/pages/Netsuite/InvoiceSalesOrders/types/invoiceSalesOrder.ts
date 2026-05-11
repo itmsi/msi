@@ -92,8 +92,14 @@ export interface InvoiceSalesOrderData {
     pagination: InvoiceSalesOrderPagination;
 }
 
+export interface SyncInfo {
+    created_at: string;
+    created_by_name: string;
+}
+
 export interface InvoiceSalesOrderResponse {
     success: boolean;
     message: string;
     data: InvoiceSalesOrderData;
+    sync_info?: SyncInfo;
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { InvoiceSalesOrder, InvoiceSalesOrderRequest } from '../types/invoiceSalesOrder';
+import { InvoiceSalesOrder, InvoiceSalesOrderRequest, SyncInfo } from '../types/invoiceSalesOrder';
 import { InvoiceSalesOrderService } from '../services/invoiceSalesOrderService';
+import toast from 'react-hot-toast';
 
 export const useInvoiceSalesOrder = () => {
     const [searchValue, setSearchValue] = useState('');
@@ -15,6 +16,8 @@ export const useInvoiceSalesOrder = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [invoiceSalesOrders, setInvoiceSalesOrders] = useState<InvoiceSalesOrder[]>([]);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [syncInfo, setSyncInfo] = useState<SyncInfo | null>(null);
 
     const [pagination, setPagination] = useState({
         page: 1,
@@ -32,7 +35,7 @@ export const useInvoiceSalesOrder = () => {
             const requestBody: InvoiceSalesOrderRequest = {
                 page: overrides?.page ?? pagination.page,
                 limit: overrides?.limit ?? pagination.page_size,
-                sort_by: 'id',
+                sort_by: 'trandate',
                 sort_order: overrides?.sort_order ?? sortOrder,
                 ...(overrides?.search !== undefined
                     ? (overrides.search ? { search: overrides.search } : {})
@@ -60,6 +63,7 @@ export const useInvoiceSalesOrder = () => {
                 total_records: response.data.pagination.total || 0,
                 total_pages: response.data.pagination.totalPages || 0
             });
+            setSyncInfo(response.sync_info || null);
         } catch (err: any) {
             setError(err?.message || 'Failed to fetch invoice sales orders data');
             console.error('Error fetching invoice sales orders data:', err);
@@ -114,6 +118,24 @@ export const useInvoiceSalesOrder = () => {
     useEffect(() => {
         fetchInvoiceSalesOrders();
     }, []);
+
+    const handleSync = useCallback(async () => {
+        setIsSyncing(true);
+        const toastId = toast.loading('Syncing data...');
+        try {
+            const result = await InvoiceSalesOrderService.syncInvoiceSalesOrders();
+            if (result.success) {
+                toast.success(result.message || 'Data successfully synced', { id: toastId });
+                fetchInvoiceSalesOrders();
+            } else {
+                toast.error(result.message || 'Failed to sync data', { id: toastId });
+            }
+        } catch (error: any) {
+            toast.error(error?.message || 'Error syncing data', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [fetchInvoiceSalesOrders]);
 
     const executeSearch = useCallback(() => {
         handleSearch(searchValue);
@@ -178,5 +200,8 @@ export const useInvoiceSalesOrder = () => {
         handleKeyPress,
         handleClearSearch,
         handleClearAllFilters,
+        isSyncing,
+        syncInfo,
+        handleSync,
     };
 };
