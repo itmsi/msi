@@ -14,6 +14,7 @@ import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
 import { getProfile } from '@/helpers/generalHelper';
 import { usePOTermSelect } from '@/hooks/usePOTermSelect';
+import FilesTab from './components/tabs/FilesTab';
 
 export default function Create() {
     const navigate = useNavigate();
@@ -33,6 +34,7 @@ export default function Create() {
         handleAddProductItem,
         handleProductDelete,
         handleUpdateProductItem,
+        handleAddFiles
     } = usePurchaseOrderCreate();
 
     // Get subsidiary_id dari form data
@@ -152,6 +154,9 @@ export default function Create() {
             initializeTermOptions();
         }
     }, [initializeTermOptions]); // Add function dependency back
+
+    const [activeTab, setActiveTab] = useState<'items' | 'files' >('items');
+
     return (
         <>
             <PageMeta
@@ -297,41 +302,78 @@ export default function Create() {
                             }}
                             departmentError={errors.department || departmentSelectError}
                         />
+                        <div>
+                            {/* Tab Navigation */}
+                            <div className="border-b border-gray-200 px-6 overflow-auto">
+                                <nav className="flex space-x-8 overflow-auto">
+                                    <button
+                                        onClick={() => setActiveTab('items')}
+                                        className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                            activeTab === 'items'
+                                                ? 'border-blue-500 text-blue-600'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        Items
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('files')}
+                                        className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                            activeTab === 'files'
+                                                ? 'border-blue-500 text-blue-600'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        Files
+                                    </button>
+                                </nav>
+                            </div>
+                            <div className='bg-white rounded-b-2xl shadow-sm'>
+                                {activeTab === 'items' && (
+                                    <PurchaseOrderItemFields
+                                        formData={formData}
+                                        errors={errors}
+                                        masterData={masterData}
+                                        loadingMasterData={loadingMasterData}
+                                        onInputChange={handleInputChange}
+                                        onSelectChange={handleSelectChange}
+                                        onDateChange={handleDateChange}
+                                        onAddProductItem={handleAddProductItem}
+                                        onProductDelete={handleProductDelete}
+                                        onUpdateProductItem={handleUpdateProductItem}
 
-                        <div className='bg-white rounded-2xl shadow-sm'>
-                            {/* Purchase Order Items */}
-                            <PurchaseOrderItemFields
-                                formData={formData}
-                                errors={errors}
-                                masterData={masterData}
-                                loadingMasterData={loadingMasterData}
-                                onInputChange={handleInputChange}
-                                onSelectChange={handleSelectChange}
-                                onDateChange={handleDateChange}
-                                onAddProductItem={handleAddProductItem}
-                                onProductDelete={handleProductDelete}
-                                onUpdateProductItem={handleUpdateProductItem}
-
-                                // Location props (is_parent = false)
-                                locationOptions={itemLocationOptions}
-                                locationPagination={itemLocationPagination}
-                                locationInputValue={itemLocationInputValue}
-                                onLocationInputChange={handleItemLocationInputChange}
-                                onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
-                                selectedLocation={selectedLocation}
-                                onLocationChange={(option) => {
-                                    setSelectedLocation(option);
-                                    if (option && option.data) {
-                                        // Update formData dengan data location yang dipilih
-                                        handleSelectChange('location', option.value);
-                                        handleSelectChange('location_name', option.data.name);
-                                    }
-                                    if (locationSelectError) {
-                                        setLocationSelectError('');
-                                    }
-                                }}
-                                locationError={locationSelectError}
-                            />
+                                        // Location props (is_parent = false)
+                                        locationOptions={itemLocationOptions}
+                                        locationPagination={itemLocationPagination}
+                                        locationInputValue={itemLocationInputValue}
+                                        onLocationInputChange={handleItemLocationInputChange}
+                                        onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
+                                        selectedLocation={selectedLocation}
+                                        onLocationChange={(option) => {
+                                            setSelectedLocation(option);
+                                            if (option && option.data) {
+                                                // Update formData dengan data location yang dipilih
+                                                handleSelectChange('location', option.value);
+                                                handleSelectChange('location_name', option.data.name);
+                                            }
+                                            if (locationSelectError) {
+                                                setLocationSelectError('');
+                                            }
+                                        }}
+                                        locationError={locationSelectError}
+                                    />
+                                )}
+                                    
+                                {activeTab === 'files' && (
+                                    <FilesTab
+                                        formData={formData}
+                                        fileList={[]}
+                                        pendingFiles={formData.files || []}
+                                        isLoading={loadingMasterData}
+                                        onAddFiles={handleAddFiles}
+                                    />
+                                )}
+                            </div>
                         </div>
 
                         {/* Form Actions */}

@@ -103,6 +103,7 @@ export interface PurchaseOrderForm {
     // description: string | null;
     // note: string | null;
     items: TablePOItem[];
+    files?: AttachFileItem[];
     grossamt?: number;
 }
 
@@ -336,6 +337,7 @@ export interface PODetailData {
     department_display?: string;
     lines: PODetailLine[];
     user_notes: UserNotesItem[];
+    files: AttachFileItem[];
 }
 
 export interface PODetailLine {
@@ -426,6 +428,7 @@ export interface PurchaseOrderFormUpdate {
     grossamt?: number;
     custbody_me_validity_date?: string;
     items?: PurchaseOrderUpdateItem[];
+    files?: AttachFileItem[];
 }
 
 export interface PurchaseOrderUpdateItem {
@@ -633,4 +636,10 @@ export interface UserNotesItem {
     title: string;
     author: string;
     direction: string;
+}
+// ATTACH FILE LIST
+export interface AttachFileItem {
+    fileUrl: string;
+    fileName: string;
+    created_by_api?: string;
 }

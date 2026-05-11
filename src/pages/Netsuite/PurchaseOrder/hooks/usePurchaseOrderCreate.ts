@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
+import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldItems, TablePOItem, AttachFileItem } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
@@ -38,7 +38,8 @@ export const usePurchaseOrderCreate = () => {
         // description: null,
         department: null,
         department_name: '',
-        items: []
+        items: [],
+        files: []
     });
 
     // Load Master Data saat component mount
@@ -181,7 +182,8 @@ export const usePurchaseOrderCreate = () => {
                     custcol_msi_fob: Number(item.custcol_msi_fob) || null,
                     description: item.description || '',
                     grossamt: Number(item.amount) || null,
-                }))
+                })),
+                files: formData.files || []
             };
 
             const response = await PurchaseOrderService.createPurchaseOrder(requestData);
@@ -268,6 +270,12 @@ export const usePurchaseOrderCreate = () => {
         });
     };
 
+    const handleAddFiles = (files: AttachFileItem[]) => {
+        setFormData(prev => ({
+            ...prev,
+            files
+        }));
+    };
     return {
         isSubmitting,
         formData,
@@ -283,5 +291,6 @@ export const usePurchaseOrderCreate = () => {
         handleAddProductItem,
         handleProductDelete,
         handleUpdateProductItem,
+        handleAddFiles
     };
 };

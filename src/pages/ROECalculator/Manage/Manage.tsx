@@ -262,58 +262,63 @@ export default function ManageRor() {
                 image="/motor-sights-international.png"
             />
             
-            <div className="bg-white shadow rounded-lg">
-                
-                {/* Header */}
-                <div className="px-6 py-4 border-b border-gray-200">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h3 className="text-lg leading-6 font-primary-bold text-gray-900">{langField('manageCalculators')}</h3>
-                            <p className="mt-1 text-sm text-gray-500">{langField('manageCalculators')}</p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <PermissionGate permission="create">
-                                <Button
-                                    onClick={() => navigate(buildPath(`/roe-roa-calculator/manage/create`))}
-                                    className="flex items-center gap-2 lg:w-[220px]"
-                                    size="sm"
-                                >
-                                    <MdAdd className="h-4 w-4" />
-                                    {langField('createCalculator')}
-                                </Button>
-                            </PermissionGate>
+            <div className="space-y-5">
+                <div className="bg-white shadow rounded-lg">
+                    
+                    {/* Header */}
+                    <div className="px-6 py-4 border-b border-gray-200">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">{langField('manageCalculators')}</h3>
+                                <p className="mt-1 text-sm text-gray-500">{langField('manageCalculators')}</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <PermissionGate permission="create">
+                                    <Button
+                                        onClick={() => navigate(buildPath(`/roe-roa-calculator/manage/create`))}
+                                        className="flex items-center gap-2 lg:w-[220px]"
+                                        size="sm"
+                                    >
+                                        <MdAdd className="h-4 w-4" />
+                                        {langField('createCalculator')}
+                                    </Button>
+                                </PermissionGate>
+                            </div>
                         </div>
                     </div>
+                    
                 </div>
                 
                 {/* Filters */}
-                <div className="px-6 py-4 border-b border-gray-200">
+                <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
                     {SearchAndFilters}
                 </div>
 
                 {/* Data Table */}
-                <div className="p-6 font-secondary">
-                    <CustomDataTable
-                        columns={columns}
-                        data={roeCalculator || []}
-                        loading={loading}
-                        pagination
-                        paginationServer
-                        paginationTotalRows={pagination?.total || 0}
-                        paginationPerPage={pagination?.limit || 10}
-                        paginationDefaultPage={pagination?.page || 1}
-                        paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
-                        onChangePage={handlePageChange}
-                        onChangeRowsPerPage={handleRowsPerPageChange}
-                        fixedHeader={true}
-                        fixedHeaderScrollHeight="600px"
-                        responsive
-                        highlightOnHover
-                        striped={false}
-                        persistTableHead
-                        borderRadius="8px"
-                        onRowClicked={handleRowClick}
-                    />
+                <div className="bg-white shadow rounded-lg">
+                    <div className="p-6 font-secondary">
+                        <CustomDataTable
+                            columns={columns}
+                            data={roeCalculator || []}
+                            loading={loading}
+                            pagination
+                            paginationServer
+                            paginationTotalRows={pagination?.total || 0}
+                            paginationPerPage={pagination?.limit || 10}
+                            paginationDefaultPage={pagination?.page || 1}
+                            paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
+                            onChangePage={handlePageChange}
+                            onChangeRowsPerPage={handleRowsPerPageChange}
+                            fixedHeader={true}
+                            fixedHeaderScrollHeight="600px"
+                            responsive
+                            highlightOnHover
+                            striped={false}
+                            persistTableHead
+                            borderRadius="8px"
+                            onRowClicked={handleRowClick}
+                        />
+                    </div>
                 </div>
             </div>
             
