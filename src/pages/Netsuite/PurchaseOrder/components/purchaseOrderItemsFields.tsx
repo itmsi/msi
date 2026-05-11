@@ -1,6 +1,6 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { formatCurrency, handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma, formatCurrencyDynamic } from '@/helpers/generalHelper';
+import { handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma, formatCurrencyDynamic } from '@/helpers/generalHelper';
 import React, { useEffect, useMemo, useState } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -349,13 +349,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        formatCurrency(row.rate.toString())
+                        formatCurrencyDynamic(row.rate.toString(), formData?.currency_symbol || '')
                     }</p>
                 ) : (
                 <Input
                     name={`rate_${index}`}
                     type="text"
-                    value={row.rate && row.rate > 0 ? formatNumberPriceKoma(row.rate.toString()) : ''}
+                    value={row.rate && row.rate > 0 ? formatCurrencyDynamic(row.rate.toString(), formData?.currency_symbol || '') : ''}
                     disabled={true}
                     readonly={true}
                     className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
@@ -650,7 +650,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 
                 {/* Add Product Section */}
                 
-                {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
+                {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (formData.approvalstatus !== 1 || formData.nextapprover === null) && (
                 <div className="flex gap-4 mb-6">
                     <div className="flex-1">
                         <Label>Select Product to Add</Label>
