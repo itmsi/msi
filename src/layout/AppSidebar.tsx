@@ -16,7 +16,7 @@ import GridShape from "@/components/common/GridShape";
 import { useLanguage } from "@/components/lang/useLanguage";
 import { menuTranslations } from "@/components/lang/menuTranslations";
 import { TbTopologyStar3, TbReport } from "react-icons/tb";
-// import { MdCalculate } from "react-icons/md";
+import { MdCalculate } from "react-icons/md";
 
 type SubNavItem = {
     name: string;
@@ -136,11 +136,11 @@ const AppSidebar: React.FC = () => {
             //     // { name: "Settings", path: "/roe-roa-calculator/settings", allowedRoles: ['Setting ROA ROE Calculate'] },
             // ],
         },
-        // {
-        //     name: "Hauling Calculator",
-        //     icon: <MdCalculate />,
-        //     path: buildPath("/hauling-calculator")
-        // },
+        {
+            name: "Hauling Calculator",
+            icon: <MdCalculate />,
+            path: buildPath("/hauling-calculator")
+        },
         {
             name: "CRM",
             icon: <TbTopologyStar3 />,

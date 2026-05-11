@@ -54,6 +54,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         location: firstLine?.location ?? null,
         memo: detail.memo || '',
         currency: detail.currency_id,
+        currency_symbol: detail.currency_symbol || '',
         terms: Number(detail.terms) || null,
         terms_display: detail.terms_display || null,
         custbody_me_pr_date: detail.custbody_me_pr_date || null,
@@ -99,6 +100,7 @@ export const usePurchaseOrderEdit = () => {
         location: null,
         memo: '',
         currency: null,
+        currency_symbol: null,
         terms: null,
         terms_display: null,
         custbody_me_pr_date: null,
@@ -183,6 +185,16 @@ export const usePurchaseOrderEdit = () => {
                 const { [fieldName]: _, ...rest } = prev;
                 return rest;
             });
+        }
+
+        if (fieldName === 'currency' && masterData) {
+            const currencySymbol = masterData.currencys.find(c => String(c.id) === String(value))?.name || '';
+            setFormData(prev => ({
+                ...prev,
+                currency: value ? Number(value) : null,
+                currency_symbol: currencySymbol
+            }));
+            return;
         }
 
         setFormData(prev => ({

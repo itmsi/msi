@@ -25,6 +25,7 @@ export const usePurchaseOrderCreate = () => {
         location: null,
         memo: '',
         currency: null,
+        currency_symbol: null,
         terms: null,
         custbody_me_pr_date: null,
         custbody_me_project_location: null,
@@ -87,6 +88,16 @@ export const usePurchaseOrderCreate = () => {
                 const { [fieldName]: _, ...rest } = prev;
                 return rest;
             });
+        }
+
+        if (fieldName === 'currency' && masterData) {
+            const currencySymbol = masterData.currencys.find(c => String(c.id) === String(value))?.name || '';
+            setFormData(prev => ({
+                ...prev,
+                currency: value ? Number(value) : null,
+                currency_symbol: currencySymbol
+            }));
+            return;
         }
         
         setFormData(prev => ({

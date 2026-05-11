@@ -75,7 +75,7 @@ export default function Step4MonthlyCosts({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Fuel Expense */}
                 <div>
-                    <Label htmlFor="fuel_expense">{langField('tyreCostPerUnit')}</Label>
+                    <Label htmlFor="tyre_expense_monthly">{langField('tyreCostPerUnit')}</Label>
                     <Input
                         id="tyre_expense_monthly"
                         onKeyPress={handleKeyPress}
@@ -102,7 +102,7 @@ export default function Step4MonthlyCosts({
 
                 {/* Maintenance Expense */}
                 <div>
-                    <Label htmlFor="maintenance_expense">{langField('maintenanceCostPerUnit')}</Label>
+                    <Label htmlFor="sparepart_expense_monthly">{langField('maintenanceCostPerUnit')}</Label>
                     <Input
                         id="sparepart_expense_monthly"
                         onKeyPress={handleKeyPress}
