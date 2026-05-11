@@ -168,9 +168,8 @@ const AppSidebar: React.FC = () => {
             icon: <TbReport />,
             allowedRoles: [
                 'Purchase Orders Netsuite', 
-                'Invoice Sales Orders Netsuite',
+                'Sales Invoice Netsuite',
                 'Admin Sync Netsuite',
-                'Invoice Sales Orders Netsuite', 
                 'Sales Order Netsuite',
                 'Manage Receipts Netsuite'
             ],
