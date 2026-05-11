@@ -187,6 +187,16 @@ export const usePurchaseOrderEdit = () => {
             });
         }
 
+        if (fieldName === 'currency' && masterData) {
+            const currencySymbol = masterData.currencys.find(c => String(c.id) === String(value))?.name || '';
+            setFormData(prev => ({
+                ...prev,
+                currency: value ? Number(value) : null,
+                currency_symbol: currencySymbol
+            }));
+            return;
+        }
+
         setFormData(prev => ({
             ...prev,
             [fieldName]: value
