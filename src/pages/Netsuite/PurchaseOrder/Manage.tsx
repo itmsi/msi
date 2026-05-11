@@ -208,6 +208,7 @@ export default function Manage() {
                         <div className="relative flex-1">
                             <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                             <Input
+                                id='search'
                                 type="text"
                                 placeholder="Search project... (Press Enter)"
                                 value={searchValue}

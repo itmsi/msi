@@ -38,7 +38,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
                 sort_by: params?.sort_by || sortModify || 'po_id',
                 sort_order: params?.sort_order || sortOrder || 'desc',
                 search: params?.search !== undefined ? params.search : searchValue,
-                status: params?.status !== undefined ? params.status : statusFilter,
+                po_status: params?.po_status !== undefined ? params.po_status : statusFilter,
                 subsidiary: params?.subsidiary !== undefined ? params.subsidiary : subsidiaryFilter,
                 location: params?.location !== undefined ? params.location : locationFilter,
                 ...(params?.approvalstatus !== undefined ? { approvalstatus: Number(approvalStatusFilter) }  : {}),
@@ -202,7 +202,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         setPagination(prev => ({ ...prev, page: 1 }));
         fetchPurchaseOrders({ 
             page: 1, 
-            status: '', 
+            po_status: '', 
             subsidiary: '', 
             location: '',
             sort_order: 'desc',

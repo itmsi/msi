@@ -26,7 +26,7 @@ export interface PurchaseOrderRequest {
     subsidiary?: string;
     location?: string;
     approvalstatus?: number | null;
-    status: string;
+    po_status: string;
 }
 export interface PurchaseOrderItem {
     id: number;
