@@ -33,6 +33,7 @@ export default function Manage() {
         searchValue,
         sortOrder,
         statusFilter,
+        approvalStatusFilter,
         subsidiaryFilter,
         locationFilter,
         setSearchValue,
@@ -88,7 +89,7 @@ export default function Manage() {
             selector: row => row.po_number || '-',
             cell: row => (<>
                 <a
-                    href={`/netsuite/purchase-order/edit/${row.po_id}`}
+                    href={`/netsuite/purchase-order/edit/${row.po_id ? row.po_id : row.id}`}
                     className="absolute inset-0"
                 />
                 
@@ -137,10 +138,12 @@ export default function Manage() {
             selector: row => row.po_status || '-',
             cell: row => (
                 <div className="items-center capitalize">
+                    {row.approvalstatus_display ? (
                     <StatusTypeBadge 
                         type={Number(row.approvalstatus) as 1 | 2 | 3} 
                         label={row.approvalstatus_display || undefined}
                     />
+                    ) : '-'}
                 </div>
             ),
             center: true,
@@ -151,11 +154,13 @@ export default function Manage() {
             selector: row => row.po_status || '-',
             cell: row => (
                 <div className="items-center capitalize">
-                    <span 
-                        className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
-                    >
-                        {row.po_status_label}
-                    </span>
+                    {row.po_status_label ? (
+                        <span 
+                            className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
+                        >
+                            {row.po_status_label}
+                        </span>
+                    ) : '-'}
                 </div>
             ),
             center: true,
@@ -163,7 +168,7 @@ export default function Manage() {
         },
         {
             name: 'Total Amount',
-            selector: row => formatCurrencyDynamic(row.total, row.currency_symbol),
+            selector: row => row.total ? formatCurrencyDynamic(row.total, row.currency_symbol) : '-',
             wrap: true,
             width: '240px'
         },
@@ -270,6 +275,7 @@ export default function Manage() {
             
             {showAdvancedFilters && (
                 <FilterSection
+                    filterApprovalStatus={approvalStatusFilter}
                     filterSubsidiary={subsidiaryFilter}
                     filterLocation={locationFilter}
                     filterStatus={statusFilter}
@@ -366,11 +372,11 @@ export default function Manage() {
                                 paginationTotalRows={pagination?.total || 0}
                                 paginationPerPage={pagination?.limit || 10}
                                 paginationDefaultPage={pagination?.page || 1}
-                                paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
+                                paginationRowsPerPageOptions={[10, 20, 50, 100, 600]}
                                 onChangePage={handlePageChangeAman}
                                 onChangeRowsPerPage={handleRowsPerPageAman}
-                                fixedHeader={true}
-                                fixedHeaderScrollHeight="625px"
+                                // fixedHeader={true}
+                                // fixedHeaderScrollHeight="625px"
                                 responsive
                                 highlightOnHover
                                 striped={false}

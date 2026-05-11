@@ -1,11 +1,14 @@
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import Button from '@/components/ui/button/Button';
+import { useApprovalStatusSelect } from '@/hooks/useApprovalStatusSelect';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
+import { usePOStatusSelect } from '@/hooks/usePOStatusSelect';
 import { useSubsidiarySelect } from '@/hooks/useSubsidiarySelect';
 import React, { useEffect, useState } from 'react'
 
 interface FilterSectionProps {
+    filterApprovalStatus?: string;
     filterSubsidiary?: string;
     filterLocation?: string;
     filterStatus?: string;
@@ -14,6 +17,7 @@ interface FilterSectionProps {
 }
 
 const FilterSection: React.FC<FilterSectionProps> = ({
+    filterApprovalStatus,
     filterSubsidiary,
     filterLocation,
     filterStatus,
@@ -30,9 +34,29 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     const currentSubsidiaryValue = filterSubsidiary
         ? subsidiaryOptions.find(o => o.value === filterSubsidiary) || null
         : null;
-    // const currentStatusValue = filterStatus
-    //     ? [{ value: 1, label: 'Pending Approval' }, { value: 2, label: 'Approved' }, { value: 3, label: 'Rejected' }].find(o => o.value === Number(filterStatus)) || null
-    //     : null;
+
+    // Approval Status
+    const { approvalStatusOptions, loading: approvalStatusLoading, initializeOptions: initializeApprovalStatusOptions } = useApprovalStatusSelect();
+    
+    useEffect(() => {
+        initializeApprovalStatusOptions();
+    }, [initializeApprovalStatusOptions]);
+    
+    const currentApprovalStatusValue = filterApprovalStatus
+        ? approvalStatusOptions.find(o => o.value === filterApprovalStatus) || null
+        : null;
+
+    // Status
+    const { poStatusOptions, loading: statusLoading, initializeOptions: initializeStatusOptions } = usePOStatusSelect();
+    
+    useEffect(() => {
+        initializeStatusOptions();
+    }, [initializeStatusOptions]);
+    
+    const currentStatusValue = filterStatus
+        ? poStatusOptions.find(o => o.value === filterStatus) || null
+        : null;
+
 
     // Location select untuk header dan items (is_parent = false)
     const {
@@ -116,7 +140,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     };
     
     // Check if any filters are active
-    const hasActiveFilters = filterSubsidiary || filterLocation || filterStatus;
+    const hasActiveFilters = filterSubsidiary || filterLocation || filterApprovalStatus || filterStatus;
     return (
         <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -173,38 +197,36 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     <CustomSelect
                         id="approvalstatus"
                         name="approvalstatus"
-                        // value={currentStatusValue}
+                        value={currentApprovalStatusValue}
                         onChange={(selected) => onFilterChange('approvalstatus', selected?.value || '')}
-                        options={[
-                            { value: 1, label: 'Pending Approval' },
-                            { value: 2, label: 'Approved' },
-                            { value: 3, label: 'Rejected' }
-                        ]}
+                        options={approvalStatusOptions}
+                        placeholder={approvalStatusLoading ? 'Loading...' : 'All Approval Statuses'}
                         isClearable={true}
                         isSearchable={true}
                         className="w-full"
+                        isLoading={approvalStatusLoading}
                     />
                 </div>
                 
+
                 {/* STATUS */}
                 <div>
-                    <label htmlFor='status' className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <label htmlFor='po_status' className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                     <CustomSelect
-                        id="status"
-                        name="status"
-                        // value={currentStatusValue}
-                        onChange={(selected) => onFilterChange('status', selected?.value || '')}
-                        options={[
-                            { value: 'pendingBilling', label: 'Pending Billing' },
-                            { value: 'pendingSupApproval', label: 'Pending Supervisor Approval' },
-                            { value: 'pendingReceipt', label: 'Pending Receipt' },
-                            // { value: 'rejected', label: 'Rejected' }
-                        ]}
+                        id="po_status"
+                        name="po_status"
+                        value={currentStatusValue}
+                        onChange={(selected) => onFilterChange('po_status', selected?.value || '')}
+                        options={poStatusOptions}
+                        placeholder={statusLoading ? 'Loading...' : 'All Statuses'}
                         isClearable={true}
                         isSearchable={true}
                         className="w-full"
+                        isLoading={statusLoading}
                     />
                 </div>
+                
+                
             </div>
             
             {/* Filter actions */}

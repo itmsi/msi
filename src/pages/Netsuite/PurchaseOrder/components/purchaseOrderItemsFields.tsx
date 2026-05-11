@@ -1,6 +1,6 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { formatCurrency, handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma } from '@/helpers/generalHelper';
+import { formatCurrency, handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma, formatCurrencyDynamic } from '@/helpers/generalHelper';
 import React, { useEffect, useMemo, useState } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -457,7 +457,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             selector: (row) => row.gross_amount || 0,
             cell: (row) => (
                 <div className="font-medium text-center">
-                    {row.gross_amount ? formatCurrency(row.gross_amount) : 'Rp 0'}
+                    {row.gross_amount ? formatCurrencyDynamic(row.gross_amount, formData?.currency_symbol || '') : formatCurrencyDynamic(0, formData?.currency_symbol || '')}
                 </div>
             ),
             center: true,
@@ -469,7 +469,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             selector: (row) => row.tax_amount || 0,
             cell: (row) => (
                 <div className="font-medium text-center">
-                    {row.tax_amount ? formatCurrency(row.tax_amount) : 'Rp 0'}
+                    {row.tax_amount ? formatCurrencyDynamic(row.tax_amount, formData?.currency_symbol || '') : formatCurrencyDynamic(0, formData?.currency_symbol || '')}
                 </div>
             ),
             center: true,
@@ -728,7 +728,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     formData.items && formData.items.length > 0 && (<>
                     {/* <div className="grid grid-cols-1 md:grid-cols-3">
                         <div className=" md:col-span-2"></div> */}
-                        <InvoiceSummary items={formData.items} />
+                        <InvoiceSummary items={formData.items} currency={formData?.currency_symbol || ''} />
                     {/* </div> */}
                     </>)
                 )}
@@ -741,7 +741,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 }
 
 // Summary invoice dari items
-export const InvoiceSummary: React.FC<{ items: TablePOItem[] }> = ({ items }) => {
+export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string }> = ({ items, currency }) => {
     // Helper to ensure numeric value  
     const toNumber = (value: any): number => {
         if (typeof value === 'string') {
@@ -769,15 +769,15 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[] }> = ({ items }) =>
                     </div>
                     <div className="flex justify-between text-sm text-gray-600">
                         <span>Subtotal</span>
-                        <span className="font-medium text-gray-800">{formatCurrency(summary.subtotal)}</span>
+                        <span className="font-medium text-gray-800">{formatCurrencyDynamic(summary.subtotal, currency)}</span>
                     </div>
                     <div className="flex justify-between text-sm text-gray-600">
                         <span>Tax</span>
-                        <span className="font-medium text-gray-800">{formatCurrency(summary.totalTax)}</span>
+                        <span className="font-medium text-gray-800">{formatCurrencyDynamic(summary.totalTax, currency)}</span>
                     </div>
                     <div className="border-t border-gray-300 pt-3 flex justify-between text-sm font-primary-bold">
                         <span>Grand Total</span>
-                        <span className="text-blue-700">{formatCurrency(summary.grandTotal)}</span>
+                        <span className="text-blue-700">{formatCurrencyDynamic(summary.grandTotal, currency)}</span>
                     </div>
                 </div>
             </div>

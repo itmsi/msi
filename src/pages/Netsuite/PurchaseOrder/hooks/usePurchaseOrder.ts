@@ -41,7 +41,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
                 po_status: params?.po_status !== undefined ? params.po_status : statusFilter,
                 subsidiary: params?.subsidiary !== undefined ? params.subsidiary : subsidiaryFilter,
                 location: params?.location !== undefined ? params.location : locationFilter,
-                ...(params?.approvalstatus !== undefined ? { approvalstatus: Number(approvalStatusFilter) }  : {}),
+                ...(params?.approvalstatus !== undefined ? { approvalstatus: approvalStatusFilter }  : {}),
                 ...(profileSSO !== undefined ? { classes: profileSSO } : {}),
                 ...params
             });
@@ -73,7 +73,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
     }, [fetchPurchaseOrders]);
 
     const handleFilterChange = useCallback((filterType: string, value: string) => {
-        if (filterType === 'status') {
+        if (filterType === 'po_status') {
             setStatusFilter(value);
         } else if (filterType === 'sort_by') {
             setSortModify(value as 'created_at' | 'updated_at' | 'last_modified' | 'po_id' | '');
@@ -90,12 +90,12 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         setPagination(prev => ({ ...prev, page: 1 }));
 
         const params: any = { page: 1 };
-        if (filterType === 'status') params.status = value;
+        if (filterType === 'po_status') params.po_status = value;
         else if (filterType === 'sort_by') params.sort_by = value;
         else if (filterType === 'sort_order') params.sort_order = value;
         else if (filterType === 'subsidiary') params.subsidiary = value;
         else if (filterType === 'location') params.location = value;
-        else if (filterType === 'approvalstatus') params.approvalstatus = Number(value);
+        else if (filterType === 'approvalstatus') params.approvalstatus = value;
 
         fetchPurchaseOrders(params);
     }, [fetchPurchaseOrders]);

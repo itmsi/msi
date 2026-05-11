@@ -25,7 +25,7 @@ export interface PurchaseOrderRequest {
     search: string;
     subsidiary?: string;
     location?: string;
-    approvalstatus?: number | null;
+    approvalstatus?: string | null;
     po_status: string;
 }
 export interface PurchaseOrderItem {
@@ -84,6 +84,7 @@ export interface PurchaseOrderForm {
     location_name?: string | null;
     memo: string;
     currency: number | null;
+    currency_symbol?: string | null;
     terms: number | null;
     terms_display?: string | null;
     custbody_me_pr_date: string | null;

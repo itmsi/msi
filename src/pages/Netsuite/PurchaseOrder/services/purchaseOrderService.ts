@@ -11,7 +11,7 @@ export class PurchaseOrderService {
             sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
-            status: '',
+            po_status: '',
             ...params
         };
 
@@ -136,7 +136,7 @@ export class PurchaseOrderService {
             sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
-            status: '',
+            po_status: '',
             ...params
         };
 
@@ -186,7 +186,7 @@ export class PurchaseOrderService {
             sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
-            status: '',
+            po_status: '',
             ...params
         };
 
