@@ -129,7 +129,7 @@ const AppSidebar: React.FC = () => {
         {
             name: "Calculator Tools",
             icon: <MdCalculate />,
-            allowedRoles: ['Manage ROA ROE Calculate'],
+            // allowedRoles: ['Manage ROA ROE Calculate'],
             subItems: [
                 { name: "Return on Equity", path: buildPath("/roe-roa-calculator/manage"), allowedRoles: ['Manage ROA ROE Calculate'], },
                 { name: "Hauling Calculator", path: buildPath("/hauling-calculator") },
