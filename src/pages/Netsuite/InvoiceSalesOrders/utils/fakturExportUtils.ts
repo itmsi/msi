@@ -62,7 +62,7 @@ export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
             xml += `          <TaxBase>${Math.round(Number(detail.dpp) || 0)}</TaxBase>\n`;
             xml += `          <OtherTaxBase>${detail.dpp_nilai_lain || 0}</OtherTaxBase>\n`;
             xml += `          <VATRate>${Math.round(Number(detail.tarif_ppn) || 0)}</VATRate>\n`;
-            xml += `          <VAT>${Math.abs(Math.round(Number(detail.ppn) || 0))}</VAT>\n`;
+            xml += `          <VAT>${detail.ppn || 0}</VAT>\n`;
             xml += `          <STLGRate>${Math.round(Number(detail.tarif_ppnnbm) || 0)}</STLGRate>\n`;
             xml += `          <STLG>${Math.abs(Math.round(Number(detail.ppnbm) || 0))}</STLG>\n`;
             xml += `        </GoodService>\n`;

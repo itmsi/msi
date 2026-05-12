@@ -22,20 +22,12 @@ export class InvoiceSalesOrderService {
         return response.data as unknown as InvoiceSalesOrderResponse;
     }
 
-    static async syncInvoiceSalesOrders(params: Partial<InvoiceSalesOrderRequest> = {}): Promise<InvoiceSalesOrderResponse> {
-        const requestData: InvoiceSalesOrderRequest = {
-            page: 1,
-            limit: 20,
-            sort_by: 'created_at',
-            sort_order: 'desc',
-            ...params
-        };
-
-        const response = await apiPost<{ data: InvoiceSalesOrderResponse }>(
-            `${API_BASE_URL}/netsuite/invoice-sales-orders/sync`,
-            requestData as Record<string, any>
+    static async syncInvoiceSalesOrders(): Promise<any> {
+        const response = await apiPost<any>(
+            `${API_BASE_URL}/netsuite/sync/modules`,
+            { module: 'invoice_sales_orders' }
         );
 
-        return response.data as unknown as InvoiceSalesOrderResponse;
+        return response.data;
     }
 }

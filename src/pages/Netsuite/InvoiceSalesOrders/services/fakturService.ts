@@ -39,4 +39,12 @@ export class FakturService {
         );
         return response.data as unknown as FakturResponse;
     }
+
+    static async updateStatusFaktur(id: string, status: boolean): Promise<any> {
+        const response = await apiPut<any>(
+            `${API_BASE_URL}/netsuite/faktur/${id}`,
+            { status }
+        );
+        return response.data;
+    }
 }
