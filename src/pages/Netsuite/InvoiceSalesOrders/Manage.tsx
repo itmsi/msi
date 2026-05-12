@@ -3,7 +3,7 @@ import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useInvoiceSalesOrder } from './hooks/useInvoiceSalesOrder';
 import { formatCurrencyID, getStatusBadge, formatDateTime } from '@/helpers/generalHelper';
-import { MdClear, MdSearch, MdEdit, MdFileDownload, MdFilterListAlt, MdExpandLess, MdExpandMore, MdOutlineSync } from 'react-icons/md';
+import { MdClear, MdSearch, MdEdit, MdFileDownload, MdFilterListAlt, MdExpandLess, MdExpandMore, MdOutlineSync, MdDoneAll } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
@@ -109,8 +109,41 @@ export default function Manage() {
         isSyncing,
         syncInfo,
         handleSync,
+        fetchInvoiceSalesOrders,
     } = useInvoiceSalesOrder();
 
+    const handleUpdateStatusSelected = async () => {
+        if (!selectedRows || selectedRows.length === 0) {
+            toast.error('Tidak ada data terpilih untuk diupdate');
+            return;
+        }
+
+        const invoicesWithFaktur = selectedRows.filter((row: InvoiceSalesOrder) => row.fakture_id);
+        if (invoicesWithFaktur.length === 0) {
+            toast.error('Tidak ada data Faktur yang valid dari pilihan Anda');
+            return;
+        }
+
+        const toastId = toast.loading(`Mengupdate status ${invoicesWithFaktur.length} data faktur...`);
+        try {
+            const updatePromises = invoicesWithFaktur.map((row: InvoiceSalesOrder) => 
+                FakturService.updateStatusFaktur(row.fakture_id, true)
+            );
+            
+            await Promise.all(updatePromises);
+            
+            // Clear selection after successful update
+            setClearSelectedRows(!clearSelectedRows);
+            setSelectedRows([]);
+            
+            toast.success(`${invoicesWithFaktur.length} Status Faktur berhasil diupdate`, { id: toastId });
+            fetchInvoiceSalesOrders();
+        } catch (error: any) {
+            console.error('Update status failed:', error);
+            toast.error(`Gagal update status: ${error.message}`, { id: toastId });
+        }
+    };
+    
     const handleExportSelected = async () => {
         if (!selectedRows || selectedRows.length === 0) {
             toast.error('Tidak ada data terpilih untuk diekspor');
@@ -177,8 +210,18 @@ export default function Manage() {
         {
             name: 'SiId',
             selector: row => row.id || '-',
+            cell: row => (
+                <div className="items-center py-2">
+                    <div className='block text-sm text-gray-900'>{row.id}</div>
+                    {(row.status_faktur === true || row.status_faktur === false) && (
+                        <span className={`${row.status_faktur ? 'text-green-600' : 'text-red-500'} font-medium italic text-xs`}>
+                            {row.status_faktur ? 'The invoice is imported' : 'Invoice not imported'}
+                        </span>
+                    )}
+                </div>
+            ),
             wrap: true,
-            minWidth: '100px',
+            minWidth: '200px',
         },
         {
             name: 'Subsidiary',
@@ -199,10 +242,40 @@ export default function Manage() {
             minWidth: '180px',
         },
         {
+            name: 'Tx Date Faktur',
+            selector: row => row.tanggal_faktur || '-',
+            cell: row => (
+                <div className="items-center py-2">
+                    <div className="block text-sm text-gray-500">
+                        {formatDateTimeID(row.tanggal_faktur || '-')}
+                    </div>
+                </div>
+            ),
+            wrap: true,
+            minWidth: '150px',
+        },
+        {
             name: 'Customer Name',
             selector: row => row.entityid || row.entity || '-',
+            cell: row => {
+                const isInvalid = !row.npwp_or_nik_pembeli || row.npwp_or_nik_pembeli === '0000000000000000';
+                return (
+                <div className="items-center py-2">
+                    <div className="block text-sm text-gray-500">
+                        {row.entityid || row.entity || '-'}
+                    </div>
+                     {isInvalid ? (
+                            <span className="text-red-500 font-medium italic text-xs">
+                                TKU ID not filled
+                            </span>
+                        ) : (
+                            <span className="text-sm text-gray-900">{row.npwp_or_nik_pembeli}</span>
+                        )}
+                </div>
+                );
+            },
             wrap: true,
-            minWidth: '200px',
+            minWidth: '220px',
         },
         {
             name: 'Status',
@@ -416,6 +489,15 @@ export default function Manage() {
                                         </div>
                                     </Button>
                                 </PermissionGate>
+                                <Button
+                                    onClick={handleUpdateStatusSelected}
+                                    variant="outline"
+                                    className="flex items-center gap-2 text-blue-600 border-blue-600 hover:bg-blue-50"
+                                    disabled={loading || selectedRows.length === 0}
+                                >
+                                    <MdDoneAll size={20} />
+                                    Update Status
+                                </Button>
                                 <Button
                                     onClick={handleExportSelected}
                                     variant="outline"
