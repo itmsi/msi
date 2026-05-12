@@ -195,19 +195,7 @@ export default function Manage() {
         handleRowsPerPageChange(newLimit, newPage);
     }, [pagination?.page, pagination?.page_size, handleRowsPerPageChange]);
 
-    const handleToggleAll = (checked: boolean) => {
-        const newChanges = { ...statusChanges };
-        invoiceSalesOrders.forEach(row => {
-            if (row.fakture_id) {
-                if (!!row.status_faktur === checked) {
-                    delete newChanges[row.fakture_id];
-                } else {
-                    newChanges[row.fakture_id] = checked;
-                }
-            }
-        });
-        setStatusChanges(newChanges);
-    };
+
 
     const handleSingleToggle = (row: InvoiceSalesOrder, checked: boolean) => {
         setStatusChanges(prev => {
@@ -221,10 +209,7 @@ export default function Manage() {
         });
     };
 
-    const hasFaktur = invoiceSalesOrders.some(r => r.fakture_id);
-    const isAllChecked = hasFaktur && invoiceSalesOrders
-        .filter(r => r.fakture_id)
-        .every(r => (statusChanges[r.fakture_id] ?? r.status_faktur) === true);
+
 
     const columns: TableColumn<InvoiceSalesOrder>[] = [
         {
@@ -239,21 +224,7 @@ export default function Manage() {
             minWidth: '140px',
         },
         {
-            name: (
-                <div className="flex flex-col items-start gap-1.5 py-1">
-                    <span className="font-semibold text-gray-700">Import Status</span>
-                    {hasFaktur && (
-                        <div onClick={e => e.stopPropagation()} className="flex items-center" title="Toggle All">
-                            <Switch
-                                label=""
-                                checked={isAllChecked}
-                                onChange={handleToggleAll}
-                                showStatusText={false}
-                            />
-                        </div>
-                    )}
-                </div>
-            ) as any,
+            name: 'Import Status',
             selector: row => (statusChanges[row.fakture_id] ?? row.status_faktur) ? 'Imported' : 'Not Imported',
             cell: row => (
                 <div className="items-center py-2">
@@ -544,17 +515,15 @@ export default function Manage() {
                                     </Button>
                                 </PermissionGate>
 
-                                {Object.keys(statusChanges).length > 0 && (
-                                    <Button
-                                        onClick={handleBulkUpdateStatus}
-                                        variant="outline"
-                                        className="flex items-center gap-2 text-blue-600 border-blue-600 hover:bg-blue-50"
-                                        disabled={loading}
-                                    >
-                                        <MdDoneAll size={20} />
-                                        Save Status ({Object.keys(statusChanges).length})
-                                    </Button>
-                                )}
+                                <Button
+                                    onClick={handleBulkUpdateStatus}
+                                    variant="outline"
+                                    className="flex items-center gap-2 text-blue-600 border-blue-600 hover:bg-blue-50"
+                                    disabled={loading || Object.keys(statusChanges).length === 0}
+                                >
+                                    <MdDoneAll size={20} />
+                                    Save Status ({Object.keys(statusChanges).length})
+                                </Button>
 
                                 <Button
                                     onClick={handleExportSelected}
