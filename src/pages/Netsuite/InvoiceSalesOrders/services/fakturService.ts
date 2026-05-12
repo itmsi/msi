@@ -47,4 +47,12 @@ export class FakturService {
         );
         return response.data;
     }
+
+    static async bulkUpdateStatusFaktur(data: { id: string, status: boolean }[]): Promise<any> {
+        const response = await apiPost<any>(
+            `${API_BASE_URL}/netsuite/faktur/status-bulk`,
+            data as unknown as Record<string, unknown>
+        );
+        return response.data;
+    }
 }
