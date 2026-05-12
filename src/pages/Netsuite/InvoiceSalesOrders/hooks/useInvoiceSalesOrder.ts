@@ -124,7 +124,7 @@ export const useInvoiceSalesOrder = () => {
         const toastId = toast.loading('Syncing data...');
         try {
             const result = await InvoiceSalesOrderService.syncInvoiceSalesOrders();
-            if (result.success) {
+            if (result.success || result.sync_status === 'success') {
                 toast.success(result.message || 'Data successfully synced', { id: toastId });
                 fetchInvoiceSalesOrders();
             } else {
