@@ -3,8 +3,9 @@ import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useInvoiceSalesOrder } from './hooks/useInvoiceSalesOrder';
 import { formatCurrencyID, getStatusBadge, formatDateTime } from '@/helpers/generalHelper';
-import { MdClear, MdSearch, MdEdit, MdFileDownload, MdFilterListAlt, MdExpandLess, MdExpandMore, MdOutlineSync } from 'react-icons/md';
+import { MdClear, MdSearch, MdEdit, MdFileDownload, MdFilterListAlt, MdExpandLess, MdExpandMore, MdOutlineSync, MdDoneAll } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
+import Switch from '@/components/form/switch/Switch';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
@@ -87,6 +88,7 @@ export default function Manage() {
     const [selectedRows, setSelectedRows] = useState<InvoiceSalesOrder[]>([]);
     const [clearSelectedRows, setClearSelectedRows] = useState(false);
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [statusChanges, setStatusChanges] = useState<Record<string, boolean>>({});
     const {
         invoiceSalesOrders,
         loading,
@@ -109,8 +111,28 @@ export default function Manage() {
         isSyncing,
         syncInfo,
         handleSync,
+        fetchInvoiceSalesOrders,
     } = useInvoiceSalesOrder();
 
+    const handleBulkUpdateStatus = async () => {
+        const changesArray = Object.entries(statusChanges).map(([id, status]) => ({ id, status }));
+        if (changesArray.length === 0) {
+            toast.error('Tidak ada perubahan status untuk diupdate');
+            return;
+        }
+
+        const toastId = toast.loading(`Mengupdate status ${changesArray.length} faktur...`);
+        try {
+            await FakturService.bulkUpdateStatusFaktur(changesArray);
+            toast.success(`${changesArray.length} Status Faktur berhasil diupdate`, { id: toastId });
+            setStatusChanges({});
+            fetchInvoiceSalesOrders();
+        } catch (error: any) {
+            console.error('Bulk update status failed:', error);
+            toast.error(`Gagal update status: ${error.message}`, { id: toastId });
+        }
+    };
+    
     const handleExportSelected = async () => {
         if (!selectedRows || selectedRows.length === 0) {
             toast.error('Tidak ada data terpilih untuk diekspor');
@@ -173,12 +195,87 @@ export default function Manage() {
         handleRowsPerPageChange(newLimit, newPage);
     }, [pagination?.page, pagination?.page_size, handleRowsPerPageChange]);
 
+    const handleToggleAll = (checked: boolean) => {
+        const newChanges = { ...statusChanges };
+        invoiceSalesOrders.forEach(row => {
+            if (row.fakture_id) {
+                if (!!row.status_faktur === checked) {
+                    delete newChanges[row.fakture_id];
+                } else {
+                    newChanges[row.fakture_id] = checked;
+                }
+            }
+        });
+        setStatusChanges(newChanges);
+    };
+
+    const handleSingleToggle = (row: InvoiceSalesOrder, checked: boolean) => {
+        setStatusChanges(prev => {
+            const next = { ...prev };
+            if (!!row.status_faktur === checked) {
+                delete next[row.fakture_id];
+            } else {
+                next[row.fakture_id] = checked;
+            }
+            return next;
+        });
+    };
+
+    const hasFaktur = invoiceSalesOrders.some(r => r.fakture_id);
+    const isAllChecked = hasFaktur && invoiceSalesOrders
+        .filter(r => r.fakture_id)
+        .every(r => (statusChanges[r.fakture_id] ?? r.status_faktur) === true);
+
     const columns: TableColumn<InvoiceSalesOrder>[] = [
         {
             name: 'SiId',
             selector: row => row.id || '-',
+            cell: row => (
+                <div className="items-center py-2">
+                    <div className='block text-sm text-gray-900'>{row.id}</div>
+                </div>
+            ),
             wrap: true,
-            minWidth: '100px',
+            minWidth: '140px',
+        },
+        {
+            name: (
+                <div className="flex flex-col items-start gap-1.5 py-1">
+                    <span className="font-semibold text-gray-700">Import Status</span>
+                    {hasFaktur && (
+                        <div onClick={e => e.stopPropagation()} className="flex items-center" title="Toggle All">
+                            <Switch
+                                label=""
+                                checked={isAllChecked}
+                                onChange={handleToggleAll}
+                                showStatusText={false}
+                            />
+                        </div>
+                    )}
+                </div>
+            ) as any,
+            selector: row => (statusChanges[row.fakture_id] ?? row.status_faktur) ? 'Imported' : 'Not Imported',
+            cell: row => (
+                <div className="items-center py-2">
+                    {row.fakture_id ? (
+                        <div onClick={e => e.stopPropagation()} className="flex flex-col mt-1">
+                            <Switch
+                                label=""
+                                checked={statusChanges[row.fakture_id] ?? !!row.status_faktur}
+                                onChange={(checked) => handleSingleToggle(row, checked)}
+                                showStatusText={false}
+                            />
+                            <span className={`mt-1 ${(statusChanges[row.fakture_id] ?? row.status_faktur) ? 'text-green-600' : 'text-gray-500'} font-medium italic text-xs`}>
+                                {(statusChanges[row.fakture_id] ?? row.status_faktur) ? 'Imported' : 'Not Imported'}
+                            </span>
+                        </div>
+                    ) : (
+                        <span className="text-gray-400 italic text-xs">No Faktur Data</span>
+                    )}
+                </div>
+            ),
+            wrap: true,
+            minWidth: '170px',
         },
         {
             name: 'Subsidiary',
@@ -199,10 +296,40 @@ export default function Manage() {
             minWidth: '180px',
         },
         {
+            name: 'Tx Date Faktur',
+            selector: row => row.tanggal_faktur || '-',
+            cell: row => (
+                <div className="items-center py-2">
+                    <div className="block text-sm text-gray-500">
+                        {formatDateTimeID(row.tanggal_faktur || '-')}
+                    </div>
+                </div>
+            ),
+            wrap: true,
+            minWidth: '150px',
+        },
+        {
             name: 'Customer Name',
             selector: row => row.entityid || row.entity || '-',
+            cell: row => {
+                const isInvalid = !row.npwp_or_nik_pembeli || row.npwp_or_nik_pembeli === '0000000000000000';
+                return (
+                <div className="items-center py-2">
+                    <div className="block text-sm text-gray-500">
+                        {row.entityid || row.entity || '-'}
+                    </div>
+                     {isInvalid ? (
+                            <span className="text-red-500 font-medium italic text-xs">
+                                TKU ID not filled
+                            </span>
+                        ) : (
+                            <span className="text-sm text-gray-900">{row.npwp_or_nik_pembeli}</span>
+                        )}
+                </div>
+                );
+            },
             wrap: true,
-            minWidth: '200px',
+            minWidth: '220px',
         },
         {
             name: 'Status',
@@ -416,6 +543,19 @@ export default function Manage() {
                                         </div>
                                     </Button>
                                 </PermissionGate>
+
+                                {Object.keys(statusChanges).length > 0 && (
+                                    <Button
+                                        onClick={handleBulkUpdateStatus}
+                                        variant="outline"
+                                        className="flex items-center gap-2 text-blue-600 border-blue-600 hover:bg-blue-50"
+                                        disabled={loading}
+                                    >
+                                        <MdDoneAll size={20} />
+                                        Save Status ({Object.keys(statusChanges).length})
+                                    </Button>
+                                )}
+
                                 <Button
                                     onClick={handleExportSelected}
                                     variant="outline"

@@ -78,6 +78,10 @@ export interface InvoiceSalesOrder {
     fakture_id: string;
     faktur_updated_at?: string | null;
     faktur_updated_by_name?: string | null;
+    tanggal_faktur?: string | null;
+    npwp_or_nik_pembeli?: string | null;
+    id_tku_pembeli?: string | null;
+    status_faktur?: boolean | null;
 }
 
 export interface InvoiceSalesOrderPagination {
