@@ -8,6 +8,7 @@ export interface InvoiceSalesOrderRequest {
     approvalstatus?: string;
     trandate_start?: string;
     trandate_end?: string;
+    status_faktur?: string;
 }
 
 export interface InvoiceSalesOrderLine {
