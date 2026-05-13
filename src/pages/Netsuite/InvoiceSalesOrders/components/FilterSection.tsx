@@ -13,6 +13,7 @@ interface FilterSectionProps {
     filterStartDate?: string;
     filterEndDate?: string;
     filterSubsidiary?: string;
+    filterImportStatus?: string;
     onFilterChange: (field: string, value: string) => void;
     onClearFilters: () => void;
 }
@@ -23,11 +24,17 @@ const APPROVAL_STATUS_OPTIONS = [
     { value: '3', label: 'Rejected' },
 ];
 
+const IMPORT_STATUS_OPTIONS = [
+    { value: 'true', label: 'Imported' },
+    { value: 'false', label: 'Not Imported' },
+];
+
 const FilterSection: React.FC<FilterSectionProps> = ({
     filterApprovalStatus,
     filterStartDate,
     filterEndDate,
     filterSubsidiary,
+    filterImportStatus,
     onFilterChange,
     onClearFilters,
 }) => {
@@ -111,9 +118,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         ? subsidiaryOptions.find(o => o.value === filterSubsidiary) || null
         : null;
 
+    const currentImportStatusValue = filterImportStatus
+        ? IMPORT_STATUS_OPTIONS.find(o => o.value === filterImportStatus) || null
+        : null;
+
     return (
         <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
                 {/* Subsidiary */}
                 <CustomSelect
@@ -137,6 +148,19 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     onChange={(selected) => onFilterChange('approvalstatus', selected?.value || '')}
                     options={APPROVAL_STATUS_OPTIONS}
                     placeholder="All Statuses"
+                    isClearable={true}
+                    isSearchable={false}
+                    className="w-full"
+                />
+
+                {/* Import Status */}
+                <CustomSelect
+                    id="status_faktur"
+                    name="status_faktur"
+                    value={currentImportStatusValue}
+                    onChange={(selected) => onFilterChange('status_faktur', selected?.value || '')}
+                    options={IMPORT_STATUS_OPTIONS}
+                    placeholder="All Import Statuses"
                     isClearable={true}
                     isSearchable={false}
                     className="w-full"
