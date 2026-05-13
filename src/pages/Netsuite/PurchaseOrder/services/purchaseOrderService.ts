@@ -1,5 +1,5 @@
 import { apiPost, apiGet, ApiResponse, apiPut } from '@/helpers/apiHelper';
-import { ComponentsDataResponse, HistoryLogResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, PostReceiptResponse, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
+import { ComponentsDataResponse, HistoryLogResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, PODownloadRequest, PODownloadResponse, POIDDetailResponse, POItemResponse, POItemsDetailRequest, POItemsRequest, PostReceiptResponse, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -114,6 +114,10 @@ export class PurchaseOrderService {
     }
 
     static async updatePurchaseOrder(data: PurchaseOrderFormUpdate): Promise<any> {
+        console.log({
+            data
+        });
+        
         const response = await apiPut(`${API_BASE_URL}/netsuite/purchasing-orders/update`, data as Record<string, any>);
         return response.data;
     }
@@ -201,5 +205,19 @@ export class PurchaseOrderService {
         };
         const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/receive-list/history-logs`, requestData as Record<string, any>);
         return response.data as HistoryLogResponse;
+    }
+
+    static async getPOIDItems(params: Partial<POItemsDetailRequest> = {}): Promise<POIDDetailResponse> {
+        const requestData: POItemsRequest = {
+            page: 1,
+            limit: 10,
+            sort_by: 'created_at',
+            sort_order: 'desc',
+            search: '',
+            ...params
+        };
+
+        const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/get-items`, requestData as Record<string, any>);
+        return response.data as POIDDetailResponse;
     }
 }

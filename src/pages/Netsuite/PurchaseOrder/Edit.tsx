@@ -48,6 +48,13 @@ export default function Edit() {
         handleSyncById,
         isSyncing,
         handleAddFiles,
+        itemTableData,
+        itemPagination,
+        loadingItemData,
+        handleItemsPageChange,
+        localAddedItems,
+        handleDeleteLocalItem,
+        handleUpdateLocalItem,
     } = usePurchaseOrderEdit();
 
     // Get subsidiary_id dari form data dengan defensive check
@@ -642,6 +649,18 @@ export default function Edit() {
                                                 }
                                             }}
                                             departmentError={errors.department || departmentSelectError}
+
+                                            // Items table pagination
+                                            itemTableData={itemTableData}
+                                            itemPagination={itemPagination}
+                                            loadingItemData={loadingItemData}
+                                            onItemsPageChange={handleItemsPageChange}
+
+                                            // Local pending items
+                                            localAddedItems={localAddedItems}
+                                            onDeleteLocalItem={handleDeleteLocalItem}
+                                            onUpdateLocalItem={handleUpdateLocalItem}
+                                            serverTotal={poDetail?.foreigntotal}
                                         />
                                     )}
                                     

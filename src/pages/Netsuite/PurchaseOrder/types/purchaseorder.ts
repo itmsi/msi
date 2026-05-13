@@ -144,6 +144,15 @@ export interface PurchaseOrderValidationErrors {
 }
 
 // FORM FIELD ITEMS PURCHASE ORDER
+export interface POItemsDetailRequest {
+    page: number;
+    limit: number;
+    sort_by: string;
+    sort_order: string;
+    search: string;
+    po_id?: string;
+    internal_id?: string;
+}
 export interface POItemsRequest {
     page: number;
     limit: number;
@@ -296,6 +305,7 @@ export interface POApprovalResponse {
 
 // PURCHASE ORDER DETAILS
 export interface PODetailData {
+    id?: string;
     po_id: string;
     po_number: string;
     po_date: string;
@@ -340,7 +350,6 @@ export interface PODetailData {
     user_notes: UserNotesItem[];
     files: AttachFileItem[];
 }
-
 export interface PODetailLine {
     line_id: number;
     item: number;
@@ -355,6 +364,7 @@ export interface PODetailLine {
     itemtype?: string;
     location?: number;
     quantity?: number;
+    qty?: number;
     quantitypending?: number;
     quantityreceived?: number;
     has_inbound?: boolean;
@@ -378,6 +388,17 @@ export interface PODetailLine {
     custcol_me_landed_cost?: number | null;
     custcol_msi_fob?: number | null;
     description?: string | null;
+}
+
+export interface POIDDetailResponse {
+    success: boolean;
+    data: DataPOIDItems;
+    message: string;
+}
+
+export interface DataPOIDItems {
+    items: PODetailLine[];
+    pagination: Pagination;
 }
 
 export interface PODetailResponse {

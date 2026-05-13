@@ -372,7 +372,7 @@ export default function Manage() {
                                 paginationTotalRows={pagination?.total || 0}
                                 paginationPerPage={pagination?.limit || 10}
                                 paginationDefaultPage={pagination?.page || 1}
-                                paginationRowsPerPageOptions={[10, 20, 50, 100]}
+                                paginationRowsPerPageOptions={[10, 20, 50]}
                                 onChangePage={handlePageChangeAman}
                                 onChangeRowsPerPage={handleRowsPerPageAman}
                                 fixedHeader={true}

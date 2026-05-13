@@ -342,6 +342,11 @@ export default function Create() {
                                         onProductDelete={handleProductDelete}
                                         onUpdateProductItem={handleUpdateProductItem}
 
+                                        // Di Create page, semua item adalah "lokal" — tampilkan via localAddedItems
+                                        localAddedItems={formData.items}
+                                        onDeleteLocalItem={handleProductDelete}
+                                        onUpdateLocalItem={handleUpdateProductItem}
+
                                         // Location props (is_parent = false)
                                         locationOptions={itemLocationOptions}
                                         locationPagination={itemLocationPagination}

@@ -2,7 +2,7 @@ import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import { handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma, formatCurrencyDynamic } from '@/helpers/generalHelper';
 import React, { useEffect, useMemo, useState } from 'react'
-import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
+import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem, Pagination } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
@@ -61,6 +61,20 @@ interface POItemsFieldsProps {
     selectedDepartment?: PODepartmentSelectOption | null;
     onDepartmentChange?: (option: PODepartmentSelectOption | null) => void;
     departmentError?: string;
+
+    // Items table (paginated dari API)
+    itemTableData?: TablePOItem[];
+    itemPagination?: Pagination | null;
+    loadingItemData?: boolean;
+    onItemsPageChange?: (page: number, limit: number) => void;
+
+    // Item yang baru ditambah (lokal, tidak hilang saat pindah halaman)
+    localAddedItems?: TablePOItem[];
+    onDeleteLocalItem?: (itemId: string) => void;
+    onUpdateLocalItem?: (index: number, field: string, value: any) => void;
+
+    // Grand total dari server (foreigntotal) — override kalkulasi lokal di Edit page
+    serverTotal?: number;
 }
 
 const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
@@ -94,7 +108,17 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
     departmentPagination = { page: 1, hasMore: true, loading: false },
     departmentInputValue = '',
     onDepartmentInputChange,
-    onDepartmentMenuScrollToBottom
+    onDepartmentMenuScrollToBottom,
+
+    itemTableData = [],
+    itemPagination,
+    loadingItemData = false,
+    onItemsPageChange,
+
+    localAddedItems = [],
+    onDeleteLocalItem,
+    onUpdateLocalItem,
+    serverTotal,
 }) => {
     // Use POItemsSelect hook for product management
     const {
@@ -111,13 +135,6 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 
     // Cek apakah semua field utama sudah terisi
     const isFormComplete = !!(formData.customform && formData.purchasedate && formData.vendorid && formData.currency && formData.subsidiary && formData.location && formData.class && formData.department);
-    // Handle update item function
-    const updateItemById = (index: number, field: string, value: any) => {
-        if (onUpdateProductItem) {
-            onUpdateProductItem(index, field, value);
-        }
-    };
-    
     // Helper to ensure numeric value
     const toNumber = (value: any): number => {
         if (typeof value === 'string') return parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
@@ -136,23 +153,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         const taxPercentage = extractTaxPercentage(taxCodeName);
         const taxAmount = (numericAmount * taxPercentage) / 100;
         const grossAmount = numericAmount + taxAmount;
-        
-        return { 
-            taxAmount: Math.round(taxAmount), 
-            grossAmount: Math.round(grossAmount)
-        };
-    };
-    
-    // Update tax calculations for an item
-    const updateTaxCalculation = (index: number, amount: number, taxCodeName?: string) => {
-        if (taxCodeName && amount > 0) {
-            const { taxAmount, grossAmount } = calculateTaxAmounts(amount, taxCodeName);
-            updateItemById(index, 'tax_amount', taxAmount);
-            updateItemById(index, 'gross_amount', grossAmount);
-        } else {
-            updateItemById(index, 'tax_amount', 0);
-            updateItemById(index, 'gross_amount', toNumber(amount));
-        }
+        return { taxAmount: Math.round(taxAmount), grossAmount: Math.round(grossAmount) };
     };
 
     // Initialize options on mount
@@ -181,8 +182,34 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         setSelectedProduct(null);
     };
     
-    // Define product table columns
-    const productColumns: TableColumn<TablePOItem>[] = [
+    // Handler pagination tabel items
+    const handlePageChange = (page: number) => {
+        onItemsPageChange?.(page, itemPagination?.limit || 10);
+    };
+
+    const handleRowsPerPage = (limit: number, page: number) => {
+        onItemsPageChange?.(page, limit);
+    };
+
+    // Factory columns — bisa dipakai untuk server items maupun local added items
+    const makeColumns = (
+        updateFn: (index: number, field: string, value: any) => void,
+        deleteFn: (id: string) => void
+    ): TableColumn<TablePOItem>[] => {
+        const update = (index: number, field: string, value: any) => updateFn(index, field, value);
+        const calcTax = (index: number, amount: number, taxCodeName?: string) => {
+            if (taxCodeName && amount > 0) {
+                const { taxAmount, grossAmount } = calculateTaxAmounts(amount, taxCodeName);
+                update(index, 'tax_amount', taxAmount);
+                update(index, 'gross_amount', grossAmount);
+            } else {
+                update(index, 'tax_amount', 0);
+                update(index, 'gross_amount', toNumber(amount));
+            }
+        };
+
+        // Define product table columns
+        return [
         {
             name: 'Product Name',
             selector: (row: TablePOItem) => row.product_name || 'N/A',
@@ -210,11 +237,11 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                                 const rate = toNumber(row.rate);
                                 const amount = qty * rate;
                                 
-                                updateItemById(index as number, 'qty', qty);
-                                updateItemById(index as number, 'amount', amount);
-                                updateItemById(index as number, 'total', amount);
+                                update(index as number, 'qty', qty);
+                                update(index as number, 'amount', amount);
+                                update(index as number, 'total', amount);
                                 
-                                updateTaxCalculation(index as number, amount, row.taxcode_name);
+                                calcTax(index as number, amount, row.taxcode_name);
                             }}
                             onBlur={(e) => {
                                 const qty = toNumber(e.target.value);
@@ -222,11 +249,11 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                                     const rate = toNumber(row.rate);
                                     const amount = rate; // qty = 1
                                     
-                                    updateItemById(index as number, 'qty', 1);
-                                    updateItemById(index as number, 'amount', amount);
-                                    updateItemById(index as number, 'total', amount);
+                                    update(index as number, 'qty', 1);
+                                    update(index as number, 'amount', amount);
+                                    update(index as number, 'total', amount);
                                     
-                                    updateTaxCalculation(index as number, amount, row.taxcode_name);
+                                    calcTax(index as number, amount, row.taxcode_name);
                                 }
                             }}
                             onFocus={(e) => e.target.select()}
@@ -250,7 +277,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             name={`description_${index}`}
                             value={row.description || ''}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {                                
-                                updateItemById(index as number, 'description', e.target.value);
+                                update(index as number, 'description', e.target.value);
                             }}
                             rows={2} 
                             placeholder="Enter item description..."
@@ -286,12 +313,12 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         const rate = fobVal + landedCost;
                         const amount = quantity * rate;
                         
-                        updateItemById(index as number, 'custcol_msi_fob', fobVal);
-                        updateItemById(index as number, 'rate', rate);
-                        updateItemById(index as number, 'amount', amount);
-                        updateItemById(index as number, 'total', amount);
+                        update(index as number, 'custcol_msi_fob', fobVal);
+                        update(index as number, 'rate', rate);
+                        update(index as number, 'amount', amount);
+                        update(index as number, 'total', amount);
                         
-                        updateTaxCalculation(index as number, amount, row.taxcode_name);
+                        calcTax(index as number, amount, row.taxcode_name);
                     }}
                     onFocus={(e) => e.target.select()}
                     className="border-1 rounded p-1 px-3 w-[285px] text-center"
@@ -326,12 +353,12 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         const rate = fob + costVal;
                         const amount = quantity * rate;
                         
-                        updateItemById(index as number, 'custcol_me_landed_cost', costVal);
-                        updateItemById(index as number, 'rate', rate);
-                        updateItemById(index as number, 'amount', amount);
-                        updateItemById(index as number, 'total', amount);
+                        update(index as number, 'custcol_me_landed_cost', costVal);
+                        update(index as number, 'rate', rate);
+                        update(index as number, 'amount', amount);
+                        update(index as number, 'total', amount);
                         
-                        updateTaxCalculation(index as number, amount, row.taxcode_name);
+                        calcTax(index as number, amount, row.taxcode_name);
                     }}
                     onFocus={(e) => e.target.select()}
                     className="border-1 rounded p-1 px-3 w-[285px] text-center"
@@ -412,20 +439,20 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         } : null}
                         onChange={(option) => {
                             if (option) {
-                                updateItemById(index as number, 'taxcode', parseInt(option.value));
-                                updateItemById(index as number, 'taxcode_name', option.label);
-                                updateItemById(index as number, 'tax_rate', option.label);
+                                update(index as number, 'taxcode', parseInt(option.value));
+                                update(index as number, 'taxcode_name', option.label);
+                                update(index as number, 'tax_rate', option.label);
                                 
                                 const currentAmount = toNumber(row.amount);
-                                updateTaxCalculation(index as number, currentAmount, option.label);
+                                calcTax(index as number, currentAmount, option.label);
                             } else {
                                 // Clear tax code
-                                updateItemById(index as number, 'taxcode', 0);
-                                updateItemById(index as number, 'taxcode_name', '');
-                                updateItemById(index as number, 'tax_rate', '');
+                                update(index as number, 'taxcode', 0);
+                                update(index as number, 'taxcode_name', '');
+                                update(index as number, 'tax_rate', '');
                                 
                                 const currentAmount = toNumber(row.amount);
-                                updateTaxCalculation(index as number, currentAmount);
+                                calcTax(index as number, currentAmount);
                             }
                         }}
                         placeholder="Select tax code"
@@ -504,8 +531,8 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         onInputChange={onDepartmentInputChange}
                         onChange={(option) => {
                             if (option) {
-                                updateItemById(index as number, 'department', parseInt(option.value));
-                                updateItemById(index as number, 'department_name', option.label);
+                                update(index as number, 'department', parseInt(option.value));
+                                update(index as number, 'department_name', option.label);
                             }
                         }}
                         error={!row.department && errors?.items_department ? errors.items_department : undefined}
@@ -547,8 +574,8 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             onInputChange={onClassInputChange}
                             onChange={(option) => {
                                 if (option) {
-                                    updateItemById(index as number, 'class', parseInt(option.value));
-                                    updateItemById(index as number, 'class_name', option.label);
+                                    update(index as number, 'class', parseInt(option.value));
+                                    update(index as number, 'class_name', option.label);
                                 }
                             }}
                             error={!row.class && errors?.items_class ? errors.items_class : undefined}
@@ -591,8 +618,8 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             onInputChange={onLocationInputChange}
                             onChange={(option) => {
                                 if (option) {
-                                    updateItemById(index as number, 'location', parseInt(option.value));
-                                    updateItemById(index as number, 'location_name', option.label);
+                                    update(index as number, 'location', parseInt(option.value));
+                                    update(index as number, 'location_name', option.label);
                                 }
                             }}
                             error={!row.location && errors?.items_location ? errors.items_location : undefined}
@@ -618,7 +645,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => onProductDelete?.(row.id || index.toString())}
+                        onClick={() => deleteFn(row.id || index.toString())}
                         className="text-red-600 hover:text-red-800"
                     >
                         <MdDeleteOutline size={14} />
@@ -631,6 +658,19 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             sortable: false
         }
     ];
+    };
+
+    // Columns untuk server items (edit existing)
+    const productColumns = makeColumns(
+        (index, field, value) => onUpdateProductItem?.(index, field, value),
+        (id) => onProductDelete?.(id)
+    );
+
+    // Columns untuk local added items (item baru sebelum disimpan)
+    const localColumns = makeColumns(
+        (index, field, value) => onUpdateLocalItem?.(index, field, value),
+        (id) => onDeleteLocalItem?.(id)
+    );
     
     if (loadingMasterData) {
         return (
@@ -642,6 +682,11 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             </div>
         );
     }
+console.log({
+    a: selectedProduct,
+    b:  isFormComplete,
+    c: formData
+});
 
     return (
         <div className="space-y-6">
@@ -697,17 +742,51 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     )
                 )}
 
-                {/* Products Table */}
-                {formData.items && formData.items.length > 0 ? (
+                {/* Pending items — item yang baru ditambah, tidak hilang saat pindah halaman */}
+                {localAddedItems.length > 0 && (
+                    <div className="mt-6 font-secondary">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm font-medium text-warning-500 py-0.5">
+                                You have {localAddedItems.length} unsaved item
+                            </span>
+                        </div>
+                        <CustomDataTable
+                            columns={localColumns}
+                            data={localAddedItems}
+                            fixedHeader={true}
+                            fixedHeaderScrollHeight="400px"
+                            responsive
+                            pagination={false}
+                            highlightOnHover
+                            striped={false}
+                            persistTableHead
+                            borderRadius="8px"
+                        />
+                    </div>
+                )}
+
+                {/* Products Table — existing items dari server, paginated */}
+                {itemTableData && itemTableData.length > 0 && (
                     <div className="mt-6 font-secondary">
                         <CustomDataTable
                             columns={productColumns}
-                            data={formData.items}
-                            pagination={false}
+                            data={itemTableData}
+                            loading={loadingItemData}
+                            pagination
+                            paginationServer
+                            paginationTotalRows={itemPagination?.total || 0}
+                            paginationPerPage={itemPagination?.limit || 10}
+                            paginationDefaultPage={itemPagination?.page || 1}
+                            paginationRowsPerPageOptions={[10, 20, 50]}
+                            onChangePage={handlePageChange}
+                            onChangeRowsPerPage={handleRowsPerPage}
+                            fixedHeader={true}
+                            fixedHeaderScrollHeight={`${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? '' : '625px'}`}
                             responsive
+                            highlightOnHover
                             striped={false}
-                            highlightOnHover={false}
-                            className={`${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? '' : 'min-h-[300px] '}`}
+                            persistTableHead
+                            borderRadius="8px"
                             noDataComponent={
                                 <div className="text-center py-8 text-gray-500">
                                     No products added yet
@@ -715,7 +794,8 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             }
                         />
                     </div>
-                ) : (
+                )}
+                {itemTableData.length > 0 || localAddedItems.length > 0 ? null : (
                     <div className={`text-center py-8 text-gray-500 border-2 border-dashed rounded-lg ${errors?.items ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}>
                         <p className="text-lg mb-2">No products added yet</p>
                         <p className="text-sm">Start by selecting a product from the dropdown above</p>
@@ -725,10 +805,10 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 {/* Invoice Summary */}
                 {
                  (formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
-                    formData.items && formData.items.length > 0 && (<>
+                    itemTableData.length > 0 && (<>
                     {/* <div className="grid grid-cols-1 md:grid-cols-3">
                         <div className=" md:col-span-2"></div> */}
-                        <InvoiceSummary items={formData.items} currency={formData?.currency_symbol || ''} />
+                        <InvoiceSummary items={formData.items} currency={formData?.currency_symbol || ''} serverTotal={serverTotal} />
                     {/* </div> */}
                     </>)
                 )}
@@ -741,7 +821,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 }
 
 // Summary invoice dari items
-export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string }> = ({ items, currency }) => {
+export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string, serverTotal?: number }> = ({ items, currency, serverTotal }) => {
     // Helper to ensure numeric value  
     const toNumber = (value: any): number => {
         if (typeof value === 'string') {
@@ -754,7 +834,7 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string }
     const summary = useMemo(() => {
         const subtotal = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.amount)), 0);
         const totalTax = items.reduce((sum, item) => sum + toNumber(item.tax_amount), 0);
-        const grandTotal = items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
+        const grandTotal = serverTotal !== undefined ? serverTotal : items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
         const totalQty = items.reduce((sum, item) => sum + toNumber(item.qty), 0);
 
         return { subtotal, totalTax, grandTotal, totalQty };
