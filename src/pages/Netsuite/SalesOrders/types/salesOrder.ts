@@ -38,6 +38,7 @@ export interface SalesOrder {
     customer_name: string;
     memo: string | null;
     last_modified: string | null;
+    last_modified_by_name: string | null;
     items: SalesOrderItem[];
 }
 

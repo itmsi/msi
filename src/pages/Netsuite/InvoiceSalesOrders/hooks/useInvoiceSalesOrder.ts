@@ -12,6 +12,7 @@ export const useInvoiceSalesOrder = () => {
     const [filterStartDate, setFilterStartDate] = useState<string>('');
     const [filterEndDate, setFilterEndDate] = useState<string>('');
     const [filterSubsidiary, setFilterSubsidiary] = useState<string>('');
+    const [filterImportStatus, setFilterImportStatus] = useState<string>('');
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -52,6 +53,9 @@ export const useInvoiceSalesOrder = () => {
                 ...(overrides?.trandate_end !== undefined
                     ? (overrides.trandate_end ? { trandate_end: overrides.trandate_end } : {})
                     : (filterEndDate ? { trandate_end: filterEndDate } : {})),
+                ...(overrides?.status_faktur !== undefined
+                    ? (overrides.status_faktur ? { status_faktur: overrides.status_faktur } : {})
+                    : (filterImportStatus ? { status_faktur: filterImportStatus } : {})),
             };
 
             const response = await InvoiceSalesOrderService.getInvoiceSalesOrders(requestBody);
@@ -70,7 +74,7 @@ export const useInvoiceSalesOrder = () => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, filterApprovalStatus, filterStartDate, filterEndDate, filterSubsidiary, pagination.page, pagination.page_size]);
+    }, [searchValue, sortOrder, filterApprovalStatus, filterStartDate, filterEndDate, filterSubsidiary, filterImportStatus, pagination.page, pagination.page_size]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
@@ -99,6 +103,8 @@ export const useInvoiceSalesOrder = () => {
             setFilterEndDate(value);
         } else if (filterType === 'subsidiary') {
             setFilterSubsidiary(value);
+        } else if (filterType === 'status_faktur') {
+            setFilterImportStatus(value);
         }
 
         setPagination(prev => ({ ...prev, page: 1 }));
@@ -110,6 +116,7 @@ export const useInvoiceSalesOrder = () => {
         else if (filterType === 'trandate_start') override.trandate_start = value;
         else if (filterType === 'trandate_end') override.trandate_end = value;
         else if (filterType === 'subsidiary') override.subsidiary = value;
+        else if (filterType === 'status_faktur') override.status_faktur = value;
 
         fetchInvoiceSalesOrders(override);
     }, [fetchInvoiceSalesOrders]);
@@ -158,6 +165,7 @@ export const useInvoiceSalesOrder = () => {
         setFilterStartDate('');
         setFilterEndDate('');
         setFilterSubsidiary('');
+        setFilterImportStatus('');
         setSortOrder('desc');
         setPagination(prev => ({ ...prev, page: 1 }));
         fetchInvoiceSalesOrders({
@@ -168,6 +176,7 @@ export const useInvoiceSalesOrder = () => {
             trandate_start: '',
             trandate_end: '',
             subsidiary: '',
+            status_faktur: '',
         });
     }, [fetchInvoiceSalesOrders]);
 
@@ -176,6 +185,7 @@ export const useInvoiceSalesOrder = () => {
         filterStartDate,
         filterEndDate,
         filterSubsidiary,
+        filterImportStatus,
     ].filter(Boolean).length;
 
     return {
@@ -189,6 +199,7 @@ export const useInvoiceSalesOrder = () => {
         filterStartDate,
         filterEndDate,
         filterSubsidiary,
+        filterImportStatus,
         activeFilterCount,
         setSearchValue,
         fetchInvoiceSalesOrders,
