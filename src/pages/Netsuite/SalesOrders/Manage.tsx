@@ -202,6 +202,7 @@ export default function Manage() {
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'Edit Detail',
                 permission: 'read',
+                condition: () => false
             },
             {
                 icon: MdOutlineSync,
