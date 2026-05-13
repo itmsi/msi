@@ -283,7 +283,7 @@ export default function Manage() {
             name: 'Customer Name',
             selector: row => row.entityid || row.entity || '-',
             cell: row => {
-                const isInvalid = !row.npwp_or_nik_pembeli || row.npwp_or_nik_pembeli === '0000000000000000';
+                const isInvalid = !row.no_tax_buyer || row.no_tax_buyer === '0000000000000000';
                 return (
                 <div className="items-center py-2">
                     <div className="block text-sm text-gray-500">
@@ -294,7 +294,7 @@ export default function Manage() {
                                 TKU ID not filled
                             </span>
                         ) : (
-                            <span className="text-sm text-gray-900">{row.npwp_or_nik_pembeli}</span>
+                            <span className="text-sm text-gray-900">{row.no_tax_buyer}</span>
                         )}
                 </div>
                 );
