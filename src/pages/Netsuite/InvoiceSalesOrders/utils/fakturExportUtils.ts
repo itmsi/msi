@@ -39,11 +39,11 @@ export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
         xml += `      <RefDesc>${escapeXML(row?.tranid || row?.id)}</RefDesc>\n`;
         xml += `      <FacilityStamp>${escapeXML(faktur.cap_fasilitas)}</FacilityStamp>\n`;
         xml += `      <SellerIDTKU>${escapeXML(faktur.id_tku_Penjual)}</SellerIDTKU>\n`;
-        xml += `      <BuyerTin>${escapeXML(faktur.npwp_or_nik_pembeli)}</BuyerTin>\n`;
-        xml += `      <BuyerDocument>${escapeXML(faktur.jenis_id_pembeli)}</BuyerDocument>\n`;
+        xml += `      <BuyerTin>${escapeXML(faktur.no_tax_buyer)}</BuyerTin>\n`;
+        xml += `      <BuyerDocument>${escapeXML(faktur.type_tax_buyer)}</BuyerDocument>\n`;
         xml += `      <BuyerCountry>${escapeXML(faktur.negara_pembeli)}</BuyerCountry>\n`;
         xml += `      <BuyerDocumentNumber>${escapeXML(faktur.nomor_dokumen_pembeli)}</BuyerDocumentNumber>\n`;
-        xml += `      <BuyerName>${escapeXML(faktur.nama_pembeli)}</BuyerName>\n`;
+        xml += `      <BuyerName>${escapeXML(faktur.name_tax_buyer)}</BuyerName>\n`;
         xml += `      <BuyerAdress>${escapeXML(faktur.alamat_pembeli)}</BuyerAdress>\n`;
         xml += `      <BuyerEmail>${escapeXML(faktur.email_pembeli)}</BuyerEmail>\n`;
         xml += `      <BuyerIDTKU>${escapeXML(faktur.id_tku_pembeli)}</BuyerIDTKU>\n`;

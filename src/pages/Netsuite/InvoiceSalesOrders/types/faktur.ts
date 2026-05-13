@@ -27,6 +27,9 @@ export interface Faktur {
     referensi?: string;
     cap_fasilitas?: string;
     id_tku_Penjual?: string;
+    type_tax_buyer?: string | null;
+    no_tax_buyer?: string | null;
+    name_tax_buyer?: string | null;
     npwp_or_nik_pembeli?: string;
     jenis_id_pembeli?: string;
     negara_pembeli?: string;
