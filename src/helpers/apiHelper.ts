@@ -137,6 +137,7 @@ export const apiPostMultipart = async <T = unknown>(url: string, data: FormData)
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            timeout: 120000, // 2 menit untuk upload file besar
         });
         return {
             data: response.data,
@@ -154,6 +155,7 @@ export const apiPutMultipart = async <T = unknown>(url: string, data: FormData):
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            timeout: 120000, // 2 menit untuk upload file besar
         });
         return {
             data: response.data,

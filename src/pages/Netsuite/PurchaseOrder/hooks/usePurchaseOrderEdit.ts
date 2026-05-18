@@ -39,6 +39,9 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
     const fileLines = (detail.files || []);
 
     const files: AttachFileItem[] = fileLines.map((line) => ({
+        id: line.id ?? '',
+        poId: line.poId ?? '',
+        storagePath: line.storagePath ?? '',
         fileUrl: line.fileUrl ?? '',
         fileName: line.fileName,
         created_by_api: line.created_by_api
@@ -163,23 +166,23 @@ export const usePurchaseOrderEdit = () => {
                 toast.error('Gagal memuat master data');
             }
 
-                // Set detail PO
-                if (detailRes.success && detailRes.data?.length > 0) {
-                    const detail = detailRes.data[0];
-                    setPODetail(detail);
-                    setFormData(mapPODetailToForm(detail));
-                } else {
-                    toast.error(detailRes.message || 'Data Purchase Order tidak ditemukan');
-                    navigate('/netsuite/purchase-order');
-                }
-            } catch (error) {
-                console.error('Error loading data:', error);
+            // Set detail PO
+            if (detailRes.success && detailRes.data?.length > 0) {
+                const detail = detailRes.data[0];
+                setPODetail(detail);
+                setFormData(mapPODetailToForm(detail));
+            } else {
+                toast.error(detailRes.message || 'Data Purchase Order tidak ditemukan');
                 navigate('/netsuite/purchase-order');
-                toast.error('Gagal memuat data');
-            } finally {
-                setIsLoading(false);
-                setLoadingMasterData(false);
             }
+        } catch (error) {
+            console.error('Error loading data:', error);
+            navigate('/netsuite/purchase-order');
+            toast.error('Gagal memuat data');
+        } finally {
+            setIsLoading(false);
+            setLoadingMasterData(false);
+        }
     }, [id]);
 
     useEffect(() => {
@@ -325,8 +328,8 @@ export const usePurchaseOrderEdit = () => {
             const response = await PurchaseOrderService.updatePurchaseOrder(requestData);
             if (response.success) {
                 toast.success('Purchase Order berhasil diupdate');
-                // window.location.href = '/netsuite/purchase-order/edit/' + id;
                 // navigate('/netsuite/purchase-order/edit/' + id);
+                window.location.href = '/netsuite/purchase-order/edit/' + id;
             } else {
                 toast.error(response.message || 'Gagal mengupdate Purchase Order');
             }
