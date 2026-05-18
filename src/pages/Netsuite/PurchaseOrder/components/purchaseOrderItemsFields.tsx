@@ -61,6 +61,8 @@ interface POItemsFieldsProps {
     selectedDepartment?: PODepartmentSelectOption | null;
     onDepartmentChange?: (option: PODepartmentSelectOption | null) => void;
     departmentError?: string;
+    // Grand total dari server (foreigntotal) — override kalkulasi lokal di Edit page
+    serverTotal?: number;
 }
 
 const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
@@ -94,7 +96,8 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
     departmentPagination = { page: 1, hasMore: true, loading: false },
     departmentInputValue = '',
     onDepartmentInputChange,
-    onDepartmentMenuScrollToBottom
+    onDepartmentMenuScrollToBottom,
+    serverTotal,
 }) => {
     // Use POItemsSelect hook for product management
     const {
@@ -680,7 +683,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             type="button"
                             onClick={handleAddProduct}
                             className="flex items-center gap-2"
-                            disabled={!selectedProduct || !isFormComplete}
+                            disabled={!selectedProduct || !isFormComplete || formData.items.length >= 300}
                         >
                             <MdAdd size={16} />
                             Add Product
@@ -728,7 +731,11 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     formData.items && formData.items.length > 0 && (<>
                     {/* <div className="grid grid-cols-1 md:grid-cols-3">
                         <div className=" md:col-span-2"></div> */}
-                        <InvoiceSummary items={formData.items} currency={formData?.currency_symbol || ''} />
+                        <InvoiceSummary 
+                            items={formData.items} 
+                            currency={formData?.currency_symbol || ''} 
+                            serverTotal={serverTotal}
+                        />
                     {/* </div> */}
                     </>)
                 )}
@@ -741,7 +748,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 }
 
 // Summary invoice dari items
-export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string }> = ({ items, currency }) => {
+export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string, serverTotal?: number }> = ({ items, currency, serverTotal }) => {
     // Helper to ensure numeric value  
     const toNumber = (value: any): number => {
         if (typeof value === 'string') {
@@ -754,7 +761,7 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string }
     const summary = useMemo(() => {
         const subtotal = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.amount)), 0);
         const totalTax = items.reduce((sum, item) => sum + toNumber(item.tax_amount), 0);
-        const grandTotal = items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
+        const grandTotal = serverTotal !== null ? serverTotal : items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
         const totalQty = items.reduce((sum, item) => sum + toNumber(item.qty), 0);
 
         return { subtotal, totalTax, grandTotal, totalQty };
@@ -777,7 +784,7 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string }
                     </div>
                     <div className="border-t border-gray-300 pt-3 flex justify-between text-sm font-primary-bold">
                         <span>Grand Total</span>
-                        <span className="text-blue-700">{formatCurrencyDynamic(summary.grandTotal, currency)}</span>
+                        <span className="text-blue-700">{formatCurrencyDynamic(Number(summary.grandTotal), currency)}</span>
                     </div>
                 </div>
             </div>

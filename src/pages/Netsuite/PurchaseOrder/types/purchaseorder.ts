@@ -152,6 +152,15 @@ export interface POItemsRequest {
     search: string;
     is_parent?: boolean;
 }
+export interface POItemsSelectRequest {
+    page: number;
+    limit: number;
+    sort_by: string;
+    sort_order: string;
+    search: string;
+    item_type: string[];
+    is_parent?: boolean;
+}
 export interface FormFieldItemsResponse {
     success: boolean;
     data: MasterDataFormFieldItems;
@@ -339,6 +348,18 @@ export interface PODetailData {
     lines: PODetailLine[];
     user_notes: UserNotesItem[];
     files: AttachFileItem[];
+    message_error: MessageError | null;
+}
+
+export interface MessageError {
+  response: ErrorResponsePayload;
+}
+
+export interface ErrorResponsePayload {
+  errors: any;
+  message: string;
+  success: boolean;
+  timestamp: string;
 }
 
 export interface PODetailLine {
@@ -355,6 +376,7 @@ export interface PODetailLine {
     itemtype?: string;
     location?: number;
     quantity?: number;
+    qty?: number;
     quantitypending?: number;
     quantityreceived?: number;
     has_inbound?: boolean;
