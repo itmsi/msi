@@ -131,6 +131,7 @@ export const createActionsColumn = (actions: Array<{
     condition?: (row: any) => boolean;
     width?: string;
     title?: string;
+    disable?: (row: any) => boolean;
 }>): TableColumn<any> => ({
     name: actions[0]?.title || 'Actions',
     cell: (row: any) => (
@@ -147,6 +148,7 @@ export const createActionsColumn = (actions: Array<{
                                 className={`p-2 rounded-md text-sm font-medium transition-colors relative ${
                                     action.className || 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                                 }`}
+                                disabled={action.disable ? action.disable(row) : false}
                             >
                                 <Icon className="w-4 h-4" />
                             </PermissionButton>

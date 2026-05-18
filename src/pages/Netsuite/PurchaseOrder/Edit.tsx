@@ -656,15 +656,18 @@ export default function Edit() {
                                     {activeTab === 'files' && (
                                         <FilesTab
                                             formData={formData}
+                                            poId={poDetail?.po_id}
                                             fileList={poDetail?.files || []}
                                             pendingFiles={(formData.files || []).filter(
                                                 file => !(poDetail?.files || []).some(
-                                                    pf => pf.fileUrl === file.fileUrl && pf.fileName === file.fileName
+                                                    pf => (pf.fileUrl || '') === (file.fileUrl || '') &&
+                                                          (pf.fileName || '') === (file.fileName || '')
                                                 )
                                             )}
                                             deletedFileUrls={(poDetail?.files || [])
                                                 .filter(pf => !(formData.files || []).some(
-                                                    file => file.fileUrl === pf.fileUrl && file.fileName === pf.fileName
+                                                    file => (file.fileUrl || '') === (pf.fileUrl || '') &&
+                                                            (file.fileName || '') === (pf.fileName || '')
                                                 ))
                                                 .map(pf => pf.fileUrl)
                                             }
