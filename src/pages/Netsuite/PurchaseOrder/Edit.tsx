@@ -374,8 +374,11 @@ export default function Edit() {
                                 <Alert variant='warning' title='Purchase Order Is Being Processed'>
                                     <div className="space-y-4">
                                         <p className="text-sm text-gray-500">
-                                            Your purchase order is currently being generated. Please allow some time for the process to complete. <br />
-                                            Click the refresh button below to check whether the data is already available.
+                                            {
+                                                poDetail?.message_error ? (poDetail.message_error.response.message) : 
+                                                <>Your purchase order is currently being generated. Please allow some time for the process to complete. <br />
+                                                Click the refresh button below to check whether the data is already available.</>
+                                            } 
                                         </p>
                                         <ElemRefresh />
                                     </div>
@@ -386,7 +389,11 @@ export default function Edit() {
                                 <Alert variant='warning' title='Failed to Generate Purchase Order'>
                                     <div className="space-y-4">
                                         <p className="text-sm text-gray-500">
-                                            We were unable to generate your purchase order at this time. Please try again by clicking the refresh button below. If the issue persists, contact support for further assistance.
+                                            {
+                                                poDetail?.message_error ? (poDetail.message_error.response.message) : 
+                                                'We were unable to generate your purchase order at this time. Please try again by clicking the refresh button below. If the issue persists, contact support for further assistance.'
+                                            } 
+                                            
                                         </p>
                                         <ElemRefresh />
                                     </div>
@@ -642,6 +649,7 @@ export default function Edit() {
                                                 }
                                             }}
                                             departmentError={errors.department || departmentSelectError}
+                                            serverTotal={poDetail?.foreigntotal}
                                         />
                                     )}
                                     

@@ -1,9 +1,35 @@
 import { useState, useEffect, useCallback } from 'react';
-import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldItems, TablePOItem, PODetailData, PurchaseOrderFormUpdate, AttachFileItem } from '../types/purchaseorder';
+import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldItems, TablePOItem, PODetailData, PurchaseOrderFormUpdate, AttachFileItem, PODetailLine } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 import { useNavigate, useParams } from 'react-router';
 import toast from 'react-hot-toast';
 
+const calcLineAmounts = (line: PODetailLine) => {
+    const fob = line.custcol_msi_fob != null ? Number(line.custcol_msi_fob) : 0;
+    const landedCost = line.custcol_me_landed_cost != null ? Number(line.custcol_me_landed_cost) : 0;
+    const qty = line.quantity ?? line.qty ?? 0;
+    const rate = line.rate ?? (fob + landedCost);
+
+    // Jika netamount null, kalkulasi dari rate * qty
+    const amount = line.netamount != null ? line.netamount : rate * qty;
+
+    const taxRate = line.taxrate1 != null ? Number(line.taxrate1) : (() => {
+        // Fallback: ekstrak persentase dari string taxcode_display (e.g. "VAT 11%")
+        if (line.taxcode_display) {
+            const match = line.taxcode_display.match(/([\d.]+)/);
+            return match ? parseFloat(match[1]) : 0;
+        }
+        return 0;
+    })();
+    // Recalculate jika tax1amt null atau 0 padahal taxrate ada (netamount null case)
+    const needsCalcTax = (line.tax1amt == null || line.tax1amt === 0) && taxRate > 0;
+    const taxAmount = needsCalcTax ? Math.round((amount * taxRate) / 100) : (line.tax1amt ?? 0);
+    // Recalculate grossamt jika null atau tidak konsisten dengan amount + taxAmount
+    const needsCalcGross = line.grossamt == null || line.grossamt === 0;
+    const grossAmount = needsCalcGross ? Math.round(amount + taxAmount) : (line.grossamt ?? 0);
+
+    return { qty, rate, amount, taxAmount, grossAmount };
+};
 // Mapping response API (PODetailData) ke format form (PurchaseOrderForm)
 const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
     const firstLine = detail.lines?.[0];
@@ -23,10 +49,8 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         product_id: String(line.item),
         product_name: line.item_display || '',
         itemId: line.item,
-        qty: line.quantity ?? 0,
-        rate: line.rate ?? 0,
-        amount: line.netamount ?? 0,
-        total: line.grossamt ?? 0,
+        ...calcLineAmounts(line),
+        total: calcLineAmounts(line).grossAmount,
         department: line.department ?? 0,
         department_name: line.department_display || '',
         class: line.class ?? 0,
@@ -36,8 +60,8 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         taxcode: line.taxcode ?? 0,
         taxcode_name: line.taxcode_display || '',
         tax_rate: line.taxrate1 != null ? String(line.taxrate1) || '' : String(line.taxcode_display) || '',
-        gross_amount: line.grossamt ?? 0,
-        tax_amount: line.tax1amt ?? 0,
+        gross_amount: calcLineAmounts(line).grossAmount,
+        tax_amount: calcLineAmounts(line).taxAmount,
         custcol_me_landed_cost: line.custcol_me_landed_cost != null ? Number(line.custcol_me_landed_cost) : 0,
         custcol_msi_fob: line.custcol_msi_fob != null ? Number(line.custcol_msi_fob) : 0,
         description: line.description || ''
@@ -134,7 +158,7 @@ export const usePurchaseOrderEdit = () => {
 
             // Set master data
             if (masterRes.data.success) {
-                setMasterData(masterRes.data.data);
+                setMasterData(masterRes.data.data);                
             } else {
                 toast.error('Gagal memuat master data');
             }
@@ -143,7 +167,6 @@ export const usePurchaseOrderEdit = () => {
                 if (detailRes.success && detailRes.data?.length > 0) {
                     const detail = detailRes.data[0];
                     setPODetail(detail);
-                    
                     setFormData(mapPODetailToForm(detail));
                 } else {
                     toast.error(detailRes.message || 'Data Purchase Order tidak ditemukan');
@@ -302,7 +325,7 @@ export const usePurchaseOrderEdit = () => {
             const response = await PurchaseOrderService.updatePurchaseOrder(requestData);
             if (response.success) {
                 toast.success('Purchase Order berhasil diupdate');
-                window.location.href = '/netsuite/purchase-order/edit/' + id;
+                // window.location.href = '/netsuite/purchase-order/edit/' + id;
                 // navigate('/netsuite/purchase-order/edit/' + id);
             } else {
                 toast.error(response.message || 'Gagal mengupdate Purchase Order');

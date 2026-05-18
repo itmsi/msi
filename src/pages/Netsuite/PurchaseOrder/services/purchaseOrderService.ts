@@ -1,5 +1,5 @@
 import { apiPost, apiGet, ApiResponse, apiPut } from '@/helpers/apiHelper';
-import { ComponentsDataResponse, HistoryLogResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, PostReceiptResponse, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
+import { ComponentsDataResponse, HistoryLogResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, POItemsSelectRequest, PostReceiptResponse, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -24,13 +24,14 @@ export class PurchaseOrderService {
         );
     }
 
-    static async getPOItems(params: Partial<POItemsRequest> = {}): Promise<POItemResponse> {
+    static async getPOItems(params: Partial<POItemsSelectRequest> = {}): Promise<POItemResponse> {
         const requestData: POItemsRequest = {
             page: 1,
             limit: 10,
             sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
+            item_type: ["Service", "Inventory Item", "Kit/Package"],
             ...params
         };
 
