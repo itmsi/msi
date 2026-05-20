@@ -35,7 +35,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
     <div className="flex justify-center items-center py-12">
         <div className="text-center">
         <LoadingSpinner size="lg" />
-        <p className="text-gray-700 font-medium">{message}</p>
+        <p className="text-gray-600 font-secondary font-medium mt-3">{message}</p>
       </div>
     </div>
   );

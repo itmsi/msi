@@ -1,7 +1,7 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import { handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma, formatCurrencyDynamic } from '@/helpers/generalHelper';
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import 'react-date-range/dist/styles.css';
@@ -16,6 +16,8 @@ import { POLocationPaginationState, POLocationSelectOption } from '@/hooks/usePO
 import { POClassPaginationState, POClassSelectOption } from '@/hooks/usePOClassSelect';
 import { PODepartmentPaginationState, PODepartmentSelectOption } from '@/hooks/usePODepartmentSelect';
 import TextArea from '@/components/form/input/TextArea';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
+import { LoadingOverlay } from '@/components/common/Loading';
 
 
 interface POItemsFieldsProps {
@@ -111,6 +113,33 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [productSelectError, setProductSelectError] = useState<string>('');
+
+    // Infinite scroll untuk tabel items
+    const BATCH_SIZE = 50;
+    const [displayCount, setDisplayCount] = useState(BATCH_SIZE);
+
+    const hasMoreItems = displayCount < (formData.items?.length || 0);
+
+    const loadMoreItems = useCallback(() => {
+        setDisplayCount(prev => Math.min(prev + BATCH_SIZE, formData.items?.length || 0));
+    }, [formData.items?.length]);
+
+    const { loadingRef } = useInfiniteScroll({
+        hasMore: hasMoreItems,
+        loading: false,
+        onLoadMore: loadMoreItems,
+        threshold: 100,
+    });
+
+    // Reset displayCount ketika items berubah (misal item ditambah/dihapus)
+    useEffect(() => {
+        setDisplayCount(BATCH_SIZE);
+    }, [formData.items?.length]);
+
+    const visibleItems = useMemo(
+        () => formData.items?.slice(0, displayCount) || [],
+        [formData.items, displayCount]
+    );
 
     // Cek apakah semua field utama sudah terisi
     const isFormComplete = !!(formData.customform && formData.purchasedate && formData.vendorid && formData.currency && formData.subsidiary && formData.location && formData.class && formData.department);
@@ -702,10 +731,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 
                 {/* Products Table */}
                 {formData.items && formData.items.length > 0 ? (
-                    <div className="mt-6 font-secondary">
+                    <div
+                        className="mt-6 font-secondary overflow-y-auto"
+                        style={{ maxHeight: formData.items?.length > 100 ? '920px' : '625px' }}
+                    >
                         <CustomDataTable
                             columns={productColumns}
-                            data={formData.items}
+                            data={visibleItems}
                             pagination={false}
                             responsive
                             striped={false}
@@ -717,6 +749,14 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                                 </div>
                             }
                         />
+                        {/* Sentinel harus di dalam wrapper scroll agar IntersectionObserver bekerja */}
+                        <div ref={loadingRef} className="py-2 text-center text-sm text-gray-400">
+                            {hasMoreItems && (
+                                <LoadingOverlay
+                                    message={`Menampilkan ${displayCount} dari ${formData.items.length} item...`}
+                                />
+                            )}
+                        </div>
                     </div>
                 ) : (
                     <div className={`text-center py-8 text-gray-500 border-2 border-dashed rounded-lg ${errors?.items ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}>
