@@ -51,13 +51,16 @@ export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
         xml += `      <ListOfGoodService>\n`;
         const details = faktur.details || [];
         details.forEach((detail: any) => {
+            const qty = parseFloat(detail.jumlah_barang_jasa || 0);
+            if (qty === 0) return;
+
             xml += `        <GoodService>\n`;
             xml += `          <Opt>${escapeXML(detail.barang_or_jasa)}</Opt>\n`;
             xml += `          <Code>${escapeXML(detail.kode_barang_jasa)}</Code>\n`;
             xml += `          <Name>${escapeXML(detail.nama_barang_or_jasa)}</Name>\n`;
             xml += `          <Unit>${escapeXML(detail.nama_satuan_ukur)}</Unit>\n`;
             xml += `          <Price>${Math.round(Number(detail.harga_satuan) || 0)}</Price>\n`;
-            xml += `          <Qty>${parseFloat(detail.jumlah_barang_jasa || 0)}</Qty>\n`;
+            xml += `          <Qty>${qty}</Qty>\n`;
             xml += `          <TotalDiscount>${Math.round(Number(detail.total_diskon) || 0)}</TotalDiscount>\n`;
             xml += `          <TaxBase>${Math.round(Number(detail.dpp) || 0)}</TaxBase>\n`;
             xml += `          <OtherTaxBase>${detail.dpp_nilai_lain || 0}</OtherTaxBase>\n`;
