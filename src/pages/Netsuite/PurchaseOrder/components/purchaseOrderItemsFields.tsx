@@ -1,6 +1,6 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { formatCurrency, handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma } from '@/helpers/generalHelper';
+import { handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma, formatCurrencyDynamic } from '@/helpers/generalHelper';
 import React, { useEffect, useMemo, useState } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -9,7 +9,7 @@ import 'react-date-range/dist/theme/default.css';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import CustomDataTable from '@/components/ui/table';
 import Button from '@/components/ui/button/Button';
-import { MdAdd, MdDelete } from 'react-icons/md';
+import { MdAdd, MdDeleteOutline } from 'react-icons/md';
 import { TableColumn } from 'react-data-table-component';
 import { usePOItemsSelect } from '@/hooks/usePOItemsSelect';
 import { POLocationPaginationState, POLocationSelectOption } from '@/hooks/usePOLocationSelect';
@@ -349,13 +349,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        formatCurrency(row.rate.toString())
+                        formatCurrencyDynamic(row.rate.toString(), formData?.currency_symbol || '')
                     }</p>
                 ) : (
                 <Input
                     name={`rate_${index}`}
                     type="text"
-                    value={row.rate && row.rate > 0 ? formatNumberPriceKoma(row.rate.toString()) : ''}
+                    value={row.rate && row.rate > 0 ? formatCurrencyDynamic(row.rate.toString(), formData?.currency_symbol || '') : ''}
                     disabled={true}
                     readonly={true}
                     className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
@@ -457,7 +457,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             selector: (row) => row.gross_amount || 0,
             cell: (row) => (
                 <div className="font-medium text-center">
-                    {row.gross_amount ? formatCurrency(row.gross_amount) : 'Rp 0'}
+                    {row.gross_amount ? formatCurrencyDynamic(row.gross_amount, formData?.currency_symbol || '') : formatCurrencyDynamic(0, formData?.currency_symbol || '')}
                 </div>
             ),
             center: true,
@@ -469,7 +469,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             selector: (row) => row.tax_amount || 0,
             cell: (row) => (
                 <div className="font-medium text-center">
-                    {row.tax_amount ? formatCurrency(row.tax_amount) : 'Rp 0'}
+                    {row.tax_amount ? formatCurrencyDynamic(row.tax_amount, formData?.currency_symbol || '') : formatCurrencyDynamic(0, formData?.currency_symbol || '')}
                 </div>
             ),
             center: true,
@@ -619,9 +619,9 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         size="sm"
                         variant="outline"
                         onClick={() => onProductDelete?.(row.id || index.toString())}
-                        className="p-1 text-red-600 hover:text-red-800"
+                        className="text-red-600 hover:text-red-800"
                     >
-                        <MdDelete size={14} />
+                        <MdDeleteOutline size={14} />
                     </Button>
                     )}
                 </div>
@@ -650,7 +650,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 
                 {/* Add Product Section */}
                 
-                {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
+                {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (formData.approvalstatus !== 1 || formData.nextapprover === null) && (
                 <div className="flex gap-4 mb-6">
                     <div className="flex-1">
                         <Label>Select Product to Add</Label>
@@ -728,7 +728,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     formData.items && formData.items.length > 0 && (<>
                     {/* <div className="grid grid-cols-1 md:grid-cols-3">
                         <div className=" md:col-span-2"></div> */}
-                        <InvoiceSummary items={formData.items} />
+                        <InvoiceSummary items={formData.items} currency={formData?.currency_symbol || ''} />
                     {/* </div> */}
                     </>)
                 )}
@@ -741,7 +741,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 }
 
 // Summary invoice dari items
-export const InvoiceSummary: React.FC<{ items: TablePOItem[] }> = ({ items }) => {
+export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string }> = ({ items, currency }) => {
     // Helper to ensure numeric value  
     const toNumber = (value: any): number => {
         if (typeof value === 'string') {
@@ -769,15 +769,15 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[] }> = ({ items }) =>
                     </div>
                     <div className="flex justify-between text-sm text-gray-600">
                         <span>Subtotal</span>
-                        <span className="font-medium text-gray-800">{formatCurrency(summary.subtotal)}</span>
+                        <span className="font-medium text-gray-800">{formatCurrencyDynamic(summary.subtotal, currency)}</span>
                     </div>
                     <div className="flex justify-between text-sm text-gray-600">
                         <span>Tax</span>
-                        <span className="font-medium text-gray-800">{formatCurrency(summary.totalTax)}</span>
+                        <span className="font-medium text-gray-800">{formatCurrencyDynamic(summary.totalTax, currency)}</span>
                     </div>
                     <div className="border-t border-gray-300 pt-3 flex justify-between text-sm font-primary-bold">
                         <span>Grand Total</span>
-                        <span className="text-blue-700">{formatCurrency(summary.grandTotal)}</span>
+                        <span className="text-blue-700">{formatCurrencyDynamic(summary.grandTotal, currency)}</span>
                     </div>
                 </div>
             </div>

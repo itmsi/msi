@@ -174,62 +174,64 @@ const Activity: React.FC = () => {
                 image="/motor-sights-international.png"
             />
             
-            <div className="bg-white shadow rounded-lg">
-                
-                {/* Header */}
-                <div className="px-6 py-4 border-b border-gray-200">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                Activities Management
-                            </h3>
-                            <p className="mt-1 text-sm text-gray-500">
-                                Manage and view customer activity transactions
-                            </p>
+            <div className="space-y-6">
+                <div className="bg-white shadow rounded-lg">
+                    {/* Header */}
+                    <div className="px-6 py-4 border-b border-gray-200">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
+                                    Activities Management
+                                </h3>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Manage and view customer activity transactions
+                                </p>
+                            </div>
+                            <PermissionGate permission="create">
+                                <Button
+                                    onClick={() => navigate('/crm/activity/create')}
+                                    className="flex items-center gap-2"
+                                    size="sm"
+                                >
+                                    <MdAdd className="h-4 w-4" />
+                                    Create Activity
+                                </Button>
+                            </PermissionGate>
                         </div>
-                        <PermissionGate permission="create">
-                            <Button
-                                onClick={() => navigate('/crm/activity/create')}
-                                className="flex items-center gap-2"
-                                size="sm"
-                            >
-                                <MdAdd className="h-4 w-4" />
-                                Create Activity
-                            </Button>
-                        </PermissionGate>
                     </div>
                 </div>
-
                 {/* Search and Filter Section */}
                 <div className="bg-white shadow rounded-lg px-6 py-4">
                     {SearchAndFilters}
                 </div>
 
 
-                {/* Data Table */}
-                <div className="p-6 font-secondary">
-                    <CustomDataTable
-                        columns={getActivityColumns()}
-                        data={activities}
-                        loading={loading}
-                        pagination
-                        paginationServer
-                        paginationTotalRows={pagination.total || 0}
-                        paginationPerPage={pagination.limit || 10}
-                        paginationDefaultPage={pagination.page || 1}
-                        paginationRowsPerPageOptions={[10, 25, 50, 100]}
-                        onChangePage={handlePageChange}
-                        onChangeRowsPerPage={handleRowsPerPageChange}
-                        onRowClicked={handleRowClick}
-                        noDataComponent={<NoDataComponent />}
-                        striped={false}
-                        persistTableHead
-                        highlightOnHover
-                        responsive
-                        borderRadius="8px"
-                        fixedHeader={true}
-                        fixedHeaderScrollHeight="600px"
-                    />
+                <div className="bg-white shadow rounded-lg">
+                    {/* Data Table */}
+                    <div className="p-6 font-secondary">
+                        <CustomDataTable
+                            columns={getActivityColumns()}
+                            data={activities}
+                            loading={loading}
+                            pagination
+                            paginationServer
+                            paginationTotalRows={pagination.total || 0}
+                            paginationPerPage={pagination.limit || 10}
+                            paginationDefaultPage={pagination.page || 1}
+                            paginationRowsPerPageOptions={[10, 25, 50, 100]}
+                            onChangePage={handlePageChange}
+                            onChangeRowsPerPage={handleRowsPerPageChange}
+                            onRowClicked={handleRowClick}
+                            noDataComponent={<NoDataComponent />}
+                            striped={false}
+                            persistTableHead
+                            highlightOnHover
+                            responsive
+                            borderRadius="8px"
+                            fixedHeader={true}
+                            fixedHeaderScrollHeight="600px"
+                        />
+                    </div>
                 </div>
                 
                 <ConfirmationModal {...modalProps} />

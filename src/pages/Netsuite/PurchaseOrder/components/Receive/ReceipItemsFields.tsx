@@ -281,8 +281,6 @@ const receiptItemFields: React.FC<POItemsFieldsProps> = ({
 
     return (
         <div className="space-y-6 p-6">
-
-            {/* ── Items to Receive ──────────────────────────── */}
             <div>
                 <h3 className="text-md font-primary-bold font-medium text-gray-900 mb-4">Items to Receive</h3>
 

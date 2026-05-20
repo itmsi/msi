@@ -95,32 +95,36 @@ export default function ManageDivision() {
                 image="/motor-sights-international.png"
             />
 
-            <div className="bg-white shadow rounded-lg">
-                <div className="px-6 py-4 border-b border-gray-200">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                Division Management
-                            </h3>
-                            <p className="mt-1 text-sm text-gray-500">
-                                Manage system divisions and their configurations
-                            </p>
+
+            <div className="space-y-6">
+
+                <div className="bg-white shadow rounded-lg">
+                    <div className="px-6 py-4 border-b border-gray-200">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
+                                    Division Management
+                                </h3>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Manage system divisions and their configurations
+                                </p>
+                            </div>
+                            <PermissionGate permission="create">
+                                <Button
+                                    onClick={handleAddDivision}
+                                    className="rounded-md w-full md:w-40 flex items-center justify-center gap-2"
+                                    size="sm"
+                                >
+                                    <MdAdd className="w-4 h-4 mr-2" />
+                                    Add Division
+                                </Button>
+                            </PermissionGate>
                         </div>
-                        <PermissionGate permission="create">
-                            <Button
-                                onClick={handleAddDivision}
-                                className="rounded-md w-full md:w-40 flex items-center justify-center gap-2"
-                                size="sm"
-                            >
-                                <MdAdd className="w-4 h-4 mr-2" />
-                                Add Division
-                            </Button>
-                        </PermissionGate>
                     </div>
                 </div>
 
                 {/* Filter Section */}
-                <div className="px-6 py-4 border-b border-gray-200">
+                <div className="bg-white shadow rounded-lg px-6 py-4">
                     <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
                         {/* Search Input */}
                         <div className="flex-1">
@@ -171,30 +175,31 @@ export default function ManageDivision() {
                         </div>
                     </div>
                 </div>
-                <div className="p-6 font-secondary">
-
-                    <CustomDataTable
-                        columns={divisionColumns}
-                        data={divisions}
-                        loading={loading}
-                        pagination
-                        paginationServer
-                        paginationTotalRows={pagination?.total || 0}
-                        paginationPerPage={pagination?.limit || 10}
-                        paginationDefaultPage={pagination?.page || 1}
-                        paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
-                        onChangePage={handlePageChange}
-                        onChangeRowsPerPage={(newPerPage) => {
-                            fetchDivisions(1, newPerPage);
-                        }}
-                        responsive
-                        highlightOnHover
-                        striped={false}
-                        persistTableHead
-                        headerBackground="rgba(2, 83, 165, 0.1)"
-                        hoverBackground="rgba(223, 232, 242, 0.3)"
-                        borderRadius="8px"
-                    />
+                <div className="bg-white shadow rounded-lg">
+                    <div className="p-6 font-secondary">
+                        <CustomDataTable
+                            columns={divisionColumns}
+                            data={divisions}
+                            loading={loading}
+                            pagination
+                            paginationServer
+                            paginationTotalRows={pagination?.total || 0}
+                            paginationPerPage={pagination?.limit || 10}
+                            paginationDefaultPage={pagination?.page || 1}
+                            paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
+                            onChangePage={handlePageChange}
+                            onChangeRowsPerPage={(newPerPage) => {
+                                fetchDivisions(1, newPerPage);
+                            }}
+                            responsive
+                            highlightOnHover
+                            striped={false}
+                            persistTableHead
+                            headerBackground="rgba(2, 83, 165, 0.1)"
+                            hoverBackground="rgba(223, 232, 242, 0.3)"
+                            borderRadius="8px"
+                        />
+                    </div>
                 </div>
             </div>
 

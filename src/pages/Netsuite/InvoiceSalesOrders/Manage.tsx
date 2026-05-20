@@ -482,8 +482,8 @@ export default function Manage() {
     return (
         <>
             <PageMeta
-                title="Invoice Sales Orders - Motor Sights International"
-                description="Manage Invoice Sales Orders - Motor Sights International"
+                title="Sales Invoice - Motor Sights International"
+                description="Manage Sales Invoice - Motor Sights International"
                 image="/motor-sights-international.png"
             />
             
@@ -494,10 +494,10 @@ export default function Manage() {
                         <div className="flex justify-between items-center">
                             <div>
                                 <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Invoice Sales Orders
+                                    Sales Invoice
                                 </h3>
                                 <p className="mt-1 text-sm text-gray-500">
-                                    Manage Invoice Sales Orders and related information
+                                    Manage Sales Invoice and related information
                                 </p>
                             </div>
                             <div className="flex space-x-3">

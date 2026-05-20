@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldItems, TablePOItem, PODetailData, PurchaseOrderFormUpdate } from '../types/purchaseorder';
+import { PurchaseOrderForm, PurchaseOrderValidationErrors, MasterDataFormFieldItems, TablePOItem, PODetailData, PurchaseOrderFormUpdate, AttachFileItem } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 import { useNavigate, useParams } from 'react-router';
 import toast from 'react-hot-toast';
@@ -10,7 +10,14 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
 
     // Filter hanya item bukan TaxItem
     const productLines = (detail.lines || []).filter(line => line.itemtype !== 'TaxItem');
+    const fileLines = (detail.files || []);
 
+    const files: AttachFileItem[] = fileLines.map((line) => ({
+        fileUrl: line.fileUrl ?? '',
+        fileName: line.fileName,
+        created_by_api: line.created_by_api
+    }));
+    
     const items: TablePOItem[] = productLines.map((line, idx) => ({
         id: `${line.item}-${idx}`,
         product_id: String(line.item),
@@ -47,6 +54,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         location: firstLine?.location ?? null,
         memo: detail.memo || '',
         currency: detail.currency_id,
+        currency_symbol: detail.currency_symbol || '',
         terms: Number(detail.terms) || null,
         terms_display: detail.terms_display || null,
         custbody_me_pr_date: detail.custbody_me_pr_date || null,
@@ -65,6 +73,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         custbody_me_validity_date: detail.custbody_me_validity_date || null,
         // description: detail.custbody_me_description || null,
         items,
+        files
     };
 };
 
@@ -91,6 +100,7 @@ export const usePurchaseOrderEdit = () => {
         location: null,
         memo: '',
         currency: null,
+        currency_symbol: null,
         terms: null,
         terms_display: null,
         custbody_me_pr_date: null,
@@ -101,7 +111,8 @@ export const usePurchaseOrderEdit = () => {
         class: null,
         // description: null,
         department: null,
-        items: []
+        items: [],
+        files: [],
     });
 
     // Load master data + detail PO secara paralel
@@ -174,6 +185,16 @@ export const usePurchaseOrderEdit = () => {
                 const { [fieldName]: _, ...rest } = prev;
                 return rest;
             });
+        }
+
+        if (fieldName === 'currency' && masterData) {
+            const currencySymbol = masterData.currencys.find(c => String(c.id) === String(value))?.name || '';
+            setFormData(prev => ({
+                ...prev,
+                currency: value ? Number(value) : null,
+                currency_symbol: currencySymbol
+            }));
+            return;
         }
 
         setFormData(prev => ({
@@ -274,7 +295,8 @@ export const usePurchaseOrderEdit = () => {
                     tax_amount: Number(item.tax_amount || 0),
                     gross_amount: Number(item.gross_amount || 0),
                     description: item.description || ''
-                }))
+                })),
+                files: formData.files || []
             };
 
             const response = await PurchaseOrderService.updatePurchaseOrder(requestData);
@@ -350,6 +372,13 @@ export const usePurchaseOrderEdit = () => {
         });
     };
 
+    const handleAddFiles = (files: AttachFileItem[]) => {
+        setFormData(prev => ({
+            ...prev,
+            files
+        }));
+    };
+
     const handleSyncById = useCallback(async (poID: string | undefined) => {
         if (isSyncing) return;
         if (!poID) return;
@@ -386,6 +415,8 @@ export const usePurchaseOrderEdit = () => {
         handleAddProductItem,
         handleProductDelete,
         handleUpdateProductItem,
+        // File handlers
+        handleAddFiles,
         loadData
     };
 };

@@ -114,6 +114,9 @@ const EditInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOr
 const NetSuiteSync = lazy(() => import('@/pages/Netsuite/Sync/Manage'));
 const Receive = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Receive'));
 const ManageReceive = lazy(() => import('@/pages/Netsuite/Receipts/Manage'));
+const ManageSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Manage'));
+const CreateSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Create'));
+const EditSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Edit'));
 // ========================================
 
 // DIVISION
@@ -123,6 +126,9 @@ const ManageDivision = lazy(() => import('@/pages/CRM/Divisions/Manage'));
 const CreateHaulingCalculator = lazy(() => import('@/pages/Calculator/HaulingPriceCalculatorCreate'));
 const EditHaulingCalculator = lazy(() => import('@/pages/Calculator/HaulingPriceCalculatorEdit'));
 const ManageHaulingCalculator = lazy(() => import('@/pages/Calculator/Manage'));
+
+// NANOGRID CALCULATOR
+// const NanogridCalculator = lazy(() => import('@/pages/Nanogrid/Manage'));
 
 export type TAppRoute = {
     path: string;
@@ -956,6 +962,34 @@ export const routes: TAppRoute[] = [
         component: ManageReceive,
         layout: AppLayout,
     },
+    // SALES ORDER NETSUITE
+    {
+        path: '/netsuite/sales-orders',
+        name: 'Sales Order Netsuite',
+        isProtected: true,
+        roles: ['Sales Order Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: ManageSalesOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/sales-orders/create',
+        name: 'Sales Order Netsuite',
+        isProtected: true,
+        roles: ['Sales Order Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: CreateSalesOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/sales-orders/edit/:id',
+        name: 'Sales Order Netsuite',
+        isProtected: true,
+        roles: ['Sales Order Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: EditSalesOrder,
+        layout: AppLayout,
+    },
     {
         path: '/hauling-calculator',
         name: 'Hauling Calculator',
@@ -980,4 +1014,12 @@ export const routes: TAppRoute[] = [
         component: EditHaulingCalculator,
         layout: AppLayout,
     },
+    // {
+    //     path: '/nanogrid-calculator',
+    //     name: 'Nanogrid Calculator',
+    //     isProtected: true,
+    //     roles: ['ADMIN'],
+    //     component: NanogridCalculator,
+    //     layout: AppLayout,
+    // },
 ];

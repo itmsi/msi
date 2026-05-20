@@ -13,7 +13,7 @@ import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { PurchaseOrderItem } from './types/purchaseorder';
 // import ModalApproval from './components/ModalApproval';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
-import { getProfile, formatCurrencyID, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
+import { getProfile, formatCurrencyDynamic, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import FilterSection from './components/FilterSection';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { createByDateColumn } from '@/components/ui/table/columnUtils';
@@ -33,6 +33,7 @@ export default function Manage() {
         searchValue,
         sortOrder,
         statusFilter,
+        approvalStatusFilter,
         subsidiaryFilter,
         locationFilter,
         setSearchValue,
@@ -88,13 +89,13 @@ export default function Manage() {
             selector: row => row.po_number || '-',
             cell: row => (<>
                 <a
-                    href={`/netsuite/purchase-order/edit/${row.po_id}`}
+                    href={`/netsuite/purchase-order/edit/${row.po_id ? row.po_id : row.id}`}
                     className="absolute inset-0"
                 />
                 
                 <div className="items-center gap-3 py-2">
-                    <div className="block text-sm text-gray-500">{formatTanggal(row.po_date)}</div>
                     <div className="font-medium text-gray-900">{row.po_number || '-'}</div>
+                    <div className="block text-sm text-gray-500">{formatTanggal(row.po_date)}</div>
                 </div>
             </>),
             wrap: true,
@@ -137,10 +138,12 @@ export default function Manage() {
             selector: row => row.po_status || '-',
             cell: row => (
                 <div className="items-center capitalize">
+                    {row.approvalstatus_display ? (
                     <StatusTypeBadge 
                         type={Number(row.approvalstatus) as 1 | 2 | 3} 
                         label={row.approvalstatus_display || undefined}
                     />
+                    ) : '-'}
                 </div>
             ),
             center: true,
@@ -151,11 +154,13 @@ export default function Manage() {
             selector: row => row.po_status || '-',
             cell: row => (
                 <div className="items-center capitalize">
-                    <span 
-                        className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
-                    >
-                        {row.po_status_label}
-                    </span>
+                    {row.po_status_label ? (
+                        <span 
+                            className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
+                        >
+                            {row.po_status_label}
+                        </span>
+                    ) : '-'}
                 </div>
             ),
             center: true,
@@ -163,7 +168,7 @@ export default function Manage() {
         },
         {
             name: 'Total Amount',
-            selector: row => formatCurrencyID(row.total) || '-',
+            selector: row => row.total ? formatCurrencyDynamic(row.total, row.currency_symbol) : '-',
             wrap: true,
             width: '240px'
         },
@@ -208,6 +213,7 @@ export default function Manage() {
                         <div className="relative flex-1">
                             <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                             <Input
+                                id='search'
                                 type="text"
                                 placeholder="Search project... (Press Enter)"
                                 value={searchValue}
@@ -269,6 +275,7 @@ export default function Manage() {
             
             {showAdvancedFilters && (
                 <FilterSection
+                    filterApprovalStatus={approvalStatusFilter}
                     filterSubsidiary={subsidiaryFilter}
                     filterLocation={locationFilter}
                     filterStatus={statusFilter}
@@ -365,7 +372,7 @@ export default function Manage() {
                                 paginationTotalRows={pagination?.total || 0}
                                 paginationPerPage={pagination?.limit || 10}
                                 paginationDefaultPage={pagination?.page || 1}
-                                paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
+                                paginationRowsPerPageOptions={[10, 20, 50, 100]}
                                 onChangePage={handlePageChangeAman}
                                 onChangeRowsPerPage={handleRowsPerPageAman}
                                 fixedHeader={true}
