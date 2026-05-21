@@ -55,6 +55,7 @@ export interface InvoiceSalesOrder {
     custbody_msi_bank_payment_so: string;
     custbody_msi_bank_payment_so_display?: string | null;
     approvalstatus: string;
+    approvalstatus_display?: string
     custbody_me_wf_created_by: string;
     custbody_me_wf_created_by_display?: string | null;
     custbody_me_wf_next_approver_blank: string | null;

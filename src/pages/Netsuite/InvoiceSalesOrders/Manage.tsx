@@ -275,9 +275,9 @@ export default function Manage() {
                 let statusKey = 'draft';
                 let statusLabel = row.approvalstatus || '-';
 
-                if (row.approvalstatus === '1') { statusKey = 'approved'; statusLabel = 'Paid In Full'; }
-                else if (row.approvalstatus === '2') { statusKey = 'pending'; statusLabel = 'Pending Approval'; }
-                else if (row.approvalstatus === '3') { statusKey = 'rejected'; statusLabel = 'Rejected'; }
+                if (row.approvalstatus === '1') { statusKey = 'pending'; statusLabel = row.approvalstatus_display || 'Pending Approval'; }
+                else if (row.approvalstatus === '2') { statusKey = 'approved'; statusLabel = row.approvalstatus_display || 'Approved'; }
+                else if (row.approvalstatus === '3') { statusKey = 'rejected'; statusLabel = row.approvalstatus_display || 'Rejected'; }
 
                 const badge = getStatusBadge(statusKey);
                 return (

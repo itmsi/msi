@@ -49,17 +49,29 @@ export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
         xml += `      <BuyerIDTKU>${escapeXML(faktur.id_tku_pembeli)}</BuyerIDTKU>\n`;
         
         xml += `      <ListOfGoodService>\n`;
-        const details = faktur.details || [];
+        const details = [...(faktur.details || [])].sort((a: any, b: any) => {
+            const barisA = parseInt(a.baris, 10);
+            const barisB = parseInt(b.baris, 10);
+            if (!isNaN(barisA) && !isNaN(barisB)) {
+                return barisA - barisB;
+            }
+            if (!isNaN(barisA)) return -1;
+            if (!isNaN(barisB)) return 1;
+            return 0;
+        });
         details.forEach((detail: any) => {
+            const qty = parseFloat(detail.jumlah_barang_jasa || 0);
+            if (qty === 0) return;
+
             xml += `        <GoodService>\n`;
             xml += `          <Opt>${escapeXML(detail.barang_or_jasa)}</Opt>\n`;
             xml += `          <Code>${escapeXML(detail.kode_barang_jasa)}</Code>\n`;
             xml += `          <Name>${escapeXML(detail.nama_barang_or_jasa)}</Name>\n`;
             xml += `          <Unit>${escapeXML(detail.nama_satuan_ukur)}</Unit>\n`;
-            xml += `          <Price>${Math.round(Number(detail.harga_satuan) || 0)}</Price>\n`;
-            xml += `          <Qty>${parseFloat(detail.jumlah_barang_jasa || 0)}</Qty>\n`;
+            xml += `          <Price>${detail.harga_satuan}</Price>\n`;
+            xml += `          <Qty>${qty}</Qty>\n`;
             xml += `          <TotalDiscount>${Math.round(Number(detail.total_diskon) || 0)}</TotalDiscount>\n`;
-            xml += `          <TaxBase>${Math.round(Number(detail.dpp) || 0)}</TaxBase>\n`;
+            xml += `          <TaxBase>${detail.dpp}</TaxBase>\n`;
             xml += `          <OtherTaxBase>${detail.dpp_nilai_lain || 0}</OtherTaxBase>\n`;
             xml += `          <VATRate>${Math.round(Number(detail.tarif_ppn) || 0)}</VATRate>\n`;
             xml += `          <VAT>${detail.ppn || 0}</VAT>\n`;
