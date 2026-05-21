@@ -53,7 +53,14 @@ export const useEditFaktur = (id?: string) => {
                             ppn: item.ppn ? Number(item.ppn) : 0,
                             tarif_ppnnbm: item.tarif_ppnnbm ? Number(item.tarif_ppnnbm) : 0,
                             ppnbm: item.ppnbm ? Number(item.ppnbm) : 0,
-                        })) 
+                        })).sort((a: any, b: any) => {
+                            const barisA = parseInt(a.baris, 10);
+                            const barisB = parseInt(b.baris, 10);
+                            if (!isNaN(barisA) && !isNaN(barisB)) return barisA - barisB;
+                            if (!isNaN(barisA)) return -1;
+                            if (!isNaN(barisB)) return 1;
+                            return 0;
+                        })
                         : []
                 });
             } else {

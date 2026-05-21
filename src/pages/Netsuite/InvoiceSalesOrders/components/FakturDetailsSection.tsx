@@ -4,6 +4,9 @@ import { FakturDetail } from '../types/faktur';
 import { buildFakturDetailColumns } from './FakturDetailsCard';
 import { useFakturReferenceSelect } from '../hooks/useFakturReferenceSelect';
 import CustomDataTable from '@/components/ui/table';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
+import { LoadingOverlay } from '@/components/common/Loading';
 
 interface FakturDetailsSectionProps {
     details: FakturDetail[];
@@ -51,6 +54,33 @@ export default function FakturDetailsSection({
             minimumFractionDigits: 2,
         }).format(value);
 
+    // Infinite scroll untuk tabel items
+    const BATCH_SIZE = 50;
+    const [displayCount, setDisplayCount] = useState(BATCH_SIZE);
+
+    const hasMoreItems = displayCount < tableData.length;
+
+    const loadMoreItems = useCallback(() => {
+        setDisplayCount(prev => Math.min(prev + BATCH_SIZE, tableData.length));
+    }, [tableData.length]);
+
+    const { loadingRef } = useInfiniteScroll({
+        hasMore: hasMoreItems,
+        loading: false,
+        onLoadMore: loadMoreItems,
+        threshold: 100,
+    });
+
+    // Reset displayCount ketika items berubah (misal item ditambah/dihapus)
+    useEffect(() => {
+        setDisplayCount(BATCH_SIZE);
+    }, [tableData.length]);
+
+    const visibleItems = useMemo(
+        () => tableData.slice(0, displayCount),
+        [tableData, displayCount]
+    );
+
     return (
         <div className="bg-white rounded-2xl shadow-sm mb-6 p-6 min-h-[300px]">
             {/* Header */}
@@ -73,10 +103,13 @@ export default function FakturDetailsSection({
                     <p className="text-sm">Click "Add Row" to add a detail line item.</p>
                 </div>
             ) : (
-                <div className="font-secondary">
+                <div
+                    className="font-secondary overflow-y-auto"
+                    style={{ maxHeight: tableData.length > 100 ? '920px' : '625px' }}
+                >
                     <CustomDataTable
                         columns={columns}
-                        data={tableData}
+                        data={visibleItems}
                         pagination={false}
                         responsive
                         striped={false}
@@ -87,6 +120,14 @@ export default function FakturDetailsSection({
                             </div>
                         }
                     />
+                    {/* Sentinel inside the scroll wrapper so IntersectionObserver works */}
+                    <div ref={loadingRef} className="py-2 text-center text-sm text-gray-400">
+                        {hasMoreItems && (
+                            <LoadingOverlay
+                                message={`Menampilkan ${displayCount} dari ${tableData.length} item...`}
+                            />
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -122,3 +163,4 @@ export default function FakturDetailsSection({
         </div>
     );
 }
+
