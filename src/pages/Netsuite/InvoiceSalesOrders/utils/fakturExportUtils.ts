@@ -49,7 +49,16 @@ export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
         xml += `      <BuyerIDTKU>${escapeXML(faktur.id_tku_pembeli)}</BuyerIDTKU>\n`;
         
         xml += `      <ListOfGoodService>\n`;
-        const details = faktur.details || [];
+        const details = [...(faktur.details || [])].sort((a: any, b: any) => {
+            const barisA = parseInt(a.baris, 10);
+            const barisB = parseInt(b.baris, 10);
+            if (!isNaN(barisA) && !isNaN(barisB)) {
+                return barisA - barisB;
+            }
+            if (!isNaN(barisA)) return -1;
+            if (!isNaN(barisB)) return 1;
+            return 0;
+        });
         details.forEach((detail: any) => {
             const qty = parseFloat(detail.jumlah_barang_jasa || 0);
             if (qty === 0) return;
