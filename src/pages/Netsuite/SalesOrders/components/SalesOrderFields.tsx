@@ -130,8 +130,8 @@ export default function SalesOrderFields({
     return (
         <div className="space-y-6">
             {/* Primary Information */}
-            <div className="bg-white rounded-2xl shadow-sm p-6">
-                <h3 className="text-base font-semibold text-gray-900 mb-4 pb-2 border-b">Primary Information</h3>
+            <div className="bg-white rounded-2xl shadow-sm space-y-6 p-6">
+                <h3 className="text-md font-primary-bold font-medium text-gray-900">Primary Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* Custom Form */}
                     <div>
@@ -273,8 +273,8 @@ export default function SalesOrderFields({
             </div>
 
             {/* Additional Information */}
-            <div className="bg-white rounded-2xl shadow-sm p-6">
-                <h3 className="text-base font-semibold text-gray-900 mb-4 pb-2 border-b">Additional Information</h3>
+            <div className="bg-white rounded-2xl shadow-sm space-y-6 p-6">
+                <h3 className="text-md font-primary-bold font-medium text-gray-900">Additional Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                     {/* Start Date */}
                     <div>
@@ -330,8 +330,8 @@ export default function SalesOrderFields({
             </div>
 
             {/* Classification */}
-            <div className="bg-white rounded-2xl shadow-sm p-6">
-                <h3 className="text-base font-semibold text-gray-900 mb-4 pb-2 border-b">Classification</h3>
+            <div className="bg-white rounded-2xl shadow-sm space-y-6 p-6">
+                <h3 className="text-md font-primary-bold font-medium text-gray-900">Classification</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                     {/* Subsidiary */}
                     <div>
