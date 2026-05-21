@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdKeyboardArrowLeft, MdOutlineSync } from 'react-icons/md';
+import { MdOutlineSync } from 'react-icons/md';
 import { FaSave, FaCopy } from 'react-icons/fa';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import PageMeta from '@/components/common/PageMeta';
