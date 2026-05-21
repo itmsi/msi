@@ -17,6 +17,7 @@ import { useSOCustomerSelect } from '@/hooks/useSOCustomerSelect';
 import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 import { getProfile } from '@/helpers/generalHelper';
 import { usePOItemsSelect } from '@/hooks/usePOItemsSelect';
+import PageHeader from '@/components/common/PageHeader';
 
 export default function Edit() {
     const { id } = useParams<{ id: string }>();
@@ -221,25 +222,13 @@ export default function Edit() {
                         />
                     ) : (<>
                         {/* Header */}
-                        <div className="flex items-center justify-between lg:h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                            <div className="flex items-center gap-1 w-full">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => navigate('/netsuite/sales-orders')}
-                                    className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                                >
-                                    <MdKeyboardArrowLeft size={20} />
-                                </Button>
-                                <div className="border-l border-gray-300 h-6 mx-3"></div>
-                                <div className='flex items-center gap-4 justify-between w-full lg:flex-row flex-col'>
-                                    <div>
-                                        <h1 className="ms-2 font-primary-bold font-normal text-xl">
-                                            Edit Sales Order
-                                        </h1>
-                                        <p className="ms-2 text-sm text-gray-600">{tranid || '-'}</p>
-                                    </div>
-                                    <div className="capitalize ms-2 flex gap-2">
-                                        {(Boolean(soInternalId) && syncInfo?.sync_status !== 'pending' && syncInfo?.sync_status !== 'failed') && (
+                        <PageHeader
+                            title="Edit Sales Order"
+                            backPath="/netsuite/sales-orders"
+                            subtitle={tranid || '-'}
+                            actions={
+                                <>
+                                    {(Boolean(soInternalId) && syncInfo?.sync_status !== 'pending' && syncInfo?.sync_status !== 'failed') && (
                                             <PermissionGate permission="read">
                                                 <Button
                                                     onClick={() => handleSyncById(String(soInternalId))}
@@ -255,9 +244,8 @@ export default function Edit() {
                                             </PermissionGate>
                                         )}
                                         {tranid !== null && (
-                                            <span
-                                                className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
-                                            >
+                                            
+                                        <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
                                                 {statusName || (formData.orderstatus ? (
                                                     [
                                                         { value: 'A', label: 'Pending Approval' },
@@ -272,10 +260,9 @@ export default function Edit() {
                                                 ) : 'Draft')}
                                             </span>
                                         )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                </>
+                            }
+                        />
 
                         <div className="space-y-6">
                             {statusName === 'pending' && (

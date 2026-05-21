@@ -678,14 +678,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
     return (
         <div className="space-y-6">
             <div className={`mb-6 space-y-6 p-6 ${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? '' : 'min-h-[500px]'}`}>
-                <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Purchase Order Items</h3>
+                <h3 className="text-lg font-primary-bold font-medium text-gray-900">Purchase Order Items</h3>
                 
                 {/* Add Product Section */}
-                
                 {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (formData.approvalstatus !== 1 || formData.nextapprover === null) && (
                 <div className="flex gap-4 mb-6">
                     <div className="flex-1">
-                        <Label>Select Product to Add</Label>
+                        <Label htmlFor='selectProduct'>Select Product to Add</Label>
                         <CustomAsyncSelect
                             name="product_select"
                             placeholder="Select product to add..."
