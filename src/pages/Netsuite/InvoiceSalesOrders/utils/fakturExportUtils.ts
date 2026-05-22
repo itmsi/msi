@@ -14,7 +14,7 @@ const escapeXML = (str: any) => {
 /**
  * Generate Formal XML Faktur Bulk
  * 
- * @param fakturs Array of { faktur: FakturData, row: InvoiceSalesOrder }
+ * @param fakturs 
  * @returns XML String
  */
 export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
@@ -66,7 +66,11 @@ export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
             xml += `        <GoodService>\n`;
             xml += `          <Opt>${escapeXML(detail.barang_or_jasa)}</Opt>\n`;
             xml += `          <Code>${escapeXML(detail.kode_barang_jasa)}</Code>\n`;
-            xml += `          <Name>${escapeXML(detail.nama_barang_or_jasa)}</Name>\n`;
+            const isIEL = faktur.subsidiary_display === 'PT Indonesia Equipment Line';
+            const itemName = isIEL
+                ? `${detail.nama_barang_or_jasa} ${detail.item_displayname}`
+                : detail.nama_barang_or_jasa;
+            xml += `          <Name>${escapeXML(itemName)}</Name>\n`;
             xml += `          <Unit>${escapeXML(detail.nama_satuan_ukur)}</Unit>\n`;
             xml += `          <Price>${detail.harga_satuan}</Price>\n`;
             xml += `          <Qty>${qty}</Qty>\n`;
