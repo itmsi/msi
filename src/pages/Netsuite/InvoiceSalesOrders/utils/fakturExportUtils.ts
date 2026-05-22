@@ -79,6 +79,11 @@ export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
                     if (displayName && namaBarang.includes(displayName)) {
                         return namaBarang;
                     }
+                    // Case: namaBarang has " - OTHER_NAME" (dash with different text) → replace after dash with displayName
+                    const dashIndex = namaBarang.indexOf(' - ');
+                    if (displayName && dashIndex !== -1) {
+                        return `${namaBarang.slice(0, dashIndex)} ${displayName}`.trim();
+                    }
                     // Case: item_displayname not present → append with space
                     return `${namaBarang} ${displayName}`.trim();
                 })()
