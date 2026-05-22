@@ -309,6 +309,11 @@ export default function Edit() {
             </Button>
         </PermissionGate>
     );
+    // poDetail?.status_proccess !== 'FAILED' && poDetail?.type_proccess !== 'CREATE'
+    console.log({
+        'poDetail status_proccess': poDetail?.status_proccess,
+        'poDetail type_proccess': poDetail?.type_proccess,
+    })
     return (
         <>
             <PageMeta
@@ -701,7 +706,7 @@ export default function Edit() {
                                 >
                                     Cancel
                                 </Button>
-                                {(poDetail?.status_proccess === 'FAILED' || poDetail?.type_proccess === 'CREATE') && (<>
+                                {(poDetail?.status_proccess !== 'FAILED' || poDetail?.type_proccess === 'CREATE') && (<>
                                     {(poDetail?.approvalstatus === 1 && poDetail.nextapprover === "" ) && (
                                         <PermissionGate permission={["create", "update"]}>
                                             <Button
