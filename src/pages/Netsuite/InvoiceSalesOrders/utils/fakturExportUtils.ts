@@ -67,9 +67,22 @@ export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
             xml += `          <Opt>${escapeXML(detail.barang_or_jasa)}</Opt>\n`;
             xml += `          <Code>${escapeXML(detail.kode_barang_jasa)}</Code>\n`;
             const isIEL = faktur.subsidiary_display === 'PT Indonesia Equipment Line';
+            const namaBarang: string = detail.nama_barang_or_jasa || '';
+            const displayName: string = detail.item_displayname || '';
             const itemName = isIEL
-                ? `${detail.nama_barang_or_jasa} ${detail.item_displayname}`
-                : detail.nama_barang_or_jasa;
+                ? (() => {
+                    // Case: "KODE - item_displayname" → strip dash → "KODE item_displayname"
+                    if (displayName && namaBarang.includes(` - ${displayName}`)) {
+                        return namaBarang.replace(` - ${displayName}`, ` ${displayName}`);
+                    }
+                    // Case: item_displayname already in nama_barang_or_jasa → use as-is
+                    if (displayName && namaBarang.includes(displayName)) {
+                        return namaBarang;
+                    }
+                    // Case: item_displayname not present → append with space
+                    return `${namaBarang} ${displayName}`.trim();
+                })()
+                : namaBarang;
             xml += `          <Name>${escapeXML(itemName)}</Name>\n`;
             xml += `          <Unit>${escapeXML(detail.nama_satuan_ukur)}</Unit>\n`;
             xml += `          <Price>${detail.harga_satuan}</Price>\n`;
