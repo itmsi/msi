@@ -88,10 +88,11 @@ export const apiPost = async <T = unknown>(
 // PUT request helper
 export const apiPut = async <T = unknown>(
     url: string,
-    data?: Record<string, unknown> | FormData
+    data?: Record<string, unknown> | FormData,
+    config?: AxiosRequestConfig
 ): Promise<ApiResponse<T>> => {
     try {
-        const response: AxiosResponse<T> = await api.put(url, data);
+        const response: AxiosResponse<T> = await api.put(url, data, config);
         return {
             data: response.data,
             status: response.status,
