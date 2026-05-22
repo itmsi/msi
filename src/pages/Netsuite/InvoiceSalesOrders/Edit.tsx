@@ -63,7 +63,8 @@ export default function EditFaktur() {
         label: string, 
         type: string = 'text', 
         required: boolean = false,
-        placeholder?: string
+        placeholder?: string,
+        disabled?: boolean
     ) => {
         return (
             <div>
@@ -77,7 +78,7 @@ export default function EditFaktur() {
                     onChange={(e) => handleFieldChange(field, type === 'number' ? Number(e.target.value) : e.target.value)}
                     className={errors[String(field)] ? 'border-red-500' : ''}
                     placeholder={placeholder}
-                    disabled={loading || submitLoading}
+                    disabled={disabled ?? (loading || submitLoading)}
                 />
                 {errors[String(field)] && <span className="text-red-500 text-xs mt-1 block">{errors[String(field)]}</span>}
             </div>
@@ -184,21 +185,22 @@ export default function EditFaktur() {
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-4 border-b border-gray-100 pb-3">Buyer Information</h2>
                             <div className="space-y-4">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {renderInput('npwp_or_nik_pembeli', 'Buyer Tax ID / National ID')}
+                                    {renderInput('npwp_or_nik_pembeli', 'Buyer Tax ID / National ID', 'text', false, undefined, true)}
                                     <div>
                                         <Label>Buyer ID Type</Label>
                                         <CustomAsyncSelect
                                             defaultOptions={jenisIdPembeliSelect.referenceOptions}
-                                            value={jenisIdPembeliSelect.referenceOptions.find(o => o.value === formData.jenis_id_pembeli) || null}
-                                            onChange={(val) => handleFieldChange('jenis_id_pembeli', val?.value || '')}
+                                            value={jenisIdPembeliSelect.referenceOptions.find(o => o.value === formData.type_tax_buyer) || null}
+                                            onChange={(val) => handleFieldChange('type_tax_buyer', val?.value || '')}
                                             onInputChange={jenisIdPembeliSelect.handleInputChange}
                                             onMenuScrollToBottom={jenisIdPembeliSelect.handleMenuScrollToBottom}
                                             isLoading={jenisIdPembeliSelect.pagination.loading}
                                             placeholder="Select ID Type"
+                                            disabled={true}
                                         />
                                     </div>
                                 </div>
-                                {renderInput('nama_pembeli', 'Buyer Name')}
+                                {renderInput('name_tax_buyer', 'Buyer Name')}
                                 {renderInput('nomor_dokumen_pembeli', 'Buyer Document No.')}
                                 {renderInput('alamat_pembeli', 'Buyer Address')}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -216,7 +218,7 @@ export default function EditFaktur() {
                                     </div>
                                     {renderInput('email_pembeli', 'Email', 'email')}
                                 </div>
-                                {renderInput('id_tku_pembeli', 'Buyer TKU ID')}
+                                {renderInput('id_tku_pembeli', 'Buyer TKU ID', 'text', false, undefined, true)}
                             </div>
                         </div>
                     </div>

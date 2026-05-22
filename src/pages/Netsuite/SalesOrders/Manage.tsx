@@ -148,12 +148,9 @@ export default function Manage() {
         },
         {
             name: 'Total Amount',
-            selector: row => {
-                const total = row.items?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0;
-                return total.toString();
-            },
+            selector: row => row.total_amount || '-',
             cell: row => {
-                const total = row.items?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0;
+                const total = row.total_amount;
                 return (
                     <div className="text-sm text-gray-900 font-medium">
                         {formatCurrencyID(total)}
@@ -163,16 +160,16 @@ export default function Manage() {
             wrap: true,
             minWidth: '160px',
         },
-        {
-            name: 'Items',
-            selector: row => row.items?.length || 0,
-            cell: row => (
-                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-50 text-blue-700 text-xs font-bold">
-                    {row.items?.length || 0}
-                </span>
-            ),
-            minWidth: '80px',
-        },
+        // {
+        //     name: 'Items',
+        //     selector: row => row.items?.length || 0,
+        //     cell: row => (
+        //         <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-50 text-blue-700 text-xs font-bold">
+        //             {row.items?.length || 0}
+        //         </span>
+        //     ),
+        //     minWidth: '80px',
+        // },
         {
             name: 'Memo',
             selector: row => row.memo || '-',
@@ -188,8 +185,11 @@ export default function Manage() {
             name: 'Last Modified',
             selector: row => row.last_modified || '-',
             cell: row => (
-                <div className="text-sm text-gray-500">
-                    {formatDateID(row.last_modified || '-')}
+                <div className="items-center py-2">
+                    <div className="block capitalize font-medium text-gray-900">{row.last_modified_by_name || '-'}</div>
+                    <div className="block text-sm text-gray-500">
+                        {formatDateTime(row.last_modified || '-')}
+                    </div>
                 </div>
             ),
             wrap: true,
@@ -201,7 +201,7 @@ export default function Manage() {
                 onClick: (row: SalesOrder) => navigate(`/netsuite/sales-orders/edit/${row.netsuite_id || row.id}`),
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'Edit Detail',
-                permission: 'read',
+                permission: 'read'
             },
             {
                 icon: MdOutlineSync,

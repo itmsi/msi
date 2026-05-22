@@ -17,41 +17,6 @@ import Button from '@/components/ui/button/Button';
 import { generateFakturXML } from './utils/fakturExportUtils';
 import FilterSection from './components/FilterSection';
 
-const formatDateTimeID = (dateString: string) => {
-    if (!dateString || dateString === '-') return '-';
-
-    let date: Date;
-    let isDateOnly = false;
-
-    // Handle NetSuite format: "DD/M/YYYY" or "DD/MM/YYYY"
-    const slashDateMatch = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (slashDateMatch) {
-        const [, d, m, y] = slashDateMatch;
-        date = new Date(Number(y), Number(m) - 1, Number(d));
-        isDateOnly = true;
-    } else {
-        date = new Date(dateString);
-        // Treat as date-only if the string has no time component
-        isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateString);
-    }
-
-    if (isNaN(date.getTime())) return dateString;
-
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = date.toLocaleString('id-ID', { month: 'short' });
-    const year = date.getFullYear();
-
-    if (isDateOnly) {
-        return `${day} ${month} ${year}`;
-    }
-
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    return `${day} ${month} ${year}, ${hours}:${minutes}:${seconds}`;
-};
-
 // Helper: export single invoice row as XML
 const exportRowAsXML = async (row: InvoiceSalesOrder) => {
     if (!row.fakture_id) {
@@ -100,6 +65,7 @@ export default function Manage() {
         filterStartDate,
         filterEndDate,
         filterSubsidiary,
+        filterImportStatus,
         activeFilterCount,
         setSearchValue,
         handlePageChange,
@@ -260,7 +226,7 @@ export default function Manage() {
             cell: row => (
                 <div className="items-center py-2">
                     <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
-                    <div className="block text-sm text-gray-500">{formatDateTimeID(row.trandate || '-')}</div>
+                    <div className="block text-sm text-gray-500">{formatDateTime(row.trandate || '-')}</div>
                 </div>
             ),
             wrap: true,
@@ -272,7 +238,7 @@ export default function Manage() {
             cell: row => (
                 <div className="items-center py-2">
                     <div className="block text-sm text-gray-500">
-                        {formatDateTimeID(row.tanggal_faktur || '-')}
+                        {formatDateTime(row.tanggal_faktur || '-')}
                     </div>
                 </div>
             ),
@@ -283,10 +249,10 @@ export default function Manage() {
             name: 'Customer Name',
             selector: row => row.entityid || row.entity || '-',
             cell: row => {
-                const isInvalid = !row.npwp_or_nik_pembeli || row.npwp_or_nik_pembeli === '0000000000000000';
+                const isInvalid = !row.no_tax_buyer || row.no_tax_buyer === '0000000000000000';
                 return (
                 <div className="items-center py-2">
-                    <div className="block text-sm text-gray-500">
+                    <div className="block text-sm text-gray-900">
                         {row.entityid || row.entity || '-'}
                     </div>
                      {isInvalid ? (
@@ -294,7 +260,7 @@ export default function Manage() {
                                 TKU ID not filled
                             </span>
                         ) : (
-                            <span className="text-sm text-gray-900">{row.npwp_or_nik_pembeli}</span>
+                            <span className="text-sm text-gray-500">{row.no_tax_buyer}</span>
                         )}
                 </div>
                 );
@@ -315,11 +281,15 @@ export default function Manage() {
 
                 const badge = getStatusBadge(statusKey);
                 return (
+                    
+                <div className="items-center capitalize">
                     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>
                         {statusLabel}
                     </span>
+                </div>
                 );
             },
+            center: true,
             minWidth: '160px',
         },
         {
@@ -361,17 +331,12 @@ export default function Manage() {
             selector: row => row.faktur_updated_at || '-',
             cell: row => (
                 <div className="items-center py-2">
+                    <div className="block capitalize font-medium text-gray-900">{row.faktur_updated_by_name || '-'}</div>
                     <div className="block text-sm text-gray-500">
-                        {formatDateTimeID(row.faktur_updated_at || '-')}
+                        {formatDateTime(row.faktur_updated_at || '-')}
                     </div>
                 </div>
             ),
-            wrap: true,
-            minWidth: '180px',
-        },
-        {
-            name: 'Modified By',
-            selector: row => row.faktur_updated_by_name || '-',
             wrap: true,
             minWidth: '180px',
         },
@@ -471,13 +436,14 @@ export default function Manage() {
                     filterStartDate={filterStartDate}
                     filterEndDate={filterEndDate}
                     filterSubsidiary={filterSubsidiary}
+                    filterImportStatus={filterImportStatus}
                     onFilterChange={handleFilterChange}
                     onClearFilters={handleClearAllFilters}
                 />
             )}
             </>
         );
-    }, [searchValue, sortOrder, filterApprovalStatus, filterStartDate, filterEndDate, activeFilterCount, showAdvancedFilters, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, handleToggleFilter, handleClearAllFilters]);
+    }, [searchValue, sortOrder, filterApprovalStatus, filterStartDate, filterEndDate, filterSubsidiary, filterImportStatus, activeFilterCount, showAdvancedFilters, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, handleToggleFilter, handleClearAllFilters]);
 
     return (
         <>

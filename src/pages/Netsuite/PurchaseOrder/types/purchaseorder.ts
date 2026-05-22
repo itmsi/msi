@@ -152,6 +152,15 @@ export interface POItemsRequest {
     search: string;
     is_parent?: boolean;
 }
+export interface POItemsSelectRequest {
+    page: number;
+    limit: number;
+    sort_by: string;
+    sort_order: string;
+    search: string;
+    item_type: string[];
+    is_parent?: boolean;
+}
 export interface FormFieldItemsResponse {
     success: boolean;
     data: MasterDataFormFieldItems;
@@ -339,6 +348,20 @@ export interface PODetailData {
     lines: PODetailLine[];
     user_notes: UserNotesItem[];
     files: AttachFileItem[];
+    status_proccess_message?: string | null;
+    status_proccess?: string;
+    type_proccess?: string;
+}
+
+export interface MessageError {
+  response: ErrorResponsePayload;
+}
+
+export interface ErrorResponsePayload {
+  errors: any;
+  message: string;
+  success: boolean;
+  timestamp: string;
 }
 
 export interface PODetailLine {
@@ -355,6 +378,7 @@ export interface PODetailLine {
     itemtype?: string;
     location?: number;
     quantity?: number;
+    qty?: number;
     quantitypending?: number;
     quantityreceived?: number;
     has_inbound?: boolean;
@@ -640,7 +664,43 @@ export interface UserNotesItem {
 }
 // ATTACH FILE LIST
 export interface AttachFileItem {
+    id?: string;
+    poId?: string;
+    po_id?: string;
     fileUrl: string;
     fileName: string;
+    storagePath?: string;
     created_by_api?: string;
+}
+export interface ResponseAttachUpdateItem {
+    success: boolean;
+    data: AttachFileItem;
+    message: string;
+}
+export interface POAttachment {
+    po_id: string;
+    file_name: string;
+    file: File;
+}
+
+export interface POAttachmentUpdate {
+    file?: File;
+    poId?: string;
+    file_name: string;
+    fileUrl: string;
+    file_id?: string;
+}
+
+export interface POAttachmentDelete {
+    fileUrl: string;
+}
+
+export interface POAttachmentResponse {
+    success: boolean;
+    id: string;
+    poId: string;
+    fileUrl: string;
+    storagePath: string;
+    fileName: string;
+    message?: string;
 }

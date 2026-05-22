@@ -14,7 +14,7 @@ const escapeXML = (str: any) => {
 /**
  * Generate Formal XML Faktur Bulk
  * 
- * @param fakturs Array of { faktur: FakturData, row: InvoiceSalesOrder }
+ * @param fakturs 
  * @returns XML String
  */
 export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
@@ -39,17 +39,26 @@ export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
         xml += `      <RefDesc>${escapeXML(row?.tranid || row?.id)}</RefDesc>\n`;
         xml += `      <FacilityStamp>${escapeXML(faktur.cap_fasilitas)}</FacilityStamp>\n`;
         xml += `      <SellerIDTKU>${escapeXML(faktur.id_tku_Penjual)}</SellerIDTKU>\n`;
-        xml += `      <BuyerTin>${escapeXML(faktur.npwp_or_nik_pembeli)}</BuyerTin>\n`;
-        xml += `      <BuyerDocument>${escapeXML(faktur.jenis_id_pembeli)}</BuyerDocument>\n`;
+        xml += `      <BuyerTin>${escapeXML(faktur.no_tax_buyer)}</BuyerTin>\n`;
+        xml += `      <BuyerDocument>${escapeXML(faktur.type_tax_buyer)}</BuyerDocument>\n`;
         xml += `      <BuyerCountry>${escapeXML(faktur.negara_pembeli)}</BuyerCountry>\n`;
         xml += `      <BuyerDocumentNumber>${escapeXML(faktur.nomor_dokumen_pembeli)}</BuyerDocumentNumber>\n`;
-        xml += `      <BuyerName>${escapeXML(faktur.nama_pembeli)}</BuyerName>\n`;
+        xml += `      <BuyerName>${escapeXML(faktur.name_tax_buyer)}</BuyerName>\n`;
         xml += `      <BuyerAdress>${escapeXML(faktur.alamat_pembeli)}</BuyerAdress>\n`;
         xml += `      <BuyerEmail>${escapeXML(faktur.email_pembeli)}</BuyerEmail>\n`;
         xml += `      <BuyerIDTKU>${escapeXML(faktur.id_tku_pembeli)}</BuyerIDTKU>\n`;
         
         xml += `      <ListOfGoodService>\n`;
-        const details = faktur.details || [];
+        const details = [...(faktur.details || [])].sort((a: any, b: any) => {
+            const barisA = parseInt(a.baris, 10);
+            const barisB = parseInt(b.baris, 10);
+            if (!isNaN(barisA) && !isNaN(barisB)) {
+                return barisA - barisB;
+            }
+            if (!isNaN(barisA)) return -1;
+            if (!isNaN(barisB)) return 1;
+            return 0;
+        });
         details.forEach((detail: any) => {
             const qty = parseFloat(detail.jumlah_barang_jasa || 0);
             if (qty === 0) return;
@@ -57,7 +66,24 @@ export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
             xml += `        <GoodService>\n`;
             xml += `          <Opt>${escapeXML(detail.barang_or_jasa)}</Opt>\n`;
             xml += `          <Code>${escapeXML(detail.kode_barang_jasa)}</Code>\n`;
-            xml += `          <Name>${escapeXML(detail.nama_barang_or_jasa)}</Name>\n`;
+            const isIEL = faktur.subsidiary_display === 'PT Indonesia Equipment Line';
+            const namaBarang: string = detail.nama_barang_or_jasa || '';
+            const displayName: string = detail.item_displayname || '';
+            const itemName = isIEL
+                ? (() => {
+                    // Case: "KODE - item_displayname" → strip dash → "KODE item_displayname"
+                    if (displayName && namaBarang.includes(` - ${displayName}`)) {
+                        return namaBarang.replace(` - ${displayName}`, ` ${displayName}`);
+                    }
+                    // Case: item_displayname already in nama_barang_or_jasa → use as-is
+                    if (displayName && namaBarang.includes(displayName)) {
+                        return namaBarang;
+                    }
+                    // Case: item_displayname not present → append with space
+                    return `${namaBarang} ${displayName}`.trim();
+                })()
+                : namaBarang;
+            xml += `          <Name>${escapeXML(itemName)}</Name>\n`;
             xml += `          <Unit>${escapeXML(detail.nama_satuan_ukur)}</Unit>\n`;
             xml += `          <Price>${detail.harga_satuan}</Price>\n`;
             xml += `          <Qty>${qty}</Qty>\n`;

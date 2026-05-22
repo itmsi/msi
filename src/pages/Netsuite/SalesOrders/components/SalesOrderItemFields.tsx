@@ -1,11 +1,16 @@
-import { useState } from 'react';
-import { MdAdd, MdDelete } from 'react-icons/md';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { MdAdd, MdDeleteOutline } from 'react-icons/md';
 import Label from '@/components/form/Label';
 import InputField from '@/components/form/input/InputField';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
-import { SalesOrderFormData } from '../types/salesOrder';
+import { SalesOrderFormData, SalesOrderFormItem } from '../types/salesOrder';
 import { formatCurrencyID } from '@/helpers/generalHelper';
 import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
+import Button from '@/components/ui/button/Button';
+import { TableColumn } from 'react-data-table-component';
+import CustomDataTable from '@/components/ui/table';
+import { LoadingOverlay } from '@/components/common/Loading';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 
 interface SOFormFieldsProps {
     formData: SalesOrderFormData;
@@ -77,22 +82,227 @@ export default function SalesOrderItemFields({
 }: SOFormFieldsProps) {
     const [selectedNewItem, setSelectedNewItem] = useState<any>(null);
 
+    // Infinite scroll untuk tabel items
+    const BATCH_SIZE = 50;
+    const [displayCount, setDisplayCount] = useState(BATCH_SIZE);
+
+    const hasMoreItems = displayCount < (formData.items?.length || 0);
+
+    const loadMoreItems = useCallback(() => {
+        setDisplayCount(prev => Math.min(prev + BATCH_SIZE, formData.items?.length || 0));
+    }, [formData.items?.length]);
+
+    const { loadingRef } = useInfiniteScroll({
+        hasMore: hasMoreItems,
+        loading: false,
+        onLoadMore: loadMoreItems,
+        threshold: 100,
+    });
+
+    // Reset displayCount ketika items berubah (misal item ditambah/dihapus)
+    useEffect(() => {
+        setDisplayCount(BATCH_SIZE);
+    }, [formData.items?.length]);
+
+    const visibleItems = useMemo(
+        () => formData.items?.slice(0, displayCount) || [],
+        [formData.items, displayCount]
+    );
+    const itemColumns: TableColumn<SalesOrderFormItem>[] = [
+        {
+            name: 'Item',
+            selector: (row: SalesOrderFormItem) => row.item_name || 'N/A',
+            cell: row => (
+                <div className="items-center gap-3 py-2">
+                    <div className="font-medium text-gray-900">{row.item_name || 'N/A'}</div>
+                    <div className="block text-sm text-gray-500">{row.itemId || '-'}</div>
+                </div>
+            ),
+            grow: 2
+        },
+        {
+            name: 'Description',
+            selector: (row: SalesOrderFormItem) => row.description || 'N/A',
+            cell: (row, idx) => (
+                <InputField
+                    type="text"
+                    value={row.description}
+                    onChange={(e) => onUpdateItem(idx, 'description', e.target.value)}
+                    placeholder="Deskripsi item"
+                    className="text-xs py-1"
+                />
+            ),
+            width: '250px',
+        },
+        {
+            name: 'Quantity',
+            selector: (row: SalesOrderFormItem) => row.qty || 0,
+            cell: (row, index) => (<>
+                <InputField
+                    type="number"
+                    value={row.qty.toString()}
+                    onChange={(e) => onUpdateItem(index, 'qty', Number(e.target.value))}
+                    className="text-right text-xs py-1"
+                    min="0"
+                />
+            </>),
+            wrap: true,
+            width: '120px',
+        },
+        {
+            name: 'Rate',
+            selector: (row: SalesOrderFormItem) => row.rate || 0,
+            cell: (row, index) => (<>
+                <InputField
+                    type="number"
+                    value={row.rate.toString()}
+                    onChange={(e) => onUpdateItem(index, 'rate', Number(e.target.value))}
+                    className="text-right text-xs py-1"
+                    min="0"
+                />
+            </>),
+            wrap: true,
+            width: '250px',
+        },
+        {
+            name: 'Amount',
+            selector: (row: SalesOrderFormItem) => formatCurrencyID(Number(row.amount)) || 'N/A',
+            center: true,
+            width: '250px',
+            sortable: false
+        },
+        {
+            name: 'Department',
+            selector: (row: SalesOrderFormItem) => row.department_name || 'N/A',
+            cell: (row, index) => (<>
+                <CustomAsyncSelect
+                    name={`department_${index}`}
+                    disabled={!formData.subsidiary}
+                    placeholder={!formData.entity ? "Pilih Customer dahulu" : !formData.subsidiary ? "Pilih Subsidiary dahulu" : "Select department..."}
+                    value={row.department ? {
+                        label: row.department_name || '',
+                        value: row.department.toString()
+                    } : null}
+                    defaultOptions={deptOptions}
+                    loadOptions={onDeptInputChange}
+                    onMenuScrollToBottom={onDeptMenuScrollToBottom}
+                    isLoading={deptPagination.loading}
+                    noOptionsMessage={() => "No departments found"}
+                    loadingMessage={() => "Loading departments..."}
+                    isSearchable={true}
+                    inputValue={deptInput}
+                    onInputChange={onDeptInputChange}
+                    onChange={(option) => {
+                        onUpdateItem(index, 'department', option ? parseInt(option.value) : null);
+                        onUpdateItem(index, 'department_name', option ? option.label : '');
+                    }}
+                    className="text-xs"
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                />
+            </>),
+            center: true,
+            width: '300px',
+            sortable: false
+        },
+        {
+            name: 'Class',
+            selector: (row: SalesOrderFormItem) => row.class || 0,
+            cell: (row, index) => (<>
+                <CustomAsyncSelect
+                    name={`class_${index}`}
+                    disabled={!formData.subsidiary}
+                    placeholder={!formData.entity ? "Pilih Customer dahulu" : !formData.subsidiary ? "Pilih Subsidiary dahulu" : "Select class..."}
+                    value={row.class ? {
+                        label: row.class_name || '',
+                        value: row.class.toString()
+                    } : null}
+                    defaultOptions={classOptions}
+                    loadOptions={onClassInputChange}
+                    onMenuScrollToBottom={onClassMenuScrollToBottom}
+                    isLoading={classPagination.loading}
+                    noOptionsMessage={() => "No classes found"}
+                    loadingMessage={() => "Loading classes..."}
+                    isSearchable={true}
+                    inputValue={classInput}
+                    onInputChange={onClassInputChange}
+                    onChange={(option) => {
+                        onUpdateItem(index, 'class', option ? parseInt(option.value) : null);
+                        onUpdateItem(index, 'class_name', option ? option.label : '');
+                    }}
+                    className="text-xs"
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                />
+            </>),
+            center: true,
+            width: '300px',
+            sortable: false
+        },
+        {
+            name: 'Location',
+            selector: (row: SalesOrderFormItem) => row.location || 0,
+            cell: (row, index) => (
+                <CustomAsyncSelect
+                    name={`location_${index}`}
+                    disabled={!formData.subsidiary}
+                    placeholder={!formData.entity ? "Pilih Customer dahulu" : !formData.subsidiary ? "Pilih Subsidiary dahulu" : "Select location..."}
+                    value={row.location ? {
+                        label: row.location_name || '',
+                        value: row.location.toString()
+                    } : null}
+                    defaultOptions={locationOptions}
+                    loadOptions={onLocationInputChange}
+                    onMenuScrollToBottom={onLocationMenuScrollToBottom}
+                    isLoading={locationPagination.loading}
+                    noOptionsMessage={() => "No locations found"}
+                    loadingMessage={() => "Loading locations..."}
+                    isSearchable={true}
+                    inputValue={locationInput}
+                    onInputChange={onLocationInputChange}
+                    onChange={(option) => {
+                        onUpdateItem(index, 'location', option ? parseInt(option.value) : null);
+                        onUpdateItem(index, 'location_name', option ? option.label : '');
+                    }}
+                    className="text-xs"
+                    menuPortalTarget={document.body}
+                    menuPosition="fixed"
+                />
+            ),
+            center: true,
+            width: '300px',
+            sortable: false
+        },
+        {
+            name: 'Actions',
+            cell: (row: SalesOrderFormItem, index: number) => (
+                <div className="flex gap-2">
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onRemoveItem(row.id || index.toString())}
+                        className="text-red-600 hover:text-red-800"
+                    >
+                        <MdDeleteOutline size={14} />
+                    </Button>
+                </div>
+            ),
+            width: '100px',
+            center: true,
+            sortable: false
+        }
+    ];
     return (
         <div className="space-y-6">
 
             {/* Items Section */}
-            <div className="bg-white rounded-2xl shadow-sm p-6">
-                <div className="flex items-center justify-between mb-4 pb-2 border-b">
-                    <h3 className="text-base font-semibold text-gray-900">
-                        Line Items
-                        <span className="ml-2 text-sm font-normal text-gray-500">({formData.items.length} item)</span>
-                    </h3>
-                </div>
+            <div className="mb-6 space-y-6 p-6">
+                <h3 className="text-lg font-primary-bold font-medium text-gray-900">Line Items</h3>
 
                 {/* Add Item */}
-                <div className="mb-4 flex gap-3 items-end">
+                <div className="flex gap-4 mb-6">
                     <div className="flex-1">
-                        <Label htmlFor="so-add-item">Tambah Item</Label>
+                        <Label htmlFor="so-add-item">Select Item to Add</Label>
                         <CustomAsyncSelect
                             name="add_item"
                             disabled={!formData.subsidiary}
@@ -110,20 +320,23 @@ export default function SalesOrderItemFields({
                             placeholder={!formData.entity ? "Pilih Customer dahulu" : !formData.subsidiary ? "Pilih Subsidiary dahulu" : "Cari item..."}
                         />
                     </div>
-                    <button
-                        type="button"
-                        onClick={() => {
-                            if (selectedNewItem) {
-                                onAddItem(selectedNewItem);
-                                setSelectedNewItem(null);
-                            }
-                        }}
-                        className={`flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium h-[42px] ${(!selectedNewItem || !formData.subsidiary) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={!selectedNewItem || !formData.subsidiary}
-                    >
-                        <MdAdd size={18} />
-                        Tambah
-                    </button>
+                    <div className="flex flex-col justify-end">
+                        <Button
+                            type="button"
+                            onClick={() => {
+                                if (selectedNewItem) {
+                                    onAddItem(selectedNewItem);
+                                    setSelectedNewItem(null);
+                                }
+                            }}
+                            
+                            className={`flex items-center gap-2 ${(!selectedNewItem || !formData.subsidiary) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={!selectedNewItem || !formData.subsidiary}
+                        >
+                            <MdAdd size={18} />
+                            Add Item
+                        </Button>
+                    </div>
                 </div>
 
                 {errors.items && (
@@ -133,182 +346,58 @@ export default function SalesOrderItemFields({
                 )}
 
                 {/* Items Table */}
-                {formData.items.length > 0 ? (
-                    <>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200 text-sm">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase min-w-[250px]">Item</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase min-w-[400px]">Description</th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase min-w-44">Qty</th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase min-w-44">Rate</th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase min-w-44">Amount</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase min-w-[400px]">Department</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase min-w-[400px]">Class</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase min-w-[400px]">Location</th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase w-16">Hapus</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-100">
-                                    {formData.items.map((item, idx) => (
-                                        <tr key={item.id} className="hover:bg-gray-50">
-                                            <td className="px-4 py-3 text-gray-500 font-medium">{idx + 1}</td>
-                                            <td className="px-4 py-3">
-                                                <div className="font-medium text-gray-900 text-xs">{item.item_name}</div>
-                                                <div className="text-xs text-gray-400">ID: {item.itemId}</div>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <InputField
-                                                    type="text"
-                                                    value={item.description}
-                                                    onChange={(e) => onUpdateItem(idx, 'description', e.target.value)}
-                                                    placeholder="Deskripsi item"
-                                                    className="text-xs py-1"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <InputField
-                                                    type="number"
-                                                    value={item.qty.toString()}
-                                                    onChange={(e) => onUpdateItem(idx, 'qty', Number(e.target.value))}
-                                                    className="text-right text-xs py-1"
-                                                    min="0"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <InputField
-                                                    type="number"
-                                                    value={item.rate.toString()}
-                                                    onChange={(e) => onUpdateItem(idx, 'rate', Number(e.target.value))}
-                                                    className="text-right text-xs py-1"
-                                                    min="0"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-3 text-right font-semibold text-gray-900">
-                                                {formatCurrencyID(Number(item.amount))}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <CustomAsyncSelect
-                                                    name={`department_${idx}`}
-                                                    disabled={!formData.subsidiary}
-                                                    placeholder={!formData.entity ? "Pilih Customer dahulu" : !formData.subsidiary ? "Pilih Subsidiary dahulu" : "Select department..."}
-                                                    value={item.department ? {
-                                                        label: item.department_name || '',
-                                                        value: item.department.toString()
-                                                    } : null}
-                                                    defaultOptions={deptOptions}
-                                                    loadOptions={onDeptInputChange}
-                                                    onMenuScrollToBottom={onDeptMenuScrollToBottom}
-                                                    isLoading={deptPagination.loading}
-                                                    noOptionsMessage={() => "No departments found"}
-                                                    loadingMessage={() => "Loading departments..."}
-                                                    isSearchable={true}
-                                                    inputValue={deptInput}
-                                                    onInputChange={onDeptInputChange}
-                                                    onChange={(option) => {
-                                                        onUpdateItem(idx, 'department', option ? parseInt(option.value) : null);
-                                                        onUpdateItem(idx, 'department_name', option ? option.label : '');
-                                                    }}
-                                                    className="text-xs"
-                                                    menuPortalTarget={document.body}
-                                                    menuPosition="fixed"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <CustomAsyncSelect
-                                                    name={`class_${idx}`}
-                                                    disabled={!formData.subsidiary}
-                                                    placeholder={!formData.entity ? "Pilih Customer dahulu" : !formData.subsidiary ? "Pilih Subsidiary dahulu" : "Select class..."}
-                                                    value={item.class ? {
-                                                        label: item.class_name || '',
-                                                        value: item.class.toString()
-                                                    } : null}
-                                                    defaultOptions={classOptions}
-                                                    loadOptions={onClassInputChange}
-                                                    onMenuScrollToBottom={onClassMenuScrollToBottom}
-                                                    isLoading={classPagination.loading}
-                                                    noOptionsMessage={() => "No classes found"}
-                                                    loadingMessage={() => "Loading classes..."}
-                                                    isSearchable={true}
-                                                    inputValue={classInput}
-                                                    onInputChange={onClassInputChange}
-                                                    onChange={(option) => {
-                                                        onUpdateItem(idx, 'class', option ? parseInt(option.value) : null);
-                                                        onUpdateItem(idx, 'class_name', option ? option.label : '');
-                                                    }}
-                                                    className="text-xs"
-                                                    menuPortalTarget={document.body}
-                                                    menuPosition="fixed"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <CustomAsyncSelect
-                                                    name={`location_${idx}`}
-                                                    disabled={!formData.subsidiary}
-                                                    placeholder={!formData.entity ? "Pilih Customer dahulu" : !formData.subsidiary ? "Pilih Subsidiary dahulu" : "Select location..."}
-                                                    value={item.location ? {
-                                                        label: item.location_name || '',
-                                                        value: item.location.toString()
-                                                    } : null}
-                                                    defaultOptions={locationOptions}
-                                                    loadOptions={onLocationInputChange}
-                                                    onMenuScrollToBottom={onLocationMenuScrollToBottom}
-                                                    isLoading={locationPagination.loading}
-                                                    noOptionsMessage={() => "No locations found"}
-                                                    loadingMessage={() => "Loading locations..."}
-                                                    isSearchable={true}
-                                                    inputValue={locationInput}
-                                                    onInputChange={onLocationInputChange}
-                                                    onChange={(option) => {
-                                                        onUpdateItem(idx, 'location', option ? parseInt(option.value) : null);
-                                                        onUpdateItem(idx, 'location_name', option ? option.label : '');
-                                                    }}
-                                                    className="text-xs"
-                                                    menuPortalTarget={document.body}
-                                                    menuPosition="fixed"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => onRemoveItem(item.id)}
-                                                    className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                                                    title="Hapus item"
-                                                >
-                                                    <MdDelete size={18} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Summary Section */}
-                        <div className="mt-6 flex justify-end">
-                            <div className="w-full lg:w-1/3 space-y-3 bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                                <div className="flex justify-between items-center text-sm text-gray-600">
-                                    <span>Total Items:</span>
-                                    <span className="font-semibold text-gray-900">
-                                        {formData.items.reduce((acc, item) => acc + (Number(item.qty) || 0), 0)}
-                                    </span>
+                {formData.items && formData.items.length > 0 ? (
+                    <div
+                        className="mt-6 font-secondary overflow-y-auto"
+                        style={{ maxHeight: formData.items?.length > 100 ? '920px' : '625px' }}
+                    >
+                        <CustomDataTable
+                            columns={itemColumns}
+                            data={visibleItems}
+                            pagination={false}
+                            responsive
+                            striped={false}
+                            highlightOnHover={false}
+                            className={`min-h-[300px]`}
+                            noDataComponent={
+                                <div className="text-center py-8 text-gray-500">
+                                    No items added yet
                                 </div>
-                                <div className="pt-3 border-t border-gray-200 flex justify-between items-center">
-                                    <span className="text-base font-bold text-gray-900">Grand Total:</span>
-                                    <span className="text-lg font-bold text-blue-600">
-                                        {formatCurrencyID(formData.items.reduce((acc, item) => acc + (Number(item.amount) || 0), 0))}
-                                    </span>
-                                </div>
-                            </div>
+                            }
+                        />
+                        {/* Sentinel harus di dalam wrapper scroll agar IntersectionObserver bekerja */}
+                        <div ref={loadingRef} className="py-2 text-center text-sm text-gray-400">
+                            {hasMoreItems && (
+                                <LoadingOverlay
+                                    message={`Menampilkan ${displayCount} dari ${formData.items.length} item...`}
+                                />
+                            )}
                         </div>
-                    </>
+                    </div>
                 ) : (
-                    <div className="py-10 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
-                        <p className="text-sm">Belum ada item. Cari dan tambahkan item di atas.</p>
+                    <div className={`text-center py-8 text-gray-500 border-2 border-dashed rounded-lg ${errors?.items ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}>
+                        <p className="text-lg mb-2">No items added yet</p>
+                        <p className="text-sm">Start by selecting an item from the dropdown above</p>
                     </div>
                 )}
+
+                {/* Summary Section */}
+                <div className="w-full px-0 space-y-3">
+                    <div className="space-y-6">
+                        <div className="flex justify-between text-sm text-gray-600">
+                            <span>Total Items:</span>
+                            <span className="font-medium text-gray-800">
+                                {formData.items.reduce((acc, item) => acc + (Number(item.qty) || 0), 0)}
+                            </span>
+                        </div>
+                        <div className="border-t border-gray-300 pt-3 flex justify-between text-sm font-primary-bold">
+                            <span className="text-base font-bold text-gray-900">Grand Total:</span>
+                            <span className="text-blue-700">
+                                {formatCurrencyID(formData.items.reduce((acc, item) => acc + (Number(item.amount) || 0), 0))}
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

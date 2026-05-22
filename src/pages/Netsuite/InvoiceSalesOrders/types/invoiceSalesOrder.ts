@@ -8,6 +8,7 @@ export interface InvoiceSalesOrderRequest {
     approvalstatus?: string;
     trandate_start?: string;
     trandate_end?: string;
+    status_faktur?: string;
 }
 
 export interface InvoiceSalesOrderLine {
@@ -80,6 +81,9 @@ export interface InvoiceSalesOrder {
     faktur_updated_at?: string | null;
     faktur_updated_by_name?: string | null;
     tanggal_faktur?: string | null;
+    type_tax_buyer?: string | null;
+    no_tax_buyer?: string | null;
+    name_tax_buyer?: string | null;
     npwp_or_nik_pembeli?: string | null;
     id_tku_pembeli?: string | null;
     status_faktur?: boolean | null;

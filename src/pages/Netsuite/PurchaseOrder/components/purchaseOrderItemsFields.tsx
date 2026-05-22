@@ -1,7 +1,7 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import { handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma, formatCurrencyDynamic } from '@/helpers/generalHelper';
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import 'react-date-range/dist/styles.css';
@@ -16,6 +16,8 @@ import { POLocationPaginationState, POLocationSelectOption } from '@/hooks/usePO
 import { POClassPaginationState, POClassSelectOption } from '@/hooks/usePOClassSelect';
 import { PODepartmentPaginationState, PODepartmentSelectOption } from '@/hooks/usePODepartmentSelect';
 import TextArea from '@/components/form/input/TextArea';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
+import { LoadingOverlay } from '@/components/common/Loading';
 
 
 interface POItemsFieldsProps {
@@ -61,6 +63,8 @@ interface POItemsFieldsProps {
     selectedDepartment?: PODepartmentSelectOption | null;
     onDepartmentChange?: (option: PODepartmentSelectOption | null) => void;
     departmentError?: string;
+    // Grand total dari server (foreigntotal) — override kalkulasi lokal di Edit page
+    serverTotal?: number;
 }
 
 const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
@@ -94,7 +98,8 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
     departmentPagination = { page: 1, hasMore: true, loading: false },
     departmentInputValue = '',
     onDepartmentInputChange,
-    onDepartmentMenuScrollToBottom
+    onDepartmentMenuScrollToBottom,
+    serverTotal,
 }) => {
     // Use POItemsSelect hook for product management
     const {
@@ -108,6 +113,33 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [productSelectError, setProductSelectError] = useState<string>('');
+
+    // Infinite scroll untuk tabel items
+    const BATCH_SIZE = 50;
+    const [displayCount, setDisplayCount] = useState(BATCH_SIZE);
+
+    const hasMoreItems = displayCount < (formData.items?.length || 0);
+
+    const loadMoreItems = useCallback(() => {
+        setDisplayCount(prev => Math.min(prev + BATCH_SIZE, formData.items?.length || 0));
+    }, [formData.items?.length]);
+
+    const { loadingRef } = useInfiniteScroll({
+        hasMore: hasMoreItems,
+        loading: false,
+        onLoadMore: loadMoreItems,
+        threshold: 100,
+    });
+
+    // Reset displayCount ketika items berubah (misal item ditambah/dihapus)
+    useEffect(() => {
+        setDisplayCount(BATCH_SIZE);
+    }, [formData.items?.length]);
+
+    const visibleItems = useMemo(
+        () => formData.items?.slice(0, displayCount) || [],
+        [formData.items, displayCount]
+    );
 
     // Cek apakah semua field utama sudah terisi
     const isFormComplete = !!(formData.customform && formData.purchasedate && formData.vendorid && formData.currency && formData.subsidiary && formData.location && formData.class && formData.department);
@@ -646,14 +678,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
     return (
         <div className="space-y-6">
             <div className={`mb-6 space-y-6 p-6 ${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? '' : 'min-h-[500px]'}`}>
-                <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Purchase Order Items</h3>
+                <h3 className="text-lg font-primary-bold font-medium text-gray-900">Purchase Order Items</h3>
                 
                 {/* Add Product Section */}
-                
                 {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (formData.approvalstatus !== 1 || formData.nextapprover === null) && (
                 <div className="flex gap-4 mb-6">
                     <div className="flex-1">
-                        <Label>Select Product to Add</Label>
+                        <Label htmlFor='selectProduct'>Select Product to Add</Label>
                         <CustomAsyncSelect
                             name="product_select"
                             placeholder="Select product to add..."
@@ -680,7 +711,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             type="button"
                             onClick={handleAddProduct}
                             className="flex items-center gap-2"
-                            disabled={!selectedProduct || !isFormComplete}
+                            disabled={!selectedProduct || !isFormComplete || formData.items.length >= 300}
                         >
                             <MdAdd size={16} />
                             Add Product
@@ -699,10 +730,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 
                 {/* Products Table */}
                 {formData.items && formData.items.length > 0 ? (
-                    <div className="mt-6 font-secondary">
+                    <div
+                        className="mt-6 font-secondary overflow-y-auto"
+                        style={{ maxHeight: formData.items?.length > 100 ? '920px' : '625px' }}
+                    >
                         <CustomDataTable
                             columns={productColumns}
-                            data={formData.items}
+                            data={visibleItems}
                             pagination={false}
                             responsive
                             striped={false}
@@ -714,6 +748,14 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                                 </div>
                             }
                         />
+                        {/* Sentinel harus di dalam wrapper scroll agar IntersectionObserver bekerja */}
+                        <div ref={loadingRef} className="py-2 text-center text-sm text-gray-400">
+                            {hasMoreItems && (
+                                <LoadingOverlay
+                                    message={`Menampilkan ${displayCount} dari ${formData.items.length} item...`}
+                                />
+                            )}
+                        </div>
                     </div>
                 ) : (
                     <div className={`text-center py-8 text-gray-500 border-2 border-dashed rounded-lg ${errors?.items ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}>
@@ -728,7 +770,11 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                     formData.items && formData.items.length > 0 && (<>
                     {/* <div className="grid grid-cols-1 md:grid-cols-3">
                         <div className=" md:col-span-2"></div> */}
-                        <InvoiceSummary items={formData.items} currency={formData?.currency_symbol || ''} />
+                        <InvoiceSummary 
+                            items={formData.items} 
+                            currency={formData?.currency_symbol || ''} 
+                            serverTotal={serverTotal}
+                        />
                     {/* </div> */}
                     </>)
                 )}
@@ -741,7 +787,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 }
 
 // Summary invoice dari items
-export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string }> = ({ items, currency }) => {
+export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string, serverTotal?: number }> = ({ items, currency, serverTotal }) => {
     // Helper to ensure numeric value  
     const toNumber = (value: any): number => {
         if (typeof value === 'string') {
@@ -754,7 +800,7 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string }
     const summary = useMemo(() => {
         const subtotal = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.amount)), 0);
         const totalTax = items.reduce((sum, item) => sum + toNumber(item.tax_amount), 0);
-        const grandTotal = items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
+        const grandTotal = serverTotal !== null ? serverTotal : items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
         const totalQty = items.reduce((sum, item) => sum + toNumber(item.qty), 0);
 
         return { subtotal, totalTax, grandTotal, totalQty };
@@ -777,7 +823,7 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string }
                     </div>
                     <div className="border-t border-gray-300 pt-3 flex justify-between text-sm font-primary-bold">
                         <span>Grand Total</span>
-                        <span className="text-blue-700">{formatCurrencyDynamic(summary.grandTotal, currency)}</span>
+                        <span className="text-blue-700">{formatCurrencyDynamic(Number(summary.grandTotal), currency)}</span>
                     </div>
                 </div>
             </div>

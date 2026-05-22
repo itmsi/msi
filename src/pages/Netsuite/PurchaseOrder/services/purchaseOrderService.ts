@@ -1,5 +1,5 @@
-import { apiPost, apiGet, ApiResponse, apiPut } from '@/helpers/apiHelper';
-import { ComponentsDataResponse, HistoryLogResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, PostReceiptResponse, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
+import { apiPost, apiGet, ApiResponse, apiPut, apiPostMultipart } from '@/helpers/apiHelper';
+import { ComponentsDataResponse, HistoryLogResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, POAttachment, POAttachmentDelete, POAttachmentResponse, POAttachmentUpdate, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, POItemsSelectRequest, PostReceiptResponse, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, ResponseAttachUpdateItem, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -24,13 +24,14 @@ export class PurchaseOrderService {
         );
     }
 
-    static async getPOItems(params: Partial<POItemsRequest> = {}): Promise<POItemResponse> {
+    static async getPOItems(params: Partial<POItemsSelectRequest> = {}): Promise<POItemResponse> {
         const requestData: POItemsRequest = {
             page: 1,
             limit: 10,
             sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
+            item_type: ["Service", "Inventory Item", "Kit/Package"],
             ...params
         };
 
@@ -193,7 +194,6 @@ export class PurchaseOrderService {
         const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/receive-list/sync`, requestData as Record<string, any>);
         return response.data as ReceiptResponse;
     }
-
     
     static async getHistoryReceiptById(params: Partial<any> = {}): Promise<HistoryLogResponse> {
         const requestData = {
@@ -201,5 +201,33 @@ export class PurchaseOrderService {
         };
         const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/receive-list/history-logs`, requestData as Record<string, any>);
         return response.data as HistoryLogResponse;
+    }
+
+    static async attachFilePO(payload: POAttachment): Promise<POAttachmentResponse> {
+        const fd = new FormData();
+        fd.append('file', payload.file);
+        fd.append('file_name', payload.file_name);
+        fd.append('po_id', payload.po_id);
+        const response = await apiPostMultipart<POAttachmentResponse>(`${API_BASE_URL}/netsuite/purchasing-orders/upload`, fd);
+        return response.data;
+    }
+
+    static async attachFilePOUpdate(payload: POAttachmentUpdate): Promise<ResponseAttachUpdateItem> {
+        const fd = new FormData();
+        if (payload.file) fd.append('file', payload.file);
+        fd.append('po_id', payload.poId ?? '');
+        fd.append('file_name', payload.file_name);
+        fd.append('fileUrl', payload.fileUrl);
+        const response = await apiPostMultipart<ResponseAttachUpdateItem>(`${API_BASE_URL}/netsuite/purchasing-orders/upload-update`, fd);
+        
+        return response.data;
+    }
+
+    static async attachFilePODelete(payload: POAttachmentDelete): Promise<POAttachmentResponse> {
+        const requestData = {
+            fileUrl: payload.fileUrl
+        };
+        const response = await apiPost<POAttachmentResponse>(`${API_BASE_URL}/netsuite/purchasing-orders/upload-delete`, requestData as Record<string, any>);
+        return response.data;
     }
 }

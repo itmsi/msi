@@ -35,7 +35,8 @@ export class FakturService {
     static async updateFakturById(id: string, data: Faktur): Promise<FakturResponse> {
         const response = await apiPut<{ data: FakturResponse }>(
             `${API_BASE_URL}/netsuite/faktur/${id}`,
-            data as unknown as Record<string, unknown>
+            data as unknown as Record<string, unknown>,
+            { timeout: 300000 }
         );
         return response.data as unknown as FakturResponse;
     }

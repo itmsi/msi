@@ -1,7 +1,7 @@
 import PageMeta from '@/components/common/PageMeta'
 import Button from '@/components/ui/button/Button'
 import { useEffect, useState } from 'react'
-import { MdKeyboardArrowLeft, MdOutlineSync, MdVerified } from 'react-icons/md'
+import { MdOutlineSync, MdVerified } from 'react-icons/md'
 import { useNavigate } from 'react-router-dom';
 import { usePurchaseOrderEdit } from './hooks/usePurchaseOrderEdit';
 import PurchaseOrderFields from './components/purchaseOrderFields';
@@ -23,6 +23,7 @@ import { useHistoryReceiptTab } from './hooks/useHistoryReceiptTab';
 import HistoryReceiptTab from './components/tabs/HistoryReceiptTab';
 import UserNoteTab from './components/tabs/UserNoteTab';
 import FilesTab from './components/tabs/FilesTab';
+import PageHeader from '@/components/common/PageHeader';
 
 export default function Edit() {
     const navigate = useNavigate();
@@ -308,6 +309,11 @@ export default function Edit() {
             </Button>
         </PermissionGate>
     );
+    // poDetail?.status_proccess !== 'FAILED' && poDetail?.type_proccess !== 'CREATE'
+    console.log({
+        'poDetail status_proccess': poDetail?.status_proccess,
+        'poDetail type_proccess': poDetail?.type_proccess,
+    })
     return (
         <>
             <PageMeta
@@ -324,69 +330,59 @@ export default function Edit() {
                         />
                     ) : ( <>
                         {/* Header */}
-                        <div className="flex items-center justify-between lg:h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                            <div className="flex items-center gap-1 w-full">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => navigate('/netsuite/purchase-order')}
-                                    className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                                >
-                                    <MdKeyboardArrowLeft size={20} />
-                                </Button>
-                                <div className="border-l border-gray-300 h-6 mx-3"></div>
-                                <div className='flex items-center gap-4 justify-between w-full lg:flex-row flex-col'>
-                                    <div>
-                                        <h1 className="ms-2 font-primary-bold font-normal text-xl">
-                                            Edit Purchase Order
-                                        </h1>
-                                        <p className="ms-2 text-sm text-gray-600">{poDetail?.po_number || '-'}</p>
-                                    </div>
-                                    <div className="capitalize ms-2 flex gap-2">
-                                        {(poDetail?.po_status !== 'pending' && poDetail?.po_status !== 'failed') && (
+                        <PageHeader
+                            title="Edit Purchase Order"
+                            backPath="/netsuite/purchase-order"
+                            subtitle={poDetail?.po_number || '-'}
+                            actions={
+                                <>
+                                    {(poDetail?.status_proccess !== 'PROCESSING' && poDetail?.status_proccess !== 'FAILED') && (
                                         <PermissionGate permission="read">
                                             <Button
                                                 onClick={() => handleSyncById(poDetail?.po_id)}
                                                 disabled={isSyncing}
                                                 className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600 py-2"
-                                                variant='outline'
+                                                variant="outline"
                                             >
                                                 <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
-                                                <div>
-                                                    <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
-                                                </div>
+                                                <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
                                             </Button>
                                         </PermissionGate>
-                                        )}
-                                        {poDetail?.po_number !== null && (
-                                            <span 
-                                                className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
-                                            >
-                                                {formData.po_status_label}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                    )}
+                                    {poDetail?.po_number && (
+                                        <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
+                                            {formData.po_status_label}
+                                        </span>
+                                    )}
+                                </>
+                            }
+                        />
 
                         <div className="space-y-6">
-                            {poDetail?.po_status === 'pending' && (
+                            {poDetail?.status_proccess === 'PROCESSING' && (
                                 <Alert variant='warning' title='Purchase Order Is Being Processed'>
                                     <div className="space-y-4">
                                         <p className="text-sm text-gray-500">
-                                            Your purchase order is currently being generated. Please allow some time for the process to complete. <br />
-                                            Click the refresh button below to check whether the data is already available.
+                                            {
+                                                poDetail?.status_proccess_message ? (poDetail.status_proccess_message) : 
+                                                <>Your purchase order is currently being generated. Please allow some time for the process to complete. <br />
+                                                Click the refresh button below to check whether the data is already available.</>
+                                            } 
                                         </p>
                                         <ElemRefresh />
                                     </div>
                                 </Alert>
                             )}
 
-                            {poDetail?.po_status === 'failed' && (
+                            {poDetail?.status_proccess === 'FAILED' && (
                                 <Alert variant='warning' title='Failed to Generate Purchase Order'>
                                     <div className="space-y-4">
                                         <p className="text-sm text-gray-500">
-                                            We were unable to generate your purchase order at this time. Please try again by clicking the refresh button below. If the issue persists, contact support for further assistance.
+                                            {
+                                                poDetail?.status_proccess_message ? (poDetail.status_proccess_message) : 
+                                                'We were unable to generate your purchase order at this time. Please try again by clicking the refresh button below. If the issue persists, contact support for further assistance.'
+                                            } 
+                                            
                                         </p>
                                         <ElemRefresh />
                                     </div>
@@ -642,21 +638,25 @@ export default function Edit() {
                                                 }
                                             }}
                                             departmentError={errors.department || departmentSelectError}
+                                            serverTotal={poDetail?.foreigntotal}
                                         />
                                     )}
                                     
                                     {activeTab === 'files' && (
                                         <FilesTab
                                             formData={formData}
+                                            poId={poDetail?.po_id}
                                             fileList={poDetail?.files || []}
                                             pendingFiles={(formData.files || []).filter(
                                                 file => !(poDetail?.files || []).some(
-                                                    pf => pf.fileUrl === file.fileUrl && pf.fileName === file.fileName
+                                                    pf => (pf.fileUrl || '') === (file.fileUrl || '') &&
+                                                          (pf.fileName || '') === (file.fileName || '')
                                                 )
                                             )}
                                             deletedFileUrls={(poDetail?.files || [])
                                                 .filter(pf => !(formData.files || []).some(
-                                                    file => file.fileUrl === pf.fileUrl && file.fileName === pf.fileName
+                                                    file => (file.fileUrl || '') === (pf.fileUrl || '') &&
+                                                            (file.fileName || '') === (pf.fileName || '')
                                                 ))
                                                 .map(pf => pf.fileUrl)
                                             }
@@ -706,87 +706,88 @@ export default function Edit() {
                                 >
                                     Cancel
                                 </Button>
-                                {(poDetail?.approvalstatus === 1 && poDetail.nextapprover === "" )&& (
-                                    <PermissionGate permission={["create", "update"]}>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => handleApprovalOpen(poDetail.po_id)}
-                                            className="group px-6 rounded-full ring-1 ring-inset ring-green-600 text-green-600 hover:bg-green-600 hover:text-white hover:ring-green-600"
-                                            disabled={isSubmitting}
-                                        >
-                                            Submit Approval
-                                        </Button>
-                                    </PermissionGate>
-                                )}
-                                {poDetail?.approvalstatus === 2 && (poDetail?.po_status_label !== 'Pending Receipt') && (
-                                    <PermissionGate permission={["create", "update"]}>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => handleApproval(poDetail.po_id)}
-                                            className="group rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
-                                            disabled={isSubmitting}
-                                        >
-                                            Re-Approval <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
-                                        </Button>
-                                    </PermissionGate>
-                                )}
-                                {poDetail?.approvalstatus === 3 && (
-                                    <PermissionGate permission={["create", "update"]}>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => handleOpenRejected(poDetail.po_id)}
-                                            className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
-                                            disabled={isSubmitting}
-                                        >
-                                            Re-Open <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
-                                        </Button>
-                                    </PermissionGate>
-                                )}
-                                {
-                                    ((formData.approvalstatus === 1 && formData.nextapprover === null))  && (
+                                {(poDetail?.status_proccess !== 'PROCESSING') && (<>
+                                    {(poDetail?.approvalstatus === 1 && poDetail.nextapprover === "" ) && (
                                         <PermissionGate permission={["create", "update"]}>
                                             <Button
-                                                onClick={handleSubmit}
-                                                className="px-6 flex items-center gap-2 rounded-full"
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => handleApprovalOpen(poDetail.po_id)}
+                                                className="group px-6 rounded-full ring-1 ring-inset ring-green-600 text-green-600 hover:bg-green-600 hover:text-white hover:ring-green-600"
                                                 disabled={isSubmitting}
                                             >
-                                                {isSubmitting ? (
-                                                    <>
-                                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                        </svg>
-                                                        Processing...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <FaSave className={`mr-2 h-4 w-4 ${isSubmitting ? 'animate-spin' : ''}`} /> Update Purchase Order
-                                                    </>
-                                                )}
+                                                Submit Approval
                                             </Button>
                                         </PermissionGate>
-                                    )
-                                }
-                                
-                                {((poDetail?.po_status_label === 'Pending Receipt' || poDetail?.po_status_label === 'Pending Billing/Partially Received') && poDetail?.po_id !== null && !editReceive) && (
-                                    <PermissionGate permission={["create", "update"]}>
-                                        <Button
-                                            type="button"
-                                            onClick={() => navigate(`/netsuite/purchase-order/${poDetail.po_id}/receive`)}
-                                            className="group px-6 rounded-full ring-1 bg-[#14B8A6] ring-inset ring-[#14B8A6] text-white hover:bg-[#0D9488] hover:ring-[#0D9488]"
-                                            disabled={isSubmitting}
-                                        >
-                                            Receive <FaReceipt className="mr-2 h-4 w-4" />
-                                        </Button>
-                                    </PermissionGate>
-                                )}
-                                
-                                    {(poDetail?.po_status === 'failed' || poDetail?.po_status === 'pending') && (
+                                    )}
+                                    {poDetail?.approvalstatus === 2 && (poDetail?.po_status_label !== 'Pending Receipt') && (
+                                        <PermissionGate permission={["create", "update"]}>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => handleApproval(poDetail.po_id)}
+                                                className="group rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
+                                                disabled={isSubmitting}
+                                            >
+                                                Re-Approval <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
+                                            </Button>
+                                        </PermissionGate>
+                                    )}
+                                    {poDetail?.approvalstatus === 3 && (
+                                        <PermissionGate permission={["create", "update"]}>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => handleOpenRejected(poDetail.po_id)}
+                                                className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
+                                                disabled={isSubmitting}
+                                            >
+                                                Re-Open <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
+                                            </Button>
+                                        </PermissionGate>
+                                    )}
+                                    {((formData.approvalstatus === 1 && (formData.nextapprover === null || formData.nextapprover === ''))) && (
+                                            <PermissionGate permission={["create", "update"]}>
+                                                <Button
+                                                    onClick={handleSubmit}
+                                                    className="px-6 flex items-center gap-2 rounded-full"
+                                                    disabled={isSubmitting}
+                                                >
+                                                    {isSubmitting ? (
+                                                        <>
+                                                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                            </svg>
+                                                            Processing...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <FaSave className={`mr-2 h-4 w-4 ${isSubmitting ? 'animate-spin' : ''}`} /> Update Purchase Order
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            </PermissionGate>
+                                    )}
+                                    
+                                    {((poDetail?.po_status_label === 'Pending Receipt' || poDetail?.po_status_label === 'Pending Billing/Partially Received') && poDetail?.po_id !== null && !editReceive) && (
+                                        <PermissionGate permission={["create", "update"]}>
+                                            <Button
+                                                type="button"
+                                                onClick={() => navigate(`/netsuite/purchase-order/${poDetail.po_id}/receive`)}
+                                                className="group px-6 rounded-full ring-1 bg-[#14B8A6] ring-inset ring-[#14B8A6] text-white hover:bg-[#0D9488] hover:ring-[#0D9488]"
+                                                disabled={isSubmitting}
+                                            >
+                                                Receive <FaReceipt className="mr-2 h-4 w-4" />
+                                            </Button>
+                                        </PermissionGate>
+                                    )}
+                                </>)}
+
+                                    {(poDetail?.status_proccess === 'FAILED' || poDetail?.status_proccess === 'PROCESSING') && (
                                         <ElemRefresh />
                                     )}
+
                                 {/*
                                 {(poDetail?.po_status_label === 'Pending Receipt' && editReceive) && (
                                     <PermissionGate permission={["create", "update"]}>
