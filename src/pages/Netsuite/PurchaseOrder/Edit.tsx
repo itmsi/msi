@@ -706,7 +706,7 @@ export default function Edit() {
                                 >
                                     Cancel
                                 </Button>
-                                {(poDetail?.status_proccess !== 'FAILED' || poDetail?.type_proccess === 'CREATE') && (<>
+                                {(poDetail?.status_proccess !== 'PROCESSING') && (<>
                                     {(poDetail?.approvalstatus === 1 && poDetail.nextapprover === "" ) && (
                                         <PermissionGate permission={["create", "update"]}>
                                             <Button
