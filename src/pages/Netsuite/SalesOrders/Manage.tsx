@@ -148,12 +148,9 @@ export default function Manage() {
         },
         {
             name: 'Total Amount',
-            selector: row => {
-                const total = row.items?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0;
-                return total.toString();
-            },
+            selector: row => row.total_amount || '-',
             cell: row => {
-                const total = row.items?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0;
+                const total = row.total_amount;
                 return (
                     <div className="text-sm text-gray-900 font-medium">
                         {formatCurrencyID(total)}
