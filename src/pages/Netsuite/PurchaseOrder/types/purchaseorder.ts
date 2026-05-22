@@ -348,7 +348,9 @@ export interface PODetailData {
     lines: PODetailLine[];
     user_notes: UserNotesItem[];
     files: AttachFileItem[];
-    message_error: MessageError | null;
+    status_proccess_message?: string | null;
+    status_proccess?: string;
+    type_proccess?: string;
 }
 
 export interface MessageError {
