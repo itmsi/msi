@@ -36,6 +36,7 @@ export interface SalesOrder {
     status_name: string;
     customer_id: string;
     customer_name: string;
+    total_amount: number;
     memo: string | null;
     last_modified: string | null;
     last_modified_by_name: string | null;
