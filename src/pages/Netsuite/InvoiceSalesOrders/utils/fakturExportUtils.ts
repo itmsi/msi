@@ -66,7 +66,8 @@ export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
             xml += `        <GoodService>\n`;
             xml += `          <Opt>${escapeXML(detail.barang_or_jasa)}</Opt>\n`;
             xml += `          <Code>${escapeXML(detail.kode_barang_jasa)}</Code>\n`;
-            const isIEL = faktur.subsidiary_display === 'PT Indonesia Equipment Line';
+            const isIEL = faktur.subsidiary_display === 'PT Indonesia Equipment Line'
+                || (faktur.referensi || '').includes('-IEL-');
             const namaBarang: string = detail.nama_barang_or_jasa || '';
             const displayName: string = detail.item_displayname || '';
             const itemName = isIEL
@@ -79,11 +80,7 @@ export const generateFakturXML = (fakturs: { faktur: any, row: any }[]) => {
                     if (displayName && namaBarang.includes(displayName)) {
                         return namaBarang;
                     }
-                    // Case: namaBarang has " - OTHER_NAME" (dash with different text) → replace after dash with displayName
-                    const dashIndex = namaBarang.indexOf(' - ');
-                    if (displayName && dashIndex !== -1) {
-                        return `${namaBarang.slice(0, dashIndex)} ${displayName}`.trim();
-                    }
+                    
                     // Case: item_displayname not present → append with space
                     return `${namaBarang} ${displayName}`.trim();
                 })()
