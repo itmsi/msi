@@ -741,3 +741,15 @@ export const getProfile = (): string => {
     const user = AuthService.getCurrentUser();
     return (user as any) || '';
 };
+
+// Format date in English locale with local timezone but without time component
+export const formatDateLocal = (dateString?: string): string => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    return date.toLocaleDateString('en-GB', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+};
