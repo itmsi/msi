@@ -42,19 +42,23 @@ export interface CreditAppliedItem {
 }
 
 export interface WorkflowHistoryItem {
-    field: string;
-    new_value: string;
-    old_value: string;
-    date_created: string;
-    user_changed: string;
-    user_display: string;
-    field_display: string;
+    workflow?: string;
+    date_entered?: string;
+    date_exited?: string;
+    options_obj?: string;
+    notes?: string;
 }
 
 export interface UserNoteItem {
-    note?: string;
     date?: string;
-    user?: string;
+    author?: string;
+    author_display?: string;
+    title?: string;
+    memo?: string;
+    direction?: string;
+    direction_display?: string | null;
+    type?: string;
+    type_display?: string | null;
     [key: string]: any;
 }
 
