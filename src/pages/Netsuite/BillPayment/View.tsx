@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { MdArrowBack } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
 import { BillPaymentService } from "./services/billPaymentService";
-import { BillPayment, AppliedToItem, CreditAppliedItem, WorkflowHistoryItem } from "./types/billPayment";
+import { BillPayment, AppliedToItem, CreditAppliedItem, WorkflowHistoryItem, UserNoteItem } from "./types/billPayment";
 import Badge from "@/components/ui/badge/Badge";
 import Button from "@/components/ui/button/Button";
 import { formatCurrencyID, formatDateTime, formatDateLocal } from "@/helpers/generalHelper";
@@ -171,36 +171,93 @@ export default function View() {
     ];
 
     const workflowColumns: TableColumn<WorkflowHistoryItem>[] = [
+        { name: 'Workflow', selector: row => row.workflow || '-', wrap: true, minWidth: '180px' },
         {
-            name: 'Date',
-            selector: row => row.date_created || '-',
-            cell: row => <span className="text-sm">{row.date_created ? formatDateTime(row.date_created) : '-'}</span>,
+            name: 'Date Entered State',
+            selector: row => row.date_entered || '-',
+            cell: row => <span className="text-sm">{row.date_entered ? formatDateTime(row.date_entered) : '-'}</span>,
             minWidth: '160px',
         },
-        { name: 'Field', selector: row => row.field_display || row.field || '-', wrap: true, minWidth: '140px' },
-        { name: 'User', selector: row => row.user_display || '-', wrap: true, minWidth: '160px' },
         {
-            name: 'Old Value',
-            selector: row => row.old_value || '-',
+            name: 'Date Exited State',
+            selector: row => row.date_exited || '-',
+            cell: row => <span className="text-sm">{row.date_exited ? formatDateTime(row.date_exited) : '-'}</span>,
+            minWidth: '160px',
+        },
+        {
+            name: 'Options',
+            selector: row => row.options_obj || '-',
+            cell: row => {
+                if (!row.options_obj || Object.keys(row.options_obj).length === 0) return '-';
+                return (
+                    <div className="py-2 text-sm text-gray-700 space-y-1 max-w-[300px]">
+                        {Object.entries(row.options_obj).map(([key, val], idx) => (
+                            <div key={idx} className="leading-tight">
+                                <span className="font-medium text-gray-900">{key}:</span> {String(val)}
+                            </div>
+                        ))}
+                    </div>
+                );
+            },
+            wrap: true,
+            minWidth: '250px',
+        },
+        {
+            name: 'Notes',
+            selector: row => row.notes || '-',
             cell: row => (
-                <div className="py-2 text-sm text-gray-500 whitespace-pre-wrap max-w-[220px]" title={row.old_value}>
-                    {row.old_value || '-'}
+                <div className="py-2 text-sm text-gray-500 whitespace-pre-wrap max-w-[300px]" title={row.notes}>
+                    {row.notes || '-'}
                 </div>
             ),
             wrap: true,
             minWidth: '200px',
         },
+    ];
+
+    const userNotesColumns: TableColumn<UserNoteItem>[] = [
         {
-            name: 'New Value',
-            selector: row => row.new_value || '-',
+            name: 'Date',
+            selector: row => row.date || '-',
+            cell: row => <span className="text-sm">{row.date ? formatDateTime(row.date) : '-'}</span>,
+            minWidth: '150px',
+            sortable: true,
+        },
+        {
+            name: 'Author',
+            selector: row => row.author_display || '-',
+            cell: row => <span className="text-sm font-medium text-blue-600">{row.author_display || '-'}</span>,
+            wrap: true,
+            minWidth: '300px',
+        },
+        {
+            name: 'Title',
+            selector: row => row.title || '-',
+            cell: row => <span className="text-sm font-medium">{row.title || '-'}</span>,
+            wrap: true,
+            minWidth: '300px',
+        },
+        {
+            name: 'Memo',
+            selector: row => row.memo || '-',
             cell: row => (
-                <div className="py-2 text-sm text-gray-900 whitespace-pre-wrap max-w-[220px]" title={row.new_value}>
-                    {row.new_value || '-'}
+                <div className="py-2 text-sm text-gray-700 whitespace-pre-wrap max-w-[400px]">
+                    {row.memo || '-'}
                 </div>
             ),
             wrap: true,
-            minWidth: '200px',
+            minWidth: '300px',
         },
+        {
+            name: 'Type',
+            selector: row => row.type_display || '-',
+            minWidth: '80px',
+        },
+        {
+            name: 'Direction',
+            selector: row => row.direction_display || '-',
+            minWidth: '80px',
+        }
     ];
 
     const tabs: { key: TabType; label: string; count?: number }[] = [
@@ -505,25 +562,19 @@ export default function View() {
                         )}
 
                         {activeTab === 'user_notes' && (
-                            <div className="p-6">
-                                {Array.isArray(billData.user_notes) && billData.user_notes.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {billData.user_notes.map((note, idx) => (
-                                            <div key={idx} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                                {note.date && (
-                                                    <p className="text-xs text-gray-500 mb-1">{formatDateTime(note.date)}</p>
-                                                )}
-                                                {note.user && (
-                                                    <p className="text-xs font-medium text-blue-600 mb-2">{note.user}</p>
-                                                )}
-                                                <p className="text-sm text-gray-800">{note.note || JSON.stringify(note)}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center text-sm text-gray-500 py-6">No user notes found</div>
-                                )}
-                            </div>
+                            <CustomDataTable
+                                columns={userNotesColumns}
+                                data={Array.isArray(billData.user_notes) ? billData.user_notes : []}
+                                pagination
+                                paginationPerPage={10}
+                                paginationRowsPerPageOptions={[10, 20, 50]}
+                                responsive
+                                highlightOnHover
+                                striped={false}
+                                noDataComponent={
+                                    <div className="p-6 text-center text-sm text-gray-500">No user notes found</div>
+                                }
+                            />
                         )}
                     </div>
                 </div>
