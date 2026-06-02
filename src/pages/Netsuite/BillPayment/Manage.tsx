@@ -64,6 +64,17 @@ export default function Manage() {
 
     const columns: TableColumn<BillPayment>[] = [
         {
+            name: 'ID',
+            selector: row => row.netsuite_id?.toString() || '-',
+            cell: row => (
+                <div className="items-center py-2">
+                    <div className="block text-sm text-gray-900">{row.netsuite_id || '-'}</div>
+                </div>
+            ),
+            wrap: true,
+            minWidth: '80px',
+        },
+        {
             name: 'Transaction No.',
             selector: row => row.transactionnumber || '-',
             cell: row => (
