@@ -7,26 +7,22 @@ import { SalesOrderService } from '../services/salesOrderService';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
 import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
 
-const formatDateForAPI = (dateStr: string): string => {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-};
-
 const DEFAULT_FORM: SalesOrderFormData = {
     customform: 104,
     subsidiary: null,
+    subsidiary_name: '',
     entity: null,
     entity_name: '',
     trandate: '',
-    startdate: '',
-    enddate: '',
+    startdate: null,
+    enddate: null,
     orderstatus: 'A',
     otherrefnum: '',
     memo: '',
     currency: 1,
+    currency_name: '',
     terms: null,
+    terms_name: '',
     department: null,
     department_name: '',
     class: null,
@@ -35,9 +31,13 @@ const DEFAULT_FORM: SalesOrderFormData = {
     location_name: '',
     custbody_msi_quotation_no_iec: '',
     custbody_msi_bank_payment_so: null,
+    custbody_msi_bank_payment_so_name: [],
     custbody_cseg_cn_cfi: null,
     custbody_msi_createdby_api: 'T',
+    // custbody_me_approval_status: 1,
+    total_amount: 0,
     items: [],
+    files: [],
 };
 
 export const useSalesOrderCreate = () => {
@@ -122,12 +122,13 @@ export const useSalesOrderCreate = () => {
             amount: 0,
             description: '',
             department: formData.department,
-            department_name: formData.department_name,
+            department_name: formData.department_name || '',
             class: formData.class,
-            class_name: formData.class_name,
+            class_name: formData.class_name || '',
             location: formData.location,
-            location_name: formData.location_name,
-            taxcode: null,
+            location_name: formData.location_name || '',
+            taxcode: 0,
+            taxcode_name: '',
         };
         setFormData(prev => ({ ...prev, items: [...prev.items, newItem] }));
     };
@@ -181,20 +182,28 @@ export const useSalesOrderCreate = () => {
             const payload = {
                 customform: formData.customform,
                 subsidiary: formData.subsidiary,
+                subsidiary_name: formData.subsidiary_name || '',
                 entity: Number(formData.entity),
-                trandate: formatDateForAPI(formData.trandate),
-                startdate: formData.startdate ? formatDateForAPI(formData.startdate) : undefined,
-                enddate: formData.enddate ? formatDateForAPI(formData.enddate) : undefined,
+                customer_name: formData.entity_name || '',
+                trandate: formData.trandate || null,
+                startdate: formData.startdate ? formData.startdate : null,
+                enddate: formData.enddate ? formData.enddate : null,
                 orderstatus: formData.orderstatus,
                 otherrefnum: formData.otherrefnum || '',
                 memo: formData.memo || '',
                 currency: formData.currency,
+                currency_name: formData.currency_name || '',
                 terms: formData.terms || undefined,
+                terms_name: formData.terms_name || '',
                 department: formData.department || undefined,
+                department_name: formData.department_name || '',
                 class: formData.class || undefined,
+                class_name: formData.class_name || '',
                 location: formData.location || undefined,
+                location_name: formData.location_name || '',
                 custbody_msi_quotation_no_iec: formData.custbody_msi_quotation_no_iec || '',
-                custbody_msi_bank_payment_so: formData.custbody_msi_bank_payment_so || undefined,
+                custbody_msi_bank_payment_so: formData.custbody_msi_bank_payment_so || [],
+                custbody_msi_bank_payment_so_name: formData.custbody_msi_bank_payment_so_name || [],
                 custbody_cseg_cn_cfi: formData.custbody_cseg_cn_cfi || undefined,
                 custbody_msi_createdby_api: formData.custbody_msi_createdby_api || 'T',
                 items: formData.items.map(item => ({
@@ -208,6 +217,7 @@ export const useSalesOrderCreate = () => {
                     location: item.location || undefined,
                     taxcode: item.taxcode || undefined,
                 })),
+                files: formData.files || [],
             };
             const response = await SalesOrderService.createSalesOrder(payload as any);
             if (response.success) {

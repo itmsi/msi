@@ -7,7 +7,7 @@ import CustomSelect from '@/components/form/select/CustomSelect';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
-import CustomDataTable from '@/components/ui/table';
+import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import Button from '@/components/ui/button/Button';
 import { MdAdd, MdDeleteOutline } from 'react-icons/md';
 import { TableColumn } from 'react-data-table-component';
@@ -218,7 +218,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         {
             name: 'Product Name',
             selector: (row: TablePOItem) => row.product_name || 'N/A',
-            sortable: true,
+            sortable: false,
             grow: 2
         },
         {
@@ -446,7 +446,6 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             if (option) {
                                 updateItemById(index as number, 'taxcode', parseInt(option.value));
                                 updateItemById(index as number, 'taxcode_name', option.label);
-                                updateItemById(index as number, 'tax_rate', option.label);
                                 
                                 const currentAmount = toNumber(row.amount);
                                 updateTaxCalculation(index as number, currentAmount, option.label);
@@ -454,7 +453,6 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                                 // Clear tax code
                                 updateItemById(index as number, 'taxcode', 0);
                                 updateItemById(index as number, 'taxcode_name', '');
-                                updateItemById(index as number, 'tax_rate', '');
                                 
                                 const currentAmount = toNumber(row.amount);
                                 updateTaxCalculation(index as number, currentAmount);
@@ -536,18 +534,19 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         onInputChange={onDepartmentInputChange}
                         onChange={(option) => {
                             if (option) {
-                                updateItemById(index as number, 'department', parseInt(option.value));
+                                updateItemById(index as number, 'department', parseInt(String(option.value)));
                                 updateItemById(index as number, 'department_name', option.label);
                             }
                         }}
                         error={!row.department && errors?.items_department ? errors.items_department : undefined}
-                        className="text-xs"
+                        className="w-full text-xs"
                         menuPortalTarget={document.body}
                         menuPosition="fixed"
                     />
                 )}
                 </div>
             ),
+            center: true,
             width: '300px',
             sortable: false
         },
@@ -579,7 +578,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             onInputChange={onClassInputChange}
                             onChange={(option) => {
                                 if (option) {
-                                    updateItemById(index as number, 'class', parseInt(option.value));
+                                    updateItemById(index as number, 'class', parseInt(String(option.value)));
                                     updateItemById(index as number, 'class_name', option.label);
                                 }
                             }}
@@ -623,7 +622,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             onInputChange={onLocationInputChange}
                             onChange={(option) => {
                                 if (option) {
-                                    updateItemById(index as number, 'location', parseInt(option.value));
+                                    updateItemById(index as number, 'location', parseInt(String(option.value)));
                                     updateItemById(index as number, 'location_name', option.label);
                                 }
                             }}
@@ -642,26 +641,17 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             width: '300px',
             sortable: false
         },
-        {
-            name: 'Actions',
-            cell: (row: TablePOItem, index: number) => (
-                <div className="flex gap-2">
-                    {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => onProductDelete?.(row.id || index.toString())}
-                        className="text-red-600 hover:text-red-800"
-                    >
-                        <MdDeleteOutline size={14} />
-                    </Button>
-                    )}
-                </div>
-            ),
-            width: '100px',
-            center: true,
-            sortable: false
-        }
+        ...((formData.approvalstatus !== 2 && formData.approvalstatus !== 3) ? [createActionsColumn([
+            {
+                icon: MdDeleteOutline,
+                onClick: (row: TablePOItem) => {
+                    onProductDelete?.(row.id || '')
+                },
+                className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                tooltip: 'Remove Item',
+                permission: 'delete' as const
+            }
+        ])] : [])
     ];
     
     if (loadingMasterData) {

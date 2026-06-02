@@ -31,7 +31,7 @@ export class PurchaseOrderService {
             sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
-            item_type: ["Service", "Inventory Item", "Kit/Package"],
+            item_type: ["Service", "Inventory Item", "Kit/Package", "Non-inventory Item"],
             ...params
         };
 
