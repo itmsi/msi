@@ -286,7 +286,7 @@ export const usePurchaseOrderEdit = () => {
         setIsSubmitting(true);
         try {
             const requestData: PurchaseOrderFormUpdate = {
-                id: Number(poDetail?.po_id || id),
+                id: poDetail?.po_id ? poDetail?.po_id : String(id),
                 customform: formData.customform || undefined,
                 vendorid: formData.vendorid || undefined,
                 purchasedate: formData.purchasedate ? formData.purchasedate : undefined,

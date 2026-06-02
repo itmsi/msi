@@ -262,23 +262,6 @@ export default function EditAccessories() {
                                                         permission: 'delete'
                                                     }
                                                 ])
-                                                // {
-                                                //     name: 'Actions',
-                                                //     cell: (row: any) => (
-                                                //         <Button
-                                                //             type="button"
-                                                //             variant="outline"
-                                                //             size="sm"
-                                                //             onClick={() => handleRemoveIsland(row.island_id)}
-                                                //             className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                                                //         >
-                                                //             <MdDelete size={16} />
-                                                //         </Button>
-                                                //     ),
-                                                //     ignoreRowClick: true,
-                                                //     allowOverflow: true,
-                                                //     button: true
-                                                // }
                                             ]}
                                             data={form.accessories_island_detail}
                                             loading={false}

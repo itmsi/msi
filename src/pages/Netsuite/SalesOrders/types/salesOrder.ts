@@ -25,6 +25,11 @@ export interface SalesOrderItem {
     amount: number;
     location_id: string | number;
     location_name: string;
+    taxcode: number | null;
+    taxcode_name?: string;
+    tax_rate?: string;
+    gross_amount?: number;
+    tax_amount?: number;
 }
 
 export interface SalesOrder {
@@ -32,13 +37,21 @@ export interface SalesOrder {
     netsuite_id?: string | null;
     tranid: string;
     tran_date: string;
-    status_code: string;
+    status_code: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H';
     status_name: string;
+    custbody_me_approval_status?: string;
+    custbody_me_approval_status_name?: string;
     customer_id: string;
     customer_name: string;
+    location_name: string;
     memo: string | null;
+    total_amount?: number;
+    currency_name?: string;
     last_modified: string | null;
     last_modified_by_name: string | null;
+    custbody_msi_quotation_no_iec?: string | null;
+    otherrefnum?: string | null;
+    nextapprover?: string | null;
     items: SalesOrderItem[];
 }
 
@@ -111,28 +124,39 @@ export interface SalesOrderUpdateRequest extends SalesOrderCreateRequest {
 // Form data (internal state)
 export interface SalesOrderFormData {
     customform: number;
+    customer_name?: string;
     subsidiary: number | null;
+    subsidiary_name?: string;
     entity: number | null;
     entity_name: string;
     trandate: string;
-    startdate: string;
-    enddate: string;
-    orderstatus: string;
+    startdate: string | null;
+    enddate: string | null;
+    orderstatus: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H';
+    status_name?: string;
     otherrefnum: string;
     memo: string;
     currency: number;
+    currency_name?: string;
     terms: number | null;
+    terms_name?: string;
     department: number | null;
-    department_name: string;
+    department_name?: string;
     class: number | null;
-    class_name: string;
+    class_name?: string;
     location: number | null;
-    location_name: string;
+    location_name?: string;
     custbody_msi_quotation_no_iec: string;
-    custbody_msi_bank_payment_so: number | null;
+    custbody_msi_bank_payment_so: number[] | null;
+    custbody_msi_bank_payment_so_name: string[];
     custbody_cseg_cn_cfi: number | null;
     custbody_msi_createdby_api: string;
     items: SalesOrderFormItem[];
+    files: AttachFileItem[];
+    custbody_me_approval_status?: number | null;
+    total_amount: number;
+    nextapprover?: string | null;
+    user_notes?: UserNotesItem[];
 }
 
 export interface SalesOrderFormItem {
@@ -150,6 +174,25 @@ export interface SalesOrderFormItem {
     location: number | null;
     location_name: string;
     taxcode: number | null;
+    taxcode_name?: string;
+    tax_rate?: string;
+    gross_amount?: number;
+    tax_amount?: number;
+}
+
+export interface BaseOption {
+    id: number;
+    name: string;
+}
+
+// USER NOTES
+export interface UserNotesItem {
+    date: string;
+    note: string;
+    type: string | null;
+    title: string;
+    author: string;
+    direction: string;
 }
 
 export interface CustomerItem {
@@ -176,4 +219,78 @@ export interface CustomerResponse {
     success: boolean;
     message: string;
     data: CustomerData;
+}
+
+// BANK SELECT
+export interface BankItem {
+    id: string;
+    name: string;
+    is_inactive: boolean;
+}
+
+export interface BankDataResponse {
+    success: boolean;
+    data: {
+        items: BankItem[];
+        pagination: SalesOrderPagination;
+    };
+    message: string;
+}
+
+// ATTACH FILE LIST
+export interface AttachFileItem {
+    id?: string;
+    fileUrl: string;
+    fileName: string;
+    storagePath?: string;
+    created_by_api?: string;
+}
+export interface ResponseAttachUpdateItem {
+    success: boolean;
+    data: AttachFileItem;
+    message: string;
+}
+export interface SOAttachment {
+    so_id: string;
+    file_name: string;
+    file: File;
+}
+
+export interface SOAttachmentUpdate {
+    file?: File;
+    soId?: string;
+    file_name: string;
+    fileUrl: string;
+    file_id?: string;
+}
+
+export interface SOAttachmentDelete {
+    fileUrl: string;
+}
+
+export interface SOAttachmentResponse {
+    success: boolean;
+    id: string;
+    soId: string;
+    fileUrl: string;
+    storagePath: string;
+    fileName: string;
+    message?: string;
+}
+
+// APPROVAL
+export interface SOApprovalRequest {
+    id: number;
+    recordType: string;
+    custbody_msi_submit_app_api: boolean;
+    custbody_msi_reopen_api: boolean;
+    custbody_msi_resubmit_api: boolean;
+    note: string;
+    noteTitle: string | null;
+}
+
+export interface SOApprovalResponse {
+    success: boolean;
+    message: string;
+    data: any;
 }

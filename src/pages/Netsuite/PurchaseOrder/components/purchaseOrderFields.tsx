@@ -540,7 +540,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 mb-0">
             <div className={`space-y-6 gap-2 ${(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? 'md:col-span-2' : 'md:col-span-3'}`}>
                 <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                    <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Primary Information</h3>
+                    <h3 className="text-md font-primary-bold font-medium text-gray-900">Primary Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {primaryFields.map((field) => (
                                 <div key={field.name}>
@@ -559,7 +559,6 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             ))}
                     </div>
                 </div>
-
                 <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
                     <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Classification</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

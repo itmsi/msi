@@ -2,15 +2,15 @@ import { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useSalesOrder } from './hooks/useSalesOrder';
-import { getStatusBadge, formatCurrencyID, formatDateTime } from '@/helpers/generalHelper';
+import { formatDateTime, formatCurrencyDynamic } from '@/helpers/generalHelper';
 import {
     MdClear,
     MdSearch,
     MdFilterListAlt,
     MdExpandLess,
     MdExpandMore,
-    MdEdit,
     MdOutlineSync,
+    MdAdd,
 } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -19,6 +19,8 @@ import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { SalesOrder } from './types/salesOrder';
 import Button from '@/components/ui/button/Button';
 import { PermissionGate } from '@/components/common/PermissionComponents';
+import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
+import { createByDateColumn } from '@/components/ui/table/columnUtils';
 
 const SO_STATUS_OPTIONS = [
     { value: 'A', label: 'Pending Approval' },
@@ -30,23 +32,6 @@ const SO_STATUS_OPTIONS = [
     { value: 'G', label: 'Billed' },
     { value: 'H', label: 'Closed' },
 ];
-
-const getSOStatusBadge = (statusCode: string, statusName: string) => {
-    let key = 'draft';
-    switch (statusCode) {
-        case 'A': key = 'pending'; break;
-        case 'B': key = 'info'; break;
-        case 'C': key = 'rejected'; break;
-        case 'D': key = 'warning'; break;
-        case 'E': key = 'warning'; break;
-        case 'F': key = 'warning'; break;
-        case 'G': key = 'approved'; break;
-        case 'H': key = 'draft'; break;
-        default: key = 'draft';
-    }
-    const badge = getStatusBadge(key);
-    return { ...badge, label: statusName || statusCode };
-};
 
 const formatDateID = (dateString: string) => {
     if (!dateString || dateString === '-') return '-';
@@ -110,16 +95,26 @@ export default function Manage() {
 
     const columns: TableColumn<SalesOrder>[] = [
         {
-            name: 'SO Number',
+            name: 'SO ID',
+            selector: row => row.customer_id || '-',
+            wrap: true,
+            width: '100px'
+        },
+        {
+            name: 'Document Number',
             selector: row => row.tranid || '-',
-            cell: row => (
+            cell: row => (<>
+                <a
+                    href={`/netsuite/sales-orders/edit/${row.netsuite_id || row.id}`}
+                    className="absolute inset-0"
+                />
                 <div className="items-center py-2">
                     <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
                     <div className="block text-sm text-gray-500">{formatDateID(row.tran_date || '-')}</div>
                 </div>
-            ),
+            </>),
             wrap: true,
-            minWidth: '160px',
+            width: '230px'
         },
         {
             name: 'Customer',
@@ -127,52 +122,82 @@ export default function Manage() {
             cell: row => (
                 <div className="items-center py-2">
                     <div className="font-medium text-gray-900">{row.customer_name || '-'}</div>
-                    <div className="block text-xs text-gray-400">ID: {row.customer_id || '-'}</div>
+                    {/* <div className="block text-xs text-gray-400">ID: {row.customer_id || '-'}</div> */}
                 </div>
             ),
             wrap: true,
+            width: '310px'
+        },
+        {
+            name: 'PO Number',
+            selector: row => row.otherrefnum || '-',
+            wrap: true,
+            width: '200px',
+            center: true
+        },
+        {
+            name: 'Quotation Number',
+            selector: row => row.custbody_msi_quotation_no_iec || '-',
+            wrap: true,
+            width: '200px',
+            center: true
+        },
+        {
+            name: 'Location',
+            selector: row => row.location_name || '-',
+            wrap: true,
+            width: '220px',
+            center: true,
+            cell: row => (
+                <div className="items-start capitalize w-full">
+                    {row.location_name || '-'}
+                </div>
+            ),
+        },
+        {
+            name: 'Next Approval',
+            selector: row => Number(row.custbody_me_approval_status) === 1 ? row.nextapprover || '-' : '-',
+            wrap: true,
+            width: '220px',
+            center: true
+        },
+        {
+            name: 'Approval Status',
+            selector: row => row.custbody_me_approval_status_name || '-',
+            cell: row => (
+                <div className="items-center capitalize">
+                    <StatusTypeBadge
+                        type={Number(row.custbody_me_approval_status) as 1 | 2 | 3} 
+                        label={row.custbody_me_approval_status_name || undefined}
+                    />
+                </div>
+            ),
+            center: true,
             minWidth: '200px',
         },
         {
             name: 'Status',
             selector: row => row.status_name || row.status_code || '-',
-            cell: row => {
-                const badge = getSOStatusBadge(row.status_code, row.status_name);
-                return (
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>
-                        {badge.label}
-                    </span>
-                );
-            },
-            minWidth: '160px',
+            cell: row => (
+                <div className="items-center capitalize">
+                    {row.status_name ? (
+                        <span 
+                            className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]`}
+                        >
+                            {row.status_name}
+                        </span>
+                    ) : '-'}
+                </div>
+            ),
+            center: true,
+            width: '280px'
         },
         {
             name: 'Total Amount',
-            selector: row => {
-                const total = row.items?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0;
-                return total.toString();
-            },
-            cell: row => {
-                const total = row.items?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0;
-                return (
-                    <div className="text-sm text-gray-900 font-medium">
-                        {formatCurrencyID(total)}
-                    </div>
-                );
-            },
+            selector: row => row.total_amount ? formatCurrencyDynamic(row.total_amount, row.currency_name || 'IDR') : '-',
             wrap: true,
-            minWidth: '160px',
+            width: '240px'
         },
-        // {
-        //     name: 'Items',
-        //     selector: row => row.items?.length || 0,
-        //     cell: row => (
-        //         <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-50 text-blue-700 text-xs font-bold">
-        //             {row.items?.length || 0}
-        //         </span>
-        //     ),
-        //     minWidth: '80px',
-        // },
         {
             name: 'Memo',
             selector: row => row.memo || '-',
@@ -184,28 +209,8 @@ export default function Manage() {
             wrap: true,
             minWidth: '180px',
         },
-        {
-            name: 'Last Modified',
-            selector: row => row.last_modified || '-',
-            cell: row => (
-                <div className="items-center py-2">
-                    <div className="block capitalize font-medium text-gray-900">{row.last_modified_by_name || '-'}</div>
-                    <div className="block text-sm text-gray-500">
-                        {formatDateTime(row.last_modified || '-')}
-                    </div>
-                </div>
-            ),
-            wrap: true,
-            minWidth: '140px',
-        },
+        createByDateColumn('Updated By', 'last_modified', 'last_modified_by_name', '320px'),
         createActionsColumn([
-            {
-                icon: MdEdit,
-                onClick: (row: SalesOrder) => navigate(`/netsuite/sales-orders/edit/${row.netsuite_id || row.id}`),
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'Edit Detail',
-                permission: 'read'
-            },
             {
                 icon: MdOutlineSync,
                 onClick: handleSyncById,
@@ -374,10 +379,10 @@ export default function Manage() {
                                 <PermissionGate permission="create">
                                     <Button
                                         onClick={() => navigate('/netsuite/sales-orders/create')}
-                                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-                                        size="sm"
+                                        className="flex items-center gap-2"
                                     >
-                                        + Create Sales Order
+                                        <MdAdd size={20} />
+                                        <span>Create Sales Order</span>
                                     </Button>
                                 </PermissionGate>
                             </div>
@@ -392,7 +397,7 @@ export default function Manage() {
                 }
 
                 {/* Search & Filter */}
-                <div className="bg-white shadow rounded-lg px-6 py-4">
+                <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
                     {SearchAndFilters}
                 </div>
 
