@@ -505,6 +505,7 @@ export interface ItemReceiptItem {
     line_id?: number;
     item: number;
     item_display?: string;
+    description?: string;
     on_hand?: number;
     quantity: number;
     quantitypending?: number;

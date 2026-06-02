@@ -13,6 +13,7 @@ const mapPODetailToForm = (detail: PODetailData): ItemReceiptPayload => {
         line_id: Number(line.line_id),
         item: line.item,
         item_display: line.item_display || '',
+        description: line.description || '',
         quantity: line.quantity ?? 0,
         quantitypending: line.quantitypending ?? 0,
         quantityreceived: line.quantityreceived ?? 0,

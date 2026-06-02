@@ -110,6 +110,13 @@ const receiptItemFields: React.FC<POItemsFieldsProps> = ({
             selector: (row) => row.item_display || String(row.item),
         },
         {
+            name: 'Description',
+            selector: (row) => row.description || '-',
+            cell: (_row) => <span>{_row.description || '-'}</span>,
+            width: '200px',
+            center: true,
+        },
+        {
             name: 'Remaining',
             selector: (row) => row.quantitypending || 0,
             cell: (_row, index) => <span>{originalQtyRef.current.get(index as number) ?? ''}</span>,
