@@ -295,6 +295,7 @@ export interface POApprovalRequest {
     custbody_msi_reopen_api: boolean;
     custbody_msi_resubmit_api: boolean;
     note: string;
+    noteTitle: string | null;
 }
 
 export interface POApprovalResponse {
@@ -432,7 +433,7 @@ export interface ComponentsDataResponse {
 }
 
 export interface PurchaseOrderFormUpdate {
-    id: number;
+    id: string | number;
     customform?: number;
     vendorid?: number;
     purchasedate?: string;

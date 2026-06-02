@@ -1,25 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { getProfile } from '@/helpers/generalHelper';
-import { SalesOrderFormData, SalesOrderFormItem } from '../types/salesOrder';
+import { AttachFileItem, SalesOrderFormData, SalesOrderFormItem, SalesOrderItem } from '../types/salesOrder';
 import { SalesOrderService } from '../services/salesOrderService';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
 import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
-
-const formatDateForAPI = (dateStr: string): string => {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-};
-
-const toInputDate = (isoOrDate: string | null | undefined): string => {
-    if (!isoOrDate) return '';
-    const match = isoOrDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (match) return `${match[1]}-${match[2]}-${match[3]}`;
-    return '';
-};
 
 // Helper untuk konversi angka yang aman
 const safeNumber = (val: any): number | null => {
@@ -28,8 +14,34 @@ const safeNumber = (val: any): number | null => {
     return isNaN(n) ? null : n;
 };
 
+const calcLineAmounts = (line: SalesOrderItem) => {
+    const val_rate = line.rate != null ? Number(line.rate) : 0;
+    const quantity = line.quantity ?? line.quantity ?? 0;
+    const rate = line.rate ?? val_rate;
+
+    // Jika netamount null, kalkulasi dari rate * quantity
+    const amount = line.amount != null ? Number(line.amount) : rate * quantity;
+
+    const taxRate = line.tax_rate != null ? Number(line.tax_rate) : (() => {
+        // Fallback: ekstrak persentase dari string taxcode_name (e.g. "VAT 11%")
+        if (line.taxcode_name) {
+            const match = line.taxcode_name.match(/([\d.]+)/);
+            return match ? parseFloat(match[1]) : 0;
+        }
+        return 0;
+    })();
+    // Recalculate jika tax_amount null atau 0 padahal taxrate ada (netamount null case)
+    const needsCalcTax = (line.tax_amount == null || line.tax_amount === 0) && taxRate > 0;
+    const tax_amount = needsCalcTax ? Math.round((amount * taxRate) / 100) : (line.tax_amount ?? 0);
+    // Recalculate grossamt jika null atau tidak konsisten dengan amount + taxAmount
+    const needsCalcGross = line.gross_amount == null || line.gross_amount === 0;
+    const gross_amount = needsCalcGross ? Math.round(amount + tax_amount) : (line.gross_amount ?? 0);
+
+    return { quantity, rate, amount, tax_amount, gross_amount };
+};
 export const useSalesOrderEdit = (id: string | undefined) => {
     const navigate = useNavigate();
+    const { paramId } = useParams<{ paramId: string }>();
     const profileSSO = getProfile() as any;
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,16 +55,20 @@ export const useSalesOrderEdit = (id: string | undefined) => {
     const [formData, setFormData] = useState<SalesOrderFormData>({
         customform: 104,
         subsidiary: null,
+        subsidiary_name: '',
         entity: null,
         entity_name: '',
         trandate: '',
-        startdate: '',
-        enddate: '',
+        startdate: null,
+        enddate: null,
         orderstatus: 'A',
+        status_name: '',
         otherrefnum: '',
         memo: '',
         currency: 1,
+        currency_name: '',
         terms: null,
+        terms_name: '',
         department: null,
         department_name: '',
         class: null,
@@ -60,10 +76,14 @@ export const useSalesOrderEdit = (id: string | undefined) => {
         location: null,
         location_name: '',
         custbody_msi_quotation_no_iec: '',
-        custbody_msi_bank_payment_so: null,
+        custbody_msi_bank_payment_so: [],
+        custbody_msi_bank_payment_so_name: [],
         custbody_cseg_cn_cfi: null,
-        custbody_msi_createdby_api: profileSSO?.email || 'T',
+        custbody_msi_createdby_api: '',
+        custbody_me_approval_status: 0,
+        total_amount: 0,
         items: [],
+        files: [],
     });
     const [tranid, setTranid] = useState<string>('');
     const [statusName, setStatusName] = useState<string>('');
@@ -81,45 +101,52 @@ export const useSalesOrderEdit = (id: string | undefined) => {
                 const so = response.data.items[0] as any;
                 
                 // Utamakan netsuite_id, jika kosong pakai id (UUID)
-                setSoInternalId(so.netsuite_id || so.id);
+                setSoInternalId(so.netsuite_id || so.id || paramId);
                 setTranid(so.tranid || '');
-                setStatusName(so.status_name || '');
-
-                // Extract message_error
-                const errorObj = so.message_error?.response?.error;
-                if (typeof errorObj === 'string') {
-                    setMessageError(errorObj);
-                } else if (errorObj && typeof errorObj === 'object' && errorObj.message) {
-                    setMessageError(errorObj.message);
-                } else {
-                    setMessageError('');
-                }
+                setStatusName(so.status_proccess || '');
+                setMessageError(so.status_proccess_message || '');
 
                 setFormData(prev => ({
                     ...prev,
                     subsidiary: safeNumber(so.subsidiary) || prev.subsidiary,
+                    subsidiary_name: so.subsidiary_name || '',
                     entity: safeNumber(so.customer_id),
                     entity_name: so.customer_name || '',
-                    trandate: toInputDate(so.tran_date),
+                    trandate: so?.tran_date || '',
                     orderstatus: so.status_code || 'A',
+                    status_name: so.status_name || '',
+                    otherrefnum: so.otherrefnum || '',
                     memo: so.memo || '',
                     currency: safeNumber(so.currency) || prev.currency,
+                    currency_name: so.currency_name || '',
+                    terms: Number(so.terms) || null,
+                    terms_name: so.terms_name || '',
                     department: safeNumber(so.department),
                     department_name: so.department_name || '',
                     class: safeNumber(so.class),
                     class_name: so.class_name || '',
                     location: safeNumber(so.location),
                     location_name: so.location_name || '',
+                    custbody_me_approval_status: safeNumber(so?.custbody_me_approval_status) || 0,
                     custbody_msi_quotation_no_iec: so.custbody_msi_quotation_no_iec || '',
-                    custbody_msi_bank_payment_so: safeNumber(so.custbody_msi_bank_payment_so),
+                    custbody_msi_bank_payment_so: Array.isArray(so.custbody_msi_bank_payment_so) ? so.custbody_msi_bank_payment_so : [],
+                    custbody_msi_bank_payment_so_name: Array.isArray(so.custbody_msi_bank_payment_so_name) ? so.custbody_msi_bank_payment_so_name : [],
                     custbody_cseg_cn_cfi: safeNumber(so.custbody_cseg_cn_cfi),
+                    startdate: so.startdate || '',
+                    enddate: so.enddate || '',
+                    total_amount: so.total_amount || 0,
+                    custbody_msi_createdby_api: so.custbody_msi_createdby_api || '',
+                    nextapprover: so.nextapprover || null,
+                    user_notes: so.user_notes || [],
                     items: (so.items || []).map((item: any, idx: number) => ({
                         id: `${item.item_id || 'item'}-${idx}-${Date.now()}`,
                         itemId: safeNumber(item.item_id) || 0,
                         item_name: item.item_name || '',
-                        qty: safeNumber(item.quantity) || 0,
-                        rate: safeNumber(item.rate) || 0,
-                        amount: safeNumber(item.amount) || 0,
+                        ...calcLineAmounts(item),
+                        qty: calcLineAmounts(item).quantity || 0,
+                        // qty: safeNumber(item.quantity) || 0,
+                        // rate: safeNumber(item.rate) || 0,
+                        // amount: safeNumber(item.amount) || 0,
                         description: item.description || '',
                         department: safeNumber(item.department),
                         department_name: item.department_name || '',
@@ -127,7 +154,14 @@ export const useSalesOrderEdit = (id: string | undefined) => {
                         class_name: item.class_name || '',
                         location: safeNumber(item.location),
                         location_name: item.location_name || '',
-                        taxcode: safeNumber(item.taxcode),
+                        taxcode: item.taxcode,
+                        taxcode_name: item.taxcode_name || '',
+                        // tax_amount: item.tax_amount || 0,
+                    })),
+                    files: (so.files || []).map((file: any) => ({
+                        id: file.file_id ?? '',
+                        fileName: file.fileName || '',
+                        fileUrl: file.fileUrl || '',
                     })),
                 }));
             } else {
@@ -169,6 +203,15 @@ export const useSalesOrderEdit = (id: string | undefined) => {
         loadDetail();
     }, [id]);
 
+    
+    
+    const handleAddFiles = (files: AttachFileItem[]) => {
+        setFormData(prev => ({
+            ...prev,
+            files
+        }));
+    };
+    
     const handleSyncById = async (soId: string) => {
         if (isSyncing || !soId) return;
         setIsSyncing(true);
@@ -220,11 +263,11 @@ export const useSalesOrderEdit = (id: string | undefined) => {
             amount: 0,
             description: '',
             department: formData.department,
-            department_name: formData.department_name,
+            department_name: formData.department_name || '',
             class: formData.class,
-            class_name: formData.class_name,
+            class_name: formData.class_name || '',
             location: formData.location,
-            location_name: formData.location_name,
+            location_name: formData.location_name || '',
             taxcode: null,
         };
         setFormData(prev => ({ ...prev, items: [...prev.items, newItem] }));
@@ -278,21 +321,23 @@ export const useSalesOrderEdit = (id: string | undefined) => {
                 customform: formData.customform,
                 subsidiary: formData.subsidiary,
                 entity: Number(formData.entity),
-                trandate: formatDateForAPI(formData.trandate),
-                startdate: formData.startdate ? formatDateForAPI(formData.startdate) : undefined,
-                enddate: formData.enddate ? formatDateForAPI(formData.enddate) : undefined,
-                orderstatus: formData.orderstatus,
+                trandate: formData.trandate || null,
+                startdate: formData.startdate || null,
+                enddate: formData.enddate || null,
+                orderstatus: formData.orderstatus || '',
                 otherrefnum: formData.otherrefnum || '',
                 memo: formData.memo || '',
                 currency: formData.currency,
                 terms: formData.terms || undefined,
+                terms_name: formData.terms_name || '',
                 department: formData.department || undefined,
                 class: formData.class || undefined,
                 location: formData.location || undefined,
                 custbody_msi_quotation_no_iec: formData.custbody_msi_quotation_no_iec || '',
-                custbody_msi_bank_payment_so: formData.custbody_msi_bank_payment_so || undefined,
+                custbody_msi_bank_payment_so: formData.custbody_msi_bank_payment_so || [],
+                custbody_msi_bank_payment_so_name: formData.custbody_msi_bank_payment_so_name || [],
                 custbody_cseg_cn_cfi: formData.custbody_cseg_cn_cfi || undefined,
-                custbody_msi_createdby_api: formData.custbody_msi_createdby_api || 'T',
+                custbody_msi_createdby_api: profileSSO?.email || undefined,
                 items: formData.items.map(item => ({
                     itemId: item.itemId,
                     qty: Number(item.qty) || 0,
@@ -304,6 +349,7 @@ export const useSalesOrderEdit = (id: string | undefined) => {
                     location: item.location || undefined,
                     taxcode: item.taxcode || undefined,
                 })),
+                files: formData.files || [],
             };
             const response = await SalesOrderService.updateSalesOrder(payload as any);
             if (response.success) {
@@ -355,5 +401,6 @@ export const useSalesOrderEdit = (id: string | undefined) => {
         messageError,
         masterData,
         loadingMasterData,
+        handleAddFiles
     };
 };

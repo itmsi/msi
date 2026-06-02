@@ -130,7 +130,7 @@ export default function View() {
       name: "Item",
       selector: (row) => row.item_display || row.item,
       cell: (row) => (
-        <div className="py-4 whitespace-nowrap">
+        <div className="py-4">
           <div className="text-sm font-medium text-gray-900">
             {row.item_display || row.item}
           </div>
@@ -138,7 +138,7 @@ export default function View() {
         </div>
       ),
       wrap: true,
-      minWidth: "200px",
+      width: "200px",
     },
     {
       name: "Category / Unit Type",
@@ -147,7 +147,7 @@ export default function View() {
         row.custitem_me_product_category ||
         "-",
       cell: (row) => (
-        <div className="py-4 whitespace-nowrap text-right w-full">
+        <div className="py-4 text-right w-full">
           <div className="text-sm text-gray-900">
             {row.custitem_me_product_category_display ||
               row.custitem_me_product_category ||

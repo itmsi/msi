@@ -121,8 +121,7 @@ export default function ManageRor() {
                         >
                             <MdOutlineAutoGraph size={16} />
                         </PermissionButton>
-                    
-                    
+
                         <PermissionButton 
                             permission="read"
                             onClick={() => {

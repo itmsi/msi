@@ -12,6 +12,7 @@ const CustomAsyncSelect: React.FC<CustomAsyncSelectProps> = ({
     disabled, 
     className = '', 
     onChange,
+    onChangeMulti,
     defaultOptions = [],
     loadOptions,
     onMenuScrollToBottom,
@@ -30,18 +31,13 @@ const CustomAsyncSelect: React.FC<CustomAsyncSelectProps> = ({
         newValue: SingleValue<SelectOption> | MultiValue<SelectOption>, 
         _actionMeta: ActionMeta<SelectOption>
     ) => {
-        if (onChange) {
-            if (!Array.isArray(newValue)) {
-                const singleValue = newValue as SingleValue<SelectOption>;
-                if (singleValue) {
-                    // Pass all properties including data
-                    onChange(singleValue as any);
-                } else {
-                    onChange(null);
-                }
-            }
+        if (Array.isArray(newValue)) {
+            if (onChangeMulti) onChangeMulti(newValue as SelectOption[]);
+        } else {
+            const singleValue = newValue as SingleValue<SelectOption>;
+            if (onChange) onChange(singleValue ? (singleValue as SelectOption) : null);
         }
-    }, [onChange]);
+    }, [onChange, onChangeMulti]);
 
     const handleInputChange = useCallback((newValue: string) => {
         if (onInputChange) {

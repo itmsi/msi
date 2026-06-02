@@ -3,15 +3,15 @@ import toast from 'react-hot-toast';
 import TextArea from '@/components/form/input/TextArea';
 import Button from '@/components/ui/button/Button';
 import { Modal } from '@/components/ui/modal';
-import { PurchaseOrderService } from '../services/purchaseOrderService';
 import { getProfile } from '@/helpers/generalHelper';
+import { SalesOrderService } from '../services/salesOrderService';
 
 interface ModalApprovalProps {
     isOpen: boolean;
     titleModal: string;
     descriptionModal: string;
     onClose: () => void;
-    poId: number | null;
+    soId: number | null;
     onSuccess?: () => void;
     reopen?: boolean;
     resubmit?: boolean;
@@ -23,7 +23,7 @@ export default function ModalApproval({
     titleModal, 
     descriptionModal,
     onClose, 
-    poId, 
+    soId, 
     onSuccess,
     reopen = false,
     resubmit = false,
@@ -53,13 +53,13 @@ export default function ModalApproval({
         }
         setNoteError('');
 
-        if (!poId) return;
+        if (!soId) return;
 
         setIsSubmitting(true);
         try {
-            const response = await PurchaseOrderService.submitApproval({
-                id: poId,
-                recordType: 'purchaseorder',
+            const response = await SalesOrderService.submitApproval({
+                id: soId,
+                recordType: 'salesorder',
                 custbody_msi_submit_app_api: submit,
                 custbody_msi_reopen_api: reopen,
                 custbody_msi_resubmit_api: resubmit,

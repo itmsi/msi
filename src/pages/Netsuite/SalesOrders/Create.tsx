@@ -15,6 +15,7 @@ import { useSOCustomerSelect } from '@/hooks/useSOCustomerSelect';
 import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 import { getProfile } from '@/helpers/generalHelper';
 import { usePOItemsSelect } from '@/hooks/usePOItemsSelect';
+import { useSOBankSelect } from '@/hooks/useSOBankSelect';
 
 export default function Create() {
     const navigate = useNavigate();
@@ -112,6 +113,18 @@ export default function Create() {
     } = usePOTermSelect();
 
     const [selectedTerm, setSelectedTerm] = useState<any>(null);
+    
+    // Bank Select
+    const {
+        SOBankOptions: bankOptions,
+        pagination: bankPagination,
+        inputValue: bankInputValue,
+        handleInputChange: handleBankInputChange,
+        handleMenuScrollToBottom: handleBankMenuScrollToBottom,
+        initializeOptions: initializeBankOptions,
+    } = useSOBankSelect();
+
+    const [selectedBank, setSelectedBank] = useState<any>(null);
 
     // Location select untuk items (is_parent = false)
     const {
@@ -142,7 +155,8 @@ export default function Create() {
         initializeCustomerOptions();
         initializeItemOptions();
         if (initializeTermOptions) initializeTermOptions();
-    }, [initializeLocationOptions, initializeItemLocationOptions, initializeClassOptions, initializeDeptOptions, initializeCustomerOptions, initializeItemOptions, initializeTermOptions]);
+        if (initializeBankOptions) initializeBankOptions();
+    }, [initializeLocationOptions, initializeItemLocationOptions, initializeClassOptions, initializeDeptOptions, initializeCustomerOptions, initializeItemOptions, initializeTermOptions, initializeBankOptions]);
 
     const [prevSubsidiaryId, setPrevSubsidiaryId] = useState<number | null | undefined>(undefined);
 
@@ -178,6 +192,9 @@ export default function Create() {
         if (formData.terms && !selectedTerm && masterData?.terms) {
             const term = masterData.terms.find((t: any) => Number(t.value) === formData.terms);
             if (term) setSelectedTerm(term);
+        }
+        if (formData.custbody_msi_bank_payment_so && !selectedBank) {
+            setSelectedBank({ value: String(formData.custbody_msi_bank_payment_so), label: formData.custbody_msi_bank_payment_so });
         }
     }, [formData, masterData]);
 
@@ -291,6 +308,19 @@ export default function Create() {
                             onTermChange={(opt) => {
                                 setSelectedTerm(opt);
                                 handleSelectChange('terms', opt ? Number(opt.value) : null);
+                                handleSelectChange('terms_name', opt?.label || '');
+                            }}
+                            // Bank Props
+                            bankOptions={bankOptions}
+                            bankPagination={bankPagination}
+                            bankInput={bankInputValue}
+                            onBankInputChange={handleBankInputChange}
+                            onBankMenuScrollToBottom={handleBankMenuScrollToBottom}
+                            selectedBank={selectedBank}
+                            onBankChange={(opts) => {
+                                setSelectedBank(opts);
+                                handleSelectChange('custbody_msi_bank_payment_so', opts.map(o => Number(o.value)));
+                                handleSelectChange('custbody_msi_bank_payment_so_name', opts.map(o => o.label));
                             }}
                         />
 

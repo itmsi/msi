@@ -17,7 +17,7 @@ export const createAsyncSelectStyles = ({ error, success, disabled }: StyleOptio
             return {
                 ...baseStyles,
                 minHeight: '44px',
-                height: '44px',
+                // height: '44px',
                 borderRadius: '0.5rem',
                 borderWidth: '1px',
                 boxShadow: state.isFocused 
@@ -57,8 +57,8 @@ export const createAsyncSelectStyles = ({ error, success, disabled }: StyleOptio
         },
         valueContainer: (baseStyles) => ({
             ...baseStyles,
-            padding: '0 16px',
-            height: '42px'
+            padding: '5px 16px',
+            minHeight: '42px'
         }),
         input: (baseStyles) => ({
             ...baseStyles,

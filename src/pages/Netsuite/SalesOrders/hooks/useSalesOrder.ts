@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { SalesOrder, SalesOrderRequest, SalesOrderSyncInfo } from '../types/salesOrder';
 import toast from 'react-hot-toast';
 import { SalesOrderService } from '../services/salesOrderService';
+import { NetSuiteSyncService } from '../../Sync/services/netSuiteSyncService';
 
 export const useSalesOrder = () => {
     const [searchValue, setSearchValue] = useState('');
@@ -19,7 +20,7 @@ export const useSalesOrder = () => {
 
     const [pagination, setPagination] = useState({
         page: 1,
-        page_size: 20,
+        page_size: 10,
         total_records: 0,
         total_pages: 0,
     });
@@ -155,13 +156,10 @@ export const useSalesOrder = () => {
         setIsSyncing(true);
         const toastId = toast.loading('Sinkronisasi data sales order...');
         try {
-            const result = await SalesOrderService.syncSalesOrders();
-            if (result.success) {
-                toast.success('Sinkronisasi berhasil', { id: toastId });
-                fetchSalesOrders({ page: 1 });
-            } else {
-                toast.error('Sinkronisasi gagal', { id: toastId });
-            }
+            // const result = await SalesOrderService.syncSalesOrders();
+            await NetSuiteSyncService.sync('sales_orders');
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            fetchSalesOrders({ page: 1 });
         } catch (err: any) {
             toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
         } finally {

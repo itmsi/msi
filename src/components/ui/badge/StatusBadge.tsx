@@ -296,4 +296,136 @@ export const StatusTypeBadge: React.FC<StatusTypeBadgeProps> = ({
         </span>
     );
 };
+// SALES ORDER APPROVAL STATUS BADGE
+interface StatusTypeBadgeSOProps {
+    type: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H';
+    label?: string;
+    variant?: 'default' | 'with-icon' | 'icon-only';
+    size?: 'sm' | 'md' | 'lg';
+    className?: string;
+}
+export const StatusTypeBadgeSO: React.FC<StatusTypeBadgeSOProps> = ({ 
+    type,
+    label,
+    size = 'md',
+    className = '' 
+}) => {
+    const getStatusStyles = (type: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H') => {
+        switch (type) {
+            case 'A': // Pending Approval
+                return {
+                    bgColor: 'bg-gray-100',
+                    textColor: 'text-gray-800',
+                    borderColor: 'border-gray-200',
+                    label: label || 'Pending Approval'
+                };
+
+            case 'B': // Pending Fulfillment
+                return {
+                    bgColor: 'bg-blue-100',
+                    textColor: 'text-blue-800',
+                    borderColor: 'border-blue-200',
+                    label: label || 'Pending Fulfillment'
+                };
+
+            case 'C': // Cancelled
+                return {
+                    bgColor: 'bg-red-100',
+                    textColor: 'text-red-800',
+                    borderColor: 'border-red-200',
+                    label: label || 'Cancelled'
+                };
+
+            case 'D': // Partially Fulfilled
+                return {
+                    bgColor: 'bg-orange-100',
+                    textColor: 'text-orange-800',
+                    borderColor: 'border-orange-200',
+                    label: label || 'Partially Fulfilled'
+                };
+
+            case 'E': // Pending Billing / Part Fulfilled
+                return {
+                    bgColor: 'bg-purple-100',
+                    textColor: 'text-purple-800',
+                    borderColor: 'border-purple-200',
+                    label: label || 'Pending Billing/Part Fulfilled'
+                };
+
+            case 'F': // Pending Billing
+                return {
+                    bgColor: 'bg-indigo-100',
+                    textColor: 'text-indigo-800',
+                    borderColor: 'border-indigo-200',
+                    label: label || 'Pending Billing'
+                };
+
+            case 'G': // Fully Billed
+                return {
+                    bgColor: 'bg-green-100',
+                    textColor: 'text-green-800',
+                    borderColor: 'border-green-200',
+                    label: label || 'Fully Billed'
+                };
+
+            case 'H': // Closed
+                return {
+                    bgColor: 'bg-gray-200',
+                    textColor: 'text-gray-700',
+                    borderColor: 'border-gray-300',
+                    label: label || 'Closed'
+                };
+
+            default:
+                return {
+                    bgColor: 'bg-gray-100',
+                    textColor: 'text-gray-800',
+                    borderColor: 'border-gray-200',
+                };
+        }
+    };
+
+    const getSizeClasses = () => {
+        switch (size) {
+            case 'sm':
+                return {
+                    padding: 'px-2 py-0.5',
+                    textSize: 'text-xs',
+                    iconSize: 'w-3 h-3'
+                };
+            case 'lg':
+                return {
+                    padding: 'px-4 py-2',
+                    textSize: 'text-sm',
+                    iconSize: 'w-5 h-5'
+                };
+            default: // md
+                return {
+                    padding: 'px-3 py-1',
+                    textSize: 'text-xs',
+                    iconSize: 'w-4 h-4'
+                };
+        }
+    };
+
+    const statusStyles = getStatusStyles(type);
+    const sizeClasses = getSizeClasses();
+
+    return (
+        <span 
+            className={`
+                inline-flex items-center justify-center gap-1 
+                ${sizeClasses.padding} 
+                ${sizeClasses.textSize} 
+                ${statusStyles.bgColor} 
+                ${statusStyles.textColor} 
+                ${statusStyles.borderColor} 
+                border rounded-full font-medium
+                ${className}
+            `.trim().replace(/\s+/g, ' ')}
+        >
+            <span>{statusStyles.label}</span>
+        </span>
+    );
+};
 export default ActiveStatusBadge;
