@@ -280,9 +280,6 @@ export default function Edit() {
             </Button>
         </PermissionGate>
     );
-console.log({
-    a: formData.custbody_me_approval_status
-});
 
     return (
         <>

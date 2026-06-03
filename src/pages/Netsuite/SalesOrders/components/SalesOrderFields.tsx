@@ -231,9 +231,6 @@ export default function SalesOrderFields({
             </div>
         );
     };
-console.log({
-    a: (formData.custbody_me_approval_status === 2 || formData.custbody_me_approval_status === 3) || (formData.custbody_me_approval_status === 1)
-});
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 mb-6">
