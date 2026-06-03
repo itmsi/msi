@@ -12,9 +12,20 @@ const UserNoteTab: React.FC<UserNoteTabProps> = ({
     noteList,
     isLoading,
 }) => {
+    // Format: "29/5/2026 4:36 pm" → DD/M/YYYY H:MM am/pm
+    const parseNetsuiteDate = (dateStr: string): number => {
+        const match = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})\s*(am|pm)$/i);
+        if (!match) return 0;
+        let [, day, month, year, hour, minute, meridiem] = match;
+        let h = parseInt(hour);
+        if (meridiem.toLowerCase() === 'pm' && h !== 12) h += 12;
+        if (meridiem.toLowerCase() === 'am' && h === 12) h = 0;
+        return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), h, parseInt(minute)).getTime();
+    };
+
     const sortedNotes = [...noteList].sort((a, b) => {
-        const dateA = a.date ? new Date(a.date).getTime() : 0;
-        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        const dateA = a.date ? parseNetsuiteDate(a.date) : 0;
+        const dateB = b.date ? parseNetsuiteDate(b.date) : 0;
         return dateB - dateA;
     });
 
