@@ -54,6 +54,7 @@ export default function EditEmployee() {
     } = usePOClassSelect(30);
     
     const [selectedClass, setSelectedClass] = useState<any>(null);
+    const [hasInitializedClass, setHasInitializedClass] = useState(false);
 
     // State for dropdown options
     const [departmentOptions, setDepartmentOptions] = useState<Array<{value: string, label: string}>>([]);
@@ -76,17 +77,18 @@ export default function EditEmployee() {
         initializeItemClassOptions();
     }, [initializeItemClassOptions]);
 
-    // Set initial NetSuite Class selection when employee data loads
+    // Set initial NetSuite Class selection when employee data loads (only once)
     useEffect(() => {
-        if (employee && employee.classes_id_netsuite && POClassOptions.length > 0) {
+        if (!hasInitializedClass && employee && employee.classes_id_netsuite && POClassOptions.length > 0) {
             const initialClass = POClassOptions.find(option => 
                 option.value === employee.classes_id_netsuite?.toString()
             );
             if (initialClass) {
                 setSelectedClass(initialClass);
+                setHasInitializedClass(true);
             }
         }
-    }, [employee?.classes_id_netsuite, POClassOptions]);
+    }, [hasInitializedClass, employee?.classes_id_netsuite, POClassOptions]);
 
     // Auto-expand first system when employee data loads (only once)
     useEffect(() => {
