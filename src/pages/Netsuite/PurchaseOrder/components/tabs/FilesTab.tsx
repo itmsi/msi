@@ -399,6 +399,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
             <CustomDataTable
                 columns={columns}
                 data={allFiles}
+                pagination={false}
                 loading={isLoading}
                 fixedHeader
                 fixedHeaderScrollHeight="500px"

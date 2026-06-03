@@ -12,7 +12,12 @@ const UserNoteTab: React.FC<UserNoteTabProps> = ({
     noteList,
     isLoading,
 }) => {
-    
+    const sortedNotes = [...noteList].sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        return dateB - dateA;
+    });
+
     const columns: TableColumn<UserNotesItem>[] = [
         {
             name: 'Date',
@@ -50,8 +55,9 @@ const UserNoteTab: React.FC<UserNoteTabProps> = ({
         <div className="p-6 font-secondary">
             <CustomDataTable
                 columns={columns}
-                data={noteList}
+                data={sortedNotes}
                 loading={isLoading}
+                pagination={false}
                 fixedHeader
                 fixedHeaderScrollHeight="500px"
                 highlightOnHover
