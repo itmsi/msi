@@ -2,7 +2,7 @@ import { apiPost, ApiResponse } from '@/helpers/apiHelper';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export type SyncMasterDataKey = 'departments' | 'locations' | 'terms' | 'classes' | 'items' | 'vendors' | 'customers' | 'invoice_sales_orders' | 'purchasing_orders' | 'sales_orders';
+export type SyncMasterDataKey = 'departments' | 'locations' | 'terms' | 'classes' | 'items' | 'vendors' | 'customers' | 'invoice_sales_orders' | 'purchasing_orders' | 'sales_orders' | 'receives';
 
 // ─── Sync List Types ──────────────────────────────────────────────────────────
 

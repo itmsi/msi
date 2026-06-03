@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdOutlineSync } from 'react-icons/md';
-import { FaSave, FaCopy } from 'react-icons/fa';
+import { MdOutlineSync, MdVerified } from 'react-icons/md';
+import { FaSave } from 'react-icons/fa';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import PageMeta from '@/components/common/PageMeta';
 import Alert from '@/components/ui/alert/Alert';
@@ -18,13 +18,18 @@ import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 import { getProfile } from '@/helpers/generalHelper';
 import { usePOItemsSelect } from '@/hooks/usePOItemsSelect';
 import PageHeader from '@/components/common/PageHeader';
+import { useSOBankSelect } from '@/hooks/useSOBankSelect';
+import FilesTab from './components/tab/FilesTab';
+import ModalApproval from './components/ModalApproval';
+import UserNoteTab from '../PurchaseOrder/components/tabs/UserNoteTab';
 
 export default function Edit() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
-    const [activeTab, setActiveTab] = useState<'items'>('items');
+    const [activeTab, setActiveTab] = useState<'items' | 'files' | 'usernotes' | 'fuelfill'>('items');
+
 
     const {
         isSubmitting,
@@ -48,7 +53,7 @@ export default function Edit() {
         messageError,
         masterData,
         loadingMasterData,
-        handleMakeCopy,
+        handleAddFiles,
     } = useSalesOrderEdit(id);
 
     const subsidiaryId = formData.subsidiary ? Number(formData.subsidiary) : undefined;
@@ -66,6 +71,10 @@ export default function Edit() {
 
     const [selectedLocation, setSelectedLocation] = useState<any>(null);
 
+    useEffect(() => {
+        if (initializeLocationOptions) initializeLocationOptions();
+    }, [initializeLocationOptions]);
+
     // Class Select
     const {
         POClassOptions: classOptions,
@@ -78,6 +87,10 @@ export default function Edit() {
     } = usePOClassSelect(30, subsidiaryId, profileSSOId);
 
     const [selectedClass, setSelectedClass] = useState<any>(null);
+
+    useEffect(() => {
+        if (initializeClassOptions) initializeClassOptions();
+    }, [initializeClassOptions]);
 
     // Department Select
     const {
@@ -92,6 +105,10 @@ export default function Edit() {
 
     const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
 
+    useEffect(() => {
+        if (initializeDeptOptions) initializeDeptOptions();
+    }, [initializeDeptOptions]);
+
     // Customer Select
     const {
         SOCustomerOptions: customerOptions,
@@ -103,6 +120,10 @@ export default function Edit() {
     } = useSOCustomerSelect(30);
 
     const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+
+    useEffect(() => {
+        if (initializeCustomerOptions) initializeCustomerOptions();
+    }, [initializeCustomerOptions]);
 
     // Term Select
     const {
@@ -116,6 +137,26 @@ export default function Edit() {
 
     const [selectedTerm, setSelectedTerm] = useState<any>(null);
 
+    useEffect(() => {
+        if (initializeTermOptions) initializeTermOptions();
+    }, [initializeTermOptions]);
+
+    // Bank Select
+    const {
+        SOBankOptions: bankOptions,
+        pagination: bankPagination,
+        inputValue: bankInputValue,
+        handleInputChange: handleBankInputChange,
+        handleMenuScrollToBottom: handleBankMenuScrollToBottom,
+        initializeOptions: initializeBankOptions,
+    } = useSOBankSelect();
+
+    const [selectedBank, setSelectedBank] = useState<any>(null);
+
+    useEffect(() => {
+        if (initializeBankOptions) initializeBankOptions();
+    }, [initializeBankOptions]);
+
     // Location select untuk items (is_parent = false)
     const {
         POLocationOptions: itemLocationOptions,
@@ -127,6 +168,10 @@ export default function Edit() {
         resetLocationOptions: resetItemLocationOptions
     } = usePOLocationSelect(30, false, subsidiaryId);
 
+    useEffect(() => {
+        if (initializeItemLocationOptions) initializeItemLocationOptions();
+    }, [initializeItemLocationOptions]);
+
     const {
         POItemsOptions: itemOptions,
         pagination: itemPagination,
@@ -136,16 +181,16 @@ export default function Edit() {
         initializeOptions: initializeItemOptions,
     } = usePOItemsSelect(20);
 
-    // Initialize options
     useEffect(() => {
-        initializeLocationOptions();
-        initializeItemLocationOptions();
-        initializeClassOptions();
-        initializeDeptOptions();
-        initializeCustomerOptions();
-        initializeItemOptions();
-        if (initializeTermOptions) initializeTermOptions();
-    }, [initializeLocationOptions, initializeItemLocationOptions, initializeClassOptions, initializeDeptOptions, initializeCustomerOptions, initializeItemOptions, initializeTermOptions]);
+        if (initializeItemOptions) initializeItemOptions();
+    }, [initializeItemOptions]);
+
+    // Initialize options
+    // useEffect(() => {
+    //     initializeClassOptions();
+    //     initializeDeptOptions();
+    //     initializeCustomerOptions();
+    // }, [initializeClassOptions, initializeDeptOptions, initializeCustomerOptions]);
 
     // Handle subsidiary change
     useEffect(() => {
@@ -156,13 +201,12 @@ export default function Edit() {
             resetDepartmentOptions();
         }
     }, [subsidiaryId]);
-
     // Sync selected state with formData once loaded
     useEffect(() => {
-        if (!loadingDetail && formData.entity) {
+        if (!loadingDetail && formData.subsidiary) {
             setSelectedCustomer({
-                label: formData.entity_name || '',
-                value: String(formData.entity)
+                label: formData.subsidiary_name || '',
+                value: String(formData.subsidiary)
             });
         }
         if (!loadingDetail && formData.location) {
@@ -185,12 +229,43 @@ export default function Edit() {
         }
         if (!loadingDetail && formData.terms) {
             setSelectedTerm({
-                label: formData.terms || '',
+                label: formData.terms_name || '',
                 value: String(formData.terms)
             });
         }
+        if (!loadingDetail && formData.custbody_msi_bank_payment_so?.length) {
+            const ids = formData.custbody_msi_bank_payment_so;
+            const names = formData.custbody_msi_bank_payment_so_name || [];
+            setSelectedBank(ids.map((id, i) => ({
+                value: String(id),
+                label: names[i] || String(id),
+            })));
+        }
     }, [loadingDetail]);
 
+    const [isOpenApproval, setIsOpenApproval] = useState(false);
+    const [selectedSoIdApproval, setSelectedSoIdApproval] = useState<string | null>(null);
+
+    const handleApprovalOpen = (soId: string) => {
+        setSelectedSoIdApproval(soId || null);
+        setIsOpenApproval(true);
+    };
+
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedSoId, setSelectedSoId] = useState<string | null>(null);
+
+    const handleApproval = (soId: string) => {
+        setSelectedSoId(soId || null);
+        setIsOpen(true);
+    };
+
+    const [isOpenRejected, setIsOpenRejected] = useState(false);
+    const [selectedSoIdRejected, setSelectedSoIdRejected] = useState<string | null>(null);
+
+    const handleOpenRejected = (soId: string) => {
+        setSelectedSoIdRejected(soId || null);
+        setIsOpenRejected(true);
+    };
     const ElemRefresh = () => (
         <PermissionGate permission="read">
             <Button
@@ -226,46 +301,32 @@ export default function Edit() {
                             title="Edit Sales Order"
                             backPath="/netsuite/sales-orders"
                             subtitle={tranid || '-'}
-                            actions={
-                                <>
-                                    {(Boolean(soInternalId) && syncInfo?.sync_status !== 'pending' && syncInfo?.sync_status !== 'failed') && (
-                                            <PermissionGate permission="read">
-                                                <Button
-                                                    onClick={() => handleSyncById(String(soInternalId))}
-                                                    disabled={isSyncing}
-                                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600 py-2"
-                                                    variant='outline'
-                                                >
-                                                    <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
-                                                    <div>
-                                                        <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
-                                                    </div>
-                                                </Button>
-                                            </PermissionGate>
-                                        )}
-                                        {tranid !== null && (
-                                            
-                                        <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
-                                                {statusName || (formData.orderstatus ? (
-                                                    [
-                                                        { value: 'A', label: 'Pending Approval' },
-                                                        { value: 'B', label: 'Pending Fulfillment' },
-                                                        { value: 'C', label: 'Cancelled' },
-                                                        { value: 'D', label: 'Partially Fulfilled' },
-                                                        { value: 'E', label: 'Pending Billing/Partially Fulfilled' },
-                                                        { value: 'F', label: 'Pending Billing' },
-                                                        { value: 'G', label: 'Billed' },
-                                                        { value: 'H', label: 'Closed' }
-                                                    ].find(o => o.value === formData.orderstatus)?.label || formData.orderstatus
-                                                ) : 'Draft')}
-                                            </span>
-                                        )}
-                                </>
-                            }
+                            actions={ <>
+                                {(Boolean(soInternalId) && syncInfo?.sync_status !== 'pending' && syncInfo?.sync_status !== 'failed') && (
+                                    <PermissionGate permission="read">
+                                        <Button
+                                            onClick={() => handleSyncById(String(soInternalId))}
+                                            disabled={isSyncing}
+                                            className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600 py-2"
+                                            variant='outline'
+                                        >
+                                            <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                            <div>
+                                                <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                            </div>
+                                        </Button>
+                                    </PermissionGate>
+                                )}
+                                {tranid !== null && (
+                                    <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
+                                        {formData.status_name || '-'}
+                                    </span>
+                                )}
+                            </>}
                         />
 
                         <div className="space-y-6">
-                            {statusName === 'pending' && (
+                            {statusName === 'PROCESSING' && (
                                 <Alert variant='warning' title='Sales Order Is Being Processed'>
                                     <div className="space-y-4">
                                         <p className="text-sm text-gray-500">
@@ -277,13 +338,12 @@ export default function Edit() {
                                 </Alert>
                             )}
 
-                            {statusName === 'failed' && (
-                                <Alert variant='warning' title='Failed to Sync Sales Order'>
+                            {statusName === 'FAILED' && (
+                                <Alert variant='error' title='Failed to Sync Sales Order'>
                                     <div className="space-y-4">
-                                        <p className="text-sm text-red-600 font-medium break-words">
+                                        <p className="text-sm text-gray-500">
                                             {messageError || 'Unknown error occurred during synchronization.'}
                                         </p>
-                                        <ElemRefresh />
                                     </div>
                                 </Alert>
                             )}
@@ -369,6 +429,18 @@ export default function Edit() {
                                     setSelectedTerm(opt);
                                     handleSelectChange('terms', opt ? Number(opt.value) : null);
                                 }}
+
+                                // Bank Props
+                                bankOptions={bankOptions}
+                                bankPagination={bankPagination}
+                                bankInput={bankInputValue}
+                                onBankInputChange={handleBankInputChange}
+                                onBankMenuScrollToBottom={handleBankMenuScrollToBottom}
+                                selectedBank={selectedBank}
+                                onBankChange={(opts) => {
+                                    setSelectedBank(opts);
+                                    handleSelectChange('custbody_msi_bank_payment_so', opts.map(o => Number(o.value)));
+                                }}
                             />
 
                             <div>
@@ -385,6 +457,36 @@ export default function Edit() {
                                             }`}
                                         >
                                             Items
+                                        </button>
+                                        <button
+                                            onClick={() => setActiveTab('files')}
+                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                                activeTab === 'files'
+                                                    ? 'border-blue-500 text-blue-600'
+                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            Files
+                                        </button>
+                                        <button
+                                            onClick={() => setActiveTab('usernotes')}
+                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                                activeTab === 'usernotes'
+                                                    ? 'border-blue-500 text-blue-600'
+                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            User Notes
+                                        </button>
+                                        <button
+                                            onClick={() => setActiveTab('fuelfill')}
+                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                                activeTab === 'fuelfill'
+                                                    ? 'border-blue-500 text-blue-600'
+                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            Items Fuel Fill
                                         </button>
                                     </nav>
                                 </div>
@@ -431,6 +533,36 @@ export default function Edit() {
                                             deptInput={deptInputValue}
                                             onDeptInputChange={handleDeptInputChange}
                                             onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
+
+                                        />
+                                    )}
+
+                                    {activeTab === 'files' && (
+                                        <FilesTab
+                                            soId={String(soInternalId)}
+                                            fileList={formData?.files || []}
+                                            pendingFiles={(formData?.files || []).filter(
+                                                file => !(formData?.files || []).some(
+                                                    pf => (pf.fileUrl || '') === (file.fileUrl || '') &&
+                                                          (pf.fileName || '') === (file.fileName || '')
+                                                )
+                                            )}
+                                            deletedFileUrls={(formData?.files || [])
+                                                .filter(pf => !(formData.files || []).some(
+                                                    file => (file.fileUrl || '') === (pf.fileUrl || '') &&
+                                                            (file.fileName || '') === (pf.fileName || '')
+                                                ))
+                                                .map(pf => pf.fileUrl)
+                                            }
+                                            isLoading={loadingMasterData}
+                                            onAddFiles={handleAddFiles}
+                                        />
+                                    )}
+
+                                    {activeTab === 'usernotes' && (
+                                        <UserNoteTab
+                                            noteList={formData?.user_notes || []}
+                                            isLoading={loadingMasterData}
                                         />
                                     )}
                                 </div>
@@ -447,47 +579,107 @@ export default function Edit() {
                                 >
                                     Cancel
                                 </Button>
+                                {(statusName !== 'PROCESSING') && (<>
+                                    {((formData?.custbody_me_approval_status === 1 && formData.nextapprover === "") && statusName !== 'FAILED' ) && (
+                                        <PermissionGate permission={["create", "update"]}>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => handleApprovalOpen(String(soInternalId))}
+                                                className="group px-6 rounded-full ring-1 ring-inset ring-green-600 text-green-600 hover:bg-green-600 hover:text-white hover:ring-green-600"
+                                                disabled={isSubmitting}
+                                            >
+                                                Submit Approval
+                                            </Button>
+                                        </PermissionGate>
+                                    )}
+                                    
+                                    {formData?.custbody_me_approval_status === 2 && (
+                                        <PermissionGate permission={["create", "update"]}>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => handleApproval(String(soInternalId))}
+                                                className="group rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
+                                                disabled={isSubmitting}
+                                            >
+                                                Re-Approval <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
+                                            </Button>
+                                        </PermissionGate>
+                                    )}
 
-                                <PermissionGate permission={["create", "update"]}>
-                                    <div className="flex gap-2">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={handleMakeCopy}
-                                            className="px-6 flex items-center gap-2 rounded-full border-blue-500 text-blue-500 hover:bg-blue-50"
-                                            disabled={isSubmitting || statusName === 'pending' || statusName === 'failed'}
-                                        >
-                                            <FaCopy className="h-4 w-4" /> Make Copy
-                                        </Button>
+                                    {formData?.custbody_me_approval_status === 3 && (
+                                        <PermissionGate permission={["create", "update"]}>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => handleOpenRejected(String(soInternalId))}
+                                                className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
+                                                disabled={isSubmitting}
+                                            >
+                                                Re-Open <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
+                                            </Button>
+                                        </PermissionGate>
+                                    )}
 
-                                        <Button
-                                            onClick={handleSubmit}
-                                            className="px-6 flex items-center gap-2 rounded-full"
-                                            disabled={isSubmitting || statusName === 'pending' || statusName === 'failed'}
-                                        >
-                                            {isSubmitting ? (
-                                                <>
+                                    {/* {(((formData.custbody_me_approval_status === 1 || formData.custbody_me_approval_status === null) && (formData.nextapprover === null || formData.nextapprover === ''))) && ( */}
+                                    {(formData.custbody_me_approval_status === 1) && (
+                                        <PermissionGate permission={["create", "update"]}>
+                                            <Button
+                                                onClick={handleSubmit}
+                                                className="px-6 flex items-center gap-2 rounded-full"
+                                                disabled={isSubmitting || statusName === 'pending' || statusName === 'failed'}
+                                            >
+                                                {isSubmitting ? (<>
                                                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                     </svg>
                                                     Processing...
-                                                </>
-                                            ) : (
-                                                <>
+                                                </>) : (<>
                                                     <FaSave className={`mr-2 h-4 w-4`} /> Update Sales Order
-                                                </>
-                                            )}
-                                        </Button>
-                                    </div>
-                                </PermissionGate>
-
+                                                </>)}
+                                            </Button>
+                                        </PermissionGate>
+                                    )}
+                                </>)}
                                 {(syncInfo?.sync_status === 'failed' || syncInfo?.sync_status === 'pending') && (
                                     <ElemRefresh />
                                 )}
                             </div>
                         </div>
                     </>)}
+
+                    {/* // MODAL REOPEN SAAT STATUS APPROVAL = APPROVED */}
+                    <ModalApproval
+                        isOpen={isOpenApproval}
+                        onClose={() => setIsOpenApproval(false)}
+                        soId={selectedSoIdApproval ? parseInt(selectedSoIdApproval) : null}
+                        onSuccess={() => navigate('/netsuite/purchase-order')}
+                        submit={true}
+                        titleModal="Submit Approval"
+                        descriptionModal="Masukkan catatan untuk proses approval"
+                    />
+                    {/* // MODAL REOPEN SAAT STATUS APPROVAL = APPROVED */}
+                    <ModalApproval
+                        isOpen={isOpen}
+                        onClose={() => setIsOpen(false)}
+                        soId={selectedSoId ? parseInt(selectedSoId) : null}
+                        onSuccess={() => navigate('/netsuite/purchase-order')}
+                        reopen={true}
+                        titleModal="Re-Open Approval"
+                        descriptionModal="Masukkan catatan untuk proses re-open approval"
+                    />
+                    {/* // MODAL RESUBMIT SAAT STATUS REJECTED */}
+                    <ModalApproval
+                        isOpen={isOpenRejected}
+                        onClose={() => setIsOpenRejected(false)}
+                        soId={selectedSoIdRejected ? parseInt(selectedSoIdRejected) : null}
+                        onSuccess={() => navigate('/netsuite/purchase-order')}
+                        resubmit={true}
+                        titleModal="Re-Submit Approval"
+                        descriptionModal="Masukkan catatan untuk proses re-submit approval"
+                    />
                 </div>
             </div>
         </>

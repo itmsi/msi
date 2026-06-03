@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { PurchaseOrderService } from '../../PurchaseOrder/services/purchaseOrderService';
 import { Pagination, PurchaseOrderItem, ReceiptItem, ReceiveRequest, SyncInfo } from '../../PurchaseOrder/types/purchaseorder';
+import { NetSuiteSyncService } from '../../Sync/services/netSuiteSyncService';
 
 export const useReceipt = (profileSSO?: number) => {
     const [searchValue, setSearchValue] = useState('');
@@ -122,15 +123,11 @@ export const useReceipt = (profileSSO?: number) => {
     const handleSync = useCallback(async (_row?: PurchaseOrderItem) => {
         if (isSyncing) return;
         setIsSyncing(true);
-        const toastId = toast.loading('Sinkronisasi data purchase order...');
+        const toastId = toast.loading('Sinkronisasi data sales order...');
         try {
-            const result = await PurchaseOrderService.syncReceiptItems();
-            if (result) {
-                toast.success('Sinkronisasi berhasil', { id: toastId });
-                fetchReceipt({ page: 1 });
-            } else {
-                toast.error('Sinkronisasi gagal', { id: toastId });
-            }
+            await NetSuiteSyncService.sync('receives');
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            fetchReceipt({ page: 1 });
         } catch (err: any) {
             toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
         } finally {

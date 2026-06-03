@@ -115,6 +115,8 @@ const NetSuiteSync = lazy(() => import('@/pages/Netsuite/Sync/Manage'));
 const Receive = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Receive'));
 const ManageReceive = lazy(() => import('@/pages/Netsuite/Receipts/Manage'));
 const ManageSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Manage'));
+const ManageBillPayment = lazy(() => import('@/pages/Netsuite/BillPayment/Manage'));
+const ViewBillPayment = lazy(() => import('@/pages/Netsuite/BillPayment/View'));
 const CreateSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Create'));
 const EditSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Edit'));
 // ========================================
@@ -962,7 +964,23 @@ export const routes: TAppRoute[] = [
         component: ManageReceive,
         layout: AppLayout,
     },
-    // SALES ORDER NETSUITE
+    {
+        path: '/netsuite/bill-payment',
+        name: 'Bill Payment Netsuite',
+        isProtected: true,
+        roles: ['Bill Payment Netsuite'],
+        component: ManageBillPayment,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/bill-payment/view/:id',
+        name: 'Bill Payment Netsuite',
+        isProtected: true,
+        roles: ['Bill Payment Netsuite'],
+        requiredPermissions: ['read'],
+        component: ViewBillPayment,
+        layout: AppLayout,
+    },
     {
         path: '/netsuite/sales-orders',
         name: 'Sales Order Netsuite',

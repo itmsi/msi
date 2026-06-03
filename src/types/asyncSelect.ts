@@ -1,10 +1,11 @@
 
 export interface SelectOption {
-    value: string | number;
+    value: string;
     label: string;
 }
 
 export interface AsyncSelectConfig {
+    isMulti?: boolean;
     isSearchable?: boolean;
     isClearable?: boolean;
     disabled?: boolean;
@@ -17,7 +18,8 @@ export interface AsyncSelectConfig {
 }
 
 export interface AsyncSelectCallbacks {
-    onChange?: (selectedOption: { value: string; label: string; } | null) => void;
+    onChange?: (selectedOption: SelectOption | null) => void;
+    onChangeMulti?: (selectedOptions: SelectOption[]) => void;
     onInputChange?: (value: string) => void;
     onMenuScrollToBottom?: () => Promise<void> | void;
 }
@@ -30,7 +32,7 @@ export interface AsyncSelectData {
 
 export interface CustomAsyncSelectProps extends AsyncSelectConfig, AsyncSelectCallbacks, AsyncSelectData {
     name?: string;
-    value?: SelectOption | null;
+    value?: SelectOption | SelectOption[] | null;
     menuPortalTarget?: HTMLElement | null;
     menuPosition?: 'absolute' | 'fixed';
     noOptionsMessage?: () => string;

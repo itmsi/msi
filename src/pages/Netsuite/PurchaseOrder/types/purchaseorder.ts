@@ -295,6 +295,7 @@ export interface POApprovalRequest {
     custbody_msi_reopen_api: boolean;
     custbody_msi_resubmit_api: boolean;
     note: string;
+    noteTitle: string | null;
 }
 
 export interface POApprovalResponse {
@@ -432,7 +433,7 @@ export interface ComponentsDataResponse {
 }
 
 export interface PurchaseOrderFormUpdate {
-    id: number;
+    id: string | number;
     customform?: number;
     vendorid?: number;
     purchasedate?: string;
@@ -504,6 +505,7 @@ export interface ItemReceiptItem {
     line_id?: number;
     item: number;
     item_display?: string;
+    description?: string;
     on_hand?: number;
     quantity: number;
     quantitypending?: number;
@@ -577,6 +579,7 @@ export interface ReceiptLine {
     inventorydetail: string;
     location_display: string;
     department_display: string;
+    description?: string;
 }
 
 // RECEIVE RESPONSE ITEMS

@@ -184,7 +184,7 @@ export default function Manage() {
                 icon: FaRegFilePdf,
                 onClick: handleDownloadInvoice,
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'Download Invoice',
+                tooltip: 'Download Purchase Order',
                 permission: 'read',
             },
             {
@@ -215,7 +215,7 @@ export default function Manage() {
                             <Input
                                 id='search'
                                 type="text"
-                                placeholder="Search project... (Press Enter)"
+                                placeholder="Search Purchase Orders... (Press Enter)"
                                 value={searchValue}
                                 onChange={(e) => setSearchValue(e.target.value)}
                                 onKeyPress={handleKeyPress}
@@ -304,7 +304,7 @@ export default function Manage() {
                                     Purchase Orders
                                 </h3>
                                 <p className="mt-1 text-sm text-gray-500">
-                                    Manage Purchase Orders and related information
+                                    Manage Purchase Orders
                                 </p>
                             </div>
                             <div className="flex space-x-3">
