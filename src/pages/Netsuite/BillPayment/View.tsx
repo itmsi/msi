@@ -189,9 +189,17 @@ export default function View() {
             selector: row => row.options_obj || '-',
             cell: row => {
                 if (!row.options_obj || Object.keys(row.options_obj).length === 0) return '-';
+
+                // Filter out undesired keys and remove question marks from labels
+                const entries = Object.entries(row.options_obj)
+                    .filter(([key]) => key !== 'Is Final Delegate? Id' && key !== 'Is Final? Id' && key !== 'Current Approver Id')
+                    .map(([key, val]) => [key.replace(/\?/g, ''), val] as [string, any]);
+
+                if (entries.length === 0) return '-';
+
                 return (
                     <div className="py-2 text-sm text-gray-700 space-y-1 max-w-[300px]">
-                        {Object.entries(row.options_obj).map(([key, val], idx) => (
+                        {entries.map(([key, val], idx) => (
                             <div key={idx} className="leading-tight">
                                 <span className="font-medium text-gray-900">{key}:</span> {String(val)}
                             </div>
