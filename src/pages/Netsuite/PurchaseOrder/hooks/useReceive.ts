@@ -63,6 +63,7 @@ const mapReceiptItemToForm = (receipt: ReceiptItem): ItemReceiptPayload => {
         location_display: line.location_display || '',
         department: Number(line.department) || 0,
         department_display: line.department_display || '',
+        description: line.description || '',
         class: Number(line.class) || 0,
         class_display: line.class_display || '',
         rate: Number(line.rate) || 0,

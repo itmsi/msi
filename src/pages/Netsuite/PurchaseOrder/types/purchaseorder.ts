@@ -579,6 +579,7 @@ export interface ReceiptLine {
     inventorydetail: string;
     location_display: string;
     department_display: string;
+    description?: string;
 }
 
 // RECEIVE RESPONSE ITEMS
