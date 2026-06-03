@@ -35,6 +35,19 @@ export const useBillPayment = () => {
             const startVal = overrides?.trandate_start !== undefined ? overrides.trandate_start : filterStartDate;
             const endVal = overrides?.trandate_end !== undefined ? overrides.trandate_end : filterEndDate;
 
+            // Retrieve current approver ID from local storage (auth_user.current_approver_netsuite_id)
+            let currentApproverId: any = undefined;
+            try {
+                const authUserStr = localStorage.getItem('auth_user');
+                if (authUserStr) {
+                    const authUser = JSON.parse(authUserStr);
+                    currentApproverId = authUser?.current_approver_netsuite_id;
+                }
+            } catch (e) {
+                // If parsing fails, keep undefined
+                console.warn('Failed to parse auth_user from localStorage', e);
+            }
+
             const requestBody: BillPaymentRequest = {
                 page: overrides?.page ?? pagination.page,
                 limit: overrides?.limit ?? pagination.page_size,
@@ -47,6 +60,8 @@ export const useBillPayment = () => {
                 ...(appVal ? { approvalstatus: isNaN(Number(appVal)) ? appVal : Number(appVal) } : {}),
                 ...(startVal ? { trandate_from: startVal } : {}),
                 ...(endVal ? { trandate_to: endVal } : {}),
+                // Include current approver ID if available
+                ...(currentApproverId !== undefined && currentApproverId !== null ? { current_approver_id: currentApproverId } : {}),
             };
 
             const response = await BillPaymentService.getBillPayments(requestBody);
