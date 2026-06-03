@@ -15,6 +15,7 @@ export interface BillPaymentRequest {
     trandate_to?: string;
     trandate_start?: string; // for compatibility
     trandate_end?: string;   // for compatibility
+    current_approver_id?: number | string;
 }
 
 export interface AppliedToItem {
