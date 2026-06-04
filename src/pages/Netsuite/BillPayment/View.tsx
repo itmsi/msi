@@ -173,18 +173,6 @@ export default function View() {
     const workflowColumns: TableColumn<WorkflowHistoryItem>[] = [
         { name: 'Workflow', selector: row => row.workflow || '-', wrap: true, minWidth: '180px' },
         {
-            name: 'Date Entered State',
-            selector: row => row.date_entered || '-',
-            cell: row => <span className="text-sm">{row.date_entered ? formatDateTime(row.date_entered) : '-'}</span>,
-            minWidth: '160px',
-        },
-        {
-            name: 'Date Exited State',
-            selector: row => row.date_exited || '-',
-            cell: row => <span className="text-sm">{row.date_exited ? formatDateTime(row.date_exited) : '-'}</span>,
-            minWidth: '160px',
-        },
-        {
             name: 'Options',
             selector: row => row.options_obj || '-',
             cell: row => {

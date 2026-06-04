@@ -33,21 +33,22 @@ export const usePurchaseOrder = (profileSSO?: number) => {
             setError(null);
 
             const response = await PurchaseOrderService.getPurchaseOrders({
-                page: params?.page || pagination.page,
-                limit: params?.limit || pagination.limit,
+                page: params?.page ?? paginationRef.current.page,
+                limit: params?.limit ?? paginationRef.current.limit,
                 sort_by: params?.sort_by || sortModify || 'po_id',
                 sort_order: params?.sort_order || sortOrder || 'desc',
                 search: params?.search !== undefined ? params.search : searchValue,
                 po_status: params?.po_status !== undefined ? params.po_status : statusFilter,
                 subsidiary: params?.subsidiary !== undefined ? params.subsidiary : subsidiaryFilter,
                 location: params?.location !== undefined ? params.location : locationFilter,
-                ...(params?.approvalstatus !== undefined ? { approvalstatus: approvalStatusFilter }  : {}),
+                ...(params?.approvalstatus !== undefined
+                    ? { approvalstatus: params.approvalstatus }
+                    : approvalStatusFilter ? { approvalstatus: approvalStatusFilter } : {}),
                 ...(profileSSO !== undefined ? { classes: profileSSO } : {}),
-                ...params
             });
 
             setPurchaseOrders(response.data?.items || []);
-            setPagination(response.data?.pagination || pagination);
+            setPagination(response.data?.pagination || paginationRef.current);
             setSyncInfo(response.sync_info || null);
         } catch (err: any) {
             setError(err?.message || 'Failed to fetch purchase order data');
@@ -55,11 +56,11 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, sortModify, statusFilter, subsidiaryFilter, locationFilter, approvalStatusFilter, pagination.page, pagination.limit]);
+    }, [searchValue, sortOrder, sortModify, statusFilter, subsidiaryFilter, locationFilter, approvalStatusFilter]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
-        fetchPurchaseOrders({ page });
+        fetchPurchaseOrders({ page, limit: paginationRef.current.limit });
     }, [fetchPurchaseOrders]);
 
     const handleRowsPerPageChange = useCallback((limit: number, page: number) => {
