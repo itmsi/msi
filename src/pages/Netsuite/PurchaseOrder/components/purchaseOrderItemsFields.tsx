@@ -168,10 +168,9 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         const taxPercentage = extractTaxPercentage(taxCodeName);
         const taxAmount = (numericAmount * taxPercentage) / 100;
         const grossAmount = numericAmount + taxAmount;
-        
         return { 
-            taxAmount: Math.round(taxAmount), 
-            grossAmount: Math.round(grossAmount)
+            taxAmount: taxAmount, 
+            grossAmount: grossAmount
         };
     };
     
@@ -212,9 +211,6 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         // Clear selection after adding
         setSelectedProduct(null);
     };
-    console.log({
-        a: visibleItems
-    });
     
     // Define product table columns
     const productColumns: TableColumn<TablePOItem>[] = [
@@ -815,11 +811,13 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string, 
     const summary = useMemo(() => {
         const subtotal = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.amount)), 0);
         const totalTax = items.reduce((sum, item) => sum + toNumber(item.tax_amount), 0);
-        const grandTotal = serverTotal !== null ? serverTotal : items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
+        // Selalu hitung dari items agar ikut update saat user mengubah field
+        const localGrandTotal = items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
+        const grandTotal = localGrandTotal > 0 ? localGrandTotal : (serverTotal ?? 0);
         const totalQty = items.reduce((sum, item) => sum + toNumber(item.qty), 0);
-
+        
         return { subtotal, totalTax, grandTotal, totalQty };
-    }, [items]);
+    }, [items, serverTotal]);
 
     return (
             <div className="w-full px-0 space-y-3">
