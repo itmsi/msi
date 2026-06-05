@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useBillPayment } from './hooks/useBillPayment';
-import { formatCurrencyID, getStatusBadge, formatDateTime, formatDateLocal } from '@/helpers/generalHelper';
+import { formatCurrencyDynamic, getStatusBadge, formatDateLocal, formatDateTime } from '@/helpers/generalHelper';
 import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdOutlineSync } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -75,25 +75,25 @@ export default function Manage() {
             minWidth: '80px',
         },
         {
-            name: 'Transaction No.',
+            name: 'Subsidiary',
+            selector: row => row.subsidiary_display || '-',
+            wrap: true,
+            minWidth: '300px',
+        },
+        {
+            name: 'Doc Number',
             selector: row => row.transactionnumber || '-',
             cell: row => (
                 <div className="items-center py-2">
                     <div className="font-medium text-gray-900">{row.transactionnumber || '-'}</div>
-                    <div className="block text-sm text-gray-500">Doc. Number: {row.tranid || '-'}</div>
+                    <div className="block text-sm text-gray-500">{row.trandate ? formatDateLocal(row.trandate) : '-'}</div>
                 </div>
             ),
             wrap: true,
-            minWidth: '160px',
+            minWidth: '220px',
         },
         {
-            name: 'Subsidiary',
-            selector: row => row.subsidiary_display || '-',
-            wrap: true,
-            minWidth: '200px',
-        },
-        {
-            name: 'Vendor',
+            name: 'Vendor Name',
             selector: row => row.entity_display || '-',
             cell: row => (
                 <div className="items-center py-2">
@@ -104,54 +104,39 @@ export default function Manage() {
             minWidth: '220px',
         },
         {
-            name: 'Account',
-            selector: row => row.account_display || '-',
+            name: 'Memo',
+            selector: row => row.memo || '-',
             cell: row => (
                 <div className="items-center py-2">
-                    <div className="block text-sm text-gray-900">{row.account_display || '-'}</div>
+                    <div className="block text-sm text-gray-900">{row.memo || '-'}</div>
                 </div>
             ),
             wrap: true,
             minWidth: '260px',
         },
         {
-            name: 'Date',
-            selector: row => row.trandate || '-',
-            cell: row => (
-                <div className="items-center py-2">
-                    <div className="block text-sm text-gray-500">{formatDateLocal(row.trandate)}</div>
-                    <div className="block text-xs text-gray-400">{row.postingperiod_display || '-'}</div>
-                </div>
-            ),
-            wrap: true,
-            minWidth: '160px',
-        },
-        {
-            name: 'Currency',
-            selector: row => row.currency_display || '-',
-            cell: row => (
-                <div className="items-center py-2">
-                    <div className="block text-sm text-gray-900">{row.currency_display || '-'}</div>
-                    {row.exchangerate !== 1 && (
-                        <div className="block text-xs text-gray-500">Rate: {row.exchangerate}</div>
-                    )}
-                </div>
-            ),
-            wrap: true,
-            minWidth: '100px',
-        },
-        {
-            name: 'Total',
+            name: 'Amount',
             selector: row => row.total,
             cell: row => (
                 <div className="items-center py-2">
                     <div className="block text-sm font-medium text-gray-900">
-                        {formatCurrencyID(Math.abs(row.total || 0))}
+                        {formatCurrencyDynamic(Math.abs(row.total || 0), row.currency_display || 'IDR')}
                     </div>
                 </div>
             ),
             wrap: true,
-            minWidth: '160px',
+            minWidth: '180px',
+        },
+        {
+            name: 'Next Approval',
+            selector: row => row.next_approver || row.next_approver_blank || '-',
+            cell: row => (
+                <div className="items-center py-2">
+                    <div className="block text-sm text-gray-900">{row.next_approver || row.next_approver_blank || '-'}</div>
+                </div>
+            ),
+            wrap: true,
+            minWidth: '220px',
         },
         {
             name: 'Approval Status',
@@ -174,12 +159,12 @@ export default function Manage() {
             selector: row => row.custbody_me_wf_created_by_display || '-',
             cell: row => (
                 <div className="items-start py-2">
-                    <div className="block text-sm text-gray-500">{row.custbody_me_wf_created_by_display || '-'}</div>
-                    <div className="block text-sm text-gray-500">{formatDateTime(row.created_at)}</div>
+                    <div className="font-medium text-gray-900">{row.custbody_me_wf_created_by_display || '-'}</div>
+                    <div className="text-sm text-gray-500">{formatDateTime(row.created_at)}</div>
                 </div>
             ),
             wrap: true,
-            minWidth: '200px',
+            minWidth: '300px',
         },
         createActionsColumn([
             {
