@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nanogrid ROI Calculator</title>
+<title>Nanogrid Calculator — Direct Price (incl. PPN)</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js">
 
@@ -442,6 +442,55 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
   .before-metric .bm-value.amber  { color:var(--amber); }
   .before-metric .bm-value.red    { color:var(--red); }
   .before-metric .bm-value.green  { color:var(--green); }
+  .before-metric .bm-imply {
+    font-size:10px; font-family:var(--mono); color:var(--text3);
+    margin-top:6px; padding-top:5px; border-top:1px dashed var(--border);
+    letter-spacing:0.02em;
+  }
+  .before-metric .bm-imply strong { color:var(--accent); font-weight:500; }
+
+  /* ── RECONCILIATION (Step 2) ── */
+  .reconcile-wrap {
+    margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border);
+  }
+  .reconcile-row {
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem;
+    font-family:var(--mono); font-size:11px; color:var(--text2);
+    padding:0.4rem 0.6rem; background:var(--surface2); border-radius:6px;
+    margin-bottom:0.5rem;
+  }
+  .reconcile-row .rc-cell { display:flex; flex-direction:column; gap:2px; }
+  .reconcile-row .rc-label { font-size:9px; color:var(--text3); text-transform:uppercase; letter-spacing:0.06em; }
+  .reconcile-row .rc-val { font-weight:500; color:var(--text); font-size:12px; }
+  .reconcile-row .rc-val.gap-bad { color:var(--amber); }
+  .reconcile-row .rc-val.gap-ok  { color:var(--green); }
+
+  .reconcile-warn {
+    display:flex; gap:0.5rem; align-items:flex-start;
+    background:rgba(217,119,6,0.08); border-left:3px solid var(--amber);
+    border-radius:6px; padding:0.55rem 0.7rem; margin-bottom:0.5rem;
+    font-size:11px; color:var(--text2); line-height:1.55;
+  }
+  .reconcile-warn .rw-icon { color:var(--amber); flex-shrink:0; font-size:14px; line-height:1.2; }
+  .reconcile-warn strong { color:var(--amber); font-weight:600; }
+
+  .reconcile-table {
+    width:100%; border-collapse:collapse; font-family:var(--mono); font-size:11px;
+    margin-top:0.4rem;
+  }
+  .reconcile-table th {
+    text-align:left; padding:5px 6px; font-weight:500; font-size:9.5px;
+    color:var(--text3); text-transform:uppercase; letter-spacing:0.06em;
+    border-bottom:1px solid var(--border);
+  }
+  .reconcile-table td {
+    padding:6px; border-bottom:1px solid var(--border); color:var(--text2);
+  }
+  .reconcile-table tr.total td {
+    font-weight:500; background:var(--surface2); color:var(--text);
+  }
+  .reconcile-table .num { text-align:right; font-variant-numeric:tabular-nums; }
+  .reconcile-table .muted { color:var(--text3); }
 
   .baseline-24h {
     background:var(--surface); border:1px solid var(--border); border-radius:10px;
@@ -511,9 +560,14 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
         <img src="data:image/png;base64,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" alt="Motor Sights International" class="msi-logo-img">
       </div>
       <div class="msi-header-text">
-        <div class="header-tag">BATTERY ENERGY STORAGE · NANOGRID HYBRID GENSET</div>
-        <h1>ROI Calculator</h1>
-        <div class="header-sub">Analisis kelayakan sistem nanogrid — penghematan BBM &amp; cashflow pelanggan</div>
+        <div class="header-tag">BATTERY ENERGY STORAGE · NANOGRID · HARGA JUAL LANGSUNG (INCL. PPN)</div>
+        <h1>Expense <span>(Cash Flow)</span> Calculator</h1>
+        <div class="header-roe-formula" style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:4px 10px;background:rgba(7,83,165,0.08);border:1px dashed rgba(7,83,165,0.3);border-radius:4px;font-family:var(--mono);font-size:11px;color:var(--accent);">
+          <span style="font-weight:600;letter-spacing:0.5px;">ROE</span>
+          <span style="color:var(--text3);">=</span>
+          <span><span style="color:var(--text2);">(Revenue − Expense)</span> &frasl; <span style="color:var(--text2);">(Asset − Liability)</span></span>
+        </div>
+        <div class="header-sub" style="margin-top:6px;">Analisis kelayakan nanogrid — input harga jual langsung (incl. PPN), tanpa breakdown HPP/modal</div>
       </div>
       <!-- <button type="button" class="btn-print-quote" onclick="generateQuotation()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -544,12 +598,12 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
       <div>
         <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:3px;font-family:var(--mono);">Nama Customer</label>
-        <input type="text" id="custName" value="PT. Tempopress Mining International" placeholder="Nama PT / Perusahaan"
+        <input type="text" id="custName" value="" placeholder="Contoh: PT. Nama Perusahaan"
                style="width:100%;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--sans);font-size:13px;font-weight:600;">
       </div>
       <div>
         <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:3px;font-family:var(--mono);">Alamat / Lokasi</label>
-        <input type="text" id="custAddress" value="Kelapa Gading, Jakarta Utara" placeholder="Kota, Provinsi"
+        <input type="text" id="custAddress" value="" placeholder="Contoh: Kota, Provinsi"
                style="width:100%;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--sans);font-size:13px;">
       </div>
       <div>
@@ -713,7 +767,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
         </div>
         <div class="input-group" style="margin-bottom:0;">
           <label>Slope per 10% load</label>
-          <input type="number" id="asmEffSlope" value="0.1" min="0" max="0.5" step="0.01" oninput="onAsumsiChange()">
+          <input type="number" id="asmEffSlope" value="0.2" min="0" max="0.5" step="0.01" oninput="onAsumsiChange()">
         </div>
       </div>
       <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:0.5rem;padding:0.4rem 0.6rem;background:var(--surface2);border-radius:5px;" id="effAutoDisp">
@@ -781,11 +835,13 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
       <div class="bm-label">Loading genset siang <span class="fx" onclick="showFx(event,'loading_pct')">ƒ</span></div>
       <div class="bm-value amber" id="bmDayLoadPct">18%</div>
       <div class="bm-sub" id="bmDayEff">Efisiensi: 2.52 kWh/L</div>
+      <div class="bm-imply" id="bmDayImply" style="display:none;">Implied (dari manual): <strong>—</strong></div>
     </div>
     <div class="before-metric bad" id="bmNightLoadCard">
       <div class="bm-label">Loading genset malam</div>
       <div class="bm-value red" id="bmNightLoadPct">8.6%</div>
       <div class="bm-sub" id="bmNightEff">Efisiensi: 1.64 kWh/L</div>
+      <div class="bm-imply" id="bmNightImply" style="display:none;">Implied (dari manual): <strong>—</strong></div>
     </div>
   </div>
 
@@ -809,6 +865,72 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
         <input type="number" id="dailyFuelManual" value="391" min="0" max="10000" step="1" oninput="onFuelOverrideChange()">
         <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px;">
           Override ini akan dipakai di semua perhitungan (tagihan BBM, penghematan, ROI).
+        </div>
+      </div>
+
+      <!-- Reconciliation: formula vs manual comparison -->
+      <div class="reconcile-wrap" id="reconcileWrap">
+        <div class="reconcile-row">
+          <div class="rc-cell">
+            <span class="rc-label">Formula (Σ shift)</span>
+            <span class="rc-val" id="rcFormulaL">— L</span>
+          </div>
+          <div class="rc-cell">
+            <span class="rc-label">Manual (customer)</span>
+            <span class="rc-val" id="rcManualL">— L</span>
+          </div>
+          <div class="rc-cell">
+            <span class="rc-label">Gap</span>
+            <span class="rc-val" id="rcGap">—</span>
+          </div>
+        </div>
+
+        <div class="reconcile-warn" id="reconcileWarn" style="display:none;">
+          <span class="rw-icon">⚠</span>
+          <div id="reconcileWarnText">
+            Gap besar antara formula dan data customer. Loading% assumption perlu di-validate saat site survey.
+          </div>
+        </div>
+
+        <table class="reconcile-table">
+          <thead>
+            <tr>
+              <th>Shift</th>
+              <th class="num">kW</th>
+              <th class="num">Jam</th>
+              <th class="num">Eff (kWh/L)</th>
+              <th class="num">BBM Formula</th>
+              <th class="num">BBM Used</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="breakRowDay">
+              <td>Siang</td>
+              <td class="num" id="breakDayKw">—</td>
+              <td class="num" id="breakDayJam">—</td>
+              <td class="num" id="breakDayEff">—</td>
+              <td class="num muted" id="breakDayFormulaL">— L</td>
+              <td class="num" id="breakDayUsedL">— L</td>
+            </tr>
+            <tr id="breakRowNight">
+              <td>Malam</td>
+              <td class="num" id="breakNightKw">—</td>
+              <td class="num" id="breakNightJam">—</td>
+              <td class="num" id="breakNightEff">—</td>
+              <td class="num muted" id="breakNightFormulaL">— L</td>
+              <td class="num" id="breakNightUsedL">— L</td>
+            </tr>
+            <tr class="total">
+              <td colspan="4">Total/hari</td>
+              <td class="num muted" id="breakTotalFormulaL">— L</td>
+              <td class="num" id="breakTotalUsedL">— L</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:0.5rem;line-height:1.5;">
+          <strong style="color:var(--text2);">Logic:</strong> BBM Used di-scale proporsional dari formula breakdown ke total manual customer.
+          Kalau gap &gt;5%, implied loading% (asumsi data customer benar) ditampilkan di card loading siang/malam untuk validasi field.
         </div>
       </div>
     </div>
@@ -932,6 +1054,19 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
         <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px;line-height:1.5;" id="battRecSub">Berdasar peak load × 1.2 dan minimum 2h coverage.</div>
       </div>
 
+      <!-- Battery QTY recommendation (power + energy constraint) -->
+      <div style="padding:0.75rem 1rem;background:rgba(56,189,248,0.07);border:1px solid rgba(56,189,248,0.28);border-radius:8px;margin-bottom:0.75rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;">
+            🔋 Rekomendasi Qty Unit <span class="fx" onclick="showFx(event,'battery_qty')">ƒ</span>
+          </div>
+          <button class="btn" onclick="applyBattQtyRec()" style="font-size:10px;padding:0.25rem 0.6rem;">Pakai</button>
+        </div>
+        <div style="font-size:18px;font-weight:600;color:var(--accent);font-family:var(--mono);" id="battQtyRecValue">— unit</div>
+        <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:6px;line-height:1.6;" id="battQtyRecSub">—</div>
+        <div id="battThrottleWarn" style="display:none;font-size:10px;font-family:var(--mono);margin-top:8px;padding:7px 9px;background:rgba(217,119,6,0.10);border-left:3px solid var(--amber);border-radius:4px;line-height:1.55;color:var(--text2);"></div>
+      </div>
+
       <!-- Battery: Capacity per unit + Number of units -->
       <div class="input-group">
         <label>Kapasitas per unit (kWh) <span class="fx" onclick="showFx(event,'battery_capacity')">ƒ</span></label>
@@ -969,6 +1104,10 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
         <div style="display:flex;justify-content:space-between;font-size:10px;margin-top:2px;color:var(--text3);font-family:var(--mono);">
           <span>Max output (C-Rate)</span>
           <span id="battMaxOutDisp" style="color:var(--green);">— kW</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;margin-top:2px;color:var(--text3);font-family:var(--mono);">
+          <span>Charge rate (siang / malam)</span>
+          <span id="chargeRateDisp">— </span>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:10px;margin-top:2px;color:var(--text3);font-family:var(--mono);">
           <span>Peak load handling</span>
@@ -1379,15 +1518,46 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
     </div>
   </div>
 
-  <!-- ════ PRICING & INSTALLMENT (moved from Step 3) ════ -->
+  <!-- ════ HARGA JUAL & CICILAN ════ -->
   <div style="margin-top:2rem;padding-top:1rem;border-top:2px dashed var(--border2);">
-    <div style="font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.6rem;">
-      💰 Harga Sistem · HPP · Cicilan · Payback
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:0.8rem;flex-wrap:wrap;">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.12em;">
+        💰 Harga Jual · Cicilan · Payback
+      </div>
     </div>
 
+    <!-- DIRECT PRICE INPUT PANEL (always visible — primary input) -->
+    <div id="directPricePanel" style="display:block;margin-bottom:1rem;padding:1.1rem 1.2rem;background:linear-gradient(135deg, rgba(7,83,165,0.08) 0%, var(--surface) 70%);border:1px solid var(--accent);border-left:4px solid var(--accent);border-radius:8px;">
+      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+        <span style="font-size:14px;">🔋</span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Harga Jual Sistem (incl. PPN 11%)</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:0.75rem;line-height:1.5;">
+        Masukkan harga jual sistem baterai (sudah termasuk PPN 11%, pengiriman &amp; instalasi) secara langsung. Cicilan, payback &amp; ROI dihitung dari harga ini.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:0.75rem;align-items:end;">
+        <div>
+          <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:3px;font-family:var(--mono);">Harga Jual Total (Rp juta, incl. PPN)</label>
+          <input type="number" id="directPriceInput" value="1150" min="50" max="50000" step="1"
+            oninput="onDirectPriceChange()"
+            style="width:100%;padding:10px 12px;background:var(--surface);border:2px solid var(--accent);border-radius:6px;color:var(--accent);font-family:var(--mono);font-size:22px;font-weight:700;text-align:right;">
+        </div>
+        <div style="padding-bottom:10px;font-family:var(--mono);color:var(--text2);font-size:13px;">
+          juta Rupiah
+        </div>
+      </div>
+      <div style="margin-top:0.6rem;padding-top:0.6rem;border-top:1px dashed var(--border);font-size:10px;color:var(--text3);font-family:var(--mono);line-height:1.5;">
+        ℹ Contoh: ketik <strong>1150</strong> untuk Rp 1,15 Miliar. Harga per-kWh = harga total ÷ kapasitas baterai (lihat ringkasan di bawah).
+      </div>
+    </div>
+
+    <!-- Hidden legacy controls (kept so JS bindings don't break) -->
+    <input type="checkbox" id="hideHppBox" checked style="display:none;">
+    <input type="checkbox" id="directPriceMode" checked style="display:none;">
+
     <div class="grid-2">
-      <!-- LEFT: HPP + Sell Price -->
-      <div class="card">
+      <!-- LEFT: HPP card — hidden in this version -->
+      <div class="card" id="hppMarginCard" style="display:none;">
         <div class="card-label" style="margin-bottom:0.75rem;">HPP & Harga Jual <span class="fx" onclick="showFx(event,'hpp')">ƒ</span></div>
 
         <!-- Tabs: per-kWh vs manual total -->
@@ -1568,8 +1738,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
             <span style="font-size:9px;color:var(--text3);font-family:var(--mono);">= Harga jual incl. PPN</span>
           </div>
           <div id="systemPriceDisp" style="font-family:var(--mono);font-size:18px;font-weight:600;color:var(--accent);">Rp 338 jt</div>
-          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px;">
-            Dihitung otomatis dari: HPP + margin + PPN 11%. Ubah komponen di section "HPP & Harga Jual" di kiri.
+          <div id="systemPriceHint" style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px;">
+            Diambil dari harga jual yang di-input di atas (incl. PPN 11%).
           </div>
         </div>
 
@@ -1603,6 +1773,26 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
             <input type="range" id="interestVis" min="0" max="20" step="0.5" value="6"
               oninput="document.getElementById('interest').value=this.value; document.getElementById('interestValVis').textContent=this.value+'% /yr'; updateRangeDisplay('interest','interestVal','%/yr'); calculate()">
             <span class="range-val" id="interestValVis">6% /yr</span>
+          </div>
+        </div>
+
+        <!-- Interest scheme: Flat (leasing standard) vs Annuity (bank standard) -->
+        <div class="input-group">
+          <label>Skema Bunga</label>
+          <div style="display:flex;gap:4px;background:var(--surface2);padding:3px;border-radius:6px;">
+            <button type="button" id="interestSchemeFlat" class="active"
+              onclick="setInterestScheme('flat', this)"
+              style="flex:1;padding:6px 10px;border:none;background:var(--accent);color:#fff;border-radius:4px;cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:600;">
+              Flat (leasing)
+            </button>
+            <button type="button" id="interestSchemeAnnuity"
+              onclick="setInterestScheme('annuity', this)"
+              style="flex:1;padding:6px 10px;border:none;background:transparent;color:var(--text2);border-radius:4px;cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:600;">
+              Annuity (bank)
+            </button>
+          </div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px;line-height:1.45;" id="interestSchemeHint">
+            Flat: bunga = sisa × % /yr × tahun, lalu dibagi tenor. Total bunga FIXED dari awal — standard leasing &amp; equipment financing Indonesia.
           </div>
         </div>
 
@@ -1692,7 +1882,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
 
   
   <footer>
-    <div>Nanogrid ROI Calculator — Data aktual: 27 Mar – 6 Apr 2026 &nbsp;|&nbsp; <span id="footerGenset">Genset: 200kW (siang) + 350kW (malam)</span></div>
+    <div>Nanogrid Expense (Cash Flow) Calculator — Data aktual: 27 Mar – 6 Apr 2026 &nbsp;|&nbsp; <span id="footerGenset">Genset: 200kW (siang) + 350kW (malam)</span></div>
     <div style="margin-top:0.25rem;color:var(--text3)">Catatan: proyeksi berdasarkan efisiensi genset aktual dan asumsi optimasi runtime. Aktual dapat bervariasi.</div>
   </footer>
 </div>
@@ -1772,9 +1962,9 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFormula
         </div>
       </div>
 
-      <!-- Formula: HPP -->
-      <div style="font-size:11px;font-family:var(--mono);color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">5. HPP (Modal) dan Harga Jual</div>
-      <div style="padding:0.75rem;background:var(--surface2);border-radius:6px;margin-bottom:0.75rem;font-family:var(--mono);font-size:12px;line-height:1.7;">
+      <!-- Formula: HPP — hidden in direct-price version -->
+      <div style="display:none;font-size:11px;font-family:var(--mono);color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">5. HPP (Modal) dan Harga Jual</div>
+      <div style="display:none;padding:0.75rem;background:var(--surface2);border-radius:6px;margin-bottom:0.75rem;font-family:var(--mono);font-size:12px;line-height:1.7;">
         <div style="color:var(--accent);">
           <strong>HPP Import:</strong> CIF + portHandling + (CIF × dutyPct) + (CIF × pphPct)<br>
           <strong>HPP Lokal:</strong> deliveryRp + installRp<br>
@@ -1821,6 +2011,8 @@ let battCapPerUnit = 261;   // kWh per unit
 let priceMode = 'perkwh'; // 'perkwh' | 'manual'
 let useSellPrice = true;   // default ON: system price auto-pulled from sell price
 let sellPriceMil = 0;
+let directPriceModeActive = false;  // Direct selling-price override (bypass HPP/margin)
+let interestScheme = 'flat';  // 'flat' (leasing standard) | 'annuity' (bank standard)
 let computedSavingPct = 0.31;   // fuel saving % from calcRuntime physics model
 let cashflowChart, cumulativeChart;
 let fuelMode = 'auto';   // 'auto' (from formula) | 'manual' (customer input)
@@ -1828,6 +2020,14 @@ let _fxCurrent = null;   // active formula popover
 
 // Cost component IDs (all values read live from inputs)
 const PPN_RATE = 0.11;
+
+// BESS system self-consumption (liquid cooling + EMS + PCS standby), kW.
+// This parasitic load is served continuously whenever the BESS operates
+// (only in the AFTER/with-BESS scenario — the genset-only baseline has none).
+const BESS_AUX_KW = 5;
+
+// Battery rated cycle life (full equivalent cycles to ~70% SoH) — MSI-B261LP-2H datasheet.
+const BATT_CYCLE_LIFE = 8000;
 
 // Global shift count: 1 = single (day only), 2 = day+night (default), 3 = 24/7
 let shiftCount = 2;
@@ -1891,7 +2091,7 @@ function getAsumsi() {
 
   // Efficiency params — now DERIVED from actual loading
   const effBase  = parseFloat(document.getElementById('asmEffBase').value)  || 2.8;
-  const effSlope = parseFloat(document.getElementById('asmEffSlope').value) || 0.1;
+  const effSlope = parseFloat(document.getElementById('asmEffSlope').value) || 0.2;
   // Actual avg loads
   const dayAvgKw   = parseFloat(document.getElementById('dayAvgLoad').value)   || 0;
   const nightAvgKw = parseFloat(document.getElementById('nightAvgLoad').value) || 0;
@@ -2101,18 +2301,28 @@ function renderOpHrsBreakdown() {
 
   function fmtShift(title, result, avgKw, genKwAfter, effOld, effNew, shiftHrs, socStart) {
     if (!result || shiftHrs <= 0) return '';
-    const genOutput = genKwAfter * d.loadPct;
-    const chargeRate = genOutput - avgKw;
+    const targetGenOutput  = result.targetGenOutput  ?? (genKwAfter * d.loadPct);
+    const actualGenOutput  = result.genOutput        ?? targetGenOutput;
+    const actualLoadPct    = result.actualLoadPct    ?? (actualGenOutput / genKwAfter);
+    const actualEff        = result.actualEffNew     ?? effNew;
+    const capped           = !!result.cRateCapped;
+    const maxChargeKw      = (parseFloat(document.getElementById('battCRate')?.value || '0.5')) * batteryCap;
+    const energyFromGenset = result.energyFromGensetNeeded ?? ((avgKw * shiftHrs) / battEffRt);
+
+    const step2 = capped
+      ? `Charge limit baterai (0.5C × ${batteryCap.toFixed(0)} kWh) = <strong>${maxChargeKw.toFixed(0)} kW</strong> &lt; target ${targetGenOutput.toFixed(0)} kW → <span style="color:var(--amber);">genset di-throttle ke ${actualGenOutput.toFixed(0)} kW</span> (loading <strong>${(actualLoadPct*100).toFixed(1)}%</strong>, eff <strong>${actualEff.toFixed(2)} kWh/L</strong>)`
+      : `Charge limit baterai (0.5C × ${batteryCap.toFixed(0)} kWh) = <strong>${maxChargeKw.toFixed(0)} kW</strong> ≥ target ${targetGenOutput.toFixed(0)} kW → <span style="color:var(--green);">no cap</span>, eff tetap <strong>${actualEff.toFixed(2)} kWh/L</strong>`;
+
     return `<div style="margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:1px dashed var(--border);">
-<strong style="color:var(--accent);">${title}</strong> — shift ${shiftHrs}j, avg ${avgKw}kW, genset after ${genKwAfter}kW
-<br>1. Genset output @ ${(d.loadPct*100).toFixed(0)}% loading = ${genKwAfter} × ${d.loadPct} = <strong>${genOutput.toFixed(0)} kW</strong>
-<br>2. Charging rate (surplus di atas load) = ${genOutput.toFixed(0)} − ${avgKw} = <strong>${chargeRate.toFixed(0)} kW</strong>
-<br>3. Cycle charge time = ${chargeNeeded.toFixed(0)} kWh ÷ ${chargeRate.toFixed(0)} kW = <strong>${result.cycleCharge ? result.cycleCharge.toFixed(2) : '—'} jam</strong>
-<br>4. Cycle discharge time = ${usable.toFixed(0)} kWh ÷ ${avgKw} kW = <strong>${result.cycleDisch ? result.cycleDisch.toFixed(2) : '—'} jam</strong>
-<br>5. Gen ratio = ${(result.cycleCharge||0).toFixed(2)} ÷ (${(result.cycleCharge||0).toFixed(2)} + ${(result.cycleDisch||0).toFixed(2)}) = <strong>${(result.genRatio||0).toFixed(3)}</strong>
-<br>6. SOC awal shift = ${socStart.toFixed(0)} kWh → cover ${(socStart/avgKw).toFixed(1)}j discharge gratis
-<br>7. Jam genset = <span style="color:var(--green);font-weight:600;">${result.genHrs.toFixed(2)} jam</span>, jam battery = <span style="color:var(--accent);">${result.battHrs.toFixed(2)} jam</span>
-<br>8. BBM = ${genOutput.toFixed(0)} kW × ${result.genHrs.toFixed(2)}j ÷ ${effNew.toFixed(2)} kWh/L = <strong style="color:var(--amber);">${result.fuel.toFixed(0)} L</strong>
+<strong style="color:var(--accent);">${title}</strong> — shift ${shiftHrs}j, avg load ${avgKw}kW (+ ${BESS_AUX_KW}kW BESS aux), genset after ${genKwAfter}kW
+<br>1. Target genset output @ ${(d.loadPct*100).toFixed(0)}% loading = ${genKwAfter} × ${d.loadPct} = <strong>${targetGenOutput.toFixed(0)} kW</strong>
+<br>2. ${step2}
+<br>3. Topologi: saat genset ON → <strong>genset suplai load langsung</strong> + charge surplus ke battery (battery TIDAK discharge). Saat genset OFF → battery suplai load. RT loss (${(battEffRt*100).toFixed(0)}%) hanya pada surplus yang lewat battery.
+<br>4. Surplus charge rate = ${actualGenOutput.toFixed(0)} − ${(avgKw + BESS_AUX_KW).toFixed(0)} = <strong>${Math.max(0, actualGenOutput - avgKw - BESS_AUX_KW).toFixed(0)} kW</strong>
+<br>5. Jam genset = ${shiftHrs} × ${(avgKw+BESS_AUX_KW).toFixed(0)} ÷ (${(avgKw+BESS_AUX_KW).toFixed(0)} + ${battEffRt.toFixed(2)}×${Math.max(0, actualGenOutput - avgKw - BESS_AUX_KW).toFixed(0)}) = <span style="color:var(--green);font-weight:600;">${result.genHrs.toFixed(2)} jam</span>
+<br>6. Jam battery (genset off) = ${shiftHrs} − ${result.genHrs.toFixed(2)} = <span style="color:var(--accent);">${result.battHrs.toFixed(2)} jam</span>
+<br>7. SOC awal shift = ${socStart.toFixed(0)} kWh (carry-over dari shift sebelumnya, untuk timeline viz saja)
+<br>8. BBM = ${energyFromGenset.toFixed(0)} kWh ÷ ${actualEff.toFixed(2)} kWh/L = <strong style="color:var(--amber);">${result.fuel.toFixed(0)} L</strong>
 </div>`;
   }
 
@@ -2266,11 +2476,18 @@ function recalcHpp(skipCalculate = false) {
   setTxt('sellMarginPct', sell.grossMargin.toFixed(1) + '%');
   setTxt('sellMarginPctVis', sell.grossMargin.toFixed(1) + '%');
 
-  // Push to system price slider
+  // Push to system price slider — UNLESS direct price override is active
   sellPriceMil = sell.sellTotal / 1e6;
   const hppMil = hpp.hppTotal / 1e6;
-  if (useSellPrice) setSystemPrice(sellPriceMil);
-  else setSystemPrice(hppMil);
+  if (directPriceModeActive) {
+    // User is overriding price directly — keep their value, don't push from HPP/margin
+    const directPrice = parseFloat(document.getElementById('directPriceInput')?.value) || 0;
+    if (directPrice > 0) setSystemPrice(directPrice);
+  } else if (useSellPrice) {
+    setSystemPrice(sellPriceMil);
+  } else {
+    setSystemPrice(hppMil);
+  }
   if (!skipCalculate) calculate();
 }
 
@@ -2291,6 +2508,10 @@ function setPerKwh(val) {
 }
 
 function getSellPriceMil() {
+  // Direct-price version: selling price is the user's direct input (incl. PPN)
+  if (directPriceModeActive) {
+    return parseFloat(document.getElementById('directPriceInput')?.value) || 0;
+  }
   const cifRp = priceMode === 'perkwh'
     ? (parseFloat(document.getElementById('batteryPerKwh').value) || 0) * batteryCap * 1000
     : (parseFloat(document.getElementById('manualBatteryInput').value) || 0) * 1e6;
@@ -2566,14 +2787,22 @@ function calculate() {
 
   const monthlySaving = fuelSavingMonthly + maintSaving;
 
-  // Installment
+  // Installment — bunga hanya diaplikasikan ke REMAINING (setelah DP), bukan total
+  // FLAT: bunga total = remaining × annual_rate × years, dibagi tenor (standard leasing Indonesia)
+  // ANNUITY: bunga dihitung dari sisa pokok berjalan (standard bank)
   const dp = systemPrice * downPct;
   const remaining = systemPrice - dp;
+  const annualRate = parseFloat(document.getElementById('interest').value) / 100;
   let monthlyInst;
-  if (interestRate === 0) {
+  if (annualRate === 0) {
     monthlyInst = remaining / tenor;
+  } else if (interestScheme === 'flat') {
+    const totalInterest = remaining * annualRate * (tenor / 12);
+    monthlyInst = (remaining + totalInterest) / tenor;
   } else {
-    monthlyInst = remaining * (interestRate * Math.pow(1+interestRate, tenor)) / (Math.pow(1+interestRate, tenor) - 1);
+    // annuity (declining balance)
+    const monthlyRate = annualRate / 12;
+    monthlyInst = remaining * (monthlyRate * Math.pow(1+monthlyRate, tenor)) / (Math.pow(1+monthlyRate, tenor) - 1);
   }
 
   const totalMonthlyWithBattery = newSystemFuelCost + monthlyInst - maintSaving;
@@ -2833,9 +3062,8 @@ function calculate() {
         <div style="display:flex;flex-direction:column;gap:0.5rem;">
           ${[
             ['Kapasitas baterai', batteryCap + ' kWh', 'accent'],
-            ['HPP sistem (modal)', fmt(getHppMil()*1e6), 'text2'],
             ['Harga jual (incl. PPN)', getSellPriceMil() > 0 ? fmt(getSellPriceMil()*1e6) : '—', 'accent'],
-            ['Gross profit (sblm PPN)', getSellPriceMil() > 0 ? fmt((getSellPriceMil() / (1 + getAsumsi().ppnRate) - getHppMil()) * 1e6) : '—', 'green'],
+            ['Harga per kWh', (getSellPriceMil() > 0 && batteryCap > 0) ? fmt(getSellPriceMil()*1e6 / batteryCap) : '—', 'text2'],
             ['Kenaikan beban BBM/bln', fmt(hikeBurden), 'red'],
             ['Penghematan BBM/bln', fmt(monthlySaving), 'green'],
             ['Cicilan customer/bln', fmt(monthlyInst), 'accent'],
@@ -3058,6 +3286,97 @@ function onUseSellPriceChange() {
   }
 }
 
+// ─── INTEREST SCHEME (Flat vs Annuity) ───────────────────────────────
+function setInterestScheme(scheme, btn) {
+  interestScheme = scheme;
+  // Update button styling
+  const flatBtn = document.getElementById('interestSchemeFlat');
+  const annBtn  = document.getElementById('interestSchemeAnnuity');
+  const activeStyle = 'background: var(--accent); color: #fff;';
+  const inactiveStyle = 'background: transparent; color: var(--text2);';
+  if (flatBtn) flatBtn.style.cssText = flatBtn.style.cssText.replace(/(background|color)[^;]*;/g,'') + (scheme === 'flat' ? activeStyle : inactiveStyle);
+  if (annBtn)  annBtn.style.cssText  = annBtn.style.cssText.replace(/(background|color)[^;]*;/g,'')  + (scheme === 'annuity' ? activeStyle : inactiveStyle);
+  // Update hint text
+  const hint = document.getElementById('interestSchemeHint');
+  if (hint) {
+    hint.textContent = scheme === 'flat'
+      ? 'Flat: bunga = sisa × % /yr × tahun, lalu dibagi tenor. Total bunga FIXED dari awal — standard leasing & equipment financing Indonesia.'
+      : 'Annuity: bunga dihitung tiap bulan dari sisa pokok yang berjalan menurun. Cicilan lebih kecil dari Flat — standard pinjaman bank.';
+  }
+  calculate();
+}
+
+// ─── HIDE HPP & MARGIN BOX (presentation mode) ─────────────────────────
+function toggleHppVisibility() {
+  const hide = document.getElementById('hideHppBox').checked;
+  const card = document.getElementById('hppMarginCard');
+  const grid = card?.parentElement;
+  const hint = document.getElementById('systemPriceHint');
+  if (!card || !grid) return;
+  if (hide) {
+    card.style.display = 'none';
+    // Right card (Cicilan) takes full width
+    grid.style.gridTemplateColumns = '1fr';
+    if (hint && !directPriceModeActive) {
+      hint.textContent = 'Harga sistem total (incl. PPN 11%) — komponen HPP & margin disembunyikan.';
+    }
+  } else {
+    card.style.display = '';
+    grid.style.gridTemplateColumns = '';
+    if (hint && !directPriceModeActive) {
+      hint.textContent = 'Dihitung otomatis dari: HPP + margin + PPN 11%. Ubah komponen di section "HPP & Harga Jual" di kiri.';
+    }
+  }
+}
+
+// ─── DIRECT SELLING PRICE OVERRIDE MODE ────────────────────────────────
+function toggleDirectPriceMode() {
+  const on = document.getElementById('directPriceMode').checked;
+  directPriceModeActive = on;
+  const panel = document.getElementById('directPricePanel');
+  const hint = document.getElementById('systemPriceHint');
+  if (panel) panel.style.display = on ? 'block' : 'none';
+
+  // When direct mode is ON, auto-hide the HPP box for cleaner UX
+  const hideCb = document.getElementById('hideHppBox');
+  if (on && hideCb && !hideCb.checked) {
+    hideCb.checked = true;
+    toggleHppVisibility();
+  }
+
+  if (hint) {
+    if (on) {
+      hint.textContent = 'Harga jual di-input langsung. HPP/margin/profit di-bypass.';
+    } else {
+      // Restore the appropriate hint depending on HPP visibility
+      const hppHidden = document.getElementById('hideHppBox')?.checked;
+      hint.textContent = hppHidden
+        ? 'Harga sistem total (incl. PPN 11%) — komponen HPP & margin disembunyikan.'
+        : 'Dihitung otomatis dari: HPP + margin + PPN 11%. Ubah komponen di section "HPP & Harga Jual" di kiri.';
+    }
+  }
+
+  if (on) {
+    // Apply current direct input value
+    onDirectPriceChange();
+  } else {
+    // Restore: recalculate from HPP + margin
+    recalcHpp();
+  }
+}
+
+function onDirectPriceChange() {
+  if (!directPriceModeActive) return;
+  const price = parseFloat(document.getElementById('directPriceInput').value) || 0;
+  if (price <= 0) return;
+  // Override systemPrice directly, bypassing HPP/margin
+  setSystemPrice(price);
+  // Also sync the inner display so cicilan card shows the right price
+  const disp = document.getElementById('systemPriceDisp');
+  if (disp) disp.textContent = 'Rp ' + price.toLocaleString('id-ID') + ' jt';
+  calculate();
+}
+
 
 
 let timelineChart = null;
@@ -3134,41 +3453,67 @@ function calcRuntime() {
   const usableKwh = capKwh * dod;
   const chargeKwh = usableKwh / battEffRt;
 
-  function computeShiftFuel(avgKw, genKwAfter, shiftHrs, effOld, effNew, socStart) {
-    if (avgKw <= 0 || shiftHrs <= 0) {
+  function computeShiftFuel(avgKwSite, genKwAfter, shiftHrs, effOld, effNew, socStart) {
+    if (avgKwSite <= 0 || shiftHrs <= 0) {
       return { genHrs: 0, battHrs: 0, fuel: 0, socEnd: socStart, demand: 0,
         genOutput: 0, chargeRate: 0, cycleCharge: 0, cycleDisch: 0, cycleTotal: 0,
         genRatio: 0, leadingSOCHrs: 0, cycles: 0, energyGen: 0, cRateOk: true };
     }
-    // C-Rate constraint: battery max output must cover avg load
+    // Effective load = site load + BESS parasitic (cooling/EMS/PCS), served continuously.
+    const avgKw = avgKwSite + BESS_AUX_KW;
+
+    // C-Rate constraint: battery max output must cover effective load
     // (otherwise battery can't supply load alone when genset OFF)
     const cRateOk = avgKw <= maxOutputKw;
-    const genOutput = genKwAfter * loadPct;
-    let chargeRate = genOutput - avgKw;
-    // Also: charge rate cannot exceed maxOutputKw (limited by C-rate)
-    if (chargeRate > maxOutputKw) chargeRate = maxOutputKw;
+
+    // ── MIO'S PHYSICS MODEL (revised) ───────────────────────────────
+    // Topology: when genset is ON it supplies the SITE LOAD DIRECTLY and
+    // simultaneously charges the battery with the surplus. The battery does
+    // NOT discharge while charging. When the genset is OFF, the battery
+    // alone supplies the load. Therefore round-trip loss applies ONLY to the
+    // surplus energy stored in the battery — not to the whole daily demand.
+    const targetGenOutput = genKwAfter * loadPct;
+    let actualGenOutput   = Math.min(targetGenOutput, maxOutputKw);
+    const cRateCapped     = actualGenOutput < targetGenOutput - 0.5;
+    const actualLoadPct   = actualGenOutput / genKwAfter;
+    const actualEffNew    = cRateCapped
+      ? effFromCurve(actualLoadPct, asm.effBase, asm.effSlope)
+      : effNew;
+    // Surplus rate charging the battery while genset runs (load served directly)
+    const chargeRate = Math.max(0, actualGenOutput - avgKw);
+
     const loadEnergyKwh = avgKw * shiftHrs;
 
-    if (chargeRate <= 0) {
-      // Genset undersized — no battery cycling possible
+    if (actualGenOutput <= avgKw || chargeRate <= 0) {
+      // Genset can't outpace load even at max → genset runs continuously
+      // (load-following, no useful battery cycling, falls back to old eff)
       return {
         genHrs: shiftHrs, battHrs: 0,
         fuel: loadEnergyKwh / effOld,
         socEnd: socStart,
         demand: loadEnergyKwh,
-        genOutput, chargeRate,
+        genOutput: actualGenOutput, chargeRate,
         cycleCharge: 0, cycleDisch: 0, cycleTotal: 0, genRatio: 1,
         leadingSOCHrs: 0, cycles: 0,
         energyGen: loadEnergyKwh,
-        cRateOk
+        cRateOk, cRateCapped, actualEffNew,
+        targetGenOutput, actualLoadPct
       };
     }
 
-    // ─── ENERGY-BALANCE: gen/batt hours from conservation ───
-    const genHrs  = shiftHrs * avgKw / (avgKw + battEffRt * chargeRate);
+    // ─── ENERGY BALANCE (load direct during charge) ───────────────
+    // Charge in (during ON) after round-trip loss = discharge out (during OFF):
+    //   genHrs × chargeRate × battEffRt = battHrs × avgKw
+    //   genHrs + battHrs = shiftHrs
+    // → genHrs = shiftHrs × avgKw / (avgKw + battEffRt × chargeRate)
+    let genHrs = shiftHrs * avgKw / (avgKw + battEffRt * chargeRate);
+    if (genHrs > shiftHrs) genHrs = shiftHrs;
+    if (genHrs < 0) genHrs = 0;
     const battHrs = shiftHrs - genHrs;
-    const energyGen = genHrs * genOutput;
-    const fuel = energyGen / effNew;
+    const energyGen = genHrs * actualGenOutput;        // genset only burns while ON
+    const fuel = energyGen / actualEffNew;
+    // Genset energy that goes through the battery (the surplus that's stored)
+    const energyFromGensetNeeded = energyGen;
 
     // ─── Cycle params (for visualization) ───
     const cycleCharge = chargeKwh / chargeRate;
@@ -3177,20 +3522,20 @@ function calcRuntime() {
     const genRatio    = cycleCharge / cycleTotal;
 
     // ─── Derive leading SOC and cycle count for timeline rendering ───
-    // In steady state, assume battery starts at ~80% → serves first ~0.8*cycleDisch hours,
-    // then alternating pattern. This is visualization only; fuel from energy balance.
     const leadingSOCHrs = Math.min(socStart / avgKw, battHrs);
     const cyclesCompleted = Math.max(0, Math.floor((battHrs - leadingSOCHrs) / cycleDisch));
-    // SOC at end: half cycle typical
     const socEnd = usableKwh * 0.5;
 
     return {
       genHrs, battHrs, fuel, socEnd, demand: loadEnergyKwh,
-      genOutput, chargeRate,
+      genOutput: actualGenOutput, chargeRate,
       cycleCharge, cycleDisch, cycleTotal, genRatio,
       leadingSOCHrs, cycles: cyclesCompleted,
       energyGen,
-      cRateOk
+      cRateOk, cRateCapped, actualEffNew,
+      targetGenOutput, actualLoadPct,
+      energyFromGensetNeeded,
+      effLoadKw: avgKw, siteLoadKw: avgKwSite
     };
   }
 
@@ -3260,6 +3605,74 @@ function calcRuntime() {
   if (recSubEl) {
     recSubEl.innerHTML = `Peak load <strong>${maxPeak}kW</strong> × 1.2 margin = <strong>${Math.ceil(maxPeak*1.2)}kWh</strong>; coverage 2h @ avg load = <strong>${Math.ceil(minAvgLoad*2)}kWh</strong>. Max keduanya → ${recRounded} kWh.`;
   }
+
+  // ── BATTERY QTY RECOMMENDATION (power + energy constraint) ──────────
+  // Mio's topology: genset only charges battery. To run genset at its
+  // efficient sweet-spot (loadPct → 3.20 kWh/L) the battery bank must be
+  // able to ABSORB the full genset output. Per-unit absorb power is
+  // capped by C-rate: unitKwh × cRate. So we need enough units that
+  //   qty × unitKwh × cRate ≥ genset_target_output
+  // AND enough units to store the autonomy energy.
+  (function recommendBattQty() {
+    const valEl  = document.getElementById('battQtyRecValue');
+    const subEl  = document.getElementById('battQtyRecSub');
+    const warnEl = document.getElementById('battThrottleWarn');
+    if (!valEl) return;
+
+    const unitKwh   = (typeof battCapPerUnit === 'number' && battCapPerUnit > 0) ? battCapPerUnit : 261;
+    const unitPwrKw = unitKwh * cRate;                       // per-unit max charge power
+    const gensetTarget = Math.max(
+      dayGenKwAfter * loadPct,
+      nightActive ? nightGenKwAfter * loadPct : 0
+    );
+
+    // Power constraint: qty so the bank absorbs full genset output (no throttle)
+    const qtyPower = unitPwrKw > 0 ? Math.ceil(gensetTarget / unitPwrKw) : 1;
+    // Energy constraint: qty so usable kWh meets the autonomy recommendation
+    const qtyEnergy = unitKwh > 0 ? Math.ceil(recRounded / unitKwh) : 1;
+    const qtyRec = Math.max(1, qtyPower, qtyEnergy);
+
+    window._battQtyRec = qtyRec;
+
+    valEl.textContent = `${qtyRec} unit × ${unitKwh.toFixed(0)} kWh = ${(qtyRec*unitKwh).toFixed(0)} kWh`;
+    if (subEl) {
+      const bind = qtyPower >= qtyEnergy ? 'power (anti-throttle)' : 'energy (autonomy)';
+      subEl.innerHTML =
+        `Power: genset target <strong>${gensetTarget.toFixed(0)} kW</strong> ÷ (${unitKwh.toFixed(0)}×${cRate.toFixed(1)}C = <strong>${unitPwrKw.toFixed(0)} kW/unit</strong>) → <strong>${qtyPower} unit</strong><br>` +
+        `Energy: autonomy <strong>${recRounded} kWh</strong> ÷ ${unitKwh.toFixed(0)} kWh = <strong>${qtyEnergy} unit</strong><br>` +
+        `Ambil max (binding: ${bind}) → <strong style="color:var(--accent);">${qtyRec} unit</strong>`;
+    }
+
+    // Throttle-penalty: compare CURRENT qty vs recommended qty on binding shift
+    if (warnEl) {
+      const curMaxCharge = battQty * unitKwh * cRate;
+      const bindGenKw = (nightActive && nightGenKwAfter*loadPct >= dayGenKwAfter*loadPct) ? nightGenKwAfter : dayGenKwAfter;
+      const bindAvg   = (nightActive && nightGenKwAfter*loadPct >= dayGenKwAfter*loadPct) ? nightAvgKw : dayAvgKw;
+      const bindHrs   = (nightActive && nightGenKwAfter*loadPct >= dayGenKwAfter*loadPct) ? asm.nightShiftHrs : asm.dayShiftHrs;
+      const bindTarget = bindGenKw * loadPct;
+      const curOut  = Math.min(bindTarget, curMaxCharge);
+      const curCap  = curOut < bindTarget - 0.5;
+      const curEff  = curCap ? effFromCurve(curOut/bindGenKw, asm.effBase, asm.effSlope) : effFromCurve(loadPct, asm.effBase, asm.effSlope);
+      const idealEff = effFromCurve(loadPct, asm.effBase, asm.effSlope);
+      const eFromGen = (bindAvg * bindHrs) / battEffRt;
+      const curFuel  = eFromGen / curEff;
+      const idealFuel = eFromGen / idealEff;
+      const dL = curFuel - idealFuel;
+
+      if (curCap && dL > 0.5) {
+        const hargaBBM = (parseFloat(document.getElementById('fuelPrice')?.value) || 17000);
+        const rpMonth = dL * 30 * hargaBBM;
+        warnEl.style.display = 'block';
+        warnEl.innerHTML =
+          `⚠ Qty sekarang (<strong>${battQty} unit</strong>) → bank absorb max <strong>${curMaxCharge.toFixed(0)} kW</strong> &lt; genset target ${bindTarget.toFixed(0)} kW. ` +
+          `Genset throttle ke ${curOut.toFixed(0)} kW (loading ${(curOut/bindGenKw*100).toFixed(1)}%, eff ${curEff.toFixed(2)} vs ideal ${idealEff.toFixed(2)} kWh/L). ` +
+          `Penalty <strong>+${dL.toFixed(0)} L/hari</strong> (~Rp ${(rpMonth/1e6).toFixed(1)} jt/bln). ` +
+          `Naik ke ${qtyRec} unit menghilangkan throttle.`;
+      } else {
+        warnEl.style.display = 'none';
+      }
+    }
+  })();
   const coverageEl = document.getElementById('coverageHrsDisp');
   if (coverageEl) coverageEl.textContent = (usableKwh / Math.max(dayAvgKw, nightAvgKw, 1)).toFixed(1) + ' jam';
   const peakHandleEl = document.getElementById('peakHandlingDisp');
@@ -3268,6 +3681,23 @@ function calcRuntime() {
     peakHandleEl.innerHTML = ok
       ? `<span style="color:var(--green);">✓ OK (${maxPeak}kW peak)</span>`
       : `<span style="color:var(--red);">⚠ peak ${maxPeak}kW > cap</span>`;
+  }
+
+  // Charge rate vs C-rate cap indicator (helps user see if battery is "throttling" the genset)
+  // Mio's model: cap applies to FULL genset output (since all output goes to battery),
+  // not just the "surplus over load" — so test target output directly.
+  const chargeRateEl = document.getElementById('chargeRateDisp');
+  if (chargeRateEl) {
+    const dayTarget   = dayGenKwAfter   * loadPct;
+    const nightTarget = nightActive ? (nightGenKwAfter * loadPct) : 0;
+    const dayCapped   = dayTarget   > maxOutputKw;
+    const nightCapped = nightActive && nightTarget > maxOutputKw;
+    const fmtRate = (raw, capped) => {
+      if (raw <= 0) return '—';
+      if (capped) return `<span style="color:var(--orange,#D97706);" title="C-Rate cap: genset di-throttle ke ${maxOutputKw.toFixed(0)} kW (loading ${(maxOutputKw/(raw/loadPct)*100).toFixed(1)}%, eff turun)">${raw.toFixed(0)}→${maxOutputKw.toFixed(0)}kW⚠</span>`;
+      return `<span style="color:var(--green);">${raw.toFixed(0)} kW ✓</span>`;
+    };
+    chargeRateEl.innerHTML = `${fmtRate(dayTarget, dayCapped)} / ${fmtRate(nightTarget, nightCapped)}`;
   }
 
   // savingPct display
@@ -3295,9 +3725,21 @@ function calcRuntime() {
   const tbody = document.getElementById('runtimeTable');
   if (tbody) {
     tbody.innerHTML = '';
+
+    // Display-scaling: if MANUAL fuel mode active, scale before+after proportionally
+    // so the table totals match the customer baseline. Per-shift saving% is invariant
+    // to uniform scaling, so the −37% etc. badges stay correct.
+    const formulaTotalB = dayFuelBefore + nightFuelBefore;
+    let dispScale = 1;
+    let manualBaseline = null;
+    if (typeof fuelMode !== 'undefined' && fuelMode === 'manual' && formulaTotalB > 0) {
+      manualBaseline = parseFloat(document.getElementById('dailyFuelManual').value) || 0;
+      dispScale = manualBaseline / formulaTotalB;
+    }
+
     const rows = [
-      { shift: '☀ Siang', gen: asm.dayGenKw+' kW → '+dayGenKwAfter+' kW',  before: dayBefore,   after: dayGenHrsTotal,   fuelB: dayFuelBefore,   fuelA: dayFuelAfter,   effB: dayEffOld,   effN: dayEffNew, show: true },
-      { shift: '🌙 Malam', gen: asm.nightGenKw+' kW → '+nightGenKwAfter+' kW', before: nightBefore, after: nightGenHrsTotal, fuelB: nightFuelBefore, fuelA: nightFuelAfter, effB: nightEffOld, effN: nightEffNew, show: nightActive },
+      { shift: '☀ Siang', gen: asm.dayGenKw+' kW → '+dayGenKwAfter+' kW',  before: dayBefore,   after: dayGenHrsTotal,   fuelB: dayFuelBefore   * dispScale, fuelA: dayFuelAfter   * dispScale, effB: dayEffOld,   effN: dayEffNew, show: true },
+      { shift: '🌙 Malam', gen: asm.nightGenKw+' kW → '+nightGenKwAfter+' kW', before: nightBefore, after: nightGenHrsTotal, fuelB: nightFuelBefore * dispScale, fuelA: nightFuelAfter * dispScale, effB: nightEffOld, effN: nightEffNew, show: nightActive },
     ];
     rows.filter(r => r.show).forEach(r => {
       const saved = r.fuelB - r.fuelA;
@@ -3314,6 +3756,11 @@ function calcRuntime() {
       `;
       tbody.appendChild(tr);
     });
+
+    // Totals (scaled for display)
+    const totalFuelBeforeDisp = totalFuelBefore * dispScale;
+    const totalFuelAfterDisp  = (dayFuelAfter + nightFuelAfter) * dispScale;
+    const totalSavedLDisp     = totalFuelBeforeDisp - totalFuelAfterDisp;
     const trTot = document.createElement('tr');
     trTot.style.background = 'rgba(56,189,248,0.05)';
     trTot.innerHTML = `
@@ -3321,11 +3768,20 @@ function calcRuntime() {
       <td></td>
       <td style="color:var(--red);font-family:var(--mono);font-weight:500">${totalHrsBefore.toFixed(1)}j</td>
       <td style="color:var(--green);font-family:var(--mono);font-weight:500">${totalHrsAfter.toFixed(1)}j</td>
-      <td style="font-family:var(--mono);font-weight:500">${totalFuelBefore.toFixed(0)} L</td>
-      <td style="color:var(--green);font-family:var(--mono);font-weight:500">${(dayFuelAfter+nightFuelAfter).toFixed(0)} L</td>
-      <td><span class="tag tag-green">-${totalSavedPct.toFixed(0)}% (${totalSavedL.toFixed(0)}L)</span></td>
+      <td style="font-family:var(--mono);font-weight:500">${totalFuelBeforeDisp.toFixed(0)} L</td>
+      <td style="color:var(--green);font-family:var(--mono);font-weight:500">${totalFuelAfterDisp.toFixed(0)} L</td>
+      <td><span class="tag tag-green">-${totalSavedPct.toFixed(0)}% (${totalSavedLDisp.toFixed(0)}L)</span></td>
     `;
     tbody.appendChild(trTot);
+
+    // Footnote when scaled
+    if (manualBaseline !== null && Math.abs(dispScale - 1) > 0.005) {
+      const note = document.createElement('tr');
+      note.innerHTML = `<td colspan="7" style="font-family:var(--mono);font-size:10px;color:var(--text3);padding-top:6px;border:none;">
+        <em>Scaled ke baseline manual (${Math.round(manualBaseline)} L) — formula raw: ${Math.round(formulaTotalB)} L. Saving% per-shift invariant ke scaling.</em>
+      </td>`;
+      tbody.appendChild(note);
+    }
   }
 
   drawTimeline(dayGenHrs, dayBattHrs, nightGenHrs, nightBattHrs, 0, 0);
@@ -3545,6 +4001,17 @@ updateRangeDisplay('battEff','battEffVal','%');
 onLoadChange();
 // Init battery price — must run after load so batteryCap is set
 recalcHpp();
+// ── DIRECT-PRICE VERSION: activate direct selling-price mode permanently ──
+directPriceModeActive = true;
+(function initDirectPriceVersion() {
+  // Hide HPP card, make Cicilan card full width
+  const card = document.getElementById('hppMarginCard');
+  const grid = card?.parentElement;
+  if (card) card.style.display = 'none';
+  if (grid) grid.style.gridTemplateColumns = '1fr';
+  // Apply the direct price input to system price + payback
+  onDirectPriceChange();
+})();
 // Init qty display
 updateQtyDisplay();
 // Init usage stats
@@ -3657,6 +4124,15 @@ function applyBatteryRec() {
   onManualCapChange();
 }
 
+function applyBattQtyRec() {
+  const q = window._battQtyRec || 1;
+  const input  = document.getElementById('battQtyInput');
+  const slider = document.getElementById('battQtySlider');
+  if (input)  input.value = q;
+  if (slider) slider.value = q;
+  onBattQtyChange();
+}
+
 // ── FUEL OVERRIDE (Step 2) ────────────────────────────────────────
 // fuelMode declared at top of script
 function setFuelMode(mode, btn) {
@@ -3666,6 +4142,7 @@ function setFuelMode(mode, btn) {
   document.getElementById('fuelAutoDisp').style.display   = (mode === 'auto') ? 'block' : 'none';
   document.getElementById('fuelManualDisp').style.display = (mode === 'manual') ? 'block' : 'none';
   onLoadChange();
+  updateReconciliation();
 }
 function onFuelOverrideChange() {
   if (fuelMode === 'manual') {
@@ -3674,6 +4151,108 @@ function onFuelOverrideChange() {
     document.getElementById('dailyFuelVal').textContent = v + ' L';
     calculate();
     updateBeforeCondition();
+    updateReconciliation();
+  }
+}
+
+// ── RECONCILIATION (formula vs manual) ──────────────────────────────
+// Computes per-shift breakdown, scales to match selected baseline,
+// shows gap warning + implied loading% when manual ≠ formula by >5%.
+function updateReconciliation() {
+  const asm = getAsumsi();
+  const sc = shiftCount;
+  const dayKw   = parseFloat(document.getElementById('dayAvgLoad').value)   || 0;
+  const nightKw = parseFloat(document.getElementById('nightAvgLoad').value) || 0;
+
+  // Formula breakdown per shift
+  const dayFormulaL   = (asm.dayEffOld   > 0) ? (dayKw   * asm.dayShiftHrs)   / asm.dayEffOld   : 0;
+  const nightFormulaL = (sc === 2 && asm.nightEffOld > 0) ? (nightKw * asm.nightShiftHrs) / asm.nightEffOld : 0;
+  const formulaTotal  = dayFormulaL + nightFormulaL;
+
+  // Baseline used
+  const manualVal = parseFloat(document.getElementById('dailyFuelManual').value) || 0;
+  const baseline  = (fuelMode === 'manual') ? manualVal : formulaTotal;
+  const gap       = formulaTotal - baseline;
+  const gapPct    = formulaTotal > 0 ? (gap / formulaTotal) * 100 : 0;
+  const absGapPct = Math.abs(gapPct);
+  const scale     = formulaTotal > 0 ? baseline / formulaTotal : 1;
+
+  // Scaled (reconciled) usage per shift
+  const dayUsedL   = dayFormulaL   * scale;
+  const nightUsedL = nightFormulaL * scale;
+
+  // Implied loading%, assuming customer fuel data is accurate
+  const implDayPct   = (asm.dayGenKw   > 0 && asm.dayShiftHrs   > 0)
+    ? (dayUsedL   * asm.dayEffOld)   / asm.dayShiftHrs   / asm.dayGenKw   * 100 : 0;
+  const implNightPct = (sc === 2 && asm.nightGenKw > 0 && asm.nightShiftHrs > 0)
+    ? (nightUsedL * asm.nightEffOld) / asm.nightShiftHrs / asm.nightGenKw * 100 : 0;
+
+  // Setters
+  const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+
+  // Comparison row
+  set('rcFormulaL', Math.round(formulaTotal) + ' L/hari');
+  set('rcManualL',  Math.round(manualVal)    + ' L/hari');
+  const gapEl = document.getElementById('rcGap');
+  if (gapEl) {
+    const sign = gap > 0 ? '−' : (gap < 0 ? '+' : '');
+    gapEl.textContent = sign + absGapPct.toFixed(1) + '% (' + sign + Math.round(Math.abs(gap)) + ' L)';
+    gapEl.classList.remove('gap-bad', 'gap-ok');
+    gapEl.classList.add(absGapPct > 5 ? 'gap-bad' : 'gap-ok');
+  }
+
+  // Per-shift breakdown
+  set('breakDayKw',  Math.round(dayKw));
+  set('breakDayJam', asm.dayShiftHrs);
+  set('breakDayEff', asm.dayEffOld.toFixed(2));
+  set('breakDayFormulaL', Math.round(dayFormulaL) + ' L');
+  set('breakDayUsedL',    Math.round(dayUsedL)    + ' L');
+
+  const nightRow = document.getElementById('breakRowNight');
+  if (nightRow) nightRow.style.display = (sc === 2) ? '' : 'none';
+  if (sc === 2) {
+    set('breakNightKw',  Math.round(nightKw));
+    set('breakNightJam', asm.nightShiftHrs);
+    set('breakNightEff', asm.nightEffOld.toFixed(2));
+    set('breakNightFormulaL', Math.round(nightFormulaL) + ' L');
+    set('breakNightUsedL',    Math.round(nightUsedL)    + ' L');
+  }
+  set('breakTotalFormulaL', Math.round(formulaTotal) + ' L');
+  set('breakTotalUsedL',    Math.round(baseline)     + ' L');
+
+  // Warning banner — only meaningful in manual mode with gap > 5%
+  const warnEl = document.getElementById('reconcileWarn');
+  const warnTxt = document.getElementById('reconcileWarnText');
+  const showWarn = (fuelMode === 'manual') && (absGapPct > 5);
+  if (warnEl) warnEl.style.display = showWarn ? 'flex' : 'none';
+  if (warnTxt && showWarn) {
+    const implParts = ['Siang <strong>' + implDayPct.toFixed(1) + '%</strong>'];
+    if (sc === 2) implParts.push('Malam <strong>' + implNightPct.toFixed(1) + '%</strong>');
+    warnTxt.innerHTML =
+      'Gap <strong>' + absGapPct.toFixed(1) + '%</strong> antara formula (' + Math.round(formulaTotal) + ' L) ' +
+      'dan data customer (' + Math.round(baseline) + ' L). ' +
+      'Implied loading kalau data customer benar: ' + implParts.join(', ') + '. ' +
+      'Validate pakai clamp meter / SCADA historian saat site survey.';
+  }
+
+  // Implied loading badges on the loading cards
+  const dayImply   = document.getElementById('bmDayImply');
+  const nightImply = document.getElementById('bmNightImply');
+  if (dayImply) {
+    if (showWarn) {
+      dayImply.style.display = 'block';
+      dayImply.innerHTML = 'Implied (dari manual): <strong>' + implDayPct.toFixed(1) + '%</strong>';
+    } else {
+      dayImply.style.display = 'none';
+    }
+  }
+  if (nightImply) {
+    if (showWarn && sc === 2) {
+      nightImply.style.display = 'block';
+      nightImply.innerHTML = 'Implied (dari manual): <strong>' + implNightPct.toFixed(1) + '%</strong>';
+    } else {
+      nightImply.style.display = 'none';
+    }
   }
 }
 
@@ -3749,10 +4328,15 @@ const FX_DEFS = {
     formula: 'optimal = max(peakLoad × 1.2, avgLoad × 2h)',
     note: 'Kapasitas baterai TIDAK mempengaruhi total BBM (hukum kekal energi). Hanya menentukan: (1) peak load handling, (2) frekuensi cycle (baterai besar = cycle panjang tapi jarang), (3) backup runtime. Rekomendasi minimum: cover peak + 2 jam runtime avg load.'
   },
+  battery_qty: {
+    title: 'Rekomendasi Qty Unit Baterai',
+    formula: 'qtyPower  = ceil(gensetTarget ÷ (unitKwh × cRate))\nqtyEnergy = ceil(autonomyKwh ÷ unitKwh)\nqtyRec    = max(qtyPower, qtyEnergy)',
+    note: 'Topologi: genset hanya charge baterai. Supaya genset bisa jalan di sweet-spot (loadPct → eff 3.20 kWh/L), bank baterai harus bisa SERAP full output genset. Daya serap per unit dibatasi C-rate (unitKwh × cRate). Unit besar China (mis. 432 kWh / 216 kW @0.5C): sering binding-nya POWER, bukan energy — butuh 2 unit bukan karena kapasitas kurang, tapi supaya genset tidak di-throttle. Penalty throttle ditampilkan kalau qty saat ini kurang.'
+  },
   three_phase: {
     title: 'Energy Conservation Model',
-    formula: 'genHrs = shiftHrs × avgLoad / (avgLoad + battEff × chargeRate)\nfuel = (genHrs × genOutput) / effNew',
-    note: 'Fisika: Total energi genset (kWh) HARUS = beban + round-trip losses. Kapasitas baterai TIDAK mempengaruhi konsumsi BBM — hanya menentukan frekuensi cycle dan peak handling. Saving 100% dari kenaikan efisiensi (low load → target load).'
+    formula: 'effLoad  = siteLoad + 5 kW (BESS aux)\ngenHrs   = shiftHrs × effLoad / (effLoad + battEff × chargeRate)\nfuel     = (genHrs × genOutput) / effNew',
+    note: 'Topologi: saat genset ON, genset menyuplai LOAD LANGSUNG + charge surplus ke baterai (baterai tidak discharge saat charging). Saat genset OFF, baterai menyuplai load. RT loss hanya pada surplus yang lewat baterai. BESS punya self-consumption 5 kW (liquid cooling + EMS + PCS) yang ditambahkan ke beban efektif — hanya pada skenario with-BESS, baseline genset-only tidak ada. Kapasitas baterai tidak mempengaruhi konsumsi BBM (hanya frekuensi cycle & umur baterai).'
   },
   recommendation: {
     title: 'Rekomendasi Genset After',
@@ -3889,6 +4473,9 @@ function updateBeforeCondition() {
         `<br><br>Dengan baterai, genset hanya nyala di target load <strong>70%</strong> (${(asm.effBase + 0.2).toFixed(1)} kWh/L) saat charging, lalu mati saat baterai discharge. Potensi hemat 20–30% BBM.`;
     }
   }
+
+  // Refresh reconciliation panel (only visible in manual mode)
+  if (typeof updateReconciliation === 'function') updateReconciliation();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -3939,33 +4526,80 @@ function generateQuotation() {
   const nightEffOld = asm.nightEffOld;
   const targetLoad = parseFloat(document.getElementById('gensetLoadPct').value) / 100;
 
-  // BEFORE per-shift
-  const dayFuelB = dayAvgKw * dayShiftHrs / dayEffOld;
-  const nightFuelB = nightAvgKw * nightShiftHrs / nightEffOld;
+  // BEFORE per-shift — respect manual fuel override if active
+  let dayFuelB = dayAvgKw * dayShiftHrs / dayEffOld;
+  let nightFuelB = nightAvgKw * nightShiftHrs / nightEffOld;
+  const dailyFuelAutoTotal = dayFuelB + nightFuelB;
+  const fuelModeCur = (typeof fuelMode !== 'undefined') ? fuelMode : 'auto';
+  if (fuelModeCur === 'manual') {
+    const manualDailyL = parseFloat(document.getElementById('dailyFuelManual')?.value) || 0;
+    if (manualDailyL > 0 && dailyFuelAutoTotal > 0) {
+      // Scale per-shift proportionally to match manual total
+      const scaleB = manualDailyL / dailyFuelAutoTotal;
+      dayFuelB = dayFuelB * scaleB;
+      nightFuelB = nightFuelB * scaleB;
+    }
+  }
   const dayCostB = dayFuelB * fuelPrice;
   const nightCostB = nightFuelB * fuelPrice;
   const maintBefore = (asm.maintRpHr || 0) * 12;     // Rp/shift assuming 12h genset on
   const dayTotB = dayCostB + maintBefore;
   const nightTotB = nightCostB + maintBefore;
 
-  // AFTER per-shift — derive from physics
-  const dayLoadAfter = asm.dayGenKw * targetLoad;        // kW genset output target (140 kW)
-  const nightLoadAfter = asm.nightGenKw * targetLoad;    // (245 kW)
-  const effNew = parseFloat(document.getElementById('asmEffBase').value) || 3.0;  // not used directly, replaced
-  const dayChargeRate = dayLoadAfter - dayAvgKw;
-  const nightChargeRate = nightLoadAfter - nightAvgKw;
-  const dayGenHrsAfter = dayShiftHrs * dayAvgKw / (dayAvgKw + rtEff * dayChargeRate);
-  const nightGenHrsAfter = nightShiftHrs * nightAvgKw / (nightAvgKw + rtEff * nightChargeRate);
-  // Use Excel-aligned: efficiency at target load = 3.0 kWh/L
-  const effTargetKwhPerL = 3.0;
-  const dayFuelA = (dayLoadAfter * dayGenHrsAfter) / effTargetKwhPerL;
-  const nightFuelA = (nightLoadAfter * nightGenHrsAfter) / effTargetKwhPerL;
+  // AFTER per-shift — derive from physics using SAME eff curve as main calc
+  const dayLoadTarget = asm.dayGenKw * targetLoad;        // kW genset output target (140 kW)
+  const nightLoadTarget = asm.nightGenKw * targetLoad;    // (245 kW)
+  const effBaseQ  = parseFloat(document.getElementById('asmEffBase').value)  || 2.8;
+  const effSlopeQ = parseFloat(document.getElementById('asmEffSlope').value) || 0.2;
+  // eff at target load — same formula as effFromCurve for pct >= 0.30
+  const effAtPct = (pct) => Math.max(1.0, effBaseQ + (pct - 0.5) * effSlopeQ * 10);
+  const effTargetKwhPerL = effAtPct(targetLoad);
+  // C-Rate cap: genset throttles down if charge rate exceeds battery's max input
+  const maxOutputKwQ = totalKwh * cRate;
+  // Effective load incl. BESS self-consumption (with-BESS scenario only)
+  const dayEffLoad   = dayAvgKw + BESS_AUX_KW;
+  const nightEffLoad = nightAvgKw + BESS_AUX_KW;
+  let dayChargeRate = dayLoadTarget - dayEffLoad;
+  let nightChargeRate = nightLoadTarget - nightEffLoad;
+  let dayLoadAfter = dayLoadTarget, dayEffAfter = effTargetKwhPerL;
+  let nightLoadAfter = nightLoadTarget, nightEffAfter = effTargetKwhPerL;
+  if (dayChargeRate > maxOutputKwQ) {
+    dayChargeRate = maxOutputKwQ;
+    dayLoadAfter = dayEffLoad + dayChargeRate;
+    dayEffAfter = effAtPct(dayLoadAfter / asm.dayGenKw);
+  }
+  if (nightChargeRate > maxOutputKwQ) {
+    nightChargeRate = maxOutputKwQ;
+    nightLoadAfter = nightEffLoad + nightChargeRate;
+    nightEffAfter = effAtPct(nightLoadAfter / asm.nightGenKw);
+  }
+  const dayGenHrsAfter = dayChargeRate > 0 ? dayShiftHrs * dayEffLoad / (dayEffLoad + rtEff * dayChargeRate) : dayShiftHrs;
+  const nightGenHrsAfter = nightChargeRate > 0 ? nightShiftHrs * nightEffLoad / (nightEffLoad + rtEff * nightChargeRate) : nightShiftHrs;
+  let dayFuelA = (dayLoadAfter * dayGenHrsAfter) / dayEffAfter;
+  let nightFuelA = (nightLoadAfter * nightGenHrsAfter) / nightEffAfter;
+  // Manual fuel mode: scale after-fuel proportionally so saving% matches main calc
+  if (fuelModeCur === 'manual') {
+    const manualDailyL = parseFloat(document.getElementById('dailyFuelManual')?.value) || 0;
+    if (manualDailyL > 0 && dailyFuelAutoTotal > 0) {
+      const scaleA = manualDailyL / dailyFuelAutoTotal;
+      dayFuelA = dayFuelA * scaleA;
+      nightFuelA = nightFuelA * scaleA;
+    }
+  }
   const dayCostA = dayFuelA * fuelPrice;
   const nightCostA = nightFuelA * fuelPrice;
   // Maintenance after — Excel sets to 0
   const maintAfter = 0;
   const dayTotA = dayCostA + maintAfter;
   const nightTotA = nightCostA + maintAfter;
+
+  // ── Battery lifetime (dynamic) — rated cycle life ÷ equivalent cycles/day ──
+  const dayBattHrs   = Math.max(0, dayShiftHrs - dayGenHrsAfter);
+  const nightActiveQ = (shiftCount === 2) && nightShiftHrs > 0 && nightAvgKw > 0;
+  const nightBattHrs = nightActiveQ ? Math.max(0, nightShiftHrs - nightGenHrsAfter) : 0;
+  const dailyDischargeKwh = dayBattHrs * dayEffLoad + nightBattHrs * nightEffLoad;
+  const cyclesPerDay = utilizedKwh > 0 ? dailyDischargeKwh / utilizedKwh : 0;
+  const battLifeYears = cyclesPerDay > 0 ? BATT_CYCLE_LIFE / (cyclesPerDay * 365) : 0;
 
   // Savings
   const dayShiftSaving = dayTotB - dayTotA;
@@ -3979,12 +4613,20 @@ function generateQuotation() {
   const sysPrice = sysPriceJtRaw * 1e6;       // convert jt → Rp
   // Apply PPN 11% on top to get total investment
   const totalWithPpn = sysPrice;  // systemPrice already includes PPN per recalcHpp logic
-  // Loan calculation
+  // Loan calculation — same scheme as main calc (flat vs annuity)
   const dpAmount = totalWithPpn * downPct;
   const remaining = totalWithPpn - dpAmount;
-  const interestPaymentTotal = remaining * (interestPctYr/100) * (tenor/12);
-  const totalPayable = remaining + interestPaymentTotal;
-  const monthlyInst = totalPayable / tenor;
+  const annualRateDec = interestPctYr / 100;
+  let monthlyInst;
+  if (annualRateDec === 0) {
+    monthlyInst = remaining / tenor;
+  } else if ((typeof interestScheme !== 'undefined' ? interestScheme : 'flat') === 'flat') {
+    const totalInterest = remaining * annualRateDec * (tenor / 12);
+    monthlyInst = (remaining + totalInterest) / tenor;
+  } else {
+    const monthlyRate = annualRateDec / 12;
+    monthlyInst = remaining * (monthlyRate * Math.pow(1+monthlyRate, tenor)) / (Math.pow(1+monthlyRate, tenor) - 1);
+  }
   const netMonthly = monthlySaving - monthlyInst;
 
   // Cumulative 5-year
@@ -4027,6 +4669,9 @@ function generateQuotation() {
   $('qp-spec-maxout').textContent = fmtNum(maxOutputKw) + '  kW';
   $('qp-spec-crate').textContent = cRate.toFixed(1) + '  C';
   $('qp-spec-rteff').textContent = (rtEff*100).toFixed(0) + ' %';
+  $('qp-spec-lifetime').textContent = battLifeYears > 0
+    ? `~${battLifeYears.toFixed(1)} years (${BATT_CYCLE_LIFE.toLocaleString('en-US')} cycles · ${cyclesPerDay.toFixed(2)} cyc/day)`
+    : `${BATT_CYCLE_LIFE.toLocaleString('en-US')} cycles rated`;
   $('qp-dod-pct').textContent = (dod*100).toFixed(0) + '%';
   $('qp-project-sub').textContent = battQty + ' × ' + fmtNum(perUnit) + ' kWh  |  Battery Energy Storage';
   $('qp-scope-batt').textContent = battQty + ' × ' + fmtNum(perUnit) + ' kWh';
@@ -4561,7 +5206,7 @@ function generateQuotation() {
         <td class="qp-spec-lbl">Utilized Capacity (DOD <span id="qp-dod-pct">80%</span>)</td>
         <td class="qp-spec-val" id="qp-spec-utilized">—</td>
         <td class="qp-spec-lbl">Est. Battery Lifetime</td>
-        <td class="qp-spec-val" id="qp-spec-lifetime">~10.4 years (8,000 cycles @ 70% SoH)</td>
+        <td class="qp-spec-val" id="qp-spec-lifetime">—</td>
       </tr>
     </table>
 
