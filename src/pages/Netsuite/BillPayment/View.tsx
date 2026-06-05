@@ -170,33 +170,55 @@ export default function View() {
         },
     ];
 
+    const parseOptionsObj = (optionsObj?: string | Record<string, any>) => {
+        if (!optionsObj) return {};
+
+        if (typeof optionsObj === 'string') {
+            try {
+                return JSON.parse(optionsObj) as Record<string, any>;
+            } catch {
+                return {};
+            }
+        }
+
+        return optionsObj;
+    };
+
+    const getWorkflowOptionValue = (optionsObj?: string | Record<string, any>, label?: string) => {
+        if (!label) return '-';
+
+        const parsedOptions = parseOptionsObj(optionsObj);
+        if (!parsedOptions || typeof parsedOptions !== 'object') return '-';
+
+        const normalized = Object.entries(parsedOptions).reduce<Record<string, any>>((acc, [key, value]) => {
+            acc[key.replace(/\?/g, '')] = value;
+            return acc;
+        }, {});
+
+        const withId = `${label} Id`;
+        return normalized[label] ?? normalized[withId] ?? '-';
+    };
+
     const workflowColumns: TableColumn<WorkflowHistoryItem>[] = [
         { name: 'Workflow', selector: row => row.workflow || '-', wrap: true, minWidth: '180px' },
         {
-            name: 'Options',
-            selector: row => row.options_obj || '-',
-            cell: row => {
-                if (!row.options_obj || Object.keys(row.options_obj).length === 0) return '-';
-
-                // Filter out undesired keys and remove question marks from labels
-                const entries = Object.entries(row.options_obj)
-                    .filter(([key]) => key !== 'Is Final Delegate? Id' && key !== 'Is Final? Id' && key !== 'Current Approver Id')
-                    .map(([key, val]) => [key.replace(/\?/g, ''), val] as [string, any]);
-
-                if (entries.length === 0) return '-';
-
-                return (
-                    <div className="py-2 text-sm text-gray-700 space-y-1 max-w-[300px]">
-                        {entries.map(([key, val], idx) => (
-                            <div key={idx} className="leading-tight">
-                                <span className="font-medium text-gray-900">{key}:</span> {String(val)}
-                            </div>
-                        ))}
-                    </div>
-                );
-            },
+            name: 'Is Final',
+            selector: row => getWorkflowOptionValue(row.options_obj, 'Is Final'),
+            cell: row => <span className="text-sm">{getWorkflowOptionValue(row.options_obj, 'Is Final')}</span>,
+            minWidth: '120px',
+        },
+        {
+            name: 'Current Approver',
+            selector: row => getWorkflowOptionValue(row.options_obj, 'Current Approver'),
+            cell: row => <span className="text-sm">{getWorkflowOptionValue(row.options_obj, 'Current Approver')}</span>,
             wrap: true,
-            minWidth: '250px',
+            minWidth: '220px',
+        },
+        {
+            name: 'Is Final Delegate',
+            selector: row => getWorkflowOptionValue(row.options_obj, 'Is Final Delegate'),
+            cell: row => <span className="text-sm">{getWorkflowOptionValue(row.options_obj, 'Is Final Delegate')}</span>,
+            minWidth: '140px',
         },
         {
             name: 'Notes',

@@ -72,6 +72,7 @@ export interface BillPayment {
     account_display: string;
     currency_display: string;
     postingperiod_display: string;
+    memo?: string;
     custbody_me_wf_created_by_display: string;
     approvalstatus_display: string;
     subsidiary_display: string;
