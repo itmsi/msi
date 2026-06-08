@@ -2,7 +2,7 @@ import { apiPost, ApiResponse } from '@/helpers/apiHelper';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export type SyncMasterDataKey = 'departments' | 'locations' | 'terms' | 'classes' | 'items' | 'vendors' | 'customers' | 'invoice_sales_orders' | 'purchasing_orders' | 'sales_orders' | 'receives';
+export type SyncMasterDataKey = 'departments' | 'locations' | 'terms' | 'classes' | 'items' | 'vendors' | 'customers' | 'invoice_sales_orders' | 'purchasing_orders' | 'sales_orders' | 'receives' | 'bill_payments';
 
 // ─── Sync List Types ──────────────────────────────────────────────────────────
 
@@ -56,14 +56,33 @@ export const SYNC_MODULE_KEY_MAP: Record<string, SyncMasterDataKey> = {
     'sales_orders':          'sales_orders',
     'sales-order':          'sales_orders',
     'sales-orders':         'sales_orders',
+    'bill_payments':         'bill_payments',
+    'bill_payment':          'bill_payments',
+    'bill-payments':         'bill_payments',
 };
 
 export class NetSuiteSyncService {
+    private static readonly SYNC_KEY_API_MODULE: Record<SyncMasterDataKey, string> = {
+        departments: 'departments',
+        locations: 'locations',
+        terms: 'terms',
+        classes: 'classes',
+        items: 'items',
+        vendors: 'vendors',
+        customers: 'customers',
+        invoice_sales_orders: 'invoice_sales_orders',
+        purchasing_orders: 'purchasing_orders',
+        sales_orders: 'sales_orders',
+        receives: 'receives',
+        bill_payments: 'bill_payments',
+    };
+
     /**
      * Dispatcher: trigger sync via unified endpoint berdasarkan key module.
      */
     static async sync(key: SyncMasterDataKey): Promise<void> {
-        await this.getSyncModule(key);
+        const moduleName = this.SYNC_KEY_API_MODULE[key] ?? key;
+        await this.getSyncModule(moduleName);
     }
 
     /**

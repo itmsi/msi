@@ -84,6 +84,12 @@ const INITIAL_ITEMS: Omit<MasterDataItem, 'status' | 'lastSync' | 'errorMessage'
         description: 'Sync Sales Invoice from NetSuite',
         icon: 'invoice_sales_orders',
     },
+    {
+        key: 'bill_payments',
+        label: 'Bill Payment',
+        description: 'Sync bill payments from NetSuite',
+        icon: 'bill_payment',
+    },
 ];
 
 // ─── Hook ───────────────────────────────────────────────────────────────────
@@ -120,57 +126,46 @@ export function useNetsuiteSync() {
         );
     }, []);
 
+    const refreshSyncHistory = useCallback(async () => {
+        setIsFetchingHistory(true);
+        try {
+            const data = await NetSuiteSyncService.getSyncList();
+
+            const latestByKey = new Map<SyncMasterDataKey, SyncListItem>();
+            for (const record of data.items) {
+                const key = SYNC_MODULE_KEY_MAP[record.sync_module];
+                if (key && !latestByKey.has(key)) {
+                    latestByKey.set(key, record);
+                }
+            }
+
+            setItems((prev) =>
+                prev.map((item) => {
+                    const record = latestByKey.get(item.key);
+                    if (!record) return item;
+
+                    const lastSync: LastSyncInfo = {
+                        synced_by: record.created_by_name,
+                        synced_at: record.updated_at,
+                    };
+
+                    return {
+                        ...item,
+                        lastSync,
+                    };
+                })
+            );
+        } catch {
+            // Non-critical: cards fall back to localStorage data
+        } finally {
+            setIsFetchingHistory(false);
+        }
+    }, []);
+
     // ── Fetch sync history from API on mount ──────────────────────────────────
     useEffect(() => {
-        let cancelled = false;
-
-        async function fetchSyncHistory() {
-            setIsFetchingHistory(true);
-            try {
-                const data = await NetSuiteSyncService.getSyncList();
-
-                if (cancelled) return;
-
-                // Group by module key, keep only the latest record per key
-                // (list is already sorted by created_at desc)
-                const latestByKey = new Map<SyncMasterDataKey, SyncListItem>();
-                for (const record of data.items) {
-                    const key = SYNC_MODULE_KEY_MAP[record.sync_module];
-                    if (key && !latestByKey.has(key)) {
-                        latestByKey.set(key, record);
-                    }
-                }
-
-                setItems((prev) =>
-                    prev.map((item) => {
-                        const record = latestByKey.get(item.key);
-                        if (!record) return item;
-
-                        const lastSync: LastSyncInfo = {
-                            synced_by: record.created_by_name,
-                            synced_at: record.updated_at,
-                        };
-
-                        return {
-                            ...item,
-                            // Keep status as 'idle' on page load — API history only
-                            // provides "last sync" metadata (who & when), not current state.
-                            status: 'idle' as SyncStatus,
-                            lastSync,
-                        };
-                    })
-                );
-            } catch {
-                // Non-critical: cards fall back to localStorage data
-            } finally {
-                if (!cancelled) setIsFetchingHistory(false);
-            }
-        }
-
-        fetchSyncHistory();
-        return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        refreshSyncHistory();
+    }, [refreshSyncHistory]);
 
     // ── Queue worker ──────────────────────────────────────────────────────────
     const processQueue = useCallback(async () => {
@@ -196,6 +191,9 @@ export function useNetsuiteSync() {
             updateItem(key, { status: 'failed', errorMessage });
             toast.error(`Failed to sync ${key}: ${errorMessage}`);
         } finally {
+            // Refresh latest sync history after each sync operation.
+            await refreshSyncHistory();
+
             // Remove current item from queue
             queueRef.current = queueRef.current.slice(1);
             processingRef.current = false;

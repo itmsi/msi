@@ -136,22 +136,6 @@ const AppSidebar: React.FC = () => {
                 { name: "Nanogrid Calculator", path: buildPath("/nanogrid-calculator") },
             ],
         },
-
-        // {
-        //     name: "Return on Equity",
-        //     icon: <GiChart />,
-        //     allowedRoles: ['Manage ROA ROE Calculate', 'Setting ROA ROE Calculate'],
-        //     path: buildPath("/roe-roa-calculator/manage")
-        //     // subItems: [
-        //     //     { name: "Manage", path: "/roe-roa-calculator/manage", allowedRoles: ['Manage ROA ROE Calculate'] },
-        //     //     // { name: "Settings", path: "/roe-roa-calculator/settings", allowedRoles: ['Setting ROA ROE Calculate'] },
-        //     // ],
-        // },
-        // {
-        //     name: "Hauling Calculator",
-        //     icon: <MdCalculate />,
-        //     path: buildPath("/hauling-calculator")
-        // },
         {
             name: "CRM",
             icon: <TbTopologyStar3 />,
@@ -197,15 +181,6 @@ const AppSidebar: React.FC = () => {
     ], [buildPath]);
 
     const othersItems: NavItem[] = useMemo(() => [
-        // {
-        //     icon: <PlugInIcon />,
-        //     name: "Authentication",
-        //     allowedRoles: ['Sign In', 'Sign Up'], // Kosongkan karena tidak ada di auth_menu
-        //     subItems: [
-        //         { name: "Sign In", path: buildPath("/signin"), allowedRoles: ['Sign In'], },
-        //         { name: "Sign Up", path: buildPath("/signup"), allowedRoles: ['Sign Up'], },
-        //     ],
-        // },
         {
             icon: <UserIcon />,
             name: "Employee",
