@@ -81,7 +81,6 @@ interface POFormFieldsProps {
     selectedDepartment?: PODepartmentSelectOption | null;
     onDepartmentChange?: (option: PODepartmentSelectOption | null) => void;
     departmentError?: string;
-    serverTotal?: number;
 }
 
 const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
@@ -140,7 +139,6 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     selectedDepartment,
     onDepartmentChange,
     departmentError,
-    serverTotal,
 }) => {
     // Get computed field configurations
     const primaryFields = getPrimaryInfoFields(masterData || undefined);
