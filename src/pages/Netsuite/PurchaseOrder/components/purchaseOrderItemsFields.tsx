@@ -1,6 +1,6 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, formatNumberPriceKoma, formatCurrencyDynamic, handleDecimalInput, formatNumberUSTyping, parseNumberUS } from '@/helpers/generalHelper';
+import { handleKeyPress, parseCurrencyIDR, formatNumberPriceKoma, formatCurrencyDynamic, handleDecimalInput, formatNumberUSTyping, parseNumberUS } from '@/helpers/generalHelper';
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -300,7 +300,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        row.custcol_msi_fob && row.custcol_msi_fob > 0 ? formatCurrencyTyping(String(row.custcol_msi_fob)) : '-'
+                        row.custcol_msi_fob && row.custcol_msi_fob > 0 ? formatNumberUSTyping(String(row.custcol_msi_fob)) : '-'
                     }</p>
                 ) : (
                 <Input
@@ -813,9 +813,9 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string, 
     const summary = useMemo(() => {
         const subtotal = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.amount)), 0);
         const totalTax = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.tax_amount)), 0);
-        // Selalu hitung dari items agar ikut update saat user mengubah field
         const localGrandTotal = items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
-        const grandTotal = localGrandTotal > 0 ? localGrandTotal : (serverTotal ?? 0);
+        // serverTotal override kalkulasi lokal; fallback ke lokal jika tidak ada
+        const grandTotal = serverTotal != null ? serverTotal : localGrandTotal;
         const totalQty = items.reduce((sum, item) => sum + toNumber(item.qty), 0);
         
         return { subtotal, totalTax, grandTotal, totalQty };
@@ -838,7 +838,7 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string, 
                     </div>
                     <div className="border-t border-gray-300 pt-3 flex justify-between text-sm font-primary-bold">
                         <span>Grand Total</span>
-                        <span className="text-blue-700">{formatCurrencyDynamic(Number(summary.grandTotal), currency)}</span>
+                        <span className="text-blue-700">{formatCurrencyDynamic(summary.grandTotal, currency)}</span>
                     </div>
                 </div>
             </div>
