@@ -707,3 +707,47 @@ export interface POAttachmentResponse {
     fileName: string;
     message?: string;
 }
+
+// DASHBOARD
+export interface PurchaseOrderDashboardRequest {
+  page: number;
+  limit: number;
+  sort_by: string;
+  sort_order: 'asc' | 'desc';
+  search?: string;
+  classes?: string;
+  subsidiary?: string;
+  location?: string;
+  po_status?: string;
+  approvalstatus?: string;
+}
+export interface PurchaseOrderDashboardItem {
+    id: string;
+    po_id: string;
+    subsidiary_display: string;
+    po_number: string;
+    po_date: string;
+    approvalstatus: number;
+    approvalstatus_display: string;
+    nextapprover: string;
+    po_status: string;
+    po_status_label: string;
+    memo: string;
+    vendor_name: string;
+    currency_symbol: string;
+    total: string;
+    custbody_msi_createdby_api: string;
+    last_modified: string;
+}
+export interface PurchaseOrderDashboardSummary {
+  items: PurchaseOrderDashboardItem[];
+  pending_approval: number;
+  pending_receipt: number;
+  pending_bill: number;
+}
+
+export interface GetPurchaseOrderListResponse {
+    data: PurchaseOrderDashboardSummary;
+    sync_info: SyncInfo;
+    message: string;
+}

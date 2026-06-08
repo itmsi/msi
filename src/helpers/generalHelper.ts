@@ -214,8 +214,13 @@ export const formatCurrencyIDR = (value: string | number | undefined | null, max
 };
 
 // Helper to format during typing (more lenient)
-export const formatCurrencyTyping = (value: string): string => {
+export const formatCurrencyTyping = (value: string, maxDecimals: number = 2): string => {
     if (!value) return '';
+    
+    // Jika value adalah JS number string (titik sebagai desimal, tanpa koma), konversi ke format koma
+    if (value.includes('.') && !value.includes(',')) {
+        value = value.replace('.', ',');
+    }
     
     // Remove all non-digit characters except comma
     const cleaned = value.replace(/[^\d,]/g, '');
@@ -225,7 +230,7 @@ export const formatCurrencyTyping = (value: string): string => {
     
     if (parts.length > 2) {
         // If more than one comma, keep only the first part and first decimal
-        return formatCurrencyTyping(`${parts[0]},${parts[1]}`);
+        return formatCurrencyTyping(`${parts[0]},${parts[1]}`, maxDecimals);
     }
     
     const integerPart = parts[0] || '';
@@ -238,8 +243,7 @@ export const formatCurrencyTyping = (value: string): string => {
     
     // Return with or without decimal part
     if (decimalPart !== undefined) {
-        // Limit to 2 decimal places
-        const limitedDecimal = decimalPart.slice(0, 2);
+        const limitedDecimal = decimalPart.slice(0, maxDecimals);
         return `${formattedInteger},${limitedDecimal}`;
     }
     
@@ -478,6 +482,8 @@ export const formatCurrencyDynamic = (value: number | string, currencySymbol: st
     return new Intl.NumberFormat(locale, {
         style: 'currency',
         currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 4,
     }).format(numValue);
 };
 export const formatCurrencyZH = (value: number | string): string => {
@@ -752,4 +758,62 @@ export const formatDateLocal = (dateString?: string): string => {
         month: 'short',
         day: 'numeric'
     });
+};
+
+/**
+ * Format angka ke format en-US: 20000.25 → "20,000.25"
+ * Mendukung hingga N digit desimal (default 4)
+ */
+export const formatNumberUS = (value: string | number | null | undefined, maxDecimals: number = 4): string => {
+    if (value === null || value === undefined || value === '') return '';
+
+    const num = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
+    if (isNaN(num)) return '';
+
+    return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: maxDecimals,
+    }).format(num);
+};
+
+/**
+ * Format saat user mengetik (en-US): menjaga input tetap nyaman
+ * Contoh: "20000.25" → "20,000.25", "20000." → "20,000."
+ */
+export const formatNumberUSTyping = (value: string, maxDecimals: number = 4): string => {
+    if (!value) return '';
+
+    // Bersihkan semua karakter kecuali digit dan titik
+    const cleaned = value.replace(/[^\d.]/g, '');
+
+    // Hanya satu titik desimal yang diizinkan
+    const parts = cleaned.split('.');
+    const intPart = parts[0] || '';
+    const decPart = parts.length > 1 ? parts[1].slice(0, maxDecimals) : undefined;
+
+    if (!intPart && decPart === undefined) return '';
+
+    // Format integer dengan koma ribuan
+    const formattedInt = intPart ? new Intl.NumberFormat('en-US').format(parseInt(intPart, 10)) : '0';
+
+    if (decPart !== undefined) {
+        return `${formattedInt}.${decPart}`;
+    }
+    // Pertahankan trailing dot saat user baru mulai ketik desimal
+    if (value.endsWith('.')) {
+        return `${formattedInt}.`;
+    }
+
+    return formattedInt;
+};
+
+/**
+ * Parse string format en-US kembali ke number
+ * "20,000.25" → 20000.25
+ */
+export const parseNumberUS = (value: string): number => {
+    if (!value) return 0;
+    const cleaned = value.replace(/,/g, '');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
 };

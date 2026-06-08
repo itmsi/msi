@@ -1,5 +1,5 @@
 import { apiPost, apiGet, ApiResponse, apiPut, apiPostMultipart } from '@/helpers/apiHelper';
-import { ComponentsDataResponse, HistoryLogResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, POAttachment, POAttachmentDelete, POAttachmentResponse, POAttachmentUpdate, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, POItemsSelectRequest, PostReceiptResponse, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, ResponseAttachUpdateItem, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
+import { ComponentsDataResponse, GetPurchaseOrderListResponse, HistoryLogResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, POAttachment, POAttachmentDelete, POAttachmentResponse, POAttachmentUpdate, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, POItemsSelectRequest, PostReceiptResponse, PurchaseOrderDashboardRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, ResponseAttachUpdateItem, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -229,5 +229,18 @@ export class PurchaseOrderService {
         };
         const response = await apiPost<POAttachmentResponse>(`${API_BASE_URL}/netsuite/purchasing-orders/upload-delete`, requestData as Record<string, any>);
         return response.data;
+    }
+    static async getDashboardPurchaseOrders(params: Partial<PurchaseOrderDashboardRequest> = {}): Promise<GetPurchaseOrderListResponse> {
+        const requestData: PurchaseOrderDashboardRequest = {
+            page: 1,
+            limit: 10,
+            sort_by: 'last_modified',
+            sort_order: 'asc',
+            search: '',
+            ...params
+        };
+
+        const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/dashboard`, requestData as Record<string, any>);
+        return response.data as GetPurchaseOrderListResponse;
     }
 }
