@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { PurchaseOrderDashboardItem } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
+import { getProfile } from '@/helpers/generalHelper';
 
 export interface DashboardSummary {
     pending_approval: number;
@@ -33,6 +34,8 @@ export const usePurchaseOrderDashboard = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const profileSSO = getProfile() as any;
+    const profileSSOId = profileSSO?.classes_id_netsuite || null;
     const fetchData = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -42,6 +45,7 @@ export const usePurchaseOrderDashboard = () => {
                 limit: 500,
                 sort_by: 'last_modified',
                 sort_order: 'asc',
+                ...(profileSSOId ? { classes: profileSSOId } : {}),
             });
             const allItems = res.data?.items || [];
             setChartItems(allItems);
@@ -57,11 +61,11 @@ export const usePurchaseOrderDashboard = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [profileSSOId]);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
     // Aggregasi chart dari chartItems
     const SUBSIDIARY_LIST = [
