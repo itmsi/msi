@@ -250,7 +250,7 @@ export default function Edit() {
     }, [poDetail, locationInitialized, classInitialized, departmentInitialized, isInitialLoadComplete]);
 
     const handleCancel = () => {
-        navigate('/netsuite/purchase-order');
+        navigate('/netsuite/purchase-order/manage');
     }
 
     const [isOpenApproval, setIsOpenApproval] = useState(false);
@@ -327,7 +327,7 @@ export default function Edit() {
                         {/* Header */}
                         <PageHeader
                             title="Edit Purchase Order"
-                            backPath="/netsuite/purchase-order"
+                            backPath="/netsuite/purchase-order/manage"
                             subtitle={poDetail?.po_number || '-'}
                             actions={
                                 <>
@@ -800,7 +800,7 @@ export default function Edit() {
                         isOpen={isOpenApproval}
                         onClose={() => setIsOpenApproval(false)}
                         poId={selectedPoIdApproval ? parseInt(selectedPoIdApproval) : null}
-                        onSuccess={() => navigate('/netsuite/purchase-order')}
+                        onSuccess={() => navigate('/netsuite/purchase-order/manage')}
                         submit={true}
                         titleModal="Submit Approval"
                         descriptionModal="Masukkan catatan untuk proses approval"
@@ -810,7 +810,7 @@ export default function Edit() {
                         isOpen={isOpen}
                         onClose={() => setIsOpen(false)}
                         poId={selectedPoId ? parseInt(selectedPoId) : null}
-                        onSuccess={() => navigate('/netsuite/purchase-order')}
+                        onSuccess={() => navigate('/netsuite/purchase-order/manage')}
                         reopen={true}
                         titleModal="Re-Open Approval"
                         descriptionModal="Masukkan catatan untuk proses re-open approval"
@@ -820,7 +820,7 @@ export default function Edit() {
                         isOpen={isOpenRejected}
                         onClose={() => setIsOpenRejected(false)}
                         poId={selectedPoIdRejected ? parseInt(selectedPoIdRejected) : null}
-                        onSuccess={() => navigate('/netsuite/purchase-order')}
+                        onSuccess={() => navigate('/netsuite/purchase-order/manage')}
                         resubmit={true}
                         titleModal="Re-Submit Approval"
                         descriptionModal="Masukkan catatan untuk proses re-submit approval"

@@ -105,6 +105,7 @@ const TNCEditITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Edit'))
 
 // ========================================
 // PURCHASE ORDER NETSUITE
+const DashboardPurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Dashboard'));
 const ManagePurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Manage'));
 const CreatePurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Create'));
 const ManageInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOrders/Manage'));
@@ -880,6 +881,14 @@ export const routes: TAppRoute[] = [
     },
     {
         path: '/netsuite/purchase-order',
+        name: 'Purchase Orders Netsuite',
+        isProtected: true,
+        roles: ['Purchase Orders Netsuite'],
+        component: DashboardPurchaseOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/purchase-order/manage',
         name: 'Purchase Orders Netsuite',
         isProtected: true,
         roles: ['Purchase Orders Netsuite'],

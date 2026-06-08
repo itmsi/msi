@@ -18,6 +18,7 @@ import FilterSection from './components/FilterSection';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { createByDateColumn } from '@/components/ui/table/columnUtils';
 import { FaRegFilePdf } from 'react-icons/fa6';
+import NavigationPO from './components/NavigationPO';
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -294,6 +295,7 @@ export default function Manage() {
                 image="/motor-sights-international.png"
             />
             
+            <NavigationPO />
             <div className="space-y-6">
                 {/* Header */}
                 <div className="bg-white shadow rounded-lg mb-3">
