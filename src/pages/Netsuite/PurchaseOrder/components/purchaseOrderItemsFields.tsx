@@ -168,13 +168,6 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         const taxPercentage = extractTaxPercentage(taxCodeName);
         const taxAmount = (numericAmount * taxPercentage) / 100;
         const grossAmount = numericAmount + taxAmount;
-        console.log({
-            numericAmount,
-            taxPercentage,
-            taxAmount,
-            grossAmount
-        });
-        
         return { 
             taxAmount: taxAmount, 
             grossAmount: grossAmount
@@ -474,6 +467,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             if (option) {
                                 updateItemById(index as number, 'taxcode', parseInt(option.value));
                                 updateItemById(index as number, 'taxcode_name', option.label);
+                                updateItemById(index as number, 'tax_rate', option.label);
                                 
                                 const currentAmount = toNumber(row.amount);
                                 updateTaxCalculation(index as number, currentAmount, option.label);
@@ -481,6 +475,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                                 // Clear tax code
                                 updateItemById(index as number, 'taxcode', 0);
                                 updateItemById(index as number, 'taxcode_name', '');
+                                updateItemById(index as number, 'tax_rate', '');
                                 
                                 const currentAmount = toNumber(row.amount);
                                 updateTaxCalculation(index as number, currentAmount);
