@@ -1,6 +1,6 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma, formatCurrencyDynamic, handleDecimalInput, formatNumberInputwithComma, formatNumberUSTyping, parseNumberUS } from '@/helpers/generalHelper';
+import { handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, formatNumberPriceKoma, formatCurrencyDynamic, handleDecimalInput, formatNumberUSTyping, parseNumberUS } from '@/helpers/generalHelper';
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -168,6 +168,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         const taxPercentage = extractTaxPercentage(taxCodeName);
         const taxAmount = (numericAmount * taxPercentage) / 100;
         const grossAmount = numericAmount + taxAmount;
+        console.log({
+            numericAmount,
+            taxPercentage,
+            taxAmount,
+            grossAmount
+        });
+        
         return { 
             taxAmount: taxAmount, 
             grossAmount: grossAmount
@@ -810,7 +817,7 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string, 
 
     const summary = useMemo(() => {
         const subtotal = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.amount)), 0);
-        const totalTax = items.reduce((sum, item) => sum + toNumber(item.tax_amount), 0);
+        const totalTax = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.tax_amount)), 0);
         // Selalu hitung dari items agar ikut update saat user mengubah field
         const localGrandTotal = items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
         const grandTotal = localGrandTotal > 0 ? localGrandTotal : (serverTotal ?? 0);

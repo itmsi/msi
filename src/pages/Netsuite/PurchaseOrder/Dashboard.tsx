@@ -1,5 +1,5 @@
 ﻿import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts/core';
 import { PieChart, BarChart } from 'echarts/charts';
@@ -11,25 +11,23 @@ import {
     GridComponent,
 } from 'echarts/components';
 import {
-    MdAdd,
     MdPendingActions,
     MdReceiptLong,
     MdRequestPage,
 } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
-import { PermissionGate } from '@/components/common/PermissionComponents';
-import Button from '@/components/ui/button/Button';
-import { formatTanggal, formatDateTime } from '@/helpers/generalHelper';
+import { formatTanggal } from '@/helpers/generalHelper';
 import { PurchaseOrderDashboardItem } from './types/purchaseorder';
 import { usePurchaseOrderDashboard, ChartDataPoint, MultiSeriesChartData } from './hooks/usePurchaseOrderDashboard';
+import NavigationPO from './components/NavigationPO';
 
 echarts.use([PieChart, BarChart, CanvasRenderer, TitleComponent, TooltipComponent, LegendComponent, GridComponent]);
 
 // --- Helpers ---
 const SUBSIDIARY_MAP: Record<string, { label: string; color: string }> = {
-    'PT Indonesia Equipment Line':   { label: 'IEL', color: 'bg-blue-100 text-blue-700' },
-    'PT Indonesia Equipment Centre': { label: 'IEC', color: 'bg-violet-100 text-violet-700' },
-    'Motor Sights International':    { label: 'MSI', color: 'bg-emerald-100 text-emerald-700' },
+    'PT Indonesia Equipment Line':   { label: 'IEL', color: 'bg-[#bf1920] text-white' },
+    'PT Indonesia Equipment Centre': { label: 'IEC', color: 'bg-[#f59e0b] text-white' },
+    'Motor Sights International':    { label: 'MSI', color: 'bg-[#0253a5] text-white' },
 };
 
 function getSubsidiaryBadge(subsidiaryDisplay: string) {
@@ -38,7 +36,7 @@ function getSubsidiaryBadge(subsidiaryDisplay: string) {
         ? SUBSIDIARY_MAP[match]
         : { label: subsidiaryDisplay || '-', color: 'bg-gray-100 text-gray-600' };
     return (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${color}`}>
+        <span className={`inline-flex items-center text-center justify-center px-2 py-0.5 rounded-md text-xs min-w-[3rem] font-medium ${color}`}>
             {label}
         </span>
     );
@@ -52,9 +50,9 @@ function getApprovalBadge(display: string) {
     );
 }
 
-function getStatusBadge(label: string) {
+function getStatusBadge(label: string , accentClass: string) {
     return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#d0e6ef] text-gray-800 border border-gray-200">
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-gray-800 border border-gray-200 ${accentClass}`}>
             {label}
         </span>
     );
@@ -65,42 +63,45 @@ interface StatCardProps {
     icon: React.ReactNode;
     label: string;
     count: number;
-    colorClass: string;
     bgClass: string;
 }
 
-function StatCard({ icon, label, count, colorClass, bgClass }: StatCardProps) {
+function StatCard({ icon, label, count, bgClass }: StatCardProps) {
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-5 hover:shadow-md transition-shadow">
-            <div className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center ${bgClass}`}>
-                <span className={colorClass}>{icon}</span>
+        <div className={`rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-5 hover:shadow-md transition-shadow relative overflow-hidden justify-end ${bgClass}`}>
+            <div className="xl:pl-[5rem]">
+                <p className="text-xs text-gray-500 mb-1">{label}</p>
+                <p className="text-6xl font-primary-bold text-gray-800">{count.toLocaleString()}</p>
             </div>
-            <div>
-                <p className="text-sm text-gray-500 mb-1">{label}</p>
-                <p className="text-3xl font-primary-bold text-gray-800">{count.toLocaleString()}</p>
-            </div>
+            {icon}
         </div>
     );
 }
 
 // --- Donut Chart: Pending Approval per Subsidiary ---
 function ApprovalStatusChart({ data, loading }: { data: ChartDataPoint[]; loading: boolean }) {
-    const COLORS = ['#f59e0b', '#6366f1', '#10b981'];
+    const COLORS = ['#bf1920', '#f59e0b', '#0253a5'];
     const option = {
         tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
         legend: {
             orient: 'vertical',
-            right: '2%',
-            top: 'center',
+            left: 'left',
             textStyle: { fontSize: 12, color: '#374151' },
         },
         series: [{
             type: 'pie',
-            radius: ['45%', '72%'],
-            center: ['38%', '50%'],
+            radius: ['40%', '70%'],
+            center: ['60%', '50%'],
             avoidLabelOverlap: false,
-            itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
-            label: { show: false },
+            itemStyle: {
+                borderRadius: 10,
+                borderColor: '#fff',
+                borderWidth: 2
+            },
+            label: {
+                show: false,
+                position: 'center'
+            },
             emphasis: {
                 label: { show: true, fontSize: 14, fontWeight: 'bold' },
                 itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.1)' },
@@ -114,11 +115,12 @@ function ApprovalStatusChart({ data, loading }: { data: ChartDataPoint[]; loadin
     };
     if (loading) return <div className="flex items-center justify-center h-52 text-gray-400 text-sm">Memuat chart...</div>;
     if (!data.length) return <div className="flex items-center justify-center h-52 text-gray-400 text-sm">Tidak ada data</div>;
-    return <ReactECharts option={option} style={{ height: '220px' }} notMerge />;
+    return <ReactECharts option={option} style={{ height: '300px' }} notMerge />;
 }
 
 // --- Grouped Bar Chart: Pending per Subsidiary ---
 function POStatusChart({ data, loading }: { data: MultiSeriesChartData; loading: boolean }) {
+    console.log({data})
     const option = {
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
         legend: {
@@ -130,7 +132,7 @@ function POStatusChart({ data, loading }: { data: MultiSeriesChartData; loading:
         xAxis: {
             type: 'category',
             data: data.categories,
-            axisLabel: { fontSize: 10, color: '#6b7280', interval: 0, overflow: 'truncate', width: 90 },
+            axisLabel: { fontSize: 11, color: '#6b7280', interval: 0, overflow: 'truncate', width: 90 },
         },
         yAxis: { type: 'value', minInterval: 1, axisLabel: { fontSize: 11, color: '#6b7280' } },
         series: data.series.map(s => ({
@@ -150,7 +152,7 @@ function POStatusChart({ data, loading }: { data: MultiSeriesChartData; loading:
     };
     if (loading) return <div className="flex items-center justify-center h-52 text-gray-400 text-sm">Memuat chart...</div>;
     if (!data.categories.length) return <div className="flex items-center justify-center h-52 text-gray-400 text-sm">Tidak ada data</div>;
-    return <ReactECharts option={option} style={{ height: '240px' }} notMerge />;
+    return <ReactECharts option={option} style={{ height: '300px' }} notMerge />;
 }
 
 // --- Horizontal Bar Chart: Total PO per Subsidiary ---
@@ -176,14 +178,14 @@ function SubsidiaryChart({ data, loading }: { data: ChartDataPoint[]; loading: b
                     ]),
                     borderRadius: [0, 6, 6, 0],
                 },
-                label: { show: true, position: 'right', fontSize: 12, color: '#374151' },
+                label: { show: true, position: 'right', fontSize: 11, color: '#374151' },
             })),
-            barMaxWidth: 32,
+            barMaxWidth: 50,
         }],
     };
     if (loading) return <div className="flex items-center justify-center h-56 text-gray-400 text-sm">Memuat chart...</div>;
     if (!data.length) return <div className="flex items-center justify-center h-56 text-gray-400 text-sm">Tidak ada data</div>;
-    return <ReactECharts option={option} style={{ height: `${Math.max(200, data.length * 36 + 40)}px` }} notMerge />;
+    return <ReactECharts option={option} style={{ height: `${Math.max(300, data.length * 36 + 40)}px` }} notMerge />;
 }
 
 // --- PO Item Card List ---
@@ -196,14 +198,10 @@ interface POItemListProps {
 }
 
 function POItemList({ title, items, loading, badgeType, accentClass }: POItemListProps) {
-    const navigate = useNavigate();
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-full flex flex-col">
+        <div className="bg-white shadow rounded-lg overflow-hidden h-full flex flex-col">
             <div className={`px-4 py-3 border-b border-gray-200 flex items-center justify-between ${accentClass}`}>
-                <h2 className="text-base font-semibold text-gray-900">{title}</h2>
-                <span className="text-xs font-medium text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">
-                    {items.length} item
-                </span>
+                <h2 className="text-base font-secondary font-semibold text-gray-900">{title}</h2>
             </div>
             <div className="overflow-auto flex-1">
                 <div className="divide-y divide-gray-200">
@@ -213,34 +211,36 @@ function POItemList({ title, items, loading, badgeType, accentClass }: POItemLis
                         <div className="px-4 py-8 text-center text-sm text-gray-500">Tidak ada data</div>
                     ) : (
                         items.map(item => (
-                            <div
+                            <Link
                                 key={`${item.id}-${item.po_id}`}
-                                className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
-                                onClick={() => navigate(`/netsuite/purchase-order/edit/${item.po_id || item.id}`)}
+                                className="block px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer min-h-[137px]"
+                                to={`/netsuite/purchase-order/edit/${item.po_id || item.id}`}
+                                target="_blank"
                             >
                                 <div className="flex items-start justify-between mb-2">
-                                    <div className="font-medium text-sm text-gray-900 truncate max-w-[140px]">
+                                    <div className="font-medium text-sm text-gray-900 max-w-[240px]">
                                         {item.po_number || '-'}
+                                        <span className="block text-xs text-gray-500">{formatTanggal(item.po_date)}</span>
                                     </div>
                                     {getSubsidiaryBadge(item.subsidiary_display || '')}
                                 </div>
                                 <div className="space-y-1">
-                                    <div className="text-xs text-gray-500">
-                                        <span className="font-medium">Tgl:</span> {formatTanggal(item.po_date)}
+                                    <div className="text-xs text-gray-700">
+                                        Vendor: <span className="font-bold font-secondary block">{item.vendor_name || '-'}</span> 
                                     </div>
-                                    {item.nextapprover && (
-                                        <div className="text-xs text-gray-700 truncate">
-                                            <span className="font-medium">Next:</span> {item.nextapprover}
-                                        </div>
-                                    )}
+                                    <div className="text-xs text-gray-700">
+                                        Next Approver: <span className="font-bold font-secondary block">
+                                            {item.nextapprover || '-'}
+                                        </span> 
+                                    </div>
                                     <div className="mt-2">
                                         {badgeType === 'approval'
                                             ? getApprovalBadge(item.approvalstatus_display || '-')
-                                            : getStatusBadge(item.po_status_label || '-')
+                                            : getStatusBadge(item.po_status_label || '-', accentClass)
                                         }
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))
                     )}
                 </div>
@@ -251,31 +251,45 @@ function POItemList({ title, items, loading, badgeType, accentClass }: POItemLis
 
 // --- Komponen utama ---
 export default function Dashboard() {
-    const navigate = useNavigate();
-
     const {
         chartItems,
         summary,
-        syncInfo,
-        chartLoading,
-        error,
+        loading,
+        // error,
         approvalStatusChart,
         poStatusChart,
         subsidiaryChart,
     } = usePurchaseOrderDashboard();
 
-    const pendingApprovalItems = useMemo(() =>
-        chartItems.filter(item => (item.approvalstatus_display || '').toLowerCase().includes('pending'))
-    , [chartItems]);
+    const { pendingApprovalItems, pendingReceiptItems, pendingBillItems } = useMemo(() => {
+        const result = {
+            pendingApprovalItems: [] as PurchaseOrderDashboardItem[],
+            pendingReceiptItems: [] as PurchaseOrderDashboardItem[],
+            pendingBillItems: [] as PurchaseOrderDashboardItem[],
+        };
+        const sortByDate = (a: PurchaseOrderDashboardItem, b: PurchaseOrderDashboardItem) =>
+            (a.po_date || '').localeCompare(b.po_date || '');
 
-    const pendingReceiptItems = useMemo(() =>
-        chartItems.filter(item => (item.po_status_label || '').toLowerCase().includes('receipt'))
-    , [chartItems]);
+        chartItems.forEach(item => {
+            const statusLower = (item.po_status_label || '').toLowerCase();
+            const approvalLower = (item.approvalstatus_display || '').toLowerCase();
+            // if (approvalLower.includes('pending')) result.pendingApprovalItems.push(item);
+            switch (approvalLower) {
+                case 'pending approval': result.pendingApprovalItems.push(item); break;
+            }
+            switch (statusLower) {
+                case 'pending receipt': result.pendingReceiptItems.push(item); break;
+                case 'pending bill':    result.pendingBillItems.push(item); break;
+            }
+        });
 
-    const pendingBillItems = useMemo(() =>
-        chartItems.filter(item => (item.po_status_label || '').toLowerCase().includes('bill'))
-    , [chartItems]);
+        result.pendingApprovalItems = result.pendingApprovalItems.sort(sortByDate).slice(0, 10);
+        result.pendingReceiptItems  = result.pendingReceiptItems.sort(sortByDate).slice(0, 10);
+        result.pendingBillItems     = result.pendingBillItems.sort(sortByDate).slice(0, 10);
 
+        return result;
+    }, [chartItems]);
+    
     return (
         <>
             <PageMeta
@@ -283,76 +297,106 @@ export default function Dashboard() {
                 description="Dashboard Purchase Order"
                 image="/motor-sights-international.png"
             />
-
+            <NavigationPO />
+            {/* Page Content */}
             <div className="space-y-6">
                 {/* Page Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-primary-bold text-gray-900">Dashboard Purchase Order</h1>
-                        <p className="text-sm text-gray-500 mt-0.5">
-                            Ringkasan dan monitoring status purchase order
-                            {syncInfo && (
-                                <span className="ml-2 text-green-600">
-                                    · Last sync: {formatDateTime(syncInfo.created_at)} oleh {syncInfo.created_by_name}
-                                </span>
-                            )}
-                        </p>
+                
+                <div className="bg-white shadow rounded-lg">
+                    <div className="px-6 py-4 border-b border-gray-200">
+                        <div className="flex justify-between items-center">
+
+                            <div>
+                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">Dashboard Purchase Order</h3>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Ringkasan dan monitoring status purchase order
+                                </p>
+                            </div>
+
+                        </div>
                     </div>
-                    <PermissionGate permission="create">
-                        <Button
-                            onClick={() => navigate('/netsuite/purchase-order/create')}
-                            className="flex items-center gap-2 shrink-0"
-                        >
-                            <MdAdd size={20} />
-                            Buat Purchase Order
-                        </Button>
-                    </PermissionGate>
                 </div>
 
-                {error && (
+                {/* {error && (
                     <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
                         <p className="text-red-600 text-sm">{error}</p>
                     </div>
-                )}
+                )} */}
 
                 {/* Stat Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <StatCard
-                        icon={<MdPendingActions size={26} />}
+                        icon={
+                            <MdPendingActions 
+                                className="text-amber-600"
+                                style={{ 
+                                    position: 'absolute',
+                                    left: '-28px',
+                                    top: '-31px',
+                                    bottom: 0,
+                                    height: '160px',
+                                    width: '160px',
+                                    opacity: 0.1
+                                }}
+                            />
+                        }
                         label="Pending Approval"
                         count={summary.pending_approval}
-                        colorClass="text-amber-600"
                         bgClass="bg-amber-50"
                     />
                     <StatCard
-                        icon={<MdReceiptLong size={26} />}
+                        icon={
+                            <MdReceiptLong 
+                                className="text-blue-600"
+                                style={{ 
+                                    position: 'absolute',
+                                    left: '-28px',
+                                    top: '-31px',
+                                    bottom: 0,
+                                    height: '160px',
+                                    width: '160px',
+                                    opacity: 0.1
+                                }}
+                            />
+                        }
                         label="Pending Receipt"
                         count={summary.pending_receipt}
-                        colorClass="text-blue-600"
                         bgClass="bg-blue-50"
                     />
                     <StatCard
-                        icon={<MdRequestPage size={26} />}
+                        icon={
+                            <MdRequestPage 
+                                className="text-emerald-600"
+                                style={{ 
+                                    position: 'absolute',
+                                    left: '-28px',
+                                    top: '-31px',
+                                    bottom: 0,
+                                    height: '160px',
+                                    width: '160px',
+                                    opacity: 0.1
+                                }}
+                            />
+                        }
                         label="Pending Bill"
                         count={summary.pending_bill}
-                        colorClass="text-emerald-600"
                         bgClass="bg-emerald-50"
                     />
                 </div>
 
                 {/* Charts */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                        <p className="text-sm font-primary-bold text-gray-700 mb-4">Pending Approval per Subsidiary</p>
-                        <ApprovalStatusChart data={approvalStatusChart} loading={chartLoading} />
+                    <div className="bg-white shadow rounded-lg p-5">
+                        <p className="text-base font-secondary font-semibold text-gray-900 mb-4">Pending Approval per Subsidiary</p>
+                        <ApprovalStatusChart data={approvalStatusChart} loading={loading} />
                     </div>
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                        <p className="text-sm font-primary-bold text-gray-700 mb-4">Status PO per Subsidiary</p>
-                        <POStatusChart data={poStatusChart} loading={chartLoading} />
+                    <div className="bg-white shadow rounded-lg p-5">
+                        <p className="text-base font-secondary font-semibold text-gray-900 mb-4">Status PO per Subsidiary</p>
+                        <POStatusChart data={poStatusChart} loading={loading} />
                     </div>
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                        <p className="text-sm font-primary-bold text-gray-700 mb-4">Total PO per Subsidiary</p>
-                        <SubsidiaryChart data={subsidiaryChart} loading={chartLoading} />
+                    <div className="bg-white shadow rounded-lg p-5">
+                        <p className="text-base font-secondary font-semibold text-gray-900 mb-4">Total PO per Subsidiary</p>
+                        <SubsidiaryChart data={subsidiaryChart} loading={loading} />
                     </div>
                 </div>
 
@@ -361,21 +405,21 @@ export default function Dashboard() {
                     <POItemList
                         title="Pending Approval"
                         items={pendingApprovalItems}
-                        loading={chartLoading}
+                        loading={loading}
                         badgeType="approval"
                         accentClass="bg-amber-50"
                     />
                     <POItemList
                         title="Pending Receipt"
                         items={pendingReceiptItems}
-                        loading={chartLoading}
+                        loading={loading}
                         badgeType="status"
                         accentClass="bg-blue-50"
                     />
                     <POItemList
                         title="Pending Bill"
                         items={pendingBillItems}
-                        loading={chartLoading}
+                        loading={loading}
                         badgeType="status"
                         accentClass="bg-emerald-50"
                     />

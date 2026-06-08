@@ -234,8 +234,8 @@ export class PurchaseOrderService {
         const requestData: PurchaseOrderDashboardRequest = {
             page: 1,
             limit: 10,
-            sort_by: 'created_at',
-            sort_order: 'desc',
+            sort_by: 'last_modified',
+            sort_order: 'asc',
             search: '',
             ...params
         };

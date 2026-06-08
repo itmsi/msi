@@ -880,7 +880,7 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/netsuite/purchase-order/dashboard',
+        path: '/netsuite/purchase-order',
         name: 'Purchase Orders Netsuite',
         isProtected: true,
         roles: ['Purchase Orders Netsuite'],
@@ -888,7 +888,7 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/netsuite/purchase-order',
+        path: '/netsuite/purchase-order/manage',
         name: 'Purchase Orders Netsuite',
         isProtected: true,
         roles: ['Purchase Orders Netsuite'],
