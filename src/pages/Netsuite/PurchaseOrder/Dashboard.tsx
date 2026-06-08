@@ -120,7 +120,6 @@ function ApprovalStatusChart({ data, loading }: { data: ChartDataPoint[]; loadin
 
 // --- Grouped Bar Chart: Pending per Subsidiary ---
 function POStatusChart({ data, loading }: { data: MultiSeriesChartData; loading: boolean }) {
-    console.log({data})
     const option = {
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
         legend: {
@@ -213,7 +212,7 @@ function POItemList({ title, items, loading, badgeType, accentClass }: POItemLis
                         items.map(item => (
                             <Link
                                 key={`${item.id}-${item.po_id}`}
-                                className="block px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer min-h-[137px]"
+                                className="block px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer min-h-[205px]"
                                 to={`/netsuite/purchase-order/edit/${item.po_id || item.id}`}
                                 target="_blank"
                             >
@@ -228,11 +227,18 @@ function POItemList({ title, items, loading, badgeType, accentClass }: POItemLis
                                     <div className="text-xs text-gray-700">
                                         Vendor: <span className="font-bold font-secondary block">{item.vendor_name || '-'}</span> 
                                     </div>
+                                    {title === 'Pending Approval' && (
+                                        <div className="text-xs text-gray-700">
+                                            Next Approver: <span className="font-bold font-secondary block">
+                                                {item.nextapprover || '-'}
+                                            </span> 
+                                        </div>
+                                    )}
                                     <div className="text-xs text-gray-700">
-                                        Next Approver: <span className="font-bold font-secondary block">
-                                            {item.nextapprover || '-'}
-                                        </span> 
-                                    </div>
+                                            Memo: <span className="font-primary-bold block">
+                                                {item.memo || '-'}
+                                            </span> 
+                                        </div>
                                     <div className="mt-2">
                                         {badgeType === 'approval'
                                             ? getApprovalBadge(item.approvalstatus_display || '-')
