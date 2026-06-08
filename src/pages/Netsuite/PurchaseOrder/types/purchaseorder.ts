@@ -101,6 +101,7 @@ export interface PurchaseOrderForm {
     nextapprover?: string | null;
     approvalstatus?: number | null;
     po_status_label?: string | null;
+    foreigntotal?: number | null;
     // description: string | null;
     // note: string | null;
     items: TablePOItem[];
@@ -453,6 +454,7 @@ export interface PurchaseOrderFormUpdate {
     department?: number;
     grossamt?: number;
     custbody_me_validity_date?: string;
+    foreigntotal?: number;
     items?: PurchaseOrderUpdateItem[];
     files?: AttachFileItem[];
 }

@@ -138,7 +138,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     onDepartmentMenuScrollToBottom,
     selectedDepartment,
     onDepartmentChange,
-    departmentError
+    departmentError,
 }) => {
     // Get computed field configurations
     const primaryFields = getPrimaryInfoFields(masterData || undefined);
@@ -609,7 +609,11 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 formData.items && formData.items.length > 0 && (
                     <div className="sticky top-0 self-start lg:px-4">
                         <div className='bg-white rounded-2xl shadow-sm p-6'>
-                            <InvoiceSummary items={formData.items} currency={formData.currency_symbol || ''} />
+                            <InvoiceSummary 
+                                items={formData.items} 
+                                currency={formData.currency_symbol || ''} 
+                                serverTotal={Number(formData.foreigntotal)}
+                            />
                         </div>
                     </div>
                 )
