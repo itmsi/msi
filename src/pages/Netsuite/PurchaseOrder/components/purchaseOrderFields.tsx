@@ -357,6 +357,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
             case "date":
                 return renderSimpleDate(field);
             case "select-location":
+                console.log(locationOptions)
                 return (
                     <div>
                         <Label>
@@ -364,7 +365,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         </Label>
                         {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                                locationOptions.find(option => String(option.value) === String(formData.location ?? ''))?.label || '-'
+                                selectedLocation?.label || '-'
                             }</p>
                         ) : (<>
                         <CustomAsyncSelect

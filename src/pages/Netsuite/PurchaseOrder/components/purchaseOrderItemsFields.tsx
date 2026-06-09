@@ -744,7 +744,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 {/* Products Table */}
                 {formData.items && formData.items.length > 0 ? (
                     <div
-                        className="mt-6 font-secondary overflow-y-auto"
+                        className="mt-6 font-secondary overflow-y-auto border-b border-gray-200"
                         style={{ maxHeight: formData.items?.length > 100 ? '920px' : '625px' }}
                     >
                         <CustomDataTable
