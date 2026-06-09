@@ -98,6 +98,7 @@ export interface PurchaseOrderForm {
     department_name?: string | null;
     custbody_msi_createdby_api?: string | null;
     custbody_me_validity_date?: string | null;
+    created_by_name?: string | null;
     nextapprover?: string | null;
     approvalstatus?: number | null;
     po_status_label?: string | null;
@@ -329,6 +330,7 @@ export interface PODetailData {
     approvalstatus_label: string;
     approvalstatus: number;
     nextapprover?: string | null;
+    created_by_name?: string | null;
     custbody_me_wf_created_by: number;
     custbody_me_wf_in_delegation: string;
     custbody_me_delegate_approver: number | null;

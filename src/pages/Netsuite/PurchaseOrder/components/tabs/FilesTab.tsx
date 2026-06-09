@@ -302,7 +302,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
             <Button
                 onClick={() => setShowForm(prev => !prev)}
                 type="button"
-                className="flex items-center gap-2 bg-blue-500 hover:text-white hover:bg-blue-600 ring-blue-800 rounded-xl text-xs p-3 mb-4"
+                className="flex items-center gap-2 bg-[#0253a5] hover:text-white hover:bg-[#023e7d] min-w-[150px] ring-blue-800 rounded-xl text-xs p-3 mb-4 shadow-sm"
             >
                 <FaPaperclip />
                 <span>Attach Files</span>
@@ -343,11 +343,11 @@ const FilesTab: React.FC<FilesTabProps> = ({
                             />
                             <label
                                 htmlFor="po-file-upload"
-                                className="flex items-center gap-2 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 min-h-[38px]"
+                                className="flex items-center justify-center gap-2 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 min-h-[38px] w-[160px]"
                             >
                                 <FaPaperclip size={12} />
-                                <span className="truncate max-w-[160px]">
-                                    {fileName || 'Pilih file...'}
+                                <span>
+                                    {fileName || 'Attach file'}
                                 </span>
                             </label>
                             {fileName && (

@@ -664,7 +664,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             width: '300px',
             sortable: false
         },
-        ...((formData.approvalstatus !== 2 && formData.approvalstatus !== 3) ? [createActionsColumn([
+        ...((formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? [] : [createActionsColumn([
             {
                 icon: MdDeleteOutline,
                 onClick: (row: TablePOItem) => {
@@ -674,7 +674,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 tooltip: 'Remove Item',
                 permission: 'delete' as const
             }
-        ])] : [])
+        ])])
     ];
     
     if (loadingMasterData) {
@@ -744,7 +744,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 {/* Products Table */}
                 {formData.items && formData.items.length > 0 ? (
                     <div
-                        className="mt-6 font-secondary overflow-y-auto"
+                        className="mt-6 font-secondary overflow-y-auto border-b border-gray-200"
                         style={{ maxHeight: formData.items?.length > 100 ? '920px' : '625px' }}
                     >
                         <CustomDataTable

@@ -179,7 +179,7 @@ export default function Manage() {
             wrap: true,
             width: '300px'
         },
-        createByDateColumn('Updated By', 'last_modified', 'custbody_msi_createdby_api', '320px'),
+        createByDateColumn('Updated By', 'last_modified', 'updated_by_name', '320px'),
         createActionsColumn([
             {
                 icon: FaRegFilePdf,

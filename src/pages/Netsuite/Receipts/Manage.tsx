@@ -74,25 +74,21 @@ export default function Manage() {
                 </div>
             </>),
             wrap: true,
-            width: '150px'
         },
         {
             name: 'Document Number',
             selector: row => row.tranid || '-',
             wrap: true,
-            width: '180px'
         },
         {
             name: 'Name',
             selector: row => row.vendor_name || '-',
             wrap: true,
-            width: '350px'
         },
         {
             name: 'Memo',
             selector: row => row.memo || '-',
             wrap: true,
-            width: '280px'
         }
     ];
     

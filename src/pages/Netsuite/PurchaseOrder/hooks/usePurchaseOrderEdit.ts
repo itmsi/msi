@@ -95,6 +95,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         approvalstatus: detail.approvalstatus,
         po_status_label: detail.po_status_label || '',
         nextapprover: detail.nextapprover || null,
+        created_by_name: detail.created_by_name || null,
         custbody_msi_createdby_api: detail.custbody_msi_createdby_api,
         custbody_me_validity_date: detail.custbody_me_validity_date || null,
         foreigntotal: detail.foreigntotal,
