@@ -586,7 +586,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             </div>
                             <div>
                                 <p className='mb-1.5 block text-sm text-gray-700'>Created By</p>
-                                <p className='break-words'>{formData.custbody_msi_createdby_api || '-'}</p>
+                                <p className='break-words'>{formData.created_by_name || formData.custbody_msi_createdby_api || '-'}</p>
                             </div>
                         </div>
                     </div>
