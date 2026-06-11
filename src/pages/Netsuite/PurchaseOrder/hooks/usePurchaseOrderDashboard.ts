@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { PurchaseOrderDashboardItem, PurchaseOrderDashboardItems } from '../types/purchaseorder';
+import { PurchaseOrderDashboardItems } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 import { getProfile } from '@/helpers/generalHelper';
 
@@ -62,12 +62,6 @@ export const usePurchaseOrderDashboard = () => {
                 sort_order: 'asc',
                 ...(profileSSOId ? { classes: profileSSOId } : {}),
             });
-            const listTabel = res.data?.list_tabel;
-            const allItems: PurchaseOrderDashboardItem[] = [
-                ...(listTabel?.pending_approval ?? []),
-                ...(listTabel?.pending_receipt ?? []),
-                ...(listTabel?.pending_bill ?? []),
-            ];
             const pendingApprovalBySub = res.data?.chart_data?.pending_approval_per_subsidiary ?? {};
             const dataPendingApproval: ChartDataPoint[] = Object.entries(pendingApprovalBySub)
                 .map(([subsidiary, total]) => ({

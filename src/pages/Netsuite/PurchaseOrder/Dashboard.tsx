@@ -42,22 +42,6 @@ function getSubsidiaryBadge(subsidiaryDisplay: string) {
     );
 }
 
-function getApprovalBadge(display: string) {
-    return (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-            {display}
-        </span>
-    );
-}
-
-function getStatusBadge(label: string , accentClass: string) {
-    return (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-gray-800 border border-gray-200 ${accentClass}`}>
-            {label}
-        </span>
-    );
-}
-
 // --- Stat Card ---
 interface StatCardProps {
     icon: React.ReactNode;
@@ -196,7 +180,7 @@ interface POItemListProps {
     accentClass: string;
 }
 
-function POItemList({ title, items, loading, badgeType, accentClass }: POItemListProps) {
+function POItemList({ title, items, loading, accentClass }: POItemListProps) {
     return (
         <div className="bg-white shadow rounded-lg overflow-hidden h-full flex flex-col">
             <div className={`px-4 py-3 border-b border-gray-200 flex items-center justify-between ${accentClass}`}>
