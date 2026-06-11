@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { PurchaseOrderDashboardItem } from '../types/purchaseorder';
+import { PurchaseOrderDashboardItem, PurchaseOrderDashboardItems } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
 import { getProfile } from '@/helpers/generalHelper';
 
@@ -19,11 +19,26 @@ export interface ChartDataPoint {
     value: number;
 }
 
+interface SubsidiaryChartRaw {
+    pending_approval_per_subsidiary: Record<string, number>;
+    status_po_per_subsidiary: Record<string, { pending_approval: number; pending_receipt: number; pending_bill: number }>;
+    total_po_per_subsidiary: Record<string, number>;
+}
+
 export const usePurchaseOrderDashboard = () => {
     // Data untuk tabel (paginated)
-    const [items, setItems] = useState<PurchaseOrderDashboardItem[]>([]);
+    const [items, setItems] = useState<PurchaseOrderDashboardItems>({
+        pending_approval: [],
+        pending_receipt: [],
+        pending_bill: [],
+    });
     // Data untuk chart (semua item, limit besar)
-    const [chartItems, setChartItems] = useState<PurchaseOrderDashboardItem[]>([]);
+    const [chartPendingApproval, setChartPendingApproval] = useState<ChartDataPoint[]>([]);
+    const [chartRaw, setChartRaw] = useState<SubsidiaryChartRaw>({
+        pending_approval_per_subsidiary: {},
+        status_po_per_subsidiary: {},
+        total_po_per_subsidiary: {},
+    });
 
     const [summary, setSummary] = useState<DashboardSummary>({
         pending_approval: 0,
@@ -42,18 +57,37 @@ export const usePurchaseOrderDashboard = () => {
         try {
             const res = await PurchaseOrderService.getDashboardPurchaseOrders({
                 page: 1,
-                limit: 500,
+                limit: 10,
                 sort_by: 'last_modified',
                 sort_order: 'asc',
                 ...(profileSSOId ? { classes: profileSSOId } : {}),
             });
-            const allItems = res.data?.items || [];
-            setChartItems(allItems);
-            setItems(allItems);
+            const listTabel = res.data?.list_tabel;
+            const allItems: PurchaseOrderDashboardItem[] = [
+                ...(listTabel?.pending_approval ?? []),
+                ...(listTabel?.pending_receipt ?? []),
+                ...(listTabel?.pending_bill ?? []),
+            ];
+            const pendingApprovalBySub = res.data?.chart_data?.pending_approval_per_subsidiary ?? {};
+            const dataPendingApproval: ChartDataPoint[] = Object.entries(pendingApprovalBySub)
+                .map(([subsidiary, total]) => ({
+                    name: subsidiary.toUpperCase(),
+                    value: Number(total) || 0,
+                }))
+                .filter(item => item.value > 0);
+
+            setChartRaw({
+                pending_approval_per_subsidiary: res.data?.chart_data?.pending_approval_per_subsidiary ?? {},
+                status_po_per_subsidiary: res.data?.chart_data?.status_po_per_subsidiary ?? {},
+                total_po_per_subsidiary: res.data?.chart_data?.total_po_per_subsidiary ?? {},
+            });
+            
+            setChartPendingApproval(dataPendingApproval);
+            setItems(res.data?.list_tabel);
             setSummary({
-                pending_approval: res.data?.pending_approval || 0,
-                pending_receipt: res.data?.pending_receipt || 0,
-                pending_bill: res.data?.pending_bill || 0,
+                pending_approval: res.data?.total_data?.pending_approval || 0,
+                pending_receipt: res.data?.total_data?.pending_receipt || 0,
+                pending_bill: res.data?.total_data?.pending_bill || 0,
             });
             // setSyncInfo(res.sync_info || null);
         } catch (err: any) {
@@ -80,30 +114,43 @@ export const usePurchaseOrderDashboard = () => {
         'Motor Sights International': 'MSI',
     };
 
-    const matchSubsidiary = (display: string) =>
-        SUBSIDIARY_LIST.find(s => display.includes(s));
+    const SUBSIDIARY_BY_KEY: Record<string, string> = {
+        iel: 'PT Indonesia Equipment Line',
+        iec: 'PT Indonesia Equipment Centre',
+        msi: 'Motor Sights International',
+    };
 
-    // Hitung metrik per subsidiary
+    const resolveSubsidiaryName = (label: string) => {
+        const normalized = label.toLowerCase();
+
+        if (SUBSIDIARY_BY_KEY[normalized]) {
+            return SUBSIDIARY_BY_KEY[normalized];
+        }
+
+        return SUBSIDIARY_LIST.find(
+            s => normalized.includes(s.toLowerCase()) || s.toLowerCase().includes(normalized)
+        );
+    };
+
+    // Ambil metrik chart langsung dari chart_data
     const subsidiaryMetrics = useMemo(() => {
         const result: Record<string, { pending_approval: number; pending_receipt: number; pending_bill: number }> = {};
         SUBSIDIARY_LIST.forEach(s => {
             result[s] = { pending_approval: 0, pending_receipt: 0, pending_bill: 0 };
         });
-        chartItems.forEach(item => {
-            const sub = matchSubsidiary(item.subsidiary_display || '');
+
+        Object.entries(chartRaw.status_po_per_subsidiary).forEach(([subsidiaryName, values]) => {
+            const sub = resolveSubsidiaryName(subsidiaryName);
             if (!sub) return;
-            const approvalLower = (item.approvalstatus_display || '').toLowerCase();
-            const statusLower = (item.po_status_label || '').toLowerCase();
-            if (approvalLower.includes('pending')) result[sub].pending_approval++;
-            switch (statusLower) {
-                case 'pending receipt':
-                    return result[sub].pending_receipt++;
-                case 'pending bill':
-                    return result[sub].pending_bill++;
-            }
+            result[sub] = {
+                pending_approval: Number(values.pending_approval) || 0,
+                pending_receipt: Number(values.pending_receipt) || 0,
+                pending_bill: Number(values.pending_bill) || 0,
+            };
         });
+
         return result;
-    }, [chartItems]);
+    }, [chartRaw]);
 
     // Donut: Pending Approval per subsidiary
     const approvalStatusChart = useMemo<ChartDataPoint[]>(() =>
@@ -140,24 +187,23 @@ export const usePurchaseOrderDashboard = () => {
 
     const subsidiaryChart = useMemo<ChartDataPoint[]>(() => {
         const map = new Map<string, number>();
-        chartItems.forEach(item => {
-            const key = item.subsidiary_display || '';
-            if (SUBSIDIARY_LIST.some(s => key.includes(s))) {
-                const fullName = SUBSIDIARY_LIST.find(s => key.includes(s)) ?? key;
-                map.set(fullName, (map.get(fullName) || 0) + 1);
-            }
+
+        Object.entries(chartRaw.total_po_per_subsidiary).forEach(([subsidiaryName, total]) => {
+            const sub = resolveSubsidiaryName(subsidiaryName);
+            if (!sub) return;
+            map.set(sub, Number(total) || 0);
         });
+
         return SUBSIDIARY_LIST
             .map(name => ({ name: SUBSIDIARY_ABBR[name] ?? name, value: map.get(name) || 0 }))
             .filter(d => d.value > 0);
-    }, [chartItems]);
-
+    }, [chartRaw]);
     return {
         items,
-        chartItems,
         summary,
         loading,
         error,
+        chartPendingApproval,
         approvalStatusChart,
         poStatusChart,
         subsidiaryChart,

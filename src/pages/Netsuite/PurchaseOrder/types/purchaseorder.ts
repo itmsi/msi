@@ -714,16 +714,16 @@ export interface POAttachmentResponse {
 
 // DASHBOARD
 export interface PurchaseOrderDashboardRequest {
-  page: number;
-  limit: number;
-  sort_by: string;
-  sort_order: 'asc' | 'desc';
-  search?: string;
-  classes?: string;
-  subsidiary?: string;
-  location?: string;
-  po_status?: string;
-  approvalstatus?: string;
+    page: number;
+    limit: number;
+    sort_by: string;
+    sort_order: 'asc' | 'desc';
+    search?: string;
+    classes?: string;
+    subsidiary?: string;
+    location?: string;
+    po_status?: string;
+    approvalstatus?: string;
 }
 export interface PurchaseOrderDashboardItem {
     id: string;
@@ -742,16 +742,35 @@ export interface PurchaseOrderDashboardItem {
     total: string;
     custbody_msi_createdby_api: string;
     last_modified: string;
+    created_by_name: string;
 }
-export interface PurchaseOrderDashboardSummary {
-  items: PurchaseOrderDashboardItem[];
-  pending_approval: number;
-  pending_receipt: number;
-  pending_bill: number;
+interface PurchaseOrderDashboardSummary {
+    pending_approval: number;
+    pending_receipt: number;
+    pending_bill: number;
+}
+
+export interface PurchaseOrderDashboardItems {
+    pending_approval: PurchaseOrderDashboardItem[];
+    pending_receipt: PurchaseOrderDashboardItem[];
+    pending_bill: PurchaseOrderDashboardItem[];
+}
+
+export interface DashboardChartData {
+    pending_approval_per_subsidiary: Record<string, number>;
+    status_po_per_subsidiary: Record<string, PurchaseOrderDashboardSummary>;
+    total_po_per_subsidiary: Record<string, number>;
+}
+
+export interface PurchaseOrderDataDashboard {
+    // items: PurchaseOrderDashboardItem[];
+    list_tabel: PurchaseOrderDashboardItems;
+    total_data: PurchaseOrderDashboardSummary;
+    chart_data: DashboardChartData;
 }
 
 export interface GetPurchaseOrderListResponse {
-    data: PurchaseOrderDashboardSummary;
+    data: PurchaseOrderDataDashboard;
     sync_info: SyncInfo;
     message: string;
 }

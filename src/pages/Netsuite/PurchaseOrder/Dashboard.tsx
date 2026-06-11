@@ -212,7 +212,7 @@ function POItemList({ title, items, loading, badgeType, accentClass }: POItemLis
                         items.map(item => (
                             <Link
                                 key={`${item.id}-${item.po_id}`}
-                                className="block px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer min-h-[205px]"
+                                className="block px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer min-h-[215px]"
                                 to={`/netsuite/purchase-order/edit/${item.po_id || item.id}`}
                                 target="_blank"
                             >
@@ -235,16 +235,21 @@ function POItemList({ title, items, loading, badgeType, accentClass }: POItemLis
                                         </div>
                                     )}
                                     <div className="text-xs text-gray-700">
-                                            Memo: <span className="font-primary-bold block">
-                                                {item.memo || '-'}
-                                            </span> 
-                                        </div>
-                                    <div className="mt-2">
+                                        Memo: <span className="font-primary-bold block">
+                                            {item.memo || '-'}
+                                        </span> 
+                                    </div>
+                                    <div className="text-xs text-gray-700">
+                                        Created By: <span className="font-primary-bold block">
+                                            {item.created_by_name || '-'}
+                                        </span> 
+                                    </div>
+                                    {/* <div className="mt-2">
                                         {badgeType === 'approval'
                                             ? getApprovalBadge(item.approvalstatus_display || '-')
                                             : getStatusBadge(item.po_status_label || '-', accentClass)
                                         }
-                                    </div>
+                                    </div> */}
                                 </div>
                             </Link>
                         ))
@@ -258,11 +263,10 @@ function POItemList({ title, items, loading, badgeType, accentClass }: POItemLis
 // --- Komponen utama ---
 export default function Dashboard() {
     const {
-        chartItems,
+        items,
         summary,
         loading,
-        // error,
-        approvalStatusChart,
+        chartPendingApproval,
         poStatusChart,
         subsidiaryChart,
     } = usePurchaseOrderDashboard();
@@ -273,28 +277,22 @@ export default function Dashboard() {
             pendingReceiptItems: [] as PurchaseOrderDashboardItem[],
             pendingBillItems: [] as PurchaseOrderDashboardItem[],
         };
+        const parsePoDate = (value?: string) => {
+            if (!value) return 0;
+            const [month, day, year] = value.split('/').map(Number);
+            if (!month || !day || !year) return 0;
+            return new Date(year, month - 1, day).getTime();
+        };
+
         const sortByDate = (a: PurchaseOrderDashboardItem, b: PurchaseOrderDashboardItem) =>
-            (a.po_date || '').localeCompare(b.po_date || '');
+            parsePoDate(a.po_date) - parsePoDate(b.po_date);
 
-        chartItems.forEach(item => {
-            const statusLower = (item.po_status_label || '').toLowerCase();
-            const approvalLower = (item.approvalstatus_display || '').toLowerCase();
-            // if (approvalLower.includes('pending')) result.pendingApprovalItems.push(item);
-            switch (approvalLower) {
-                case 'pending approval': result.pendingApprovalItems.push(item); break;
-            }
-            switch (statusLower) {
-                case 'pending receipt': result.pendingReceiptItems.push(item); break;
-                case 'pending bill':    result.pendingBillItems.push(item); break;
-            }
-        });
-
-        result.pendingApprovalItems = result.pendingApprovalItems.sort(sortByDate).slice(0, 10);
-        result.pendingReceiptItems  = result.pendingReceiptItems.sort(sortByDate).slice(0, 10);
-        result.pendingBillItems     = result.pendingBillItems.sort(sortByDate).slice(0, 10);
+        result.pendingApprovalItems = items.pending_approval.sort(sortByDate);
+        result.pendingReceiptItems  = items.pending_receipt.sort(sortByDate);
+        result.pendingBillItems     = items.pending_bill.sort(sortByDate);
 
         return result;
-    }, [chartItems]);
+    }, [items]);
     
     return (
         <>
@@ -322,12 +320,6 @@ export default function Dashboard() {
                         </div>
                     </div>
                 </div>
-
-                {/* {error && (
-                    <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                        <p className="text-red-600 text-sm">{error}</p>
-                    </div>
-                )} */}
 
                 {/* Stat Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -394,7 +386,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     <div className="bg-white shadow rounded-lg p-5">
                         <p className="text-base font-secondary font-semibold text-gray-900 mb-4">Pending Approval per Subsidiary</p>
-                        <ApprovalStatusChart data={approvalStatusChart} loading={loading} />
+                        <ApprovalStatusChart data={chartPendingApproval} loading={loading} />
                     </div>
                     <div className="bg-white shadow rounded-lg p-5">
                         <p className="text-base font-secondary font-semibold text-gray-900 mb-4">Status PO per Subsidiary</p>
