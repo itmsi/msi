@@ -287,9 +287,9 @@ export default function Dashboard() {
         const sortByDate = (a: PurchaseOrderDashboardItem, b: PurchaseOrderDashboardItem) =>
             parsePoDate(a.po_date) - parsePoDate(b.po_date);
 
-        result.pendingApprovalItems = items.pending_approval.sort(sortByDate);
-        result.pendingReceiptItems  = items.pending_receipt.sort(sortByDate);
-        result.pendingBillItems     = items.pending_bill.sort(sortByDate);
+        result.pendingApprovalItems = items?.pending_approval?.sort(sortByDate) || [];
+        result.pendingReceiptItems  = items?.pending_receipt?.sort(sortByDate) || [];
+        result.pendingBillItems     = items?.pending_bill?.sort(sortByDate) || [];
 
         return result;
     }, [items]);
