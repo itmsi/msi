@@ -714,7 +714,7 @@ export default function Edit() {
                                             </Button>
                                         </PermissionGate>
                                     )}
-                                    {poDetail?.approvalstatus === 2 && (poDetail?.po_status_label !== 'Pending Receipt') && (
+                                    {poDetail?.approvalstatus === 2 && (poDetail?.po_status_label !== 'Pending Receipt' && poDetail?.po_status_label !== 'Pending Bill') && (
                                         <PermissionGate permission={["create", "update"]}>
                                             <Button
                                                 type="button"
