@@ -8,7 +8,7 @@ import { useProjectManagement } from './hooks/useProjectManagement';
 import { ProjectItem } from './types/project';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { formatDateTime } from '@/helpers/generalHelper';
 import { useMemo, useState, useCallback } from 'react';
 import { ProjectService } from './services/projectService';
@@ -20,6 +20,7 @@ import { ActivityTypeBadge } from '../Contractors/components/ContractorBadges';
 
 
 export default function ManageCRMProject() {
+    const location = useLocation();
     const navigate = useNavigate();
 
     // Delete state
@@ -30,9 +31,8 @@ export default function ManageCRMProject() {
         loading,
         error,
         pagination,
+        filters,
         searchValue,
-        sortOrder,
-        statusFilter,
         setSearchValue,
         handlePageChange,
         handleRowsPerPageChange,
@@ -43,7 +43,11 @@ export default function ManageCRMProject() {
     } = useProjectManagement( { iup_customer_id: '' });
 
     const handleDelete = (row: ProjectItem) => {
-        setConfirmDelete({ show: true, projectId: row.project_id, projectName: row.project_name || row.project_id });
+        setConfirmDelete({ 
+            show: true, 
+            projectId: row.project_id,
+            projectName: row.project_name || row.project_id 
+        });
     };
 
     const handleDeleteConfirm = async () => {
@@ -81,7 +85,7 @@ export default function ManageCRMProject() {
             selector: row => row.project_name || '-',
             cell: row => (<>
                 <a
-                    href={`/crm/project/edit/${row.project_id}`}
+                    href={`/crm/project/edit/${row.project_id}${location.search}`}
                     className="absolute inset-0"
                 />
                 <div className="py-2">
@@ -176,12 +180,12 @@ export default function ManageCRMProject() {
                     <CustomSelect
                         id="sort_order"
                         name="sort_order"
-                        value={sortOrder ? { 
-                            value: sortOrder, 
-                            label: sortOrder === 'asc' ? 'Ascending' : 'Descending' 
+                        value={filters.sort_order ? {
+                            value: filters.sort_order,
+                            label: filters.sort_order === 'asc' ? 'Ascending' : 'Descending'
                         } : null}
-                        onChange={(selectedOption) => 
-                            handleFilterChange('sort_order', selectedOption?.value || '')
+                        onChange={(selectedOption) =>
+                            handleFilterChange({ sort_order: (selectedOption?.value as 'asc' | 'desc') || 'desc' })
                         }
                         options={[
                             { value: 'asc', label: 'Ascending' },
@@ -197,11 +201,11 @@ export default function ManageCRMProject() {
                     <CustomSelect
                         id="status_filter"
                         name="status_filter"
-                        value={statusFilter ? {
-                            value: statusFilter,
-                            label: statusFilter
+                        value={filters.status ? {
+                            value: filters.status,
+                            label: filters.status
                         } : null}
-                        onChange={(opt) => handleFilterChange('status', opt?.value || '')}
+                        onChange={(opt) => handleFilterChange({ status: (opt?.value as 'Not Started' | 'Find' | 'Pull' | 'Survey' | 'BAST') || 'Not Started' })}
                         options={[
                             { value: 'Not Started', label: 'Not Started' },
                             { value: 'Find', label: 'Find' },
@@ -217,7 +221,7 @@ export default function ManageCRMProject() {
                 </div>
             </div>
         );
-    }, [searchValue, sortOrder, statusFilter, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange]);
+    }, [searchValue, filters, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange]);
 
     return (
         <>
@@ -278,7 +282,7 @@ export default function ManageCRMProject() {
                             paginationTotalRows={pagination?.total || 0}
                             paginationPerPage={pagination?.limit || 10}
                             paginationDefaultPage={pagination?.page || 1}
-                            paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
+                            paginationRowsPerPageOptions={[10, 20, 30, 50]}
                             onChangePage={handlePageChangeAman}
                             onChangeRowsPerPage={handleRowsPerPageAman}
                             fixedHeader={true}

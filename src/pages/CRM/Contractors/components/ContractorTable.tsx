@@ -1,11 +1,11 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { TableColumn } from 'react-data-table-component';
 import { Contractor } from '../types/contractor';
 import CustomDataTable from '@/components/ui/table/CustomDataTable';
 import { createActionsColumn } from '@/components/ui/table';
 import { formatDateTime, formatPhoneNumber } from '@/helpers/generalHelper';
 import { FaIndustry } from 'react-icons/fa';
-import { useNavigate } from 'react-router';
 import { MdDeleteOutline } from 'react-icons/md';
 import { ActivityTypeBadge } from './ContractorBadges';
 import { ActiveStatusBadge } from '@/components/ui/badge';
@@ -34,12 +34,18 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
     onDelete,
     // onRowClick,
 }) => {
-    const navigate = useNavigate();
+    const location = useLocation();
+
+    // const navigate = useNavigate();
     const columns: TableColumn<Contractor>[] = [
         {
             name: 'Customer Name',
             selector: (row) => row.customer_name,
-            cell: (row) => (
+            cell: (row) => (<>
+                <a
+                    href={`/crm/contractors/edit/${row.iup_customer_id}${location.search}`}
+                    className="absolute inset-0"
+                />
                 <div className=" items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">
                         {row?.customer_name || '-'}
@@ -52,7 +58,7 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
                     </div>
                     <div className="block text-sm text-gray-500">{`${row?.customer_phone ? formatPhoneNumber(row.customer_phone) : '-'}`}</div>
                 </div>
-            ),
+            </>),
             sortable: false,
             wrap: true,
             width: '280px',
@@ -149,11 +155,6 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             }
         ])
     ];
-    const onRowClick = (contractor: Contractor) => {
-
-        
-        navigate(`/crm/contractors/edit/${contractor.iup_customer_id}`);
-    }
 
     return (
         <CustomDataTable
@@ -168,7 +169,6 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
             paginationRowsPerPageOptions={[10, 20, 30, 50]}
             onChangePage={onPageChange}
             onChangeRowsPerPage={onRowsPerPageChange}
-            onRowClicked={onRowClick}
             highlightOnHover
             striped
             responsive

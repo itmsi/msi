@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
@@ -15,6 +15,8 @@ import DivisionOverviewContainer from './components/DivisionOverview/DivisionOve
 
 const EditProject: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const listRoute = `/crm/project${location.search}`;
     const { id } = useParams<{ id: string }>();
     const [activeTab, setActiveTab] = useState< 'project_overview' | 'sales_tracking' | 'division_overview' | 'task_division'>('project_overview');
 
@@ -28,7 +30,7 @@ const EditProject: React.FC = () => {
         handleRemoveExistingAttachment,
         handleSubmit,
         loadDetail,
-    } = useProjectForm({ mode: 'edit', project_id: id });
+    } = useProjectForm({ mode: 'edit', project_id: id }, listRoute);
 
     useEffect(() => {
         if (id) {
@@ -60,7 +62,7 @@ const EditProject: React.FC = () => {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/crm/project')}
+                                onClick={() => navigate(listRoute)}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
