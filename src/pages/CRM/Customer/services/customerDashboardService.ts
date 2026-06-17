@@ -1,10 +1,10 @@
 import { apiPost } from '@/helpers/apiHelper';
-import { DashboardApiResponse, BrandRequest } from '../types/customerDashboard';
+import { DashboardApiResponse, CustomerRequest } from '../types/customerDashboard';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export class CustomerService {
-    static async getDashboards(params: Partial<BrandRequest> = {}): Promise<DashboardApiResponse> {
-        const requestData: BrandRequest = {
+    static async getDashboards(params: Partial<CustomerRequest> = {}): Promise<DashboardApiResponse> {
+        const requestData: CustomerRequest = {
             page: 1,
             limit: 10,
             sort_order: 'desc',

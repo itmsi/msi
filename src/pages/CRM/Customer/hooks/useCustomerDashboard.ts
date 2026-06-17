@@ -1,298 +1,182 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Brand, BrandFilters, BrandPagination, BrandPayload, BrandRequest, BrandValidationErrors } from '../types/customerDashboard';
-import toast from 'react-hot-toast';
-import { BrandService } from '../services/customerDashboardService';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { getProfile } from '@/helpers/generalHelper';
+import { CustomerInformation, TerritoryInformation, CustomerData } from '../types/customerDashboard';
 
-export const useBrandManagement = () => {
-    const isInitialized = useRef(false);
-    
+export interface ChartDataPoint {
+    name: string;
+    value: number;
+}
+
+const sampleData = {
+    "success": true,
+    "data": [
+        {
+            "data_customer": {
+                "customer_name": "PT ALAM LESTARI BARATAMAINDO",
+                "customer_id": "9eda31ae-f7f5-4041-a82c-5ec2fa80acdf",
+                "customer_email": "lintangacc555@gmail.com",
+                "customer_phone": "085795585792",
+                "customer_address": "Jl. A. Yani, Sebamban 2 Blok E, RT 3 RW 1, Desa Mekar Jaya, Kec. Angsana, Kabupaten Tanah Bumbu Kalimantan Selatan",
+                "customer_city": "",
+                "customer_state": "KALIMANTAN",
+                "customer_zip": "",
+                "customer_country": "INDONESIA",
+                "contact_person": "Ibu Lintang",
+                "customer_code": "ALB",
+                "contact_persons": [
+                    {
+                        "contact_person_name": " Pak Yovandha Hidayat",
+                        "contact_person_email": "yovandha1995@gmail.com",
+                        "contact_person_phone": "085232636481",
+                    }
+                ]
+            },
+            "data_teritory": [
+                {
+                    "island_name": "KALIMANTAN",
+                    "group_name": "G1",
+                    "area_name": "3",
+                    "iup_zone_name": "BARITO UTARA",
+                    "iup_segmentation_name": "NIKEL",
+                    "iup_name": "PAGUN TAKA",
+                },
+                {
+                    "island_name": "SULAWESI",
+                    "group_name": "G3",
+                    "area_name": "7",
+                    "iup_zone_name": "BOMBANA",
+                    "iup_segmentation_name": "NIKEL",
+                    "iup_name": "TONIA MITRA SEJAHTERA",
+                },
+                {
+                    "island_name": "SULAWESI",
+                    "group_name": "G1",
+                    "area_name": "1",
+                    "iup_zone_name": "BANGGAI",
+                    "iup_segmentation_name": "NIKEL",
+                    "iup_name": "KONINIS FAJAR MINERAL",
+                },
+                {
+                    "island_name": "SUMATERA",
+                    "group_name": "G3",
+                    "area_name": "8",
+                    "iup_zone_name": "LAHAT",
+                    "iup_segmentation_name": "BATUBARA",
+                    "iup_name": "MUSTIKA INDAH PERMAI",
+                }
+            ],
+            "data_iup_per_segmentasi": {
+                "nikel": 2,
+                "batubara": 3
+            },
+            "data_unit_per_segmentasi_iup_aktif": {
+                "nikel": 5,
+                "batubara": 10
+            },
+            "data_unit_per_segmentasi_iup_non_aktif": {
+                "nikel": 1,
+                "batubara": 2
+            },
+            "data_unit_per_brand_iup_aktif": {
+                "motorsights": 5,
+                "hino": 5,
+                "sany": 10
+            },
+            "data_unit_per_brand_iup_non_aktif": {
+                "motorsights": 1,
+                "hino": 1,
+                "sany": 2
+            },
+            "data_rkab": [
+                {
+                    "nama_iup": "KAHALA MINERA",
+                    "tahun": 2024,
+                    "rkab": 5,
+                    "target_production": 900000,
+                    "current_production": 920000
+                },
+                {
+                    "nama_iup": "TEST IUP Segmentasi Nikel",
+                    "tahun": 2021,
+                    "rkab": 5,
+                    "target_production": 50000,
+                    "current_production": 95000
+                },
+                {
+                    "nama_iup": "Test IUP Segmentasi baru",
+                    "tahun": 2026,
+                    "rkab": 5,
+                    "target_production": 55000,
+                    "current_production": 80000
+                }
+            ],
+            "total_rkab_iup_aktif": 1,
+            "total_rkab_iup_non_aktif": 0,
+            "data_quotations": [
+                {
+                    "customer_id": "86fb7e4d-c11d-4a9b-aadf-a4d5aa911883",
+                    "componen_product_name": "Mesin Genset",
+                    "msi_product": "Harlo",
+                    "msi_model": "Harlo 150 KVA",
+                    "code_unique": "1234567890",
+                    "quantity": 2,
+                    "min_price": 1000000,
+                    "max_price": 2000000
+                }
+            ],
+            "data_sales_order": [
+                {
+                    "customer_id": "e0d19e7b-cf12-4c44-8b77-8aeeb6fe89b8",
+                    "componen_product_name": "POLYAMIDE TUBE PA14",
+                    "msi_product": "POLYAMIDE TUBE PA14",
+                    "msi_model": "04.35160.9714",
+                    "code_unique": "19593",
+                    "quantity": 5,
+                    "min_price": 1500000,
+                    "max_price": 1500000
+                }
+            ]
+        }
+    ],
+    "pagination": {
+        "page": 1,
+        "limit": 10,
+        "total": 1,
+        "totalPages": 1
+    }
+    }
+export const useCustomerDashboard = () => {
+    // Data untuk tabel (paginated)
+    const [customerInformation, setCustomerInformation] = useState<CustomerInformation | null>(null);
+    const [customerData, setCustomerData] = useState<CustomerData | null>(null);
     const [loading, setLoading] = useState(false);
-    const [pagination, setPagination] = useState<BrandPagination | null>(null);
-    const [brands, setBrands] = useState<Brand[]>([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
-    const [formData, setFormData] = useState<BrandPayload>({
-        brand_name_en: ''
-    });
-    const [validationErrors, setValidationErrors] = useState<Partial<BrandValidationErrors>>({});
-    const [filters, setFilters] = useState<BrandFilters>({
-        search: '',
-        sort_order: ''
-    });
+    const [error, setError] = useState<string | null>(null);
 
-    const fetchBrands = useCallback(async (page: number = 1, limit: number = 10) => {
+    const profileSSO = getProfile() as any;
+    const profileSSOId = profileSSO?.classes_id_netsuite || null;
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
         try {
-            setLoading(true);
-            const requestParams: BrandRequest = {
-                page,
-                limit,
-                sort_order: filters.sort_order || 'desc',
-                search: filters.search || ''
-            };
-
-            const response = await BrandService.getBrands(requestParams);
-
-            if (response.success) {
-                setBrands(response.data || []);
-                setPagination(response.pagination);
-            } else {
-                toast.error(response.message || 'Failed to fetch brands');
-            }
-        } catch (error) {
-            console.error('Error fetching brands:', error);
-            toast.error('Failed to fetch brands');
+            const data = sampleData.data[0];
+            setCustomerInformation(data.data_customer || null);
+            setCustomerData(data);
+        } catch (err: any) {
+            setError(err?.message || 'Gagal memuat data customer');
         } finally {
             setLoading(false);
         }
-    }, [filters.sort_order, filters.search]);
+    }, [profileSSOId]);
 
-    // Initialize brand on component mount only
     useEffect(() => {
-        if (!isInitialized.current) {
-            isInitialized.current = true;
-            fetchBrands(1, 10);
-        }
-    }, [fetchBrands]);
-
-    // Form handlers
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        
-        // Clear validation error when user starts typing
-        if (validationErrors[name as keyof BrandValidationErrors]) {
-            setValidationErrors(prev => ({ ...prev, [name]: '' }));
-        }
-    }, [validationErrors]);
-
-    // Modal handlers
-    const handleAddBrand = useCallback(() => {
-        setEditingBrand(null);
-        setFormData({
-            brand_name_en: ''
-        });
-        setValidationErrors({});
-        setIsModalOpen(true);
-    }, []);
-
-    const handleEditBrand = useCallback((brand: Brand) => {
-        setEditingBrand(brand);
-        setFormData({
-            brand_name_en: brand.brand_name_en
-        });
-        setValidationErrors({});
-        setIsModalOpen(true);
-    }, []);
-
-    const handleCloseModal = useCallback(() => {
-        setIsModalOpen(false);
-        setEditingBrand(null);
-        setFormData({
-            brand_name_en: ''
-        });
-        setValidationErrors({});
-    }, []);
-
-    // Validation functions
-    const validateBrandForm = useCallback((data: BrandPayload): BrandValidationErrors => {
-        const errors: BrandValidationErrors = {};
-
-        // Company name validation
-        if (!data.brand_name_en || data.brand_name_en.trim() === '') {
-            errors.brand_name_en = 'Brand name is required';
-        } else {
-            const isDuplicate = brands.some(brand => 
-                brand.brand_name_en.toLowerCase() === data.brand_name_en.trim().toLowerCase() &&
-                (!editingBrand || brand.brand_name_en !== editingBrand.brand_name_en)
-            );
-            if (isDuplicate) {
-                errors.brand_name_en = 'A brand with this name already exists';
-            }
-        }
-
-        return errors;
-    }, [brands, editingBrand]);
-
-    const clearValidationError = useCallback((fieldName: keyof BrandValidationErrors) => {
-        setValidationErrors(prev => ({
-            ...prev,
-            [fieldName]: undefined
-        }));
-    }, []);
-
-    // CRUD operations
-    const handleSubmit = useCallback(async (e: React.FormEvent) => {
-        e.preventDefault();
-        setValidationErrors({});
-        const errors = validateBrandForm(formData);
-        
-        if (Object.keys(errors).length > 0) {
-            setValidationErrors(errors);
-            toast.error('Please fix the validation errors before submitting');
-            return;
-        }
-
-        try {
-            setLoading(true);
-            
-            if (editingBrand) {
-                const response = await BrandService.updateBrand(editingBrand.brand_id, formData);
-                if (response.status === 200 || response.status === 201) {
-                    toast.success('Brand updated successfully');
-                    handleCloseModal();
-                    fetchBrands(pagination?.page || 1, pagination?.limit || 10);
-                } else {
-                    toast.error('Failed to update brand');
-                }
-            } else {
-                const response = await BrandService.createBrand(formData);
-                if (response.status === 200 || response.status === 201) {
-                    toast.success('Brand created successfully');
-                    handleCloseModal();
-                    fetchBrands(pagination?.page || 1, pagination?.limit || 10);
-                } else {
-                    toast.error('Failed to create brand');
-                }
-            }
-        } catch (error) {
-            console.error('Error saving brand:', error);
-            toast.error('Failed to saving brand');
-        } finally {
-            setLoading(false);
-        }
-    }, [formData, editingBrand, pagination, fetchBrands, handleCloseModal, validateBrandForm]);
-    const handleDeleteBrand = useCallback(async (brand: Brand) => {
-        try {
-            setLoading(true);
-            const response = await BrandService.deleteBrand(brand.brand_id);
-            if (response.status === 200 || response.status === 204) {
-                toast.success('Brand deleted successfully');
-                fetchBrands(pagination?.page || 1, pagination?.limit || 10);
-            } else {
-                toast.error('Failed to delete brand');
-            }
-        } catch (error) {
-            console.error('Error deleting brand:', error);
-            toast.error('Failed to delete brand. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    }, [pagination, fetchBrands]);
-
-    // Pagination handler
-    const handlePageChange = useCallback((page: number) => {
-        fetchBrands(page, pagination?.limit || 10);
-    }, [fetchBrands, pagination?.limit]);
-
-    // Filter functions with debouncing
-    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-    
-    const handleFilterChange = useCallback((filterKey: keyof BrandFilters, value: string) => {
-        setFilters(prev => ({
-            ...prev,
-            [filterKey]: value
-        }));
-        
-        if (debounceTimer.current) {
-            clearTimeout(debounceTimer.current);
-        }
-        
-        debounceTimer.current = setTimeout(() => {
-            const sortOrderValue = filterKey === 'sort_order' ? value : filters.sort_order || 'desc';
-            const requestParams: BrandRequest = {
-                page: 1,
-                limit: pagination?.limit || 10,
-                sort_order: (sortOrderValue === 'asc' || sortOrderValue === 'desc') ? sortOrderValue : 'desc',
-                search: filterKey === 'search' ? value : filters.search || 'undefined'
-            };
-
-            BrandService.getBrands(requestParams).then(response => {
-                if (response.success) {
-                    setBrands(response.data || []);
-                    setPagination(response.pagination);
-                } else {
-                    toast.error(response.message || 'Failed to fetch brands');
-                }
-            }).catch(error => {
-                console.error('Error fetching brands:', error);
-                toast.error('Failed to fetch brands');
-            });
-        }, 500);
-    }, [pagination?.limit, filters]);
-
-    const handleSearchChange = useCallback((value: string) => {
-        handleFilterChange('search', value);
-    }, [handleFilterChange]);
-
-    const resetFilters = useCallback(() => {
-        // Clear all debounce timers first
-        if (debounceTimer.current) {
-            clearTimeout(debounceTimer.current);
-        }
-        
-        // Reset filters state
-        setFilters({
-            search: '',
-            sort_order: ''
-        });
-        
-        const clearedParams: BrandRequest = {
-            page: 1,
-            limit: pagination?.limit || 10,
-            sort_order: 'desc',
-            search: ''
-        };
-        
-        BrandService.getBrands(clearedParams).then(response => {
-            if (response.success) {
-                setBrands(response.data || []);
-                setPagination(response.pagination);
-            } else {
-                toast.error(response.message || 'Failed to fetch brands');
-            }
-        }).catch(error => {
-            console.error('Error fetching brands:', error);
-            toast.error('Failed to fetch brands');
-        });
-    }, [pagination?.limit]);
-
-    // Cleanup debounce timer
-    useEffect(() => {
-        return () => {
-            if (debounceTimer.current) {
-                clearTimeout(debounceTimer.current);
-            }
-        };
-    }, []);
+        fetchData();
+    }, [fetchData]);
 
     return {
-        // State
         loading,
-        brands,
-        pagination,
-        filters,
-        isModalOpen,
-        editingBrand,
-        formData,
-        validationErrors,
-
-        // Actions
-        handleInputChange,
-        handleAddBrand,
-        handleEditBrand,
-        handleDeleteBrand,
-        handleSubmit,
-        handleCloseModal,
-        handlePageChange,
-        fetchBrands,
-        
-        // Filter actions
-        handleFilterChange,
-        handleSearchChange,
-        resetFilters,
-
-        // Validation actions
-        validateBrandForm,
-        clearValidationError,
+        error,
+        customerInformation,
+        customerData,
     };
 };

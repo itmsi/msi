@@ -361,6 +361,44 @@ export default function Create() {
                                             }
                                         }}
                                         locationError={locationSelectError}
+                                        
+                                        // Class props  
+                                        classOptions={POClassOptions}
+                                        classPagination={itemClassPagination}
+                                        classInputValue={itemClassInputValue}
+                                        onClassInputChange={handleItemClassInputChange}
+                                        onClassMenuScrollToBottom={handleItemClassScrollToBottom}
+                                        selectedClass={selectedClass}
+                                        onClassChange={(option) => {
+                                            setSelectedClass(option);
+                                            if (option && option.data) {
+                                                // Update formData dengan data class yang dipilih
+                                                handleSelectChange('class', option.value);
+                                                handleSelectChange('class_name', option.data.name);
+                                            }
+                                            if (classSelectError) {
+                                                setClassSelectError('');
+                                            }
+                                        }}
+                                        
+                                        // Department props  
+                                        departmentOptions={PODepartmentOptions}
+                                        departmentPagination={itemDepartmentPagination}
+                                        departmentInputValue={itemDepartmentInputValue}
+                                        onDepartmentInputChange={handleItemDepartmentInputChange}
+                                        onDepartmentMenuScrollToBottom={handleItemDepartmentScrollToBottom}
+                                        selectedDepartment={selectedDepartment}
+                                        onDepartmentChange={(option) => {
+                                            setSelectedDepartment(option);
+                                            if (option && option.data) {
+                                                // Update formData dengan data department yang dipilih
+                                                handleSelectChange('department', option.value);
+                                                handleSelectChange('department_name', option.data.name);
+                                            }
+                                            if (departmentSelectError) {
+                                                setDepartmentSelectError('');
+                                            }
+                                        }}
                                     />
                                 )}
                                     

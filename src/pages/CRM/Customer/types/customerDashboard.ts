@@ -3,7 +3,7 @@ export interface Brand {
     brand_name_en: string;
 }
 
-export interface BrandRequest {
+export interface CustomerRequest {
     page: number;
     limit: number;
     search: string;
@@ -54,8 +54,17 @@ export interface DashboardApiResponse {
     pagination: BrandPagination;
 }
 
+export interface TerritoryInformation {
+    island_name: string;
+    group_name: string;
+    area_name: string;
+    iup_zone_name: string;
+    iup_segmentation_name: string;
+    iup_name: string;
+}
+
 export interface CustomerData {
-    data_customer: Customer;
+    data_customer: CustomerInformation;
 
     data_iup_per_segmentasi: Segmentasi;
     data_unit_per_segmentasi_iup_aktif: Segmentasi;
@@ -71,9 +80,11 @@ export interface CustomerData {
 
     data_quotations: Quotation[];
     data_sales_order: SalesOrder[];
+
+    data_teritory: TerritoryInformation[];
 }
 
-export interface Customer {
+export interface CustomerInformation {
     customer_name: string;
     customer_id: string;
     customer_email: string;
