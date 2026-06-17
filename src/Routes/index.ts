@@ -75,6 +75,7 @@ const EditActivities = lazy(() => import('@/pages/CRM/Activity/EditActivity'));
 const ManageCRMProject = lazy(() => import('@/pages/CRM/Project/Manage'));
 const CreateCRMProject = lazy(() => import('@/pages/CRM/Project/CreateProject'));
 const EditCRMProject = lazy(() => import('@/pages/CRM/Project/EditProject'));
+const CustomerCRM = lazy(() => import('@/pages/CRM/Customer/Manage'));
 
 // ========================================
 // QUOTATION ITI
@@ -877,6 +878,15 @@ export const routes: TAppRoute[] = [
         roles: ['Division CRM'],
         requiredPermissions: ['update', 'read'],
         component: ManageDivision,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/customer',
+        name: 'Customer CRM',
+        isProtected: true,
+        roles: ['Customer CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: CustomerCRM,
         layout: AppLayout,
     },
     {
