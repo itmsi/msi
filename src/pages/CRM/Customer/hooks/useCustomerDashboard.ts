@@ -23,7 +23,13 @@ const sampleData = {
                 "customer_country": "INDONESIA",
                 "contact_person": "Ibu Lintang",
                 "customer_code": "ALB",
+                "job_title": "DEV",
                 "contact_persons": [
+                    {
+                        "contact_person_name": " Pak Yovandha Hidayat",
+                        "contact_person_email": "yovandha1995@gmail.com",
+                        "contact_person_phone": "085232636481",
+                    },
                     {
                         "contact_person_name": " Pak Yovandha Hidayat",
                         "contact_person_email": "yovandha1995@gmail.com",

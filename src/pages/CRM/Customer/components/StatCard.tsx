@@ -5,20 +5,24 @@ interface StatCardProps {
     title: string;
     value: string | number;
     description?: React.ReactNode;
-    Icon?: React.ElementType; // Menerima komponen icon
+    Icon?: React.ElementType;
+    className?: string;
+    iconClassName?: string;
 }
 
 export const StatCard: React.FC<StatCardProps> = ({ 
     title, 
     value, 
     description, 
-    Icon 
+    Icon,
+    className = '',
+    iconClassName = ""
 }) => {
     return (
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 pt-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2">
-                <p className="text-muted-foreground">{title}</p>
-                <p className="text-3xl text-slate-800">
+        <div className={`overflow-hidden shadow-sm rounded-2xl relative hover:shadow-md transition-shadow ${className}`}>
+            <div className="grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 pt-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2 text-end">
+                <p className="text-xs text-gray-500 mb-1">{title}</p>
+                <p className="text-6xl font-primary-bold text-gray-800">
                     {value}
                 </p>
             </div>
@@ -26,8 +30,8 @@ export const StatCard: React.FC<StatCardProps> = ({
             {/* Bagian bawah hanya akan dirender jika ada description atau Icon */}
             {(description || Icon) && (
                 <div className="px-6 [&:last-child]:pb-6">
-                    <div className="flex items-center gap-2 text-sm text-slate-500">
-                        {Icon && <Icon className="h-4 w-4" />}
+                    <div className="flex items-center justify-end gap-2 text-sm text-slate-500">
+                        {Icon && <Icon className={`h-4 w-4 absolute top-0 bottom-0 m-auto left-5 opacity-20 ${iconClassName}`} style={{transform: 'scale(10)'}} />}
                         <span>{description}</span>
                     </div>
                 </div>

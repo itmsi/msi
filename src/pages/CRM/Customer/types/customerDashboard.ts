@@ -96,6 +96,7 @@ export interface CustomerInformation {
     customer_country: string;
     contact_person: string;
     customer_code: string;
+    job_title: string;
     contact_persons: ContactPerson[];
 }
 export interface ContactPerson {

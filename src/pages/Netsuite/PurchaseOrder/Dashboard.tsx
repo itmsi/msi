@@ -75,7 +75,7 @@ function ApprovalStatusChart({ data, loading }: { data: ChartDataPoint[]; loadin
         series: [{
             type: 'pie',
             radius: ['40%', '70%'],
-            center: ['60%', '50%'],
+            center: ['50%', '40%'],
             avoidLabelOverlap: false,
             itemStyle: {
                 borderRadius: 10,
