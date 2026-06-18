@@ -29,7 +29,7 @@ interface FilesTabProps {
 const emptyEntry: AttachFileItem = { po_id: '', fileUrl: '', fileName: '' };
 
 interface AddEntryParams {
-    selectedFile?: File | null;
+    selectedFile?: File;
     fileName?: string;
 }
 
@@ -110,7 +110,8 @@ const FilesTab: React.FC<FilesTabProps> = ({
     };
 
     const handleAddEntry = async ({ selectedFile: selectedFileParam, fileName: fileNameParam }: AddEntryParams = {}) => {
-        const finalSelectedFile = selectedFileParam ?? selectedFile;
+        const selectedFileState = selectedFile ?? undefined;
+        const finalSelectedFile = selectedFileParam ?? selectedFileState;
         const finalFileName = (fileNameParam ?? entry.fileName).trim();
 
         if (!finalFileName) {
@@ -138,18 +139,12 @@ const FilesTab: React.FC<FilesTabProps> = ({
             return;
         }
 
-
-        if (!finalSelectedFile) {
-            setEntryError('Pilih file terlebih dahulu');
-            return;
-        }
-
         setIsUploading(true);
         try {
             if (poId && editingFile) {
                 // Mode edit file yang sudah ada di server
                 const res = await PurchaseOrderService.attachFilePOUpdate({
-                    file: finalSelectedFile,
+                    ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
                     poId: String(poId),
                     file_name: finalFileName,
                     fileUrl: editingFile.fileUrl ?? 'kosong',
@@ -188,8 +183,15 @@ const FilesTab: React.FC<FilesTabProps> = ({
                 setEditingFile(null);
             } else {
                 // Mode tambah file baru (dengan atau tanpa poId)
+                if (!finalSelectedFile) {
+                    setEntryError('Pilih file terlebih dahulu');
+                    return;
+                }
+
+                const fileToUpload: File = finalSelectedFile;
+
                 const res = await PurchaseOrderService.attachFilePO({
-                    file: finalSelectedFile,
+                    file: fileToUpload,
                     file_name: finalFileName,
                     po_id: String(poId ?? 'temp-' + Date.now()),
                 });
@@ -224,6 +226,11 @@ const FilesTab: React.FC<FilesTabProps> = ({
 
     const handleEdit = (row: AttachFileItemLocal) => {
         setEditingFile(row);
+        setSelectedFile(null);
+        setFileName(row.fileName);
+        if (fileAttachRef.current) {
+            fileAttachRef.current.value = '';
+        }
         setEntry({ po_id: row.po_id ?? '', fileUrl: row.fileUrl, fileName: row.fileName });
         setShowForm(true);
         setEntryError('');
@@ -231,6 +238,11 @@ const FilesTab: React.FC<FilesTabProps> = ({
 
     const handleCancelEdit = () => {
         setEditingFile(null);
+        setSelectedFile(null);
+        setFileName('');
+        if (fileAttachRef.current) {
+            fileAttachRef.current.value = '';
+        }
         setEntry(emptyEntry);
         setEntryError('');
     };
