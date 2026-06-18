@@ -11,6 +11,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
     const [subsidiaryFilter, setSubsidiaryFilter] = useState('');
     const [locationFilter, setLocationFilter] = useState('');
     const [approvalStatusFilter, setApprovalStatusFilter] = useState('');
+    const [employeeFilter, setEmployeeFilter] = useState('');
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -41,6 +42,8 @@ export const usePurchaseOrder = (profileSSO?: number) => {
                 po_status: params?.po_status !== undefined ? params.po_status : statusFilter,
                 subsidiary: params?.subsidiary !== undefined ? params.subsidiary : subsidiaryFilter,
                 location: params?.location !== undefined ? params.location : locationFilter,
+                // ...(params?.employee_id ? { classes: profileSSO } : {}),
+                created_by: params?.employee !== undefined ? params.employee : employeeFilter,
                 ...(params?.approvalstatus !== undefined
                     ? { approvalstatus: params.approvalstatus }
                     : approvalStatusFilter ? { approvalstatus: approvalStatusFilter } : {}),
@@ -56,7 +59,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, sortModify, statusFilter, subsidiaryFilter, locationFilter, approvalStatusFilter]);
+    }, [searchValue, sortOrder, sortModify, statusFilter, subsidiaryFilter, locationFilter, approvalStatusFilter, employeeFilter]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
@@ -86,6 +89,8 @@ export const usePurchaseOrder = (profileSSO?: number) => {
             setLocationFilter(value);
         } else if (filterType === 'approvalstatus') {
             setApprovalStatusFilter(value);
+        } else if (filterType === 'employee') {
+            setEmployeeFilter(value);
         }
 
         setPagination(prev => ({ ...prev, page: 1 }));
@@ -97,6 +102,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         else if (filterType === 'subsidiary') params.subsidiary = value;
         else if (filterType === 'location') params.location = value;
         else if (filterType === 'approvalstatus') params.approvalstatus = value;
+        else if (filterType === 'employee') params.employee = value;
 
         fetchPurchaseOrders(params);
     }, [fetchPurchaseOrders]);
@@ -197,6 +203,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         setSubsidiaryFilter('');
         setLocationFilter('');
         setApprovalStatusFilter('');
+        setEmployeeFilter('');
         setSortOrder('desc');
         setSortModify('created_at');
         
@@ -206,6 +213,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
             po_status: '', 
             subsidiary: '', 
             location: '',
+            employee: '',
             sort_order: 'desc',
             sort_by: 'created_at'
         });
@@ -224,6 +232,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         subsidiaryFilter,
         locationFilter,
         approvalStatusFilter,
+        employeeFilter,
         setSearchValue,
         fetchPurchaseOrders,
         handlePageChange,

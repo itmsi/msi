@@ -25,8 +25,10 @@ export interface PurchaseOrderRequest {
     search: string;
     subsidiary?: string;
     location?: string;
+    employee?: string;
     approvalstatus?: string | null;
     po_status: string;
+    created_by?: string;
 }
 export interface PurchaseOrderItem {
     id: number;

@@ -28,6 +28,11 @@ interface FilesTabProps {
 
 const emptyEntry: AttachFileItem = { po_id: '', fileUrl: '', fileName: '' };
 
+interface AddEntryParams {
+    selectedFile?: File | null;
+    fileName?: string;
+}
+
 // Get document icon based on file type
 const getDocumentIcon = (fileName: string) => {
     const lowerFileName = fileName.toLowerCase();
@@ -83,10 +88,13 @@ const FilesTab: React.FC<FilesTabProps> = ({
             e.target.value = '';
             return;
         }
-
         setSelectedFile(file);
-        setFileName(file.name);
+        setFileName(file.name.replace(/\.[^/.]+$/, ''));
         setEntryError('');
+        setEntry(prev => ({ ...prev, fileName: file.name.replace(/\.[^/.]+$/, '') }));
+        // if (!editingFile) {
+            handleAddEntry({ selectedFile: file, fileName: file.name.replace(/\.[^/.]+$/, '') });
+        // }
     };
 
     // Gabungkan file dari server (minus yang dihapus) + file baru dengan flag isNew
@@ -101,15 +109,18 @@ const FilesTab: React.FC<FilesTabProps> = ({
         onAddFiles?.([...existingFiles, ...updatedNewFiles]);
     };
 
-    const handleAddEntry = async () => {
-        if (!entry.fileName.trim()) {
+    const handleAddEntry = async ({ selectedFile: selectedFileParam, fileName: fileNameParam }: AddEntryParams = {}) => {
+        const finalSelectedFile = selectedFileParam ?? selectedFile;
+        const finalFileName = (fileNameParam ?? entry.fileName).trim();
+
+        if (!finalFileName) {
             setEntryError('File Name is required');
             return;
         }
 
         // Cek duplikat: fileUrl dan fileName sama dengan yang sudah ada
         const isDuplicate = allFiles.some(
-            f => f.fileUrl === entry.fileUrl.trim() && f.fileName === entry.fileName.trim()
+            f => f.fileUrl === entry.fileUrl.trim() && f.fileName === finalFileName
                 && !(editingFile && f.fileUrl === editingFile.fileUrl && f.fileName === editingFile.fileName)
         );
         if (isDuplicate) {
@@ -119,7 +130,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
 
         // Cek nama file sudah dipakai
         const isDuplicateName = allFiles.some(
-            f => f.fileName.trim().toLowerCase() === entry.fileName.trim().toLowerCase()
+            f => f.fileName.trim().toLowerCase() === finalFileName.toLowerCase()
                 && !(editingFile && f.fileUrl === editingFile.fileUrl && f.fileName === editingFile.fileName)
         );
         if (isDuplicateName) {
@@ -128,7 +139,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
         }
 
 
-        if (!selectedFile) {
+        if (!finalSelectedFile) {
             setEntryError('Pilih file terlebih dahulu');
             return;
         }
@@ -138,9 +149,9 @@ const FilesTab: React.FC<FilesTabProps> = ({
             if (poId && editingFile) {
                 // Mode edit file yang sudah ada di server
                 const res = await PurchaseOrderService.attachFilePOUpdate({
-                    file: selectedFile,
+                    file: finalSelectedFile,
                     poId: String(poId),
-                    file_name: entry.fileName,
+                    file_name: finalFileName,
                     fileUrl: editingFile.fileUrl ?? 'kosong',
                 });
 
@@ -178,8 +189,8 @@ const FilesTab: React.FC<FilesTabProps> = ({
             } else {
                 // Mode tambah file baru (dengan atau tanpa poId)
                 const res = await PurchaseOrderService.attachFilePO({
-                    file: selectedFile,
-                    file_name: entry.fileName,
+                    file: finalSelectedFile,
+                    file_name: finalFileName,
                     po_id: String(poId ?? 'temp-' + Date.now()),
                 });
 

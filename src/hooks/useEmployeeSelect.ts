@@ -21,19 +21,32 @@ export const useEmployeeSelect = () => {
         hasMore: true,
         loading: false
     });
-    const [activeSales, setActiveSales] = useState(false);
     const [inputValue, setInputValue] = useState('');
         
     const isInitialized = useRef(false);
     const isLoadingRef = useRef(false);
+    const activeSalesRef = useRef<boolean | undefined>(undefined);
+    const userNetsuiteRef = useRef<boolean | undefined>(undefined);
+
+    const setActiveSales = useCallback((value: boolean | undefined) => {
+        activeSalesRef.current = value;
+    }, []);
+
+    const setUserNetsuite = useCallback((value: boolean | undefined) => {
+        userNetsuiteRef.current = value;
+    }, []);
 
     const loadEmployeeOptions = useCallback(async (
         inputValue: string = '', 
         loadedOptions: EmployeeSelectOption[] = [],
         page: number = 1,
         reset: boolean = false,
-        activeSales: boolean = false
+        activeSales?: boolean | undefined,
+        is_user_netsuite?: boolean | undefined
     ) => {
+        const filterActiveSales = activeSales ?? activeSalesRef.current;
+        const filterUserNetsuite = is_user_netsuite ?? userNetsuiteRef.current;
+        
         try {
             if (isLoadingRef.current && !reset) return loadedOptions;
             
@@ -45,7 +58,12 @@ export const useEmployeeSelect = () => {
                 page: page,
                 limit: 25,
                 sort_order: 'desc',
-                is_sales_quotation: activeSales
+                ...(filterActiveSales !== undefined && {
+                    is_sales_quotation: filterActiveSales,
+                }),
+                ...(filterUserNetsuite !== undefined && {
+                    is_user_netsuite: filterUserNetsuite,
+                }),
             });
 
             if (response.success) {
@@ -84,29 +102,30 @@ export const useEmployeeSelect = () => {
         setEmployeeOptions([]); // Clear existing options for new search
         setPagination({ page: 1, hasMore: true, loading: false });
         
-        return await loadEmployeeOptions(inputValue, [], 1, true, activeSales);
-    }, [loadEmployeeOptions, activeSales]);
+        return await loadEmployeeOptions(inputValue, [], 1, true);
+    }, [loadEmployeeOptions]);
 
     // Handle scroll to bottom - load next page
     const handleMenuScrollToBottom = useCallback(() => {
         if (pagination.hasMore && !isLoadingRef.current) {
-            loadEmployeeOptions(inputValue, employeeOptions, pagination.page + 1, false, activeSales);
+            loadEmployeeOptions(inputValue, employeeOptions, pagination.page + 1, false);
         }
-    }, [pagination.hasMore, pagination.page, inputValue, employeeOptions, loadEmployeeOptions, activeSales]);
+    }, [pagination.hasMore, pagination.page, inputValue, employeeOptions, loadEmployeeOptions]);
 
     // Initialize options
     const initializeOptions = useCallback(async () => {
         if (isInitialized.current || isLoadingRef.current) return;
         
         isInitialized.current = true;
-        await loadEmployeeOptions('', [], 1, true, activeSales);
-    }, [loadEmployeeOptions, activeSales]);
-
+        await loadEmployeeOptions('', [], 1, true);
+    }, [loadEmployeeOptions]);
+    
     return {
         employeeOptions,
         pagination,
         inputValue,
         setActiveSales,
+        setUserNetsuite,
         handleInputChange,
         handleMenuScrollToBottom,
         initializeOptions,
