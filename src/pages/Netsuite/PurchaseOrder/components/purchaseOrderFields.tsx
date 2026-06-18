@@ -357,7 +357,6 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
             case "date":
                 return renderSimpleDate(field);
             case "select-location":
-                console.log(locationOptions)
                 return (
                     <div>
                         <Label>
