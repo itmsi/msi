@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts/core';
 import { PieChart, BarChart } from 'echarts/charts';
@@ -10,23 +9,15 @@ import {
     LegendComponent,
     GridComponent,
 } from 'echarts/components';
-import {
-    MdPendingActions,
-    MdReceiptLong,
-    MdRequestPage,
-    MdMap,
-    MdFileDownload,
-} from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
 import { useCustomerDashboard } from './hooks/useCustomerDashboard';
-import { LuTruck, LuLayers,LuClipboardCheck, LuReceiptText, LuBuilding2, LuCalendar, LuUser, LuMapPin, LuPhone, LuMail, LuFactory, LuChevronRight, LuTarget, LuCircleAlert, LuLightbulb } from 'react-icons/lu';
+import { LuTruck, LuLayers,LuClipboardCheck, LuReceiptText, LuBuilding2, LuCalendar, LuUser, LuMapPin, LuPhone, LuMail } from 'react-icons/lu';
 import { StatCard } from './components/StatCard';
 import UnitTable from './components/UnitTable';
 import TerritoryTableCustomer from './components/TerritoryTableCustomer';
 import RkabTable from './components/RkabTable';
 import QuotationTable from './components/QuotationTable';
 import SalesOrderTable from './components/SalesOrderTable';
-import Badge from '@/components/ui/badge/Badge';
 
 echarts.use([
     TitleComponent,

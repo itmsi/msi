@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getProfile } from '@/helpers/generalHelper';
-import { CustomerInformation, TerritoryInformation, CustomerData } from '../types/customerDashboard';
+import { CustomerInformation, CustomerData } from '../types/customerDashboard';
 
 export interface ChartDataPoint {
     name: string;
