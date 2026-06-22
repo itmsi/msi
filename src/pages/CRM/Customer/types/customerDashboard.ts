@@ -63,6 +63,16 @@ export interface TerritoryInformation {
     iup_name: string;
 }
 
+export interface Unit {
+    brand_id: string;
+    brand_name: string;
+    type: string;
+    specification: string;
+    physical_availability: string | null;
+    quantity: number;
+    engine: string | null;
+}
+
 export interface CustomerData {
     data_customer: CustomerInformation;
 
@@ -80,6 +90,8 @@ export interface CustomerData {
 
     data_quotations: Quotation[];
     data_sales_order: SalesOrder[];
+
+    units: Unit[];
 
     data_teritory: TerritoryInformation[];
 }
@@ -124,6 +136,7 @@ export interface RKAB {
 export interface Quotation {
     customer_id: string;
     componen_product_name: string;
+    manage_quotation_no: string;
     msi_product: string;
     msi_model: string;
     code_unique: string;
@@ -135,6 +148,9 @@ export interface Quotation {
 export interface SalesOrder {
     customer_id: string;
     componen_product_name: string;
+    manage_sales_order_no: string;
+    manage_sales_order_date: string;
+    manage_sales_order_valid_date: string;
     msi_product: string;
     msi_model: string;
     code_unique: string;

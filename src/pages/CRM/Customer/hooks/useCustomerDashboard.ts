@@ -93,20 +93,49 @@ const sampleData = {
                 "hino": 1,
                 "sany": 2
             },
+            "units": [
+                {
+                    "brand_id": "040d979a-1b71-4562-a4a8-dbc1ff967b82",
+                    "brand_name": "Motorsights",
+                    "type": "Dump Truck : 46  Unit\nWater Truck : 01  unit",
+                    "specification": "MS 600 6x4\nMS 600 8x4\nMS 700 6x4\nMS 700 8x4",
+                    "physical_availability": null,
+                    "quantity": 47,
+                    "engine": 'WEICHAI'
+                },
+                {
+                    "brand_id": "1a9e8949-2f5e-48be-98d0-2fc123302bc1",
+                    "brand_name": "Howo",
+                    "type": "Dump Truck",
+                    "specification": "40 Hz 6x4, 28 DT\n(6x4 and 8x4)",
+                    "physical_availability": null,
+                    "quantity": 1,
+                    "engine": null
+                },
+                {
+                    "brand_id": "e0338e5d-676f-4281-a502-4e00b3501525",
+                    "brand_name": "Mercedes",
+                    "type": "Dump Truck",
+                    "specification": "40 Hz 6x4, 28 DT\n(6x4 and 8x4)",
+                    "physical_availability": null,
+                    "quantity": 67,
+                    "engine": null
+                }
+            ],
             "data_rkab": [
                 {
                     "nama_iup": "KAHALA MINERA",
                     "tahun": 2024,
                     "rkab": 5,
                     "target_production": 900000,
-                    "current_production": 920000
+                    "current_production": 720000
                 },
                 {
                     "nama_iup": "TEST IUP Segmentasi Nikel",
                     "tahun": 2021,
                     "rkab": 5,
                     "target_production": 50000,
-                    "current_production": 95000
+                    "current_production": 35000
                 },
                 {
                     "nama_iup": "Test IUP Segmentasi baru",
@@ -121,6 +150,7 @@ const sampleData = {
             "data_quotations": [
                 {
                     "customer_id": "86fb7e4d-c11d-4a9b-aadf-a4d5aa911883",
+                    "manage_quotation_no": "054/IEC-MSI/II/2026",
                     "componen_product_name": "Mesin Genset",
                     "msi_product": "Harlo",
                     "msi_model": "Harlo 150 KVA",
@@ -134,6 +164,9 @@ const sampleData = {
                 {
                     "customer_id": "e0d19e7b-cf12-4c44-8b77-8aeeb6fe89b8",
                     "componen_product_name": "POLYAMIDE TUBE PA14",
+                    "manage_sales_order_no": "SO-2026-0001",
+                    "manage_sales_order_date": "2026-02-10T00:00:00.000Z",
+                    "manage_sales_order_valid_date": "2026-02-17T00:00:00.000Z",
                     "msi_product": "POLYAMIDE TUBE PA14",
                     "msi_model": "04.35160.9714",
                     "code_unique": "19593",
