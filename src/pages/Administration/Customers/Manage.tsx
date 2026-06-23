@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { MdAdd, MdEdit, MdSearch, MdPeople, MdClear, MdDeleteOutline } from 'react-icons/md';
+import { MdAdd, MdSearch, MdPeople, MdClear, MdDeleteOutline } from 'react-icons/md';
 import { useCustomerManagement } from './hooks/useCustomerManagement';
 import { CustomerUtilityService } from './services/customerUtilityService';
 import { Customer } from './types/customer';
@@ -14,7 +14,7 @@ import { createActionsColumn } from '@/components/ui/table';
 import { useNavigate } from 'react-router';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 
-const ManageCustomers: React.FC = () => {
+const ManageCustomers: React.FC<{ action?: boolean, urlPath?: string }> = ({ action = true, urlPath = `/quotations/administration/customers/edit/` }) => {
     const navigate = useNavigate();
     
     // Custom hook untuk semua state management dan handlers
@@ -32,7 +32,6 @@ const ManageCustomers: React.FC = () => {
         handleManualSearch,
         handleClearFilters,
         handleFilterChange,
-        handleEdit,
         handleDelete,
         confirmDeleteCustomer,
         cancelDelete
@@ -44,14 +43,18 @@ const ManageCustomers: React.FC = () => {
             name: 'Customer Name',
             selector: row => row.customer_name,
             cell: (row) => {
-                return (
+                return (<>
+                    <a
+                        href={`${urlPath}${row.customer_id}`}
+                        className="absolute inset-0"
+                    />
                     <div className="py-2">
                         <div className="font-medium text-gray-900">
                             {row?.customer_name ?? '-'}
                         </div>
                         <div className="text-sm text-gray-500">{row?.contact_person ?? '-'}{row?.customer_code ? ` - ${row.customer_code}` : ''}</div>
                     </div>
-                );
+                </>);
             }
         },
         {
@@ -96,22 +99,22 @@ const ManageCustomers: React.FC = () => {
             width: '200px'
         },
         // createDateColumn('Created At', 'created_at', tableDateFormat),
-        createActionsColumn([
-            {
-                icon: MdEdit,
-                onClick: handleEdit,
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'Edit',
-                permission: 'update'
-            },
-            {
-                icon: MdDeleteOutline,
-                onClick: handleDelete,
-                className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
-                tooltip: 'Delete',
-                permission: 'delete'
-            }
-        ])
+        ...(action) ? [createActionsColumn([
+                // {
+                //     icon: MdEdit,
+                //     onClick: handleEdit,
+                //     className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                //     tooltip: 'Edit',
+                //     permission: 'update'
+                // },
+                {
+                    icon: MdDeleteOutline,
+                    onClick: handleDelete,
+                    className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                    tooltip: 'Delete',
+                    permission: 'delete'
+                }
+            ])] : []
     ];
 
     // Search and filter component
@@ -193,16 +196,18 @@ const ManageCustomers: React.FC = () => {
                             <h3 className="text-lg leading-6 font-primary-bold text-gray-900">Manage Customers</h3>
                             <p className="mt-1 text-sm text-gray-500">Manage and organize your customer database</p>
                         </div>
-                        <PermissionGate permission="create">
-                            <Button
-                                onClick={() => navigate('/quotations/administration/customers/create')}
-                                className="flex items-center gap-2"
-                                size="sm"
-                            >
-                                <MdAdd className="h-4 w-4" />
-                                Add New Customer
-                            </Button>
-                        </PermissionGate>
+                        {action && (
+                            <PermissionGate permission="create">
+                                <Button
+                                    onClick={() => navigate('/quotations/administration/customers/create')}
+                                    className="flex items-center gap-2"
+                                    size="sm"
+                                >
+                                    <MdAdd className="h-4 w-4" />
+                                    Add New Customer
+                                </Button>
+                            </PermissionGate>
+                        )}
                     </div>
                 </div>
                 
@@ -248,7 +253,7 @@ const ManageCustomers: React.FC = () => {
                         }
                         persistTableHead
                         borderRadius="8px"
-                        onRowClicked={handleEdit}
+                        // onRowClicked={handleEdit}
                     />
                 </div>
             </div>

@@ -637,6 +637,7 @@ export interface EmployeeListRequest {
     department_name?: string;
     title_name?: string;
     is_sales_quotation?: boolean;
+    is_user_netsuite?: boolean;
     employee_status?: string;
 }
 export interface UserListRequest {

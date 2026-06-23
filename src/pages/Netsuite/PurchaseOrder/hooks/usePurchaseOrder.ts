@@ -17,6 +17,14 @@ type FilterState = {
 export const usePurchaseOrder = (profileSSO?: number) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const location = useLocation(); 
+    const [searchValue, setSearchValue] = useState('');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
+    const [sortModify, setSortModify] = useState< 'created_at' | 'updated_at' | 'last_modified' | 'po_id' | ''>('created_at');
+    const [statusFilter, setStatusFilter] = useState('');
+    const [subsidiaryFilter, setSubsidiaryFilter] = useState('');
+    const [locationFilter, setLocationFilter] = useState('');
+    const [approvalStatusFilter, setApprovalStatusFilter] = useState('');
+    const [employeeFilter, setEmployeeFilter] = useState('');
 
     const urlPage = Math.max(Number(searchParams.get('page')) || 1, 1);
     const urlLimit = Math.max(Number(searchParams.get('limit')) || 10, 1);
@@ -30,8 +38,6 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         approvalstatus: searchParams.get('approvalstatus') || null,
         segmentation_id: searchParams.get('segmentation_id') || '',
     };
-
-    const [searchValue, setSearchValue] = useState('');
 
     const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderItem[]>([]);
     const [loading, setLoading] = useState(false);

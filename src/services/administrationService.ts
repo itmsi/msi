@@ -402,6 +402,10 @@ export class employeesService {
             filteredParams.is_sales_quotation = params.is_sales_quotation;
         }
 
+        if (params.is_user_netsuite !== undefined) {
+            filteredParams.is_user_netsuite = params.is_user_netsuite;
+        }
+
         const response = await apiPost(`${API_BASE_URL}/employees/get`, filteredParams);
         return response.data as EmployeeListResponse;
     }

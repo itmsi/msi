@@ -313,7 +313,7 @@ export default function Manage() {
                 {/* Header */}
                 <div className="bg-white shadow rounded-lg mb-3">
                     <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
+                        <div className="flex flex-col md:flex-row lg:justify-between lg:items-center ">
                             <div>
                                 <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
                                     Purchase Orders
@@ -322,7 +322,7 @@ export default function Manage() {
                                     Manage Purchase Orders
                                 </p>
                             </div>
-                            <div className="flex space-x-3">
+                            <div className="flex space-x-3 lg:mt-0 mt-3">
                                 <PermissionGate permission="read">
                                     <Button
                                         onClick={() => handleSync()}
