@@ -11,14 +11,14 @@ import {
 } from 'echarts/components';
 import PageMeta from '@/components/common/PageMeta';
 import { useCustomerDashboard } from './hooks/useCustomerDashboard';
-import { LuTruck, LuLayers,LuClipboardCheck, LuReceiptText, LuBuilding2, LuCalendar, LuUser, LuMapPin, LuPhone, LuMail, LuLightbulb, LuTarget, LuChevronRight } from 'react-icons/lu';
+import { LuTruck, LuLayers,LuClipboardCheck, LuReceiptText, LuBuilding2, LuCalendar, LuUser, LuMapPin, LuPhone, LuMail } from 'react-icons/lu';
 import { StatCard } from './components/StatCard';
 import UnitTable from './components/UnitTable';
 import TerritoryTableCustomer from './components/TerritoryTableCustomer';
 import RkabTable from './components/RkabTable';
 import QuotationTable from './components/QuotationTable';
 import SalesOrderTable from './components/SalesOrderTable';
-import Badge from '@/components/ui/badge/Badge';
+// import Badge from '@/components/ui/badge/Badge';
 
 echarts.use([
     TitleComponent,
