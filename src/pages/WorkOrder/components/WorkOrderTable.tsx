@@ -151,6 +151,23 @@ const WorkOrderTable: React.FC<WorkOrderTableProps> = ({
             width: '180px',
         },
         {
+            name: 'Status',
+            selector: row => row.work_order_status,
+            cell: (row) => (
+                <StatusTypeBadgeWO
+                    type={row.work_order_status as WorkOrderStatus}
+                />
+                // <Badge
+                //     variant="light"
+                //     status={row.work_order_status}
+                //     showLabel
+                // />
+            ),
+            wrap: true,
+            center: true,
+            width: '180px',
+        },
+        {
             name: 'Action',
             selector: row => row.body_no,
             cell: (row) => (
@@ -222,23 +239,6 @@ const WorkOrderTable: React.FC<WorkOrderTableProps> = ({
             ),
             wrap: true,
             width: '210px',
-        },
-        {
-            name: 'Status',
-            selector: row => row.work_order_status,
-            cell: (row) => (
-                <StatusTypeBadgeWO
-                    type={row.work_order_status as WorkOrderStatus}
-                />
-                // <Badge
-                //     variant="light"
-                //     status={row.work_order_status}
-                //     showLabel
-                // />
-            ),
-            wrap: true,
-            center: true,
-            width: '180px',
         }
     ], [handleStartRepairProcess, handleEndRepairProcess]);
 
