@@ -135,6 +135,9 @@ const CreateHaulingCalculator = lazy(() => import('@/pages/Calculator/HaulingPri
 const EditHaulingCalculator = lazy(() => import('@/pages/Calculator/HaulingPriceCalculatorEdit'));
 const ManageHaulingCalculator = lazy(() => import('@/pages/Calculator/Manage'));
 
+// WORK ORDER
+const ManageWorkOrder = lazy(() => import('@/pages/WorkOrder/Manage'));
+
 // NANOGRID CALCULATOR
 const NanogridCalculator = lazy(() => import('@/pages/Nanogrid/Manage'));
 
@@ -1096,6 +1099,14 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['ADMIN'],
         component: NanogridCalculator,
+        layout: AppLayout,
+    },
+    {
+        path: '/work-order/manage',
+        name: 'Manage Work Orders',
+        isProtected: true,
+        roles: ['ADMIN'],
+        component: ManageWorkOrder,
         layout: AppLayout,
     },
 ];

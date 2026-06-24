@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { TableColumn } from 'react-data-table-component';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { usePurchaseOrder } from './hooks/usePurchaseOrder';
 // import Badge from '@/components/ui/badge/Badge';
 import { MdAdd, MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch, MdOutlineSync } from 'react-icons/md';
@@ -21,6 +21,7 @@ import { FaRegFilePdf } from 'react-icons/fa6';
 import NavigationPO from './components/NavigationPO';
 
 export default function Manage() {
+    const location = useLocation();
     const navigate = useNavigate();
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
@@ -31,19 +32,14 @@ export default function Manage() {
         loading,
         error,
         pagination,
+        filters,
         searchValue,
-        sortOrder,
-        statusFilter,
-        approvalStatusFilter,
-        subsidiaryFilter,
-        locationFilter,
         setSearchValue,
         handlePageChange,
         handleRowsPerPageChange,
         handleFilterChange,
         handleKeyPress,
         handleClearSearch,
-        handleClearFilters,
         isSyncing,
         handleSync,
         handleSyncById,
@@ -90,7 +86,7 @@ export default function Manage() {
             selector: row => row.po_number || '-',
             cell: row => (<>
                 <a
-                    href={`/netsuite/purchase-order/edit/${row.po_id ? row.po_id : row.id}`}
+                    href={`/netsuite/purchase-order/edit/${row.po_id ? row.po_id : row.id}${location.search}`}
                     className="absolute inset-0"
                 />
                 
@@ -199,13 +195,30 @@ export default function Manage() {
         ])
     ];
     
-    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const params = new URLSearchParams(location.search);
+    const filterKeys = ['search', 'approvalstatus', 'subsidiary', 'location', 'po_status'];
+    
+    // Mengecek apakah minimal salah satu key di atas ada di URL
+    const hasActiveFilter = filterKeys.some(key => params.has(key) && params.get(key) !== '');
+    
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(hasActiveFilter ? true : false);
     const handleToggleFilter = () => {
         setShowAdvancedFilters(prev => !prev);
     };
+
+    const handleClearFilters = () => {
+        handleFilterChange({
+            search: '',
+            sort_order: 'desc',
+            po_status: '',
+            subsidiary: '',
+            location: '',
+            approvalstatus: '',
+            segmentation_id: ''
+        });
+    };
     
     // Count active filters
-    const activeFiltersCount = [subsidiaryFilter, locationFilter].filter(Boolean).length;
     const SearchAndFilters = useMemo(() => {
         return (<>
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -238,12 +251,12 @@ export default function Manage() {
                     <CustomSelect
                         id="sort_order"
                         name="sort_order"
-                        value={sortOrder ? { 
-                            value: sortOrder, 
-                            label: sortOrder === 'asc' ? 'Ascending' : 'Descending' 
+                        value={filters.sort_order ? {
+                            value: filters.sort_order,
+                            label: filters.sort_order === 'asc' ? 'Ascending' : 'Descending'
                         } : null}
-                        onChange={(selectedOption) => 
-                            handleFilterChange('sort_order', selectedOption?.value || '')
+                        onChange={(selectedOption) =>
+                            handleFilterChange({ sort_order: (selectedOption?.value as 'asc' | 'desc') || 'desc' })
                         }
                         options={[
                             { value: 'asc', label: 'Ascending' },
@@ -259,7 +272,7 @@ export default function Manage() {
                 <div className="flex items-center gap-2">
                     <Button
                         onClick={handleToggleFilter}
-                        className={`h-[42px] px-4 py-2 ${activeFiltersCount > 0 ? 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-300' : 'bg-transparent hover:bg-gray-300 text-gray-700'} border border-gray-300 relative`}
+                        className={`h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700'} border border-gray-300 relative`}
                         size="sm"
                     >
                         <MdFilterListAlt className="w-4 h-4 mr-2" />
@@ -276,16 +289,16 @@ export default function Manage() {
             
             {showAdvancedFilters && (
                 <FilterSection
-                    filterApprovalStatus={approvalStatusFilter}
-                    filterSubsidiary={subsidiaryFilter}
-                    filterLocation={locationFilter}
-                    filterStatus={statusFilter}
-                    onFilterChange={handleFilterChange}
+                    filterApprovalStatus={filters.approvalstatus || location.search.includes('approvalstatus=') ? filters.approvalstatus || '' : ''}
+                    filterSubsidiary={filters.subsidiary || location.search.includes('subsidiary=') ? filters.subsidiary || '' : ''}
+                    filterLocation={filters.location || location.search.includes('location=') ? filters.location || '' : ''}
+                    filterStatus={filters.po_status || location.search.includes('po_status=') ? filters.po_status || '' : ''}
+                    onFilterChange={(field, value) => handleFilterChange({ [field]: value })}
                     onClearFilters={handleClearFilters}
                 />
             )}
         </>);
-    }, [searchValue, sortOrder, statusFilter, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, subsidiaryFilter, locationFilter, handleClearFilters, activeFiltersCount]);
+    }, [searchValue, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, filters]);
 
     return (
         <>

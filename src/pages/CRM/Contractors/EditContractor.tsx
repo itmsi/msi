@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
 import { MdKeyboardArrowLeft, MdTaskAlt } from 'react-icons/md';
@@ -31,6 +31,8 @@ import ContractorROEInformation from './components/ContractorROEInformation';
 
 const EditContractor: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const listRoute = `/crm/contractors${location.search}`;
 
     // Main hook for contractor editing
     const {
@@ -56,7 +58,7 @@ const EditContractor: React.FC = () => {
         handleRkabChange,
         handleActivitySelectionChange,
         handleSubmit
-    } = useContractorEdit();
+    } = useContractorEdit(listRoute);
 
     // External selection hooks
     const {
@@ -121,7 +123,7 @@ const EditContractor: React.FC = () => {
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
-                                onClick={() => navigate('/crm/contractors')}
+                                onClick={() => navigate(listRoute)}
                                 className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                             >
                                 <MdKeyboardArrowLeft size={20} />
@@ -261,7 +263,7 @@ const EditContractor: React.FC = () => {
                             {/* Form Actions */}
                             <FormActions
                                 isSubmitting={isSubmitting}
-                                cancelRoute="/crm/contractors"
+                                cancelRoute={listRoute}
                                 onSubmit={handleSubmit}
                                 submitText={isSubmitting ? 'Updating...' : 'Update Contractor'}
                             />

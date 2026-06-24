@@ -428,4 +428,86 @@ export const StatusTypeBadgeSO: React.FC<StatusTypeBadgeSOProps> = ({
         </span>
     );
 };
+// WORK ORDER STATUS BADGE
+interface StatusTypeBadgeWOProps {
+    type: "open" | "review" | "waiting_sparepart" | "onprogress" | "repair_process" | "quality_check" | "ready_pickup" | "complete" | "cancelled";
+    label?: string;
+    variant?: 'default' | 'with-icon' | 'icon-only';
+    size?: 'sm' | 'md' | 'lg';
+    className?: string;
+}
+export const StatusTypeBadgeWO: React.FC<StatusTypeBadgeWOProps> = ({ 
+    type,
+    label,
+    size = 'md',
+    className = '' 
+}) => {
+    const getStatusStyles = (type: "open" | "review" | "waiting_sparepart" | "onprogress" | "repair_process" | "quality_check" | "ready_pickup" | "complete" | "cancelled") => {
+        switch (type) {
+            case 'open':
+                return { bgColor: 'bg-gray-100',   textColor: 'text-gray-800',   borderColor: 'border-gray-200',   label: label || 'Pending Approval' };
+            case 'review':
+                return { bgColor: 'bg-blue-100',   textColor: 'text-blue-800',   borderColor: 'border-blue-200',   label: label || 'Pending Fulfillment' };
+            case 'waiting_sparepart':
+                return { bgColor: 'bg-amber-100',  textColor: 'text-amber-900',  borderColor: 'border-amber-200',  label: label || 'Partially Fulfilled' };
+            case 'onprogress':
+                return { bgColor: 'bg-purple-100', textColor: 'text-purple-800', borderColor: 'border-purple-200', label: label || 'On Progress' };
+            case 'repair_process':
+                return { bgColor: 'bg-teal-100',   textColor: 'text-teal-800',   borderColor: 'border-teal-200',   label: label || 'In Repair' };
+            case 'quality_check':
+                return { bgColor: 'bg-pink-100',   textColor: 'text-pink-800',   borderColor: 'border-pink-200',   label: label || 'Quality Check' };
+            case 'ready_pickup':
+                return { bgColor: 'bg-green-100',  textColor: 'text-green-800',  borderColor: 'border-green-200',  label: label || 'Ready for Pickup' };
+            case 'complete':
+                return { bgColor: 'bg-green-100', textColor: 'text-green-800',  borderColor: 'border-green-200',  label: label || 'Completed' };
+            case 'cancelled':
+                return { bgColor: 'bg-red-100',    textColor: 'text-red-800',    borderColor: 'border-red-200',    label: label || 'Cancelled' };
+            default:
+                return { bgColor: 'bg-gray-100',   textColor: 'text-gray-800',   borderColor: 'border-gray-200' };
+        }
+    };
+
+    const getSizeClasses = () => {
+        switch (size) {
+            case 'sm':
+                return {
+                    padding: 'px-2 py-0.5',
+                    textSize: 'text-xs',
+                    iconSize: 'w-3 h-3'
+                };
+            case 'lg':
+                return {
+                    padding: 'px-4 py-2',
+                    textSize: 'text-sm',
+                    iconSize: 'w-5 h-5'
+                };
+            default: // md
+                return {
+                    padding: 'px-3 py-1',
+                    textSize: 'text-xs',
+                    iconSize: 'w-4 h-4'
+                };
+        }
+    };
+
+    const statusStyles = getStatusStyles(type);
+    const sizeClasses = getSizeClasses();
+
+    return (
+        <span 
+            className={`
+                inline-flex items-center justify-center gap-1 
+                ${sizeClasses.padding} 
+                ${sizeClasses.textSize} 
+                ${statusStyles.bgColor} 
+                ${statusStyles.textColor} 
+                ${statusStyles.borderColor} 
+                border rounded-full font-medium
+                ${className}
+            `.trim().replace(/\s+/g, ' ')}
+        >
+            <span>{statusStyles.label}</span>
+        </span>
+    );
+};
 export default ActiveStatusBadge;

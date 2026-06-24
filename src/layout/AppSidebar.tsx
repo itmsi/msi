@@ -16,6 +16,7 @@ import { useLanguage } from "@/components/lang/useLanguage";
 import { menuTranslations } from "@/components/lang/menuTranslations";
 import { TbTopologyStar3, TbReport } from "react-icons/tb";
 import { MdCalculate } from "react-icons/md";
+import { LuClipboardList } from "react-icons/lu";
 
 type SubNavItem = {
     name: string;
@@ -179,6 +180,13 @@ const AppSidebar: React.FC = () => {
                 { name: "Receipts", path: "/netsuite/receipts", allowedRoles: ['Manage Receipts Netsuite'] },
                 { name: "Bill Payment", path: "/netsuite/bill-payment", allowedRoles: ['Bill Payment Netsuite'] },
                 { name: "Quotation", path: "/netsuite/quotation", allowedRoles: ['Quotation Netsuite'] },
+            ],
+        },
+        {
+            name: "Work Order",
+            icon: <LuClipboardList />,
+            subItems: [
+                { name: "Manage Work Orders", path: "/workorders/manage"     },
             ],
         }
     ], [buildPath]);

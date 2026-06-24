@@ -1,36 +1,35 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ProjectItem, ProjectRequest, Pagination } from '../types/project';
-import { ProjectService } from '../services/projectService';
+// import { WorkOrderItem, IupRequest, IupSummary, Pagination } from '../types/iupmanagement';
 import { useLocation, useSearchParams } from 'react-router-dom';
-
-interface UseProjectManagementProps {
-    iup_customer_id: string;
-}
+import { WorkOrderService } from '../services/workOrderService';
+import { Pagination, WorkOrderItem, WorkOrderRequest } from '../types/workorder';
 
 type FilterState = {
     search: string;
-    status: 'Not Started' | 'Find' | 'Pull' | 'Survey' | 'BAST';
+    sort_by: 'updated_at' | 'created_at' | '';
     sort_order: 'asc' | 'desc' | '';
+    status: 'active' | 'inactive' | '';
 };
-
-export const useProjectManagement = ({ iup_customer_id }: UseProjectManagementProps) => {
+export const useWorkOrder = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const location = useLocation(); 
 
     const urlPage = Math.max(Number(searchParams.get('page')) || 1, 1);
     const urlLimit = Math.max(Number(searchParams.get('limit')) || 10, 1);
-    
+
     const urlFilters: FilterState = {
         search: searchParams.get('search') || '',
-        status: (searchParams.get('status') as FilterState['status']) || '',
+        sort_by: (searchParams.get('sort_by') as FilterState['sort_by']) || 'created_at',
         sort_order: (searchParams.get('sort_order') as FilterState['sort_order']) || 'desc',
+        status: (searchParams.get('status') as FilterState['status']) || '',
     };
 
     const [searchValue, setSearchValue] = useState(urlFilters.search);
     
-    const [projects, setProjects] = useState<ProjectItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [workOrders, setWorkOrders] = useState<WorkOrderItem[]>([]);
+
     const [pagination, setPagination] = useState<Pagination>({
         page: urlPage,
         limit: urlLimit,
@@ -52,28 +51,29 @@ export const useProjectManagement = ({ iup_customer_id }: UseProjectManagementPr
         setSearchParams(params);
     }, [setSearchParams]);
 
-    const fetchProjects = useCallback(async (params?: Partial<ProjectRequest>) => {
+    const fetchWorkOrders = useCallback(async (params?: Partial<WorkOrderRequest>) => {
         try {
             setLoading(true);
             setError(null);
-
-            const response = await ProjectService.getProjects({
-                page: pagination.page,
-                limit: pagination.limit,
-                iup_customer_id: iup_customer_id ? iup_customer_id : '',
+            
+            const requestParams: WorkOrderRequest = {
+                page: urlPage,
+                limit: urlLimit,
                 ...urlFilters,
                 ...params
-            });
-
-            setProjects(response.data || []);
-            setPagination(response.pagination);
+            };
+            
+            const response = await WorkOrderService.getWorkOrders(requestParams);
+            
+            setWorkOrders(response.data.items);
+            setPagination(response.data.pagination);
         } catch (err: any) {
-            setError(err?.message || 'Failed to fetch project data');
-            console.error('Error fetching project data:', err);
+            setError(err?.message || 'Failed to fetch work orders');
+            console.error('Error fetching work orders:', err);
         } finally {
             setLoading(false);
         }
-    }, [urlFilters, pagination.page, pagination.limit]);
+    }, [urlFilters, urlLimit, urlPage]);
 
     const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
         const updatedFilters = { ...urlFilters, ...newFilters };
@@ -102,29 +102,34 @@ export const useProjectManagement = ({ iup_customer_id }: UseProjectManagementPr
     }, [handleFilterChange]);
 
     useEffect(() => {
-        fetchProjects({
-            page: urlPage,
-            limit: urlLimit,
-            ...urlFilters
-        });
+        fetchWorkOrders();
         setSearchValue(urlFilters.search);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const interval = setInterval(fetchWorkOrders, 5000);
+        return () => clearInterval(interval);
     }, [location.search]);
 
     return {
-        projects,
-        filters: urlFilters,
+        // State
+        workOrders,
         loading,
         error,
         pagination,
+
+        filters: urlFilters,
         searchValue,
         setSearchValue,
-        fetchProjects,
+        
+        // Actions
+        fetchWorkOrders,
         handlePageChange,
         handleRowsPerPageChange,
         handleFilterChange,
+
+        // Search functions
         executeSearch,
         handleKeyPress,
         handleClearSearch,
+        // resetFilters,
+        refetch: fetchWorkOrders
     };
 };

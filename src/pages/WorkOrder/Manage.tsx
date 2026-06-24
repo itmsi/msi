@@ -1,25 +1,25 @@
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MdAdd, MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch } from 'react-icons/md';
-import { useContractors } from './hooks/useContractors';
-import { Contractor } from './types/contractor';
-import ContractorTable from './components/ContractorTable';
+import React, { useMemo } from 'react';
+import { MdClear, MdSearch } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
-import Button from '@/components/ui/button/Button';
-import { PermissionGate } from '@/components/common/PermissionComponents';
 import Input from '@/components/form/input/InputField';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import { useConfirmation } from '@/hooks/useConfirmation';
-import { ContractorServices } from './services/contractorServices';
+// import { ContractorServices } from './services/contractorServices';
 import CustomSelect from '@/components/form/select/CustomSelect';
-import FilterSection from './components/FilterSection';
+import WorkOrderTable from './components/WorkOrderTable';
+import { useWorkOrder } from './hooks/useWorkOrder';
+import { WorkOrderItem } from './types/workorder';
+import { WorkOrderService } from './services/workOrderService';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
+import toast from 'react-hot-toast';
+import { format } from 'date-fns'
+// import FilterSection from './components/FilterSection';
 
-const Contractors: React.FC = () => {
-    const navigate = useNavigate();
-    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+const Manage: React.FC = () => {
+    // const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const {
         // State
-        contractors,
+        workOrders,
         loading,
         error,
         pagination,
@@ -36,38 +36,36 @@ const Contractors: React.FC = () => {
         // Search functions
         handleKeyPress,
         handleClearSearch
-    } = useContractors();
+    } = useWorkOrder();
 
     const { showConfirmation, modalProps } = useConfirmation();
 
-    const handleToggleFilter = () => {
-        setShowAdvancedFilters(prev => !prev);
-    };
+    // const handleToggleFilter = () => {
+    //     setShowAdvancedFilters(prev => !prev);
+    // };
 
-    const handleClearFilters = () => {
-        setSearchValue('');
-        handleFilterChange({
-            sort_order: 'desc', // Kembalikan ke default
-            status: '',
-            segmentation_id: '',
-            mine_type: '',
-            search: ''
-        });
-    };
+    // const handleClearFilters = () => {
+    //     setSearchValue('');
+    //     handleFilterChange({
+    //         sort_order: 'desc', // Kembalikan ke default
+    //         status: '',
+    //         search: ''
+    //     });
+    // };
 
-    const handleDelete = async (contractor: Contractor) => {
-        const typeLabel = contractor.customer_name;
+    const handleDelete = async (workorder: WorkOrderItem) => {
+        const typeLabel = workorder.customer_name;
                 
         const confirmed = await showConfirmation({
             title: `Delete ${typeLabel}`,
-            message: `Are you sure you want to delete "${contractor.customer_name}"?\n\nType: ${typeLabel}\nCode: ${contractor.customer_name}\n\nThis action cannot be undone and will also delete all child territories.`,
+            message: `Are you sure you want to delete "${workorder.customer_name}"?\n\nType: ${typeLabel}\nCode: ${workorder.customer_name}\n\nThis action cannot be undone and will also delete all child territories.`,
             confirmText: `Delete ${typeLabel}`,
             cancelText: 'Cancel',
             type: 'danger',
         });
 
         if (confirmed) {
-            await ContractorServices.deleteContractor(contractor.iup_customer_id);
+            await WorkOrderService.deleteWorkOrder(workorder.work_order_id);
             refetch();
         }
     };
@@ -125,7 +123,7 @@ const Contractors: React.FC = () => {
                 />
             </div>
             
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
                 <Button
                     onClick={handleToggleFilter}
                     className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
@@ -135,54 +133,60 @@ const Contractors: React.FC = () => {
                     Filter
                     {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
                 </Button>
-            </div>
+            </div> */}
         </div>
         
-        {showAdvancedFilters && (
+        {/* {showAdvancedFilters && (
             <FilterSection
                 // onFilterChange={handleFilterChange}
                 onFilterChange={(field, value) => handleFilterChange({ [field]: value })}
                 onClearFilters={handleClearFilters}
             />
-        )}
+        )} */}
         </>
     
-    )}, [searchValue, filters, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters]);
-    
+    )}, [searchValue, filters, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange]);
+    const handleStartRepairProcess = async (woid: string) => {
+        const start = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
+        const params = {
+            work_order_status: 'onprogress',
+            repair_start_date: start
+        };
+        const response = await WorkOrderService.repairProcessWorkOrder(woid, params);
+        if (response.status === 200) {
+            toast.success('Repair process started successfully');
+            refetch();
+        } else {
+            toast.error('Failed to start repair process');
+        }
+    }
+    const handleEndRepairProcess = async (woid: string) => {
+        const end = format(new Date(), 'yyyy-MM-dd HH:mm:ss')
+        const params = {
+            work_order_status: 'complete',
+            repair_end_date: end
+        };
+        const response = await WorkOrderService.repairProcessWorkOrder(woid, params);
+        if (response.status === 200) {
+            toast.success('Repair process ended successfully');
+            refetch();
+        } else {
+            toast.error('Failed to end repair process');
+        }
+    }
     return (
         <>
             <PageMeta 
-                title="Contractors - CRM" 
-                description="Manage mining contractors and fleet"
+                title="Work Order Management | Motor Sights International" 
+                description="Manage work orders and assignments for Motor Sights International"
                 image="/motor-sights-international.png"
             />
             <div className="space-y-6">
-                
-                <div className="bg-white shadow rounded-lg">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Contractors Management
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Manage mining contractors and their fleet information
-                                </p>
-                            </div>
-                            <div className="flex space-x-3">
-                                <PermissionGate permission="create">
-                                    <Button
-                                        onClick={() => navigate('/crm/contractors/create')}
-                                        className="flex items-center"
-                                    >
-                                        <MdAdd className="mr-2" />
-                                        Add Contractor
-                                    </Button>
-                                </PermissionGate>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+                <PageHeaderManage
+                    title="Work Order Management"
+                    subtitle="Manage work orders and assignments"
+                />
 
                 <div className="bg-white shadow rounded-lg px-6 py-4">
                     {SearchAndFilters}
@@ -197,12 +201,14 @@ const Contractors: React.FC = () => {
                             </div>
                         )}
                         
-                        <ContractorTable
-                            contractors={contractors}
+                        <WorkOrderTable
+                            workOrders={workOrders}
                             loading={loading}
                             pagination={pagination}
                             onPageChange={handlePageChange}
                             onRowsPerPageChange={handleRowsPerPageChange}
+                            handleStartRepairProcess={(workOrder) => handleStartRepairProcess(workOrder.work_order_id)}
+                            handleEndRepairProcess={(workOrder) => handleEndRepairProcess(workOrder.work_order_id)}
                             onDelete={handleDelete}
                         />
                     </div>
@@ -214,4 +220,4 @@ const Contractors: React.FC = () => {
     );
 };
 
-export default Contractors;
+export default Manage;

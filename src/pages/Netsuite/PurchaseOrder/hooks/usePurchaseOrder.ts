@@ -1,32 +1,73 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { Pagination, PurchaseOrderItem, PurchaseOrderRequest, SyncInfo } from '../types/purchaseorder';
 import { PurchaseOrderService } from '../services/purchaseOrderService';
+import { useLocation, useSearchParams } from 'react-router-dom';
+
+type FilterState = {
+    search: string;
+    sort_order: 'asc' | 'desc' | '';
+    po_status: string;
+    subsidiary: string;
+    location: string;
+    approvalstatus: string | null;
+    segmentation_id: string;
+};
 
 export const usePurchaseOrder = (profileSSO?: number) => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const location = useLocation(); 
     const [searchValue, setSearchValue] = useState('');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
-    const [sortModify, setSortModify] = useState< 'created_at' | 'updated_at' | 'last_modified' | 'po_id' | ''>('created_at');
-    const [statusFilter, setStatusFilter] = useState('');
-    const [subsidiaryFilter, setSubsidiaryFilter] = useState('');
-    const [locationFilter, setLocationFilter] = useState('');
-    const [approvalStatusFilter, setApprovalStatusFilter] = useState('');
-    const [employeeFilter, setEmployeeFilter] = useState('');
+    // const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
+    // const [sortModify, setSortModify] = useState< 'created_at' | 'updated_at' | 'last_modified' | 'po_id' | ''>('created_at');
+    // const [statusFilter, setStatusFilter] = useState('');
+    // const [subsidiaryFilter, setSubsidiaryFilter] = useState('');
+    // const [locationFilter, setLocationFilter] = useState('');
+    // const [approvalStatusFilter, setApprovalStatusFilter] = useState('');
+    // const [employeeFilter, setEmployeeFilter] = useState('');
 
+    const urlPage = Math.max(Number(searchParams.get('page')) || 1, 1);
+    const urlLimit = Math.max(Number(searchParams.get('limit')) || 10, 1);
+
+    const urlFilters: FilterState = {
+        search: searchParams.get('search') || '',
+        sort_order: (searchParams.get('sort_order') as FilterState['sort_order']) || 'desc',
+        po_status: searchParams.get('po_status') || '',
+        subsidiary: searchParams.get('subsidiary') || '',
+        location: searchParams.get('location') || '',
+        approvalstatus: searchParams.get('approvalstatus') || null,
+        segmentation_id: searchParams.get('segmentation_id') || '',
+    };
+
+    const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderItem[]>([]);
     const [syncInfo, setSyncInfo] = useState<SyncInfo | null>(null);
     const [pagination, setPagination] = useState<Pagination>({
-        page: 1,
-        limit: 10,
+        page: urlPage,
+        limit: urlLimit,
         total: 0,
         totalPages: 0
     });
-    const paginationRef = useRef(pagination);
-    useEffect(() => {
-        paginationRef.current = pagination;
-    }, [pagination]);
+
+    // const paginationRef = useRef(pagination);
+    // useEffect(() => {
+    //     paginationRef.current = pagination;
+    // }, [pagination]);
+
+    const updateUrlParams = useCallback((currentFilters: FilterState, page: number, limit: number) => {
+        const params = new URLSearchParams();
+        if (page > 1) params.set('page', String(page));
+        if (limit !== 10) params.set('limit', String(limit));
+        
+        Object.entries(currentFilters).forEach(([key, value]) => {
+            if (value && value !== 'desc') { // Jangan masukkan nilai kosong atau default sort
+                params.set(key, value);
+            }
+        });
+        
+        setSearchParams(params);
+    }, [setSearchParams]);
 
     const fetchPurchaseOrders = useCallback(async (params?: Partial<PurchaseOrderRequest>) => {
         try {
@@ -34,24 +75,16 @@ export const usePurchaseOrder = (profileSSO?: number) => {
             setError(null);
 
             const response = await PurchaseOrderService.getPurchaseOrders({
-                page: params?.page ?? paginationRef.current.page,
-                limit: params?.limit ?? paginationRef.current.limit,
-                sort_by: params?.sort_by || sortModify || 'po_id',
-                sort_order: params?.sort_order || sortOrder || 'desc',
-                search: params?.search !== undefined ? params.search : searchValue,
-                po_status: params?.po_status !== undefined ? params.po_status : statusFilter,
-                subsidiary: params?.subsidiary !== undefined ? params.subsidiary : subsidiaryFilter,
-                location: params?.location !== undefined ? params.location : locationFilter,
-                // ...(params?.employee_id ? { classes: profileSSO } : {}),
-                created_by: params?.employee !== undefined ? params.employee : employeeFilter,
-                ...(params?.approvalstatus !== undefined
-                    ? { approvalstatus: params.approvalstatus }
-                    : approvalStatusFilter ? { approvalstatus: approvalStatusFilter } : {}),
+                page: urlPage,
+                limit: urlLimit,
+                sort_by: 'created_at',
                 ...(profileSSO !== undefined ? { classes: profileSSO } : {}),
+                ...urlFilters,
+                ...params,
             });
 
             setPurchaseOrders(response.data?.items || []);
-            setPagination(response.data?.pagination || paginationRef.current);
+            setPagination(response.data?.pagination || pagination);
             setSyncInfo(response.sync_info || null);
         } catch (err: any) {
             setError(err?.message || 'Failed to fetch purchase order data');
@@ -59,73 +92,41 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, sortModify, statusFilter, subsidiaryFilter, locationFilter, approvalStatusFilter, employeeFilter]);
+    }, [urlFilters, urlLimit, urlPage]);
 
+    const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
+        const updatedFilters = { ...urlFilters, ...newFilters };
+        updateUrlParams(updatedFilters, 1, urlLimit); // Reset ke page 1 tiap filter berubah
+    }, [urlFilters, urlLimit, updateUrlParams]);
+    
     const handlePageChange = useCallback((page: number) => {
-        setPagination(prev => ({ ...prev, page }));
-        fetchPurchaseOrders({ page, limit: paginationRef.current.limit });
-    }, [fetchPurchaseOrders]);
+        updateUrlParams(urlFilters, page, urlLimit);
+    }, [urlFilters, urlLimit, updateUrlParams]);
 
     const handleRowsPerPageChange = useCallback((limit: number, page: number) => {
-        setPagination(prev => ({ ...prev, limit, page }));
-        fetchPurchaseOrders({ limit, page });
-    }, [fetchPurchaseOrders]);
-
-    const handleSearch = useCallback((searchQuery: string) => {
-        setPagination(prev => ({ ...prev, page: 1 }));
-        fetchPurchaseOrders({ search: searchQuery, page: 1 });
-    }, [fetchPurchaseOrders]);
-
-    const handleFilterChange = useCallback((filterType: string, value: string) => {
-        if (filterType === 'po_status') {
-            setStatusFilter(value);
-        } else if (filterType === 'sort_by') {
-            setSortModify(value as 'created_at' | 'updated_at' | 'last_modified' | 'po_id' | '');
-        } else if (filterType === 'sort_order') {
-            setSortOrder(value as 'asc' | 'desc' | '');
-        } else if (filterType === 'subsidiary') {
-            setSubsidiaryFilter(value);
-        } else if (filterType === 'location') {
-            setLocationFilter(value);
-        } else if (filterType === 'approvalstatus') {
-            setApprovalStatusFilter(value);
-        } else if (filterType === 'employee') {
-            setEmployeeFilter(value);
-        }
-
-        setPagination(prev => ({ ...prev, page: 1 }));
-
-        const params: any = { page: 1 };
-        if (filterType === 'po_status') params.po_status = value;
-        else if (filterType === 'sort_by') params.sort_by = value;
-        else if (filterType === 'sort_order') params.sort_order = value;
-        else if (filterType === 'subsidiary') params.subsidiary = value;
-        else if (filterType === 'location') params.location = value;
-        else if (filterType === 'approvalstatus') params.approvalstatus = value;
-        else if (filterType === 'employee') params.employee = value;
-
-        fetchPurchaseOrders(params);
-    }, [fetchPurchaseOrders]);
-
-    // Initial load
-    useEffect(() => {
-        fetchPurchaseOrders();
-    }, []);
+        updateUrlParams(urlFilters, page, limit);
+    }, [urlFilters, updateUrlParams]);
 
     const executeSearch = useCallback(() => {
-        handleSearch(searchValue);
-    }, [handleSearch, searchValue]);
+        handleFilterChange({ search: searchValue });
+    }, [handleFilterChange, searchValue]);
 
     const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            executeSearch();
-        }
+        if (e.key === 'Enter') executeSearch();
     }, [executeSearch]);
-
+    
     const handleClearSearch = useCallback(() => {
         setSearchValue('');
-        handleSearch('');
-    }, [handleSearch]);
+        handleFilterChange({ search: '' });
+    }, [handleFilterChange]);
+
+    useEffect(() => {
+        fetchPurchaseOrders();
+        
+        // Memastikan input text search ter-reset jika user memencet tombol Back
+        setSearchValue(urlFilters.search);
+        
+    }, [location.search]);
 
     const [isSyncing, setIsSyncing] = useState(false);
 
@@ -156,7 +157,8 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         try {
             await PurchaseOrderService.syncPOById(String(row.po_id));
             toast.success('Sinkronisasi berhasil', { id: toastId });
-            fetchPurchaseOrders({ page: paginationRef.current.page, limit: paginationRef.current.limit });
+            // fetchPurchaseOrders({ page: urlPage, limit: urlLimit, ...urlFilters });
+            fetchPurchaseOrders({ page: urlPage, limit: urlLimit });
         } catch (err: any) {
             toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
         } finally {
@@ -198,51 +200,25 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         }
     }, []);
 
-    const handleClearFilters = useCallback(() => {
-        setStatusFilter('');
-        setSubsidiaryFilter('');
-        setLocationFilter('');
-        setApprovalStatusFilter('');
-        setEmployeeFilter('');
-        setSortOrder('desc');
-        setSortModify('created_at');
-        
-        setPagination(prev => ({ ...prev, page: 1 }));
-        fetchPurchaseOrders({ 
-            page: 1, 
-            po_status: '', 
-            subsidiary: '', 
-            location: '',
-            employee: '',
-            sort_order: 'desc',
-            sort_by: 'created_at'
-        });
-    }, [fetchPurchaseOrders]);
-
     return {
         purchaseOrders,
         syncInfo,
         loading,
         error,
         pagination,
+        
+        filters: urlFilters,
         searchValue,
-        sortOrder,
-        sortModify,
-        statusFilter,
-        subsidiaryFilter,
-        locationFilter,
-        approvalStatusFilter,
-        employeeFilter,
         setSearchValue,
+
         fetchPurchaseOrders,
         handlePageChange,
         handleRowsPerPageChange,
         handleFilterChange,
-        handleSearch,
+        
         executeSearch,
         handleKeyPress,
         handleClearSearch,
-        handleClearFilters,
         isSyncing,
         handleSync,
         handleSyncById,

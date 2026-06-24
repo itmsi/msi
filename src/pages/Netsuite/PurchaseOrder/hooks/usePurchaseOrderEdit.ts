@@ -105,7 +105,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
     };
 };
 
-export const usePurchaseOrderEdit = () => {
+export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-order/manage') => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const [isLoading, setIsLoading] = useState(true);
@@ -174,17 +174,17 @@ export const usePurchaseOrderEdit = () => {
                 setFormData(mapPODetailToForm(detail));
             } else {
                 toast.error(detailRes.message || 'Data Purchase Order tidak ditemukan');
-                navigate('/netsuite/purchase-order');
+                navigate(backRoute);
             }
         } catch (error) {
             console.error('Error loading data:', error);
-            navigate('/netsuite/purchase-order');
+            navigate(backRoute);
             toast.error('Gagal memuat data');
         } finally {
             setIsLoading(false);
             setLoadingMasterData(false);
         }
-    }, [id]);
+    }, [id, backRoute, navigate]);
 
     useEffect(() => {
         loadData();
