@@ -8,6 +8,7 @@ import { LoadingOverlay } from '@/components/common/Loading';
 import { useQuotationCreate } from './hooks/useQuotationCreate';
 import QuotationFields from './components/QuotationFields';
 import QuotationItemFields from './components/QuotationItemFields';
+import FilesTab from './components/tab/FilesTab';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
@@ -22,6 +23,7 @@ export default function Create() {
     const location = useLocation();
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
+    const [activeTab, setActiveTab] = useState<'items' | 'files'>('items');
 
     // Ambil data awal dari state navigasi (jika ada dari "Make Copy")
     const initialData = location.state?.formData;
@@ -37,6 +39,7 @@ export default function Create() {
         handleRemoveItem,
         handleUpdateItem,
         handleSubmit,
+        handleAddFiles,
         masterData,
         loadingMasterData,
     } = useQuotationCreate();
@@ -324,48 +327,89 @@ export default function Create() {
                             }}
                         />
 
-                        <div className='bg-white rounded-2xl shadow-sm'>
-                            {/* Quotation Items */}
-                            <QuotationItemFields
-                                formData={formData}
-                                errors={errors}
-                                masterData={masterData}
-                                loadingMasterData={loadingMasterData}
-                                onInputChange={handleInputChange}
-                                onSelectChange={handleSelectChange}
-                                onDateChange={handleDateChange}
-                                onAddItem={handleAddItem}
-                                onRemoveItem={handleRemoveItem}
-                                onUpdateItem={handleUpdateItem}
+                        <div>
+                            {/* Tab Navigation */}
+                            <div className="border-b border-gray-200 px-6 overflow-auto">
+                                <nav className="flex space-x-8 overflow-auto">
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab('items')}
+                                        className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                            activeTab === 'items'
+                                                ? 'border-blue-500 text-blue-600'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        Items
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab('files')}
+                                        className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                            activeTab === 'files'
+                                                ? 'border-blue-500 text-blue-600'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        Files
+                                    </button>
+                                </nav>
+                            </div>
 
-                                // Item Select Props
-                                itemOptions={itemOptions}
-                                itemPagination={itemPagination}
-                                itemInput={itemInputValue}
-                                onItemInputChange={handleItemInputChange}
-                                onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
+                            <div className='bg-white rounded-b-2xl shadow-sm'>
+                                {/* Items Tab */}
+                                {activeTab === 'items' && (
+                                    <QuotationItemFields
+                                        formData={formData}
+                                        errors={errors}
+                                        masterData={masterData}
+                                        loadingMasterData={loadingMasterData}
+                                        onInputChange={handleInputChange}
+                                        onSelectChange={handleSelectChange}
+                                        onDateChange={handleDateChange}
+                                        onAddItem={handleAddItem}
+                                        onRemoveItem={handleRemoveItem}
+                                        onUpdateItem={handleUpdateItem}
 
-                                // Location Props (for items)
-                                locationOptions={itemLocationOptions}
-                                locationPagination={itemLocationPagination}
-                                locationInput={itemLocationInputValue}
-                                onLocationInputChange={handleItemLocationInputChange}
-                                onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
+                                        // Item Select Props
+                                        itemOptions={itemOptions}
+                                        itemPagination={itemPagination}
+                                        itemInput={itemInputValue}
+                                        onItemInputChange={handleItemInputChange}
+                                        onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
 
-                                // Class Props
-                                classOptions={classOptions}
-                                classPagination={classPagination}
-                                classInput={classInputValue}
-                                onClassInputChange={handleClassInputChange}
-                                onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
+                                        // Location Props (for items)
+                                        locationOptions={itemLocationOptions}
+                                        locationPagination={itemLocationPagination}
+                                        locationInput={itemLocationInputValue}
+                                        onLocationInputChange={handleItemLocationInputChange}
+                                        onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
 
-                                // Dept Props
-                                deptOptions={deptOptions}
-                                deptPagination={deptPagination}
-                                deptInput={deptInputValue}
-                                onDeptInputChange={handleDeptInputChange}
-                                onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
-                            />
+                                        // Class Props
+                                        classOptions={classOptions}
+                                        classPagination={classPagination}
+                                        classInput={classInputValue}
+                                        onClassInputChange={handleClassInputChange}
+                                        onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
+
+                                        // Dept Props
+                                        deptOptions={deptOptions}
+                                        deptPagination={deptPagination}
+                                        deptInput={deptInputValue}
+                                        onDeptInputChange={handleDeptInputChange}
+                                        onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
+                                    />
+                                )}
+
+                                {/* Files Tab */}
+                                {activeTab === 'files' && (
+                                    <FilesTab
+                                        fileList={formData?.files || []}
+                                        isLoading={false}
+                                        onAddFiles={handleAddFiles}
+                                    />
+                                )}
+                            </div>
                         </div>
 
                         {/* Form Actions */}

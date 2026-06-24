@@ -162,6 +162,10 @@ export const useQuotationCreate = () => {
         });
     };
 
+    const handleAddFiles = (files: any[]) => {
+        setFormData(prev => ({ ...prev, files }));
+    };
+
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
         if (!formData.entity) newErrors.entity = 'Customer wajib dipilih';
@@ -253,6 +257,7 @@ export const useQuotationCreate = () => {
         handleAddItem,
         handleRemoveItem,
         handleUpdateItem,
+        handleAddFiles,
         handleSubmit,
         masterData,
         loadingMasterData,

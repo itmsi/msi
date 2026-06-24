@@ -1,11 +1,16 @@
-import { apiGet, apiPost, apiPut, ApiResponse } from '@/helpers/apiHelper';
+import { apiGet, apiPost, apiPut, ApiResponse, apiPostMultipart } from '@/helpers/apiHelper';
 import {
     QuotationRequest,
     QuotationListResponse,
     QuotationDetailResponse,
     QuotationCreateRequest,
     QuotationUpdateRequest,
-    MasterDataFormFieldItems
+    MasterDataFormFieldItems,
+    SOAttachment,
+    SOAttachmentDelete,
+    SOAttachmentResponse,
+    SOAttachmentUpdate,
+    ResponseAttachUpdateItem,
 } from '../types/quotation';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -65,4 +70,34 @@ export class QuotationService {
         );
         return response.data;
     }
+
+
+    static async attachFileQUO(payload: SOAttachment): Promise<SOAttachmentResponse> {
+        const fd = new FormData();
+        fd.append('file', payload.file);
+        fd.append('file_name', payload.file_name);
+        fd.append('so_id', payload.so_id);
+        const response = await apiPostMultipart<SOAttachmentResponse>(`${API_BASE_URL}/netsuite/sales-orders/upload`, fd);
+        return response.data;
+    }
+
+    static async attachFileQOUpdate(payload: SOAttachmentUpdate): Promise<ResponseAttachUpdateItem> {
+        const fd = new FormData();
+        if (payload.file) fd.append('file', payload.file);
+        fd.append('so_id', payload.soId ?? '');
+        fd.append('file_name', payload.file_name);
+        fd.append('fileUrl', payload.fileUrl);
+        const response = await apiPostMultipart<ResponseAttachUpdateItem>(`${API_BASE_URL}/netsuite/sales-orders/upload-update`, fd);
+
+        return response.data;
+    }
+
+    static async attachFileQUODelete(payload: SOAttachmentDelete): Promise<SOAttachmentResponse> {
+        const requestData = {
+            fileUrl: payload.fileUrl
+        };
+        const response = await apiPost<SOAttachmentResponse>(`${API_BASE_URL}/netsuite/sales-orders/upload-delete`, requestData as Record<string, any>);
+        return response.data;
+    }
+
 }
