@@ -266,3 +266,87 @@ export interface BaseOption {
     id: number;
     name: string;
 }
+
+// ATTACH FILE LIST
+export interface AttachFileItem {
+    id?: string;
+    poId?: string;
+    po_id?: string;
+    fileUrl: string;
+    fileName: string;
+    storagePath?: string;
+    created_by_api?: string;
+}
+export interface ResponseAttachUpdateItem {
+    success: boolean;
+    data: AttachFileItem;
+    message: string;
+}
+export interface POAttachment {
+    po_id: string;
+    file_name: string;
+    file: File;
+}
+
+export interface POAttachmentUpdate {
+    file?: File;
+    poId?: string;
+    file_name: string;
+    fileUrl: string;
+    file_id?: string;
+}
+
+export interface POAttachmentDelete {
+    fileUrl: string;
+}
+
+export interface POAttachmentResponse {
+    success: boolean;
+    id: string;
+    poId: string;
+    fileUrl: string;
+    storagePath: string;
+    fileName: string;
+    message?: string;
+}
+
+// ATTACH FILE LIST
+export interface AttachFileItem {
+    id?: string;
+    fileUrl: string;
+    fileName: string;
+    storagePath?: string;
+    created_by_api?: string;
+}
+export interface ResponseAttachUpdateItem {
+    success: boolean;
+    data: AttachFileItem;
+    message: string;
+}
+export interface SOAttachment {
+    so_id: string;
+    file_name: string;
+    file: File;
+}
+
+export interface SOAttachmentUpdate {
+    file?: File;
+    soId?: string;
+    file_name: string;
+    fileUrl: string;
+    file_id?: string;
+}
+
+export interface SOAttachmentDelete {
+    fileUrl: string;
+}
+
+export interface SOAttachmentResponse {
+    success: boolean;
+    id: string;
+    soId: string;
+    fileUrl: string;
+    storagePath: string;
+    fileName: string;
+    message?: string;
+}

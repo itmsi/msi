@@ -10,8 +10,8 @@ import { MdDeleteOutline, MdEdit } from 'react-icons/md';
 import toast from 'react-hot-toast';
 
 import { FaFileExcel, FaFilePowerpoint, FaFileWord, FaRegFile, FaRegFilePdf } from 'react-icons/fa6';
-import { AttachFileItem } from '../../types/Quotation';
-import { QuotationService } from '../../services/QuotationService';
+import { AttachFileItem } from '../../types/quotation';
+import { QuotationService } from '../../services/quotationService';
 
 interface AttachFileItemLocal extends AttachFileItem {
     isNew?: boolean;
@@ -145,7 +145,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
         try {
             if (soId && editingFile) {
                 // Mode edit file yang sudah ada di server
-                const res = await QuotationService.attachFileSOUpdate({
+                const res = await QuotationService.attachFileQOUpdate({
                     file: selectedFile ?? undefined,
                     soId: String(soId),
                     file_name: entry.fileName,
@@ -185,7 +185,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
                 setEditingFile(null);
             } else {
                 // Mode tambah file baru (dengan atau tanpa soId)
-                const res = await QuotationService.attachFileSO({
+                const res = await QuotationService.attachFileQUO({
                     file: selectedFile!,
                     file_name: entry.fileName,
                     so_id: String(soId ?? 'temp-' + Date.now()),
@@ -235,7 +235,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
     const handleDelete = async (row: AttachFileItemLocal) => {
         setLoadingDelete(true);
         try {
-            const res = await QuotationService.attachFileSODelete({ fileUrl: row.fileUrl });
+            const res = await QuotationService.attachFileQUODelete({ fileUrl: row.fileUrl });
             if (res.success) {
                 if (row.isNew) {
                     const updated = newFiles.filter(
@@ -338,7 +338,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
                         </div>
                     )}
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
-                        
+
                         {/* File picker — selalu tampil, baik add maupun edit */}
                         <div className="flex flex-col gap-1">
                             <input
