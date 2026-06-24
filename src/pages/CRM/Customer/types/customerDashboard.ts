@@ -7,6 +7,7 @@ export interface CustomerRequest {
     page: number;
     limit: number;
     search: string;
+    customer_id?: string;
     sort_order: "asc" | "desc";
 }
 

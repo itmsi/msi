@@ -30,7 +30,7 @@ const RkabTable: React.FC<{
             selector: (row) => row.target_production || 0,
             center: true,
             wrap: true,
-            width: '150px',
+            width: '170px',
         },
         {
             name: 'Current Production ',

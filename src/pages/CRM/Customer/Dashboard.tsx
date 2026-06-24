@@ -18,6 +18,8 @@ import TerritoryTableCustomer from './components/TerritoryTableCustomer';
 import RkabTable from './components/RkabTable';
 import QuotationTable from './components/QuotationTable';
 import SalesOrderTable from './components/SalesOrderTable';
+import PageHeader from '@/components/common/PageHeader';
+import { useLocation } from 'react-router-dom';
 // import Badge from '@/components/ui/badge/Badge';
 
 echarts.use([
@@ -31,6 +33,8 @@ echarts.use([
 ]);
 
 export default function Dashboard() {
+    const location = useLocation();
+    const listRoute = `/crm/customer${location.search}`;
     const { customerInformation, customerData, loading } = useCustomerDashboard();
     const fleetData = customerData?.data_unit_per_segmentasi_iup_aktif || {};
     const totalFleet = Object.values(fleetData).reduce((sum, value) => sum + value, 0);
@@ -157,8 +161,12 @@ export default function Dashboard() {
                 description="Customer Dashboard - Motor Sights International"
                 image="/motor-sights-international.png"
             />
-
             <div className="space-y-5">
+
+                <PageHeader
+                    title="Customer Dashboard"
+                    backPath={listRoute}
+                />
                 {/* Customer Information Card */}
                 {customerInformation && (<>
                     <div className="flex justify-between items-center">
@@ -198,41 +206,41 @@ export default function Dashboard() {
 
                                 <div className={`space-y-3 ${(customerData?.data_customer?.contact_persons.length === 1 || customerData?.data_customer?.contact_persons.length === 0) ? '' : 'md:col-span-2'}`}>
                                     <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">PIC / Account Manager</p>
-                                    <div className='flex '>
-                                    <div className="flex-1 space-y-2">
-                                        <div className="flex items-start gap-2">
-                                            <LuUser className="h-4 w-4 text-slate-400" />
-                                            <div>
-                                                <p className="text-sm font-semibold text-slate-800">{customerInformation.contact_person}</p>
-                                                <p className="text-xs text-slate-500">{customerInformation.job_title}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start gap-2">
-                                            <LuPhone className="h-4 w-4 text-slate-400" />
-                                            <p className="text-sm text-slate-600">{customerInformation.customer_phone}</p>
-                                        </div>
-                                        <div className="flex items-start gap-2">
-                                            <LuMail className="h-4 w-4 text-slate-400" />
-                                            <p className="text-sm text-slate-600">{customerInformation.customer_email}</p>
-                                        </div>
-                                    </div>
-
-                                    {customerData?.data_customer?.contact_persons.map((site, index) => (
-                                        <div key={index} className="flex-1 space-y-2">
+                                    <div className='flex flex-wrap gap-6'>
+                                        <div className="flex-1 space-y-2">
                                             <div className="flex items-start gap-2">
                                                 <LuUser className="h-4 w-4 text-slate-400" />
-                                                <p className="text-sm font-semibold text-slate-800">{site.contact_person_name}</p>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-slate-800">{customerInformation.contact_person}</p>
+                                                    <p className="text-xs text-slate-500">{customerInformation.job_title}</p>
+                                                </div>
                                             </div>
                                             <div className="flex items-start gap-2">
                                                 <LuPhone className="h-4 w-4 text-slate-400" />
-                                                <p className="text-sm text-slate-600">{site.contact_person_phone}</p>
+                                                <p className="text-sm text-slate-600">{customerInformation.customer_phone}</p>
                                             </div>
                                             <div className="flex items-start gap-2">
                                                 <LuMail className="h-4 w-4 text-slate-400" />
-                                                <p className="text-sm text-slate-600">{site.contact_person_email}</p>
+                                                <p className="text-sm text-slate-600">{customerInformation.customer_email}</p>
                                             </div>
                                         </div>
-                                    ))}
+
+                                        {customerData?.data_customer?.contact_persons.map((site, index) => (
+                                            <div key={index} className="flex-1 space-y-2">
+                                                <div className="flex items-start gap-2">
+                                                    <LuUser className="h-4 w-4 text-slate-400" />
+                                                    <p className="text-sm font-semibold text-slate-800">{site.contact_person_name}</p>
+                                                </div>
+                                                <div className="flex items-start gap-2">
+                                                    <LuPhone className="h-4 w-4 text-slate-400" />
+                                                    <p className="text-sm text-slate-600">{site.contact_person_phone}</p>
+                                                </div>
+                                                <div className="flex items-start gap-2">
+                                                    <LuMail className="h-4 w-4 text-slate-400" />
+                                                    <p className="text-sm text-slate-600">{site.contact_person_email}</p>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                                 {/* <div className="space-y-3">
@@ -332,13 +340,19 @@ export default function Dashboard() {
                         </div>
                     )}
                 </div>
-
+                {/* POPULATION UNIT */}
+                <div className="bg-white shadow rounded-lg relative overflow-hidden">
+                    <div className="p-6 font-secondary">
+                        <h3 className="text-base font-secondary font-semibold text-gray-900 mb-4">Daftar Unit</h3>
+                        <UnitTable units={customerData?.units || []} loading={loading} />
+                    </div>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    {/* POPULATION UNIT */}
+                    {/* Quotations */}
                     <div className="bg-white shadow rounded-lg relative overflow-hidden">
                         <div className="p-6 font-secondary">
-                            <h3 className="text-base font-secondary font-semibold text-gray-900 mb-4">Daftar Unit</h3>
-                            <UnitTable units={customerData?.units || []} loading={loading} Icon={LuTruck} iconClassName="text-blue-600" />
+                            <h3 className="text-base font-secondary font-semibold text-gray-900 mb-4">Quotations</h3>
+                            <QuotationTable quotations={customerData?.data_quotations || []} loading={loading} Icon={LuTruck} iconClassName="text-blue-600" />
                         </div>
                     </div>
                     {/* POPULATION UNIT */}
@@ -358,22 +372,28 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-
+                {/* Sales Orders */}
+                <div className="bg-white shadow rounded-lg relative overflow-hidden">
+                    <div className="p-6 font-secondary">
+                        <h3 className="text-base font-secondary font-semibold text-gray-900 mb-4">Sales Orders</h3>
+                        <SalesOrderTable salesOrders={customerData?.data_sales_order || []} loading={loading}/>
+                    </div>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                     {/* Quotation */}
-                    <div className="bg-white shadow rounded-lg relative overflow-hidden">
+                    {/* <div className="bg-white shadow rounded-lg relative overflow-hidden">
                         <div className="p-6 font-secondary">
                             <h3 className="text-base font-secondary font-semibold text-gray-900 mb-4">Quotations</h3>
                             <QuotationTable quotations={customerData?.data_quotations || []} loading={loading} />
                         </div>
-                    </div>
+                    </div> */}
                     {/* Sales Orders */}
-                    <div className="bg-white shadow rounded-lg relative overflow-hidden">
+                    {/* <div className="bg-white shadow rounded-lg relative overflow-hidden">
                         <div className="p-6 font-secondary">
                             <h3 className="text-base font-secondary font-semibold text-gray-900 mb-4">Sales Orders</h3>
                             <SalesOrderTable salesOrders={customerData?.data_sales_order || []} loading={loading}/>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
