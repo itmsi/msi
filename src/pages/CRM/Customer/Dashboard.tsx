@@ -417,7 +417,7 @@ export default function Dashboard() {
                         </div>
                     </div> */}
 
-                    <div className="border-l-4 border-l-emerald-400">
+                    {/* <div className="border-l-4 border-l-emerald-400">
                         <div>
                             <div className="flex items-center gap-2">
                                 <LuLightbulb className="h-4 w-4 text-emerald-500" />
@@ -449,7 +449,7 @@ export default function Dashboard() {
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </div> */}
                 </div>
 
             </div>
