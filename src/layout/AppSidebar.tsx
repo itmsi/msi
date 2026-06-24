@@ -178,6 +178,13 @@ const AppSidebar: React.FC = () => {
                 { name: "Receipts", path: "/netsuite/receipts", allowedRoles: ['Manage Receipts Netsuite'] },
                 { name: "Bill Payment", path: "/netsuite/bill-payment", allowedRoles: ['Bill Payment Netsuite'] },
             ],
+        },
+        {
+            name: "Work Order",
+            icon: <TbReport />,
+            subItems: [
+                { name: "Manage Work Orders", path: "/workorders/manage"     },
+            ],
         }
     ], [buildPath]);
 

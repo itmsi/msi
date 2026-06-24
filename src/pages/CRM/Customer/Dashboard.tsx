@@ -11,13 +11,14 @@ import {
 } from 'echarts/components';
 import PageMeta from '@/components/common/PageMeta';
 import { useCustomerDashboard } from './hooks/useCustomerDashboard';
-import { LuTruck, LuLayers,LuClipboardCheck, LuReceiptText, LuBuilding2, LuCalendar, LuUser, LuMapPin, LuPhone, LuMail } from 'react-icons/lu';
+import { LuTruck, LuLayers,LuClipboardCheck, LuReceiptText, LuBuilding2, LuCalendar, LuUser, LuMapPin, LuPhone, LuMail, LuLightbulb, LuTarget, LuChevronRight } from 'react-icons/lu';
 import { StatCard } from './components/StatCard';
 import UnitTable from './components/UnitTable';
 import TerritoryTableCustomer from './components/TerritoryTableCustomer';
 import RkabTable from './components/RkabTable';
 import QuotationTable from './components/QuotationTable';
 import SalesOrderTable from './components/SalesOrderTable';
+import Badge from '@/components/ui/badge/Badge';
 
 echarts.use([
     TitleComponent,
@@ -131,6 +132,16 @@ export default function Dashboard() {
             ],
         };
     }, [customerData?.data_unit_per_brand_iup_aktif, customerData?.data_unit_per_brand_iup_non_aktif]);
+
+    const opportunities = (customerData?.data_rkab || []).map(item => {
+            const gap = item.target_production - item.current_production;
+            const achievement = (item.current_production / item.target_production) * 100;
+            return { ...item, gap, achievement };
+        })
+        .filter(item => item.gap > 0)
+        .sort((a, b) => b.gap - a.gap);
+
+    const formatNumber = (value: number) => new Intl.NumberFormat("id-ID").format(value);
 
     if (loading)
         return (
@@ -365,8 +376,8 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="border-l-4 border-l-amber-400">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* <div className="border-l-4 border-l-amber-400">
                         <div>
                             <div className="flex items-center gap-2">
                                 <LuCircleAlert className="h-4 w-4 text-amber-500" />
@@ -404,7 +415,7 @@ export default function Dashboard() {
                             ))
                         )}
                         </div>
-                    </div>
+                    </div> */}
 
                     <div className="border-l-4 border-l-emerald-400">
                         <div>
@@ -415,10 +426,10 @@ export default function Dashboard() {
                             <div>Peluang berdasarkan gap produksi RKAB IUP</div>
                         </div>
                         <div className="space-y-3">
-                            {opportunities.map((opp) => (
-                                <div key={opp.iup} className="bg-slate-50 rounded-lg p-3 border space-y-2">
+                            {opportunities.map((opp, index) => (
+                                <div key={index} className="bg-slate-50 rounded-lg p-3 border space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="font-mono text-xs font-medium text-slate-600">{opp.iup}</span>
+                                        <span className="font-mono text-xs font-medium text-slate-600">{opp.nama_iup}</span>
                                         <Badge variant="outline">
                                             Gap: {formatNumber(opp.gap)} ton
                                         </Badge>
@@ -439,7 +450,7 @@ export default function Dashboard() {
                             ))}
                         </div>
                     </div>
-                </div> */}
+                </div>
 
             </div>
         </>
