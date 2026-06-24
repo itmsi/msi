@@ -1073,7 +1073,7 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
-        path: '/work-order/manage',
+        path: '/workorders/manage',
         name: 'Manage Work Orders',
         isProtected: true,
         roles: ['ADMIN'],
