@@ -133,15 +133,15 @@ export default function Dashboard() {
         };
     }, [customerData?.data_unit_per_brand_iup_aktif, customerData?.data_unit_per_brand_iup_non_aktif]);
 
-    const opportunities = (customerData?.data_rkab || []).map(item => {
-            const gap = item.target_production - item.current_production;
-            const achievement = (item.current_production / item.target_production) * 100;
-            return { ...item, gap, achievement };
-        })
-        .filter(item => item.gap > 0)
-        .sort((a, b) => b.gap - a.gap);
+    // const opportunities = (customerData?.data_rkab || []).map(item => {
+    //         const gap = item.target_production - item.current_production;
+    //         const achievement = (item.current_production / item.target_production) * 100;
+    //         return { ...item, gap, achievement };
+    //     })
+    //     .filter(item => item.gap > 0)
+    //     .sort((a, b) => b.gap - a.gap);
 
-    const formatNumber = (value: number) => new Intl.NumberFormat("id-ID").format(value);
+    // const formatNumber = (value: number) => new Intl.NumberFormat("id-ID").format(value);
 
     if (loading)
         return (
