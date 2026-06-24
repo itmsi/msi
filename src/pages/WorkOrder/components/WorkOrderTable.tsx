@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import CustomDataTable from '@/components/ui/table/CustomDataTable';
-import { formatDateTime } from '@/helpers/generalHelper';
+import { formatDate } from '@/helpers/generalHelper';
 import { WorkOrderItem, WorkOrderStatus } from '../types/workorder';
 import { LuCheck, LuPaperclip, LuPause, LuPlay } from 'react-icons/lu';
 import Button from '@/components/ui/button/Button';
@@ -55,7 +55,7 @@ const WorkOrderTable: React.FC<WorkOrderTableProps> = ({
                     <div className="font-medium text-[#0253a5]">
                         {row.work_order_no || '-'}
                     </div>
-                    <div className="block text-sm text-gray-500">{formatDateTime(row.work_order_date)}</div>
+                    <div className="block text-sm text-gray-500">{formatDate(row.work_order_date)}</div>
                 </div>
             </>),
             sortable: false,
@@ -220,7 +220,7 @@ const WorkOrderTable: React.FC<WorkOrderTableProps> = ({
             cell: (row) => (
                 <div className="text-sm text-gray-800 max-w-xs space-y-2">
                     <p className="leading-relaxed text-gray-700">
-                        {row.repair_start_date ? moment(row.repair_start_date, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss') : ''}
+                        {row.repair_start_date ? moment(row.repair_start_date, 'YYYY-MM-DD HH:mm:ss').format('DD MMM YYYY HH:mm:ss') : ''}
                     </p>
                 </div>
             ),
@@ -233,7 +233,7 @@ const WorkOrderTable: React.FC<WorkOrderTableProps> = ({
             cell: (row) => (
                 <div className="text-sm text-gray-800 max-w-xs space-y-2">
                     <p className="leading-relaxed text-gray-700">
-                        {row.repair_end_date ? moment(row.repair_end_date, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss') : ''}
+                        {row.repair_end_date ? moment(row.repair_end_date, 'YYYY-MM-DD HH:mm:ss').format('DD MMM YYYY HH:mm:ss') : ''}
                     </p>
                 </div>
             ),
