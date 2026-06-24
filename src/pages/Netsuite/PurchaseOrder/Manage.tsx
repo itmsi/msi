@@ -18,6 +18,7 @@ import FilterSection from './components/FilterSection';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { createByDateColumn } from '@/components/ui/table/columnUtils';
 import { FaRegFilePdf } from 'react-icons/fa6';
+import NavigationPO from './components/NavigationPO';
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -178,7 +179,7 @@ export default function Manage() {
             wrap: true,
             width: '300px'
         },
-        createByDateColumn('Updated By', 'last_modified', 'custbody_msi_createdby_api', '320px'),
+        createByDateColumn('Updated By', 'last_modified', 'updated_by_name', '320px'),
         createActionsColumn([
             {
                 icon: FaRegFilePdf,
@@ -294,11 +295,12 @@ export default function Manage() {
                 image="/motor-sights-international.png"
             />
             
+            <NavigationPO />
             <div className="space-y-6">
                 {/* Header */}
                 <div className="bg-white shadow rounded-lg mb-3">
                     <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
+                        <div className="flex flex-col md:flex-row lg:justify-between lg:items-center ">
                             <div>
                                 <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
                                     Purchase Orders
@@ -307,7 +309,7 @@ export default function Manage() {
                                     Manage Purchase Orders
                                 </p>
                             </div>
-                            <div className="flex space-x-3">
+                            <div className="flex space-x-3 lg:mt-0 mt-3">
                                 <PermissionGate permission="read">
                                     <Button
                                         onClick={() => handleSync()}

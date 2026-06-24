@@ -108,7 +108,7 @@ const Tooltip: React.FC<TooltipProps> = ({
                     style = {
                         position: 'fixed',
                         top: triggerRect.top + triggerRect.height / 2,
-                        left: triggerRect.left - tooltipWidth - 8,
+                        left: triggerRect.left - tooltipWidth - 7,
                         maxWidth: maxWidth ? maxWidth : 'auto',
                         textAlign: 'center',
                         zIndex: 9999,

@@ -1,7 +1,7 @@
 import PageMeta from '@/components/common/PageMeta'
 import Button from '@/components/ui/button/Button'
 import { useEffect, useState } from 'react'
-import { MdOutlineSync, MdVerified } from 'react-icons/md'
+import { MdHistory, MdInventory2, MdOutlineAttachFile, MdOutlineComment, MdOutlineSync, MdReceiptLong, MdVerified } from 'react-icons/md'
 import { useNavigate } from 'react-router-dom';
 import { usePurchaseOrderEdit } from './hooks/usePurchaseOrderEdit';
 import PurchaseOrderFields from './components/purchaseOrderFields';
@@ -250,7 +250,7 @@ export default function Edit() {
     }, [poDetail, locationInitialized, classInitialized, departmentInitialized, isInitialLoadComplete]);
 
     const handleCancel = () => {
-        navigate('/netsuite/purchase-order');
+        navigate('/netsuite/purchase-order/manage');
     }
 
     const [isOpenApproval, setIsOpenApproval] = useState(false);
@@ -309,6 +309,7 @@ export default function Edit() {
             </Button>
         </PermissionGate>
     );
+    
     return (
         <>
             <PageMeta
@@ -327,7 +328,7 @@ export default function Edit() {
                         {/* Header */}
                         <PageHeader
                             title="Edit Purchase Order"
-                            backPath="/netsuite/purchase-order"
+                            backPath="/netsuite/purchase-order/manage"
                             subtitle={poDetail?.po_number || '-'}
                             actions={
                                 <>
@@ -501,57 +502,57 @@ export default function Edit() {
 
                             <div>
                                 {/* Tab Navigation */}
-                                <div className="border-b border-gray-200 px-6 overflow-auto">
-                                    <nav className="flex space-x-8 overflow-auto">
+                                <div className="border-b border-gray-200 overflow-auto">
+                                    <nav className="flex space-x-2 overflow-auto">
                                         <button
                                             onClick={() => setActiveTab('items')}
-                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                            className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
                                                 activeTab === 'items'
-                                                    ? 'border-blue-500 text-blue-600'
+                                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                         >
-                                            Items
+                                            <MdInventory2 /> Items
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('files')}
-                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                            className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
                                                 activeTab === 'files'
-                                                    ? 'border-blue-500 text-blue-600'
+                                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                         >
-                                            Files
+                                            <MdOutlineAttachFile /> Files
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('usernotes')}
-                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                            className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
                                                 activeTab === 'usernotes'
-                                                    ? 'border-blue-500 text-blue-600'
+                                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                         >
-                                            User Notes
+                                            <MdOutlineComment /> User Notes
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('receipt')}
-                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                            className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
                                                 activeTab === 'receipt'
-                                                    ? 'border-blue-500 text-blue-600'
+                                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                         >
-                                            Receipt & Bill
+                                            <MdReceiptLong /> Receipt & Bill
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('historyreceipt')}
-                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                            className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
                                                 activeTab === 'historyreceipt'
-                                                    ? 'border-blue-500 text-blue-600'
+                                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                         >
-                                            History Receipt
+                                            <MdHistory /> History Receipt
                                         </button>
                                     </nav>
                                 </div>
@@ -714,7 +715,7 @@ export default function Edit() {
                                             </Button>
                                         </PermissionGate>
                                     )}
-                                    {poDetail?.approvalstatus === 2 && (poDetail?.po_status_label !== 'Pending Receipt') && (
+                                    {poDetail?.approvalstatus === 2 && (poDetail?.po_status_label !== 'Pending Receipt' && poDetail?.po_status_label !== 'Pending Bill') && (
                                         <PermissionGate permission={["create", "update"]}>
                                             <Button
                                                 type="button"
@@ -800,7 +801,7 @@ export default function Edit() {
                         isOpen={isOpenApproval}
                         onClose={() => setIsOpenApproval(false)}
                         poId={selectedPoIdApproval ? parseInt(selectedPoIdApproval) : null}
-                        onSuccess={() => navigate('/netsuite/purchase-order')}
+                        onSuccess={() => navigate('/netsuite/purchase-order/manage')}
                         submit={true}
                         titleModal="Submit Approval"
                         descriptionModal="Masukkan catatan untuk proses approval"
@@ -810,7 +811,7 @@ export default function Edit() {
                         isOpen={isOpen}
                         onClose={() => setIsOpen(false)}
                         poId={selectedPoId ? parseInt(selectedPoId) : null}
-                        onSuccess={() => navigate('/netsuite/purchase-order')}
+                        onSuccess={() => navigate('/netsuite/purchase-order/manage')}
                         reopen={true}
                         titleModal="Re-Open Approval"
                         descriptionModal="Masukkan catatan untuk proses re-open approval"
@@ -820,7 +821,7 @@ export default function Edit() {
                         isOpen={isOpenRejected}
                         onClose={() => setIsOpenRejected(false)}
                         poId={selectedPoIdRejected ? parseInt(selectedPoIdRejected) : null}
-                        onSuccess={() => navigate('/netsuite/purchase-order')}
+                        onSuccess={() => navigate('/netsuite/purchase-order/manage')}
                         resubmit={true}
                         titleModal="Re-Submit Approval"
                         descriptionModal="Masukkan catatan untuk proses re-submit approval"

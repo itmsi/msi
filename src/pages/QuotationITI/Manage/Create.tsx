@@ -34,7 +34,7 @@ import { ItemProductService } from '../Product/services/productService';
 import { QuotationService } from './services/quotationService';
 import ProductDetailDrawer from './components/ProductDetailDrawer';
 import { BankSelectOption, useBankSelect } from '../hooks/useBankSelect';
-import { useEmployeeSelect } from '../hooks/useEmployeeSelect';
+import { useEmployeeSelect } from '@/hooks/useEmployeeSelect';
 import { useCustomerSelect } from '../hooks/useCustomerSelect';
 import { FaEye } from 'react-icons/fa6';
 import { IslandSelectOption, useIslandSelect } from '@/hooks/useIslandSelect';

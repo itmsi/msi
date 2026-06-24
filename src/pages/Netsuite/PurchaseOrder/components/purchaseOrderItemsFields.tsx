@@ -1,6 +1,6 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
-import { handleKeyPress, formatCurrencyTyping, parseCurrencyIDR, handleCurrencyKeyPress, formatNumberPriceKoma, formatCurrencyDynamic } from '@/helpers/generalHelper';
+import { handleKeyPress, parseCurrencyIDR, formatNumberPriceKoma, formatCurrencyDynamic, handleDecimalInput, formatNumberUSTyping, parseNumberUS } from '@/helpers/generalHelper';
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { PurchaseOrderForm, MasterDataFormFieldItems, TablePOItem } from '../types/purchaseorder';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -168,10 +168,9 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         const taxPercentage = extractTaxPercentage(taxCodeName);
         const taxAmount = (numericAmount * taxPercentage) / 100;
         const grossAmount = numericAmount + taxAmount;
-        
         return { 
-            taxAmount: Math.round(taxAmount), 
-            grossAmount: Math.round(grossAmount)
+            taxAmount: taxAmount, 
+            grossAmount: grossAmount
         };
     };
     
@@ -301,31 +300,43 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        row.custcol_msi_fob && row.custcol_msi_fob > 0 ? formatCurrencyTyping(row.custcol_msi_fob.toString()) : '-'
+                        row.custcol_msi_fob && row.custcol_msi_fob > 0 ? formatNumberUSTyping(String(row.custcol_msi_fob)) : '-'
                     }</p>
                 ) : (
                 <Input
                     name={`custcol_msi_fob_${index}`}
                     type="text"
-                    value={row.custcol_msi_fob && row.custcol_msi_fob > 0 ? formatCurrencyTyping(row.custcol_msi_fob.toString()) : ''}
-                    onKeyPress={handleCurrencyKeyPress}
+                    value={row.custcol_msi_fob && row.custcol_msi_fob > 0
+                        ? formatNumberUSTyping(String(row.custcol_msi_fob))
+                        : ''}
+                    // onKeyPress={handleCurrencyKeyPress}
                     onChange={(e) => {
                         const rawValue = e.target.value;
-                        const fobVal = parseCurrencyIDR(rawValue);
-                        const landedCost = toNumber(row.custcol_me_landed_cost);
+                        const fobVal = parseNumberUS(rawValue);
+
+                        handleDecimalInput(
+                            rawValue,
+                            (validValue) => updateItemById(index as number, 'custcol_msi_fob', validValue),
+                            () => updateItemById(index as number, 'custcol_msi_fob', null),
+                            true,
+                            12,
+                            4
+                        );
+                        
+                        const landedCost = parseNumberUS(String(row.custcol_me_landed_cost));
                         const quantity = toNumber(row.qty) || 1;
                         
                         const rate = fobVal + landedCost;
-                        const amount = quantity * rate;
+                        const amount = quantity * Number(rate);
                         
-                        updateItemById(index as number, 'custcol_msi_fob', fobVal);
+                        // updateItemById(index as number, 'custcol_msi_fob', fobVal);
                         updateItemById(index as number, 'rate', rate);
                         updateItemById(index as number, 'amount', amount);
                         updateItemById(index as number, 'total', amount);
                         
                         updateTaxCalculation(index as number, amount, row.taxcode_name);
                     }}
-                    onFocus={(e) => e.target.select()}
+                    // onFocus={(e) => e.target.select()}
                     className="border-1 rounded p-1 px-3 w-[285px] text-center"
                     placeholder="0"
                 />
@@ -341,31 +352,41 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatCurrencyTyping(row.custcol_me_landed_cost.toString()) : '-'
+                        row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatNumberUSTyping(row.custcol_me_landed_cost.toString()) : '-'
                     }</p>
                 ) : (
                 <Input
                     name={`custcol_me_landed_cost_${index}`}
                     type="text"
-                    value={row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatCurrencyTyping(row.custcol_me_landed_cost.toString()) : '0'}
-                    onKeyPress={handleCurrencyKeyPress}
+                    value={row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatNumberUSTyping(String(row.custcol_me_landed_cost)) : '0'}
+                    // onKeyPress={handleCurrencyKeyPress}
                     onChange={(e) => {
                         const rawValue = e.target.value;
-                        const costVal = parseCurrencyIDR(rawValue);
-                        const fob = toNumber(row.custcol_msi_fob);
+                        const costVal = parseNumberUS(String(rawValue));
+                        const fob = parseNumberUS(String(row.custcol_msi_fob));
                         const quantity = toNumber(row.qty) || 1;
                         
+                        handleDecimalInput(
+                            rawValue,
+                            (validValue) => updateItemById(index as number, 'custcol_me_landed_cost', validValue),
+                            () => updateItemById(index as number, 'custcol_me_landed_cost', null),
+                            true,
+                            12,
+                            4
+                        );
+
                         const rate = fob + costVal;
                         const amount = quantity * rate;
                         
-                        updateItemById(index as number, 'custcol_me_landed_cost', costVal);
+
+                        // updateItemById(index as number, 'custcol_me_landed_cost', costVal);
                         updateItemById(index as number, 'rate', rate);
                         updateItemById(index as number, 'amount', amount);
                         updateItemById(index as number, 'total', amount);
                         
                         updateTaxCalculation(index as number, amount, row.taxcode_name);
                     }}
-                    onFocus={(e) => e.target.select()}
+                    // onFocus={(e) => e.target.select()}
                     className="border-1 rounded p-1 px-3 w-[285px] text-center"
                     placeholder="0"
                 />
@@ -381,13 +402,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        formatCurrencyDynamic(row.rate.toString(), formData?.currency_symbol || '')
+                        row.rate && row.rate > 0 ? formatNumberUSTyping(String(row.rate)) : '-'
                     }</p>
                 ) : (
                 <Input
                     name={`rate_${index}`}
                     type="text"
-                    value={row.rate && row.rate > 0 ? formatCurrencyDynamic(row.rate.toString(), formData?.currency_symbol || '') : ''}
+                    value={row.rate && row.rate > 0 ? formatNumberUSTyping(String(row.rate)) : ''}
                     disabled={true}
                     readonly={true}
                     className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
@@ -405,13 +426,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                        row.amount && row.amount > 0 ? formatCurrencyTyping(row.amount.toString()) : '-'
+                        row.amount && row.amount > 0 ? formatNumberUSTyping(String(row.amount)) : '-'
                     }</p>
                 ) : (
                 <Input
                     name={`amount_${index}`}
                     type="text"
-                    value={row.amount && row.amount > 0 ? formatNumberPriceKoma(row.amount) : ''}
+                    value={row.amount && row.amount > 0 ? formatNumberUSTyping(String(row.amount)) : ''}
                     disabled={true}
                     readonly={true}
                     className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
@@ -446,6 +467,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             if (option) {
                                 updateItemById(index as number, 'taxcode', parseInt(option.value));
                                 updateItemById(index as number, 'taxcode_name', option.label);
+                                updateItemById(index as number, 'tax_rate', option.label);
                                 
                                 const currentAmount = toNumber(row.amount);
                                 updateTaxCalculation(index as number, currentAmount, option.label);
@@ -453,6 +475,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                                 // Clear tax code
                                 updateItemById(index as number, 'taxcode', 0);
                                 updateItemById(index as number, 'taxcode_name', '');
+                                updateItemById(index as number, 'tax_rate', '');
                                 
                                 const currentAmount = toNumber(row.amount);
                                 updateTaxCalculation(index as number, currentAmount);
@@ -641,7 +664,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             width: '300px',
             sortable: false
         },
-        ...((formData.approvalstatus !== 2 && formData.approvalstatus !== 3) ? [createActionsColumn([
+        ...((formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? [] : [createActionsColumn([
             {
                 icon: MdDeleteOutline,
                 onClick: (row: TablePOItem) => {
@@ -651,7 +674,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 tooltip: 'Remove Item',
                 permission: 'delete' as const
             }
-        ])] : [])
+        ])])
     ];
     
     if (loadingMasterData) {
@@ -721,7 +744,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 {/* Products Table */}
                 {formData.items && formData.items.length > 0 ? (
                     <div
-                        className="mt-6 font-secondary overflow-y-auto"
+                        className="mt-6 font-secondary overflow-y-auto border-b border-gray-200"
                         style={{ maxHeight: formData.items?.length > 100 ? '920px' : '625px' }}
                     >
                         <CustomDataTable
@@ -789,12 +812,14 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string, 
 
     const summary = useMemo(() => {
         const subtotal = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.amount)), 0);
-        const totalTax = items.reduce((sum, item) => sum + toNumber(item.tax_amount), 0);
-        const grandTotal = serverTotal !== null ? serverTotal : items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
+        const totalTax = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.tax_amount)), 0);
+        const localGrandTotal = items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
+        // serverTotal override kalkulasi lokal; fallback ke lokal jika tidak ada
+        const grandTotal = serverTotal != null ? serverTotal : localGrandTotal;
         const totalQty = items.reduce((sum, item) => sum + toNumber(item.qty), 0);
-
+        
         return { subtotal, totalTax, grandTotal, totalQty };
-    }, [items]);
+    }, [items, serverTotal]);
 
     return (
             <div className="w-full px-0 space-y-3">
@@ -813,7 +838,7 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string, 
                     </div>
                     <div className="border-t border-gray-300 pt-3 flex justify-between text-sm font-primary-bold">
                         <span>Grand Total</span>
-                        <span className="text-blue-700">{formatCurrencyDynamic(Number(summary.grandTotal), currency)}</span>
+                        <span className="text-blue-700">{formatCurrencyDynamic(summary.grandTotal, currency)}</span>
                     </div>
                 </div>
             </div>

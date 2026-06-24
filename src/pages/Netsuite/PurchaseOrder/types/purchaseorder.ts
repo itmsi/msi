@@ -25,8 +25,10 @@ export interface PurchaseOrderRequest {
     search: string;
     subsidiary?: string;
     location?: string;
+    employee?: string;
     approvalstatus?: string | null;
     po_status: string;
+    created_by?: string;
 }
 export interface PurchaseOrderItem {
     id: number;
@@ -98,9 +100,11 @@ export interface PurchaseOrderForm {
     department_name?: string | null;
     custbody_msi_createdby_api?: string | null;
     custbody_me_validity_date?: string | null;
+    created_by_name?: string | null;
     nextapprover?: string | null;
     approvalstatus?: number | null;
     po_status_label?: string | null;
+    foreigntotal?: number | null;
     // description: string | null;
     // note: string | null;
     items: TablePOItem[];
@@ -328,6 +332,7 @@ export interface PODetailData {
     approvalstatus_label: string;
     approvalstatus: number;
     nextapprover?: string | null;
+    created_by_name?: string | null;
     custbody_me_wf_created_by: number;
     custbody_me_wf_in_delegation: string;
     custbody_me_delegate_approver: number | null;
@@ -453,6 +458,7 @@ export interface PurchaseOrderFormUpdate {
     department?: number;
     grossamt?: number;
     custbody_me_validity_date?: string;
+    foreigntotal?: number;
     items?: PurchaseOrderUpdateItem[];
     files?: AttachFileItem[];
 }
@@ -706,4 +712,67 @@ export interface POAttachmentResponse {
     storagePath: string;
     fileName: string;
     message?: string;
+}
+
+// DASHBOARD
+export interface PurchaseOrderDashboardRequest {
+    page: number;
+    limit: number;
+    sort_by: string;
+    sort_order: 'asc' | 'desc';
+    search?: string;
+    classes?: string;
+    subsidiary?: string;
+    location?: string;
+    po_status?: string;
+    approvalstatus?: string;
+}
+export interface PurchaseOrderDashboardItem {
+    id: string;
+    po_id: string;
+    subsidiary_display: string;
+    po_number: string;
+    po_date: string;
+    approvalstatus: number;
+    approvalstatus_display: string;
+    nextapprover: string;
+    po_status: string;
+    po_status_label: string;
+    memo: string;
+    vendor_name: string;
+    currency_symbol: string;
+    total: string;
+    custbody_msi_createdby_api: string;
+    last_modified: string;
+    created_by_name: string;
+}
+interface PurchaseOrderDashboardSummary {
+    pending_approval: number;
+    pending_receipt: number;
+    pending_bill: number;
+}
+
+export interface PurchaseOrderDashboardItems {
+    pending_approval: PurchaseOrderDashboardItem[];
+    pending_receipt: PurchaseOrderDashboardItem[];
+    pending_bill: PurchaseOrderDashboardItem[];
+}
+
+export interface DashboardChartData {
+    pending_approval_per_subsidiary: Record<string, number>;
+    status_po_per_subsidiary: Record<string, PurchaseOrderDashboardSummary>;
+    total_po_per_subsidiary: Record<string, number>;
+}
+
+export interface PurchaseOrderDataDashboard {
+    // items: PurchaseOrderDashboardItem[];
+    list_tabel: PurchaseOrderDashboardItems;
+    total_data: PurchaseOrderDashboardSummary;
+    chart_data: DashboardChartData;
+}
+
+export interface GetPurchaseOrderListResponse {
+    data: PurchaseOrderDataDashboard;
+    sync_info: SyncInfo;
+    message: string;
 }

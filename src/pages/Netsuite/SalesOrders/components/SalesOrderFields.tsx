@@ -280,7 +280,7 @@ export default function SalesOrderFields({
                         <div>
                             <Label htmlFor="so-entity">Customer <span className="text-red-500">*</span></Label>
                             {(formData.custbody_me_approval_status === 2 || formData.custbody_me_approval_status === 3) || (formData.custbody_me_approval_status === 1 && formData.nextapprover !== null) ? (
-                                <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{formData.customer_name}</p>
+                                <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{selectedCustomer?.label || '-'}</p>
                             ) : (<>
                                 <CustomAsyncSelect
                                     name="entity"
@@ -312,7 +312,7 @@ export default function SalesOrderFields({
                         <div>
                             <Label htmlFor="so-terms">Terms</Label>
                             {(formData.custbody_me_approval_status === 2 || formData.custbody_me_approval_status === 3) || (formData.custbody_me_approval_status === 1 && formData.nextapprover !== null) ? (
-                                <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{formData.terms_name}</p>
+                                <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{selectedTerm?.label || '-'}</p>
                             ) : (<>
                             <CustomAsyncSelect
                                 name="terms"

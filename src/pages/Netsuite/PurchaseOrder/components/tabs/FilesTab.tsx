@@ -28,6 +28,11 @@ interface FilesTabProps {
 
 const emptyEntry: AttachFileItem = { po_id: '', fileUrl: '', fileName: '' };
 
+interface AddEntryParams {
+    selectedFile?: File;
+    fileName?: string;
+}
+
 // Get document icon based on file type
 const getDocumentIcon = (fileName: string) => {
     const lowerFileName = fileName.toLowerCase();
@@ -83,10 +88,13 @@ const FilesTab: React.FC<FilesTabProps> = ({
             e.target.value = '';
             return;
         }
-
         setSelectedFile(file);
-        setFileName(file.name);
+        setFileName(file.name.replace(/\.[^/.]+$/, ''));
         setEntryError('');
+        setEntry(prev => ({ ...prev, fileName: file.name.replace(/\.[^/.]+$/, '') }));
+        // if (!editingFile) {
+            handleAddEntry({ selectedFile: file, fileName: file.name.replace(/\.[^/.]+$/, '') });
+        // }
     };
 
     // Gabungkan file dari server (minus yang dihapus) + file baru dengan flag isNew
@@ -101,15 +109,19 @@ const FilesTab: React.FC<FilesTabProps> = ({
         onAddFiles?.([...existingFiles, ...updatedNewFiles]);
     };
 
-    const handleAddEntry = async () => {
-        if (!entry.fileName.trim()) {
+    const handleAddEntry = async ({ selectedFile: selectedFileParam, fileName: fileNameParam }: AddEntryParams = {}) => {
+        const selectedFileState = selectedFile ?? undefined;
+        const finalSelectedFile = selectedFileParam ?? selectedFileState;
+        const finalFileName = (fileNameParam ?? entry.fileName).trim();
+
+        if (!finalFileName) {
             setEntryError('File Name is required');
             return;
         }
 
         // Cek duplikat: fileUrl dan fileName sama dengan yang sudah ada
         const isDuplicate = allFiles.some(
-            f => f.fileUrl === entry.fileUrl.trim() && f.fileName === entry.fileName.trim()
+            f => f.fileUrl === entry.fileUrl.trim() && f.fileName === finalFileName
                 && !(editingFile && f.fileUrl === editingFile.fileUrl && f.fileName === editingFile.fileName)
         );
         if (isDuplicate) {
@@ -119,17 +131,11 @@ const FilesTab: React.FC<FilesTabProps> = ({
 
         // Cek nama file sudah dipakai
         const isDuplicateName = allFiles.some(
-            f => f.fileName.trim().toLowerCase() === entry.fileName.trim().toLowerCase()
+            f => f.fileName.trim().toLowerCase() === finalFileName.toLowerCase()
                 && !(editingFile && f.fileUrl === editingFile.fileUrl && f.fileName === editingFile.fileName)
         );
         if (isDuplicateName) {
             setEntryError('File Name already in use, please choose a different name');
-            return;
-        }
-
-
-        if (!selectedFile) {
-            setEntryError('Pilih file terlebih dahulu');
             return;
         }
 
@@ -138,9 +144,9 @@ const FilesTab: React.FC<FilesTabProps> = ({
             if (poId && editingFile) {
                 // Mode edit file yang sudah ada di server
                 const res = await PurchaseOrderService.attachFilePOUpdate({
-                    file: selectedFile,
+                    ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
                     poId: String(poId),
-                    file_name: entry.fileName,
+                    file_name: finalFileName,
                     fileUrl: editingFile.fileUrl ?? 'kosong',
                 });
 
@@ -177,9 +183,16 @@ const FilesTab: React.FC<FilesTabProps> = ({
                 setEditingFile(null);
             } else {
                 // Mode tambah file baru (dengan atau tanpa poId)
+                if (!finalSelectedFile) {
+                    setEntryError('Pilih file terlebih dahulu');
+                    return;
+                }
+
+                const fileToUpload: File = finalSelectedFile;
+
                 const res = await PurchaseOrderService.attachFilePO({
-                    file: selectedFile,
-                    file_name: entry.fileName,
+                    file: fileToUpload,
+                    file_name: finalFileName,
                     po_id: String(poId ?? 'temp-' + Date.now()),
                 });
 
@@ -213,6 +226,11 @@ const FilesTab: React.FC<FilesTabProps> = ({
 
     const handleEdit = (row: AttachFileItemLocal) => {
         setEditingFile(row);
+        setSelectedFile(null);
+        setFileName(row.fileName);
+        if (fileAttachRef.current) {
+            fileAttachRef.current.value = '';
+        }
         setEntry({ po_id: row.po_id ?? '', fileUrl: row.fileUrl, fileName: row.fileName });
         setShowForm(true);
         setEntryError('');
@@ -220,6 +238,11 @@ const FilesTab: React.FC<FilesTabProps> = ({
 
     const handleCancelEdit = () => {
         setEditingFile(null);
+        setSelectedFile(null);
+        setFileName('');
+        if (fileAttachRef.current) {
+            fileAttachRef.current.value = '';
+        }
         setEntry(emptyEntry);
         setEntryError('');
     };
@@ -302,7 +325,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
             <Button
                 onClick={() => setShowForm(prev => !prev)}
                 type="button"
-                className="flex items-center gap-2 bg-blue-500 hover:text-white hover:bg-blue-600 ring-blue-800 rounded-xl text-xs p-3 mb-4"
+                className="flex items-center gap-2 bg-[#0253a5] hover:text-white hover:bg-[#023e7d] min-w-[150px] ring-blue-800 rounded-xl text-xs p-3 mb-4 shadow-sm"
             >
                 <FaPaperclip />
                 <span>Attach Files</span>
@@ -343,11 +366,11 @@ const FilesTab: React.FC<FilesTabProps> = ({
                             />
                             <label
                                 htmlFor="po-file-upload"
-                                className="flex items-center gap-2 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 min-h-[38px]"
+                                className="flex items-center justify-center gap-2 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 min-h-[38px] w-[160px]"
                             >
                                 <FaPaperclip size={12} />
-                                <span className="truncate max-w-[160px]">
-                                    {fileName || 'Pilih file...'}
+                                <span>
+                                    {fileName || 'Attach file'}
                                 </span>
                             </label>
                             {fileName && (

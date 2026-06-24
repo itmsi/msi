@@ -23,10 +23,10 @@ const calcLineAmounts = (line: PODetailLine) => {
     })();
     // Recalculate jika tax1amt null atau 0 padahal taxrate ada (netamount null case)
     const needsCalcTax = (line.tax1amt == null || line.tax1amt === 0) && taxRate > 0;
-    const taxAmount = needsCalcTax ? Math.round((amount * taxRate) / 100) : (line.tax1amt ?? 0);
+    const taxAmount = needsCalcTax ? (amount * taxRate) / 100 : (line.tax1amt ?? 0);
     // Recalculate grossamt jika null atau tidak konsisten dengan amount + taxAmount
     const needsCalcGross = line.grossamt == null || line.grossamt === 0;
-    const grossAmount = needsCalcGross ? Math.round(amount + taxAmount) : (line.grossamt ?? 0);
+    const grossAmount = needsCalcGross ? amount + taxAmount : (line.grossamt ?? 0);
 
     return { qty, rate, amount, taxAmount, grossAmount };
 };
@@ -46,7 +46,6 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         fileName: line.fileName,
         created_by_api: line.created_by_api
     }));
-    
     const items: TablePOItem[] = productLines.map((line, idx) => ({
         id: `${line.item}-${idx}`,
         product_id: String(line.item),
@@ -96,8 +95,10 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         approvalstatus: detail.approvalstatus,
         po_status_label: detail.po_status_label || '',
         nextapprover: detail.nextapprover || null,
+        created_by_name: detail.created_by_name || null,
         custbody_msi_createdby_api: detail.custbody_msi_createdby_api,
         custbody_me_validity_date: detail.custbody_me_validity_date || null,
+        foreigntotal: detail.foreigntotal,
         // description: detail.custbody_me_description || null,
         items,
         files

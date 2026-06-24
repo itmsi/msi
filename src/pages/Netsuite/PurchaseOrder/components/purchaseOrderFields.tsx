@@ -138,7 +138,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     onDepartmentMenuScrollToBottom,
     selectedDepartment,
     onDepartmentChange,
-    departmentError
+    departmentError,
 }) => {
     // Get computed field configurations
     const primaryFields = getPrimaryInfoFields(masterData || undefined);
@@ -364,7 +364,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         </Label>
                         {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                             <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                                locationOptions.find(option => String(option.value) === String(formData.location ?? ''))?.label || '-'
+                                selectedLocation?.label || '-'
                             }</p>
                         ) : (<>
                         <CustomAsyncSelect
@@ -585,7 +585,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             </div>
                             <div>
                                 <p className='mb-1.5 block text-sm text-gray-700'>Created By</p>
-                                <p className='break-words'>{formData.custbody_msi_createdby_api || '-'}</p>
+                                <p className='break-words'>{formData.created_by_name || formData.custbody_msi_createdby_api || '-'}</p>
                             </div>
                         </div>
                     </div>
@@ -609,7 +609,11 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 formData.items && formData.items.length > 0 && (
                     <div className="sticky top-0 self-start lg:px-4">
                         <div className='bg-white rounded-2xl shadow-sm p-6'>
-                            <InvoiceSummary items={formData.items} currency={formData.currency_symbol || ''} />
+                            <InvoiceSummary 
+                                items={formData.items} 
+                                currency={formData.currency_symbol || ''} 
+                                serverTotal={Number(formData.foreigntotal)}
+                            />
                         </div>
                     </div>
                 )

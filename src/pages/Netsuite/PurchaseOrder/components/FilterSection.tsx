@@ -5,6 +5,7 @@ import { useApprovalStatusSelect } from '@/hooks/useApprovalStatusSelect';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOStatusSelect } from '@/hooks/usePOStatusSelect';
 import { useSubsidiarySelect } from '@/hooks/useSubsidiarySelect';
+import { useEmployeeSelect } from '@/hooks/useEmployeeSelect';
 import React, { useEffect, useState } from 'react'
 
 interface FilterSectionProps {
@@ -101,49 +102,34 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         }
     }, [filterLocation, POLocationOptions]);
     
-    
-    // const [selectedApprovalStatus, setSelectedApprovalStatus] = useState<any>(null);
-    // const [approvalStatusSelectError, setApprovalStatusSelectError] = useState<string>('');
-        
-    // const [selectedStatus, setSelectedStatus] = useState<any>(null);
-    // const [statusSelectError, setStatusSelectError] = useState<string>('');
+    const {
+        employeeOptions,
+        pagination: employeePagination,
+        inputValue: employeeInputValue,
+        setUserNetsuite,
+        handleInputChange: handleEmployeeInputChange,
+        handleMenuScrollToBottom: handleEmployeeMenuScrollToBottom,
+        initializeOptions: initializeEmployeeOptions
+    } = useEmployeeSelect();
 
-    // Initialize hooks only once when not yet initialized
-    // useEffect(() => {
-    //     if (!statusInitialized && !statusLoading) {
-    //         initializeStatusOptions();
-    //     }
-    // }, [statusInitialized, statusLoading, initializeStatusOptions]);
-    
-    // Sync internal state with filter props
-    // useEffect(() => {
-    //     if (filterStatus) {
-    //         const approvalStatusOption = statusOptions.approvalStatus.find(opt => opt.value === filterStatus);
-    //         const statusOption = statusOptions.status.find(opt => opt.value === filterStatus);
-    //         if (approvalStatusOption) {
-    //             if (!selectedApprovalStatus || selectedApprovalStatus.value !== filterStatus) {
-    //                 setSelectedApprovalStatus(approvalStatusOption);
-    //             }
-    //         } else if (selectedApprovalStatus?.value !== filterStatus) {
-    //             setSelectedApprovalStatus({ 
-    //                 value: filterStatus, 
-    //                 label: `Status ${filterStatus}` 
-    //             });
-    //         }
-    //     } else if (!filterStatus && selectedApprovalStatus) {
-    //         setSelectedApprovalStatus(null);
-    //     }
-    // }, [filterStatus, statusOptions]);
+    const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+    const [employeeSelectError, setEmployeeSelectError] = useState<string>('');
+
+    useEffect(() => {
+        setUserNetsuite(true);
+        initializeEmployeeOptions();
+    }, [initializeEmployeeOptions]);
 
     const handleClearAll = () => {
         onClearFilters();
+        setSelectedEmployee(null);
     };
     
     // Check if any filters are active
-    const hasActiveFilters = filterSubsidiary || filterLocation || filterApprovalStatus || filterStatus;
+    const hasActiveFilters = filterSubsidiary || filterLocation || filterApprovalStatus || filterStatus || selectedEmployee;
     return (
         <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 {/* Subsidiary */}
                 <div>
                     <label htmlFor='subsidiary' className="block text-sm font-medium text-gray-700 mb-1">Subsidiary</label>
@@ -223,6 +209,35 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         isSearchable={true}
                         className="w-full"
                         isLoading={statusLoading}
+                    />
+                </div>
+                
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Created By</label>
+                    <CustomAsyncSelect
+                        id="employee_id"
+                        placeholder="Select employee..."
+                        value={selectedEmployee}
+                        defaultOptions={employeeOptions}
+                        loadOptions={handleEmployeeInputChange}
+                        onMenuScrollToBottom={handleEmployeeMenuScrollToBottom}
+                        isLoading={employeePagination.loading}
+                        noOptionsMessage={() => "No employees found"}
+                        loadingMessage={() => "Loading employees..."}
+                        isSearchable={true}
+                        inputValue={employeeInputValue}
+                        onInputChange={(inputValue) => {
+                            handleEmployeeInputChange(inputValue);
+                        }}
+                        onChange={
+                            (option) => {
+                                setSelectedEmployee(option);
+                                onFilterChange('employee', option?.value || '');
+                                if (employeeSelectError) {
+                                    setEmployeeSelectError('');
+                                }
+                            }
+                        }
                     />
                 </div>
                 

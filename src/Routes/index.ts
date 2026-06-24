@@ -75,6 +75,8 @@ const EditActivities = lazy(() => import('@/pages/CRM/Activity/EditActivity'));
 const ManageCRMProject = lazy(() => import('@/pages/CRM/Project/Manage'));
 const CreateCRMProject = lazy(() => import('@/pages/CRM/Project/CreateProject'));
 const EditCRMProject = lazy(() => import('@/pages/CRM/Project/EditProject'));
+const CustomerCRM = lazy(() => import('@/pages/CRM/Customer/Manage'));
+const CustomerDashboard = lazy(() => import('@/pages/CRM/Customer/Dashboard'));
 
 // ========================================
 // QUOTATION ITI
@@ -105,6 +107,7 @@ const TNCEditITI = lazy(() => import('@/pages/QuotationITI/TermCondition/Edit'))
 
 // ========================================
 // PURCHASE ORDER NETSUITE
+const DashboardPurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Dashboard'));
 const ManagePurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Manage'));
 const CreatePurchaseOrder = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Create'));
 const ManageInvoiceSalesOrder = lazy(() => import('@/pages/Netsuite/InvoiceSalesOrders/Manage'));
@@ -882,7 +885,33 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
+        path: '/crm/customer',
+        name: 'Customer CRM',
+        isProtected: true,
+        roles: ['Customer CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: CustomerCRM,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/customer/dashboard/:id',
+        name: 'Customer CRM',
+        isProtected: true,
+        roles: ['Customer CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: CustomerDashboard,
+        layout: AppLayout,
+    },
+    {
         path: '/netsuite/purchase-order',
+        name: 'Purchase Orders Netsuite',
+        isProtected: true,
+        roles: ['Purchase Orders Netsuite'],
+        component: DashboardPurchaseOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/purchase-order/manage',
         name: 'Purchase Orders Netsuite',
         isProtected: true,
         roles: ['Purchase Orders Netsuite'],
