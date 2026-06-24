@@ -1,0 +1,260 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { getProfile } from '@/helpers/generalHelper';
+import { QuotationFormData, QuotationFormItem } from '../types/quotation';
+import { QuotationService } from '../services/quotationService';
+import { MasterDataFormFieldItems } from '../types/quotation';
+
+const DEFAULT_FORM: QuotationFormData = {
+    customform: 114,
+    title: '',
+    subsidiary: null,
+    subsidiary_name: '',
+    entity: null,
+    entity_name: '',
+    trandate: '',
+    duedate: null,
+    expectedclosedate: null,
+    orderstatus: 'A',
+    otherrefnum: '',
+    memo: '',
+    currency: 1,
+    currency_name: '',
+    terms: null,
+    terms_name: '',
+    department: null,
+    department_name: '',
+    class: null,
+    class_name: '',
+    location: null,
+    location_name: '',
+    probability: null,
+    forecasttype: 0,
+    salesrep: '',
+    salesrep_name: '',
+    opportunity: '',
+    opportunity_name: '',
+    partner: '',
+    partner_name: '',
+    custbody_msi_bank_payment_so: null,
+    custbody_msi_bank_payment_so_name: [],
+    custbody_cseg_cn_cfi: null,
+    custbody_me_approval_status: 1,
+    custbody_msi_createdby_api: 'T',
+    custbody_msi_quotation_no_iec: '',
+    total_amount: 0,
+    items: [],
+};
+
+export const useQuotationCreate = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const profileSSO = getProfile() as any;
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [masterData, setMasterData] = useState<MasterDataFormFieldItems | null>(null);
+    const [loadingMasterData, setLoadingMasterData] = useState(true);
+    const [formData, setFormData] = useState<QuotationFormData>(() => {
+        if (location.state?.formData) {
+            return {
+                ...location.state.formData,
+                orderstatus: 'A', // Reset to default status
+                custbody_msi_createdby_api: profileSSO?.email || 'T',
+            };
+        }
+        return {
+            ...DEFAULT_FORM,
+            custbody_msi_createdby_api: profileSSO?.email || 'T',
+        };
+    });
+
+    // Load Master Data saat component mount
+    useEffect(() => {
+        const loadMasterData = async () => {
+            try {
+                setLoadingMasterData(true);
+                const response = await QuotationService.getFieldComponentById();
+                if (response.data.success) {
+                    setMasterData(response.data.data);
+                } else {
+                    toast.error('Failed to load master data');
+                }
+            } catch (error) {
+                console.error('Error loading master data:', error);
+                toast.error('Error loading master data');
+            } finally {
+                setLoadingMasterData(false);
+            }
+        };
+
+        loadMasterData();
+    }, []);
+
+    const clearError = (field: string) => {
+        if (errors[field]) {
+            setErrors(prev => {
+                const { [field]: _, ...rest } = prev;
+                return rest;
+            });
+        }
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        clearError(name);
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSelectChange = (field: string, value: any) => {
+        clearError(field);
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleDateChange = (field: string, value: string) => {
+        clearError(field);
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    // Items management
+    const handleAddItem = (selectedItem: any) => {
+        if (!selectedItem) return;
+        const newItem: QuotationFormItem = {
+            id: `${selectedItem.value}-${Date.now()}`,
+            itemId: Number(selectedItem.value),
+            item_name: selectedItem.label,
+            qty: 1,
+            rate: 0,
+            amount: 0,
+            description: '',
+            department: formData.department,
+            department_name: formData.department_name || '',
+            class: formData.class,
+            class_name: formData.class_name || '',
+            location: formData.location,
+            location_name: formData.location_name || '',
+            taxcode: null,
+            taxcode_name: '',
+        };
+        setFormData(prev => ({ ...prev, items: [...prev.items, newItem] }));
+    };
+
+    const handleRemoveItem = (itemId: string) => {
+        setFormData(prev => ({
+            ...prev,
+            items: prev.items.filter(i => i.id !== itemId),
+        }));
+    };
+
+    const handleUpdateItem = (index: number, field: string, value: any) => {
+        setFormData(prev => {
+            const updated = [...prev.items];
+            if (updated[index]) {
+                const item = { ...updated[index], [field]: value };
+                // Auto-calc amount when qty or rate changes
+                if (field === 'qty' || field === 'rate') {
+                    item.amount = Number(item.qty) * Number(item.rate);
+                }
+                updated[index] = item;
+            }
+            return { ...prev, items: updated };
+        });
+    };
+
+    const validateForm = (): boolean => {
+        const newErrors: Record<string, string> = {};
+        if (!formData.entity) newErrors.entity = 'Customer wajib dipilih';
+        if (!formData.trandate) newErrors.trandate = 'Transaction Date wajib diisi';
+        if (!formData.subsidiary) newErrors.subsidiary = 'Subsidiary wajib dipilih';
+        if (!formData.currency) newErrors.currency = 'Currency wajib dipilih';
+        if (!formData.items || formData.items.length === 0) {
+            newErrors.items = 'Minimal 1 item harus ditambahkan';
+        }
+        setErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) {
+            toast.error('Lengkapi field yang wajib diisi');
+            return false;
+        }
+        return true;
+    };
+
+    const handleSubmit = async () => {
+        if (!validateForm()) return;
+        setIsSubmitting(true);
+        try {
+            const payload = {
+                customform: formData.customform,
+                title: formData.title || '',
+                subsidiary: formData.subsidiary,
+                entity: Number(formData.entity),
+                trandate: formData.trandate || null,
+                duedate: formData.duedate || null,
+                expectedclosedate: formData.expectedclosedate ? formData.expectedclosedate : null,
+                orderstatus: formData.orderstatus,
+                otherrefnum: formData.otherrefnum || '',
+                memo: formData.memo || '',
+                currency: formData.currency,
+                terms: formData.terms || undefined,
+                department: formData.department || undefined,
+                class: formData.class || undefined,
+                location: formData.location || undefined,
+                probability: formData.probability || undefined,
+                forecasttype: formData.forecasttype || undefined,
+                salesrep: formData.salesrep || '',
+                opportunity: formData.opportunity || '',
+                partner: formData.partner || '',
+                custbody_msi_bank_payment_so: formData.custbody_msi_bank_payment_so || [],
+                custbody_cseg_cn_cfi: formData.custbody_cseg_cn_cfi || undefined,
+                custbody_me_approval_status: formData.custbody_me_approval_status ?? undefined,
+                custbody_msi_createdby_api: formData.custbody_msi_createdby_api || 'T',
+                custbody_msi_quotation_no_iec: formData.custbody_msi_quotation_no_iec || '',
+                items: formData.items.map(item => ({
+                    itemId: item.itemId,
+                    qty: Number(item.qty),
+                    rate: Number(item.rate),
+                    amount: Number(item.amount),
+                    description: item.description || '',
+                    department: item.department || undefined,
+                    class: item.class || undefined,
+                    location: item.location || undefined,
+                    taxcode: item.taxcode || undefined,
+                    pricelevel: item.pricelevel || undefined,
+                    unit: item.unit || undefined,
+                })),
+            };
+            const response = await QuotationService.createQuotation(payload as any);
+            if (response.success) {
+                toast.success('Quotation berhasil dibuat');
+                const newId = response.data?.data?.quoId || response.data?.quoId || response.data?.id || (response.data?.items && response.data.items[0]?.id);
+                if (newId) {
+                    navigate(`/netsuite/quotation/edit/${newId}`);
+                } else {
+                    navigate('/netsuite/quotation');
+                }
+            } else {
+                toast.error(response.message || 'Quotation tidak berhasil dibuat');
+            }
+        } catch (error: any) {
+            console.error('Error creating quotation:', error);
+            toast.error(error.message || 'Gagal membuat quotation');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return {
+        isSubmitting,
+        formData,
+        errors,
+        handleInputChange,
+        handleSelectChange,
+        handleDateChange,
+        handleAddItem,
+        handleRemoveItem,
+        handleUpdateItem,
+        handleSubmit,
+        masterData,
+        loadingMasterData,
+    };
+};

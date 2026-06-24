@@ -120,6 +120,9 @@ const ManageReceive = lazy(() => import('@/pages/Netsuite/Receipts/Manage'));
 const ManageSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Manage'));
 const ManageBillPayment = lazy(() => import('@/pages/Netsuite/BillPayment/Manage'));
 const ViewBillPayment = lazy(() => import('@/pages/Netsuite/BillPayment/View'));
+const ManageQuotationNetsuite = lazy(() => import('@/pages/Netsuite/Quotation/Manage'));
+const CreateQuotationNetsuite = lazy(() => import('@/pages/Netsuite/Quotation/Create'));
+const EditQuotationNetsuite = lazy(() => import('@/pages/Netsuite/Quotation/Edit'));
 const CreateSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Create'));
 const EditSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Edit'));
 // ========================================
@@ -1011,6 +1014,32 @@ export const routes: TAppRoute[] = [
         roles: ['Bill Payment Netsuite'],
         requiredPermissions: ['read'],
         component: ViewBillPayment,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/quotation',
+        name: 'Quotation Netsuite',
+        isProtected: true,
+        roles: ['Quotation Netsuite'],
+        component: ManageQuotationNetsuite,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/quotation/create',
+        name: 'Quotation Netsuite',
+        isProtected: true,
+        roles: ['Quotation Netsuite'],
+        requiredPermissions: ['create'],
+        component: CreateQuotationNetsuite,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/quotation/edit/:id',
+        name: 'Quotation Netsuite',
+        isProtected: true,
+        roles: ['Quotation Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: EditQuotationNetsuite,
         layout: AppLayout,
     },
     {
