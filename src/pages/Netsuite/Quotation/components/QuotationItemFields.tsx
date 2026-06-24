@@ -155,6 +155,8 @@ export default function QuotationItemFields({
         [formData.items, displayCount]
     );
 
+    const isFormComplete = formData.subsidiary && formData.location && formData.class && formData.department;
+
     const itemColumns: TableColumn<QuotationFormItem>[] = [
         {
             name: 'Item',
@@ -551,8 +553,8 @@ export default function QuotationItemFields({
                                     }
                                 }}
                                 
-                                className={`flex items-center gap-2 ${(!selectedNewItem || !formData.subsidiary) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                disabled={!selectedNewItem || !formData.subsidiary}
+                                className={`flex items-center gap-2 ${(!selectedNewItem || !isFormComplete) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                disabled={!selectedNewItem || !isFormComplete}
                             >
                                 <MdAdd size={18} />
                                 Add Item
@@ -560,6 +562,14 @@ export default function QuotationItemFields({
                         </div>
                     </div>
                 </>)}
+
+                {(formData.custbody_me_approval_status === 1 || !formData.custbody_me_approval_status) && (
+                    !isFormComplete && (
+                        <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 mb-6">
+                            Lengkapi field Subsidiary, Location, Class, dan Department terlebih dahulu sebelum menambahkan item.
+                        </p>
+                    )
+                )}
 
                 {errors.items && (
                     <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">

@@ -49,7 +49,7 @@ export const useQuotationEdit = (id: string | undefined) => {
     const [masterData, setMasterData] = useState<MasterDataFormFieldItems | null>(null);
     const [loadingMasterData, setLoadingMasterData] = useState(true);
     const [formData, setFormData] = useState<QuotationFormData>({
-        customform: 104,
+        customform: 114,
         title: '',
         subsidiary: null,
         subsidiary_name: '',
@@ -83,7 +83,8 @@ export const useQuotationEdit = (id: string | undefined) => {
         custbody_msi_bank_payment_so: [],
         custbody_msi_bank_payment_so_name: [],
         custbody_cseg_cn_cfi: null,
-        custbody_me_approval_status: 0,
+        custbody_me_approval_status: 1,
+        custbody_me_approval_status_name: '',
         custbody_msi_createdby_api: '',
         custbody_msi_quotation_no_iec: '',
         total_amount: 0,
@@ -148,7 +149,8 @@ export const useQuotationEdit = (id: string | undefined) => {
                     opportunity_name: quo.opportunity_name || '',
                     partner: quo.partner || '',
                     partner_name: quo.partner_name || '',
-                    custbody_me_approval_status: safeNumber(quo?.custbody_me_approval_status) || 0,
+                    custbody_me_approval_status: safeNumber(quo?.custbody_me_approval_status) || 1,
+                    custbody_me_approval_status_name: quo?.custbody_me_approval_status_name || '',
                     custbody_msi_bank_payment_so: Array.isArray(quo.custbody_msi_bank_payment_so) ? quo.custbody_msi_bank_payment_so : [],
                     custbody_msi_bank_payment_so_name: Array.isArray(quo.custbody_msi_bank_payment_so_name) ? quo.custbody_msi_bank_payment_so_name : [],
                     custbody_cseg_cn_cfi: safeNumber(quo.custbody_cseg_cn_cfi),

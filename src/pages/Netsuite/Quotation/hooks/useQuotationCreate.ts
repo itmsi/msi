@@ -7,7 +7,7 @@ import { QuotationService } from '../services/quotationService';
 import { MasterDataFormFieldItems } from '../types/quotation';
 
 const DEFAULT_FORM: QuotationFormData = {
-    customform: 104,
+    customform: 114,
     title: '',
     subsidiary: null,
     subsidiary_name: '',
@@ -30,7 +30,7 @@ const DEFAULT_FORM: QuotationFormData = {
     location: null,
     location_name: '',
     probability: null,
-    forecasttype: null,
+    forecasttype: 0,
     salesrep: '',
     salesrep_name: '',
     opportunity: '',
@@ -40,7 +40,7 @@ const DEFAULT_FORM: QuotationFormData = {
     custbody_msi_bank_payment_so: null,
     custbody_msi_bank_payment_so_name: [],
     custbody_cseg_cn_cfi: null,
-    custbody_me_approval_status: null,
+    custbody_me_approval_status: 1,
     custbody_msi_createdby_api: 'T',
     custbody_msi_quotation_no_iec: '',
     total_amount: 0,

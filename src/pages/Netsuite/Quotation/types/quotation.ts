@@ -208,6 +208,7 @@ export interface QuotationFormData {
     custbody_msi_bank_payment_so_name: string[];
     custbody_cseg_cn_cfi: number | null;
     custbody_me_approval_status?: number | null;
+    custbody_me_approval_status_name?: string;
     custbody_msi_createdby_api: string;
     items: QuotationFormItem[];
     total_amount: number;

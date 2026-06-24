@@ -295,7 +295,7 @@ export default function Edit() {
                                 )}
                                 {tranid !== null && (
                                     <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
-                                        {formData.status_name || '-'}
+                                        {formData.custbody_me_approval_status_name || '-'}
                                     </span>
                                 )}
                             </>}
