@@ -445,7 +445,7 @@ export const StatusTypeBadgeWO: React.FC<StatusTypeBadgeWOProps> = ({
     const getStatusStyles = (type: "open" | "review" | "waiting_sparepart" | "onprogress" | "repair_process" | "quality_check" | "ready_pickup" | "complete" | "cancelled") => {
         switch (type) {
             case 'open':
-                return { bgColor: 'bg-gray-100',   textColor: 'text-gray-800',   borderColor: 'border-gray-200',   label: label || 'Pending Approval' };
+                return { bgColor: 'bg-gray-100',   textColor: 'text-gray-800',   borderColor: 'border-gray-200',   label: label || 'Open' };
             case 'review':
                 return { bgColor: 'bg-blue-100',   textColor: 'text-blue-800',   borderColor: 'border-blue-200',   label: label || 'Pending Fulfillment' };
             case 'waiting_sparepart':
@@ -463,7 +463,7 @@ export const StatusTypeBadgeWO: React.FC<StatusTypeBadgeWOProps> = ({
             case 'cancelled':
                 return { bgColor: 'bg-red-100',    textColor: 'text-red-800',    borderColor: 'border-red-200',    label: label || 'Cancelled' };
             default:
-                return { bgColor: 'bg-gray-100',   textColor: 'text-gray-800',   borderColor: 'border-gray-200' };
+                return { bgColor: 'bg-gray-100',   textColor: 'text-gray-800',   borderColor: 'border-gray-200',   label: label || 'Unknown' };
         }
     };
 
