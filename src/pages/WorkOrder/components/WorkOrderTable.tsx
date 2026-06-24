@@ -8,6 +8,7 @@ import Button from '@/components/ui/button/Button';
 import { Tooltip } from '@/components/ui/tooltip';
 import { useTimeProgress } from '@/helpers/timeProgres';
 import { StatusTypeBadgeWO } from '@/components/ui/badge/StatusBadge';
+import moment from 'moment';
 
 interface WorkOrderTableProps {
     workOrders: WorkOrderItem[];
@@ -45,7 +46,7 @@ const WorkOrderTable: React.FC<WorkOrderTableProps> = ({
     // onRowClick,
 }) => {
     
-    const columns: TableColumn<WorkOrderItem>[] = useMemo(() => [
+    const columns: TableColumn<any>[] = useMemo(() => [
         {
             name: 'Work Order No',
             selector: (row) => row.work_order_no,
@@ -128,7 +129,7 @@ const WorkOrderTable: React.FC<WorkOrderTableProps> = ({
             cell: (row) => (
                 <div className="flex flex-col gap-1 py-1 text-xs">
                     {row.image?.length > 0 ? (
-                        row.image.map((url, i) => (
+                        row.image.map((url: any, i: any) => (
                             <a
                                 key={i}
                                 href={url}
@@ -195,6 +196,32 @@ const WorkOrderTable: React.FC<WorkOrderTableProps> = ({
             cell: (row) => <DurationCell row={row} />,
             wrap: true,
             // width: '170px',
+        },
+        {
+            name: 'Start Time',
+            selector: row => row.repair_start_date,
+            cell: (row) => (
+                <div className="text-sm text-gray-800 max-w-xs space-y-2">
+                    <p className="leading-relaxed text-gray-700">
+                        {row.repair_start_date ? moment(row.repair_start_date, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss') : ''}
+                    </p>
+                </div>
+            ),
+            wrap: true,
+            width: '210px',
+        },
+        {
+            name: 'End Time',
+            selector: row => row.repair_end_date,
+            cell: (row) => (
+                <div className="text-sm text-gray-800 max-w-xs space-y-2">
+                    <p className="leading-relaxed text-gray-700">
+                        {row.repair_end_date ? moment(row.repair_end_date, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss') : ''}
+                    </p>
+                </div>
+            ),
+            wrap: true,
+            width: '210px',
         },
         {
             name: 'Status',

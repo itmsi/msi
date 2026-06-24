@@ -41,9 +41,9 @@ export interface WorkOrderItem extends AuditFields {
     problem: string;
     image: string[];
     status: string;
-    repair_start_date: string | null;
-    repair_end_date: string | null;
-    repair_diff_days: string | null;
+    repair_start_date: string | null | undefined;
+    repair_end_date: string | null | undefined;
+    repair_diff_days: string | null | undefined;
 }
 
 // Pagination

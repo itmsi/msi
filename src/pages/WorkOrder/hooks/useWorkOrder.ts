@@ -104,7 +104,7 @@ export const useWorkOrder = () => {
     useEffect(() => {
         fetchWorkOrders();
         setSearchValue(urlFilters.search);
-        const interval = setInterval(fetchWorkOrders, 5000);
+        const interval = setInterval(fetchWorkOrders, 20000);
         return () => clearInterval(interval);
     }, [location.search]);
 
