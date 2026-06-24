@@ -1,5 +1,5 @@
 import Label from '@/components/form/Label';
-import InputField from '@/components/form/input/InputField';
+import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import { QuotationFormData, MasterDataFormFieldItems } from '../types/quotation';
@@ -305,7 +305,7 @@ export default function QuotationFields({
                         {/* Title */}
                         <div>
                             <Label htmlFor="quo-title">Title</Label>
-                            <InputField
+                            <Input
                                 id="quo-title"
                                 name="title"
                                 type="text"
@@ -350,7 +350,7 @@ export default function QuotationFields({
                             {(formData.custbody_me_approval_status === 2 || formData.custbody_me_approval_status === 3) || (formData.custbody_me_approval_status === 1 && formData.nextapprover !== null) ? (
                                 <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{formData.probability || '-'}</p>
                             ) : (<>
-                                <InputField
+                                <Input
                                     id="quo-probability"
                                     name="probability"
                                     type="number"
@@ -400,7 +400,7 @@ export default function QuotationFields({
                             {(formData.custbody_me_approval_status === 2 || formData.custbody_me_approval_status === 3) || (formData.custbody_me_approval_status === 1 && formData.nextapprover !== null) ? (
                                 <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{formData.otherrefnum}</p>
                             ) : (<>
-                                <InputField
+                                <Input
                                     id="quo-otherrefnum"
                                     name="otherrefnum"
                                     type="text"
@@ -444,7 +444,7 @@ export default function QuotationFields({
                             {(formData.custbody_me_approval_status === 2 || formData.custbody_me_approval_status === 3) || (formData.custbody_me_approval_status === 1 && formData.nextapprover !== null) ? (
                                 <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{formData.memo}</p>
                             ) : (<>
-                                <InputField
+                                <Input
                                     id="quo-memo"
                                     name="memo"
                                     value={formData.memo}
@@ -498,7 +498,7 @@ export default function QuotationFields({
                             {(formData.custbody_me_approval_status === 2 || formData.custbody_me_approval_status === 3) || (formData.custbody_me_approval_status === 1 && formData.nextapprover !== null) ? (
                                 <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{formData.memo}</p>
                             ) : (<>
-                                <InputField
+                                <Input
                                     id="quo-quotation"
                                     name="custbody_msi_quotation_no_iec"
                                     type="text"
@@ -532,7 +532,7 @@ export default function QuotationFields({
                         {/* Sales Rep */}
                         <div>
                             <Label htmlFor="quo-salesrep">Sales Rep</Label>
-                            <InputField
+                            <Input
                                 id="quo-salesrep"
                                 name="salesrep"
                                 type="text"
@@ -545,7 +545,7 @@ export default function QuotationFields({
                         {/* Opportunity */}
                         <div>
                             <Label htmlFor="quo-opportunity">Opportunity</Label>
-                            <InputField
+                            <Input
                                 id="quo-opportunity"
                                 name="opportunity"
                                 type="text"
@@ -558,7 +558,7 @@ export default function QuotationFields({
                         {/* Partner */}
                         <div>
                             <Label htmlFor="quo-partner">Partner</Label>
-                            <InputField
+                            <Input
                                 id="quo-partner"
                                 name="partner"
                                 type="text"

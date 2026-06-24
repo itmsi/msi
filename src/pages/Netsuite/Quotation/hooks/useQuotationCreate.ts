@@ -45,6 +45,7 @@ const DEFAULT_FORM: QuotationFormData = {
     custbody_msi_quotation_no_iec: '',
     total_amount: 0,
     items: [],
+    nextapprover: null,
 };
 
 export const useQuotationCreate = () => {
@@ -61,6 +62,8 @@ export const useQuotationCreate = () => {
             return {
                 ...location.state.formData,
                 orderstatus: 'A', // Reset to default status
+                custbody_me_approval_status: 1,
+                nextapprover: null,
                 custbody_msi_createdby_api: profileSSO?.email || 'T',
             };
         }
