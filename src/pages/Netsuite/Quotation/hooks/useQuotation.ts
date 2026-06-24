@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Quotation, QuotationRequest } from '../types/quotation';
+import toast from 'react-hot-toast';
+import { Quotation, QuotationRequest, SyncInfo } from '../types/quotation';
 import { QuotationService } from '../services/quotationService';
 
 export const useQuotation = () => {
@@ -15,6 +16,8 @@ export const useQuotation = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [quotations, setQuotations] = useState<Quotation[]>([]);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [syncInfo, setSyncInfo] = useState<SyncInfo | null>(null);
 
     const [pagination, setPagination] = useState({
         page: 1,
@@ -56,6 +59,9 @@ export const useQuotation = () => {
                 total_records: response.data.pagination.total || 0,
                 total_pages: response.data.pagination.totalPages || 0
             });
+            if (response.sync_info) {
+                setSyncInfo(response.sync_info);
+            }
         } catch (err: any) {
             setError(err?.message || 'Failed to fetch quotations data');
             console.error('Error fetching quotations data:', err);
@@ -143,6 +149,42 @@ export const useQuotation = () => {
         });
     }, [fetchQuotations]);
 
+    const handleSync = useCallback(async () => {
+        if (isSyncing) return;
+        setIsSyncing(true);
+        const toastId = toast.loading('Sinkronisasi data quotation...');
+        try {
+            const result = await QuotationService.syncQuotations();
+            if (result) {
+                toast.success('Sinkronisasi berhasil', { id: toastId });
+                fetchQuotations({ page: 1 });
+            } else {
+                toast.error('Sinkronisasi gagal', { id: toastId });
+            }
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, fetchQuotations]);
+
+    const handleSyncById = useCallback(async (row: Quotation) => {
+        if (isSyncing) return;
+        const quoId = row?.netsuite_id;
+        if (!quoId) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi Quotation: ${row.tranid || quoId}...`);
+        try {
+            await QuotationService.syncQuotationById(String(quoId));
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            fetchQuotations({ page: pagination.page, limit: pagination.page_size });
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, fetchQuotations, pagination.page, pagination.page_size]);
+
     const activeFilterCount = [
         filterApprovalStatus,
         filterStartDate,
@@ -162,6 +204,8 @@ export const useQuotation = () => {
         filterEndDate,
         filterSubsidiary,
         activeFilterCount,
+        isSyncing,
+        syncInfo,
         setSearchValue,
         fetchQuotations,
         handlePageChange,
@@ -172,5 +216,7 @@ export const useQuotation = () => {
         handleKeyPress,
         handleClearSearch,
         handleClearAllFilters,
+        handleSync,
+        handleSyncById,
     };
 };

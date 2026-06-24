@@ -3,7 +3,7 @@ import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useQuotation } from './hooks/useQuotation';
 import { formatCurrencyDynamic, getStatusBadge, formatDateLocal, formatDateTime } from '@/helpers/generalHelper';
-import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdEdit, MdAdd } from 'react-icons/md';
+import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdEdit, MdAdd, MdOutlineSync } from 'react-icons/md';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -29,6 +29,8 @@ export default function Manage() {
         filterEndDate,
         filterSubsidiary,
         activeFilterCount,
+        isSyncing,
+        syncInfo,
         setSearchValue,
         handlePageChange,
         handleRowsPerPageChange,
@@ -36,6 +38,8 @@ export default function Manage() {
         handleKeyPress,
         handleClearSearch,
         handleClearAllFilters,
+        handleSync,
+        handleSyncById,
     } = useQuotation();
 
     const handlePageChangeSafe = useCallback((newPage: number) => {
@@ -155,6 +159,12 @@ export default function Manage() {
         },
         createActionsColumn([
             {
+                icon: MdOutlineSync,
+                onClick: (row: Quotation) => handleSyncById(row),
+                className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                tooltip: 'Sync this Quotation',
+            },
+            {
                 icon: MdEdit,
                 onClick: (row: Quotation) => navigate(`/netsuite/quotation/edit/${row.netsuite_id || row.id}`),
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
@@ -272,6 +282,17 @@ export default function Manage() {
                                 </p>
                             </div>
                             <div className="flex space-x-3">
+                                <PermissionGate permission="read">
+                                    <Button
+                                        onClick={() => handleSync()}
+                                        disabled={isSyncing}
+                                        className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                        variant='outline'
+                                    >
+                                        <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                        <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                    </Button>
+                                </PermissionGate>
                                 <PermissionGate permission="create">
                                     <Button
                                         onClick={() => navigate('/netsuite/quotation/create')}
@@ -285,6 +306,9 @@ export default function Manage() {
                         </div>
                     </div>
                 </div>
+                {syncInfo && (
+                    <span className='block text-xs text-green-600 pe-6 text-end mb-0'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
+                )}
 
                 {/* Search & Filter */}
                 <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">

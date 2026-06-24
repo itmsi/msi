@@ -64,6 +64,14 @@ export class QuotationService {
         return response.data;
     }
 
+    static async syncQuotations(): Promise<any> {
+        const response = await apiPost<any>(
+            `${API_BASE_URL}/netsuite/sync/modules`,
+            { module: 'quotation' }
+        );
+        return response.data;
+    }
+
     static async syncQuotationById(id: string): Promise<QuotationDetailResponse> {
         const response = await apiGet<QuotationDetailResponse>(
             `${API_BASE_URL}/netsuite/quotation/sync/${id}`
