@@ -108,10 +108,17 @@ export interface QuotationListData {
     pagination: QuotationPagination;
 }
 
+export interface SyncInfo {
+    sync_status: boolean;
+    created_at: string;
+    created_by_name: string;
+}
+
 export interface QuotationListResponse {
     success: boolean;
     message: string;
     data: QuotationListData;
+    sync_info?: SyncInfo;
 }
 
 export interface QuotationDetailResponse {
