@@ -1,5 +1,5 @@
 import { apiPost, apiGet, ApiResponse, apiPut, apiPostMultipart } from '@/helpers/apiHelper';
-import { ComponentsDataResponse, GetPurchaseOrderListResponse, HistoryLogResponse, ItemReceiptPayload, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, POAttachment, POAttachmentDelete, POAttachmentResponse, POAttachmentUpdate, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, POItemsSelectRequest, PostReceiptResponse, PurchaseOrderDashboardRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, ResponseAttachUpdateItem, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
+import { ComponentsDataResponse, GetPurchaseOrderListResponse, HistoryLogResponse, ItemReceiptPayload, ItemTypeResponse, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, POAttachment, POAttachmentDelete, POAttachmentResponse, POAttachmentUpdate, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, POItemsSelectRequest, PostReceiptResponse, PurchaseOrderDashboardRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, ResponseAttachUpdateItem, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -25,18 +25,36 @@ export class PurchaseOrderService {
     }
 
     static async getPOItems(params: Partial<POItemsSelectRequest> = {}): Promise<POItemResponse> {
+        const requestData: any = {
+            page: 1,
+            limit: 10,
+            sort_by: 'created_at',
+            sort_order: 'desc',
+            search: '',
+            ...params
+        };
+
+        // Hanya kirim item_type_id jika ada nilai filter yang dipilih
+        if (!params.item_type_id || params.item_type_id.length === 0) {
+            delete requestData.item_type_id;
+        }
+
+        const response = await apiPost(`${API_BASE_URL}/netsuite/items/get-list`, requestData as Record<string, any>);
+        return response.data as POItemResponse;
+    }
+
+    static async getItemTypes(params: Partial<POItemsRequest> = {}): Promise<ItemTypeResponse> {
         const requestData: POItemsRequest = {
             page: 1,
             limit: 10,
             sort_by: 'created_at',
             sort_order: 'desc',
             search: '',
-            item_type: ["Service", "Inventory Item", "Kit/Package", "Non-inventory Item"],
             ...params
         };
 
-        const response = await apiPost(`${API_BASE_URL}/netsuite/items/get-list`, requestData as Record<string, any>);
-        return response.data as POItemResponse;
+        const response = await apiPost(`${API_BASE_URL}/netsuite/item_type/get`, requestData as Record<string, any>);
+        return response.data as ItemTypeResponse;
     }
 
     static async getPOLocation(params: Partial<POItemsRequest> = {}): Promise<LocationDataResponse> {

@@ -21,6 +21,8 @@ import PageHeader from '@/components/common/PageHeader';
 import { useSOBankSelect } from '@/hooks/useSOBankSelect';
 import FilesTab from './components/tab/FilesTab';
 import UserNoteTab from '../PurchaseOrder/components/tabs/UserNoteTab';
+import CustomSelect from '@/components/form/select/CustomSelect';
+import Label from '@/components/form/Label';
 
 export default function Edit() {
     const { id } = useParams<{ id: string }>();
@@ -178,6 +180,9 @@ export default function Edit() {
         handleInputChange: handleItemInputChange,
         handleMenuScrollToBottom: handleItemMenuScrollToBottom,
         initializeOptions: initializeItemOptions,
+        itemTypeFilter,
+        itemTypeOptions,
+        handleItemTypeChange
     } = usePOItemsSelect(20);
 
     useEffect(() => {
@@ -458,6 +463,22 @@ export default function Edit() {
                                 <div className='bg-white rounded-b-2xl shadow-sm'>
                                     {/* Items Tab */}
                                     {activeTab === 'items' && (
+                                        <>
+                                        <div className="px-6 pt-4">
+                                            <div className="mb-4">
+                                                <Label>Filter Item Type</Label>
+                                                <CustomSelect
+                                                    name="item_type_filter"
+                                                    placeholder="All Item Types"
+                                                    value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
+                                                    options={itemTypeOptions}
+                                                    isClearable={true}
+                                                    onChange={(option: any) => {
+                                                        handleItemTypeChange(option);
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
                                         <QuotationItemFields
                                             formData={formData}
                                             errors={errors}
@@ -499,6 +520,7 @@ export default function Edit() {
                                             onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
 
                                         />
+                                        </>
                                     )}
 
                                     {activeTab === 'files' && (
