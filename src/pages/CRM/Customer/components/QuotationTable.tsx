@@ -2,6 +2,7 @@ import React from 'react';
 import { TableColumn } from 'react-data-table-component';
 import CustomDataTable from '@/components/ui/table/CustomDataTable';
 import { Quotation } from '../types/customerDashboard';
+import { formatCurrencyDynamic } from '@/helpers/generalHelper';
 
 const QuotationTable: React.FC<{ 
     quotations: Quotation[], 
@@ -20,14 +21,14 @@ const QuotationTable: React.FC<{
                     </div>
                 </div>
             ),
-            width: '220px',
+            width: '180px',
         },
         {
             name: 'Quantity ',
             selector: (row) => row.quantity || 0,
             center: true,
             wrap: true,
-            width: '150px',
+            width: '120px',
         },
         {
             name: 'Min',
@@ -36,11 +37,12 @@ const QuotationTable: React.FC<{
             cell: (row) => (
                 <div className="flex-1 items-center gap-3 py-2">
                     <div className="font-medium text-gray-900 flex">
-                        {row?.min_price || '-'}
+                        {row?.min_price ? formatCurrencyDynamic(row.min_price, 'IDR') : '-'}
                     </div>
                 </div>
             ),
             wrap: true,
+            width: '240px',
         },
         {
             name: 'Max',
@@ -49,11 +51,12 @@ const QuotationTable: React.FC<{
             cell: (row) => (
                 <div className="flex-1 items-center gap-3 py-2">
                     <div className="font-medium text-gray-900 flex">
-                        {row?.max_price || '-'}
+                        {row?.max_price ? formatCurrencyDynamic(row.max_price, 'IDR') : '-'}
                     </div>
                 </div>
             ),
             wrap: true,
+            width: '230px',
         },
     ];
 

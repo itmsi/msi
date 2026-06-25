@@ -27,14 +27,14 @@ const RkabTable: React.FC<{
         },
         {
             name: 'Target Production ',
-            selector: (row) => row.target_production || 0,
+            selector: (row) => row.target_production.toLocaleString() || 0,
             center: true,
             wrap: true,
             width: '170px',
         },
         {
             name: 'Current Production ',
-            selector: (row) => row.current_production || 0,
+            selector: (row) => row.current_production.toLocaleString() || 0,
             center: true,
             wrap: true,
             width: '180px',

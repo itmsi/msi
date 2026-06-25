@@ -36,7 +36,7 @@ export default function Dashboard() {
     const location = useLocation();
     const listRoute = `/crm/customer${location.search}`;
     const { customerInformation, customerData, loading } = useCustomerDashboard();
-    const fleetData = customerData?.data_unit_per_segmentasi_iup_aktif || {};
+    const fleetData = customerData?.data_unit_per_segmentasi || {};
     const totalFleet = Object.values(fleetData).reduce((sum, value) => sum + value, 0);
 
     const yearsRKAB = customerData?.data_rkab?.map(item => item.tahun) || [];
@@ -56,9 +56,9 @@ export default function Dashboard() {
         .join(' · ');
 
     const iupSegmentasiChart = useMemo(() => {
-        if (!customerData?.data_iup_per_segmentasi) return null;
+        if (!customerData?.data_unit_per_segmentasi) return null;
 
-        const data = Object.entries(customerData.data_iup_per_segmentasi).map(
+        const data = Object.entries(customerData.data_unit_per_segmentasi).map(
             ([name, value]) => ({
                 name: name.charAt(0).toUpperCase() + name.slice(1),
                 value,
@@ -96,11 +96,11 @@ export default function Dashboard() {
 
     const unitPerBrandChart = useMemo(() => {
         if (
-            !customerData?.data_unit_per_brand_iup_aktif
+            !customerData?.data_unit_per_brand
         )
         return null;
 
-        const brands = Object.entries(customerData.data_unit_per_brand_iup_aktif).map(
+        const brands = Object.entries(customerData.data_unit_per_brand).map(
             ([name, value]) => ({
                 name: name.charAt(0).toUpperCase() + name.slice(1),
                 value,
@@ -123,10 +123,6 @@ export default function Dashboard() {
                         borderColor: '#fff',
                         borderWidth: 2
                     },
-                    // label: {
-                    //     show: false,
-                    //     position: 'center'
-                    // },
                     emphasis: {
                         label: { show: true, fontSize: 14, fontWeight: 'bold' },
                         itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.1)' },
@@ -285,7 +281,7 @@ export default function Dashboard() {
                     />
                     
                     <StatCard
-                        title="RKAB IUP Aktif"
+                        title="RKAB IUP"
                         value={customerData?.data_rkab?.length || 0}
                         Icon={LuClipboardCheck}
                         description={`Periode ${minYear}-${maxYear}`}
