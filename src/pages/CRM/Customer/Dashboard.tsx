@@ -11,7 +11,7 @@ import {
 } from 'echarts/components';
 import PageMeta from '@/components/common/PageMeta';
 import { useCustomerDashboard } from './hooks/useCustomerDashboard';
-import { LuTruck, LuLayers,LuClipboardCheck, LuReceiptText, LuBuilding2, LuCalendar, LuUser, LuMapPin, LuPhone, LuMail } from 'react-icons/lu';
+import { LuTruck, LuLayers,LuClipboardCheck, LuReceiptText, LuBuilding2, LuCalendar, LuUser, LuMapPin, LuPhone, LuMail, LuFileCheck } from 'react-icons/lu';
 import { StatCard } from './components/StatCard';
 import UnitTable from './components/UnitTable';
 import TerritoryTableCustomer from './components/TerritoryTableCustomer';
@@ -352,7 +352,7 @@ export default function Dashboard() {
                     <div className="bg-white shadow rounded-lg relative overflow-hidden">
                         <div className="p-6 font-secondary">
                             <h3 className="text-base font-secondary font-semibold text-gray-900 mb-4">Quotations</h3>
-                            <QuotationTable quotations={customerData?.data_quotations || []} loading={loading} Icon={LuTruck} iconClassName="text-blue-600" />
+                            <QuotationTable quotations={customerData?.data_quotations || []} loading={loading} Icon={LuFileCheck} iconClassName="text-blue-600" />
                         </div>
                     </div>
                     {/* POPULATION UNIT */}

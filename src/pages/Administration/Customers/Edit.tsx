@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
@@ -16,6 +16,8 @@ import CustomSelect from "@/components/form/select/CustomSelect";
 
 export default function EditCustomer() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const listRoute = `/quotations/administration/customers${location.search}`;
     const { id } = useParams<{ id: string }>();
     
     const [isLoading, setIsLoading] = useState(true);
@@ -265,14 +267,13 @@ export default function EditCustomer() {
                     {/* HEADER */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
-                            <Link to="/quotations/administration/customers">
-                                <Button
-                                    variant="outline"
-                                    className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                                >
-                                    <MdKeyboardArrowLeft size={20} />
-                                </Button>
-                            </Link>
+                            <Button
+                                variant="outline"
+                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
+                                onClick={() => navigate(listRoute)}
+                            >
+                                <MdKeyboardArrowLeft size={20} />
+                            </Button>
                             <div className="border-l border-gray-300 h-6 mx-3"></div>
                             <MdPerson size={20} className="text-primary" />
                             <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit Customer</h1>

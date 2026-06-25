@@ -15,6 +15,7 @@ import { formatCurrency, formatDateTime } from "@/helpers/generalHelper";
 import { FaRegFilePdf } from "react-icons/fa6";
 import { useLanguage } from "@/components/lang/useLanguage";
 import { roeCalculatorLabels } from "../language/roeCalculatorLabels";
+import PageHeaderManage from "@/components/common/PageHeaderManage";
 
 export default function ManageRor() {
     const { lang, langField, buildPath } = useLanguage(roeCalculatorLabels);
@@ -261,35 +262,30 @@ export default function ManageRor() {
                 image="/motor-sights-international.png"
             />
             
-            <div className="space-y-5">
-                <div className="bg-white shadow rounded-lg">
-                    
-                    {/* Header */}
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">{langField('manageCalculators')}</h3>
-                                <p className="mt-1 text-sm text-gray-500">{langField('manageCalculators')}</p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <PermissionGate permission="create">
-                                    <Button
-                                        onClick={() => navigate(buildPath(`/roe-roa-calculator/manage/create`))}
-                                        className="flex items-center gap-2 lg:w-[220px]"
-                                        size="sm"
-                                    >
-                                        <MdAdd className="h-4 w-4" />
-                                        {langField('createCalculator')}
-                                    </Button>
-                                </PermissionGate>
-                            </div>
-                        </div>
-                    </div>
-                    
-                </div>
+            <div className="space-y-3">
+                <PageHeaderManage
+                    title={langField('manageCalculators')}
+                    subtitle={langField('manageCalculators')}
+                    actions={[
+                        {
+                        key: 'create',
+                        element: (
+                            <PermissionGate permission="create">
+                                <Button
+                                    onClick={() => navigate(buildPath(`/roe-roa-calculator/manage/create`))}
+                                    className="flex items-center gap-2 lg:w-[220px]"
+                                    size="sm"
+                                >
+                                    <MdAdd className="h-4 w-4" />
+                                    {langField('createCalculator')}
+                                </Button>
+                            </PermissionGate>
+                        )}
+                    ]}
+                />
                 
                 {/* Filters */}
-                <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
+                <div className="bg-white shadow rounded-lg px-6 py-4">
                     {SearchAndFilters}
                 </div>
 

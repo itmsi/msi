@@ -8,6 +8,7 @@ import TerritoryTable from './components/TerritoryTable';
 import AddTerritoryModal from './components/AddTerritoryModal';
 import EditTerritoryModal from './components/EditTerritoryModal';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
 
 const Territory: React.FC = () => {
     const {
@@ -38,33 +39,26 @@ const Territory: React.FC = () => {
                 image="/motor-sights-international.png"
             />
             
-            <div className="space-y-6">
-                {/* Header Section */}
-                <div className="bg-white shadow rounded-lg">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Territory Management
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Manage and organize your territory database with hierarchical structure
-                                </p>
-                            </div>
-                            <div className="flex space-x-3">
-                                <PermissionGate permission="create">
-                                    <Button
-                                        onClick={handleAddTerritory}
-                                        className="flex items-center"
-                                    >
-                                        <MdAdd className="mr-2" />
-                                        Add Territory
-                                    </Button>
-                                </PermissionGate>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div className="space-y-3">
+                <PageHeaderManage
+                    title="Manage Territories"
+                    subtitle="Manage and organize your territory database"
+                    actions={[
+                        {
+                        key: 'create',
+                        element: (
+                            <PermissionGate permission="create">
+                                <Button
+                                    onClick={handleAddTerritory}
+                                    className="flex items-center"
+                                >
+                                    <MdAdd className="mr-2" />
+                                    Add Territory
+                                </Button>
+                            </PermissionGate>
+                        )}
+                    ]}
+                />
 
                 {/* Error Message */}
                 {error && (
@@ -84,7 +78,7 @@ const Territory: React.FC = () => {
 
                 {/* Stats Cards */}
                 {!loading && !error && (
-                    <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
                         <div className="bg-white overflow-hidden shadow rounded-lg">
                             <div className="p-5">
                                 <div className="flex items-center">

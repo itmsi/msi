@@ -80,7 +80,7 @@ const Manage: React.FC = () => {
                         <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                         <Input
                             type="text"
-                            placeholder="Search by customer name, contractor... (Press Enter to search)"
+                            placeholder="Search workorders... (Press Enter to search)"
                             value={searchValue}
                             onChange={(e) => setSearchValue(e.target.value)}
                             onKeyPress={handleKeyPress}
@@ -181,8 +181,7 @@ const Manage: React.FC = () => {
                 description="Manage work orders and assignments for Motor Sights International"
                 image="/motor-sights-international.png"
             />
-            <div className="space-y-6">
-
+            <div className="space-y-3">
                 <PageHeaderManage
                     title="Work Order Management"
                     subtitle="Manage work orders and assignments"

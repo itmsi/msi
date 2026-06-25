@@ -44,7 +44,7 @@ export interface CustomerResponse {
 export interface CustomerRequest {
     page: number;
     limit: number;
-    sort_order: 'asc' | 'desc';
+    sort_order?: 'asc' | 'desc' | '';
     search: string;
 }
 
