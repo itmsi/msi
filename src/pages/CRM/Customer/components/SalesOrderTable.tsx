@@ -2,7 +2,7 @@ import React from 'react';
 import { TableColumn } from 'react-data-table-component';
 import CustomDataTable from '@/components/ui/table/CustomDataTable';
 import { SalesOrder } from '../types/customerDashboard';
-import { formatDate } from '@/helpers/generalHelper';
+import { formatCurrencyDynamic, formatDate } from '@/helpers/generalHelper';
 
 const SalesOrderTable: React.FC<{ 
     salesOrders: SalesOrder[], 
@@ -64,7 +64,7 @@ const SalesOrderTable: React.FC<{
             cell: (row) => (
                 <div className="flex-1 items-center gap-3 py-2">
                     <div className="font-medium text-gray-900 flex">
-                        {row?.min_price || '-'}
+                        {row.min_price ? formatCurrencyDynamic(row.min_price, 'IDR') : '-'}
                     </div>
                 </div>
             ),

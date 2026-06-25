@@ -78,11 +78,13 @@ export interface CustomerData {
     data_customer: CustomerInformation;
 
     data_iup_per_segmentasi: Segmentasi;
+    data_unit_per_segmentasi: Segmentasi;
     data_unit_per_segmentasi_iup_aktif: Segmentasi;
     data_unit_per_segmentasi_iup_non_aktif: Segmentasi;
 
     data_unit_per_brand_iup_aktif: BrandUnit;
     data_unit_per_brand_iup_non_aktif: BrandUnit;
+    data_unit_per_brand: BrandUnit;
 
     data_rkab: RKAB[];
 

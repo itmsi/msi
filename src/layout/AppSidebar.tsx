@@ -145,6 +145,7 @@ const AppSidebar: React.FC = () => {
                 'IUP Management CRM', 
                 'Contractors CRM',
                 'Activities CRM',
+                'Customer CRM',
                 'User Management CRM',
                 'Project CRM',
                 'Division CRM'
@@ -154,7 +155,7 @@ const AppSidebar: React.FC = () => {
                 { name: "IUP Management", path: buildPath("/crm/iup-management"), allowedRoles: ['IUP Management CRM'] },
                 { name: "Contractors", path: buildPath("/crm/contractors"), allowedRoles: ['Contractors CRM'] },
                 { name: "Activities", path: buildPath("/crm/activity"), allowedRoles: ['Activities CRM'] },
-                { name: "Customer", path: buildPath("/crm/customer") },
+                { name: "Customer", path: buildPath("/crm/customer"), allowedRoles: ['Customer CRM'] },
                 { name: "Projects", path: buildPath("/crm/project"), allowedRoles: ['Project CRM'] },
                 { name: "User Management", path: buildPath("/crm/user-management"), allowedRoles: ['User Management CRM'] },
                 { name: "Division", path: buildPath("/crm/manage-division"), allowedRoles: ['Division CRM'] }
