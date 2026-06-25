@@ -108,7 +108,10 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         inputValue,
         handleInputChange: handleProductInputChange,
         handleMenuScrollToBottom,
-        initializeOptions
+        initializeOptions,
+        itemTypeFilter,
+        itemTypeOptions,
+        handleItemTypeChange
     } = usePOItemsSelect();
 
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -695,7 +698,21 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 
                 {/* Add Product Section */}
                 {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (formData.approvalstatus !== 1 || formData.nextapprover === null) && (
-                <div className="flex gap-4 mb-6">
+                <div className="space-y-4 mb-6">
+                    <div>
+                        <Label>Filter Item Type</Label>
+                        <CustomSelect
+                            name="item_type_filter"
+                            placeholder="All Item Types"
+                            value={itemTypeFilter.length > 0 ? itemTypeOptions.find(o => o.value === itemTypeFilter[0]) : null}
+                            options={itemTypeOptions}
+                            isClearable={true}
+                            onChange={(option) => {
+                                handleItemTypeChange(option);
+                            }}
+                        />
+                    </div>
+                    <div className="flex gap-4">
                     <div className="flex-1">
                         <Label htmlFor='selectProduct'>Select Product to Add</Label>
                         <CustomAsyncSelect
@@ -729,6 +746,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             <MdAdd size={16} />
                             Add Product
                         </Button>
+                    </div>
                     </div>
                 </div>
                 )}

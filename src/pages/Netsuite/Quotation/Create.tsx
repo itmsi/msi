@@ -17,6 +17,8 @@ import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 import { getProfile } from '@/helpers/generalHelper';
 import { usePOItemsSelect } from '@/hooks/usePOItemsSelect';
 import { useSOBankSelect } from '@/hooks/useSOBankSelect';
+import CustomSelect from '@/components/form/select/CustomSelect';
+import Label from '@/components/form/Label';
 
 export default function Create() {
     const navigate = useNavigate();
@@ -147,6 +149,9 @@ export default function Create() {
         handleInputChange: handleItemInputChange,
         handleMenuScrollToBottom: handleItemMenuScrollToBottom,
         initializeOptions: initializeItemOptions,
+        itemTypeFilter,
+        itemTypeOptions,
+        handleItemTypeChange
     } = usePOItemsSelect(20);
 
     // Initialize options
@@ -359,6 +364,22 @@ export default function Create() {
                             <div className='bg-white rounded-b-2xl shadow-sm'>
                                 {/* Items Tab */}
                                 {activeTab === 'items' && (
+                                    <>
+                                    <div className="px-6 pt-4">
+                                        <div className="mb-4">
+                                            <Label>Filter Item Type</Label>
+                                            <CustomSelect
+                                                name="item_type_filter"
+                                                placeholder="All Item Types"
+                                                value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
+                                                options={itemTypeOptions}
+                                                isClearable={true}
+                                                onChange={(option: any) => {
+                                                    handleItemTypeChange(option);
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
                                     <QuotationItemFields
                                         formData={formData}
                                         errors={errors}
@@ -399,6 +420,7 @@ export default function Create() {
                                         onDeptInputChange={handleDeptInputChange}
                                         onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
                                     />
+                                    </>
                                 )}
 
                                 {/* Files Tab */}

@@ -16,6 +16,8 @@ import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 import { getProfile } from '@/helpers/generalHelper';
 import { usePOItemsSelect } from '@/hooks/usePOItemsSelect';
 import { useSOBankSelect } from '@/hooks/useSOBankSelect';
+import CustomSelect from '@/components/form/select/CustomSelect';
+import Label from '@/components/form/Label';
 
 export default function Create() {
     const navigate = useNavigate();
@@ -144,6 +146,9 @@ export default function Create() {
         handleInputChange: handleItemInputChange,
         handleMenuScrollToBottom: handleItemMenuScrollToBottom,
         initializeOptions: initializeItemOptions,
+        itemTypeFilter,
+        itemTypeOptions,
+        handleItemTypeChange
     } = usePOItemsSelect(20);
 
     // Initialize options
@@ -326,6 +331,22 @@ export default function Create() {
 
                         <div className='bg-white rounded-2xl shadow-sm'>
                             {/* Sales Order Items */}
+                            <div className="px-6 pt-4">
+                                <h3 className="text-lg font-primary-bold font-medium text-gray-900 mb-4">Sales Order Items</h3>
+                                <div className="mb-4">
+                                    <Label>Filter Item Type</Label>
+                                    <CustomSelect
+                                        name="item_type_filter"
+                                        placeholder="All Item Types"
+                                        value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
+                                        options={itemTypeOptions}
+                                        isClearable={true}
+                                        onChange={(option: any) => {
+                                            handleItemTypeChange(option);
+                                        }}
+                                    />
+                                </div>
+                            </div>
                             <SalesOrderItemFields
                                 formData={formData}
                                 errors={errors}
