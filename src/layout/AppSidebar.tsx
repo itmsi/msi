@@ -16,7 +16,7 @@ import { useLanguage } from "@/components/lang/useLanguage";
 import { menuTranslations } from "@/components/lang/menuTranslations";
 import { TbTopologyStar3, TbReport } from "react-icons/tb";
 import { MdCalculate } from "react-icons/md";
-import { LuClipboardList } from "react-icons/lu";
+// import { LuClipboardList } from "react-icons/lu";
 
 type SubNavItem = {
     name: string;
@@ -183,13 +183,13 @@ const AppSidebar: React.FC = () => {
                 { name: "Quotation", path: "/netsuite/quotation", allowedRoles: ['Quotation Netsuite'] },
             ],
         },
-        {
-            name: "Work Order",
-            icon: <LuClipboardList />,
-            subItems: [
-                { name: "Manage Work Orders", path: "/workorders/manage"     },
-            ],
-        }
+        // {
+        //     name: "Work Order",
+        //     icon: <LuClipboardList />,
+        //     subItems: [
+        //         { name: "Manage Work Orders", path: "/workorders/manage"     },
+        //     ],
+        // }
     ], [buildPath]);
 
     const othersItems: NavItem[] = useMemo(() => [
