@@ -162,7 +162,7 @@ export interface POItemsSelectRequest {
     sort_by: string;
     sort_order: string;
     search: string;
-    item_type: string[];
+    item_type_id?: string[];
     is_parent?: boolean;
 }
 export interface FormFieldItemsResponse {
@@ -213,6 +213,7 @@ export interface POItemsRequest {
     sort_by: string;
     sort_order: string;
     search: string;
+    item_type_id?: string[];
 }
 
 export interface TablePOItem {
@@ -479,7 +480,41 @@ export interface PurchaseOrderUpdateItem {
     gross_amount?: number;
     description?: string;
 }
-// TERM SELECT
+// ITEM TYPE
+ export interface ItemTypeRequest {
+     page: number;
+     limit: number;
+     sort_by: string;
+     sort_order: string;
+     search: string;
+ }
+ 
+ export interface ItemTypeResponse {
+     success: boolean;
+     data: ItemTypeDataResponse;
+     message: string;
+ }
+ 
+ export interface ItemTypeDataResponse {
+     items: ItemTypeItem[];
+     pagination: Pagination;
+ }
+ 
+ export interface ItemTypeItem {
+     id: string;
+     netsuite_id: string | null;
+     code: string;
+     name: string;
+     created_at: string | null;
+     created_by: string | null;
+     updated_at: string | null;
+     updated_by: string | null;
+     deleted_at: string | null;
+     deleted_by: string | null;
+     is_deleted: boolean;
+ }
+ 
+ // TERM SELECT
 export interface TermsItem {
     id: string;
     name: string;

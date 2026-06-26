@@ -1,45 +1,68 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { CustomerService } from '../services/customerService';
 import { Customer, CustomerRequest, CustomerPagination } from '../types/customer';
+import { useLocation, useSearchParams } from 'react-router-dom';
+
+type FilterState = {
+    search: string;
+    sort_order: 'asc' | 'desc' | '';
+};
 
 export const useCustomers = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const location = useLocation(); 
+
+    const urlPage = Math.max(Number(searchParams.get('page')) || 1, 1);
+    const urlLimit = Math.max(Number(searchParams.get('limit')) || 10, 1);
+
+    const urlFilters: FilterState = {
+        search: searchParams.get('search') || '',
+        sort_order: (searchParams.get('sort_order') as FilterState['sort_order']) || '',
+    };
+
+    // Input search dipisah agar tidak memicu fetch saat user masih mengetik
+    const [searchValue, setSearchValue] = useState(urlFilters.search);
+    
     const [customers, setCustomers] = useState<Customer[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [pagination, setPagination] = useState<CustomerPagination>({
-        page: 1,
-        limit: 10,
+        page: urlPage,
+        limit: urlLimit,
         total: 0,
         totalPages: 0
     });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [filters, setFilters] = useState({ 
-        search: '',
-        sort_order: 'desc' as 'asc' | 'desc'
-    });
 
-    // Debounce timer ref
-    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-
-    const fetchCustomers = useCallback(async (page?: number, limit?: number, appendData: boolean = false) => {
-        setLoading(true);
-        setError(null);
+    const updateUrlParams = useCallback((currentFilters: FilterState, page: number, limit: number) => {
+        const params = new URLSearchParams();
+        if (page > 1) params.set('page', String(page));
+        if (limit !== 10) params.set('limit', String(limit));
         
+        Object.entries(currentFilters).forEach(([key, value]) => {
+            if (value && value !== 'desc') { // Jangan masukkan nilai kosong atau default sort
+                params.set(key, value);
+            }
+        });
+        
+        setSearchParams(params);
+    }, [setSearchParams]);
+    
+    const fetchCustomers = useCallback(async (params?: Partial<CustomerRequest>) => {
         try {
-            const requestParams: Partial<CustomerRequest> = {
-                page: page || pagination.page,
-                limit: limit || pagination.limit,
-                search: filters.search,
-                sort_order: filters.sort_order
+            setLoading(true);
+            setError(null);
+                        
+            const requestParams: CustomerRequest = {
+                page: urlPage,
+                limit: urlLimit,
+                ...urlFilters,
+                ...params // Nilai baru akan menimpa nilai state lama disini
             };
             
             const response = await CustomerService.getCustomers(requestParams);
             
             if (response.success) {
-                if (appendData && page && page > 1) {
-                    setCustomers(prev => [...prev, ...response.data.data]);
-                } else {
-                    setCustomers(response.data.data);
-                }
+                setCustomers(response.data.data);
                 setPagination(response.data.pagination);
             } else {
                 setError(response.message || 'Failed to fetch customers');
@@ -50,7 +73,7 @@ export const useCustomers = () => {
         } finally {
             setLoading(false);
         }
-    }, [pagination.page, pagination.limit, filters.search]);
+    }, [urlFilters, urlLimit, urlPage]);
 
     const updateCustomer = useCallback(async (customerId: string, customerData: Partial<Omit<Customer, 'customer_id'>>) => {
         setLoading(true);
@@ -90,90 +113,61 @@ export const useCustomers = () => {
         }
     }, []);
 
-    const handleFilterChangeDebounced = useCallback((filterKey: string, value: string) => {
-        if (debounceTimer.current) {
-            clearTimeout(debounceTimer.current);
-        }
+    const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
+        const updatedFilters = { ...urlFilters, ...newFilters };
+        updateUrlParams(updatedFilters, 1, urlLimit); // Reset ke page 1 tiap filter berubah
+    }, [urlFilters, urlLimit, updateUrlParams]);
 
-        debounceTimer.current = setTimeout(() => {
-            setFilters(prev => ({ ...prev, [filterKey]: value }));
-            setPagination(prev => ({ ...prev, page: 1 }));
-            const requestParams: Partial<CustomerRequest> = {
-                page: 1,
-                limit: pagination.limit,
-                search: filterKey === 'search' ? value : filters.search,
-                sort_order: filterKey === 'sort_order' ? value as 'asc' | 'desc' : filters.sort_order
-            };
-            
-            setLoading(true);
-            setError(null);
-            
-            CustomerService.getCustomers(requestParams)
-                .then(response => {
-                    if (response.success) {
-                        setCustomers(response.data.data);
-                        setPagination(response.data.pagination);
-                    } else {
-                        setError(response.message || 'Failed to fetch customers');
-                    }
-                })
-                .catch(err => {
-                    setError('Something went wrong while fetching customers');
-                    console.error('Fetch customers error:', err);
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
-        }, 500);
-    }, [pagination.limit, filters.search]);
+    const handlePageChange = useCallback((page: number) => {
+        updateUrlParams(urlFilters, page, urlLimit);
+    }, [urlFilters, urlLimit, updateUrlParams]);
 
-    const handleSearchChange = useCallback((search: string) => {
-        setFilters(prev => ({ ...prev, search }));
-        
-        setPagination(prev => ({ ...prev, page: 1 }));
-        
-        const requestParams: Partial<CustomerRequest> = {
-            page: 1,
-            limit: pagination.limit,
-            search: search,
-            sort_order: filters.sort_order
-        };
-        
-        setLoading(true);
-        setError(null);
-        
-        CustomerService.getCustomers(requestParams)
-            .then(response => {
-                if (response.success) {
-                    setCustomers(response.data.data);
-                    setPagination(response.data.pagination);
-                } else {
-                    setError(response.message || 'Failed to fetch customers');
-                }
-            })
-            .catch(err => {
-                setError('Something went wrong while fetching customers');
-                console.error('Fetch customers error:', err);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, [pagination.limit, filters.sort_order]);
+    const handleRowsPerPageChange = useCallback((limit: number, page: number) => {
+        updateUrlParams(urlFilters, page, limit);
+    }, [urlFilters, updateUrlParams]);
 
-    // Handle sort change
-    const handleSortChange = useCallback((sort_order: 'asc' | 'desc') => {
-        handleFilterChangeDebounced('sort_order', sort_order);
-    }, [handleFilterChangeDebounced]);
+    // Search functions
+    const executeSearch = useCallback(() => {
+        handleFilterChange({ search: searchValue });
+    }, [handleFilterChange, searchValue]);
 
+    const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') executeSearch();
+    }, [executeSearch]);
+
+    const handleClearSearch = useCallback(() => {
+        setSearchValue('');
+        handleFilterChange({ search: '' });
+    }, [handleFilterChange]);
+
+    useEffect(() => {
+        fetchCustomers();
+        
+        // Memastikan input text search ter-reset jika user memencet tombol Back
+        setSearchValue(urlFilters.search);
+        
+    }, [location.search]);
     return {
         customers,
         pagination,
         loading,
         error,
+
+        filters: urlFilters,
+        searchValue,
+        setSearchValue,
+
         fetchCustomers,
         updateCustomer,
         deleteCustomer,
-        handleSearchChange,
-        handleSortChange,
+
+        handlePageChange,
+        handleRowsPerPageChange,
+        handleFilterChange,
+        executeSearch,
+        handleKeyPress,
+        handleClearSearch,
+        
+        refetch: fetchCustomers
     };
 };

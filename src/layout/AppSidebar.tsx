@@ -16,6 +16,7 @@ import { useLanguage } from "@/components/lang/useLanguage";
 import { menuTranslations } from "@/components/lang/menuTranslations";
 import { TbTopologyStar3, TbReport } from "react-icons/tb";
 import { MdCalculate } from "react-icons/md";
+import { LuClipboardList } from "react-icons/lu";
 
 type SubNavItem = {
     name: string;
@@ -144,6 +145,7 @@ const AppSidebar: React.FC = () => {
                 'IUP Management CRM', 
                 'Contractors CRM',
                 'Activities CRM',
+                'Customer CRM',
                 'User Management CRM',
                 'Project CRM',
                 'Division CRM'
@@ -153,6 +155,7 @@ const AppSidebar: React.FC = () => {
                 { name: "IUP Management", path: buildPath("/crm/iup-management"), allowedRoles: ['IUP Management CRM'] },
                 { name: "Contractors", path: buildPath("/crm/contractors"), allowedRoles: ['Contractors CRM'] },
                 { name: "Activities", path: buildPath("/crm/activity"), allowedRoles: ['Activities CRM'] },
+                { name: "Customer", path: buildPath("/crm/customer"), allowedRoles: ['Customer CRM'] },
                 { name: "Projects", path: buildPath("/crm/project"), allowedRoles: ['Project CRM'] },
                 { name: "User Management", path: buildPath("/crm/user-management"), allowedRoles: ['User Management CRM'] },
                 { name: "Division", path: buildPath("/crm/manage-division"), allowedRoles: ['Division CRM'] }
@@ -167,7 +170,8 @@ const AppSidebar: React.FC = () => {
                 'Admin Sync Netsuite',
                 'Sales Order Netsuite',
                 'Manage Receipts Netsuite',
-                'Bill Payment Netsuite'
+                'Bill Payment Netsuite',
+                'Quotation Netsuite'
             ],
             subItems: [
                 { name: "Purchase Orders", path: "/netsuite/purchase-order", allowedRoles: ['Purchase Orders Netsuite'] },
@@ -176,6 +180,14 @@ const AppSidebar: React.FC = () => {
                 { name: "Admin Sync", path: "/netsuite/sync", allowedRoles: ['Admin Sync Netsuite'] },
                 { name: "Receipts", path: "/netsuite/receipts", allowedRoles: ['Manage Receipts Netsuite'] },
                 { name: "Bill Payment", path: "/netsuite/bill-payment", allowedRoles: ['Bill Payment Netsuite'] },
+                { name: "Quotation", path: "/netsuite/quotation", allowedRoles: ['Quotation Netsuite'] },
+            ],
+        },
+        {
+            name: "Work Order",
+            icon: <LuClipboardList />,
+            subItems: [
+                { name: "Manage Work Orders", path: "/workorders/manage"     },
             ],
         }
     ], [buildPath]);

@@ -2,10 +2,13 @@
 import PageMeta from "@/components/common/PageMeta";
 import { useLanguage } from "@/components/lang/useLanguage";
 import { homeTranslations } from "./translations";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function Home() {
     const { langField } = useLanguage(homeTranslations);
-
+    const {
+        profile,
+    } = useProfile(true);
     return (
         <>
             <PageMeta
@@ -13,6 +16,7 @@ export default function Home() {
                 description={langField('page_description')}
                 image="/motor-sights-international.png"
             />
+            <h1 className="hidden">{profile?.employee_name || ''}</h1>
             <div className="flex flex-col justify-center items-center h-[70vh] gap-6">
                 <img 
                     src="/motor-sights-international-logo.png" 

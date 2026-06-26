@@ -12,6 +12,7 @@ import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import { HaulingPriceItem } from './types/calculator';
 import { useCalculatorManagement } from './hooks/useCalculatorManagement';
 import { createByDateColumn } from '@/components/ui/table/columnUtils';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -155,34 +156,27 @@ export default function Manage() {
                 image="/motor-sights-international.png"
             />
 
-            <div className="space-y-6">
-                {/* Header */}
-                <div className="bg-white shadow rounded-lg mb-3">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Manage Hauling Price Calculations
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Manage hauling price calculations and related information
-                                </p>
-                            </div>
-                            <div className="flex space-x-3">
-                                    <Button
-                                        onClick={() => navigate('/hauling-calculator/create')}
-                                        className="flex items-center gap-2"
-                                    >
-                                        <MdAdd size={20} />
-                                        <span>Create Hauling Price Calculation</span>
-                                    </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div className="space-y-3">
+                <PageHeaderManage
+                    title="Manage Hauling Price Calculations"
+                    subtitle="Manage hauling price calculations and related information"
+                    actions={[
+                        {
+                        key: 'create',
+                        element: (
+                            <Button
+                                onClick={() => navigate('/hauling-calculator/create')}
+                                className="flex items-center gap-2"
+                            >
+                                <MdAdd size={20} />
+                                <span>Create Hauling Price Calculation</span>
+                            </Button>
+                        )}
+                    ]}
+                />
 
                 {/* Search & Filter */}
-                <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
+                <div className="bg-white shadow rounded-lg px-6 py-4">
                     {SearchAndFilters}
                 </div>
 

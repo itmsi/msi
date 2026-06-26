@@ -75,6 +75,8 @@ const EditActivities = lazy(() => import('@/pages/CRM/Activity/EditActivity'));
 const ManageCRMProject = lazy(() => import('@/pages/CRM/Project/Manage'));
 const CreateCRMProject = lazy(() => import('@/pages/CRM/Project/CreateProject'));
 const EditCRMProject = lazy(() => import('@/pages/CRM/Project/EditProject'));
+const CustomerCRM = lazy(() => import('@/pages/CRM/Customer/Manage'));
+const CustomerDashboard = lazy(() => import('@/pages/CRM/Customer/Dashboard'));
 
 // ========================================
 // QUOTATION ITI
@@ -118,6 +120,9 @@ const ManageReceive = lazy(() => import('@/pages/Netsuite/Receipts/Manage'));
 const ManageSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Manage'));
 const ManageBillPayment = lazy(() => import('@/pages/Netsuite/BillPayment/Manage'));
 const ViewBillPayment = lazy(() => import('@/pages/Netsuite/BillPayment/View'));
+const ManageQuotationNetsuite = lazy(() => import('@/pages/Netsuite/Quotation/Manage'));
+const CreateQuotationNetsuite = lazy(() => import('@/pages/Netsuite/Quotation/Create'));
+const EditQuotationNetsuite = lazy(() => import('@/pages/Netsuite/Quotation/Edit'));
 const CreateSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Create'));
 const EditSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Edit'));
 // ========================================
@@ -129,6 +134,9 @@ const ManageDivision = lazy(() => import('@/pages/CRM/Divisions/Manage'));
 const CreateHaulingCalculator = lazy(() => import('@/pages/Calculator/HaulingPriceCalculatorCreate'));
 const EditHaulingCalculator = lazy(() => import('@/pages/Calculator/HaulingPriceCalculatorEdit'));
 const ManageHaulingCalculator = lazy(() => import('@/pages/Calculator/Manage'));
+
+// WORK ORDER
+const ManageWorkOrder = lazy(() => import('@/pages/WorkOrder/Manage'));
 
 // NANOGRID CALCULATOR
 const NanogridCalculator = lazy(() => import('@/pages/Nanogrid/Manage'));
@@ -880,6 +888,24 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
+        path: '/crm/customer',
+        name: 'Customer CRM',
+        isProtected: true,
+        roles: ['Customer CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: CustomerCRM,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/customer/dashboard/:id',
+        name: 'Customer CRM',
+        isProtected: true,
+        roles: ['Customer CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: CustomerDashboard,
+        layout: AppLayout,
+    },
+    {
         path: '/netsuite/purchase-order',
         name: 'Purchase Orders Netsuite',
         isProtected: true,
@@ -991,6 +1017,32 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
+        path: '/netsuite/quotation',
+        name: 'Quotation Netsuite',
+        isProtected: true,
+        roles: ['Quotation Netsuite'],
+        component: ManageQuotationNetsuite,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/quotation/create',
+        name: 'Quotation Netsuite',
+        isProtected: true,
+        roles: ['Quotation Netsuite'],
+        requiredPermissions: ['create'],
+        component: CreateQuotationNetsuite,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/quotation/edit/:id',
+        name: 'Quotation Netsuite',
+        isProtected: true,
+        roles: ['Quotation Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: EditQuotationNetsuite,
+        layout: AppLayout,
+    },
+    {
         path: '/netsuite/sales-orders',
         name: 'Sales Order Netsuite',
         isProtected: true,
@@ -1047,6 +1099,14 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['ADMIN'],
         component: NanogridCalculator,
+        layout: AppLayout,
+    },
+    {
+        path: '/workorders/manage',
+        name: 'Manage Work Orders',
+        isProtected: true,
+        roles: ['ADMIN'],
+        component: ManageWorkOrder,
         layout: AppLayout,
     },
 ];

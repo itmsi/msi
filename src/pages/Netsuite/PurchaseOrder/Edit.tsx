@@ -2,7 +2,7 @@ import PageMeta from '@/components/common/PageMeta'
 import Button from '@/components/ui/button/Button'
 import { useEffect, useState } from 'react'
 import { MdHistory, MdInventory2, MdOutlineAttachFile, MdOutlineComment, MdOutlineSync, MdReceiptLong, MdVerified } from 'react-icons/md'
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { usePurchaseOrderEdit } from './hooks/usePurchaseOrderEdit';
 import PurchaseOrderFields from './components/purchaseOrderFields';
 import PurchaseOrderItemFields from './components/purchaseOrderItemsFields';
@@ -27,6 +27,8 @@ import PageHeader from '@/components/common/PageHeader';
 
 export default function Edit() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const listRoute = `/netsuite/purchase-order/manage${location.search}`;
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
     
@@ -49,7 +51,7 @@ export default function Edit() {
         handleSyncById,
         isSyncing,
         handleAddFiles,
-    } = usePurchaseOrderEdit();
+    } = usePurchaseOrderEdit(listRoute);
 
     // Get subsidiary_id dari form data dengan defensive check
     const subsidiaryId = formData?.subsidiary ? Number(formData.subsidiary) : undefined;
@@ -250,7 +252,7 @@ export default function Edit() {
     }, [poDetail, locationInitialized, classInitialized, departmentInitialized, isInitialLoadComplete]);
 
     const handleCancel = () => {
-        navigate('/netsuite/purchase-order/manage');
+        navigate(listRoute);
     }
 
     const [isOpenApproval, setIsOpenApproval] = useState(false);
@@ -328,7 +330,7 @@ export default function Edit() {
                         {/* Header */}
                         <PageHeader
                             title="Edit Purchase Order"
-                            backPath="/netsuite/purchase-order/manage"
+                            backPath={listRoute}
                             subtitle={poDetail?.po_number || '-'}
                             actions={
                                 <>

@@ -11,7 +11,7 @@ interface UseProjectFormProps {
     project_id?: string;
 }
 
-export const useProjectForm = ({ mode, project_id }: UseProjectFormProps) => {
+export const useProjectForm = ({ mode, project_id }: UseProjectFormProps, backRoute: string = '/crm/project') => {
     const employeeId = useMemo(() => {
         const user = AuthService.getCurrentUser();
         return user?.employee_id || '';
@@ -82,10 +82,11 @@ export const useProjectForm = ({ mode, project_id }: UseProjectFormProps) => {
             }
         } catch (err: any) {
             toast.error(err?.message || 'Failed to load project data');
+            navigate(backRoute);
         } finally {
             setIsLoadingDetail(false);
         }
-    }, [employeeId]);
+    }, [employeeId, backRoute]);
 
     const handleChange = (field: keyof ProjectFormData, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -174,7 +175,7 @@ export const useProjectForm = ({ mode, project_id }: UseProjectFormProps) => {
 
             if (response?.status || response?.success) {
                 toast.success(mode === 'create' ? 'Project created successfully' : 'Project updated successfully');
-                navigate('/crm/project');
+                navigate(backRoute);
             } else {
                 toast.error(response?.message || 'Operation failed');
             }

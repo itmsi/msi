@@ -1,3 +1,5 @@
+import { getStatusBadgeConfig } from "./badgeHelper";
+
 type BadgeVariant = "light" | "solid" | "outline" | "dot";
 type BadgeSize = "sm" | "md" | "lg";
 type BadgeColor =
@@ -15,19 +17,26 @@ interface BadgeProps {
     variant?: BadgeVariant;
     size?: BadgeSize;
     color?: BadgeColor;
+    status?: string;
+    showLabel?: boolean;
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
-    children: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 const Badge: React.FC<BadgeProps> = ({
     variant = "light",
-    color = "primary",
+    color: colorProp,
     size = "md",
+    status,
+    showLabel = false,
     startIcon,
     endIcon,
     children,
 }) => {
+    // Auto-map status to color if status prop is provided
+    const statusConfig = status ? getStatusBadgeConfig(status) : null;
+    const color = colorProp || statusConfig?.color || "primary";
     const baseStyles =
         "inline-flex items-center justify-center rounded-md font-medium px-2 py-0.5 text-xs";
 
@@ -105,7 +114,8 @@ const Badge: React.FC<BadgeProps> = ({
                 <span className="mr-1">{startIcon}</span>
             )}
 
-            {children}
+            {/* Show status label if available and showLabel is true, otherwise show children */}
+            {statusConfig && showLabel ? statusConfig.label : children}
 
             {/* Optional End Icon */}
             {endIcon && variant !== "dot" && (

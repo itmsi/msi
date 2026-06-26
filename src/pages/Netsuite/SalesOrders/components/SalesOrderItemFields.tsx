@@ -500,7 +500,7 @@ export default function SalesOrderItemFields({
             width: '300px',
             sortable: false
         },
-        ...(formData.custbody_me_approval_status === 1 ? [createActionsColumn([
+        ...(formData.custbody_me_approval_status !== 2 && formData.custbody_me_approval_status !== 3 ? [createActionsColumn([
             {
                 icon: MdDeleteOutline,
                 onClick: (row: SalesOrderFormItem) => {
@@ -519,7 +519,7 @@ export default function SalesOrderItemFields({
             <div className="mb-6 space-y-6 p-6">
                 <h3 className="text-lg font-primary-bold font-medium text-gray-900">Line Items</h3>
 
-                {(formData.custbody_me_approval_status) === 1 && (<>
+                {(formData.custbody_me_approval_status !== 2 && formData.custbody_me_approval_status !== 3) && (<>  
                     {/* Add Item */}
                     <div className="flex gap-4 mb-6">
                         <div className="flex-1">
@@ -559,6 +559,11 @@ export default function SalesOrderItemFields({
                             </Button>
                         </div>
                     </div>
+                    {(!formData.subsidiary || !formData.location || !formData.class || !formData.department) && (
+                        <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 mb-4">
+                            Lengkapi field Subsidiary, Location, Class, dan Department terlebih dahulu sebelum menambahkan item.
+                        </p>
+                    )}
                 </>)}
 
                 {errors.items && (

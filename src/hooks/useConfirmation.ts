@@ -4,7 +4,7 @@ import { ConfirmationModalProps } from '@/components/ui/modal/ConfirmationModal'
 // INI ADALAH FUNGSI UNTUK CONFIRMATION MODAL
 export interface UseConfirmationOptions {
     title?: string;
-    message?: string;
+    message?: string | React.ReactNode;
     confirmText?: string;
     cancelText?: string;
     type?: 'danger' | 'warning' | 'info' | 'success';

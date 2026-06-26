@@ -8,7 +8,7 @@ interface ValidationErrors {
     [key: string]: string;
 }
 
-export const useContractorEdit = () => {
+export const useContractorEdit = (backRoute: string = '/crm/contractors') => {
     const navigate = useNavigate();
     const { iup_customer_id } = useParams<{ iup_customer_id: string }>();
     const [isLoading, setIsLoading] = useState(true);
@@ -158,14 +158,14 @@ export const useContractorEdit = () => {
             } catch (error) {
                 console.error('Error loading contractor:', error);
                 toast.error('Failed to load contractor data');
-                navigate('/crm/contractors');
+                navigate(backRoute);
             } finally {
                 setIsLoading(false);
             }
         };
 
         loadContractorData();
-    }, [iup_customer_id, navigate]);
+    }, [iup_customer_id, navigate, backRoute]);
 
     // Customer data handlers
     const handleCustomerChange = (field: keyof ContractorFormData['customer_data'], value: string) => {
@@ -469,7 +469,7 @@ export const useContractorEdit = () => {
             const response = await ContractorServices.updateContractor(iup_customer_id, submissionData);
             if (response.success === true) {
                 toast.success('Contractor updated successfully');
-                navigate('/crm/contractors');
+                navigate(backRoute);
             } else {
                 if (response.message && Array.isArray(response.message)) {
                     response.message.forEach((msg: any) => toast.error(msg));

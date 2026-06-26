@@ -23,16 +23,9 @@ const Contractors: React.FC = () => {
         loading,
         error,
         pagination,
+        filters,
         searchValue,
         setSearchValue,
-        sortOrder,
-        setSortOrder,
-        statusFilter,
-        setStatusFilter,
-        segmentationFilter,
-        setSegmentationFilter,
-        // mineTypeFilter,
-        setMineTypeFilter,
         
         // Actions
         handlePageChange,
@@ -52,13 +45,16 @@ const Contractors: React.FC = () => {
     };
 
     const handleClearFilters = () => {
-        setSortOrder('');
-        setStatusFilter('');
-        setSegmentationFilter('');
-        setMineTypeFilter('');
         setSearchValue('');
-        handleClearSearch();
+        handleFilterChange({
+            sort_order: 'desc', // Kembalikan ke default
+            status: '',
+            segmentation_id: '',
+            mine_type: '',
+            search: ''
+        });
     };
+
     const handleDelete = async (contractor: Contractor) => {
         const typeLabel = contractor.customer_name;
                 
@@ -95,7 +91,6 @@ const Contractors: React.FC = () => {
                         {searchValue && (
                             <button
                                 onClick={() => {
-                                    setSearchValue('');
                                     handleClearSearch();
                                 }}
                                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
@@ -112,12 +107,12 @@ const Contractors: React.FC = () => {
                 <CustomSelect
                     id="sort_order"
                     name="sort_order"
-                    value={sortOrder ? {
-                        value: sortOrder,
-                        label: sortOrder === 'asc' ? 'Ascending' : 'Descending'
+                    value={filters.sort_order ? {
+                        value: filters.sort_order,
+                        label: filters.sort_order === 'asc' ? 'Ascending' : 'Descending'
                     } : null}
                     onChange={(selectedOption) =>
-                        handleFilterChange('sort_order', selectedOption?.value || '')
+                        handleFilterChange({ sort_order: (selectedOption?.value as 'asc' | 'desc') || 'desc' })
                     }
                     options={[
                         { value: 'asc', label: 'Ascending' },
@@ -145,13 +140,14 @@ const Contractors: React.FC = () => {
         
         {showAdvancedFilters && (
             <FilterSection
-                onFilterChange={handleFilterChange}
+                // onFilterChange={handleFilterChange}
+                onFilterChange={(field, value) => handleFilterChange({ [field]: value })}
                 onClearFilters={handleClearFilters}
             />
         )}
         </>
     
-    )}, [searchValue, statusFilter, segmentationFilter, sortOrder, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleClearFilters]);
+    )}, [searchValue, filters, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters]);
     
     return (
         <>

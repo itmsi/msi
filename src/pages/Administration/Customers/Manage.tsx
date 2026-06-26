@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { MdAdd, MdEdit, MdSearch, MdPeople, MdClear, MdDeleteOutline } from 'react-icons/md';
+import { MdAdd, MdSearch, MdClear, MdDeleteOutline } from 'react-icons/md';
 import { useCustomerManagement } from './hooks/useCustomerManagement';
 import { CustomerUtilityService } from './services/customerUtilityService';
 import { Customer } from './types/customer';
@@ -11,47 +11,80 @@ import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { createActionsColumn } from '@/components/ui/table';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import { useConfirmation } from '@/hooks/useConfirmation';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
 
-const ManageCustomers: React.FC = () => {
+const ManageCustomers: React.FC<{ action?: boolean, urlPath?: string }> = ({ action = true, urlPath = `/quotations/administration/customers/edit/` }) => {
     const navigate = useNavigate();
     
     // Custom hook untuk semua state management dan handlers
     const {
-        searchTerm,
-        sortOrder,
         customers,
-        pagination,
         loading,
         error,
-        confirmDelete,
+        pagination,
+
+        filters,
+        searchValue,
+        setSearchValue,
+
+        // confirmDelete,
+
         handlePageChange,
         handleRowsPerPageChange,
-        handleSearchChange,
-        handleManualSearch,
-        handleClearFilters,
         handleFilterChange,
-        handleEdit,
-        handleDelete,
-        confirmDeleteCustomer,
-        cancelDelete
+        refetch,
+
+        deleteCustomer,
+        handleKeyPress,
+        handleClearSearch,
+
     } = useCustomerManagement();
-    
+
+    const location = useLocation();
+    const { showConfirmation, modalProps } = useConfirmation();
+    const handleDelete = async (customer: any) => {
+        const typeLabel = customer.customer_name;
+                
+        const confirmed = await showConfirmation({
+            title: `Delete ${typeLabel}`,
+            message: (
+                <>
+                    Are you sure you want to delete <strong className="font-primary-bold">{customer.customer_name}?</strong>
+                    <br />
+                    This action cannot be undone.
+                </>
+            ),
+            confirmText: `Delete ${typeLabel}`,
+            cancelText: 'Cancel',
+            type: 'danger',
+        });
+
+        if (confirmed) {
+            await deleteCustomer(customer.customer_id);
+            refetch();
+        }
+    };
     // Definisi kolom untuk DataTable
     const columns: TableColumn<Customer>[] = [
         {
             name: 'Customer Name',
             selector: row => row.customer_name,
             cell: (row) => {
-                return (
+                return (<>
+                    <a
+                        href={`${urlPath}${row.customer_id}${location.search}`}
+                        className="absolute inset-0"
+                    />
                     <div className="py-2">
                         <div className="font-medium text-gray-900">
                             {row?.customer_name ?? '-'}
                         </div>
                         <div className="text-sm text-gray-500">{row?.contact_person ?? '-'}{row?.customer_code ? ` - ${row.customer_code}` : ''}</div>
                     </div>
-                );
+                </>);
             }
         },
         {
@@ -96,24 +129,24 @@ const ManageCustomers: React.FC = () => {
             width: '200px'
         },
         // createDateColumn('Created At', 'created_at', tableDateFormat),
-        createActionsColumn([
-            {
-                icon: MdEdit,
-                onClick: handleEdit,
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'Edit',
-                permission: 'update'
-            },
-            {
-                icon: MdDeleteOutline,
-                onClick: handleDelete,
-                className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
-                tooltip: 'Delete',
-                permission: 'delete'
-            }
-        ])
+        ...(action) ? [createActionsColumn([
+                // {
+                //     icon: MdEdit,
+                //     onClick: handleEdit,
+                //     className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                //     tooltip: 'Edit',
+                //     permission: 'update'
+                // },
+                {
+                    icon: MdDeleteOutline,
+                    onClick: handleDelete,
+                    className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
+                    tooltip: 'Delete',
+                    permission: 'delete'
+                }
+            ])] : []
     ];
-
+    
     // Search and filter component
     const SearchAndFilters = useMemo(() => (
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -123,20 +156,18 @@ const ManageCustomers: React.FC = () => {
                         <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                         <Input
                             type="text"
-                            placeholder="Search customers..."
-                            value={searchTerm}
-                            onChange={(e) => handleSearchChange(e.target.value)}
-                            onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    handleManualSearch();
-                                }
-                            }}
-                            className={`pl-10 py-2 w-full rounded-r-none ${searchTerm ? 'pr-10' : 'pr-4'}`}
+                            placeholder="Search customers... (Press Enter to search)"
+                            value={searchValue}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                            
+                            onKeyPress={handleKeyPress}
+                            className={`pl-10 py-2 w-full ${searchValue ? 'pr-10' : 'pr-4'}`}
                         />
-                        {searchTerm && (
+                        {searchValue && (
                             <button
-                                onClick={handleClearFilters}
+                                onClick={() => {
+                                    handleClearSearch();
+                                }}
                                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                                 type="button"
                             >
@@ -144,13 +175,6 @@ const ManageCustomers: React.FC = () => {
                             </button>
                         )}
                     </div>
-                    <Button
-                        onClick={handleManualSearch}
-                        className="rounded-l-none px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 border-l-0"
-                        size="sm"
-                    >
-                        <MdSearch className="w-4 h-4" />
-                    </Button>
                 </div>
             </div>
             
@@ -159,12 +183,12 @@ const ManageCustomers: React.FC = () => {
                 <CustomSelect
                     id="sort_order"
                     name="sort_order"
-                    value={sortOrder ? { 
-                        value: sortOrder, 
-                        label: sortOrder === 'asc' ? 'Ascending' : 'Descending' 
+                    value={filters.sort_order ? {
+                        value: filters.sort_order,
+                        label: filters.sort_order === 'asc' ? 'Ascending' : 'Descending'
                     } : null}
                     onChange={(selectedOption) => 
-                        handleFilterChange('sort_order', selectedOption?.value || '')
+                        handleFilterChange({ sort_order: (selectedOption?.value as 'asc' | 'desc') || 'desc' })
                     }
                     options={[
                         { value: 'asc', label: 'Ascending' },
@@ -177,7 +201,7 @@ const ManageCustomers: React.FC = () => {
                 />
             </div>
         </div>
-    ), [searchTerm, sortOrder, loading, customers.length, handleSearchChange, handleManualSearch, handleClearFilters, handleFilterChange]);
+    ), [filters, loading, customers.length, handleFilterChange]);
     return (
         <>
             <PageMeta
@@ -185,84 +209,67 @@ const ManageCustomers: React.FC = () => {
                 description="Manage Customers - Motor Sights International"
                 image="/motor-sights-international.png"
             />
-            <div className="bg-white shadow rounded-lg">
-                {/* Header */}
-                <div className="px-6 py-4 border-b border-gray-200">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h3 className="text-lg leading-6 font-primary-bold text-gray-900">Manage Customers</h3>
-                            <p className="mt-1 text-sm text-gray-500">Manage and organize your customer database</p>
-                        </div>
-                        <PermissionGate permission="create">
-                            <Button
-                                onClick={() => navigate('/quotations/administration/customers/create')}
-                                className="flex items-center gap-2"
-                                size="sm"
-                            >
-                                <MdAdd className="h-4 w-4" />
-                                Add New Customer
-                            </Button>
-                        </PermissionGate>
-                    </div>
-                </div>
-                
+            <div className="space-y-3">
+                <PageHeaderManage
+                    title="Manage Customers"
+                    subtitle="Manage and organize your customer database"
+                    actions={[
+                        {
+                        key: 'create',
+                        element: action && (
+                            <PermissionGate permission="create">
+                                <Button
+                                    onClick={() => navigate('/quotations/administration/customers/create')}
+                                    className="flex items-center gap-2"
+                                    size="sm"
+                                >
+                                    <MdAdd className="h-4 w-4" />
+                                    Add New Customer
+                                </Button>
+                            </PermissionGate>
+                        )}
+                    ]}
+                />
                 {/* Filters */}
-                <div className="px-6 py-4 border-b border-gray-200">
+                <div className="bg-white shadow rounded-lg px-6 py-4">
                     {SearchAndFilters}
                 </div>
 
                 {/* Error Message */}
-                {error && (
-                    <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-red-800">{error}</p>
-                    </div>
-                )}
-
-                {/* Data Table */}
-                <div className="p-6 font-secondary">
-                    <CustomDataTable
-                        columns={columns}
-                        data={customers}
-                        loading={loading}
-                        pagination
-                        paginationServer
-                        paginationTotalRows={pagination?.total || 0}
-                        paginationPerPage={pagination?.limit || 10}
-                        paginationDefaultPage={pagination?.page || 1}
-                        paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
-                        onChangePage={handlePageChange}
-                        onChangeRowsPerPage={handleRowsPerPageChange}
-                        fixedHeader={true}
-                        fixedHeaderScrollHeight="600px"
-                        responsive
-                        highlightOnHover
-                        striped={false}
-                        noDataComponent={
-                            <div className="text-center py-8">
-                                <MdPeople className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                <p className="text-gray-500">No customers found</p>
-                                <p className="text-sm text-gray-400">
-                                    {searchTerm ? 'Try adjusting your search' : 'Start by adding your first customer'}
-                                </p>
+                <div className="bg-white shadow rounded-lg">
+                    <div className="p-6 font-secondary">
+                        {error && (
+                            <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                                <p className="text-red-800">{error}</p>
                             </div>
-                        }
-                        persistTableHead
-                        borderRadius="8px"
-                        onRowClicked={handleEdit}
-                    />
+                        )}
+                        <CustomDataTable
+                            columns={columns}
+                            data={customers}
+                            loading={loading}
+                            pagination
+                            paginationServer
+                            paginationTotalRows={pagination?.total || 0}
+                            paginationPerPage={pagination?.limit || 10}
+                            paginationDefaultPage={pagination?.page || 1}
+                            paginationRowsPerPageOptions={[5, 10, 25, 50, 100]}
+                            onChangePage={handlePageChange}
+                            onChangeRowsPerPage={handleRowsPerPageChange}
+                            fixedHeader={true}
+                            fixedHeaderScrollHeight="600px"
+                            responsive
+                            highlightOnHover
+                            striped={false}
+                            persistTableHead
+                            borderRadius="8px"
+                            // onRowClicked={handleEdit}
+                        />
+                    </div>
                 </div>
             </div>
             
             {/* Delete Confirmation Modal */}
-            <ConfirmationModal
-                isOpen={confirmDelete.show}
-                onClose={cancelDelete}
-                onConfirm={confirmDeleteCustomer}
-                title="Delete Customer"
-                message="Are you sure you want to delete this customer? This action cannot be undone."
-                confirmText="Delete"
-                cancelText="Cancel"
-            />
+            <ConfirmationModal {...modalProps} />
         </>
     );
 };

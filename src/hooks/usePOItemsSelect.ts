@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
-import { DataItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
+import { DataItems, ItemTypeItem } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
 
 export interface POItemsSelectOption {
     value: string;
@@ -22,22 +22,52 @@ export const usePOItemsSelect = (limit: number = 10) => {
         loading: false
     });
     const [inputValue, setInputValue] = useState('');
+    const [itemTypeFilter, setItemTypeFilter] = useState<string[]>([]);
+    const [itemTypeOptions, setItemTypeOptions] = useState<{ value: string; label: string }[]>([]);
+
+    // Load item types for dropdown
+    const loadItemTypes = useCallback(async () => {
+        try {
+            const response = await PurchaseOrderService.getItemTypes();
+            if (response.success) {
+                const options = response.data.items.map((item: ItemTypeItem) => ({
+                    value: item.code,
+                    label: item.name
+                }));
+                setItemTypeOptions(options);
+            }
+        } catch (error) {
+            console.error('Error loading item types:', error);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadItemTypes();
+    }, [loadItemTypes]);
 
     const loadPOItemsOptions = useCallback(async (
         inputValue: string = '', 
         loadedOptions: POItemsSelectOption[] = [],
         page: number = 1,
-        reset: boolean = false
+        reset: boolean = false,
+        itemTypeIds?: string[]
     ) => {
         try {
             setPagination(prev => ({ ...prev, loading: true }));
 
-            const response = await PurchaseOrderService.getPOItems({
+            const params: any = {
                 search: inputValue,
                 page: page,
                 limit: limit,
                 sort_order: 'desc'
-            });
+            };
+
+            const activeFilter = itemTypeIds ?? itemTypeFilter;
+            if (activeFilter.length > 0) {
+                params.item_type_id = activeFilter;
+            }
+
+            const response = await PurchaseOrderService.getPOItems(params);
 
             if (response.success) {
                 const newOptions: POItemsSelectOption[] = response.data.items.map((poItems: DataItems) => ({
@@ -66,7 +96,7 @@ export const usePOItemsSelect = (limit: number = 10) => {
 
         setPagination(prev => ({ ...prev, loading: false }));
         return loadedOptions;
-    }, [limit]);
+    }, [limit, itemTypeFilter]);
 
     // Handle input change
     const handleInputChange = useCallback(async (inputValue: string) => {
@@ -89,6 +119,25 @@ export const usePOItemsSelect = (limit: number = 10) => {
             await loadPOItemsOptions('', [], 1, true);
         }
     }, [POItemsOptions.length, loadPOItemsOptions]);
+
+    // Handle item type select change - single value
+    const handleItemTypeChange = useCallback(async (selected: { value: string; label: string } | null) => {
+        const newFilter = selected ? [selected.value] : [];
+        setItemTypeFilter(newFilter);
+        setPOItemsOptions([]);
+        setPagination({ page: 1, hasMore: true, loading: false });
+        setInputValue('');
+        return await loadPOItemsOptions('', [], 1, true, newFilter);
+    }, [loadPOItemsOptions]);
+
+    // Set item type filter and reload items
+    const setItemTypeIds = useCallback(async (itemTypeIds: string[]) => {
+        setItemTypeFilter(itemTypeIds);
+        setPOItemsOptions([]);
+        setPagination({ page: 1, hasMore: true, loading: false });
+        setInputValue('');
+        return await loadPOItemsOptions('', [], 1, true, itemTypeIds);
+    }, [loadPOItemsOptions]);
 
     // Get PO item by ID
     const getPOItemById = useCallback(async (poItemId: string): Promise<POItemsSelectOption | null> => {
@@ -116,6 +165,11 @@ export const usePOItemsSelect = (limit: number = 10) => {
         handleMenuScrollToBottom,
         initializeOptions,
         loadPOItemsOptions,
-        getPOItemById
+        getPOItemById,
+        itemTypeFilter,
+        setItemTypeIds,
+        itemTypeOptions,
+        handleItemTypeChange,
+        loadItemTypes
     };
 };

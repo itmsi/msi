@@ -59,6 +59,9 @@ interface CustomDataTableProps<T> {
     // Fixed header options
     fixedHeader?: boolean;
     fixedHeaderScrollHeight?: string;
+
+    // Row identity
+    keyField?: string;
     
     className?: string;
 }
@@ -120,6 +123,9 @@ const CustomDataTable = <T extends Record<string, any>>({
     // Fixed header
     fixedHeader = false,
     fixedHeaderScrollHeight = '400px',
+
+    // Row identity
+    keyField = 'id',
     
     className = '',
     ...props 
@@ -334,6 +340,9 @@ const CustomDataTable = <T extends Record<string, any>>({
                     // Fixed header
                     fixedHeader={fixedHeader}
                     fixedHeaderScrollHeight={fixedHeaderScrollHeight}
+
+                    // Row identity
+                    keyField={keyField}
                 />
             </StyleSheetManager>
         </div>
