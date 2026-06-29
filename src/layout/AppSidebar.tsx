@@ -151,14 +151,56 @@ const AppSidebar: React.FC = () => {
                 'Division CRM'
             ],
             subItems: [
-                { name: "Area Structure", path: buildPath("/crm/area-structure"), allowedRoles: ['Area Structure CRM'] },
-                { name: "IUP Management", path: buildPath("/crm/iup-management"), allowedRoles: ['IUP Management CRM'] },
-                { name: "Contractors", path: buildPath("/crm/contractors"), allowedRoles: ['Contractors CRM'] },
-                { name: "Activities", path: buildPath("/crm/activity"), allowedRoles: ['Activities CRM'] },
-                { name: "Customer", path: buildPath("/crm/customer"), allowedRoles: ['Customer CRM'] },
-                { name: "Projects", path: buildPath("/crm/project"), allowedRoles: ['Project CRM'] },
-                { name: "User Management", path: buildPath("/crm/user-management"), allowedRoles: ['User Management CRM'] },
-                { name: "Division", path: buildPath("/crm/manage-division"), allowedRoles: ['Division CRM'] }
+                {
+                    name: "IUP Management",
+                    subItems: [
+                        { 
+                            name: "Area Structure",
+                            path: buildPath("/crm/area-structure"),
+                            allowedRoles: ['Area Structure CRM'] 
+                        },
+                        { 
+                            name: "IUP",
+                            path: buildPath("/crm/iup-management"),
+                            allowedRoles: ['IUP Management CRM'] 
+                        },
+                        { 
+                            name: "Contractors",
+                            path: buildPath("/crm/contractors"),
+                            allowedRoles: ['Contractors CRM'] 
+                        },
+                    ]
+                }, 
+                {
+                    name: "Project Management",
+                    subItems: [
+                        { 
+                            name: "Projects",
+                            path: buildPath("/crm/project"),
+                            allowedRoles: ['Project CRM'] 
+                        },
+                        { 
+                            name: "Activities",
+                            path: buildPath("/crm/activity"),
+                            allowedRoles: ['Activities CRM'] 
+                        },
+                        { 
+                            name: "Division",
+                            path: buildPath("/crm/manage-division"),
+                            allowedRoles: ['Division CRM'] 
+                        }
+                    ]
+                },
+                { 
+                    name: "Customer 360°",
+                    path: buildPath("/crm/customer"),
+                    allowedRoles: ['Customer CRM'] 
+                },
+                { 
+                    name: "User Management",
+                    path: buildPath("/crm/user-management"),
+                    allowedRoles: ['User Management CRM'] 
+                },
             ],
         },
         {
