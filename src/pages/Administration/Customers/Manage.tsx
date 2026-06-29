@@ -16,7 +16,17 @@ import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import { useConfirmation } from '@/hooks/useConfirmation';
 import PageHeaderManage from '@/components/common/PageHeaderManage';
 
-const ManageCustomers: React.FC<{ action?: boolean, urlPath?: string }> = ({ action = true, urlPath = `/quotations/administration/customers/edit/` }) => {
+const ManageCustomers: React.FC<{ 
+    action?: boolean, 
+    urlPath?: string,
+    titlePage?: string,
+    descPage?: string,
+}> = ({ 
+    action = true, 
+    urlPath = `/quotations/administration/customers/edit/`,
+    titlePage = "Manage Customers",
+    descPage = "Manage and organize your customer database"
+ }) => {
     const navigate = useNavigate();
     
     // Custom hook untuk semua state management dan handlers
@@ -211,8 +221,8 @@ const ManageCustomers: React.FC<{ action?: boolean, urlPath?: string }> = ({ act
             />
             <div className="space-y-3">
                 <PageHeaderManage
-                    title="Manage Customers"
-                    subtitle="Manage and organize your customer database"
+                    title={titlePage}
+                    subtitle={descPage}
                     actions={[
                         {
                         key: 'create',
