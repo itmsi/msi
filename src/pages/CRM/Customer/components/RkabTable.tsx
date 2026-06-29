@@ -49,6 +49,7 @@ const RkabTable: React.FC<{
                     : pct >= 80
                       ? "info"
                       : "warning";
+
                 return (
                     <div className="flex items-center gap-3">
                         <div className="flex-1 bg-slate-100 rounded-full h-2.5 min-w-[120px]">
@@ -58,7 +59,7 @@ const RkabTable: React.FC<{
                             />
                         </div>
                         <Badge variant="outline" color={badgeCls}>
-                            {pct.toFixed(1)}%
+                            {row.target_production !== 0 ? pct.toFixed(1) : 100}%
                         </Badge>
                     </div>
                 )},

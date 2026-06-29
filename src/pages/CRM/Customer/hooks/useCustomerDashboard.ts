@@ -29,7 +29,6 @@ export const useCustomerDashboard = () => {
                 customer_id: id,
             };
             const response = await CustomerService.getDashboards(params);
-            console.log('Customer Dashboard Response:', response);
             setCustomerInformation(response.data[0]?.data_customer || null);
             setCustomerData(response.data[0] || null);
         } catch (err: any) {
