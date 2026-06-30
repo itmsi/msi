@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Candidate, Company, Department, JobTitle } from '../types/hr';
+import type { Candidate, Company, Department, JobTitle, Group } from '../types/hr';
 import {
-  candidateService, hrCompanyService, hrDepartmentService, hrJobTitleService,
+  candidateService, hrCompanyService, hrDepartmentService, hrJobTitleService, hrGroupService,
 } from '../services/hrService';
 
 export function useCandidate() {
@@ -23,6 +23,20 @@ export function useCandidate() {
   const refresh = useCallback(() => { fetchCandidates(); }, [fetchCandidates]);
 
   return { candidates, loading, error, refresh };
+}
+
+export function useGroupList() {
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    hrGroupService.getList()
+      .then((result) => { setGroups(result.data || []); setLoading(false); })
+      .catch(() => { setError(true); setLoading(false); });
+  }, []);
+
+  return { groups, loading, error };
 }
 
 export function useCompanyList() {
@@ -64,7 +78,7 @@ export function useJobTitleList(departmentId: string | null) {
     if (!departmentId) { setJobTitles([]); return; }
     setLoading(true);
     hrJobTitleService.getList(departmentId)
-      .then((result) => { setJobTitles(result.response?.result || []); setLoading(false); })
+      .then((result) => { setJobTitles(result.data || []); setLoading(false); })
       .catch(() => { setError(true); setLoading(false); });
   }, [departmentId]);
 

@@ -27,12 +27,9 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
     candidate_name: '',
     candidate_email: '',
     candidate_phone: '',
-    candidate_title: '',
-    cum_title_id: '',
-    candidate_company: '',
-    cum_companies_id: '',
-    candidate_department: '',
-    cum_departement_id: '',
+    title_id: '',
+    company_id: '',
+    department_id: '',
     candidate_nationality: '',
     candidate_gender: '',
     candidate_religion: '',
@@ -46,6 +43,10 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
     candidate_foto: null as File | string | null,
     candidate_resume: null as File | string | null,
   });
+
+  const [selectedCompanyName, setSelectedCompanyName] = useState('');
+  const [selectedDeptName, setSelectedDeptName] = useState('');
+  const [selectedTitleName, setSelectedTitleName] = useState('');
 
   const [fileNamePhoto, setFileNamePhoto] = useState('');
   const [fileNameCV, setFileNameCV] = useState('');
@@ -65,48 +66,48 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
 
     setForm((prev) => ({
       ...prev,
-      candidate_name: initialData.name || '',
-      candidate_email: initialData.email || '',
-      candidate_phone: initialData?.personal_information?.[0]?.candidate_phone || '',
-      candidate_title: initialData.position || '',
-      cum_title_id: initialData.position_id || '',
-      candidate_company: initialData.company || '',
-      cum_companies_id: initialData.company_id || '',
-      candidate_department: initialData.department || '',
-      cum_departement_id: initialData.department_id || '',
-      candidate_nationality: initialData?.personal_information?.[0]?.candidate_nationality || '',
-      candidate_gender: initialData?.personal_information?.[0]?.candidate_gender || '',
-      candidate_religion: initialData?.personal_information?.[0]?.candidate_religion || '',
-      candidate_date_birth: initialData?.personal_information?.[0]?.candidate_date_birth
-        ? new Date(initialData.personal_information[0].candidate_date_birth)
+      candidate_name: initialData.candidate_name || '',
+      candidate_email: initialData.candidate_email || '',
+      candidate_phone: initialData.candidate_phone || '',
+      title_id: initialData.title_id || '',
+      company_id: initialData.company_id || '',
+      department_id: initialData.department_id || '',
+      candidate_nationality: initialData.candidate_nationality || '',
+      candidate_gender: initialData.candidate_gender || '',
+      candidate_religion: initialData.candidate_religion || '',
+      candidate_date_birth: initialData.candidate_date_birth
+        ? new Date(initialData.candidate_date_birth)
         : null,
-      candidate_age: initialData.age || '',
-      candidate_marital_status: initialData?.personal_information?.[0]?.candidate_marital_status || '',
-      candidate_address: initialData?.address_information?.[0]?.candidate_address || '',
-      candidate_city: initialData?.address_information?.[0]?.candidate_city || '',
-      candidate_state: initialData?.address_information?.[0]?.candidate_state || '',
-      candidate_country: initialData?.address_information?.[0]?.candidate_country || '',
-      candidate_foto: initialData.image || null,
-      candidate_resume: initialData.resume || null,
+      candidate_age: String(initialData.candidate_age ?? ''),
+      candidate_marital_status: initialData.candidate_marital_status || '',
+      candidate_address: initialData.candidate_address || '',
+      candidate_city: initialData.candidate_city || '',
+      candidate_state: initialData.candidate_state || '',
+      candidate_country: initialData.candidate_country || '',
+      candidate_foto: initialData.candidate_foto || null,
+      candidate_resume: initialData.candidate_resume || null,
     }));
+    setSelectedCompanyName(initialData.company_name || '');
+    setSelectedDeptName(initialData.department_name || '');
+    setSelectedTitleName(initialData.title_name || '');
 
-    if (initialData.image) {
-      setFileNamePhoto(typeof initialData.image === 'string' ? 'Current Photo' : '');
+    if (initialData.candidate_foto) {
+      setFileNamePhoto('Current Photo');
     }
-    if (initialData.resume) {
-      setFileNameCV(typeof initialData.resume === 'string' ? 'Current Resume' : '');
+    if (initialData.candidate_resume) {
+      setFileNameCV('Current Resume');
     }
   }, [initialData]);
 
   // Load departments & job titles when editing
   useEffect(() => {
-    if (!initialData || !initialData.company || companies.length === 0 || loadingCompany) return;
+    if (!initialData || !initialData.company_name || companies.length === 0 || loadingCompany) return;
 
-    const selectedCompany = companies.find((c) => c.company_name === initialData.company);
+    const selectedCompany = companies.find((c) => c.company_name === initialData.company_name);
     if (!selectedCompany) return;
 
     const companyId = selectedCompany.company_id;
-    setForm((prev) => ({ ...prev, cum_companies_id: companyId }));
+    setForm((prev) => ({ ...prev, company_id: companyId }));
 
     setLoadingDept(true);
     hrDepartmentService
@@ -114,17 +115,17 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
       .then((result) => {
         setDepartments(result.data || []);
         const selectedDept = result.data?.find(
-          (d) => d.departement_name === initialData.department
+          (d) => d.department_name === initialData.department_name
         );
         if (selectedDept) {
-          setForm((prev) => ({ ...prev, cum_departement_id: selectedDept.departement_id }));
-          return hrJobTitleService.getList(selectedDept.departement_id);
+          setForm((prev) => ({ ...prev, department_id: selectedDept.department_id }));
+          return hrJobTitleService.getList(selectedDept.department_id);
         }
         return null;
       })
       .then((jobResult) => {
         if (jobResult) {
-          setJobTitles(jobResult.response?.result || []);
+          setJobTitles(jobResult.data || []);
         }
       })
       .catch(() => toast.error('Failed to load dependent data'))
@@ -133,56 +134,44 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-      ...(name === 'candidate_company' && {
-        candidate_department: '',
-        candidate_title: '',
-        cum_departement_id: '',
-        cum_title_id: '',
-      }),
-      ...(name === 'candidate_department' && {
-        candidate_title: '',
-        cum_title_id: '',
-      }),
-    }));
-
-    // Load departments when company changes
-    if (name === 'candidate_company' && value) {
+    if (name === 'candidate_company') {
+      setSelectedCompanyName(value);
+      setSelectedDeptName('');
+      setSelectedTitleName('');
+      setForm((prev) => ({ ...prev, department_id: '', title_id: '' }));
       const selected = companies.find((c) => c.company_name === value);
       if (selected) {
-        setForm((prev) => ({ ...prev, cum_companies_id: selected.company_id }));
+        setForm((prev) => ({ ...prev, company_id: selected.company_id }));
         setLoadingDept(true);
-        hrDepartmentService
-          .getList(selected.company_id)
+        hrDepartmentService.getList(selected.company_id)
           .then((result) => setDepartments(result.data || []))
           .catch(() => setDepartments([]))
           .finally(() => setLoadingDept(false));
       }
+      return;
     }
-
-    // Load job titles when department changes
-    if (name === 'candidate_department' && value) {
-      const selected = departments.find((d) => d.departement_name === value);
+    if (name === 'candidate_department') {
+      setSelectedDeptName(value);
+      setSelectedTitleName('');
+      setForm((prev) => ({ ...prev, title_id: '' }));
+      const selected = departments.find((d) => d.department_name === value);
       if (selected) {
-        setForm((prev) => ({ ...prev, cum_departement_id: selected.departement_id }));
+        setForm((prev) => ({ ...prev, department_id: selected.department_id }));
         setLoadingJob(true);
-        hrJobTitleService
-          .getList(selected.departement_id)
-          .then((result) => setJobTitles(result.response?.result || []))
+        hrJobTitleService.getList(selected.department_id)
+          .then((result) => setJobTitles(result.data || []))
           .catch(() => setJobTitles([]))
           .finally(() => setLoadingJob(false));
       }
+      return;
     }
-
-    // Store title ID when title changes
-    if (name === 'candidate_title' && value) {
-      const selected = jobTitles.find((j) => j.job_title_name === value);
-      if (selected) {
-        setForm((prev) => ({ ...prev, cum_title_id: selected.job_title_id }));
-      }
+    if (name === 'candidate_title') {
+      setSelectedTitleName(value);
+      const selected = jobTitles.find((j) => j.title_name === value);
+      if (selected) setForm((prev) => ({ ...prev, title_id: selected.title_id }));
+      return;
     }
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,26 +224,11 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
         submitData.candidate_date_birth = dayjs(submitData.candidate_date_birth).format('YYYY-MM-DD') as unknown as Date;
       }
 
-      const hasFile = form.candidate_foto instanceof File || form.candidate_resume instanceof File;
-
       if (isEdit) {
-        await candidateService.updateMultipart(initialData!.id, buildFormData(submitData));
+        await candidateService.updateMultipart(initialData!.candidate_id, buildFormData(submitData));
         toast.success('Candidate updated successfully!');
       } else {
-        if (hasFile) {
-          await candidateService.createMultipart(buildFormData(submitData));
-        } else {
-          const payload = Object.entries(submitData).reduce(
-            (acc, [key, val]) => {
-              if (val !== null && val !== undefined && val !== '' && !(val instanceof File)) {
-                acc[key] = val as string;
-              }
-              return acc;
-            },
-            {} as Record<string, string>
-          );
-          await candidateService.create(payload);
-        }
+        await candidateService.createMultipart(buildFormData(submitData));
         toast.success('Candidate created successfully!');
       }
 
@@ -342,7 +316,7 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
           <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
           <select
             name="candidate_company"
-            value={form.candidate_company}
+            value={selectedCompanyName}
             onChange={handleChange}
             required
             disabled={loadingCompany}
@@ -367,26 +341,26 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
           <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
           <select
             name="candidate_department"
-            value={form.candidate_department}
+            value={selectedDeptName}
             onChange={handleChange}
             required
-            disabled={loadingDept || !form.candidate_company}
+            disabled={loadingDept || !selectedCompanyName}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100"
           >
             <option value="">
-              {!form.candidate_company
+              {!selectedCompanyName
                 ? 'Select a company first'
                 : loadingDept
                   ? 'Loading departments...'
                   : '-- Choose Department --'}
             </option>
-            {form.candidate_company &&
+            {selectedCompanyName &&
               !loadingDept &&
               [...departments]
-                .sort((a, b) => a.departement_name.localeCompare(b.departement_name))
+                .sort((a, b) => (a.department_name || '').localeCompare(b.department_name || ''))
                 .map((dept) => (
-                  <option key={dept.departement_id} value={dept.departement_name}>
-                    {dept.departement_name}
+                  <option key={dept.department_id} value={dept.department_name}>
+                    {dept.department_name}
                   </option>
                 ))}
           </select>
@@ -397,26 +371,26 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
           <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
           <select
             name="candidate_title"
-            value={form.candidate_title}
+            value={selectedTitleName}
             onChange={handleChange}
             required
-            disabled={loadingJob || !form.candidate_department}
+            disabled={loadingJob || !selectedDeptName}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100"
           >
             <option value="">
-              {!form.candidate_department
+              {!selectedDeptName
                 ? 'Select a department first'
                 : loadingJob
                   ? 'Loading positions...'
                   : '-- Choose Position --'}
             </option>
-            {form.candidate_department &&
+            {selectedDeptName &&
               !loadingJob &&
               [...jobTitles]
-                .sort((a, b) => a.job_title_name.localeCompare(b.job_title_name))
+                .sort((a, b) => (a.title_name || '').localeCompare(b.title_name || ''))
                 .map((job) => (
-                  <option key={job.job_title_id} value={job.job_title_name}>
-                    {job.job_title_name}
+                  <option key={job.title_id} value={job.title_name}>
+                    {job.title_name}
                   </option>
                 ))}
           </select>

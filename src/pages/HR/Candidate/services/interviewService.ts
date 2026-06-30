@@ -1,74 +1,99 @@
-import { apiDelete, apiGet, apiPost } from '@/helpers/apiHelper';
-import type { ApiDetailResponse, ApiListResponse } from '../types/hr';
+import { apiDelete, apiPost, apiPut } from '@/helpers/apiHelper';
+import type { ApiDetailResponse, ApiListResponse, ApiWrapper } from '../types/hr';
 
-const API_CAREER = 'https://career-api.motorsights.com';
+const GW = import.meta.env.VITE_API_BASE_URL || 'https://dev-gateway.motorsights.com/api';
+const HRM = `${GW}/hrm`;
 
-export interface InterviewSchedule {
-  id: string;
+async function unwrapList<T>(url: string, body: Record<string, unknown>): Promise<ApiListResponse<T>> {
+  const raw = await apiPost<ApiWrapper<T>>(url, body);
+  const d = raw?.data?.data;
+  return { data: d?.data || [], pagination: d?.pagination };
+}
+
+// ============================================================
+// Types
+// ============================================================
+
+export interface ScheduleApiItem {
+  schedule_interview_id: string;
   candidate_id: string;
+  assign_role?: { role?: string } | string | null;
   schedule_interview_date: string;
   schedule_interview_time: string;
   schedule_interview_duration: string;
-  create_at: string;
-  interview?: InterviewGroup[];
+  created_at: string;
 }
 
-export interface InterviewGroup {
-  assigned_name: string;
-  assigned_role_alias: string;
-  form_interviews?: FormInterviewItem[];
+export type InterviewSchedule = ScheduleApiItem;
+
+export interface ScheduleCreateRequest {
+  candidate_id: string;
+  assign_role?: string;
+  schedule_interview_date: string;
+  schedule_interview_time: string;
+  schedule_interview_duration: string;
 }
 
-export interface FormInterviewItem {
-  interview_id: number | null;
-  questions?: InterviewQuestion[];
-}
-
-export interface InterviewQuestion {
-  aspect_label?: string;
-  aspect_key?: string;
-  point?: number;
-  question?: string;
-  remark?: string;
-  total_score?: number;
-  company_value?: string;
-}
+// ============================================================
+// Interview Schedule Service (HRM)
+// ============================================================
 
 export class interviewScheduleService {
   static async getList(candidateId: string): Promise<ApiListResponse<InterviewSchedule>> {
-    const response = await apiGet<ApiListResponse<InterviewSchedule>>(`${API_CAREER}/date-interview`, {
-      candidate_id: candidateId, systemName: 'interview', menuName: 'candidate', permissionName: 'read',
+    return unwrapList<InterviewSchedule>(`${HRM}/schedule_interview/get`, {
+      candidate_id: candidateId, page: 1, limit: 100,
     });
+  }
+
+  static async create(data: ScheduleCreateRequest): Promise<ApiDetailResponse<InterviewSchedule>> {
+    const payload: Record<string, unknown> = {
+      candidate_id: data.candidate_id,
+      schedule_interview_date: data.schedule_interview_date,
+      schedule_interview_time: data.schedule_interview_time,
+      schedule_interview_duration: data.schedule_interview_duration,
+    };
+    if (data.assign_role) {
+      payload.assign_role = { role: data.assign_role };
+    }
+    const response = await apiPost<ApiDetailResponse<InterviewSchedule>>(`${HRM}/schedule_interview/create`, payload);
     return response.data;
   }
 
-  static async create(data: Record<string, unknown>): Promise<ApiDetailResponse<InterviewSchedule>> {
-    const response = await apiPost<ApiDetailResponse<InterviewSchedule>>(`${API_CAREER}/date-interview`, data);
-    return response.data;
-  }
-
-  static async update(id: string, data: Record<string, unknown>): Promise<ApiDetailResponse<InterviewSchedule>> {
-    const response = await apiPost<ApiDetailResponse<InterviewSchedule>>(`${API_CAREER}/date-interview/${id}`, data);
+  static async update(id: string, data: ScheduleCreateRequest): Promise<ApiDetailResponse<InterviewSchedule>> {
+    const payload: Record<string, unknown> = {
+      candidate_id: data.candidate_id,
+      schedule_interview_date: data.schedule_interview_date,
+      schedule_interview_time: data.schedule_interview_time,
+      schedule_interview_duration: data.schedule_interview_duration,
+    };
+    if (data.assign_role) {
+      payload.assign_role = { role: data.assign_role };
+    }
+    const response = await apiPut<ApiDetailResponse<InterviewSchedule>>(`${HRM}/schedule_interview/${id}`, payload);
     return response.data;
   }
 
   static async delete(id: string): Promise<void> {
-    await apiDelete(`${API_CAREER}/date-interview/${id}`);
+    await apiDelete(`${HRM}/schedule_interview/${id}`);
   }
 }
 
+// ============================================================
+// Interview Form Service (HRM)
+// ============================================================
+
 export class interviewFormService {
   static async submit(data: Record<string, unknown>): Promise<ApiDetailResponse<unknown>> {
-    const response = await apiPost<ApiDetailResponse<unknown>>(`${API_CAREER}/form-interview`, data);
+    const response = await apiPost<ApiDetailResponse<unknown>>(`${HRM}/interviews/create`, data);
     return response.data;
   }
 
   static async update(id: string, data: Record<string, unknown>): Promise<ApiDetailResponse<unknown>> {
-    const response = await apiPost<ApiDetailResponse<unknown>>(`${API_CAREER}/form-interview/${id}`, data);
+    const response = await apiPut<ApiDetailResponse<unknown>>(`${HRM}/interviews/${id}`, data);
     return response.data;
   }
 
   static async delete(interviewId: string): Promise<void> {
-    await apiDelete(`${API_CAREER}/form-interview/${interviewId}`);
+    await apiDelete(`${HRM}/interviews/${interviewId}`);
   }
 }

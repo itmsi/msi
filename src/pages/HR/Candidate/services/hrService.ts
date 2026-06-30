@@ -1,129 +1,117 @@
-import { apiDelete, apiGet, apiPatch, apiPost, apiPostMultipart } from '@/helpers/apiHelper';
+import { apiDelete, apiPost, apiPostMultipart, apiPutMultipart } from '@/helpers/apiHelper';
 import type {
   ApiListResponse,
   ApiDetailResponse,
   Candidate,
-  CandidateNote,
-  NoteFormData,
+  NoteItem,
+  NoteCreateRequest,
   BackgroundCheckItem,
   OnBoardDocument,
+  ApiWrapper,
+  Group,
   Company,
   Department,
   JobTitle,
+  CandidateListRequest,
 } from '../types/hr';
 
-const API_CAREER = 'https://career-api.motorsights.com';
-const API_CUM = 'https://dev-cum-api.motorsights.com/api/v1';
+const GW = import.meta.env.VITE_API_BASE_URL;
+const HRM = `${GW}/hrm`;
+
+async function unwrapList<T>(url: string, body: Record<string, unknown>): Promise<ApiListResponse<T>> {
+  const raw = await apiPost<ApiWrapper<T>>(url, body);
+  const d = raw?.data?.data;
+  return { data: d?.data || [], pagination: d?.pagination };
+}
 
 export class candidateService {
-  static async getList(params?: Record<string, string | number | boolean>): Promise<ApiListResponse<Candidate>> {
-    const response = await apiGet<ApiListResponse<Candidate>>(`${API_CAREER}/dashboard/candidates`, params);
-    return response.data;
-  }
-
-  static async getById(id: string): Promise<ApiDetailResponse<Candidate>> {
-    const response = await apiGet<ApiDetailResponse<Candidate>>(`${API_CAREER}/candidates/${id}`);
-    return response.data;
-  }
-
-  static async create(data: Record<string, unknown>): Promise<ApiDetailResponse<Candidate>> {
-    const response = await apiPost<ApiDetailResponse<Candidate>>(`${API_CAREER}/candidates`, data);
-    return response.data;
+  static async getList(req?: CandidateListRequest): Promise<ApiListResponse<Candidate>> {
+    return unwrapList<Candidate>(`${HRM}/candidates/get`, (req || {}) as Record<string, unknown>);
   }
 
   static async createMultipart(formData: FormData): Promise<ApiDetailResponse<Candidate>> {
-    const response = await apiPostMultipart<ApiDetailResponse<Candidate>>(`${API_CAREER}/candidates/multipart`, formData);
-    return response.data;
-  }
-
-  static async update(id: string, data: Record<string, unknown>): Promise<ApiDetailResponse<Candidate>> {
-    const response = await apiPatch<ApiDetailResponse<Candidate>>(`${API_CAREER}/candidates/${id}`, data);
+    const response = await apiPostMultipart<ApiDetailResponse<Candidate>>(`${HRM}/candidates/create`, formData);
     return response.data;
   }
 
   static async updateMultipart(id: string, formData: FormData): Promise<ApiDetailResponse<Candidate>> {
-    const response = await apiPostMultipart<ApiDetailResponse<Candidate>>(
-      `${API_CAREER}/candidates/${id}/multipart?permissionName=update&menuName=candidate&systemName=interview`,
-      formData
-    );
+    const response = await apiPutMultipart<ApiDetailResponse<Candidate>>(`${HRM}/candidates/${id}`, formData);
     return response.data;
   }
 
   static async delete(id: string): Promise<void> {
-    await apiDelete(`${API_CAREER}/candidates/${id}`);
+    await apiDelete(`${HRM}/candidates/${id}`);
+  }
+}
+
+export class hrGroupService {
+  static async getList(limit = 100): Promise<ApiListResponse<Group>> {
+    return unwrapList<Group>(`${GW}/sso/group/get`, { limit });
   }
 }
 
 export class hrCompanyService {
-  static async getList(limit = 500): Promise<ApiListResponse<Company>> {
-    const response = await apiGet<ApiListResponse<Company>>(`${API_CUM}/companies`, { limit });
-    return response.data;
+  static async getList(limit = 100): Promise<ApiListResponse<Company>> {
+    return unwrapList<Company>(`${GW}/companies/get`, { limit });
   }
 }
 
 export class hrDepartmentService {
-  static async getList(companiesId: string, limit = 500): Promise<ApiListResponse<Department>> {
-    const response = await apiGet<ApiListResponse<Department>>(`${API_CUM}/departement`, {
-      limit, companies_id: companiesId,
-    });
-    return response.data;
+  static async getList(companiesId: string, limit = 100): Promise<ApiListResponse<Department>> {
+    return unwrapList<Department>(`${GW}/departments/get`, { limit, company_id: companiesId });
   }
 }
 
 export class hrJobTitleService {
-  static async getList(departementId: string, limit = 500): Promise<{ response: { result: JobTitle[] } }> {
-    const response = await apiGet<{ response: { result: JobTitle[] } }>(`${API_CUM}/job-titles`, {
-      limit, departement_id: departementId,
-    });
-    return response.data;
+  static async getList(departementId: string, limit = 100): Promise<ApiListResponse<JobTitle>> {
+    return unwrapList<JobTitle>(`${GW}/titles/get`, { limit, department_id: departementId });
   }
 }
 
 export class notesService {
-  static async getList(candidateId: string): Promise<ApiListResponse<CandidateNote>> {
-    const response = await apiGet<ApiListResponse<CandidateNote>>(`${API_CAREER}/notes`, {
-      page: 1, limit: 500, orderBy: 'create_at', orderDirection: 'DESC', candidate_id: candidateId,
-    });
+  static async getList(candidateId: string): Promise<ApiListResponse<NoteItem>> {
+    return unwrapList<NoteItem>(`${HRM}/note/get`, { candidate_id: candidateId, page: 1, limit: 100 });
+  }
+
+  static async create(data: NoteCreateRequest): Promise<ApiDetailResponse<NoteItem>> {
+    const response = await apiPost<ApiDetailResponse<NoteItem>>(`${HRM}/note/create`, data as unknown as Record<string, unknown>);
     return response.data;
   }
 
-  static async create(data: NoteFormData): Promise<ApiDetailResponse<CandidateNote>> {
-    const response = await apiPost<ApiDetailResponse<CandidateNote>>(`${API_CAREER}/notes`, data as unknown as Record<string, unknown>);
-    return response.data;
+  static async delete(id: string): Promise<void> {
+    await apiDelete(`${HRM}/note/${id}`);
   }
 }
 
 export class backgroundCheckService {
   static async getList(candidateId: string): Promise<ApiListResponse<BackgroundCheckItem>> {
-    const response = await apiGet<ApiListResponse<BackgroundCheckItem>>(`${API_CAREER}/background-check`, {
-      page: 1, limit: 500, orderBy: 'create_at', orderDirection: 'DESC', candidate_id: candidateId,
+    return unwrapList<BackgroundCheckItem>(`${HRM}/background_check/get`, {
+      candidate_id: candidateId, page: 1, limit: 100,
     });
-    return response.data;
   }
 
   static async create(formData: FormData): Promise<ApiDetailResponse<BackgroundCheckItem>> {
-    const response = await apiPostMultipart<ApiDetailResponse<BackgroundCheckItem>>(`${API_CAREER}/background-check/multipart`, formData);
+    const response = await apiPostMultipart<ApiDetailResponse<BackgroundCheckItem>>(`${HRM}/background_check/create`, formData);
     return response.data;
   }
 
   static async delete(id: string): Promise<void> {
-    await apiDelete(`${API_CAREER}/background-check/${id}`);
+    await apiDelete(`${HRM}/background_check/${id}`);
   }
 }
 
 export class documentService {
   static async getList(candidateId: string): Promise<ApiListResponse<OnBoardDocument>> {
-    const response = await apiGet<ApiListResponse<OnBoardDocument>>(`${API_CAREER}/on-board-documents`, {
-      page: 1, limit: 500, orderBy: 'create_at', orderDirection: 'DESC', candidate_id: candidateId,
+    return unwrapList<OnBoardDocument>(`${HRM}/on_board_document/get`, {
+      candidate_id: candidateId, page: 1, limit: 100,
     });
-    return response.data;
   }
 
   static async create(formData: FormData): Promise<void> {
-    await apiPostMultipart(`${API_CAREER}/on-board-documents/multipart`, formData);
+    await apiPostMultipart(`${HRM}/on_board_document/create`, formData);
   }
 
   static async delete(id: string): Promise<void> {
-    await apiDelete(`${API_CAREER}/on-board-documents/${id}`);
+    await apiDelete(`${HRM}/on_board_document/${id}`);
   }
 }

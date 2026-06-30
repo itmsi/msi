@@ -19,7 +19,7 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  const [form, setForm] = useState({ title: '', file: null as File | null });
+  const [form, setForm] = useState({ on_board_documents_name: '', file: null as File | null });
 
   const fetchData = async () => {
     if (!candidateId) return;
@@ -39,19 +39,18 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
   }, [isActive, candidateId]);
 
   const handleUpload = async () => {
-    if (!form.title.trim()) { toast.error('Enter document title'); return; }
+    if (!form.on_board_documents_name.trim()) { toast.error('Enter document title'); return; }
     if (!form.file) { toast.error('Select a file'); return; }
     setUploading(true);
     try {
       const fd = new FormData();
-      fd.append('candidate_id', String(candidateId));
-      fd.append('on_board_documents_name', form.title);
-      fd.append('create_by', 'User');
+      fd.append('candidate_id', candidateId);
+      fd.append('on_board_documents_name', form.on_board_documents_name);
       fd.append('on_board_documents_file', form.file);
       await documentService.create(fd);
       toast.success('Document uploaded');
       setShowAddModal(false);
-      setForm({ title: '', file: null });
+      setForm({ on_board_documents_name: '', file: null });
       fetchData();
     } catch {
       toast.error('Upload failed');
@@ -96,20 +95,20 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
       ) : (
         <div className="space-y-2">
           {docs.map((doc) => (
-            <div key={doc.id} className="flex items-center justify-between bg-white rounded-xl border border-gray-200 p-3">
+            <div key={doc.on_board_documents_id} className="flex items-center justify-between bg-white rounded-xl border border-gray-200 p-3">
               <div className="flex items-center gap-3 min-w-0">
                 {getFileIcon(doc.on_board_documents_file)}
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-gray-800 truncate">{doc.on_board_documents_name}</p>
-                  <p className="text-xs text-gray-400">{doc.create_by} · {doc.create_at}</p>
+                  <p className="text-xs text-gray-400">{doc.created_by} · {new Date(doc.created_at).toLocaleDateString()}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <a href={doc.on_board_documents_file} target="_blank" rel="noopener noreferrer"
+                <a href={doc.on_board_documents_file?.startsWith('http') ? doc.on_board_documents_file + '/download' : doc.on_board_documents_file} target="_blank" rel="noopener noreferrer"
                   className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
                   <FaDownload className="w-3.5 h-3.5" />
                 </a>
-                <button onClick={() => { setDeletingId(doc.id); setShowDeleteModal(true); }}
+                <button onClick={() => { setDeletingId(doc.on_board_documents_id); setShowDeleteModal(true); }}
                   className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
                   <FaTrash className="w-3.5 h-3.5" />
                 </button>
@@ -127,8 +126,8 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                <input type="text" value={form.title}
-                  onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))}
+                <input type="text" value={form.on_board_documents_name}
+                  onChange={(e) => setForm(f => ({ ...f, on_board_documents_name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>

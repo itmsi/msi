@@ -18,7 +18,7 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [form, setForm] = useState({ status: '', notes: '', file: null as File | null });
+  const [form, setForm] = useState({ background_check_status: '', background_check_note: '', file: null as File | null });
 
   const fetchData = async () => {
     if (!candidateId) return;
@@ -38,19 +38,18 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
   }, [isActive, candidateId]);
 
   const handleSubmit = async () => {
-    if (!form.status) { toast.error('Please select a status'); return; }
+    if (!form.background_check_status) { toast.error('Please select a status'); return; }
     setSubmitting(true);
     try {
       const fd = new FormData();
-      fd.append('candidate_id', String(candidateId));
-      fd.append('status', form.status);
-      fd.append('notes', form.notes);
-      fd.append('create_by', 'User');
+      fd.append('candidate_id', candidateId);
+      fd.append('background_check_status', form.background_check_status);
+      fd.append('background_check_note', form.background_check_note);
       if (form.file) fd.append('file_attachment', form.file);
       await backgroundCheckService.create(fd);
       toast.success('Background check added');
       setShowAddModal(false);
-      setForm({ status: '', notes: '', file: null });
+      setForm({ background_check_status: '', background_check_note: '', file: null });
       fetchData();
     } catch {
       toast.error('Failed to add background check');
@@ -90,22 +89,24 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
       ) : (
         <div className="space-y-3">
           {items.map((item) => (
-            <div key={item.id} className="bg-white rounded-xl border border-gray-200 p-4">
+            <div key={item.background_check_id} className="bg-white rounded-xl border border-gray-200 p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                    item.status === 'hired' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    item.background_check_status === 'Hired' ? 'bg-green-100 text-green-700' :
+                    item.background_check_status === 'Rejected' ? 'bg-red-100 text-red-700' :
+                    'bg-yellow-100 text-yellow-700'
                   }`}>
-                    {item.status === 'hired' ? 'Hired' : 'Rejected'}
+                    {item.background_check_status}
                   </span>
-                  <span className="text-xs text-gray-400">{item.create_by} · {item.create_at}</span>
+                  <span className="text-xs text-gray-400">{item.created_by} · {new Date(item.created_at).toLocaleDateString()}</span>
                 </div>
-                <button onClick={() => { setDeletingId(item.id); setShowDeleteModal(true); }}
+                <button onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }}
                   className="text-red-400 hover:text-red-600">
                   <FaTrash className="w-3.5 h-3.5" />
                 </button>
               </div>
-              {item.notes && <p className="text-sm text-gray-600 mb-2">{item.notes}</p>}
+              {item.background_check_note && <p className="text-sm text-gray-600 mb-2">{item.background_check_note}</p>}
               {item.file_attachment && (
                 <a href={item.file_attachment} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700">
@@ -124,30 +125,36 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
             <h3 className="text-lg font-semibold mb-4">Add Background Check</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2 text-sm">
-                    <input type="radio" name="bg-status" value="hired" checked={form.status === 'hired'}
-                      onChange={(e) => setForm(f => ({ ...f, status: e.target.value }))} />
-                    Hired
-                  </label>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input type="radio" name="bg-status" value="rejected" checked={form.status === 'rejected'}
-                      onChange={(e) => setForm(f => ({ ...f, status: e.target.value }))} />
-                    Rejected
-                  </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Background Check Result</label>
+                <div className="flex gap-4 flex-wrap">
+                  {['Hired', 'Rejected', 'On Hold'].map((s) => (
+                    <label key={s} className="flex items-center gap-2 text-sm">
+                      <input type="radio" name="bg-status" value={s} checked={form.background_check_status === s}
+                        onChange={(e) => setForm(f => ({ ...f, background_check_status: e.target.value }))} />
+                      {s}
+                    </label>
+                  ))}
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <textarea value={form.notes} onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))}
+                <textarea value={form.background_check_note} onChange={(e) => setForm(f => ({ ...f, background_check_note: e.target.value }))}
                   rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Attachment (PDF)</label>
                 <input type="file" accept=".pdf,application/pdf"
-                  onChange={(e) => setForm(f => ({ ...f, file: e.target.files?.[0] || null }))}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file && file.size > 10 * 1024 * 1024) {
+                      toast.error('File size must be less than 10MB');
+                      e.target.value = '';
+                      return;
+                    }
+                    setForm(f => ({ ...f, file: file || null }));
+                  }}
                   className="w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700" />
+                <p className="text-xs text-gray-400 mt-1">Upload background check documents (PDF only, max 10MB)</p>
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">

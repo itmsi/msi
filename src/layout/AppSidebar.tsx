@@ -232,6 +232,16 @@ const AppSidebar: React.FC = () => {
         //         { name: "Manage Work Orders", path: "/workorders/manage"     },
         //     ],
         // }
+        {
+            name: "HRM",
+            icon: <UserIcon />,
+            allowedRoles: [
+                'Candidate HRM'
+            ],
+            subItems: [
+                { name: "Candidate Management", path: buildPath("/hr/candidate"), allowedRoles: ['Candidate HRM'] },
+            ],
+        }
     ], [buildPath]);
 
     const othersItems: NavItem[] = useMemo(() => [

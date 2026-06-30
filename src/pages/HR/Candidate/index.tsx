@@ -60,7 +60,7 @@ const CandidatePage = () => {
   // Open detail if id param exists
   useEffect(() => {
     if (id && candidates.length > 0) {
-      const found = candidates.find((c) => String(c.id) === id);
+      const found = candidates.find((c) => String(c.candidate_id) === id);
       if (found) {
         setSelectedCandidate(found);
         setShowDetail(true);
@@ -92,7 +92,7 @@ const CandidatePage = () => {
   const handleConfirmDelete = async () => {
     if (!deletingCandidate) return;
     try {
-      await candidateService.delete(deletingCandidate.id);
+      await candidateService.delete(deletingCandidate.candidate_id);
       await fetchCandidates();
       toast.success('Candidate deleted successfully!');
       setShowDeleteConfirm(false);
@@ -107,7 +107,7 @@ const CandidatePage = () => {
   const handleShowDetail = (candidate: Candidate) => {
     setSelectedCandidate(candidate);
     setShowDetail(true);
-    navigate(`/hr/candidate/${candidate.id}`, { replace: true });
+    navigate(`/hr/candidate/${candidate.candidate_id}`, { replace: true });
   };
 
   const handleCloseDetail = () => {
@@ -126,24 +126,25 @@ const CandidatePage = () => {
     return candidates
       .filter((c) => {
         const q = filters.text.toLowerCase();
-        const interviewerText = Array.isArray(c.interviewer) && c.interviewer.length > 0
-          ? c.interviewer.join(' ')
-          : 'No interviewers';
-        const matchText = `${c.name} ${c.email} ${c.id_candidate} ${c.position} ${c.status} ${interviewerText}`
+        const assignRole = (c.schedule_interview && typeof c.schedule_interview.assign_role === 'string')
+          ? c.schedule_interview.assign_role
+          : '';
+        const interviewerText = assignRole || '';
+        const matchText = `${c.candidate_name} ${c.candidate_email} ${c.candidate_number} ${c.title_name || ''} ${c.candidate_status} ${interviewerText}`
           .toLowerCase()
           .includes(q);
-        const matchStatus = filters.status ? c.status === filters.status : true;
+        const matchStatus = filters.status ? c.candidate_status === filters.status : true;
         const matchInterviewer = filters.interviewer
-          ? Array.isArray(c.interviewer) && c.interviewer.includes(filters.interviewer)
+          ? assignRole.split(',').map((s: string) => s.trim()).includes(filters.interviewer)
           : true;
-        const matchCompany = filters.company ? c.company === filters.company : true;
-        const matchDepartment = filters.department ? c.department === filters.department : true;
-        const matchPosition = filters.position ? c.position === filters.position : true;
+        const matchCompany = filters.company ? c.company_name === filters.company : true;
+        const matchDepartment = filters.department ? c.department_name === filters.department : true;
+        const matchPosition = filters.position ? c.title_name === filters.position : true;
         return matchText && matchStatus && matchInterviewer && matchCompany && matchDepartment && matchPosition;
       })
       .sort((a, b) => {
-        const dA = new Date(a.date_applied).getTime();
-        const dB = new Date(b.date_applied).getTime();
+        const dA = new Date(a.created_at).getTime();
+        const dB = new Date(b.created_at).getTime();
         return filters.sort === 'latest' ? dB - dA : dA - dB;
       });
   }, [candidates, filters]);
@@ -160,7 +161,7 @@ const CandidatePage = () => {
   }, [filteredCandidates, currentPage]);
 
   const uniqueCompanies = useMemo(
-    () => [...new Set(candidates.map((c) => c.company).filter(Boolean) as string[])],
+    () => [...new Set(candidates.map((c) => c.company_name).filter(Boolean) as string[])],
     [candidates]
   );
 
@@ -355,7 +356,7 @@ const CandidatePage = () => {
               {/* Candidate Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {paginatedCandidates.map((candidate) => (
-                  <div key={candidate.id}>
+                  <div key={candidate.candidate_id}>
                     <CandidateCard
                       candidate={candidate}
                       onView={() => handleShowDetail(candidate)}
@@ -456,7 +457,7 @@ const CandidatePage = () => {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <h2 className="text-lg font-semibold mb-4">Delete Candidate</h2>
             <p className="text-gray-600 mb-2">
-              Are you sure you want to delete <strong>{deletingCandidate.name}</strong>?
+              Are you sure you want to delete <strong>{deletingCandidate.candidate_name}</strong>?
             </p>
             <p className="text-sm text-gray-400 mb-6">This action cannot be undone.</p>
             <div className="flex justify-end gap-3">

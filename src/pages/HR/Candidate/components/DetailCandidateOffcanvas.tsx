@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
-import type { Candidate, CandidateNote, CandidatePersonalInfo, CandidateAddressInfo } from '../types/hr';
+import type { Candidate, NoteItem } from '../types/hr';
 import { notesService } from '../services/hrService';
-import { formatDate, onImageProfileError, placeholderProfileImage } from '../utils';
+import { onImageProfileError, placeholderProfileImage } from '../utils';
 import { FaPencil, FaTrash, FaXmark, FaPlus } from 'react-icons/fa6';
 import { MdOutlineFileDownload } from 'react-icons/md';
 import { toast } from 'react-hot-toast';
 import BackgroundCheckTab from './BackgroundCheckTab';
 import DocumentTab from './DocumentTab';
 import DateInterviewTab from './DateInterviewTab';
-import FormInterviewTab from './FormInterviewTab';
-
 interface DetailCandidateOffcanvasProps {
   candidate: Candidate;
   onClose: () => void;
@@ -18,7 +16,7 @@ interface DetailCandidateOffcanvasProps {
   onUpdate: () => void;
 }
 
-type TabName = 'profile' | 'assigned' | 'interview' | 'form' | 'background' | 'document' | 'notes';
+type TabName = 'profile' | 'interview' | 'background' | 'document' | 'notes';
 
 const DetailCandidateOffcanvas = ({
   candidate,
@@ -29,21 +27,14 @@ const DetailCandidateOffcanvas = ({
 }: DetailCandidateOffcanvasProps) => {
   const [activeTab, setActiveTab] = useState<TabName>('profile');
   const [loadingNotes, setLoadingNotes] = useState(false);
-  const [notes, setNotes] = useState<CandidateNote[]>([]);
-
-  const personalInfo = Array.isArray(candidate.personal_information)
-    ? candidate.personal_information[0]
-    : candidate.personal_information;
-  const addressInfo = Array.isArray(candidate.address_information)
-    ? candidate.address_information[0]
-    : candidate.address_information;
+  const [notes, setNotes] = useState<NoteItem[]>([]);
 
   // Fetch data when tab changes
   const fetchNotes = async () => {
-    if (!candidate.id) return;
+    if (!candidate.candidate_id) return;
     setLoadingNotes(true);
     try {
-      const result = await notesService.getList(candidate.id);
+      const result = await notesService.getList(candidate.candidate_id);
       const rawData = result?.data;
       setNotes(Array.isArray(rawData) ? rawData : []);
     } catch {
@@ -57,13 +48,11 @@ const DetailCandidateOffcanvas = ({
     if (activeTab === 'notes') {
       fetchNotes();
     }
-  }, [activeTab, candidate.id]);
+  }, [activeTab, candidate.candidate_id]);
 
   const tabs: { key: TabName; label: string }[] = [
     { key: 'profile', label: 'Profile' },
-    { key: 'assigned', label: 'Assigned' },
     { key: 'interview', label: 'Date Interview' },
-    { key: 'form', label: 'Form' },
     { key: 'background', label: 'Background Check' },
     { key: 'document', label: 'Documents' },
     { key: 'notes', label: 'Notes' },
@@ -85,14 +74,14 @@ const DetailCandidateOffcanvas = ({
         <div className="bg-white border-b border-gray-200 px-6 py-4 mt-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
-              src={candidate.image || placeholderProfileImage}
-              alt={candidate.name}
-              className="w-10 h-10 rounded-full object-cover"
+              src={candidate.candidate_foto?.startsWith('http') ? candidate.candidate_foto + '/download' : placeholderProfileImage}
+              alt={candidate.candidate_name}
+              className="w-10 h-10 rounded-full object-cover bg-gray-100"
               onError={onImageProfileError}
             />
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">{candidate.name}</h2>
-              <p className="text-xs text-gray-500">{candidate.id_candidate}</p>
+              <h2 className="text-lg font-semibold text-gray-900">{candidate.candidate_name}</h2>
+              <p className="text-xs text-gray-500">{candidate.candidate_number}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -117,45 +106,41 @@ const DetailCandidateOffcanvas = ({
           </div>
         </div>
 
-        {/* Summary Card — like cum-web's HeaderInformationProfile */}
+        {/* Summary Card */}
         <div className="px-6 pt-4">
           <div className="bg-white rounded-xl border border-gray-200">
             <div className="p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Candidate Name</p>
-                  <p className="text-sm font-medium text-gray-800">{candidate.name}</p>
+                  <p className="text-sm font-medium text-gray-800">{candidate.candidate_name}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Company</p>
-                  <p className="text-sm font-medium text-gray-800">{candidate.company || '-'}</p>
+                  <p className="text-sm font-medium text-gray-800">{candidate.company_name || '-'}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Department</p>
-                  <p className="text-sm font-medium text-gray-800">{candidate.department || '-'}</p>
+                  <p className="text-sm font-medium text-gray-800">{candidate.department_name || '-'}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Applied Role</p>
-                  <p className="text-sm font-medium text-gray-800">{candidate.position}</p>
+                  <p className="text-sm font-medium text-gray-800">{candidate.title_name || '-'}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Age</p>
-                  <p className="text-sm font-medium text-gray-800">{candidate.age || '-'}</p>
+                  <p className="text-sm font-medium text-gray-800">{candidate.candidate_age ?? '-'}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Gender</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    {candidate.personal_information?.[0]?.candidate_gender || '-'}
-                  </p>
+                  <p className="text-sm font-medium text-gray-800">{candidate.candidate_gender || '-'}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Recruiter</p>
                   <div className="flex flex-wrap gap-1">
-                    {Array.isArray(candidate.interviewer) && candidate.interviewer.length > 0
-                      ? candidate.interviewer.map((name, i) => (
-                          <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
-                            {name}
-                          </span>
+                    {candidate.schedule_interview?.assign_role
+                      ? candidate.schedule_interview.assign_role.split(',').map((name, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{name.trim()}</span>
                         ))
                       : <span className="text-xs text-gray-400">-</span>
                     }
@@ -164,10 +149,8 @@ const DetailCandidateOffcanvas = ({
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Date of Interview</p>
                   <p className="text-sm font-medium text-gray-800">
-                    {candidate.date_schedule && candidate.date_schedule.length > 0
-                      ? [...candidate.date_schedule].sort(
-                          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-                        )[0].date
+                    {candidate.schedule_interview?.schedule_interview_date
+                      ? new Date(candidate.schedule_interview.schedule_interview_date).toLocaleDateString()
                       : '-'}
                   </p>
                 </div>
@@ -197,23 +180,13 @@ const DetailCandidateOffcanvas = ({
 
         {/* Tab Content */}
         <div className="p-6">
-          {activeTab === 'profile' && (
-            <ProfileTab personalInfo={personalInfo} addressInfo={addressInfo} resume={candidate.resume} />
-          )}
-          {activeTab === 'assigned' && <AssignedTab data={candidate.referred} />}
+          {activeTab === 'profile' && <ProfileTab candidate={candidate} />}
           {activeTab === 'interview' && (
-            <DateInterviewTab candidateId={candidate.id} isActive={activeTab === 'interview'} candidateName={candidate.name} />
+            <DateInterviewTab candidateId={candidate.candidate_id} isActive={activeTab === 'interview'} />
           )}
-          {activeTab === 'form' && (
-            <FormInterviewTab candidateId={candidate.id} candidateName={candidate.name} />
-          )}
-          {activeTab === 'background' && (
-            <BackgroundCheckTab candidateId={candidate.id} isActive={activeTab === 'background'} />
-          )}
-          {activeTab === 'document' && (
-            <DocumentTab candidateId={candidate.id} isActive={activeTab === 'document'} />
-          )}
-          {activeTab === 'notes' && <NotesTab notes={notes} loading={loadingNotes} candidateId={candidate.id} onRefresh={fetchNotes} />}
+          {activeTab === 'background' && <BackgroundCheckTab candidateId={candidate.candidate_id} isActive={activeTab === 'background'} />}
+          {activeTab === 'document' && <DocumentTab candidateId={candidate.candidate_id} isActive={activeTab === 'document'} />}
+          {activeTab === 'notes' && <NotesTab notes={notes} loading={loadingNotes} candidateId={candidate.candidate_id} onRefresh={fetchNotes} />}
         </div>
       </div>
     </div>
@@ -224,36 +197,27 @@ const DetailCandidateOffcanvas = ({
 // Tab Components
 // ============================================================
 
-const ProfileTab = ({
-  personalInfo,
-  addressInfo,
-  resume,
-}: {
-  personalInfo?: CandidatePersonalInfo;
-  addressInfo?: CandidateAddressInfo;
-  resume?: string | null;
-}) => {
+const ProfileTab = ({ candidate }: { candidate: Candidate }) => {
   const fields = [
-    { label: 'Candidate Name', value: personalInfo?.candidate_name || 'n/a' },
-    { label: 'Phone', value: personalInfo?.candidate_phone || '-' },
-    { label: 'Gender', value: personalInfo?.candidate_gender || 'n/a' },
-    { label: 'Date of Birth', value: personalInfo?.candidate_date_birth || 'n/a' },
-    { label: 'Email', value: personalInfo?.candidate_email || 'n/a' },
-    { label: 'Nationality', value: personalInfo?.candidate_nationality || '-' },
-    { label: 'Religion', value: personalInfo?.candidate_religion || '-' },
-    { label: 'Marital Status', value: personalInfo?.candidate_marital_status || '-' },
+    { label: 'Candidate Name', value: candidate.candidate_name || 'n/a' },
+    { label: 'Phone', value: candidate.candidate_phone || '-' },
+    { label: 'Gender', value: candidate.candidate_gender || 'n/a' },
+    { label: 'Date of Birth', value: candidate.candidate_date_birth ? new Date(candidate.candidate_date_birth).toLocaleDateString() : 'n/a' },
+    { label: 'Email', value: candidate.candidate_email || 'n/a' },
+    { label: 'Nationality', value: candidate.candidate_nationality || '-' },
+    { label: 'Religion', value: candidate.candidate_religion || '-' },
+    { label: 'Marital Status', value: candidate.candidate_marital_status || '-' },
   ];
 
   const addressFields = [
-    { label: 'Address', value: addressInfo?.candidate_address || '-' },
-    { label: 'City', value: addressInfo?.candidate_city || '-' },
-    { label: 'State', value: addressInfo?.candidate_state || '-' },
-    { label: 'Country', value: addressInfo?.candidate_country || '-' },
+    { label: 'Address', value: candidate.candidate_address || '-' },
+    { label: 'City', value: candidate.candidate_city || '-' },
+    { label: 'State', value: candidate.candidate_state || '-' },
+    { label: 'Country', value: candidate.candidate_country || '-' },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Personal Information */}
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="px-4 py-3 border-b border-gray-100">
           <h3 className="text-sm font-semibold text-gray-900">Personal Information</h3>
@@ -267,8 +231,6 @@ const ProfileTab = ({
           ))}
         </div>
       </div>
-
-      {/* Address Information */}
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="px-4 py-3 border-b border-gray-100">
           <h3 className="text-sm font-semibold text-gray-900">Address Information</h3>
@@ -282,22 +244,15 @@ const ProfileTab = ({
           ))}
         </div>
       </div>
-
-      {/* Resume */}
-      {resume && (
+      {candidate.candidate_resume && (
         <div className="bg-white rounded-xl border border-gray-200">
           <div className="px-4 py-3 border-b border-gray-100">
             <h3 className="text-sm font-semibold text-gray-900">Resume</h3>
           </div>
           <div className="p-4">
-            <a
-              href={resume}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
-            >
-              <MdOutlineFileDownload className="w-4 h-4" />
-              Download Resume
+            <a href={candidate.candidate_resume} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700">
+              <MdOutlineFileDownload className="w-4 h-4" /> Download Resume
             </a>
           </div>
         </div>
@@ -306,40 +261,11 @@ const ProfileTab = ({
   );
 };
 
-const AssignedTab = ({ data }: { data?: { name: string; email: string; role: string; role_alias: string }[] }) => {
-  if (!data || data.length === 0) {
-    return <p className="text-sm text-gray-500">No referred data available.</p>;
-  }
-
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="bg-gray-50 border-b border-gray-200">
-            <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-            <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
-            <th className="text-left px-4 py-3 font-medium text-gray-600">Role</th>
-            <th className="text-left px-4 py-3 font-medium text-gray-600">Role Alias</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100">
-          {data.map((ref, idx) => (
-            <tr key={idx} className="hover:bg-gray-50">
-              <td className="px-4 py-3">{ref.name}</td>
-              <td className="px-4 py-3 text-gray-500">{ref.email}</td>
-              <td className="px-4 py-3">{ref.role}</td>
-              <td className="px-4 py-3">{ref.role_alias}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
-
-const NotesTab = ({ notes, loading, candidateId, onRefresh }: { notes: CandidateNote[]; loading: boolean; candidateId: string; onRefresh: () => void }) => {
+const NotesTab = ({ notes, loading, candidateId, onRefresh }: { notes: NoteItem[]; loading: boolean; candidateId: string; onRefresh: () => void }) => {
+  const [showForm, setShowForm] = useState(false);
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const handleAdd = async () => {
     if (!text.trim()) return;
@@ -348,11 +274,11 @@ const NotesTab = ({ notes, loading, candidateId, onRefresh }: { notes: Candidate
       await notesService.create({
         candidate_id: candidateId,
         notes: text.trim(),
-        create_by: 'User',
-        assigned_data: [],
+        created_by: 'User',
       });
       toast.success('Note added!');
       setText('');
+      setShowForm(false);
       onRefresh();
     } catch {
       toast.error('Failed to add note');
@@ -361,30 +287,53 @@ const NotesTab = ({ notes, loading, candidateId, onRefresh }: { notes: Candidate
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await notesService.delete(deleteId);
+      toast.success('Note deleted');
+      setDeleteId(null);
+      onRefresh();
+    } catch {
+      toast.error('Failed to delete note');
+    }
+  };
+
   return (
     <div className="space-y-4">
-      {/* Add Note Form */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          rows={3}
-          placeholder="Write a note..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-        />
-        <div className="flex justify-end mt-2">
-          <button
-            onClick={handleAdd}
-            disabled={submitting || !text.trim()}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-[#0253a5] text-white rounded-lg hover:bg-[#003061] disabled:opacity-50"
-          >
-            <FaPlus className="w-3 h-3" />
-            {submitting ? 'Adding...' : 'Add Note'}
-          </button>
-        </div>
+      {/* Toggle Button */}
+      <div className="flex justify-start">
+        <button
+          onClick={() => setShowForm(prev => !prev)}
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-[#0253a5] text-white rounded-lg hover:bg-[#003061]"
+        >
+          <FaPlus className="w-3 h-3" />
+          {showForm ? 'Cancel' : 'Add Note'}
+        </button>
       </div>
 
-      {/* Notes List */}
+      {/* Add Note Form */}
+      {showForm && (
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={3}
+            placeholder="Write a note..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+          />
+          <div className="flex justify-end mt-2">
+            <button
+              onClick={handleAdd}
+              disabled={submitting || !text.trim()}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-[#0253a5] text-white rounded-lg hover:bg-[#003061] disabled:opacity-50"
+            >
+              <FaPlus className="w-3 h-3" />
+              {submitting ? 'Adding...' : 'Add Note'}
+            </button>
+          </div>
+        </div>
+      )}
       {loading ? (
         <p className="text-sm text-gray-400">Loading notes...</p>
       ) : notes.length === 0 ? (
@@ -392,23 +341,43 @@ const NotesTab = ({ notes, loading, candidateId, onRefresh }: { notes: Candidate
       ) : (
         <div className="space-y-3">
           {notes.map((note) => (
-            <div key={note.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+            <div key={note.note_id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-gray-800">{note.name || note.create_by || '-'}</span>
-                  {note.role_alias && (
-                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">{note.role_alias}</span>
-                  )}
+                  <span className="text-sm font-semibold text-gray-800">{note.created_by || '-'}</span>
                 </div>
-                <span className="text-xs text-gray-400">{note.date_created || formatDate(note.create_at)}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400">{new Date(note.created_at).toLocaleDateString()}</span>
+                  <button
+                    onClick={() => setDeleteId(note.note_id)}
+                    className="text-red-400 hover:text-red-600"
+                    title="Delete note"
+                  >
+                    <FaTrash className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
-              <p className="text-sm text-gray-600 whitespace-pre-wrap">{note.note}</p>
+              <p className="text-sm text-gray-600 whitespace-pre-wrap">{note.notes}</p>
             </div>
           ))}
         </div>
       )}
-    </div>
-  );
+
+      {/* Delete Confirmation */}
+      {deleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+            <p className="text-sm text-gray-600 mb-6">Delete this note?</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setDeleteId(null)}
+                className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg">Cancel</button>
+              <button onClick={handleDelete}
+                className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>);
 };
 
 export default DetailCandidateOffcanvas;

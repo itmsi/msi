@@ -11,7 +11,12 @@ interface CandidateCardProps {
 }
 
 const CandidateCard = ({ candidate, onView, onEdit, onDelete }: CandidateCardProps) => {
-  const badgeColor = getBadgeVariant(candidate.status);
+  const badgeColor = getBadgeVariant(candidate.candidate_status);
+  const assignRole = candidate.schedule_interview?.assign_role || '';
+  const interviewers = assignRole ? assignRole.split(',').map(s => s.trim()) : [];
+  const fotoUrl = candidate.candidate_foto?.startsWith('http')
+    ? candidate.candidate_foto + '/download'
+    : null;
 
   return (
     <div
@@ -22,17 +27,17 @@ const CandidateCard = ({ candidate, onView, onEdit, onDelete }: CandidateCardPro
         {/* Header */}
         <div className="flex items-center gap-3 mb-3">
           <img
-            src={candidate.image || placeholderProfileImage}
-            alt={candidate.name}
+            src={fotoUrl || placeholderProfileImage}
+            alt={candidate.candidate_name}
             width={48}
             height={48}
             loading="lazy"
-            className="rounded-full object-cover w-12 h-12"
+            className="rounded-full object-cover w-12 h-12 bg-gray-100"
             onError={onImageProfileError}
           />
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-gray-900 truncate">{candidate.name}</h3>
-            <p className="text-xs text-gray-500 truncate">{candidate.email}</p>
+            <h3 className="text-sm font-semibold text-gray-900 truncate">{candidate.candidate_name}</h3>
+            <p className="text-xs text-gray-500 truncate">{candidate.candidate_email}</p>
           </div>
         </div>
 
@@ -40,19 +45,19 @@ const CandidateCard = ({ candidate, onView, onEdit, onDelete }: CandidateCardPro
         <div className="space-y-2 text-xs">
           <div className="flex justify-between">
             <span className="text-gray-400">ID</span>
-            <span className="text-gray-700 font-medium">{candidate.id_candidate}</span>
+            <span className="text-gray-700 font-medium">{candidate.candidate_number}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Position</span>
-            <span className="text-gray-700 font-medium truncate ml-2">{candidate.position}</span>
+            <span className="text-gray-700 font-medium truncate ml-2">{candidate.title_name || '-'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Company</span>
-            <span className="text-gray-700 font-medium">{candidate.company || '-'}</span>
+            <span className="text-gray-700 font-medium">{candidate.company_name || '-'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Applied</span>
-            <span className="text-gray-700 font-medium">{candidate.date_applied}</span>
+            <span className="text-gray-700 font-medium">{candidate.created_at ? new Date(candidate.created_at).toLocaleDateString() : '-'}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-gray-400">Status</span>
@@ -65,15 +70,15 @@ const CandidateCard = ({ candidate, onView, onEdit, onDelete }: CandidateCardPro
               `}
             >
               <VscDebugBreakpointData className="w-3 h-3" />
-              {candidate.status}
+              {candidate.candidate_status}
             </span>
           </div>
         </div>
 
         {/* Interviewer badges */}
-        {Array.isArray(candidate.interviewer) && candidate.interviewer.length > 0 && (
+        {interviewers.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-3">
-            {candidate.interviewer.map((role, i) => (
+            {interviewers.map((role, i) => (
               <span
                 key={i}
                 className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium"

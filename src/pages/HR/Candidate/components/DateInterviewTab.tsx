@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
-import { interviewScheduleService, type InterviewSchedule } from '../services/interviewService';
+import { interviewScheduleService, type InterviewSchedule, type ScheduleCreateRequest } from '../services/interviewService';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaTrash, FaPen, FaRegFilePdf } from 'react-icons/fa6';
-import { usePDFDownload } from '../hooks/usePDFDownload';
+import { FaPlus, FaTrash, FaPen } from 'react-icons/fa6';
 
 interface DateInterviewTabProps {
   candidateId: string;
   isActive: boolean;
-  candidateName?: string;
 }
 
-const DateInterviewTab = ({ candidateId, isActive, candidateName }: DateInterviewTabProps) => {
+const ROLE_OPTIONS = ['HR', 'GM', 'VP', 'BOD', 'PUB'];
+
+const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
   const [schedules, setSchedules] = useState<InterviewSchedule[]>([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -19,8 +19,13 @@ const DateInterviewTab = ({ candidateId, isActive, candidateName }: DateIntervie
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [form, setForm] = useState({ date: '', time: '', duration: '' });
-  const { downloadPDF, isGenerating } = usePDFDownload();
+  const [form, setForm] = useState({ date: '', time: '', duration: '', assign_role: [] as string[] });
+
+  const getAssignRoleArr = (s: InterviewSchedule): string[] => {
+    if (!s.assign_role) return [];
+    if (typeof s.assign_role === 'string') return s.assign_role.split(',').map(r => r.trim());
+    return (s.assign_role?.role || '').split(',').map(r => r.trim()).filter(Boolean);
+  };
 
   const fetchData = async () => {
     if (!candidateId) return;
@@ -41,16 +46,23 @@ const DateInterviewTab = ({ candidateId, isActive, candidateName }: DateIntervie
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ date: '', time: '', duration: '' });
+    setForm({ date: '', time: '', duration: '', assign_role: [] });
     setShowModal(true);
   };
 
   const openEdit = (s: InterviewSchedule) => {
     setEditing(s);
+    const rawDate = s.schedule_interview_date || '';
+    const rawTime = s.schedule_interview_time || '';
+    // Convert ISO date to YYYY-MM-DD for input[type=date]
+    const dateOnly = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate;
+    // Convert HH:mm:ss to HH:mm for input[type=time]
+    const timeOnly = rawTime.length > 5 ? rawTime.substring(0, 5) : rawTime;
     setForm({
-      date: s.schedule_interview_date || '',
-      time: s.schedule_interview_time || '',
+      date: dateOnly,
+      time: timeOnly,
       duration: s.schedule_interview_duration || '',
+      assign_role: getAssignRoleArr(s),
     });
     setShowModal(true);
   };
@@ -59,18 +71,16 @@ const DateInterviewTab = ({ candidateId, isActive, candidateName }: DateIntervie
     if (!form.date || !form.time) { toast.error('Date and time required'); return; }
     setSubmitting(true);
     try {
-      const payload = {
+      const payload: ScheduleCreateRequest = {
         candidate_id: candidateId,
         schedule_interview_date: form.date,
         schedule_interview_time: form.time,
         schedule_interview_duration: form.duration,
-        systemName: 'interview',
-        menuName: 'candidate',
-        permissionName: editing ? 'update' : 'create',
+        assign_role: form.assign_role.join(', '),
       };
 
       if (editing) {
-        await interviewScheduleService.update(editing.id, payload);
+        await interviewScheduleService.update(editing.schedule_interview_id, payload);
         toast.success('Schedule updated');
       } else {
         await interviewScheduleService.create(payload);
@@ -78,8 +88,9 @@ const DateInterviewTab = ({ candidateId, isActive, candidateName }: DateIntervie
       }
       setShowModal(false);
       fetchData();
-    } catch {
-      toast.error('Failed to save schedule');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to save schedule';
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -98,13 +109,18 @@ const DateInterviewTab = ({ candidateId, isActive, candidateName }: DateIntervie
     }
   };
 
+  const handleDeleteClick = (s: InterviewSchedule) => {
+    setDeletingId(s.schedule_interview_id);
+    setShowDeleteConfirm(true);
+  };
+
   if (loading) return <p className="text-sm text-gray-400">Loading schedules...</p>;
 
   return (
     <div>
       <div className="flex justify-end mb-4">
         <button onClick={openAdd}
-          className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+          className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0253a5] text-white text-sm rounded-lg hover:bg-[#003061]">
           <FaPlus className="w-3 h-3" /> Add Schedule
         </button>
       </div>
@@ -113,46 +129,33 @@ const DateInterviewTab = ({ candidateId, isActive, candidateName }: DateIntervie
         <p className="text-sm text-gray-500">No interview schedules yet.</p>
       ) : (
         <div className="space-y-3">
-          {schedules.map((s, idx) => (
-            <div key={s.id || idx} className="bg-white rounded-xl border border-gray-200 p-4">
+          {schedules.map((s) => (
+            <div key={s.schedule_interview_id} className="bg-white rounded-xl border border-gray-200 p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-gray-800">
-                    {s.schedule_interview_date} at {s.schedule_interview_time}
+                    {s.schedule_interview_date ? new Date(s.schedule_interview_date).toLocaleDateString() : '-'} at {s.schedule_interview_time}
                   </p>
                   {s.schedule_interview_duration && (
-                    <p className="text-xs text-gray-500">{s.schedule_interview_duration} minutes</p>
+                    <p className="text-xs text-gray-500">{s.schedule_interview_duration}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-1">
-                  {s.interview && s.interview.length > 0 && (
-                    <button
-                      onClick={() => downloadPDF({
-                        data_candidate: { name_candidate: candidateName },
-                        interview: s.interview?.flatMap(iv => iv.form_interviews || []),
-                      })}
-                      disabled={isGenerating}
-                      className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
-                      title="Download PDF"
-                    >
-                      <FaRegFilePdf className="w-3 h-3" />
-                    </button>
-                  )}
                   <button onClick={() => openEdit(s)}
-                    className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg">
+                    className="p-1.5 text-[#0253a5] hover:bg-blue-50 rounded-lg">
                     <FaPen className="w-3 h-3" />
                   </button>
-                  <button onClick={() => { setDeletingId(s.id); setShowDeleteConfirm(true); }}
+                  <button onClick={() => handleDeleteClick(s)}
                     className="p-1.5 text-red-400 hover:bg-red-50 rounded-lg">
                     <FaTrash className="w-3 h-3" />
                   </button>
                 </div>
               </div>
-              {s.interview && s.interview.length > 0 && (
+              {s.assign_role && (
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {s.interview.map((iv, i) => (
+                  {getAssignRoleArr(s).map((role, i) => (
                     <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
-                      {iv.assigned_name} ({iv.assigned_role_alias})
+                      {role}
                     </span>
                   ))}
                 </div>
@@ -186,6 +189,28 @@ const DateInterviewTab = ({ candidateId, isActive, candidateName }: DateIntervie
                   onChange={(e) => setForm(f => ({ ...f, duration: e.target.value }))}
                   placeholder="e.g. 60"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Assign Role</label>
+                <div className="flex flex-wrap gap-3 mt-1">
+                  {ROLE_OPTIONS.map((role) => (
+                    <label key={role} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.assign_role.includes(role)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setForm(f => ({ ...f, assign_role: [...f.assign_role, role] }));
+                          } else {
+                            setForm(f => ({ ...f, assign_role: f.assign_role.filter(r => r !== role) }));
+                          }
+                        }}
+                        className="rounded border-gray-300 text-[#0253a5] focus:ring-[#0253a5]"
+                      />
+                      {role}
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">

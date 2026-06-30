@@ -9,7 +9,6 @@ import { usePDFDownload } from '../hooks/usePDFDownload';
 
 interface FormInterviewTabProps {
   candidateId: string;
-  candidateName?: string;
 }
 
 // ============================================================

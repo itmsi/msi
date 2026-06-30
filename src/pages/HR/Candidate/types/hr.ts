@@ -1,137 +1,168 @@
 // ============================================================
-// Candidate Types
+// Candidate Types — langsung dari API gateway HRM
 // ============================================================
 
-export interface CandidatePersonalInfo {
-  candidate_name?: string;
-  candidate_email?: string;
-  candidate_phone?: string;
-  candidate_nationality?: string;
-  candidate_gender?: string;
-  candidate_religion?: string;
-  candidate_date_birth?: string;
-  candidate_marital_status?: string;
-}
-
-export interface CandidateAddressInfo {
-  candidate_address?: string;
-  candidate_city?: string;
-  candidate_state?: string;
-  candidate_country?: string;
-}
-
-export interface CandidateReferred {
-  name: string;
-  email: string;
-  role: string;
-  role_alias: string;
-}
-
-export interface DateSchedule {
-  id: string | number;
-  name: string;
-  interviewer: string[];
-  image: string;
-  date: string;
-  time: string;
+export interface ScheduleInterview {
+  assign_role?: string;
+  schedule_interview_date?: string;
+  schedule_interview_time?: string;
+  schedule_interview_duration?: string;
 }
 
 export interface Candidate {
-  id: string;
-  name: string;
-  email: string;
-  image: string | null;
-  id_candidate: string;
-  date_applied: string;
-  position: string;
-  interviewer: string[];
-  status: string;
-  age: string;
-  company: string;
-  department?: string;
-  referred: CandidateReferred[];
-  personal_information: CandidatePersonalInfo[];
-  address_information: CandidateAddressInfo[];
-  resume: string | null;
-  notes: CandidateNote[];
-  date_schedule: DateSchedule[];
-  position_id?: string;
-  company_id?: string;
-  department_id?: string;
-}
-
-export interface CandidateFormData {
+  candidate_id: string;
+  company_id: string;
+  department_id: string | null;
+  title_id: string | null;
+  candidate_number: string;
   candidate_name: string;
   candidate_email: string;
   candidate_phone: string;
-  candidate_title: string;
-  cum_title_id: string;
-  candidate_company: string;
-  cum_companies_id: string;
-  candidate_department: string;
-  cum_departement_id: string;
-  candidate_nationality: string;
-  candidate_gender: string;
   candidate_religion: string;
-  candidate_date_birth: Date | null;
-  candidate_age: string;
+  candidate_gender: string;
   candidate_marital_status: string;
-  candidate_address: string;
+  candidate_age: number | null;
+  candidate_date_birth: string | null;
+  candidate_nationality: string;
   candidate_city: string;
   candidate_state: string;
   candidate_country: string;
-  candidate_foto: File | string | null;
-  candidate_resume: File | string | null;
+  candidate_address: string;
+  candidate_foto: string | null;
+  candidate_resume: string | null;
+  candidate_foto_path: string | null;
+  candidate_resume_path: string | null;
+  schedule_interview: ScheduleInterview | null;
+  ptk_date: string | null;
+  offering_letter: string | null;
+  remark: string | null;
+  group_id: string | null;
+  candidate_status: string;
+  candidate_status_offering_letter: string | null;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+  deleted_at: string | null;
+  deleted_by: string | null;
+  is_delete: boolean;
+  // Joined fields
+  group_name?: string;
+  company_name?: string;
+  department_name?: string;
+  title_name?: string;
+}
+
+export interface CandidateListRequest {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sort_by?: string;
+  sort_order?: string;
+  group_id?: string;
+  company_id?: string;
+  department_id?: string;
+  title_id?: string;
+  candidate_status?: string;
+  candidate_status_offering_letter?: string;
+  assign_role?: string;
+}
+
+export interface CandidateCreateRequest {
+  company_id: string;
+  department_id: string;
+  title_id: string;
+  candidate_name: string;
+  candidate_email: string;
+  candidate_phone: string;
+  candidate_religion: string;
+  candidate_gender: string;
+  candidate_marital_status: string;
+  candidate_age: number;
+  candidate_date_birth: string;
+  candidate_nationality: string;
+  candidate_city: string;
+  candidate_state: string;
+  candidate_country: string;
+  candidate_address: string;
+  ptk_date?: string;
+  offering_letter?: string;
+  remark?: string;
+  group_id?: string;
+}
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface ApiWrapper<T> {
+  success: boolean;
+  message?: string;
+  data: {
+    data: T[];
+    pagination?: Pagination;
+  };
+  timestamp?: string;
 }
 
 // ============================================================
-// Interview / Date Schedule Types
+// Schedule Interview Types
 // ============================================================
 
-export interface DateInterviewForm {
-  date: Date | null;
-  time: Date | null;
-  assign: string[];
-  duration: string;
-}
-
-export interface InterviewAssignment {
-  cum_id?: number;
-  assigned_name: string;
-  assigned_email: string;
-  assigned_role: string;
-  assigned_role_alias: string;
-}
-
-export interface InterviewFormData {
+export interface ScheduleInterviewItem {
+  schedule_interview_id: string;
+  candidate_id: string;
+  assign_role?: string | { role?: string };
   schedule_interview_date: string;
   schedule_interview_time: string;
   schedule_interview_duration: string;
-  assigned_data: InterviewAssignment[];
+  created_at: string;
+  created_by: string;
+}
+
+// ============================================================
+// Interview / Scoring Types
+// ============================================================
+
+export interface DetailInterview {
+  detail_interview_id: string;
+  interview_id: string;
+  aspect: string;
+  question: string;
+  answer: string;
+  score: string;
+}
+
+export interface InterviewItem {
+  interview_id: string;
+  schedule_interview_id: string;
+  assigned_id: string | null;
+  company_value: string;
+  comment: string;
+  detail_interviews: DetailInterview[];
+  created_at: string;
+  created_by: string;
 }
 
 // ============================================================
 // Notes Types
 // ============================================================
 
-export interface CandidateNote {
-  id: number | string;
-  name: string;
-  image_profile: string | null;
-  date_created: string;
-  role_alias: string;
-  note: string;
-  note_id?: number;
-  candidate_id?: number;
-  create_at?: string;
-  create_by?: string;
-}
-
-export interface NoteFormData {
+export interface NoteItem {
+  note_id: string;
   candidate_id: string;
   notes: string;
-  create_by: string;
-  assigned_data: InterviewAssignment[];
+  created_at: string;
+  created_by: string;
+}
+
+export interface NoteCreateRequest {
+  candidate_id: string;
+  notes: string;
+  created_by: string;
 }
 
 // ============================================================
@@ -139,12 +170,80 @@ export interface NoteFormData {
 // ============================================================
 
 export interface BackgroundCheckItem {
-  id: string;
+  background_check_id: string;
   candidate_id: string;
-  status: string;
-  notes: string;
+  background_check_note: string;
   file_attachment: string | null;
-  create_at: string;
+  file_attachment_path: string | null;
+  background_check_status: string;
+  created_at: string;
+  created_by: string | null;
+}
+
+// ============================================================
+// On Board Document Types
+// ============================================================
+
+export interface OnBoardDocument {
+  on_board_documents_id: string;
+  candidate_id: string;
+  on_board_documents_name: string;
+  on_board_documents_file: string;
+  on_board_documents_file_path: string;
+  created_at: string;
+  created_by: string;
+}
+
+// ============================================================
+// Dropdown Types (dari gateway SSO)
+// ============================================================
+
+export interface Group {
+  group_id: string;
+  group_name: string;
+}
+
+export interface Company {
+  company_id: string;
+  company_name: string;
+}
+
+export interface Department {
+  department_id: string;
+  department_name: string;
+  company_id: string;
+  company_name?: string;
+}
+
+export interface JobTitle {
+  title_id: string;
+  title_name: string;
+  department_id: string;
+  department_name?: string;
+}
+
+// ============================================================
+// API Response Types
+// ============================================================
+
+export interface ApiListResponse<T> {
+  data: T[];
+  pagination?: Pagination;
+}
+
+export interface ApiDetailResponse<T> {
+  data: T;
+  message?: string;
+  status?: boolean;
+}
+
+// ============================================================
+// Utility types for form
+// ============================================================
+
+export interface NoteFormData {
+  candidate_id: string;
+  notes: string;
   create_by: string;
 }
 
@@ -154,33 +253,10 @@ export interface BackgroundCheckFormData {
   file_attachment: File | null;
 }
 
-// ============================================================
-// Document Onboarding Types
-// ============================================================
-
-export interface OnBoardDocument {
-  id: string;
-  candidate_id: string;
-  on_board_documents_name: string;
-  on_board_documents_file: string;
-  create_at: string;
-  create_by: string;
-}
-
-// ============================================================
-// Form Interview / Scoring Types
-// ============================================================
-
 export interface FormInterviewAspect {
   key: string;
   label: string;
   defaultQuestion?: string;
-}
-
-export interface FormInterviewPoint {
-  point: string;
-  question: string;
-  remark: string;
 }
 
 export interface ScoreMetric {
@@ -191,25 +267,6 @@ export interface ScoreMetric {
 export interface InterviewScoreData {
   data_candidate: Record<string, unknown>;
   data_score: ScoreMetric[];
-}
-
-// ============================================================
-// Company / Department / Job Title Types
-// ============================================================
-
-export interface Company {
-  company_id: string;
-  company_name: string;
-}
-
-export interface Department {
-  departement_id: string;
-  departement_name: string;
-}
-
-export interface JobTitle {
-  job_title_id: string;
-  job_title_name: string;
 }
 
 // ============================================================
