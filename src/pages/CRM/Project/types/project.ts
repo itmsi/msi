@@ -7,6 +7,7 @@ export interface ProjectRequest {
     search?: string;
     status?: string;
     iup_customer_id?: string;
+    employee_id?: string;
 }
 
 export interface ProjectAttachment {
