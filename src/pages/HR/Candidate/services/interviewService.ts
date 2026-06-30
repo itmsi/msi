@@ -1,7 +1,7 @@
 import { apiDelete, apiPost, apiPut } from '@/helpers/apiHelper';
 import type { ApiDetailResponse, ApiListResponse, ApiWrapper } from '../types/hr';
 
-const GW = import.meta.env.VITE_API_BASE_URL || 'https://dev-gateway.motorsights.com/api';
+const GW = import.meta.env.VITE_API_BASE_URL;
 const HRM = `${GW}/hrm`;
 
 async function unwrapList<T>(url: string, body: Record<string, unknown>): Promise<ApiListResponse<T>> {
@@ -22,6 +22,8 @@ export interface ScheduleApiItem {
   schedule_interview_time: string;
   schedule_interview_duration: string;
   created_at: string;
+  created_by: string;
+  created_by_name?: string;
 }
 
 export type InterviewSchedule = ScheduleApiItem;
