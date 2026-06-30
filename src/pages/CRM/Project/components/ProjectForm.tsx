@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { ProjectAttachment, ProjectFormData, ProjectValidationErrors } from '../types/project';
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
-import TextArea from '@/components/form/input/TextArea';
+import EditableField from '@/components/form/editor/EditableField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import IupContractorSelect from '@/components/form/select/IupContractorSelect';
@@ -243,60 +243,48 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                 <h3 className="text-lg font-primary-bold font-medium text-gray-900">Detail</h3>
                 <div className="grid grid-cols-1 gap-6">
                     {/* Description */}
-                    <div>
-                        <Label htmlFor="description">Description</Label>
-                        <TextArea
-                            value={formData.description}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange('description', e.target.value)}
-                            placeholder="Project description..."
-                            rows={4}
-                            disabled={isSubmitting}
-                            className="flex"
-                        />
-                        {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
-                    </div>
+                    <EditableField
+                        id="description"
+                        label="Description"
+                        value={formData.description}
+                        onChange={(value: string) => onChange('description', value)}
+                        placeholder="Project description..."
+                        disabled={isSubmitting}
+                        error={errors.description}
+                    />
 
                     {/* Pain Point */}
-                    <div>
-                        <Label htmlFor="pain_point">Pain Point</Label>
-                        <TextArea
-                            value={formData.pain_point}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange('pain_point', e.target.value)}
-                            placeholder="Customer pain points..."
-                            rows={4}
-                            disabled={isSubmitting}
-                            className="flex"
-                        />
-                        {errors.pain_point && <p className="text-red-500 text-sm mt-1">{errors.pain_point}</p>}
-                    </div>
+                    <EditableField
+                        id="pain_point"
+                        label="Pain Point"
+                        value={formData.pain_point}
+                        onChange={(value: string) => onChange('pain_point', value)}
+                        placeholder="Customer pain points..."
+                        disabled={isSubmitting}
+                        error={errors.pain_point}
+                    />
 
                     {/* Propose Solution */}
-                    <div>
-                        <Label htmlFor="propose_solution">Propose Solution</Label>
-                        <TextArea
-                            value={formData.propose_solution}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange('propose_solution', e.target.value)}
-                            placeholder="Proposed solution..."
-                            rows={4}
-                            disabled={isSubmitting}
-                            className="flex"
-                        />
-                        {errors.propose_solution && <p className="text-red-500 text-sm mt-1">{errors.propose_solution}</p>}
-                    </div>
+                    <EditableField
+                        id="propose_solution"
+                        label="Propose Solution"
+                        value={formData.propose_solution}
+                        onChange={(value: string) => onChange('propose_solution', value)}
+                        placeholder="Proposed solution..."
+                        disabled={isSubmitting}
+                        error={errors.propose_solution}
+                    />
 
                     {/* Remark */}
-                    <div>
-                        <Label htmlFor="remark">Remark</Label>
-                        <TextArea
-                            value={formData.remark}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange('remark', e.target.value)}
-                            placeholder="Additional remarks..."
-                            rows={3}
-                            disabled={isSubmitting}
-                            className="flex"
-                        />
-                        {errors.remark && <p className="text-red-500 text-sm mt-1">{errors.remark}</p>}
-                    </div>
+                    <EditableField
+                        id="remark"
+                        label="Remark"
+                        value={formData.remark}
+                        onChange={(value: string) => onChange('remark', value)}
+                        placeholder="Additional remarks..."
+                        disabled={isSubmitting}
+                        error={errors.remark}
+                    />
                 </div>
             </div>
 
