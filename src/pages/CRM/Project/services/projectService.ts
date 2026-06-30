@@ -3,6 +3,8 @@ import { ProjectItemDetails, ProjectListResponse, ProjectRequest } from '../type
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+ const authUserStr = localStorage.getItem('auth_user');
+ const authUser = JSON.parse(authUserStr as any);
 export class ProjectService {
     static async getProjects(params: Partial<ProjectRequest> = {}): Promise<ProjectListResponse> {
         const requestData: ProjectRequest = {
@@ -13,6 +15,7 @@ export class ProjectService {
             search: '',
             status: '',
             iup_customer_id: '',
+            employee_id: authUser?.employee_id || '',
             ...params
         };
 
