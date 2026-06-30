@@ -1,5 +1,6 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
+import { FaSpinner } from 'react-icons/fa';
 
 const TINYMCE_CDN = '/tinymce/tinymce.min.js';
 
@@ -70,6 +71,7 @@ const TinyMceEditor: React.FC<TinyMceEditorProps> = ({
     id = 'tinymce-editor'
 }) => {
     const editorRef = useRef<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const handleEditorChange = useCallback(
         (content: string) => {
@@ -77,6 +79,11 @@ const TinyMceEditor: React.FC<TinyMceEditorProps> = ({
         },
         [onChange]
     );
+
+    const handleInit = useCallback((_evt: any, editor: any) => {
+        editorRef.current = editor;
+        setIsLoading(false);
+    }, []);
 
     return (
         <div className={`tinymce-editor-wrapper ${className}`}>
@@ -90,19 +97,26 @@ const TinyMceEditor: React.FC<TinyMceEditorProps> = ({
             )}
 
             <div
-                className={`w-full border rounded-lg overflow-hidden ${
+                className={`w-full border rounded-lg overflow-hidden relative ${
                     error ? 'border-red-500' : 'border-gray-300'
                 } ${disabled ? 'opacity-60 pointer-events-none' : ''}`}
+                style={{ minHeight: parseInt(minHeight) }}
             >
+                {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+                        <div className="flex flex-col items-center gap-2">
+                            <FaSpinner className="w-6 h-6 text-blue-500 animate-spin" />
+                            <span className="text-sm text-gray-500">Loading editor...</span>
+                        </div>
+                    </div>
+                )}
                 <Editor
                     id={id}
                     tinymceScriptSrc={TINYMCE_CDN}
                     value={value}
                     disabled={disabled}
                     onEditorChange={handleEditorChange}
-                    onInit={(_evt, editor) => {
-                        editorRef.current = editor;
-                    }}
+                    onInit={handleInit}
                     init={{
                         ...EDITOR_INIT,
                         height: parseInt(minHeight),
