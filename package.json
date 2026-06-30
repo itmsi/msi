@@ -14,6 +14,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@tailwindcss/typography": "^0.5.19",
+    "@tinymce/tinymce-react": "^6.3.0",
     "@tiptap/extension-color": "^3.10.4",
     "@tiptap/extension-text-style": "^3.10.4",
     "animate.css": "^4.1.1",
@@ -47,7 +48,8 @@
     "react-select": "^5.10.2",
     "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.19",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "tinymce": "^8.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

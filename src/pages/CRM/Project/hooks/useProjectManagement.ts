@@ -16,12 +16,13 @@ type FilterState = {
 export const useProjectManagement = ({ iup_customer_id }: UseProjectManagementProps) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const location = useLocation(); 
-
     const urlPage = Math.max(Number(searchParams.get('page')) || 1, 1);
     const urlLimit = Math.max(Number(searchParams.get('limit')) || 10, 1);
     
     const urlFilters: FilterState = {
-        search: searchParams.get('search') || '',
+        search: location.pathname.includes('crm/project')
+            ? searchParams.get('search') ?? ''
+            : '',
         status: (searchParams.get('status') as FilterState['status']) || '',
         sort_order: (searchParams.get('sort_order') as FilterState['sort_order']) || 'desc',
     };
