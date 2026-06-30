@@ -108,10 +108,10 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div className="flex w-full mb-4">
         <button onClick={openAdd}
-          className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0253a5] text-white text-sm rounded-lg hover:bg-[#003061]">
-          <FaPlus className="w-3 h-3" /> Add Schedule
+          className="flex w-full items-center justify-center gap-2 px-3 py-1.5 bg-[#0253a5] text-white text-sm rounded-lg hover:bg-[#003061]">
+          <FaPlus className="w-3 h-3" /> Add Date of Interview
         </button>
       </div>
 

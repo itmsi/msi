@@ -178,6 +178,7 @@ export interface BackgroundCheckItem {
   background_check_status: string;
   created_at: string;
   created_by: string | null;
+  created_by_name?: string | null;
 }
 
 // ============================================================
@@ -192,6 +193,7 @@ export interface OnBoardDocument {
   on_board_documents_file_path: string;
   created_at: string;
   created_by: string;
+  created_by_name?: string;
 }
 
 // ============================================================

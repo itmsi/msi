@@ -1,5 +1,5 @@
 import type { Candidate } from '../types/hr';
-import { getBadgeVariant, onImageProfileError, placeholderProfileImage } from '../utils';
+import { getBadgeVariant, onImageProfileError, placeholderProfileImage } from '../utils/utils';
 import { FaPencil, FaTrash } from 'react-icons/fa6';
 import { VscDebugBreakpointData } from 'react-icons/vsc';
 

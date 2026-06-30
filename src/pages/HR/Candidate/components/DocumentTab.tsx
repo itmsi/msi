@@ -85,10 +85,10 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div className="flex w-full justify-center mb-4">
         <button onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0253a5] text-white text-sm rounded-lg hover:bg-[#003061]">
-          <FaPlus className="w-3 h-3" /> Upload
+          className="flex w-full justify-center items-center gap-2 px-3 py-1.5 bg-[#0253a5] text-white text-sm rounded-lg hover:bg-[#003061]">
+          <FaPlus className="w-3 h-3" /> Upload Document
         </button>
       </div>
 
@@ -113,7 +113,7 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
                   <td className="px-4 py-3">
                     <span className="font-medium text-gray-800">{doc.on_board_documents_name}</span>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{doc.created_by || 'Unknown'}</td>
+                  <td className="px-4 py-3 text-gray-600">{doc.created_by_name || 'Unknown'}</td>
                   <td className="px-4 py-3 text-gray-500">
                     {new Date(doc.created_at).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </td>

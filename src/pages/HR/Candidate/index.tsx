@@ -431,9 +431,9 @@ const CandidatePage = () => {
 
       {/* Edit Modal */}
       {showEdit && editingCandidate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6">
-            <div className="flex items-center justify-between mb-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto px-6 pb-6">
+            <div className="flex items-center justify-between mb-4 sticky top-0 bg-white py-4 z-10 border-b border-gray-200">
               <h2 className="text-lg font-semibold">Edit Candidate Profile</h2>
               <button
                 onClick={() => { setShowEdit(false); setEditingCandidate(null); }}

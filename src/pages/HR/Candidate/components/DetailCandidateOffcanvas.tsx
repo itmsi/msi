@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Candidate, NoteItem } from '../types/hr';
 import { notesService } from '../services/hrService';
-import { onImageProfileError, placeholderProfileImage } from '../utils';
+import { onImageProfileError, placeholderProfileImage } from '../utils/utils';
 import { FaPencil, FaTrash, FaXmark, FaPlus } from 'react-icons/fa6';
 import { MdOutlineFileDownload } from 'react-icons/md';
 import { toast } from 'react-hot-toast';
@@ -302,12 +302,12 @@ const NotesTab = ({ notes, loading, candidateId, onRefresh }: { notes: NoteItem[
   return (
     <div className="space-y-4">
       {/* Toggle Button */}
-      <div className="flex justify-start">
+      <div className="flex w-full justify-center">
         <button
           onClick={() => setShowForm(prev => !prev)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-[#0253a5] text-white rounded-lg hover:bg-[#003061]"
+          className="flex w-full justify-center items-center gap-2 px-4 py-2 text-sm bg-[#0253a5] text-white rounded-lg hover:bg-[#003061]"
         >
-          <FaPlus className="w-3 h-3" />
+          {showForm ? <FaXmark className="w-3 h-3" /> : <FaPlus className="w-3 h-3" />}
           {showForm ? 'Cancel' : 'Add Note'}
         </button>
       </div>

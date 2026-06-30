@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { interviewFormService } from '../services/interviewService';
-import { getBadgeVariant } from '../utils';
+import { getBadgeVariant } from '../utils/utils';
 import { toast } from 'react-hot-toast';
 import { FaRegPenToSquare, FaChartSimple, FaRegFilePdf } from 'react-icons/fa6';
 import { RxPencil2 } from 'react-icons/rx';

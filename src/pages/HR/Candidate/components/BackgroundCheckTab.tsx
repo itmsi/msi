@@ -75,10 +75,10 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div className="flex w-full justify-center mb-4">
         <button onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0253a5] text-white text-sm rounded-lg hover:bg-[#003061]">
-          <FaPlus className="w-3 h-3" /> Add
+          className="flex items-center justify-center w-full gap-2 px-3 py-1.5 bg-[#0253a5] text-white text-sm rounded-lg hover:bg-[#003061]">
+          <FaPlus className="w-3 h-3" /> Add Background Check
         </button>
       </div>
 
@@ -104,7 +104,7 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
                       <span className="text-gray-800">{item.background_check_note || '-'}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{item.created_by || '-'}</td>
+                  <td className="px-4 py-3 text-gray-600">{item.created_by_name || '-'}</td>
                   <td className="px-4 py-3 text-gray-600">{item.created_at ? new Date(item.created_at).toLocaleDateString() : '-'}</td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -119,8 +119,8 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
                       {item.file_attachment && (
                         <a href={item.file_attachment?.startsWith('http') ? item.file_attachment + '/download' : item.file_attachment}
                           target="_blank" rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-700 inline-flex items-center mx-2">
-                          <FaDownload className="w-3 h-3" />
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-600 border border-blue-200 rounded hover:bg-blue-50">
+                          <FaDownload className="w-3 h-3" /> Download
                         </a>
                       )}
                     <button onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }}

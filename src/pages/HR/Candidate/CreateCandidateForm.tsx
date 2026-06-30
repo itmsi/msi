@@ -533,7 +533,13 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
             className="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
           {fileNamePhoto && (
-            <p className="text-xs text-gray-400 mt-1">{fileNamePhoto}</p>
+            <p className="text-xs text-gray-400 mt-1">
+              {fileNamePhoto}
+              {isEdit && typeof initialData?.candidate_foto === 'string' && initialData.candidate_foto.startsWith('http') && (
+                <a href={initialData.candidate_foto + '/download'} target="_blank" rel="noopener noreferrer"
+                  className="ml-2 text-blue-600 hover:text-blue-700 underline">View</a>
+              )}
+            </p>
           )}
         </div>
 
@@ -548,7 +554,13 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
             className="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
           {fileNameCV && (
-            <p className="text-xs text-gray-400 mt-1">{fileNameCV}</p>
+            <p className="text-xs text-gray-400 mt-1">
+              {fileNameCV}
+              {isEdit && typeof initialData?.candidate_resume === 'string' && initialData.candidate_resume.startsWith('http') && (
+                <a href={initialData.candidate_resume + '/download'} target="_blank" rel="noopener noreferrer"
+                  className="ml-2 text-blue-600 hover:text-blue-700 underline">Download</a>
+              )}
+            </p>
           )}
         </div>
       </div>
