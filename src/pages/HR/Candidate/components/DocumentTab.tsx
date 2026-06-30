@@ -72,10 +72,12 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
     }
   };
 
-  const getFileIcon = (filename: string) => {
-    if (filename.endsWith('.pdf')) return <BsFiletypePdf className="w-5 h-5 text-red-500" />;
-    if (filename.endsWith('.doc') || filename.endsWith('.docx')) return <BsFiletypeDoc className="w-5 h-5 text-blue-500" />;
-    if (filename.endsWith('.xls') || filename.endsWith('.xlsx')) return <BsFiletypeXls className="w-5 h-5 text-green-500" />;
+  const getFileIcon = (doc: OnBoardDocument) => {
+    const name = doc.on_board_documents_file_path?.toLowerCase() || doc.on_board_documents_file?.toLowerCase() || '';
+    if (name.endsWith('.pdf')) return <BsFiletypePdf className="w-5 h-5 text-red-500" />;
+    if (name.endsWith('.doc') || name.endsWith('.docx')) return <BsFiletypeDoc className="w-5 h-5 text-blue-500" />;
+    if (name.endsWith('.xls') || name.endsWith('.xlsx')) return <BsFiletypeXls className="w-5 h-5 text-green-500" />;
+    if (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.gif')) return <FaFileAlt className="w-5 h-5 text-purple-500" />;
     return <FaFileAlt className="w-5 h-5 text-gray-400" />;
   };
 
@@ -85,7 +87,7 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
     <div>
       <div className="flex justify-end mb-4">
         <button onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+          className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0253a5] text-white text-sm rounded-lg hover:bg-[#003061]">
           <FaPlus className="w-3 h-3" /> Upload
         </button>
       </div>
@@ -93,28 +95,47 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
       {docs.length === 0 ? (
         <p className="text-sm text-gray-500">No documents uploaded yet.</p>
       ) : (
-        <div className="space-y-2">
-          {docs.map((doc) => (
-            <div key={doc.on_board_documents_id} className="flex items-center justify-between bg-white rounded-xl border border-gray-200 p-3">
-              <div className="flex items-center gap-3 min-w-0">
-                {getFileIcon(doc.on_board_documents_file)}
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{doc.on_board_documents_name}</p>
-                  <p className="text-xs text-gray-400">{doc.created_by} · {new Date(doc.created_at).toLocaleDateString()}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <a href={doc.on_board_documents_file?.startsWith('http') ? doc.on_board_documents_file + '/download' : doc.on_board_documents_file} target="_blank" rel="noopener noreferrer"
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
-                  <FaDownload className="w-3.5 h-3.5" />
-                </a>
-                <button onClick={() => { setDeletingId(doc.on_board_documents_id); setShowDeleteModal(true); }}
-                  className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
-                  <FaTrash className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          ))}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="w-10 px-4 py-3"></th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Document</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Uploaded By</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">Date</th>
+                <th className="text-center px-4 py-3 font-medium text-gray-600">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {docs.map((doc) => (
+                <tr key={doc.on_board_documents_id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 text-center">{getFileIcon(doc)}</td>
+                  <td className="px-4 py-3">
+                    <span className="font-medium text-gray-800">{doc.on_board_documents_name}</span>
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">{doc.created_by || 'Unknown'}</td>
+                  <td className="px-4 py-3 text-gray-500">
+                    {new Date(doc.created_at).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-center gap-2">
+                      {doc.on_board_documents_file && (
+                        <a href={doc.on_board_documents_file?.startsWith('http') ? doc.on_board_documents_file + '/download' : doc.on_board_documents_file}
+                          target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-600 border border-blue-200 rounded hover:bg-blue-50">
+                          <FaDownload className="w-3 h-3" /> Download
+                        </a>
+                      )}
+                      <button onClick={() => { setDeletingId(doc.on_board_documents_id); setShowDeleteModal(true); }}
+                        className="p-1.5 text-red-400 hover:bg-red-50 rounded-lg" title="Delete">
+                        <FaTrash className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -141,7 +162,7 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
               <button onClick={() => setShowAddModal(false)}
                 className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
               <button onClick={handleUpload} disabled={uploading}
-                className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                className="px-4 py-2 text-sm text-white bg-[#0253a5] rounded-lg hover:bg-[#003061] disabled:opacity-50">
                 {uploading ? 'Uploading...' : 'Upload'}
               </button>
             </div>
