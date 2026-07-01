@@ -145,6 +145,7 @@ const AppSidebar: React.FC = () => {
                 'IUP Management CRM', 
                 'Contractors CRM',
                 'Activities CRM',
+                'Daily Task Activity CRM',
                 'Customer CRM',
                 'User Management CRM',
                 'Project CRM',
@@ -188,6 +189,11 @@ const AppSidebar: React.FC = () => {
                             name: "Division",
                             path: buildPath("/crm/manage-division"),
                             allowedRoles: ['Division CRM'] 
+                        },
+                        { 
+                            name: "Daily Task",
+                            path: buildPath("/crm/daily-task-activity"),
+                            allowedRoles: ['Daily Task Activity CRM'] 
                         }
                     ]
                 },
