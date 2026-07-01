@@ -2,6 +2,7 @@ import type { Candidate } from '../types/hr';
 import { getBadgeVariant, onImageProfileError, placeholderProfileImage } from '../utils/utils';
 import { FaPencil, FaTrash } from 'react-icons/fa6';
 import { VscDebugBreakpointData } from 'react-icons/vsc';
+import Button from '@/components/ui/button/Button';
 
 interface CandidateCardProps {
   candidate: Candidate;
@@ -92,24 +93,12 @@ const CandidateCard = ({ candidate, onView, onEdit, onDelete }: CandidateCardPro
 
       {/* Actions */}
       <div className="flex border-t border-gray-100 divide-x divide-gray-100">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit();
-          }}
-          className="flex-1 py-2 text-xs text-[#0253a5] hover:bg-blue-50 transition-colors flex items-center justify-center gap-1"
-        >
-          <FaPencil className="w-3 h-3" /> Edit
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          className="flex-1 py-2 text-xs text-red-500 hover:bg-red-50 transition-colors flex items-center justify-center gap-1"
-        >
-          <FaTrash className="w-3 h-3" /> Delete
-        </button>
+        <Button size="sm" variant="transparent" onClick={(e) => { e.stopPropagation(); onEdit(); }} className="flex-1! justify-center! text-[#0253a5]!" startIcon={<FaPencil className="w-3 h-3" />}>
+          Edit
+        </Button>
+        <Button size="sm" variant="transparent" onClick={(e) => { e.stopPropagation(); onDelete(); }} className="flex-1! justify-center! text-red-500!" startIcon={<FaTrash className="w-3 h-3" />}>
+          Delete
+        </Button>
       </div>
     </div>
   );

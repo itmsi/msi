@@ -3,6 +3,9 @@ import type { BackgroundCheckItem } from '../types/hr';
 import { backgroundCheckService } from '../services/hrService';
 import { toast } from 'react-hot-toast';
 import { FaPlus, FaTrash, FaDownload } from 'react-icons/fa6';
+import Button from '@/components/ui/button/Button';
+import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import TextArea from '@/components/form/input/TextArea';
 
 
 interface BackgroundCheckTabProps {
@@ -76,10 +79,7 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
   return (
     <div>
       <div className="flex w-full justify-center mb-4">
-        <button onClick={() => setShowAddModal(true)}
-          className="flex items-center justify-center w-full gap-2 px-3 py-1.5 bg-[#0253a5] text-white text-sm rounded-lg hover:bg-[#003061]">
-          <FaPlus className="w-3 h-3" /> Add Background Check
-        </button>
+        <Button onClick={() => setShowAddModal(true)} startIcon={<FaPlus />} className="w-full justify-center!">Add Background Check</Button>
       </div>
 
       {items.length === 0 ? (
@@ -123,10 +123,9 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
                           <FaDownload className="w-3 h-3" /> Download
                         </a>
                       )}
-                    <button onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }}
-                      className="p-1.5 text-red-400 hover:bg-red-50 rounded-lg" title="Delete">
+                    <Button size="sm" variant="transparent" onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }} className="text-red-400!">
                       <FaTrash className="w-3.5 h-3.5" />
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -155,8 +154,8 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Background Check Result</label>
-                <textarea value={form.background_check_note} onChange={(e) => setForm(f => ({ ...f, background_check_note: e.target.value }))}
-                  rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                <TextArea value={form.background_check_note} onChange={(e) => setForm(f => ({ ...f, background_check_note: e.target.value }))}
+                  rows={3} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Attachment (PDF)</label>
@@ -175,31 +174,27 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
-              <button onClick={handleSubmit} disabled={submitting}
-                className="px-4 py-2 text-sm text-white bg-[#0253a5] rounded-lg hover:bg-[#003061] disabled:opacity-50">
+              <Button variant="outline" onClick={() => setShowAddModal(false)}>Cancel</Button>
+              <Button onClick={handleSubmit} disabled={submitting}>
                 {submitting ? 'Saving...' : 'Save'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
 
       {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-            <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this background check?</p>
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg">Cancel</button>
-              <button onClick={handleDelete}
-                className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Delete Background Check"
+        message="Are you sure you want to delete this background check?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        size="sm"
+      />
     </div>
   );
 };

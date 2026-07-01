@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { interviewFormService } from '../services/interviewService';
 import { toast } from 'react-hot-toast';
+import Button from '@/components/ui/button/Button';
+import TextArea from '@/components/form/input/TextArea';
+import CustomSelect from '@/components/form/select/CustomSelect';
 
 const POINT_OPTIONS = [
   { value: '', label: 'Select point' },
@@ -74,15 +77,15 @@ const FormScoringCanvas = ({ candidateId, scheduleId, onBack }: FormScoringCanva
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <button onClick={onBack} className="text-sm text-[#0253a5] hover:underline">&larr; Back to list</button>
+        <Button variant="transparent" onClick={onBack}>&larr; Back to list</Button>
       </div>
 
       <div className="flex gap-1 border-b border-gray-200 mb-4 overflow-x-auto">
         {tabs.map((tab) => (
-          <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.key ? 'border-[#0253a5] text-[#0253a5]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+          <Button key={tab.key} onClick={() => setActiveTab(tab.key)} variant="transparent"
+            className={`whitespace-nowrap border-b-2 rounded-none! ${activeTab === tab.key ? 'border-[#0253a5] text-[#0253a5]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
             {tab.label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -138,35 +141,37 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
               <div className="md:col-span-2">
                 <label className="block text-xs font-medium text-gray-500 mb-1">Score</label>
-                <select value={form[aspect.key]?.point || ''}
-                  onChange={(e) => setForm((prev) => {
-                    const updated = { ...prev, [aspect.key]: { ...prev[aspect.key], point: e.target.value } };
-                    if (autoQuestion && e.target.value) updated[aspect.key].question = aspect.label;
+                <CustomSelect
+                  value={form[aspect.key]?.point ? { value: form[aspect.key].point, label: POINT_OPTIONS.find(o => o.value === form[aspect.key].point)?.label || form[aspect.key].point } : null}
+                  onChange={(opt) => setForm((prev) => {
+                    const pointVal = opt?.value || '';
+                    const updated = { ...prev, [aspect.key]: { ...prev[aspect.key], point: pointVal } };
+                    if (autoQuestion && pointVal) updated[aspect.key].question = aspect.label;
                     return updated;
                   })}
-                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                  {POINT_OPTIONS.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
-                </select>
-              </div>
+                  options={POINT_OPTIONS.filter(o => o.value !== '')}
+                  placeholder="Select point"
+                  isSearchable={false}
+                  isClearable
+                />
               <div className="md:col-span-5">
                 <label className="block text-xs font-medium text-gray-500 mb-1">{aspect.label}</label>
-                <textarea value={form[aspect.key]?.question || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], question: e.target.value } }))}
-                  rows={2} placeholder={aspect.defaultQ || 'Question'} readOnly={defaultQuestions}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 ${defaultQuestions ? 'bg-gray-50 cursor-not-allowed' : ''}`} />
+                <TextArea value={form[aspect.key]?.question || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], question: e.target.value } }))}
+                  rows={2} placeholder={aspect.defaultQ || 'Question'} readonly={defaultQuestions} />
               </div>
               <div className="md:col-span-5">
                 <label className="block text-xs font-medium text-gray-500 mb-1">Remark / Answer</label>
-                <textarea value={form[aspect.key]?.remark || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], remark: e.target.value } }))}
-                  rows={2} placeholder="Remark" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                <TextArea value={form[aspect.key]?.remark || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], remark: e.target.value } }))}
+                  rows={2} placeholder="Remark" />
               </div>
             </div>
           </div>
         ))}
       </div>
       <div className="flex justify-end pt-2">
-        <button type="submit" disabled={isSubmitting} className="px-6 py-2 text-sm font-medium text-white bg-[#0253a5] rounded-lg hover:bg-[#003061] disabled:opacity-50">
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Saving...' : `Save ${title.split(' ')[0]}`}
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -199,20 +204,24 @@ const SDTForm = ({ scheduleInterviewId }: { scheduleInterviewId: string }) => {
       <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Select SDT Aspect</label>
-          <select value={selectedAspect} onChange={(e) => setSelectedAspect(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="">Choose SDT Aspect...</option>
-            {SDT_ASPECTS.map((a) => (<option key={a.key} value={a.key}>{a.label}</option>))}
-          </select>
+          <CustomSelect
+            value={selectedAspect ? { value: selectedAspect, label: SDT_ASPECTS.find(a => a.key === selectedAspect)?.label || '' } : null}
+            onChange={(opt) => setSelectedAspect(opt?.value || '')}
+            options={SDT_ASPECTS.map((a) => ({ value: a.key, label: a.label }))}
+            placeholder="Choose SDT Aspect..."
+            isSearchable={false}
+            isClearable
+          />
         </div>
         <div><label className="block text-sm font-medium text-gray-700 mb-1">Auto Point</label><div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-lg font-bold text-gray-700">{pointValue || '-'}</div></div>
         <div><label className="block text-sm font-medium text-gray-700 mb-1">Remark</label>
-          <textarea value={remark} onChange={(e) => setRemark(e.target.value)} rows={3} placeholder="Remark" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+          <TextArea value={remark} onChange={(e) => setRemark(e.target.value)} rows={3} placeholder="Remark" />
         </div>
       </div>
       <div className="flex justify-end pt-2">
-        <button type="submit" disabled={isSubmitting || !selectedAspect} className="px-6 py-2 text-sm font-medium text-white bg-[#0253a5] rounded-lg hover:bg-[#003061] disabled:opacity-50">
+        <Button type="submit" disabled={isSubmitting || !selectedAspect}>
           {isSubmitting ? 'Saving...' : 'Save SDT'}
-        </button>
+        </Button>
       </div>
     </form>
   );

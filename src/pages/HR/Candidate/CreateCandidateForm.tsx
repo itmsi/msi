@@ -3,6 +3,10 @@ import { candidateService, hrCompanyService, hrDepartmentService, hrJobTitleServ
 import type { Candidate, Company, Department, JobTitle } from './types/hr';
 import { toast } from 'react-hot-toast';
 import dayjs from 'dayjs';
+import Button from '@/components/ui/button/Button';
+import Input from '@/components/form/input/InputField';
+import TextArea from '@/components/form/input/TextArea';
+import CustomSelect from '@/components/form/select/CustomSelect';
 
 interface CreateCandidateFormProps {
   initialData?: Candidate | null;
@@ -255,35 +259,33 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
         {/* Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-          <input
+          <Input
             type="text"
             name="candidate_name"
             value={form.candidate_name}
             onChange={handleChange}
-            required
             placeholder="Enter full name"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="required-field"
           />
         </div>
 
         {/* Email */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input
+          <Input
             type="email"
             name="candidate_email"
             value={form.candidate_email}
             onChange={handleChange}
-            required
             placeholder="email@example.com"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="required-field"
           />
         </div>
 
         {/* Phone */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-          <input
+          <Input
             type="text"
             name="candidate_phone"
             value={form.candidate_phone}
@@ -292,142 +294,132 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
               setForm((prev) => ({ ...prev, candidate_phone: value }));
             }}
             maxLength={13}
-            required
             placeholder="08xxxxxxxxxx"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="required-field"
           />
         </div>
 
         {/* Religion */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Religion</label>
-          <input
+          <Input
             type="text"
             name="candidate_religion"
             value={form.candidate_religion}
             onChange={handleChange}
             placeholder="Enter religion"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
 
         {/* Company */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-          <select
+          <CustomSelect
             name="candidate_company"
-            value={selectedCompanyName}
-            onChange={handleChange}
-            required
-            disabled={loadingCompany}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100"
-          >
-            <option value="">
-              {loadingCompany ? 'Loading companies...' : '-- Choose Company --'}
-            </option>
-            {!loadingCompany &&
-              [...companies]
-                .sort((a, b) => a.company_name.localeCompare(b.company_name))
-                .map((comp) => (
-                  <option key={comp.company_id} value={comp.company_name}>
-                    {comp.company_name}
-                  </option>
-                ))}
-          </select>
+            value={selectedCompanyName ? { value: selectedCompanyName, label: selectedCompanyName } : null}
+            onChange={(opt) => {
+              const value = opt?.value || '';
+              setSelectedCompanyName(value);
+              setSelectedDeptName('');
+              setSelectedTitleName('');
+              setForm((prev) => ({ ...prev, department_id: '', title_id: '' }));
+              const selected = companies.find((c) => c.company_name === value);
+              if (selected) {
+                setForm((prev) => ({ ...prev, company_id: selected.company_id }));
+                setLoadingDept(true);
+                hrDepartmentService.getList(selected.company_id)
+                  .then((result) => setDepartments(result.data || []))
+                  .catch(() => setDepartments([]))
+                  .finally(() => setLoadingDept(false));
+              }
+            }}
+            options={[...companies].sort((a, b) => a.company_name.localeCompare(b.company_name)).map((c) => ({ value: c.company_name, label: c.company_name }))}
+            placeholder={loadingCompany ? 'Loading companies...' : '-- Choose Company --'}
+            isDisabled={loadingCompany}
+            isSearchable
+            isClearable
+          />
         </div>
 
         {/* Department */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-          <select
+          <CustomSelect
             name="candidate_department"
-            value={selectedDeptName}
-            onChange={handleChange}
-            required
-            disabled={loadingDept || !selectedCompanyName}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100"
-          >
-            <option value="">
-              {!selectedCompanyName
-                ? 'Select a company first'
-                : loadingDept
-                  ? 'Loading departments...'
-                  : '-- Choose Department --'}
-            </option>
-            {selectedCompanyName &&
-              !loadingDept &&
-              [...departments]
-                .sort((a, b) => (a.department_name || '').localeCompare(b.department_name || ''))
-                .map((dept) => (
-                  <option key={dept.department_id} value={dept.department_name}>
-                    {dept.department_name}
-                  </option>
-                ))}
-          </select>
+            value={selectedDeptName ? { value: selectedDeptName, label: selectedDeptName } : null}
+            onChange={(opt) => {
+              const value = opt?.value || '';
+              setSelectedDeptName(value);
+              setSelectedTitleName('');
+              setForm((prev) => ({ ...prev, title_id: '' }));
+              const selected = departments.find((d) => d.department_name === value);
+              if (selected) {
+                setForm((prev) => ({ ...prev, department_id: selected.department_id }));
+                setLoadingJob(true);
+                hrJobTitleService.getList(selected.department_id)
+                  .then((result) => setJobTitles(result.data || []))
+                  .catch(() => setJobTitles([]))
+                  .finally(() => setLoadingJob(false));
+              }
+            }}
+            options={[...departments].sort((a, b) => (a.department_name || '').localeCompare(b.department_name || '')).map((d) => ({ value: d.department_name, label: d.department_name }))}
+            placeholder={!selectedCompanyName ? 'Select a company first' : loadingDept ? 'Loading departments...' : '-- Choose Department --'}
+            isDisabled={loadingDept || !selectedCompanyName}
+            isSearchable
+            isClearable
+          />
         </div>
 
         {/* Position / Job Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
-          <select
+          <CustomSelect
             name="candidate_title"
-            value={selectedTitleName}
-            onChange={handleChange}
-            required
-            disabled={loadingJob || !selectedDeptName}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-100"
-          >
-            <option value="">
-              {!selectedDeptName
-                ? 'Select a department first'
-                : loadingJob
-                  ? 'Loading positions...'
-                  : '-- Choose Position --'}
-            </option>
-            {selectedDeptName &&
-              !loadingJob &&
-              [...jobTitles]
-                .sort((a, b) => (a.title_name || '').localeCompare(b.title_name || ''))
-                .map((job) => (
-                  <option key={job.title_id} value={job.title_name}>
-                    {job.title_name}
-                  </option>
-                ))}
-          </select>
+            value={selectedTitleName ? { value: selectedTitleName, label: selectedTitleName } : null}
+            onChange={(opt) => {
+              const value = opt?.value || '';
+              setSelectedTitleName(value);
+              const selected = jobTitles.find((j) => j.title_name === value);
+              if (selected) setForm((prev) => ({ ...prev, title_id: selected.title_id }));
+            }}
+            options={[...jobTitles].sort((a, b) => (a.title_name || '').localeCompare(b.title_name || '')).map((j) => ({ value: j.title_name, label: j.title_name }))}
+            placeholder={!selectedDeptName ? 'Select a department first' : loadingJob ? 'Loading positions...' : '-- Choose Position --'}
+            isDisabled={loadingJob || !selectedDeptName}
+            isSearchable
+            isClearable
+          />
         </div>
 
         {/* Nationality */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
-          <input
+          <Input
             type="text"
             name="candidate_nationality"
             value={form.candidate_nationality}
             onChange={handleChange}
             placeholder="Enter nationality"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
 
         {/* Gender */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-          <select
+          <CustomSelect
             name="candidate_gender"
-            value={form.candidate_gender}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          >
-            <option value="">-- Choose Gender --</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
+            value={form.candidate_gender ? { value: form.candidate_gender, label: form.candidate_gender } : null}
+            onChange={(opt) => setForm((prev) => ({ ...prev, candidate_gender: opt?.value || '' }))}
+            options={[ { value: 'Male', label: 'Male' }, { value: 'Female', label: 'Female' } ]}
+            placeholder="-- Choose Gender --"
+            isSearchable={false}
+            isClearable
+          />
         </div>
 
         {/* Date of Birth */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-          <input
+          <Input
             type="date"
             name="candidate_date_birth"
             value={
@@ -441,84 +433,76 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
                 candidate_date_birth: e.target.value ? new Date(e.target.value) : null,
               }))
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
 
         {/* Age */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
-          <input
+          <Input
             type="number"
             name="candidate_age"
             value={form.candidate_age}
             onChange={handleChange}
             placeholder="Enter age"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
 
         {/* Marital Status */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Marital Status</label>
-          <select
+          <CustomSelect
             name="candidate_marital_status"
-            value={form.candidate_marital_status}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          >
-            <option value="">-- Choose --</option>
-            <option value="Single">Single</option>
-            <option value="Married">Married</option>
-            <option value="Divorced">Divorced</option>
-          </select>
+            value={form.candidate_marital_status ? { value: form.candidate_marital_status, label: form.candidate_marital_status } : null}
+            onChange={(opt) => setForm((prev) => ({ ...prev, candidate_marital_status: opt?.value || '' }))}
+            options={[ { value: 'Single', label: 'Single' }, { value: 'Married', label: 'Married' }, { value: 'Divorced', label: 'Divorced' } ]}
+            placeholder="-- Choose --"
+            isSearchable={false}
+            isClearable
+          />
         </div>
 
         {/* Address */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-          <textarea
+          <TextArea
             name="candidate_address"
             value={form.candidate_address}
             onChange={handleChange}
             rows={2}
             placeholder="Enter address"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
 
         {/* City, State, Country row */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-          <input
+          <Input
             type="text"
             name="candidate_city"
             value={form.candidate_city}
             onChange={handleChange}
             placeholder="City"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-          <input
+          <Input
             type="text"
             name="candidate_state"
             value={form.candidate_state}
             onChange={handleChange}
             placeholder="State"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-          <input
+          <Input
             type="text"
             name="candidate_country"
             value={form.candidate_country}
             onChange={handleChange}
             placeholder="Country"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
 
@@ -567,20 +551,10 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
 
       {/* Actions */}
       <div className="flex justify-end gap-3 mt-6">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-        >
+        <Button variant="outline" type="button" onClick={onCancel}>Cancel</Button>
+        <Button type="submit" disabled={submitting}>
           {submitting ? 'Saving...' : isEdit ? 'Update Candidate' : 'Create Candidate'}
-        </button>
+        </Button>
       </div>
     </form>
   );

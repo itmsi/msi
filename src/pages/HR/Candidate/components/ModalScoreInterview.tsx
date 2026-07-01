@@ -1,4 +1,5 @@
 import InterviewScoreChart from './InterviewScoreChart';
+import Button from '@/components/ui/button/Button';
 
 interface ScoreMetric {
   company_value: string;
@@ -21,7 +22,7 @@ const ModalScoreInterview = ({ show, onClose, scoreData }: ModalScoreInterviewPr
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-end mb-2">
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+          <Button variant="transparent" onClick={onClose} className="text-gray-400! text-xl">&times;</Button>
         </div>
         <InterviewScoreChart metrics={scoreData} />
       </div>

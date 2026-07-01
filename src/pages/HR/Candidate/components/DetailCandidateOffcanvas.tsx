@@ -8,6 +8,9 @@ import { toast } from 'react-hot-toast';
 import BackgroundCheckTab from './BackgroundCheckTab';
 import DocumentTab from './DocumentTab';
 import DateInterviewTab from './DateInterviewTab';
+import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import Button from '@/components/ui/button/Button';
+import TextArea from '@/components/form/input/TextArea';
 interface DetailCandidateOffcanvasProps {
   candidate: Candidate;
   onClose: () => void;
@@ -85,24 +88,9 @@ const DetailCandidateOffcanvas = ({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={onEdit}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-[#0253a5] text-white rounded-lg hover:bg-[#003061] transition-colors"
-            >
-              <FaPencil className="w-3 h-3" /> Edit
-            </button>
-            <button
-              onClick={onDelete}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              <FaTrash className="w-3 h-3" /> Delete
-            </button>
-            <button
-              onClick={handleClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <FaXmark className="w-5 h-5" />
-            </button>
+            <Button size="sm" startIcon={<FaPencil className="w-3 h-3" />} onClick={onEdit}>Edit</Button>
+            <Button size="sm" startIcon={<FaTrash className="w-3 h-3" />} onClick={onDelete} className="bg-red-600 hover:bg-red-700! text-white">Delete</Button>
+            <Button variant="transparent" onClick={handleClose} className="text-gray-400!"><FaXmark className="w-5 h-5" /></Button>
           </div>
         </div>
 
@@ -163,17 +151,18 @@ const DetailCandidateOffcanvas = ({
         <div className="border-b border-gray-200 px-6 mt-4 overflow-x-auto">
           <div className="flex gap-1 min-w-max">
             {tabs.map((tab) => (
-              <button
+              <Button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                variant="transparent"
+                className={`whitespace-nowrap border-b-2 rounded-none! ${
                   activeTab === tab.key
                     ? 'border-[#0253a5] text-[#0253a5]'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
                 {tab.label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -303,34 +292,32 @@ const NotesTab = ({ notes, loading, candidateId, onRefresh }: { notes: NoteItem[
     <div className="space-y-4">
       {/* Toggle Button */}
       <div className="flex w-full justify-center">
-        <button
+        <Button
           onClick={() => setShowForm(prev => !prev)}
-          className="flex w-full justify-center items-center gap-2 px-4 py-2 text-sm bg-[#0253a5] text-white rounded-lg hover:bg-[#003061]"
+          className="w-full justify-center!"
+          startIcon={showForm ? <FaXmark className="w-3 h-3" /> : <FaPlus className="w-3 h-3" />}
         >
-          {showForm ? <FaXmark className="w-3 h-3" /> : <FaPlus className="w-3 h-3" />}
           {showForm ? 'Cancel' : 'Add Note'}
-        </button>
+        </Button>
       </div>
 
       {/* Add Note Form */}
       {showForm && (
         <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <textarea
+          <TextArea
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={3}
             placeholder="Write a note..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
           <div className="flex justify-end mt-2">
-            <button
+            <Button
               onClick={handleAdd}
               disabled={submitting || !text.trim()}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-[#0253a5] text-white rounded-lg hover:bg-[#003061] disabled:opacity-50"
+              startIcon={<FaPlus className="w-3 h-3" />}
             >
-              <FaPlus className="w-3 h-3" />
               {submitting ? 'Adding...' : 'Add Note'}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -348,13 +335,14 @@ const NotesTab = ({ notes, loading, candidateId, onRefresh }: { notes: NoteItem[
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400">{new Date(note.created_at).toLocaleDateString()}</span>
-                  <button
+                  <Button
+                    size="sm"
+                    variant="transparent"
                     onClick={() => setDeleteId(note.note_id)}
-                    className="text-red-400 hover:text-red-600"
-                    title="Delete note"
+                    className="text-red-400!"
                   >
                     <FaTrash className="w-3 h-3" />
-                  </button>
+                  </Button>
                 </div>
               </div>
               <p className="text-sm text-gray-600 whitespace-pre-wrap">{note.notes}</p>
@@ -364,19 +352,17 @@ const NotesTab = ({ notes, loading, candidateId, onRefresh }: { notes: NoteItem[
       )}
 
       {/* Delete Confirmation */}
-      {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-            <p className="text-sm text-gray-600 mb-6">Delete this note?</p>
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setDeleteId(null)}
-                className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg">Cancel</button>
-              <button onClick={handleDelete}
-                className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Delete Note"
+        message="Delete this note?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        size="sm"
+      />
     </div>);
 };
 

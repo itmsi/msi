@@ -11,6 +11,8 @@ import { toast } from 'react-hot-toast';
 import { MdAdd, MdFilterListAlt, MdExpandLess, MdExpandMore, MdSearch, MdClear } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
+import Button from '@/components/ui/button/Button';
+import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 
 const CandidatePage = () => {
   const navigate = useNavigate();
@@ -179,13 +181,9 @@ const CandidatePage = () => {
               <h3 className="text-lg leading-6 font-primary-bold text-gray-900">Candidate Management</h3>
               <p className="mt-1 text-sm text-gray-500">Manage interview candidates and their assessments</p>
             </div>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="inline-flex items-center gap-2 px-5 py-3.5 text-sm bg-[#0253a5] text-white shadow-theme-xs rounded-lg hover:bg-[#003061] hover:shadow-md transition"
-            >
-              <MdAdd className="w-4 h-4" />
+            <Button onClick={() => setShowAddForm(true)} size="sm" startIcon={<MdAdd className="w-4 h-4" />}>
               Add Candidate
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -221,10 +219,7 @@ const CandidatePage = () => {
             {error ? (
             <div className="text-center py-12">
               <p className="text-red-500 mb-4">Failed to load candidates</p>
-              <button onClick={handleRetry}
-                className="px-5 py-3.5 text-sm bg-[#0253a5] text-white rounded-lg hover:bg-[#003061]">
-                Retry
-              </button>
+              <Button onClick={handleRetry} size="sm">Retry</Button>
             </div>
           ) : loading ? (
             <LoadingCandidates />
@@ -244,13 +239,14 @@ const CandidatePage = () => {
                         className={`pl-10 py-2 w-full ${filters.text ? 'pr-10' : 'pr-4'}`}
                       />
                       {filters.text && (
-                        <button
+                        <Button
+                          variant="transparent"
                           onClick={() => setFilters((f) => ({ ...f, text: '' }))}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                          className="absolute inset-y-0 right-0 pr-3! text-gray-400!"
                           type="button"
                         >
                           <MdClear className="h-4 w-4" />
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -272,19 +268,20 @@ const CandidatePage = () => {
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
+                  <Button
+                    variant="outline"
                     onClick={handleToggleFilter}
-                    className="inline-flex items-center h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 rounded-lg text-sm"
+                    className="h-[42px]"
+                    startIcon={<MdFilterListAlt className="w-4 h-4" />}
+                    endIcon={showAdvancedFilters ? <MdExpandLess className="w-4 h-4" /> : <MdExpandMore className="w-4 h-4" />}
                   >
-                    <MdFilterListAlt className="w-4 h-4 mr-2" />
                     Filter
                     {activeFilterCount > 0 && (
                       <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-[#0253a5] text-white">
                         {activeFilterCount}
                       </span>
                     )}
-                    {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -336,12 +333,12 @@ const CandidatePage = () => {
                     />
                   </div>
                   <div className="flex items-end">
-                    <button
+                    <Button
+                      variant="outline"
                       onClick={() => setFilters((f) => ({ ...f, status: '', interviewer: '', company: '' }))}
-                      className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100"
                     >
                       Clear All
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -379,13 +376,14 @@ const CandidatePage = () => {
                     {filteredCandidates.length}
                   </p>
                   <div className="flex items-center gap-1">
-                    <button
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Prev
-                    </button>
+                    </Button>
                     {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
                       let pageNum: number;
                       if (totalPages <= 7) {
@@ -398,26 +396,25 @@ const CandidatePage = () => {
                         pageNum = currentPage - 3 + i;
                       }
                       return (
-                        <button
+                        <Button
                           key={pageNum}
+                          size="sm"
+                          variant={currentPage === pageNum ? 'primary' : 'outline'}
                           onClick={() => setCurrentPage(pageNum)}
-                          className={`w-8 h-8 text-sm rounded-lg ${
-                            currentPage === pageNum
-                              ? 'bg-blue-600 text-white'
-                              : 'border border-gray-300 hover:bg-gray-50'
-                          }`}
+                          className={`w-8! h-8! p-0! ${currentPage === pageNum ? '' : ''}`}
                         >
                           {pageNum}
-                        </button>
+                        </Button>
                       );
                     })}
-                    <button
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                       disabled={currentPage === totalPages}
-                      className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Next
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -435,12 +432,13 @@ const CandidatePage = () => {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto px-6 pb-6">
             <div className="flex items-center justify-between mb-4 sticky top-0 bg-white py-4 z-10 border-b border-gray-200">
               <h2 className="text-lg font-semibold">Edit Candidate Profile</h2>
-              <button
+              <Button
+                variant="transparent"
                 onClick={() => { setShowEdit(false); setEditingCandidate(null); }}
-                className="text-gray-400 hover:text-gray-600 text-xl"
+                className="text-gray-400! text-xl"
               >
                 &times;
-              </button>
+              </Button>
             </div>
             <CreateCandidateForm
               initialData={editingCandidate}
@@ -451,32 +449,17 @@ const CandidatePage = () => {
         </div>
       )}
 
-      {/* Delete Confirmation */}
-      {showDeleteConfirm && deletingCandidate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h2 className="text-lg font-semibold mb-4">Delete Candidate</h2>
-            <p className="text-gray-600 mb-2">
-              Are you sure you want to delete <strong>{deletingCandidate.candidate_name}</strong>?
-            </p>
-            <p className="text-sm text-gray-400 mb-6">This action cannot be undone.</p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => { setShowDeleteConfirm(false); setDeletingCandidate(null); }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmDelete}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        onClose={() => { setShowDeleteConfirm(false); setDeletingCandidate(null); }}
+        onConfirm={handleConfirmDelete}
+        title="Delete Candidate"
+        message={<p className="text-sm text-gray-600">Are you sure you want to delete <strong>{deletingCandidate?.candidate_name}</strong>? This action cannot be undone.</p>}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        size="sm"
+      />
 
       {/* Detail Offcanvas */}
       {showDetail && selectedCandidate && (

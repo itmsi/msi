@@ -6,6 +6,9 @@ import { FaRegPenToSquare, FaChartSimple, FaRegFilePdf } from 'react-icons/fa6';
 import { RxPencil2 } from 'react-icons/rx';
 import ModalScoreInterview from './ModalScoreInterview';
 import { usePDFDownload } from '../hooks/usePDFDownload';
+import Button from '@/components/ui/button/Button';
+import TextArea from '@/components/form/input/TextArea';
+import CustomSelect from '@/components/form/select/CustomSelect';
 
 interface FormInterviewTabProps {
   candidateId: string;
@@ -104,12 +107,9 @@ const FormInterviewTab = ({ candidateId }: FormInterviewTabProps) => {
   if (submittedForms.length === 0 && !showCanvas) {
     return (
       <div className="flex justify-center items-center py-12">
-        <button
-          onClick={() => setShowCanvas(true)}
-          className="inline-flex items-center gap-2 px-5 py-3.5 text-sm bg-[#0253a5] text-white rounded-lg hover:bg-[#003061]"
-        >
-          <RxPencil2 className="w-4 h-4" /> Create Question
-        </button>
+        <Button onClick={() => setShowCanvas(true)} startIcon={<RxPencil2 className="w-4 h-4" />}>
+          Create Question
+        </Button>
       </div>
     );
   }
@@ -126,12 +126,9 @@ const FormInterviewTab = ({ candidateId }: FormInterviewTabProps) => {
       ) : (
         <>
           <div className="flex justify-end mb-4">
-            <button
-              onClick={() => setShowCanvas(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-[#0253a5] text-white rounded-lg hover:bg-[#003061]"
-            >
-              <RxPencil2 className="w-4 h-4" /> Create Question
-            </button>
+            <Button onClick={() => setShowCanvas(true)} startIcon={<RxPencil2 className="w-4 h-4" />}>
+              Create Question
+            </Button>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -166,33 +163,17 @@ const FormInterviewTab = ({ candidateId }: FormInterviewTabProps) => {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => { setEditingFormId(f.id); setShowCanvas(true); }}
-                          className="p-1.5 text-[#0253a5] hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Edit"
-                        >
+                        <Button size="sm" variant="transparent" onClick={() => { setEditingFormId(f.id); setShowCanvas(true); }} className="text-[#0253a5]!">
                           <FaRegPenToSquare className="w-4 h-4" />
-                        </button>
+                        </Button>
                         {f.status === 'submit' && (
                           <>
-                            <button
-                              onClick={() => setShowScore(true)}
-                              className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                              title="Show Score"
-                            >
+                            <Button size="sm" variant="transparent" onClick={() => setShowScore(true)} className="text-green-600!">
                               <FaChartSimple className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => downloadPDF({
-                                data_candidate: {},
-                                interview: [],
-                              })}
-                              disabled={isGenerating}
-                              className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Download PDF"
-                            >
+                            </Button>
+                            <Button size="sm" variant="transparent" onClick={() => downloadPDF({ data_candidate: {}, interview: [] })} disabled={isGenerating} className="text-red-500!">
                               <FaRegFilePdf className="w-4 h-4" />
-                            </button>
+                            </Button>
                           </>
                         )}
                       </div>
@@ -241,9 +222,9 @@ const FormScoringCanvas = ({ candidateId, editingFormId, onBack }: FormScoringCa
     <div>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <button onClick={onBack} className="text-sm text-[#0253a5] hover:underline">
+          <Button variant="transparent" onClick={onBack}>
             &larr; Back to list
-          </button>
+          </Button>
           {isEditMode && (
             <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">
               Edit Mode
@@ -255,17 +236,18 @@ const FormScoringCanvas = ({ candidateId, editingFormId, onBack }: FormScoringCa
       {/* Tab Bar */}
       <div className="flex gap-1 border-b border-gray-200 mb-4 overflow-x-auto">
         {tabs.map((tab) => (
-          <button
+          <Button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+            variant="transparent"
+            className={`whitespace-nowrap border-b-2 rounded-none! ${
               activeTab === tab.key
                 ? 'border-[#0253a5] text-[#0253a5]'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
             {tab.label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -399,28 +381,23 @@ const ScoringForm = ({
               {/* Point Select */}
               <div className="md:col-span-2">
                 <label className="block text-xs font-medium text-gray-500 mb-1">Score</label>
-                <select
-                  value={form[aspect.key]?.point || ''}
-                  onChange={(e) =>
+                <CustomSelect
+                  value={form[aspect.key]?.point ? { value: form[aspect.key].point, label: POINT_OPTIONS.find(o => o.value === form[aspect.key].point)?.label || form[aspect.key].point } : null}
+                  onChange={(opt) =>
                     setForm((prev) => {
-                      const updated = {
-                        ...prev,
-                        [aspect.key]: { ...prev[aspect.key], point: e.target.value },
-                      };
-                      if (autoQuestion && e.target.value) {
+                      const pointVal = opt?.value || '';
+                      const updated = { ...prev, [aspect.key]: { ...prev[aspect.key], point: pointVal } };
+                      if (autoQuestion && pointVal) {
                         updated[aspect.key].question = aspect.label;
                       }
                       return updated;
                     })
                   }
-                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {POINT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  options={POINT_OPTIONS.filter(o => o.value !== '')}
+                  placeholder="Select point"
+                  isSearchable={false}
+                  isClearable
+                />
               </div>
 
               {/* Question */}
@@ -428,7 +405,7 @@ const ScoringForm = ({
                 <label className="block text-xs font-medium text-gray-500 mb-1">
                   {aspect.label}
                 </label>
-                <textarea
+                <TextArea
                   value={form[aspect.key]?.question || ''}
                   onChange={(e) =>
                     setForm((prev) => ({
@@ -438,17 +415,14 @@ const ScoringForm = ({
                   }
                   rows={2}
                   placeholder={aspect.defaultQ || 'Question'}
-                  readOnly={defaultQuestions}
-                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 ${
-                    defaultQuestions ? 'bg-gray-50 cursor-not-allowed' : ''
-                  }`}
+                  readonly={defaultQuestions}
                 />
               </div>
 
               {/* Remark */}
               <div className="md:col-span-5">
                 <label className="block text-xs font-medium text-gray-500 mb-1">Remark / Answer</label>
-                <textarea
+                <TextArea
                   value={form[aspect.key]?.remark || ''}
                   onChange={(e) =>
                     setForm((prev) => ({
@@ -458,7 +432,6 @@ const ScoringForm = ({
                   }
                   rows={2}
                   placeholder="Remark"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -467,13 +440,9 @@ const ScoringForm = ({
       </div>
 
       <div className="flex justify-end pt-2">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-2 text-sm font-medium text-white bg-[#0253a5] rounded-lg hover:bg-[#003061] disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Saving...' : `Save ${title.split(' ')[0]}`}
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -533,18 +502,14 @@ const SDTForm = ({ candidateId }: { candidateId: string }) => {
         {/* Aspect Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Select SDT Aspect</label>
-          <select
-            value={selectedAspect}
-            onChange={(e) => setSelectedAspect(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Choose SDT Aspect...</option>
-            {SDT_ASPECTS.map((a) => (
-              <option key={a.key} value={a.key}>
-                {a.label}
-              </option>
-            ))}
-          </select>
+          <CustomSelect
+            value={selectedAspect ? { value: selectedAspect, label: SDT_ASPECTS.find(a => a.key === selectedAspect)?.label || '' } : null}
+            onChange={(opt) => setSelectedAspect(opt?.value || '')}
+            options={SDT_ASPECTS.map((a) => ({ value: a.key, label: a.label }))}
+            placeholder="Choose SDT Aspect..."
+            isSearchable={false}
+            isClearable
+          />
         </div>
 
         {/* Point Display */}
@@ -558,24 +523,19 @@ const SDTForm = ({ candidateId }: { candidateId: string }) => {
         {/* Remark */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Remark</label>
-          <textarea
+          <TextArea
             value={remark}
             onChange={(e) => setRemark(e.target.value)}
             rows={3}
             placeholder="Remark"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
 
       <div className="flex justify-end pt-2">
-        <button
-          type="submit"
-          disabled={isSubmitting || !selectedAspect}
-          className="px-6 py-2 text-sm font-medium text-white bg-[#0253a5] rounded-lg hover:bg-[#003061] disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isSubmitting || !selectedAspect}>
           {isSubmitting ? 'Saving...' : 'Save SDT'}
-        </button>
+        </Button>
       </div>
     </form>
   );

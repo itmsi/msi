@@ -4,7 +4,9 @@ import { documentService } from '../services/hrService';
 import { toast } from 'react-hot-toast';
 import { FaPlus, FaTrash, FaDownload, FaFileAlt } from 'react-icons/fa';
 import { BsFiletypePdf, BsFiletypeDoc, BsFiletypeXls } from 'react-icons/bs';
-
+import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import Button from '@/components/ui/button/Button';
+import Input from '@/components/form/input/InputField';
 
 interface DocumentTabProps {
   candidateId: string;
@@ -86,10 +88,7 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
   return (
     <div>
       <div className="flex w-full justify-center mb-4">
-        <button onClick={() => setShowAddModal(true)}
-          className="flex w-full justify-center items-center gap-2 px-3 py-1.5 bg-[#0253a5] text-white text-sm rounded-lg hover:bg-[#003061]">
-          <FaPlus className="w-3 h-3" /> Upload Document
-        </button>
+        <Button onClick={() => setShowAddModal(true)} startIcon={<FaPlus />} className="w-full justify-center!">Upload Document</Button>
       </div>
 
       {docs.length === 0 ? (
@@ -126,10 +125,9 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
                           <FaDownload className="w-3 h-3" /> Download
                         </a>
                       )}
-                      <button onClick={() => { setDeletingId(doc.on_board_documents_id); setShowDeleteModal(true); }}
-                        className="p-1.5 text-red-400 hover:bg-red-50 rounded-lg" title="Delete">
+                      <Button size="sm" variant="transparent" onClick={() => { setDeletingId(doc.on_board_documents_id); setShowDeleteModal(true); }} className="text-red-400!">
                         <FaTrash className="w-3.5 h-3.5" />
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -147,9 +145,8 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                <input type="text" value={form.on_board_documents_name}
-                  onChange={(e) => setForm(f => ({ ...f, on_board_documents_name: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input type="text" value={form.on_board_documents_name}
+                  onChange={(e) => setForm(f => ({ ...f, on_board_documents_name: e.target.value }))} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">File</label>
@@ -159,31 +156,27 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
-              <button onClick={handleUpload} disabled={uploading}
-                className="px-4 py-2 text-sm text-white bg-[#0253a5] rounded-lg hover:bg-[#003061] disabled:opacity-50">
+              <Button variant="outline" onClick={() => setShowAddModal(false)}>Cancel</Button>
+              <Button onClick={handleUpload} disabled={uploading}>
                 {uploading ? 'Uploading...' : 'Upload'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
 
       {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-            <p className="text-sm text-gray-600 mb-6">Delete this document?</p>
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg">Cancel</button>
-              <button onClick={handleDelete}
-                className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Delete Document"
+        message="Delete this document?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        size="sm"
+      />
     </div>
   );
 };

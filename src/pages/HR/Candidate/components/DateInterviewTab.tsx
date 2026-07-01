@@ -4,6 +4,9 @@ import { toast } from 'react-hot-toast';
 import { FaPlus, FaTrash, FaPen, FaChartSimple } from 'react-icons/fa6';
 import ModalScoreInterview from './ModalScoreInterview';
 import FormScoringCanvas from './FormScoringCanvas';
+import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import Button from '@/components/ui/button/Button';
+import Input from '@/components/form/input/InputField';
 
 interface DateInterviewTabProps {
   candidateId: string;
@@ -109,10 +112,7 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
   return (
     <div>
       <div className="flex w-full mb-4">
-        <button onClick={openAdd}
-          className="flex w-full items-center justify-center gap-2 px-3 py-1.5 bg-[#0253a5] text-white text-sm rounded-lg hover:bg-[#003061]">
-          <FaPlus className="w-3 h-3" /> Add Date of Interview
-        </button>
+        <Button onClick={openAdd} startIcon={<FaPlus />} className="w-full justify-center">Add Date of Interview</Button>
       </div>
 
       {schedules.length === 0 ? (
@@ -147,18 +147,10 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <button onClick={() => setShowCanvas(s.schedule_interview_id)} className="p-1.5 text-[#0253a5] hover:bg-blue-50 rounded-lg" title="Form Interview">
-                        <FaPlus className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => setShowScore(true)} className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg" title="Show Score">
-                        <FaChartSimple className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => openEdit(s)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" title="Edit Schedule">
-                        <FaPen className="w-3 h-3" />
-                      </button>
-                      <button onClick={() => { setDeletingId(s.schedule_interview_id); setShowDeleteConfirm(true); }} className="p-1.5 text-red-400 hover:bg-red-50 rounded-lg" title="Delete Schedule">
-                        <FaTrash className="w-3 h-3" />
-                      </button>
+                      <Button size="sm" variant="transparent" onClick={() => setShowCanvas(s.schedule_interview_id)} className="text-[#0253a5]!"><FaPlus /></Button>
+                      <Button size="sm" variant="transparent" onClick={() => setShowScore(true)} className="text-green-600!"><FaChartSimple /></Button>
+                      <Button size="sm" variant="transparent" onClick={() => openEdit(s)} className="text-blue-600!"><FaPen /></Button>
+                      <Button size="sm" variant="transparent" onClick={() => { setDeletingId(s.schedule_interview_id); setShowDeleteConfirm(true); }} className="text-red-400!"><FaTrash /></Button>
                     </div>
                   </td>
                 </tr>
@@ -177,7 +169,7 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
           <div className="relative w-full max-w-4xl bg-white shadow-xl h-full overflow-y-auto">
             <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Interview Form</h2>
-              <button onClick={() => { setShowCanvas(null); }} className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+              <Button variant="transparent" onClick={() => { setShowCanvas(null); }} className="text-gray-400! text-xl">&times;</Button>
             </div>
             <div className="p-6">
               <FormScoringCanvas
@@ -198,15 +190,15 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                <input type="date" value={form.date} onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input type="date" value={form.date} onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                <input type="time" value={form.time} onChange={(e) => setForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input type="time" value={form.time} onChange={(e) => setForm(f => ({ ...f, time: e.target.value }))} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
-                <input type="text" value={form.duration} onChange={(e) => setForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 60" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+                <Input type="text" value={form.duration} onChange={(e) => setForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 60" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Assign Role</label>
@@ -223,25 +215,25 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
-              <button onClick={handleSubmit} disabled={submitting} className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50">{submitting ? 'Saving...' : 'Save'}</button>
+              <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
+              <Button onClick={handleSubmit} disabled={submitting}>{submitting ? 'Saving...' : 'Save'}</Button>
             </div>
           </div>
         </div>
       )}
 
       {/* Delete Confirm */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-            <p className="text-sm text-gray-600 mb-6">Delete this schedule?</p>
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg">Cancel</button>
-              <button onClick={handleDelete} className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        title="Delete Schedule"
+        message="Delete this schedule?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        size="sm"
+      />
     </div>
   );
 };
