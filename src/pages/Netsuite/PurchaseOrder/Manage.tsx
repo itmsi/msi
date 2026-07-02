@@ -70,18 +70,6 @@ export default function Manage() {
 
     const columns: TableColumn<PurchaseOrderItem>[] = [
         {
-            name: 'PO ID',
-            selector: row => row.po_id || '-',
-            wrap: true,
-            width: '100px'
-        },
-        {
-            name: 'Subsidiary',
-            selector: row => row.subsidiary_display || '-',
-            wrap: true,
-            width: '280px'
-        },
-        {
             name: 'Document Number',
             selector: row => row.po_number || '-',
             cell: row => (<>
@@ -99,17 +87,23 @@ export default function Manage() {
             width: '230px'
         },
         {
+            name: 'PR Number',
+            selector: row => row.custbody_me_pr_number || '-',
+            wrap: true,
+            width: '200px',
+            center: true
+        },
+        {
             name: 'Vendor Name',
             selector: row => row.vendor_name || '-',
             wrap: true,
             width: '350px'
         },
         {
-            name: 'PR Number',
-            selector: row => row.custbody_me_pr_number || '-',
+            name: 'Memo',
+            selector: row => row.memo || '-',
             wrap: true,
-            width: '200px',
-            center: true
+            width: '300px'
         },
         {
             name: 'Location',
@@ -122,6 +116,12 @@ export default function Manage() {
                     {row.location_display || '-'}
                 </div>
             ),
+        },
+        {
+            name: 'Total Amount',
+            selector: row => row.total ? formatCurrencyDynamic(row.total, row.currency_symbol) : '-',
+            wrap: true,
+            width: '240px'
         },
         {
             name: 'Next Approval',
@@ -163,17 +163,28 @@ export default function Manage() {
             center: true,
             width: '250px'
         },
+        // {
+        //     name: 'Subsidiary',
+        //     selector: row => row.subsidiary_display || '-',
+        //     wrap: true,
+        //     width: '280px'
+        // },
         {
-            name: 'Total Amount',
-            selector: row => row.total ? formatCurrencyDynamic(row.total, row.currency_symbol) : '-',
+            name: 'Created By',
+            selector: (row: any) => row.po_id,
+            cell: row => (
+                <div className="flex flex-col py-2">
+                    <span className="font-medium text-gray-900">
+                        {row.created_by_name || '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        PO ID: {row.po_id || '-'}
+                    </span>
+                </div>
+            ),
+            center: true,
             wrap: true,
-            width: '240px'
-        },
-        {
-            name: 'Memo',
-            selector: row => row.memo || '-',
-            wrap: true,
-            width: '300px'
+            width: '320px'
         },
         createByDateColumn('Updated By', 'last_modified', 'updated_by_name', '320px'),
         createActionsColumn([
@@ -207,15 +218,7 @@ export default function Manage() {
     };
 
     const handleClearFilters = () => {
-        handleFilterChange({
-            search: '',
-            sort_order: 'desc',
-            po_status: '',
-            subsidiary: '',
-            location: '',
-            approvalstatus: '',
-            segmentation_id: ''
-        });
+        handleClearSearch();
     };
     
     // Count active filters
@@ -299,7 +302,6 @@ export default function Manage() {
             )}
         </>);
     }, [searchValue, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, filters]);
-
     return (
         <>
             <PageMeta
