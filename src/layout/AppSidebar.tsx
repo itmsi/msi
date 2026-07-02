@@ -191,7 +191,7 @@ const AppSidebar: React.FC = () => {
                             allowedRoles: ['Division CRM'] 
                         },
                         { 
-                            name: "Daily Task",
+                            name: "Daily Task Activity",
                             path: buildPath("/crm/daily-task-activity"),
                             allowedRoles: ['Daily Task Activity CRM'] 
                         }

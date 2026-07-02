@@ -37,6 +37,8 @@ export const useDailyTasks = () => {
     });
     const [history, setHistory] = useState<DailyTaskHistory[]>([]);
     const [historyLoading, setHistoryLoading] = useState(false);
+    const [drawerHistory, setDrawerHistory] = useState<DailyTaskHistory[]>([]);
+    const [drawerHistoryLoading, setDrawerHistoryLoading] = useState(false);
     const [formModalOpen, setFormModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<DailyTask | null>(null);
     const [defaultStatus, setDefaultStatus] = useState<string>('open');
@@ -142,12 +144,20 @@ export const useDailyTasks = () => {
         setInitialLoading(false);
     }, [buildBoardData, priorityValue, refreshColumns]);
 
-    const fetchHistory = useCallback(async (taskId?: string) => {
+    const fetchHistory = useCallback(async () => {
         try {
             setHistoryLoading(true);
-            const res = await DailyTaskServices.getHistory({ daily_task_activitity_id: taskId || '', page: 1, limit: 50 });
+            const res = await DailyTaskServices.getHistory({ daily_task_activitity_id: '', page: 1, limit: 50 });
             setHistory(res.data || []);
         } catch { } finally { setHistoryLoading(false); }
+    }, []);
+
+    const fetchDrawerHistory = useCallback(async (taskId: string) => {
+        try {
+            setDrawerHistoryLoading(true);
+            const res = await DailyTaskServices.getHistory({ daily_task_activitity_id: taskId, page: 1, limit: 50 });
+            setDrawerHistory(res.data || []);
+        } catch { } finally { setDrawerHistoryLoading(false); }
     }, []);
 
     useEffect(() => { fetchTasks(); fetchHistory(); }, []);
@@ -187,7 +197,9 @@ export const useDailyTasks = () => {
         DailyTaskServices.updateTask(cardId, { status: toColumnId } as DailyTaskFormData)
             .then(() => {
                 toast.success('Task moved successfully');
-                selectedTask?.daily_task_activitity_id === cardId ? fetchHistory(cardId) : fetchHistory();
+                if (selectedTask?.daily_task_activitity_id === cardId) {
+                    fetchDrawerHistory(cardId);
+                }
             }).catch((_err) => {
                 toast.error('Failed to update task status');
                 fetchTasks(searchValue);
@@ -196,7 +208,7 @@ export const useDailyTasks = () => {
 
     const openCreateModal = useCallback((status: string = 'open') => { setEditingTask(null); setDefaultStatus(status); setFormModalOpen(true); }, []);
     const openEditModal = useCallback((task: DailyTask) => { setEditingTask(task); setDefaultStatus(task.status); setFormModalOpen(true); }, []);
-    const openDetailDrawer = useCallback((task: DailyTask) => { setSelectedTask(task); setDrawerOpen(true); fetchHistory(task.daily_task_activitity_id); }, [fetchHistory]);
+    const openDetailDrawer = useCallback((task: DailyTask) => { setSelectedTask(task); setDrawerOpen(true); fetchDrawerHistory(task.daily_task_activitity_id); }, [fetchDrawerHistory]);
     const closeDrawer = useCallback(() => { setDrawerOpen(false); setSelectedTask(null); }, []);
 
     const handleDeleteTask = useCallback(async (id: string) => {
@@ -213,5 +225,5 @@ export const useDailyTasks = () => {
 
     const tasks = Object.values(columns).flatMap((c) => c.tasks);
 
-    return { tasks, dataSource, initialLoading, searchValue, priorityValue, history, historyLoading, formModalOpen, editingTask, defaultStatus, drawerOpen, selectedTask, setSearchValue, setFormModalOpen, handleSearch, handlePriorityChange, handleCardMove, openCreateModal, openEditModal, openDetailDrawer, closeDrawer, handleSubmitForm, handleUpdateTask, handleDeleteTask, loadMoreTasks, fetchTasks };
+    return { tasks, dataSource, initialLoading, searchValue, priorityValue, history, historyLoading, drawerHistory, drawerHistoryLoading, formModalOpen, editingTask, defaultStatus, drawerOpen, selectedTask, setSearchValue, setFormModalOpen, handleSearch, handlePriorityChange, handleCardMove, openCreateModal, openEditModal, openDetailDrawer, closeDrawer, handleSubmitForm, handleUpdateTask, handleDeleteTask, loadMoreTasks, fetchTasks };
 };

@@ -12,6 +12,9 @@ import TaskFormModal from './components/TaskFormModal';
 import TaskDetailDrawer from './components/TaskDetailDrawer';
 import HistoryTimeline from './components/HistoryTimeline';
 import Badge from '@/components/ui/badge/Badge';
+import { usePermissions } from '@/hooks/usePermissions';
+import { PermissionGate } from '@/components/common/PermissionComponents';
+import { toast } from 'react-hot-toast';
 import { PRIORITY_OPTIONS } from './types/dailyTask';
 
 // ConfigMap type - defined locally because it's not re-exported from react-kanban-kit
@@ -36,6 +39,8 @@ const DailyTaskActivity: React.FC = () => {
         tasks,
         history,
         historyLoading,
+        drawerHistory,
+        drawerHistoryLoading,
         formModalOpen,
         editingTask,
         defaultStatus,
@@ -56,8 +61,38 @@ const DailyTaskActivity: React.FC = () => {
         loadMoreTasks,
     } = useDailyTasks();
 
+    const { canCreate, canUpdate, canDelete } = usePermissions();
+
+    // Permission-guarded handlers
+    const guardedSubmitForm = useCallback(
+        async (data: import('./types/dailyTask').DailyTaskFormData) => {
+            if (!canCreate && !editingTask) {
+                toast.error('You do not have permission to create tasks');
+                return;
+            }
+            if (!canUpdate && editingTask) {
+                toast.error('You do not have permission to update tasks');
+                return;
+            }
+            await handleSubmitForm(data);
+        },
+        [handleSubmitForm, canCreate, canUpdate, editingTask]
+    );
+
+    const guardedUpdateTask = useCallback(
+        async (id: string, data: import('./types/dailyTask').DailyTaskFormData) => {
+            if (!canUpdate) {
+                toast.error('You do not have permission to update tasks');
+                return;
+            }
+            await handleUpdateTask(id, data);
+        },
+        [handleUpdateTask, canUpdate]
+    );
+
     const [localSearch, setLocalSearch] = useState('');
     const [prioritySearch, setPrioritySearch] = useState('');
+    const [showHistory, setShowHistory] = useState(false);
 
     // Infinite scroll load more — per column
     const handleLoadMore = useCallback(
@@ -158,10 +193,10 @@ const DailyTaskActivity: React.FC = () => {
                         </div>
                     );
                 },
-                isDraggable: true,
+                isDraggable: canUpdate,
             },
         }),
-        []
+        [canUpdate]
     );
 
     // Handle card click to open detail drawer
@@ -175,13 +210,17 @@ const DailyTaskActivity: React.FC = () => {
         [tasks, openDetailDrawer]
     );
 
-    // Handle card move — delegasikan ke hook untuk optimistic update
+    // Handle card move — dengan permission guard + toast
     const onCardMove = useCallback(
         (move: { cardId: string; fromColumnId: string; toColumnId: string }) => {
+            if (!canUpdate) {
+                toast.error('You do not have permission to move tasks');
+                return;
+            }
             if (move.fromColumnId === move.toColumnId) return;
             handleCardMove(move);
         },
-        [handleCardMove]
+        [handleCardMove, canUpdate]
     );
 
     // Column header renderer — simple like demo
@@ -237,10 +276,12 @@ const DailyTaskActivity: React.FC = () => {
                             Manage and track your daily tasks with Kanban board
                         </p>
                     </div>
-                    <Button onClick={() => openCreateModal('open')} className="flex items-center gap-2">
-                        <MdAdd size={18} />
-                        New Task
-                    </Button>
+                    <PermissionGate permission="create">
+                        <Button onClick={() => openCreateModal('open')} className="flex items-center gap-2">
+                            <MdAdd size={18} />
+                            New Task
+                        </Button>
+                    </PermissionGate>
                 </div>
 
                 {/* Search */}
@@ -295,7 +336,7 @@ const DailyTaskActivity: React.FC = () => {
                             onCardMove={onCardMove}
                             onCardClick={handleCardClick}
                             renderColumnHeader={renderColumnHeader}
-                            renderColumnFooter={renderColumnFooter}
+                            renderColumnFooter={canCreate ? renderColumnFooter : undefined}
                             cardsGap={8}
                             virtualization={true}
                             loadMore={handleLoadMore}
@@ -322,14 +363,28 @@ const DailyTaskActivity: React.FC = () => {
                 )}
 
                 {/* History Section */}
-                <HistoryTimeline history={history} loading={historyLoading} tasks={tasks} />
+                <div className="flex items-center gap-3 hidden"> {/* jika ingin memunculkan tabel, hapus aja "hidden" ini*/}
+                    <button
+                        onClick={() => setShowHistory(!showHistory)}
+                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                        <svg className={`w-4 h-4 transition-transform ${showHistory ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                        History List
+                    </button>
+                </div>
+
+                {showHistory && (
+                    <HistoryTimeline history={history} loading={historyLoading} tasks={tasks} />
+                )}
             </div>
 
             {/* Task Form Modal */}
             <TaskFormModal
                 isOpen={formModalOpen}
                 onClose={() => setFormModalOpen(false)}
-                onSubmit={handleSubmitForm}
+                onSubmit={guardedSubmitForm}
                 editingTask={editingTask}
                 defaultStatus={defaultStatus}
             />
@@ -339,9 +394,11 @@ const DailyTaskActivity: React.FC = () => {
                 isOpen={drawerOpen}
                 onClose={closeDrawer}
                 task={selectedTask}
-                history={history}
-                historyLoading={historyLoading}
-                onSave={handleUpdateTask}
+                history={drawerHistory}
+                historyLoading={drawerHistoryLoading}
+                onSave={guardedUpdateTask}
+                canUpdate={canUpdate}
+                canDelete={canDelete}
                 onDelete={(id) => {
                     if (window.confirm('Are you sure you want to delete this task?')) {
                         handleDeleteTask(id);
