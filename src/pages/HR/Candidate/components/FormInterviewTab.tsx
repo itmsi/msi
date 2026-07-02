@@ -9,6 +9,7 @@ import { usePDFDownload } from '../hooks/usePDFDownload';
 import Button from '@/components/ui/button/Button';
 import TextArea from '@/components/form/input/TextArea';
 import CustomSelect from '@/components/form/select/CustomSelect';
+import HRAccordion from './HRAccordion';
 
 interface FormInterviewTabProps {
   candidateId: string;
@@ -207,7 +208,7 @@ interface FormScoringCanvasProps {
 }
 
 const FormScoringCanvas = ({ candidateId, editingFormId, onBack }: FormScoringCanvasProps) => {
-  const [activeTab, setActiveTab] = useState<FormType>('cse');
+  const [activeTab, setActiveTab] = useState<FormType>('siah');
   const isEditMode = !!editingFormId;
 
   const tabs: { key: FormType; label: string }[] = [
@@ -341,18 +342,14 @@ const ScoringForm = ({
         aspect: a.label,
         question: form[a.key]?.question || a.label,
         answer: form[a.key]?.remark || '',
-        score: parseInt(form[a.key]?.point) || 0,
+        score: String(form[a.key]?.point || ''),
       }));
 
-      await interviewFormService.submit({
+      await interviewFormService.create({
         schedule_interview_id: candidateId,
-        interviews: [
-          {
-            company_value: companyValue,
-            comment: 'tidak ada komentar',
-            detail_interviews: detailInterviews,
-          },
-        ],
+        company_value: companyValue,
+        comment: 'tidak ada komentar',
+        detail_interviews: detailInterviews,
       });
 
       toast.success(`${title} submitted!`);
@@ -375,68 +372,76 @@ const ScoringForm = ({
       </div>
 
       <div className="space-y-4">
-        {aspects.map((aspect) => (
-          <div key={aspect.key} className="bg-white rounded-xl border border-gray-200 p-4">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-              {/* Point Select */}
-              <div className="md:col-span-2">
-                <label className="block text-xs font-medium text-gray-500 mb-1">Score</label>
-                <CustomSelect
-                  value={form[aspect.key]?.point ? { value: form[aspect.key].point, label: POINT_OPTIONS.find(o => o.value === form[aspect.key].point)?.label || form[aspect.key].point } : null}
-                  onChange={(opt) =>
-                    setForm((prev) => {
-                      const pointVal = opt?.value || '';
-                      const updated = { ...prev, [aspect.key]: { ...prev[aspect.key], point: pointVal } };
-                      if (autoQuestion && pointVal) {
-                        updated[aspect.key].question = aspect.label;
+        <HRAccordion
+          allowMultiple
+          items={aspects.map((aspect) => ({
+            id: aspect.key,
+            judul: aspect.label,
+            konten: (
+              <div className="space-y-3">
+                {/* Point Selector - full width */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Specific point</label>
+                  <CustomSelect
+                    value={form[aspect.key]?.point ? { value: form[aspect.key].point, label: POINT_OPTIONS.find(o => o.value === form[aspect.key].point)?.label || form[aspect.key].point } : null}
+                    onChange={(opt) =>
+                      setForm((prev) => {
+                        const pointVal = opt?.value || '';
+                        const updated = { ...prev, [aspect.key]: { ...prev[aspect.key], point: pointVal } };
+                        if (autoQuestion && pointVal) {
+                          updated[aspect.key].question = aspect.label;
+                        }
+                        return updated;
+                      })
+                    }
+                    options={POINT_OPTIONS.filter(o => o.value !== '')}
+                    placeholder="Select point"
+                    isSearchable={false}
+                    isClearable
+                  />
+                </div>
+                {/* Row: Point (readonly) | Question | Remark */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                  <div className="md:col-span-1">
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Point</label>
+                    <div className="h-11 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-700">
+                      {form[aspect.key]?.point || '-'}
+                    </div>
+                  </div>
+                  <div className="md:col-span-5">
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Question</label>
+                    <TextArea
+                      value={form[aspect.key]?.question || ''}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          [aspect.key]: { ...prev[aspect.key], question: e.target.value },
+                        }))
                       }
-                      return updated;
-                    })
-                  }
-                  options={POINT_OPTIONS.filter(o => o.value !== '')}
-                  placeholder="Select point"
-                  isSearchable={false}
-                  isClearable
-                />
+                      rows={2}
+                      placeholder={aspect.defaultQ || 'Question'}
+                      readonly={defaultQuestions}
+                    />
+                  </div>
+                  <div className="md:col-span-6">
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Remark / Answer</label>
+                    <TextArea
+                      value={form[aspect.key]?.remark || ''}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          [aspect.key]: { ...prev[aspect.key], remark: e.target.value },
+                        }))
+                      }
+                      rows={2}
+                      placeholder="Remark"
+                    />
+                  </div>
+                </div>
               </div>
-
-              {/* Question */}
-              <div className="md:col-span-5">
-                <label className="block text-xs font-medium text-gray-500 mb-1">
-                  {aspect.label}
-                </label>
-                <TextArea
-                  value={form[aspect.key]?.question || ''}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      [aspect.key]: { ...prev[aspect.key], question: e.target.value },
-                    }))
-                  }
-                  rows={2}
-                  placeholder={aspect.defaultQ || 'Question'}
-                  readonly={defaultQuestions}
-                />
-              </div>
-
-              {/* Remark */}
-              <div className="md:col-span-5">
-                <label className="block text-xs font-medium text-gray-500 mb-1">Remark / Answer</label>
-                <TextArea
-                  value={form[aspect.key]?.remark || ''}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      [aspect.key]: { ...prev[aspect.key], remark: e.target.value },
-                    }))
-                  }
-                  rows={2}
-                  placeholder="Remark"
-                />
-              </div>
-            </div>
-          </div>
-        ))}
+            ),
+          }))}
+        />
       </div>
 
       <div className="flex justify-end pt-2">
@@ -466,20 +471,16 @@ const SDTForm = ({ candidateId }: { candidateId: string }) => {
     setIsSubmitting(true);
 
     try {
-      await interviewFormService.submit({
+      await interviewFormService.create({
         schedule_interview_id: candidateId,
-        interviews: [
+        company_value: 'SDT',
+        comment: 'tidak ada komentar',
+        detail_interviews: [
           {
-            company_value: 'SDT',
-            comment: 'tidak ada komentar',
-            detail_interviews: [
-              {
-                aspect: currentAspect!.label,
-                question: currentAspect!.label,
-                answer: remark,
-                score: pointValue,
-              },
-            ],
+            aspect: currentAspect!.label,
+            question: currentAspect!.label,
+            answer: remark,
+            score: String(pointValue),
           },
         ],
       });

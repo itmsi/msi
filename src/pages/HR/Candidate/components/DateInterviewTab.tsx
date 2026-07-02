@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { interviewScheduleService, type InterviewSchedule, type ScheduleCreateRequest } from '../services/interviewService';
+import React from 'react';
+import { interviewScheduleService, interviewFormService, type InterviewSchedule, type InterviewFormItem, type ScheduleCreateRequest } from '../services/interviewService';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaTrash, FaPen, FaChartSimple } from 'react-icons/fa6';
+import { FaPlus, FaTrash, FaPen, FaChartSimple, FaChevronDown, FaChevronUp, FaRegFilePdf, FaRegPenToSquare } from 'react-icons/fa6';
 import ModalScoreInterview from './ModalScoreInterview';
 import FormScoringCanvas from './FormScoringCanvas';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface DateInterviewTabProps {
   candidateId: string;
@@ -22,9 +24,15 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
   const [editing, setEditing] = useState<InterviewSchedule | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showDeleteFormConfirm, setShowDeleteFormConfirm] = useState(false);
+  const [deletingFormId, setDeletingFormId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [showCanvas, setShowCanvas] = useState<string | null>(null);
-  const [showScore, setShowScore] = useState(false);
+  const [showCanvas, setShowCanvas] = useState<{ scheduleId: string; editingFormId?: string } | null>(null);
+  const [expandedSchedules, setExpandedSchedules] = useState<Record<string, boolean>>({});
+  const [scheduleForms, setScheduleForms] = useState<Record<string, InterviewFormItem[]>>({});
+  const [loadingForms, setLoadingForms] = useState<Record<string, boolean>>({});
+  const [showFormScore, setShowFormScore] = useState(false);
+  const [formScoreData, setFormScoreData] = useState<{ company_value: string; total_score: number }[]>([]);
 
   const [form, setForm] = useState({ date: '', time: '', duration: '', assign_role: [] as string[] });
 
@@ -50,6 +58,50 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
   useEffect(() => {
     if (isActive) fetchData();
   }, [isActive, candidateId]);
+
+  const toggleExpand = async (scheduleId: string) => {
+    const willOpen = !expandedSchedules[scheduleId];
+    setExpandedSchedules(prev => ({ ...prev, [scheduleId]: willOpen }));
+    if (willOpen && !scheduleForms[scheduleId]) {
+      setLoadingForms(prev => ({ ...prev, [scheduleId]: true }));
+      try {
+        const result = await interviewFormService.getList({ schedule_interview_id: scheduleId });
+        setScheduleForms(prev => ({ ...prev, [scheduleId]: result.data || [] }));
+      } catch {
+        toast.error('Failed to load interview forms');
+      } finally {
+        setLoadingForms(prev => ({ ...prev, [scheduleId]: false }));
+      }
+    }
+  };
+
+  const getFormScoreData = (forms: InterviewFormItem[]) =>
+    forms.map((form) => ({
+      company_value: form.company_value,
+      total_score: form.detail_interviews?.reduce((sum, detail) => sum + (parseInt(detail.score) || 0), 0) || 0,
+    }));
+
+  const handleOpenScoreStats = async (scheduleId: string) => {
+    const forms = scheduleForms[scheduleId];
+    if (forms) {
+      setFormScoreData(getFormScoreData(forms));
+      setShowFormScore(true);
+      return;
+    }
+
+    setLoadingForms(prev => ({ ...prev, [scheduleId]: true }));
+    try {
+      const result = await interviewFormService.getList({ schedule_interview_id: scheduleId });
+      const loadedForms = result.data || [];
+      setScheduleForms(prev => ({ ...prev, [scheduleId]: loadedForms }));
+      setFormScoreData(getFormScoreData(loadedForms));
+      setShowFormScore(true);
+    } catch {
+      toast.error('Failed to load interview forms');
+    } finally {
+      setLoadingForms(prev => ({ ...prev, [scheduleId]: false }));
+    }
+  };
 
   const openAdd = () => {
     setEditing(null);
@@ -107,6 +159,26 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
     }
   };
 
+  const handleDeleteForm = async () => {
+    if (!deletingFormId) return;
+    try {
+      await interviewFormService.delete(deletingFormId);
+      toast.success('Form deleted');
+      setShowDeleteFormConfirm(false);
+      setDeletingFormId(null);
+      // Refresh forms for all open schedules
+      const keys = Object.keys(expandedSchedules);
+      for (const sid of keys) {
+        if (expandedSchedules[sid]) {
+          const result = await interviewFormService.getList({ schedule_interview_id: sid });
+          setScheduleForms(prev => ({ ...prev, [sid]: result.data || [] }));
+        }
+      }
+    } catch {
+      toast.error('Delete failed');
+    }
+  };
+
   if (loading) return <p className="text-sm text-gray-400">Loading schedules...</p>;
 
   return (
@@ -130,7 +202,8 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {schedules.map((s) => (
-                <tr key={s.schedule_interview_id} className="hover:bg-gray-50">
+                <React.Fragment key={s.schedule_interview_id}>
+                <tr className="hover:bg-gray-50">
                   <td className="px-4 py-3">{s.created_by_name || s.created_by || '-'}</td>
                   <td className="px-4 py-3">
                     {s.assign_role ? (
@@ -147,34 +220,119 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <Button size="sm" variant="transparent" onClick={() => setShowCanvas(s.schedule_interview_id)} className="text-[#0253a5]!"><FaPlus /></Button>
-                      <Button size="sm" variant="transparent" onClick={() => setShowScore(true)} className="text-green-600!"><FaChartSimple /></Button>
+                      <Button size="sm" variant="transparent" onClick={() => setShowCanvas({ scheduleId: s.schedule_interview_id })} className="text-[#0253a5]!"><FaPlus /></Button>
+                      <Button size="sm" variant="transparent" onClick={() => handleOpenScoreStats(s.schedule_interview_id)} className="text-green-600!"><FaChartSimple /></Button>
                       <Button size="sm" variant="transparent" onClick={() => openEdit(s)} className="text-blue-600!"><FaPen /></Button>
                       <Button size="sm" variant="transparent" onClick={() => { setDeletingId(s.schedule_interview_id); setShowDeleteConfirm(true); }} className="text-red-400!"><FaTrash /></Button>
+                      <Button size="sm" variant="transparent" onClick={() => toggleExpand(s.schedule_interview_id)} className="text-gray-400!">
+                        {expandedSchedules[s.schedule_interview_id] ? <FaChevronUp /> : <FaChevronDown />}
+                      </Button>
                     </div>
                   </td>
                 </tr>
+                {/* Collapsible: submitted interview forms */}
+                <tr>
+                  <td colSpan={4} className="p-0">
+                    <AnimatePresence initial={false}>
+                      {expandedSchedules[s.schedule_interview_id] && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        >
+                          <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+                            {loadingForms[s.schedule_interview_id] ? (
+                              <p className="text-sm text-gray-400">Loading forms...</p>
+                            ) : scheduleForms[s.schedule_interview_id]?.length === 0 ? (
+                              <p className="text-sm text-gray-500">No forms submitted yet.</p>
+                            ) : (
+                              (() => {
+                                // Group forms by interviewer (created_by_name)
+                                const grouped: Record<string, typeof scheduleForms[string]> = {};
+                                for (const form of scheduleForms[s.schedule_interview_id] || []) {
+                                  const key = form.created_by_name || 'Unknown';
+                                  if (!grouped[key]) grouped[key] = [];
+                                  grouped[key].push(form);
+                                }
+                                return (
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {Object.entries(grouped).map(([interviewer, forms]) => {
+                                      const totalScore = forms.reduce((sum, f) => sum + (f.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0), 0);
+                                      return (
+                                        <div key={interviewer} className="bg-white rounded-lg border border-gray-200 p-3">
+                                          <div className="flex items-center justify-between mb-2">
+                                            <h6 className="text-sm font-semibold text-gray-800 mb-0">{interviewer}</h6>
+                                            <span className="text-[10px] text-gray-400">Score: {totalScore}</span>
+                                          </div>
+                                          <p className="text-xs text-gray-500 mb-2">
+                                            Interviewer: <span className="font-medium text-gray-700">{getAssignRoleArr(s).join(', ') || '-'}</span>
+                                          </p>
+                                          <div className="flex flex-wrap gap-1.5 mb-2">
+                                            {forms.map((form) => {
+                                              const score = form.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0;
+                                              return (
+                                                <span key={form.interview_id}
+                                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+                                                >
+                                                  {form.company_value}: {score}
+                                                </span>
+                                              );
+                                            })}
+                                          </div>
+                                          <div className="flex items-center gap-1 mt-2">
+                                            <Button size="sm" variant="transparent" onClick={() => setShowCanvas({ scheduleId: s.schedule_interview_id, editingFormId: forms[0]?.interview_id })} className="text-[#0253a5]!">
+                                              <FaRegPenToSquare className="w-3.5 h-3.5" />
+                                            </Button>
+                                            <Button size="sm" variant="transparent" onClick={() => { setFormScoreData(forms.map(f => ({ company_value: f.company_value, total_score: f.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0 }))); setShowFormScore(true); }} className="text-green-600!">
+                                              <FaChartSimple className="w-3.5 h-3.5" />
+                                            </Button>
+                                            <Button size="sm" variant="transparent" className="text-red-500!">
+                                              <FaRegFilePdf className="w-3.5 h-3.5" />
+                                            </Button>
+                                            <Button size="sm" variant="transparent" onClick={() => { setDeletingFormId(forms[0]?.interview_id); setShowDeleteFormConfirm(true); }} className="text-red-400!">
+                                              <FaTrash className="w-3 h-3" />
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                );
+                              })()
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </td>
+                </tr>
+                </React.Fragment>
               ))}
             </tbody>
           </table>
         </div>
       )}
 
-      <ModalScoreInterview show={showScore} onClose={() => setShowScore(false)} />
+      <ModalScoreInterview show={showFormScore} onClose={() => setShowFormScore(false)} scoreData={formScoreData} />
 
       {/* Form Scoring Offcanvas */}
       {showCanvas && (
         <div className="fixed inset-0 z-40 flex justify-end">
           <div className="absolute inset-0 bg-black/40" onClick={() => { setShowCanvas(null); }} />
           <div className="relative w-full max-w-4xl bg-white shadow-xl h-full overflow-y-auto">
-            <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Interview Form</h2>
+            <div className="sticky top-18 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button variant="transparent" onClick={() => { setShowCanvas(null); fetchData(); }} className="text-sm">&larr; Back</Button>
+                <h2 className="text-lg font-semibold">Interview Form</h2>
+              </div>
               <Button variant="transparent" onClick={() => { setShowCanvas(null); }} className="text-gray-400! text-xl">&times;</Button>
             </div>
-            <div className="p-6">
+            <div className="p-6 mt-13">
               <FormScoringCanvas
                 candidateId={candidateId}
-                scheduleId={showCanvas}
+                scheduleId={showCanvas.scheduleId}
+                editingFormId={showCanvas.editingFormId}
                 onBack={() => { setShowCanvas(null); fetchData(); }}
               />
             </div>
@@ -229,6 +387,19 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
         onConfirm={handleDelete}
         title="Delete Schedule"
         message="Delete this schedule?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        size="sm"
+      />
+
+      {/* Delete Form Confirm */}
+      <ConfirmationModal
+        isOpen={showDeleteFormConfirm}
+        onClose={() => setShowDeleteFormConfirm(false)}
+        onConfirm={handleDeleteForm}
+        title="Delete Interview Form"
+        message="Delete this interview form?"
         confirmText="Delete"
         cancelText="Cancel"
         type="danger"

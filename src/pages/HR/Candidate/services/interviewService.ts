@@ -1,4 +1,4 @@
-import { apiDelete, apiPost, apiPut } from '@/helpers/apiHelper';
+import { apiDelete, apiGet, apiPost, apiPut } from '@/helpers/apiHelper';
 import type { ApiDetailResponse, ApiListResponse, ApiWrapper } from '../types/hr';
 
 const GW = import.meta.env.VITE_API_BASE_URL;
@@ -84,14 +84,82 @@ export class interviewScheduleService {
 // Interview Form Service (HRM)
 // ============================================================
 
+export interface InterviewFormItem {
+  interview_id: string;
+  schedule_interview_id: string;
+  assigned_id: string | null;
+  company_value: string;
+  comment: string;
+  created_at: string;
+  created_by: string;
+  created_by_name: string;
+  updated_at: string;
+  updated_by_name: string;
+  detail_interviews: {
+    detail_interview_id: string;
+    interview_id: string;
+    aspect: string;
+    question: string;
+    answer: string;
+    score: string;
+    created_at: string;
+    created_by: string;
+    created_by_name: string;
+  }[];
+}
+
+export interface InterviewCreateRequest {
+  schedule_interview_id: string;
+  assigned_id?: string;
+  company_value: string;
+  comment: string;
+  detail_interviews: { aspect: string; question: string; answer: string; score: string }[];
+}
+
 export class interviewFormService {
-  static async submit(data: Record<string, unknown>): Promise<ApiDetailResponse<unknown>> {
-    const response = await apiPost<ApiDetailResponse<unknown>>(`${HRM}/interviews/create`, data);
+  static async getList(params: {
+    schedule_interview_id: string;
+    page?: number;
+    limit?: number;
+    search?: string;
+    sort_by?: string;
+    sort_order?: string;
+  }): Promise<ApiListResponse<InterviewFormItem>> {
+    return unwrapList<InterviewFormItem>(`${HRM}/interviews/get`, {
+      page: params.page || 1,
+      limit: params.limit || 100,
+      search: params.search || '',
+      sort_by: params.sort_by || 'created_at',
+      sort_order: params.sort_order || 'desc',
+      schedule_interview_id: params.schedule_interview_id,
+    });
+  }
+
+  static async create(data: InterviewCreateRequest): Promise<ApiDetailResponse<InterviewFormItem>> {
+    const payload: Record<string, unknown> = {
+      schedule_interview_id: data.schedule_interview_id,
+      company_value: data.company_value,
+      comment: data.comment,
+      detail_interviews: data.detail_interviews,
+    };
+    if (data.assigned_id) payload.assigned_id = data.assigned_id;
+    const response = await apiPost<ApiDetailResponse<InterviewFormItem>>(`${HRM}/interviews/create`, payload);
     return response.data;
   }
 
-  static async update(id: string, data: Record<string, unknown>): Promise<ApiDetailResponse<unknown>> {
-    const response = await apiPut<ApiDetailResponse<unknown>>(`${HRM}/interviews/${id}`, data);
+  static async getById(id: string): Promise<ApiDetailResponse<InterviewFormItem>> {
+    const response = await apiGet<ApiDetailResponse<InterviewFormItem>>(`${HRM}/interviews/${id}`);
+    return response.data;
+  }
+
+  static async update(id: string, data: Partial<InterviewCreateRequest>): Promise<ApiDetailResponse<InterviewFormItem>> {
+    const payload: Record<string, unknown> = {};
+    if (data.schedule_interview_id) payload.schedule_interview_id = data.schedule_interview_id;
+    if (data.company_value) payload.company_value = data.company_value;
+    if (data.comment) payload.comment = data.comment;
+    if (data.assigned_id) payload.assigned_id = data.assigned_id;
+    if (data.detail_interviews) payload.detail_interviews = data.detail_interviews;
+    const response = await apiPut<ApiDetailResponse<InterviewFormItem>>(`${HRM}/interviews/${id}`, payload);
     return response.data;
   }
 

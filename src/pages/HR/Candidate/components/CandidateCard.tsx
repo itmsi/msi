@@ -92,11 +92,11 @@ const CandidateCard = ({ candidate, onView, onEdit, onDelete }: CandidateCardPro
       </div>
 
       {/* Actions */}
-      <div className="flex border-t border-gray-100 divide-x divide-gray-100">
-        <Button size="sm" variant="transparent" onClick={(e) => { e.stopPropagation(); onEdit(); }} className="flex-1! justify-center! text-[#0253a5]!" startIcon={<FaPencil className="w-3 h-3" />}>
+      <div className="flex border-t border-gray-100 divide-x divide-gray-100" onClick={(e) => e.stopPropagation()}>
+        <Button size="sm" variant="transparent" onClick={() => onEdit()} className="flex-1! justify-center! text-[#0253a5]!" startIcon={<FaPencil className="w-3 h-3" />}>
           Edit
         </Button>
-        <Button size="sm" variant="transparent" onClick={(e) => { e.stopPropagation(); onDelete(); }} className="flex-1! justify-center! text-red-500!" startIcon={<FaTrash className="w-3 h-3" />}>
+        <Button size="sm" variant="transparent" onClick={() => onDelete()} className="flex-1! justify-center! text-red-500!" startIcon={<FaTrash className="w-3 h-3" />}>
           Delete
         </Button>
       </div>

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { interviewFormService } from '../services/interviewService';
 import { toast } from 'react-hot-toast';
 import Button from '@/components/ui/button/Button';
 import TextArea from '@/components/form/input/TextArea';
 import CustomSelect from '@/components/form/select/CustomSelect';
+import HRAccordion from './HRAccordion';
 
 const POINT_OPTIONS = [
   { value: '', label: 'Select point' },
@@ -34,7 +35,7 @@ const VALUE_ASPECTS = [
 const CSE_ASPECTS = [
   { key: 'self_esteem', label: 'Self Esteem', defaultQ: 'Does this person believe in their own worth?' },
   { key: 'self_efficacy', label: 'Self Efficacy', defaultQ: 'Does this person believe they have the ability to complete their work?' },
-  { key: 'locus_control', label: 'Locus of Control', defaultQ: 'Is their success determined by own actions or external factors?' },
+  { key: 'locus_control', label: 'Locus of Control', defaultQ: 'Does this person believe their success is determined by their own actions or external factors?' },
   { key: 'emotional_stability', label: 'Emotional Stability', defaultQ: 'Can this person control their emotions?' },
 ];
 
@@ -50,7 +51,7 @@ const EXPERIENCE_ASPECTS = [
   { key: 'role_matching', label: 'Role Matching' },
   { key: 'product_knowledge', label: 'Product Knowledge' },
   { key: 'significant_contribution', label: 'Significant Contribution' },
-  { key: 'goals_align', label: 'Goals align with ROE' },
+  { key: 'goals_align', label: 'Goals align with ROE Company' },
 ];
 
 type FormType = 'siah' | 'values' | 'cse' | 'sdt' | 'experience';
@@ -59,12 +60,41 @@ type AspectForm = Record<string, { point: string; question: string; remark: stri
 interface FormScoringCanvasProps {
   candidateId: string;
   scheduleId?: string | null;
+  editingFormId?: string;
   onBack: () => void;
 }
 
-const FormScoringCanvas = ({ candidateId, scheduleId, onBack }: FormScoringCanvasProps) => {
-  const [activeTab, setActiveTab] = useState<FormType>('cse');
+const FormScoringCanvas = ({ candidateId, scheduleId, editingFormId }: FormScoringCanvasProps) => {
   const scheduleInterviewId = scheduleId || candidateId;
+  const [formIdMap, setFormIdMap] = useState<Record<string, string>>({});
+  const [activeTab, setActiveTab] = useState<FormType>('siah');
+
+  // Load all existing interviews for this schedule → map company_value → interview_id
+  useEffect(() => {
+    if (!scheduleInterviewId) return;
+    interviewFormService.getList({ schedule_interview_id: scheduleInterviewId })
+      .then((res) => {
+        const map: Record<string, string> = {};
+        (res.data || []).forEach((f) => {
+          map[f.company_value] = f.interview_id;
+        });
+        setFormIdMap(map);
+        // If editingFormId provided, find its company_value and set that tab
+        if (editingFormId) {
+          const match = (res.data || []).find((f) => f.interview_id === editingFormId);
+          if (match) {
+            const key = match.company_value === '7 Values' ? 'values'
+              : match.company_value === 'SIAH' ? 'siah'
+              : match.company_value === 'CSE' ? 'cse'
+              : match.company_value === 'SDT' ? 'sdt'
+              : match.company_value === 'EXPERIENCE' ? 'experience'
+              : 'siah';
+            setActiveTab(key);
+          }
+        }
+      })
+      .catch(() => {});
+  }, [scheduleInterviewId, editingFormId]);
 
   const tabs: { key: FormType; label: string }[] = [
     { key: 'siah', label: 'SIAH' },
@@ -76,10 +106,6 @@ const FormScoringCanvas = ({ candidateId, scheduleId, onBack }: FormScoringCanva
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <Button variant="transparent" onClick={onBack}>&larr; Back to list</Button>
-      </div>
-
       <div className="flex gap-1 border-b border-gray-200 mb-4 overflow-x-auto">
         {tabs.map((tab) => (
           <Button key={tab.key} onClick={() => setActiveTab(tab.key)} variant="transparent"
@@ -89,11 +115,11 @@ const FormScoringCanvas = ({ candidateId, scheduleId, onBack }: FormScoringCanva
         ))}
       </div>
 
-      {activeTab === 'siah' && <ScoringForm title="SIAH Assessment" caption="Assess sincerity, trustworthiness, altruism, and humility." companyValue="SIAH" aspects={SIAH_ASPECTS} scheduleInterviewId={scheduleInterviewId} />}
-      {activeTab === 'values' && <ScoringForm title="7 Values Assessment" caption="Evaluate alignment with company's core values." companyValue="7 Values" aspects={VALUE_ASPECTS} scheduleInterviewId={scheduleInterviewId} />}
-      {activeTab === 'cse' && <ScoringForm title="CSE Assessment" caption="Assess core self-evaluation traits." companyValue="CSE" aspects={CSE_ASPECTS} scheduleInterviewId={scheduleInterviewId} defaultQuestions />}
-      {activeTab === 'sdt' && <SDTForm scheduleInterviewId={scheduleInterviewId} />}
-      {activeTab === 'experience' && <ScoringForm title="Experience Assessment" caption="Evaluate role fit and contributions." companyValue="EXPERIENCE" aspects={EXPERIENCE_ASPECTS} scheduleInterviewId={scheduleInterviewId} autoQuestion />}
+      {activeTab === 'siah' && <ScoringForm title="SIAH Assessment" caption="Assess sincerity, trustworthiness, altruism, and humility." companyValue="SIAH" aspects={SIAH_ASPECTS} scheduleInterviewId={scheduleInterviewId} interviewId={formIdMap['SIAH']} />}
+      {activeTab === 'values' && <ScoringForm title="7 Values Assessment" caption="Evaluate alignment with company's core values." companyValue="7 Values" aspects={VALUE_ASPECTS} scheduleInterviewId={scheduleInterviewId} interviewId={formIdMap['7 Values']} />}
+      {activeTab === 'cse' && <ScoringForm title="CSE Assessment" caption="Assess core self-evaluation traits." companyValue="CSE" aspects={CSE_ASPECTS} scheduleInterviewId={scheduleInterviewId} defaultQuestions interviewId={formIdMap['CSE']} />}
+      {activeTab === 'sdt' && <SDTForm scheduleInterviewId={scheduleInterviewId} interviewId={formIdMap['SDT']} />}
+      {activeTab === 'experience' && <ScoringForm title="Experience Assessment" caption="Evaluate role fit and contributions." companyValue="EXPERIENCE" aspects={EXPERIENCE_ASPECTS} scheduleInterviewId={scheduleInterviewId} autoQuestion interviewId={formIdMap['EXPERIENCE']} />}
     </div>
   );
 };
@@ -106,13 +132,43 @@ interface ScoringFormProps {
   scheduleInterviewId: string;
   defaultQuestions?: boolean;
   autoQuestion?: boolean;
+  interviewId?: string;
 }
 
-const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewId, defaultQuestions, autoQuestion }: ScoringFormProps) => {
+const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewId, defaultQuestions, autoQuestion, interviewId }: ScoringFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState<AspectForm>(() =>
     aspects.reduce((acc, a) => ({ ...acc, [a.key]: { point: '', question: a.defaultQ || '', remark: '' } }), {})
   );
+  const [loadingData, setLoadingData] = useState(false);
+
+  // Load existing data if interviewId matches this company_value
+  useEffect(() => {
+    if (!interviewId) return;
+    let cancelled = false;
+    setLoadingData(true);
+    interviewFormService.getById(interviewId)
+      .then((res) => {
+        if (cancelled || !res?.data) return;
+        const formData = res.data;
+        if (formData.company_value !== companyValue) return;
+        const loaded: AspectForm = {};
+        aspects.forEach((a) => {
+          const match = formData.detail_interviews?.find((d: { aspect: string }) => d.aspect === a.label);
+          loaded[a.key] = {
+            point: match?.score || '',
+            question: match?.question || a.defaultQ || '',
+            remark: match?.answer || '',
+          };
+        });
+        setForm(loaded);
+      })
+      .catch(() => toast.error('Failed to load form data'))
+      .finally(() => { if (!cancelled) setLoadingData(false); });
+    return () => { cancelled = true; };
+  }, [interviewId]);
+
+  const isEditing = interviewId ? true : false;
 
   const totalScore = aspects.reduce((sum, a) => sum + (parseInt(form[a.key]?.point) || 0), 0);
   const maxScore = aspects.length * 5;
@@ -122,81 +178,139 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
     setIsSubmitting(true);
     try {
       const detailInterviews = aspects.map((a) => ({
-        aspect: a.label, question: form[a.key]?.question || a.label, answer: form[a.key]?.remark || '', score: parseInt(form[a.key]?.point) || 0,
+        aspect: a.label, question: form[a.key]?.question || a.label, answer: form[a.key]?.remark || '', score: String(form[a.key]?.point || ''),
       }));
-      await interviewFormService.submit({ schedule_interview_id: scheduleInterviewId, interviews: [{ company_value: companyValue, comment: 'tidak ada komentar', detail_interviews: detailInterviews }] });
-      toast.success(`${title} submitted!`);
+      if (isEditing && interviewId) {
+        await interviewFormService.update(interviewId, { schedule_interview_id: scheduleInterviewId, company_value: companyValue, comment: 'tidak ada komentar', detail_interviews: detailInterviews });
+        toast.success(`${title} updated!`);
+      } else {
+        await interviewFormService.create({ schedule_interview_id: scheduleInterviewId, company_value: companyValue, comment: 'tidak ada komentar', detail_interviews: detailInterviews });
+        toast.success(`${title} submitted!`);
+      }
     } catch (err: unknown) {
       toast.error(`Failed: ${err instanceof Error ? err.message : 'Error'}`);
     } finally { setIsSubmitting(false); }
   };
+
+  if (loadingData) return <p className="text-sm text-gray-400">Loading form data...</p>;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div><h4 className="text-base font-bold text-[#0253a5]">{title}</h4><p className="text-sm text-gray-500 mb-3">{caption}</p></div>
       <div className="text-sm text-gray-600 mb-2">Total: <span className="font-semibold">{totalScore}</span> / {maxScore}</div>
       <div className="space-y-4">
-        {aspects.map((aspect) => (
-          <div key={aspect.key} className="bg-white rounded-xl border border-gray-200 p-4">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-              <div className="md:col-span-2">
-                <label className="block text-xs font-medium text-gray-500 mb-1">Score</label>
-                <CustomSelect
-                  value={form[aspect.key]?.point ? { value: form[aspect.key].point, label: POINT_OPTIONS.find(o => o.value === form[aspect.key].point)?.label || form[aspect.key].point } : null}
-                  onChange={(opt) => setForm((prev) => {
-                    const pointVal = opt?.value || '';
-                    const updated = { ...prev, [aspect.key]: { ...prev[aspect.key], point: pointVal } };
-                    if (autoQuestion && pointVal) updated[aspect.key].question = aspect.label;
-                    return updated;
-                  })}
-                  options={POINT_OPTIONS.filter(o => o.value !== '')}
-                  placeholder="Select point"
-                  isSearchable={false}
-                  isClearable
-                />
-              <div className="md:col-span-5">
-                <label className="block text-xs font-medium text-gray-500 mb-1">{aspect.label}</label>
-                <TextArea value={form[aspect.key]?.question || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], question: e.target.value } }))}
-                  rows={2} placeholder={aspect.defaultQ || 'Question'} readonly={defaultQuestions} />
+        <HRAccordion
+          allowMultiple
+          items={aspects.map((aspect) => ({
+            id: aspect.key,
+            judul: aspect.label,
+            konten: (
+              <div className="space-y-3">
+                {/* Point Selector - full width */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Specific point</label>
+                  <CustomSelect
+                    value={form[aspect.key]?.point ? { value: form[aspect.key].point, label: POINT_OPTIONS.find(o => o.value === form[aspect.key].point)?.label || form[aspect.key].point } : null}
+                    onChange={(opt) => setForm((prev) => {
+                      const pointVal = opt?.value || '';
+                      const updated = { ...prev, [aspect.key]: { ...prev[aspect.key], point: pointVal } };
+                      if (autoQuestion && pointVal) updated[aspect.key].question = aspect.label;
+                      return updated;
+                    })}
+                    options={POINT_OPTIONS.filter(o => o.value !== '')}
+                    placeholder="Select point"
+                    isSearchable={false}
+                    isClearable
+                  />
+                </div>
+                {/* Row: Point (readonly) | Question | Remark */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                  <div className="md:col-span-1">
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Point</label>
+                    <div className="h-16 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-700">
+                      {form[aspect.key]?.point || '-'}
+                    </div>
+                  </div>
+                  <div className="md:col-span-5">
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Question</label>
+                    <TextArea value={form[aspect.key]?.question || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], question: e.target.value } }))}
+                      rows={2} placeholder={aspect.defaultQ || 'Question'} readonly={defaultQuestions} />
+                  </div>
+                  <div className="md:col-span-6">
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Remark / Answer</label>
+                    <TextArea value={form[aspect.key]?.remark || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], remark: e.target.value } }))}
+                      rows={2} placeholder="Remark" />
+                  </div>
+                </div>
               </div>
-              <div className="md:col-span-5">
-                <label className="block text-xs font-medium text-gray-500 mb-1">Remark / Answer</label>
-                <TextArea value={form[aspect.key]?.remark || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], remark: e.target.value } }))}
-                  rows={2} placeholder="Remark" />
-              </div>
-            </div>
-          </div>
-        ))}
+            ),
+          }))}
+        />
       </div>
       <div className="flex justify-end pt-2">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : `Save ${title.split(' ')[0]}`}
+          {isSubmitting ? 'Saving...' : isEditing ? `Update ${title.split(' ')[0]}` : `Save ${title.split(' ')[0]}`}
         </Button>
       </div>
     </form>
   );
 };
 
-const SDTForm = ({ scheduleInterviewId }: { scheduleInterviewId: string }) => {
+const SDTForm = ({ scheduleInterviewId, interviewId }: { scheduleInterviewId: string; interviewId?: string }) => {
   const [selectedAspect, setSelectedAspect] = useState('');
   const [remark, setRemark] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
   const currentAspect = SDT_ASPECTS.find((a) => a.key === selectedAspect);
   const pointValue = currentAspect?.point || 0;
+
+  // Load existing data if editing
+  useEffect(() => {
+    if (!interviewId) return;
+    let cancelled = false;
+    setLoadingData(true);
+    interviewFormService.getById(interviewId)
+      .then((res) => {
+        if (cancelled || !res?.data) return;
+        const formData = res.data;
+        if (formData.company_value !== 'SDT') return;
+        if (formData.detail_interviews?.[0]) {
+          const d = formData.detail_interviews[0];
+          const match = SDT_ASPECTS.find((a) => a.label === d.aspect);
+          if (match) setSelectedAspect(match.key);
+          setRemark(d.answer || '');
+        }
+      })
+      .catch(() => toast.error('Failed to load form data'))
+      .finally(() => { if (!cancelled) setLoadingData(false); });
+    return () => { cancelled = true; };
+  }, [interviewId]);
+
+  const isEditing = interviewId ? true : false;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedAspect) return;
     setIsSubmitting(true);
     try {
-      await interviewFormService.submit({
+      const payload = {
         schedule_interview_id: scheduleInterviewId,
-        interviews: [{ company_value: 'SDT', comment: 'tidak ada komentar', detail_interviews: [{ aspect: currentAspect!.label, question: currentAspect!.label, answer: remark, score: pointValue }] }],
-      });
-      toast.success('SDT form submitted!');
+        company_value: 'SDT',
+        comment: 'tidak ada komentar',
+        detail_interviews: [{ aspect: currentAspect!.label, question: currentAspect!.label, answer: remark, score: String(pointValue) }],
+      };
+      if (isEditing && interviewId) {
+        await interviewFormService.update(interviewId, payload);
+        toast.success('SDT form updated!');
+      } else {
+        await interviewFormService.create(payload);
+        toast.success('SDT form submitted!');
+      }
     } catch (err: unknown) { toast.error(`Failed: ${err instanceof Error ? err.message : 'Error'}`); }
     finally { setIsSubmitting(false); }
   };
+
+  if (loadingData) return <p className="text-sm text-gray-400">Loading form data...</p>;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -220,7 +334,7 @@ const SDTForm = ({ scheduleInterviewId }: { scheduleInterviewId: string }) => {
       </div>
       <div className="flex justify-end pt-2">
         <Button type="submit" disabled={isSubmitting || !selectedAspect}>
-          {isSubmitting ? 'Saving...' : 'Save SDT'}
+          {isSubmitting ? 'Saving...' : isEditing ? 'Update SDT' : 'Save SDT'}
         </Button>
       </div>
     </form>

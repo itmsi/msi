@@ -21,29 +21,24 @@ interface InterviewScoreChartProps {
 }
 
 const STANDARD_VALUES: ScoreMetric[] = [
-  { company_value: 'SIAH', total_score: 40 },
-  { company_value: '7 Values', total_score: 60 },
+  { company_value: 'SIAH', total_score: 20 },
+  { company_value: '7 Values', total_score: 35 },
   { company_value: 'SDT', total_score: 40 },
-  { company_value: 'CSE', total_score: 40 },
+  { company_value: 'CSE', total_score: 20 },
   { company_value: 'EXPERIENCE', total_score: 20 },
 ];
 
 const DESIRED_ORDER = ['SIAH', '7 Values', 'CSE', 'SDT', 'EXPERIENCE'];
 
-const getMultipliedScore = (companyValue: string, score: number): number => {
-  switch (companyValue) {
-    case 'SIAH': return score * 2;
-    case '7 Values': return score * 1.7;
-    case 'CSE': return score * 2;
-    default: return score;
-  }
+const getMultipliedScore = (_companyValue: string, score: number): number => {
+  return score;
 };
 
 const getEvaluation = (total: number): { remark: string; recommendation: string } => {
-  if (total <= 20) return { remark: 'Very Poor', recommendation: 'Reject' };
-  if (total <= 40) return { remark: 'Poor', recommendation: 'Reject' };
-  if (total <= 60) return { remark: 'Average', recommendation: 'Consideration - need comparison' };
-  if (total <= 80) return { remark: 'Good', recommendation: 'Next Process To be Hired' };
+  if (total <= 14) return { remark: 'Very Poor', recommendation: 'Reject' };
+  if (total <= 27) return { remark: 'Poor', recommendation: 'Reject' };
+  if (total <= 41) return { remark: 'Average', recommendation: 'Consideration - need comparison' };
+  if (total <= 54) return { remark: 'Good', recommendation: 'Next Process To be Hired' };
   return { remark: 'Excellent', recommendation: 'Next Process To be Hired' };
 };
 
@@ -58,7 +53,7 @@ const InterviewScoreChart = ({ metrics = [] }: InterviewScoreChartProps) => {
 
   if (!isValid) {
     return (
-      <div className="p-4 border rounded bg-white shadow-sm text-center">
+      <div className="p-4 border rounded bg-white shadow-sm m-2 text-center">
         <h5 className="mb-3 font-semibold">Interview Scoring</h5>
         <p className="text-gray-500">No scoring data available or insufficient data to display chart</p>
       </div>
@@ -192,7 +187,7 @@ const InterviewScoreChart = ({ metrics = [] }: InterviewScoreChartProps) => {
   };
 
   return (
-    <div className="p-4 border rounded bg-white shadow-sm">
+    <div className="p-4 border rounded bg-white shadow-sm m-2">
       <div className="flex flex-col lg:flex-row items-center gap-6">
         {/* Chart */}
         <div className="w-full lg:w-2/3" style={{ height: '400px' }}>
