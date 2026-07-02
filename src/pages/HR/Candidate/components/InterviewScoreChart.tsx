@@ -21,24 +21,35 @@ interface InterviewScoreChartProps {
 }
 
 const STANDARD_VALUES: ScoreMetric[] = [
-  { company_value: 'SIAH', total_score: 20 },
-  { company_value: '7 Values', total_score: 35 },
+  { company_value: 'SIAH', total_score: 40 },
+  { company_value: '7 Values', total_score: 60 },
   { company_value: 'SDT', total_score: 40 },
-  { company_value: 'CSE', total_score: 20 },
+  { company_value: 'CSE', total_score: 40 },
   { company_value: 'EXPERIENCE', total_score: 20 },
 ];
 
 const DESIRED_ORDER = ['SIAH', '7 Values', 'CSE', 'SDT', 'EXPERIENCE'];
 
-const getMultipliedScore = (_companyValue: string, score: number): number => {
-  return score;
+const getMultipliedScore = (companyValue: string, score: number): number => {
+  switch (companyValue) {
+    case 'SIAH':
+      return score * 2;
+    case '7 Values': {
+      const multipliedValue = score * 1.7;
+      return Math.floor(multipliedValue) + (multipliedValue % 1 >= 0.5 ? 1 : 0);
+    }
+    case 'CSE':
+      return score * 2;
+    default:
+      return score;
+  }
 };
 
 const getEvaluation = (total: number): { remark: string; recommendation: string } => {
-  if (total <= 14) return { remark: 'Very Poor', recommendation: 'Reject' };
-  if (total <= 27) return { remark: 'Poor', recommendation: 'Reject' };
-  if (total <= 41) return { remark: 'Average', recommendation: 'Consideration - need comparison' };
-  if (total <= 54) return { remark: 'Good', recommendation: 'Next Process To be Hired' };
+  if (total <= 20) return { remark: 'Very Poor', recommendation: 'Reject' };
+  if (total <= 40) return { remark: 'Poor', recommendation: 'Reject' };
+  if (total <= 60) return { remark: 'Average', recommendation: 'Consideration - need comparison' };
+  if (total <= 80) return { remark: 'Good', recommendation: 'Next Process To be Hired' };
   return { remark: 'Excellent', recommendation: 'Next Process To be Hired' };
 };
 
