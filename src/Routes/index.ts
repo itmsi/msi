@@ -71,6 +71,9 @@ const Activities = lazy(() => import('@/pages/CRM/Activity/Activity'));
 const CreateActivities = lazy(() => import('@/pages/CRM/Activity/CreateActivity'));
 const EditActivities = lazy(() => import('@/pages/CRM/Activity/EditActivity'));
 
+// CRM - Daily Task Activity
+const DailyTaskActivity = lazy(() => import('@/pages/CRM/DailyTaskActivity/DailyTaskActivity'));
+
 // CRM - Projects
 const ManageCRMProject = lazy(() => import('@/pages/CRM/Project/Manage'));
 const CreateCRMProject = lazy(() => import('@/pages/CRM/Project/CreateProject'));
@@ -876,6 +879,17 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Activities CRM'],
         component: EditActivities,
+        layout: AppLayout,
+    },
+
+    // CRM - Daily Task Activity
+    {
+        path: '/crm/daily-task-activity',
+        name: 'Daily Task Activity CRM',
+        isProtected: true,
+        roles: ['Daily Task Activity CRM'],
+        requiredPermissions: ['read'],
+        component: DailyTaskActivity,
         layout: AppLayout,
     },
     {

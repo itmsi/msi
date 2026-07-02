@@ -7,6 +7,7 @@ import { usePOStatusSelect } from '@/hooks/usePOStatusSelect';
 import { useSubsidiarySelect } from '@/hooks/useSubsidiarySelect';
 import { useEmployeeSelect } from '@/hooks/useEmployeeSelect';
 import React, { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom';
 
 interface FilterSectionProps {
     filterApprovalStatus?: string;
@@ -126,7 +127,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     };
     
     // Check if any filters are active
-    const hasActiveFilters = filterSubsidiary || filterLocation || filterApprovalStatus || filterStatus || selectedEmployee;
+    
+    const [searchParams] = useSearchParams();
+    const checkToggleFilter = searchParams.get('subsidiary') || searchParams.get('location') || searchParams.get('approvalstatus') || searchParams.get('po_status') || searchParams.get('created_by');
+    const hasActiveFilters = checkToggleFilter !== null;
+    // const hasActiveFilters = filterSubsidiary || filterLocation || filterApprovalStatus || filterStatus || selectedEmployee;
     return (
         <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -232,7 +237,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         onChange={
                             (option) => {
                                 setSelectedEmployee(option);
-                                onFilterChange('employee', option?.value || '');
+                                onFilterChange('created_by', option?.value || '');
                                 if (employeeSelectError) {
                                     setEmployeeSelectError('');
                                 }
