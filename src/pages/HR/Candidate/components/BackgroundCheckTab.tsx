@@ -4,6 +4,7 @@ import { backgroundCheckService } from '../services/hrService';
 import { toast } from 'react-hot-toast';
 import { FaPlus, FaTrash, FaDownload } from 'react-icons/fa6';
 import Button from '@/components/ui/button/Button';
+import formatIndonesianDate from '../utils/date';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import TextArea from '@/components/form/input/TextArea';
 
@@ -105,7 +106,7 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
                     </div>
                   </td>
                   <td className="px-4 py-3 text-gray-600">{item.created_by_name || '-'}</td>
-                  <td className="px-4 py-3 text-gray-600">{item.created_at ? new Date(item.created_at).toLocaleDateString() : '-'}</td>
+                  <td className="px-4 py-3 text-gray-600">{formatIndonesianDate(item.created_at)}</td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
                       item.background_check_status === 'Hired' ? 'bg-green-100 text-green-700' :

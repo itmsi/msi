@@ -1,6 +1,7 @@
 import type { Candidate } from '../types/hr';
 import { getBadgeVariant, onImageProfileError, placeholderProfileImage } from '../utils/utils';
 import { FaPencil, FaTrash } from 'react-icons/fa6';
+import formatIndonesianDate from '../utils/date';
 import { VscDebugBreakpointData } from 'react-icons/vsc';
 import Button from '@/components/ui/button/Button';
 
@@ -58,7 +59,7 @@ const CandidateCard = ({ candidate, onView, onEdit, onDelete }: CandidateCardPro
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Applied</span>
-            <span className="text-gray-700 font-medium">{candidate.created_at ? new Date(candidate.created_at).toLocaleDateString() : '-'}</span>
+            <span className="text-gray-700 font-medium">{formatIndonesianDate(candidate.created_at)}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-gray-400">Status</span>

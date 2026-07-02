@@ -9,6 +9,7 @@ import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
 import { motion, AnimatePresence } from 'framer-motion';
+import formatIndonesianDate from '../utils/date';
 
 interface DateInterviewTabProps {
   candidateId: string;
@@ -215,7 +216,7 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                     ) : '-'}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="text-gray-900">{s.schedule_interview_date ? new Date(s.schedule_interview_date).toLocaleDateString() : '-'}</div>
+                    <div className="text-gray-900">{formatIndonesianDate(s.schedule_interview_date)}</div>
                     <div className="text-xs text-gray-500">{s.schedule_interview_time} {s.schedule_interview_duration ? `(${s.schedule_interview_duration})` : ''}</div>
                   </td>
                   <td className="px-4 py-3">

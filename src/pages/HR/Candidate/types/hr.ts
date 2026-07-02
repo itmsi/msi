@@ -157,6 +157,7 @@ export interface NoteItem {
   notes: string;
   created_at: string;
   created_by: string;
+  created_by_name?: string;
 }
 
 export interface NoteCreateRequest {

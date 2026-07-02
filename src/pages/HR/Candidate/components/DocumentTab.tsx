@@ -4,6 +4,7 @@ import { documentService } from '../services/hrService';
 import { toast } from 'react-hot-toast';
 import { FaPlus, FaTrash, FaDownload, FaFileAlt } from 'react-icons/fa';
 import { BsFiletypePdf, BsFiletypeDoc, BsFiletypeXls } from 'react-icons/bs';
+import formatIndonesianDate from '../utils/date';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
@@ -114,7 +115,7 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
                   </td>
                   <td className="px-4 py-3 text-gray-600">{doc.created_by_name || 'Unknown'}</td>
                   <td className="px-4 py-3 text-gray-500">
-                    {new Date(doc.created_at).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    {formatIndonesianDate(doc.created_at)}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-2">

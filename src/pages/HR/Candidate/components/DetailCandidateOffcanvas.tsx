@@ -5,6 +5,7 @@ import { onImageProfileError, placeholderProfileImage } from '../utils/utils';
 import { FaPencil, FaTrash, FaXmark, FaPlus } from 'react-icons/fa6';
 import { MdOutlineFileDownload } from 'react-icons/md';
 import { toast } from 'react-hot-toast';
+import formatIndonesianDate from '../utils/date';
 import BackgroundCheckTab from './BackgroundCheckTab';
 import DocumentTab from './DocumentTab';
 import DateInterviewTab from './DateInterviewTab';
@@ -137,9 +138,7 @@ const DetailCandidateOffcanvas = ({
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Date of Interview</p>
                   <p className="text-sm font-medium text-gray-800">
-                    {candidate.schedule_interview?.schedule_interview_date
-                      ? new Date(candidate.schedule_interview.schedule_interview_date).toLocaleDateString()
-                      : '-'}
+                    {formatIndonesianDate(candidate.schedule_interview?.schedule_interview_date)}
                   </p>
                 </div>
               </div>
@@ -191,7 +190,7 @@ const ProfileTab = ({ candidate }: { candidate: Candidate }) => {
     { label: 'Candidate Name', value: candidate.candidate_name || 'n/a' },
     { label: 'Phone', value: candidate.candidate_phone || '-' },
     { label: 'Gender', value: candidate.candidate_gender || 'n/a' },
-    { label: 'Date of Birth', value: candidate.candidate_date_birth ? new Date(candidate.candidate_date_birth).toLocaleDateString() : 'n/a' },
+    { label: 'Date of Birth', value: formatIndonesianDate(candidate.candidate_date_birth) === '-' ? 'n/a' : formatIndonesianDate(candidate.candidate_date_birth) },
     { label: 'Email', value: candidate.candidate_email || 'n/a' },
     { label: 'Nationality', value: candidate.candidate_nationality || '-' },
     { label: 'Religion', value: candidate.candidate_religion || '-' },
@@ -331,10 +330,10 @@ const NotesTab = ({ notes, loading, candidateId, onRefresh }: { notes: NoteItem[
             <div key={note.note_id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-gray-800">{note.created_by || '-'}</span>
+                  <span className="text-sm font-semibold text-gray-800">{note.created_by_name || '-'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">{new Date(note.created_at).toLocaleDateString()}</span>
+                  <span className="text-xs text-gray-400">{formatIndonesianDate(note.created_at)}</span>
                   <Button
                     size="sm"
                     variant="transparent"
