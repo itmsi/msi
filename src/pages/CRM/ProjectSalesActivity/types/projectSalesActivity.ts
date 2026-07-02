@@ -26,7 +26,27 @@ export interface ProjectSalesActivityItem {
     customer_name: string;
     iup_name: string;
 }
+export interface ProjectSalesActivitySummaryItem {
+    project_id: string;
+    employee_id: string;
 
+    image: string | null;
+    image_path: string | null;
+
+    description: string;
+
+    latitude: string;
+    longitude: string;
+
+    created_at: string;
+
+    project_name: string;
+    status: string;
+
+    employee_name: string;
+    customer_name: string;
+    iup_name: string;
+}
 // export interface ProjectSalesActivityDetailItem {
 //     project_sales_activity_id: string;
 //     project_id: string;

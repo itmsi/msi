@@ -3,8 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
 import { PermissionGate } from '@/components/common/PermissionComponents';
-import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
-import { useConfirmation } from '@/hooks/useConfirmation';
 import CustomDataTable from '@/components/ui/table/CustomDataTable';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -70,11 +68,6 @@ const ManageProjectSalesActivity: React.FC = () => {
     const handleClearSearchLocal = () => {
         setSearchValue('');
         handleClearSearch();
-    };
-
-    // Handle row click - navigate to detail page
-    const handleRowClick = (row: any) => {
-        navigate(`/crm/activity/edit/${row.transactions_id}`);
     };
 
     // SearchAndFilters component matching IUP Management/Contractors pattern
@@ -169,31 +162,6 @@ const ManageProjectSalesActivity: React.FC = () => {
             />
             
             <div className="space-y-6">
-                <div className="bg-white shadow rounded-lg">
-                    {/* Header */}
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Activities Management
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Manage and view customer activity transactions
-                                </p>
-                            </div>
-                            <PermissionGate permission="create">
-                                <Button
-                                    onClick={() => navigate('/crm/activity/create')}
-                                    className="flex items-center gap-2"
-                                    size="sm"
-                                >
-                                    <MdAdd className="h-4 w-4" />
-                                    Create Activity
-                                </Button>
-                            </PermissionGate>
-                        </div>
-                    </div>
-                </div>
                 {/* Search and Filter Section */}
                 <div className="bg-white shadow rounded-lg px-6 py-4">
                     {SearchAndFilters}
@@ -213,9 +181,8 @@ const ManageProjectSalesActivity: React.FC = () => {
                             paginationPerPage={pagination.limit || 10}
                             paginationDefaultPage={pagination.page || 1}
                             paginationRowsPerPageOptions={[10, 25, 50, 100]}
-                            onChangePage={handlePageChange}
-                            onChangeRowsPerPage={handleRowsPerPageChange}
-                            onRowClicked={handleRowClick}
+                            onChangePage={handlePageChangeAman}
+                            onChangeRowsPerPage={handleRowsPerPageAman}
                             noDataComponent={<NoDataComponent />}
                             striped={false}
                             persistTableHead
@@ -228,7 +195,6 @@ const ManageProjectSalesActivity: React.FC = () => {
                     </div>
                 </div>
                 
-                <ConfirmationModal {...modalProps} />
             </div>
         </>
     );

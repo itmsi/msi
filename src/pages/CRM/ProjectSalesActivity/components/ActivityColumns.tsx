@@ -1,19 +1,13 @@
 import { TableColumn } from 'react-data-table-component';
-import { Activity } from '../types/projectSalesActivity';
-import { formatDate, formatDateTime } from '@/helpers/generalHelper';
-import Badge from '@/components/ui/badge/Badge';
+import { ProjectSalesActivitySummaryItem } from '../types/projectSalesActivity';
+import { formatDate } from '@/helpers/generalHelper';
 import { ActivityTypeBadge } from '../../Contractors/components/ContractorBadges';
 
-export const getActivityColumns = (): TableColumn<Activity>[] => [
-    {
-        name: 'Transaction Type',
-        selector: (row) => row?.transaction_type || 'find',
-        cell: (row) => <ActivityTypeBadge type={(row?.transaction_type as 'Find' | 'Pull' | 'Survey') || 'Find'} />
-    },
+export const getActivityColumns = (): TableColumn<ProjectSalesActivitySummaryItem>[] => [
     {
         name: 'Sales Name',
-        selector: (row: Activity) => row.employee_name || '-',
-        cell: (row: Activity) => (
+        selector: (row: ProjectSalesActivitySummaryItem) => row.employee_name || '-',
+        cell: (row: ProjectSalesActivitySummaryItem) => (
             <div className="py-2">
                 <p className="text-sm font-medium text-gray-900">
                     {row.employee_name || '-'}
@@ -23,86 +17,47 @@ export const getActivityColumns = (): TableColumn<Activity>[] => [
     },
     {
         name: 'Contractor Name',
-        selector: (row: Activity) => row.customer_iup_name || '-',
-        cell: (row: Activity) => (
+        selector: (row: ProjectSalesActivitySummaryItem) => row.customer_name || '-',
+        cell: (row: ProjectSalesActivitySummaryItem) => (
             <div className="py-2">
                 <p className="text-sm font-medium text-gray-900">
-                    {row.customer_iup_name || '-'}
+                    {row.customer_name || '-'}
+                </p>
+                <p className="text-sm font-medium text-gray-900">
+                    {row.iup_name || '-'}
                 </p>
             </div>
         ),
     },
     {
-        name: 'Segmentation',
-        selector: (row: Activity) => row.segmentation_properties?.segmentation_name_en || '-',
+        name: 'Project Name',
+        selector: (row: ProjectSalesActivitySummaryItem) => row.project_name || '-',
         // width: '160px',
-        cell: (row: Activity) => (
+        cell: (row: ProjectSalesActivitySummaryItem) => (
             <div className="py-2">
                 <p className="text-sm font-medium text-gray-900">
-                    {row.segmentation_properties?.segmentation_name_en || '-'}
+                    {row.project_name || '-'}
                 </p>
             </div>
         ),
     },
     {
-        name: 'Visit Date',
-        selector: (row: Activity) => row.transaction_date || '-',
-        cell: (row: Activity) => (
+        name: 'Status',
+        selector: (row: ProjectSalesActivitySummaryItem) => row?.status || 'find',
+        cell: (row: ProjectSalesActivitySummaryItem) => <ActivityTypeBadge type={(row?.status as 'Find' | 'Pull' | 'Survey') || 'Find'} />
+    },
+    {
+        name: 'Last Update',
+        selector: (row: ProjectSalesActivitySummaryItem) => row.created_at || '-',
+        cell: (row: ProjectSalesActivitySummaryItem) => (
             <div className=" items-center gap-3 py-2">
                 <div className="font-medium text-gray-900">
-                    {row.transaction_date ? formatDate(row.transaction_date) : '-'}
-                </div>
-                <div className="block text-sm text-gray-500">
-                    {row.transaction_time || '-'}
+                    {row.created_at ? formatDate(row.created_at) : '-'}
                 </div>
             </div>
         ),
         width: '160px'
     },
-    {
-        name: 'Location',
-        selector: (row: Activity) => `${row.latitude}, ${row.longitude}`,
-        // width: '140px',
-        cell: (row: Activity) => (
-            <div className="py-2">
-                <p className="text-xs text-gray-600">
-                    {row.latitude && row.longitude ? 
-                        `${parseFloat(row.latitude).toFixed(4)}, ${parseFloat(row.longitude).toFixed(4)}` : 
-                        '-'
-                    }
-                </p>
-            </div>
-        ),
-    },
-    {
-        name: 'Updated By',
-        selector: row => row.updated_at,
-        cell: (row) => (
-            <div className="items-center gap-3 py-2">
-                <div className="font-medium text-gray-900">
-                    {row?.updated_by_name || '-'}
-                </div>
-                <div className="block text-sm text-gray-500">{`${formatDateTime(row.updated_at)}`}</div>
-            </div>
-        ),
-        width: '200px'
-    },
-    {
-        name: 'Transaction Source',
-        selector: (row: Activity) => row.transaction_source || '-',
-        // width: '140px',
-        cell: (row: Activity) => (
-            <div className="items-center capitalize">
-                <Badge
-                    color={row.transaction_source.toLowerCase() === 'manual' ? 'primary' :'info'}
-                    variant='light'
-                >
-                    {row.transaction_source}
-                </Badge>
-            </div>
-        ),
-        center: true,
-    }
 ];
 
 // No data component

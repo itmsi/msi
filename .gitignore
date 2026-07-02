@@ -27,3 +27,4 @@ src/components/demo
 .env
 package-lock.json
 .github
+public/tinymce

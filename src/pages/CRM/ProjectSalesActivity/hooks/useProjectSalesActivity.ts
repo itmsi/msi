@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ActivityServices } from '../services/projectSalesActivityServices';
-import { ProjectSalesActivityItem, ProjectSalesActivityRequest, Pagination } from '../types/projectSalesActivity';
+import { ProjectSalesActivitySummaryItem, ProjectSalesActivityRequest, Pagination } from '../types/projectSalesActivity';
 import { useLocation, useSearchParams } from "react-router-dom";
 
 type FilterState = {
@@ -35,7 +35,7 @@ export const useProjectSalesActivity = () => {
     // Input search dipisah agar tidak memicu fetch saat user masih mengetik
     const [searchValue, setSearchValue] = useState(urlFilters.search);
 
-    const [activities, setActivities] = useState<ProjectSalesActivityItem[]>([]);
+    const [activities, setActivities] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [pagination, setPagination] = useState<Pagination>({
