@@ -11,7 +11,7 @@ type FilterState = {
     subsidiary: string;
     location: string;
     approvalstatus: string | null;
-    segmentation_id: string;
+    created_by?: string;
 };
 
 export const usePurchaseOrder = (profileSSO?: number) => {
@@ -36,7 +36,7 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         subsidiary: searchParams.get('subsidiary') || '',
         location: searchParams.get('location') || '',
         approvalstatus: searchParams.get('approvalstatus') || null,
-        segmentation_id: searchParams.get('segmentation_id') || '',
+        created_by: searchParams.get('created_by') || '',
     };
 
     const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderItem[]>([]);
@@ -115,10 +115,19 @@ export const usePurchaseOrder = (profileSSO?: number) => {
         if (e.key === 'Enter') executeSearch();
     }, [executeSearch]);
     
+    // Clear search — reset URL params agar useEffect trigger refetch otomatis
     const handleClearSearch = useCallback(() => {
         setSearchValue('');
-        handleFilterChange({ search: '' });
-    }, [handleFilterChange]);
+        updateUrlParams({
+            search: '',
+            sort_order: 'desc',
+            po_status: '',
+            subsidiary: '',
+            location: '',
+            approvalstatus: null,
+            created_by: '',
+        }, 1, urlLimit);
+    }, [updateUrlParams, urlLimit]);
 
     useEffect(() => {
         fetchPurchaseOrders();
