@@ -888,7 +888,7 @@ export const routes: TAppRoute[] = [
         name: 'Daily Task Activity CRM',
         isProtected: true,
         roles: ['Daily Task Activity CRM'],
-        requiredPermissions: ['read', 'update', 'delete', 'create'],
+        requiredPermissions: ['read'],
         component: DailyTaskActivity,
         layout: AppLayout,
     },

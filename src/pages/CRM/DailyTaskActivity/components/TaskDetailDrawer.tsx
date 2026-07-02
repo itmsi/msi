@@ -14,6 +14,8 @@ interface TaskDetailDrawerProps {
     historyLoading: boolean;
     onSave: (id: string, data: DailyTaskFormData) => Promise<void>;
     onDelete: (id: string) => void;
+    canUpdate?: boolean;
+    canDelete?: boolean;
 }
 
 const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
@@ -24,6 +26,8 @@ const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
     historyLoading,
     onSave,
     onDelete,
+    canUpdate = true,
+    canDelete = true,
 }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState<DailyTaskFormData>({
@@ -105,18 +109,22 @@ const TaskDetailDrawer: React.FC<TaskDetailDrawerProps> = ({
                                 )}
                             </div>
                             <div className="flex gap-3 flex-shrink-0 ml-4">
-                                <Button onClick={() => setIsEditing(true)}>Edit Task</Button>
-                                <Button
-                                    variant="outline"
-                                    className="!text-red-600 !border-red-300 hover:!bg-red-50"
-                                    onClick={() => {
-                                        if (window.confirm('Are you sure you want to delete this task?')) {
-                                            onDelete(task.daily_task_activitity_id);
-                                        }
-                                    }}
-                                >
-                                    Delete
-                                </Button>
+                                {canUpdate && (
+                                    <Button onClick={() => setIsEditing(true)}>Edit Task</Button>
+                                )}
+                                {canDelete && (
+                                    <Button
+                                        variant="outline"
+                                        className="!text-red-600 !border-red-300 hover:!bg-red-50"
+                                        onClick={() => {
+                                            if (window.confirm('Are you sure you want to delete this task?')) {
+                                                onDelete(task.daily_task_activitity_id);
+                                            }
+                                        }}
+                                    >
+                                        Delete
+                                    </Button>
+                                )}
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4 text-sm">
