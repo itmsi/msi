@@ -144,6 +144,11 @@ const ManageWorkOrder = lazy(() => import('@/pages/WorkOrder/Manage'));
 // NANOGRID CALCULATOR
 const NanogridCalculator = lazy(() => import('@/pages/Nanogrid/Manage'));
 
+// ========================================
+// HR MODULE - Candidate/Interview
+const HRCandidateList = lazy(() => import('@/pages/HR/Candidate/index'));
+const HRCandidateCreate = lazy(() => import('@/pages/HR/Candidate/Create'));
+
 export type TAppRoute = {
     path: string;
     name: string;
@@ -1121,6 +1126,34 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['ADMIN'],
         component: ManageWorkOrder,
+        layout: AppLayout,
+    },
+    // ========================================
+    // HR MODULE - Candidate Management
+    {
+        path: '/hr/candidate',
+        name: 'Candidate HRM',
+        isProtected: true,
+        roles: ['Candidate HRM'],
+        component: HRCandidateList,
+        layout: AppLayout,
+    },
+    {
+        path: '/hr/candidate/create',
+        name: 'Candidate HRM',
+        isProtected: true,
+        roles: ['Candidate HRM'],
+        requiredPermissions: ['create'],
+        component: HRCandidateCreate,
+        layout: AppLayout,
+    },
+    {
+        path: '/hr/candidate/:id',
+        name: 'Candidate HRM',
+        isProtected: true,
+        roles: ['Candidate HRM'],
+        requiredPermissions: ['update', 'read'],
+        component: HRCandidateList,
         layout: AppLayout,
     },
 ];

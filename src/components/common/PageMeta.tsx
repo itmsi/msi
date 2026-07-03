@@ -7,7 +7,7 @@ const PageMeta = ({
 }: {
     title: string;
     description: string;
-    image: string;
+    image?: string;
 }) => (
     <Helmet>
         <title>{title}</title>
@@ -15,7 +15,7 @@ const PageMeta = ({
 
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content={image} />
+        {image && <meta property="og:image" content={image} />}
         <meta property="og:url" content={typeof window !== "undefined" ? window.location.href : ""} />
         <meta property="og:type" content="article" />
 
