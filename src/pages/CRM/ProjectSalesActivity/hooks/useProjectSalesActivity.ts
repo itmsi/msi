@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ActivityServices } from '../services/projectSalesActivityServices';
-import { ProjectSalesActivitySummaryItem, ProjectSalesActivityRequest, Pagination } from '../types/projectSalesActivity';
+import { ProjectSalesActivityRequest, Pagination } from '../types/projectSalesActivity';
 import { useLocation, useSearchParams } from "react-router-dom";
 
 type FilterState = {
