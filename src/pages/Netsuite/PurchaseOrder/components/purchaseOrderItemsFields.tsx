@@ -9,7 +9,7 @@ import 'react-date-range/dist/theme/default.css';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import Button from '@/components/ui/button/Button';
-import { MdAdd, MdDeleteOutline } from 'react-icons/md';
+import { MdAdd, MdContentCopy, MdDeleteOutline } from 'react-icons/md';
 import { TableColumn } from 'react-data-table-component';
 import { usePOItemsSelect } from '@/hooks/usePOItemsSelect';
 import { POLocationPaginationState, POLocationSelectOption } from '@/hooks/usePOLocationSelect';
@@ -30,6 +30,7 @@ interface POItemsFieldsProps {
     onDateChange?: (name: string, value: string) => void;
     onAddProductItem: (selectedProduct: any) => void;
     onProductDelete?: (productId: string) => void;
+    onProductCopy?: (productId: string) => void;
     onUpdateProductItem?: (index: number, field: string, value: any) => void;
     
     // Receive status edit
@@ -74,6 +75,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
     loadingMasterData,
     onAddProductItem,
     onProductDelete,
+    onProductCopy,
     onUpdateProductItem,
 
     // Receive status edit
@@ -676,7 +678,16 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                 className: 'text-red-600 hover:text-red-700 hover:bg-red-50',
                 tooltip: 'Remove Item',
                 permission: 'delete' as const
-            }
+            },
+            {
+                icon: MdContentCopy,
+                onClick: (row: TablePOItem) => {
+                    onProductCopy?.(row.id || '')
+                },
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                tooltip: 'Copy Item',
+                permission: 'create' as const
+            },
         ])])
     ];
     
