@@ -85,7 +85,11 @@ export const useProjectSalesActivity = () => {
 
     const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
         const updatedFilters = { ...urlFilters, ...newFilters };
-        updateUrlParams(updatedFilters, 1, urlLimit); // Reset ke page 1 tiap filter berubah
+        console.log({
+            updatedFilters,
+            newFilters
+        })
+        updateUrlParams(updatedFilters, 1, urlLimit);
     }, [urlFilters, urlLimit, updateUrlParams]);
     
     const handlePageChange = useCallback((page: number) => {

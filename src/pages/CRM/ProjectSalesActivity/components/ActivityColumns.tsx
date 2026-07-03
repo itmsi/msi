@@ -2,8 +2,21 @@ import { TableColumn } from 'react-data-table-component';
 import { ProjectSalesActivitySummaryItem } from '../types/projectSalesActivity';
 import { formatDate } from '@/helpers/generalHelper';
 import { ActivityTypeBadge } from '../../Contractors/components/ContractorBadges';
+import { FaImage, FaIndustry, FaMapPin } from 'react-icons/fa';
 
 export const getActivityColumns = (): TableColumn<ProjectSalesActivitySummaryItem>[] => [
+    {
+        name: 'Date Visited',
+        selector: (row: ProjectSalesActivitySummaryItem) => row.created_at || '-',
+        cell: (row: ProjectSalesActivitySummaryItem) => (
+            <div className=" items-center gap-3 py-2">
+                <div className="font-medium text-gray-900">
+                    {row.created_at ? formatDate(row.created_at) : '-'}
+                </div>
+            </div>
+        ),
+        width: '160px'
+    },
     {
         name: 'Sales Name',
         selector: (row: ProjectSalesActivitySummaryItem) => row.employee_name || '-',
@@ -14,6 +27,7 @@ export const getActivityColumns = (): TableColumn<ProjectSalesActivitySummaryIte
                 </p>
             </div>
         ),
+        width: '250px'
     },
     {
         name: 'Contractor Name',
@@ -23,11 +37,12 @@ export const getActivityColumns = (): TableColumn<ProjectSalesActivitySummaryIte
                 <p className="text-sm font-medium text-gray-900">
                     {row.customer_name || '-'}
                 </p>
-                <p className="text-sm font-medium text-gray-900">
-                    {row.iup_name || '-'}
-                </p>
+                <div className="text-xs text-gray-900 flex items-center">
+                    <FaIndustry className="text-gray-500 text-xs mr-2" /> {row.iup_name}
+                </div>
             </div>
         ),
+        width: '350px'
     },
     {
         name: 'Project Name',
@@ -40,24 +55,67 @@ export const getActivityColumns = (): TableColumn<ProjectSalesActivitySummaryIte
                 </p>
             </div>
         ),
+        width: '250px'
     },
     {
         name: 'Status',
-        selector: (row: ProjectSalesActivitySummaryItem) => row?.status || 'find',
-        cell: (row: ProjectSalesActivitySummaryItem) => <ActivityTypeBadge type={(row?.status as 'Find' | 'Pull' | 'Survey') || 'Find'} />
+        selector: (row: ProjectSalesActivitySummaryItem) => row?.image || 'Find',
+        cell: (row: ProjectSalesActivitySummaryItem) => <ActivityTypeBadge type={(row?.project_status as 'Find' | 'Pull' | 'Survey') || 'Find'} />
     },
     {
-        name: 'Last Update',
-        selector: (row: ProjectSalesActivitySummaryItem) => row.created_at || '-',
-        cell: (row: ProjectSalesActivitySummaryItem) => (
-            <div className=" items-center gap-3 py-2">
-                <div className="font-medium text-gray-900">
-                    {row.created_at ? formatDate(row.created_at) : '-'}
-                </div>
+        name: 'Locations',
+        selector: row => row?.project_status || 'find',
+        cell: row => (
+            <div className="items-center capitalize">
+                {row.project_status ? (
+                    <a 
+                        href={`https://www.google.com/maps/search/?api=1&query=${row.latitude},${row.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#a2d2ff]`}
+                    >
+                        <FaMapPin /> View Location
+                    </a>
+                ) : '-'}
             </div>
         ),
-        width: '160px'
+        center: true,
+        width: '250px'
     },
+    {
+        name: 'Image Preview',
+        selector: row => row?.image || 'find',
+        cell: row => (
+            <div className="items-center capitalize">
+                {row.image ? (
+                    <a 
+                        href={row.image}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-blue-200 border rounded-md font-medium `}
+                    >
+                        <FaImage /> View Image
+                    </a>
+                ) : '-'}
+            </div>
+        ),
+        center: true,
+        width: '250px'
+    },
+    {
+        name: 'Description',
+        selector: row => row?.description || 'find',
+        cell: row => (
+            <div className="items-center capitalize">
+                {row.description ? (
+                    <div >
+                        {row.description ? row.description : '-'}
+                    </div>
+                ) : '-'}
+            </div>
+        ),
+        width: '250px'
+    }
 ];
 
 // No data component

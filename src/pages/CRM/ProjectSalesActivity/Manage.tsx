@@ -1,12 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
-import { PermissionGate } from '@/components/common/PermissionComponents';
 import CustomDataTable from '@/components/ui/table/CustomDataTable';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
-import { MdAdd, MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch } from 'react-icons/md';
+import { MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch } from 'react-icons/md';
 import { toast } from 'react-hot-toast';
 
 // Activity specific imports
@@ -14,9 +12,6 @@ import { getActivityColumns, NoDataComponent, FilterSection } from './components
 import { useProjectSalesActivity } from './hooks/useProjectSalesActivity';
 
 const ManageProjectSalesActivity: React.FC = () => {
-    const location = useLocation();
-    const navigate = useNavigate();
-    
     const {
         activities,
         loading,
@@ -45,7 +40,11 @@ const ManageProjectSalesActivity: React.FC = () => {
         handleRowsPerPageChange(limitBaru, halamanBaru);
     }, [pagination?.page, pagination?.limit, handleRowsPerPageChange]);
     
-    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    
+    const params = new URLSearchParams(location.search);
+    const filterKeys = ['search', 'iup_id', 'iup_customer_id', 'start_date', 'end_date'];
+    const hasActiveFilter = filterKeys.some(key => params.has(key) && params.get(key) !== '');
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(hasActiveFilter ? true : false);
 
     // Handle filter toggle
     const handleToggleFilter = () => {
@@ -135,10 +134,11 @@ const ManageProjectSalesActivity: React.FC = () => {
             
             {showAdvancedFilters && (
                 <FilterSection
-                    filterIup={filters.iup_id || location.search.includes('iup=') ? filters.iup_id || '' : ''}
-                    filterStartDate={filters.start_date || location.search.includes('start_date=') ? filters.start_date || '' : ''}
-                    filterEndDate={filters.end_date || location.search.includes('end_date=') ? filters.end_date || '' : ''}
-                    onFilterChange={(field, value) => handleFilterChange({ [field]: value })}
+                    filterIup={filters.iup_id || ''}
+                    filterContractor={filters.iup_customer_id || ''}
+                    filterStartDate={filters.start_date || ''}
+                    filterEndDate={filters.end_date || ''}
+                    onFilterChange={(fields) => handleFilterChange(fields)}
                     onClearFilters={handleClearFilters}
                 />
             )}
@@ -156,7 +156,7 @@ const ManageProjectSalesActivity: React.FC = () => {
     return (
         <>
             <PageMeta
-                title="Activity Management | CRM"
+                title="Sales Activity Overview | CRM"
                 description="Manage customer activities and transactions"
                 image="/motor-sights-international.png"
             />

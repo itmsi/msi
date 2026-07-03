@@ -25,6 +25,7 @@ interface IupContractorSelectProps {
     
     // Common props
     disabled?: boolean;
+    disabledContractor?: boolean;
     className?: string;
     
     // Layout props
@@ -59,6 +60,7 @@ const IupContractorSelect: React.FC<IupContractorSelectProps> = ({
     
     // Common props
     disabled = false,
+    disabledContractor = true,
     className = "",
     
     // Layout props
@@ -214,9 +216,11 @@ const IupContractorSelect: React.FC<IupContractorSelectProps> = ({
         <div className={wrapperClass}>
             {/* IUP Selection */}
             <div>
-                <Label>
-                    {iupLabel} {iupRequired && <span className="text-red-500">*</span>}
-                </Label>
+                {iupLabel !== '' && (
+                    <Label>
+                        {iupLabel} {iupRequired && <span className="text-red-500">*</span>}
+                    </Label>
+                )}
                 <CustomAsyncSelect
                     loadOptions={handleIupInputChange}
                     defaultOptions={iupOptions}
@@ -238,9 +242,11 @@ const IupContractorSelect: React.FC<IupContractorSelectProps> = ({
 
             {/* Contractor Selection */}
             <div>
-                <Label>
-                    {contractorLabel} {contractorRequired && <span className="text-red-500">*</span>}
-                </Label>
+                {contractorLabel !== '' && (
+                    <Label>
+                        {contractorLabel} {contractorRequired && <span className="text-red-500">*</span>}
+                    </Label>
+                )}
                 <CustomAsyncSelect
                     loadOptions={loadContractorOptionsCallback}
                     defaultOptions={contractorDefaultOptions}
@@ -256,7 +262,7 @@ const IupContractorSelect: React.FC<IupContractorSelectProps> = ({
                     onChange={handleContractorChangeInternal}
                     placeholder={!selectedIup ? "Please select IUP first" : contractorPlaceholder}
                     isLoading={contractorPagination.loading}
-                    disabled={!selectedIup || disabled}
+                    disabled={disabledContractor ? !selectedIup || disabled : false}
                     isClearable={!contractorRequired}
                     noOptionsMessage={() => !selectedIup ? "Please select IUP first" : "No contractors found"}
                     loadingMessage={() => "Loading contractors..."}

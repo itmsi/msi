@@ -41,6 +41,7 @@ export interface ProjectSalesActivitySummaryItem {
     created_at: string;
 
     project_name: string;
+    project_status: string;
     status: string;
 
     employee_name: string;
