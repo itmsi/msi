@@ -263,7 +263,7 @@ export default function Dashboard() {
         };
         const parsePoDate = (value?: string) => {
             if (!value) return 0;
-            const [month, day, year] = value.split('/').map(Number);
+            const [day, month, year] = value.split('/').map(Number);
             if (!month || !day || !year) return 0;
             return new Date(year, month - 1, day).getTime();
         };
