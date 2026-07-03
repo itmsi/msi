@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { candidateService } from './services/hrService';
+import { candidateService, hrGroupService, hrCompanyService, hrDepartmentService, hrJobTitleService } from './services/hrService';
 import type { Candidate } from './types/hr';
+import type { Group, Company, Department, JobTitle } from './types/hr';
 import CandidateCard from './components/CandidateCard';
 import CreateCandidateForm from './CreateCandidateForm';
 import DetailCandidateOffcanvas from './components/DetailCandidateOffcanvas';
@@ -20,6 +21,8 @@ const CandidatePage = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
@@ -34,30 +37,112 @@ const CandidatePage = () => {
     status: '',
     interviewer: '',
     company: '',
+    group_id: '',
+    candidate_status_offering_letter: '',
     department: '',
     position: '',
     sort: 'latest',
   });
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [jobTitles, setJobTitles] = useState<JobTitle[]>([]);
 
   const handleToggleFilter = () => setShowAdvancedFilters(prev => !prev);
 
-  const fetchCandidates = useCallback(async () => {
+  const fetchCandidates = useCallback(async (page = 1, limit = 10, currentFilters = filters) => {
     setLoading(true);
     setError(false);
     try {
-      const result = await candidateService.getList();
+      const payload = {
+        page,
+        limit,
+        search: currentFilters.text || '',
+        sort_by: 'created_at',
+        sort_order: currentFilters.sort === 'latest' ? 'desc' : 'asc',
+        group_id: currentFilters.group_id || '',
+        company_id: currentFilters.company || '',
+        department_id: currentFilters.department || '',
+        title_id: currentFilters.position || '',
+        candidate_status: currentFilters.status || '',
+        candidate_status_offering_letter: currentFilters.candidate_status_offering_letter || '',
+        assign_role: currentFilters.interviewer || '',
+      };
+
+      const result = await candidateService.getList(payload as any);
       setCandidates(result.data || []);
-    } catch {
+      if (result.pagination) {
+        setTotal(result.pagination.total || 0);
+        setTotalPages(result.pagination.totalPages || Math.ceil((result.pagination.total || 0) / (result.pagination.limit || limit)));
+        setCurrentPage(result.pagination.page || page);
+      }
+    } catch (err) {
       setError(true);
     } finally {
       setLoading(false);
     }
+  }, [filters]);
+
+  // Fetch dropdown data
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const groupsRes = await hrGroupService.getList({ page: 1, limit: 100, search: '' } as any);
+        const companiesRes = await hrCompanyService.getList(100);
+        if (!mounted) return;
+        setGroups(groupsRes.data || []);
+        setCompanies(companiesRes.data || []);
+      } catch (e) {
+        // ignore
+      }
+    })();
+    return () => { mounted = false; };
   }, []);
 
+  // Fetch departments when company changes
   useEffect(() => {
-    fetchCandidates();
-  }, [fetchCandidates]);
+    if (!filters.company) {
+      setDepartments([]);
+      return;
+    }
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await hrDepartmentService.getList(filters.company, 100);
+        if (!mounted) return;
+        setDepartments(res.data || []);
+      } catch {
+        setDepartments([]);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [filters.company]);
+
+  // Fetch job titles when department changes
+  useEffect(() => {
+    if (!filters.department) {
+      setJobTitles([]);
+      return;
+    }
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await hrJobTitleService.getList(filters.department, 100);
+        if (!mounted) return;
+        setJobTitles(res.data || []);
+      } catch {
+        setJobTitles([]);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [filters.department]);
+
+  useEffect(() => {
+    fetchCandidates(currentPage, pageSize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Open detail if id param exists
   useEffect(() => {
@@ -120,54 +205,19 @@ const CandidatePage = () => {
   };
 
   // Pagination
-  const pageSize = 24;
+  const pageSize = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Filter and sort candidates
-  const filteredCandidates = useMemo(() => {
-    return candidates
-      .filter((c) => {
-        const q = filters.text.toLowerCase();
-        const assignRole = (c.schedule_interview && typeof c.schedule_interview.assign_role === 'string')
-          ? c.schedule_interview.assign_role
-          : '';
-        const interviewerText = assignRole || '';
-        const matchText = `${c.candidate_name} ${c.candidate_email} ${c.candidate_number} ${c.title_name || ''} ${c.candidate_status} ${interviewerText}`
-          .toLowerCase()
-          .includes(q);
-        const matchStatus = filters.status ? c.candidate_status === filters.status : true;
-        const matchInterviewer = filters.interviewer
-          ? assignRole.split(',').map((s: string) => s.trim()).includes(filters.interviewer)
-          : true;
-        const matchCompany = filters.company ? c.company_name === filters.company : true;
-        const matchDepartment = filters.department ? c.department_name === filters.department : true;
-        const matchPosition = filters.position ? c.title_name === filters.position : true;
-        return matchText && matchStatus && matchInterviewer && matchCompany && matchDepartment && matchPosition;
-      })
-      .sort((a, b) => {
-        const dA = new Date(a.created_at).getTime();
-        const dB = new Date(b.created_at).getTime();
-        return filters.sort === 'latest' ? dB - dA : dA - dB;
-      });
-  }, [candidates, filters]);
-
-  // Reset page when filters change
+  // When filters change, reset to first page and fetch server-side
   useEffect(() => {
     setCurrentPage(1);
+    fetchCandidates(1, pageSize, filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
-  const totalPages = Math.ceil(filteredCandidates.length / pageSize);
-  const paginatedCandidates = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredCandidates.slice(start, start + pageSize);
-  }, [filteredCandidates, currentPage]);
+  
 
-  const uniqueCompanies = useMemo(
-    () => [...new Set(candidates.map((c) => c.company_name).filter(Boolean) as string[])],
-    [candidates]
-  );
-
-  const activeFilterCount = [filters.status, filters.interviewer, filters.company].filter(Boolean).length;
+  const activeFilterCount = [filters.status, filters.interviewer, filters.company, filters.department, filters.position, filters.group_id].filter(Boolean).length;
 
   return (
     <div>
@@ -325,9 +375,42 @@ const CandidatePage = () => {
                     <label className="block text-xs font-medium text-gray-500 mb-1">Company</label>
                     <CustomSelect
                       placeholder="All Companies"
-                      options={uniqueCompanies.map((c) => ({ value: c, label: c }))}
-                      value={filters.company ? { value: filters.company, label: filters.company } : null}
+                      options={companies.map((c) => ({ value: c.company_id, label: c.company_name }))}
+                      value={filters.company ? { value: filters.company, label: companies.find(x => x.company_id === filters.company)?.company_name || filters.company } : null}
                       onChange={(opt) => setFilters((f) => ({ ...f, company: opt?.value || '' }))}
+                      isClearable
+                      isSearchable={false}
+                    />
+                  </div>
+                  <div className="w-48">
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Department</label>
+                    <CustomSelect
+                      placeholder="All Departments"
+                      options={departments.map((d) => ({ value: d.department_id, label: d.department_name }))}
+                      value={filters.department ? { value: filters.department, label: departments.find(x => x.department_id === filters.department)?.department_name || filters.department } : null}
+                      onChange={(opt) => setFilters((f) => ({ ...f, department: opt?.value || '' }))}
+                      isClearable
+                      isSearchable={false}
+                    />
+                  </div>
+                  <div className="w-48">
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Job Title</label>
+                    <CustomSelect
+                      placeholder="All Titles"
+                      options={jobTitles.map((j) => ({ value: j.title_id, label: j.title_name }))}
+                      value={filters.position ? { value: filters.position, label: jobTitles.find(x => x.title_id === filters.position)?.title_name || filters.position } : null}
+                      onChange={(opt) => setFilters((f) => ({ ...f, position: opt?.value || '' }))}
+                      isClearable
+                      isSearchable={false}
+                    />
+                  </div>
+                  <div className="w-48">
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Group</label>
+                    <CustomSelect
+                      placeholder="All Groups"
+                      options={groups.map((g) => ({ value: g.group_id, label: g.group_name }))}
+                      value={filters.group_id ? { value: filters.group_id, label: groups.find(x => x.group_id === filters.group_id)?.group_name || filters.group_id } : null}
+                      onChange={(opt) => setFilters((f) => ({ ...f, group_id: opt?.value || '' }))}
                       isClearable
                       isSearchable={false}
                     />
@@ -335,7 +418,7 @@ const CandidatePage = () => {
                   <div className="flex items-end">
                     <Button
                       variant="outline"
-                      onClick={() => setFilters((f) => ({ ...f, status: '', interviewer: '', company: '' }))}
+                      onClick={() => setFilters((f) => ({ ...f, status: '', interviewer: '', company: '', department: '', position: '', group_id: '' }))}
                     >
                       Clear All
                     </Button>
@@ -344,15 +427,15 @@ const CandidatePage = () => {
               )}
 
               <div className="flex items-center text-sm text-gray-500 mb-3">
-                <span className="font-medium">{filteredCandidates.length}</span>
-                <span className="mx-1">of</span>
                 <span className="font-medium">{candidates.length}</span>
+                <span className="mx-1">of</span>
+                <span className="font-medium">{total}</span>
                 <span className="ml-1">candidates</span>
               </div>
 
               {/* Candidate Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {paginatedCandidates.map((candidate) => (
+                {candidates.map((candidate) => (
                   <div key={candidate.candidate_id}>
                     <CandidateCard
                       candidate={candidate}
@@ -364,7 +447,7 @@ const CandidatePage = () => {
                 ))}
               </div>
 
-              {filteredCandidates.length === 0 && (
+              {candidates.length === 0 && !loading && (
                 <div className="text-center py-12 text-gray-500">No candidates found</div>
               )}
 
@@ -372,14 +455,14 @@ const CandidatePage = () => {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
                   <p className="text-sm text-gray-500">
-                    Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredCandidates.length)} of{' '}
-                    {filteredCandidates.length}
+                    Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, total)} of{' '}
+                    {total}
                   </p>
                   <div className="flex items-center gap-1">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      onClick={() => { const next = Math.max(1, currentPage - 1); setCurrentPage(next); fetchCandidates(next, pageSize); }}
                       disabled={currentPage === 1}
                     >
                       Prev
@@ -400,7 +483,7 @@ const CandidatePage = () => {
                           key={pageNum}
                           size="sm"
                           variant={currentPage === pageNum ? 'primary' : 'outline'}
-                          onClick={() => setCurrentPage(pageNum)}
+                          onClick={() => { setCurrentPage(pageNum); fetchCandidates(pageNum, pageSize); }}
                           className={`w-8! h-8! p-0! ${currentPage === pageNum ? '' : ''}`}
                         >
                           {pageNum}
@@ -410,7 +493,7 @@ const CandidatePage = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      onClick={() => { const next = Math.min(totalPages, currentPage + 1); setCurrentPage(next); fetchCandidates(next, pageSize); }}
                       disabled={currentPage === totalPages}
                     >
                       Next
