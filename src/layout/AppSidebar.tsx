@@ -9,6 +9,7 @@ import {
     HorizontaLDots,
     UserIcon
 } from "@/icons";
+import { FaUsers } from 'react-icons/fa';
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "@/hooks/useAuth";
 import GridShape from "@/components/common/GridShape";
@@ -240,7 +241,7 @@ const AppSidebar: React.FC = () => {
         // }
         {
             name: "HRM",
-            icon: <UserIcon />,
+            icon: <FaUsers />,
             allowedRoles: [
                 'Candidate HRM'
             ],
