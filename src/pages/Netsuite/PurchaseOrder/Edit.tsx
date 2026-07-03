@@ -46,6 +46,7 @@ export default function Edit() {
         handleSubmit,
         handleAddProductItem,
         handleProductDelete,
+        handleProductCopy,
         handleUpdateProductItem,
         loadData,
         handleSyncById,
@@ -571,6 +572,7 @@ export default function Edit() {
                                             onDateChange={handleDateChange}
                                             onAddProductItem={handleAddProductItem}
                                             onProductDelete={handleProductDelete}
+                                            onProductCopy={handleProductCopy}
                                             onUpdateProductItem={handleUpdateProductItem}
                                             
                                             // EDIT RECIVE STATUS

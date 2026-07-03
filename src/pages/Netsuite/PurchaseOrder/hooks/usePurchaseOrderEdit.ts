@@ -66,7 +66,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         tax_amount: calcLineAmounts(line).taxAmount,
         custcol_me_landed_cost: line.custcol_me_landed_cost != null ? Number(line.custcol_me_landed_cost) : 0,
         custcol_msi_fob: line.custcol_msi_fob != null ? Number(line.custcol_msi_fob) : 0,
-        description: line.description || ''
+        description: line.description || '',
     }));
 
     return {
@@ -88,10 +88,10 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         custbody_me_pr_type: detail.custbody_me_pr_type ?? null,
         custbody_me_saving_type: detail.custbody_me_saving_type ?? null,
         custbody_me_pr_number: detail.custbody_me_pr_number || '',
-        class: Number(items[0].class) ?? null,
-        class_name: items[0].class_name || '',
-        department: Number(items[0].department) ?? null,
-        department_name: items[0].department_name || '',
+        class: Number(detail.class) ?? null,
+        class_name: detail.class_display || '',
+        department: Number(detail.department) ?? null,
+        department_name: detail.department_display || '',
         approvalstatus: detail.approvalstatus,
         po_status_label: detail.po_status_label || '',
         nextapprover: detail.nextapprover || null,
@@ -383,6 +383,18 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
         }));
     };
 
+    const handleProductCopy = (productId: string) => {
+        setFormData(prev => {
+            const productToCopy = prev.items.find(item => item.id === productId);
+            if (!productToCopy) return prev;
+            const newItem = { ...productToCopy, id: `${productToCopy.id}-${Date.now()}` };
+            return {
+                ...prev,
+                items: [...prev.items, newItem]
+            };
+        });
+    };
+
     const handleUpdateProductItem = (index: number, field: string, value: any) => {
         setFormData(prev => {
             const updatedItems = [...prev.items];
@@ -441,6 +453,7 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
         // Product handlers
         handleAddProductItem,
         handleProductDelete,
+        handleProductCopy,
         handleUpdateProductItem,
         // File handlers
         handleAddFiles,

@@ -118,7 +118,7 @@ export const createByDateColumn = (
             </span>
         </div>
     ),
-    center: true,
+    center: false,
     wrap: true,
     width,
 });

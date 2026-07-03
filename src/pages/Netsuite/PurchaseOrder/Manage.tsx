@@ -163,12 +163,6 @@ export default function Manage() {
             center: true,
             width: '250px'
         },
-        // {
-        //     name: 'Subsidiary',
-        //     selector: row => row.subsidiary_display || '-',
-        //     wrap: true,
-        //     width: '280px'
-        // },
         {
             name: 'Created By',
             selector: (row: any) => row.po_id,
@@ -182,7 +176,6 @@ export default function Manage() {
                     </span>
                 </div>
             ),
-            center: true,
             wrap: true,
             width: '320px'
         },
