@@ -85,15 +85,15 @@ const FormScoringCanvas = ({ candidateId, scheduleId, editingFormId }: FormScori
           if (match) {
             const key = match.company_value === '7 Values' ? 'values'
               : match.company_value === 'SIAH' ? 'siah'
-              : match.company_value === 'CSE' ? 'cse'
-              : match.company_value === 'SDT' ? 'sdt'
-              : match.company_value === 'EXPERIENCE' ? 'experience'
-              : 'siah';
+                : match.company_value === 'CSE' ? 'cse'
+                  : match.company_value === 'SDT' ? 'sdt'
+                    : match.company_value === 'EXPERIENCE' ? 'experience'
+                      : 'siah';
             setActiveTab(key);
           }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [scheduleInterviewId, editingFormId]);
 
   const tabs: { key: FormType; label: string }[] = [
@@ -175,6 +175,15 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (companyValue === 'SIAH') {
+      const isMissingRequired = aspects.some((a) => !form[a.key]?.point || !form[a.key]?.question?.trim());
+      if (isMissingRequired) {
+        toast.error('Specific point and Question are required for all aspects in SIAH.');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
       const detailInterviews = aspects.map((a) => ({
@@ -203,12 +212,19 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
           allowMultiple
           items={aspects.map((aspect) => ({
             id: aspect.key,
-            judul: aspect.label,
+            judul: (
+              <>
+                {aspect.label}
+                {companyValue === 'SIAH' && <span className="text-red-500 ml-1">*</span>}
+              </>
+            ),
             konten: (
               <div className="space-y-3">
                 {/* Point Selector - full width */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Specific point</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Specific point {companyValue === 'SIAH' && <span className="text-red-500">*</span>}
+                  </label>
                   <CustomSelect
                     value={form[aspect.key]?.point ? { value: form[aspect.key].point, label: POINT_OPTIONS.find(o => o.value === form[aspect.key].point)?.label || form[aspect.key].point } : null}
                     onChange={(opt) => setForm((prev) => {
@@ -232,7 +248,9 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
                     </div>
                   </div>
                   <div className="md:col-span-5">
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Question</label>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                      Question {companyValue === 'SIAH' && <span className="text-red-500">*</span>}
+                    </label>
                     <TextArea value={form[aspect.key]?.question || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], question: e.target.value } }))}
                       rows={2} placeholder={aspect.defaultQ || 'Question'} readonly={defaultQuestions} />
                   </div>
@@ -249,7 +267,7 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
       </div>
       <div className="flex justify-end pt-2">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : isEditing ? `Update ${title.split(' ')[0]}` : `Save ${title.split(' ')[0]}`}
+          {isSubmitting ? 'Saving...' : isEditing ? `Update ${title.replace(' Assessment', '')}` : `Save ${title.replace(' Assessment', '')}`}
         </Button>
       </div>
     </form>

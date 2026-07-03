@@ -105,6 +105,10 @@ const DetailCandidateOffcanvas = ({
                   <p className="text-sm font-medium text-gray-800">{candidate.candidate_name}</p>
                 </div>
                 <div>
+                  <p className="text-xs text-gray-400 mb-0.5">Group</p>
+                  <p className="text-sm font-medium text-gray-800">{candidate.group_name || '-'}</p>
+                </div>
+                <div>
                   <p className="text-xs text-gray-400 mb-0.5">Company</p>
                   <p className="text-sm font-medium text-gray-800">{candidate.company_name || '-'}</p>
                 </div>
@@ -129,8 +133,8 @@ const DetailCandidateOffcanvas = ({
                   <div className="flex flex-wrap gap-1">
                     {candidate.schedule_interview?.assign_role
                       ? candidate.schedule_interview.assign_role.split(',').map((name, i) => (
-                          <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{name.trim()}</span>
-                        ))
+                        <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{name.trim()}</span>
+                      ))
                       : <span className="text-xs text-gray-400">-</span>
                     }
                   </div>
@@ -154,11 +158,10 @@ const DetailCandidateOffcanvas = ({
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 variant="transparent"
-                className={`whitespace-nowrap border-b-2 rounded-none! ${
-                  activeTab === tab.key
-                    ? 'border-[#0253a5] text-[#0253a5]'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                className={`whitespace-nowrap border-b-2 rounded-none! ${activeTab === tab.key
+                  ? 'border-[#0253a5] text-[#0253a5]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
               >
                 {tab.label}
               </Button>
@@ -191,6 +194,10 @@ const ProfileTab = ({ candidate }: { candidate: Candidate }) => {
     { label: 'Phone', value: candidate.candidate_phone || '-' },
     { label: 'Gender', value: candidate.candidate_gender || 'n/a' },
     { label: 'Date of Birth', value: formatIndonesianDate(candidate.candidate_date_birth) === '-' ? 'n/a' : formatIndonesianDate(candidate.candidate_date_birth) },
+    { label: 'PTK Date', value: formatIndonesianDate(candidate.ptk_date) === '-' ? 'n/a' : formatIndonesianDate(candidate.ptk_date) },
+    { label: 'Offering Letter Date', value: formatIndonesianDate(candidate.offering_letter) === '-' ? 'n/a' : formatIndonesianDate(candidate.offering_letter) },
+    { label: 'Group', value: candidate.group_name || 'n/a' },
+    { label: 'Remark', value: candidate.remark || '-' },
     { label: 'Email', value: candidate.candidate_email || 'n/a' },
     { label: 'Nationality', value: candidate.candidate_nationality || '-' },
     { label: 'Religion', value: candidate.candidate_religion || '-' },

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { candidateService, hrCompanyService, hrDepartmentService, hrJobTitleService } from './services/hrService';
-import type { Candidate, Company, Department, JobTitle } from './types/hr';
+import { candidateService, hrCompanyService, hrDepartmentService, hrJobTitleService, hrGroupService } from './services/hrService';
+import type { Candidate, Company, Department, JobTitle, Group } from './types/hr';
 import { toast } from 'react-hot-toast';
 import dayjs from 'dayjs';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
 import TextArea from '@/components/form/input/TextArea';
 import CustomSelect from '@/components/form/select/CustomSelect';
+import DatePicker from '@/components/form/date-picker';
 
 interface CreateCandidateFormProps {
   initialData?: Candidate | null;
@@ -20,6 +21,9 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
   const [submitting, setSubmitting] = useState(false);
 
   // Dropdown data
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [loadingGroup, setLoadingGroup] = useState(true);
+  const [selectedGroupName, setSelectedGroupName] = useState('');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loadingCompany, setLoadingCompany] = useState(true);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -46,6 +50,10 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
     candidate_country: '',
     candidate_foto: null as File | string | null,
     candidate_resume: null as File | string | null,
+    ptk_date: null as Date | null,
+    offering_letter: null as Date | null,
+    remark: '',
+    group_id: '',
   });
 
   const [selectedCompanyName, setSelectedCompanyName] = useState('');
@@ -54,6 +62,21 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
 
   const [fileNamePhoto, setFileNamePhoto] = useState('');
   const [fileNameCV, setFileNameCV] = useState('');
+
+  // Load groups on mount
+  useEffect(() => {
+    hrGroupService
+      .getList({
+        page: 1,
+        limit: 10,
+        search: '',
+        sort_by: 'created_at',
+        sort_order: 'desc',
+      })
+      .then((result) => setGroups(result.data || []))
+      .catch(() => toast.error('Failed to load groups'))
+      .finally(() => setLoadingGroup(false));
+  }, []);
 
   // Load companies on mount
   useEffect(() => {
@@ -90,7 +113,12 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
       candidate_country: initialData.candidate_country || '',
       candidate_foto: initialData.candidate_foto || null,
       candidate_resume: initialData.candidate_resume || null,
+      ptk_date: initialData.ptk_date ? new Date(initialData.ptk_date) : null,
+      offering_letter: initialData.offering_letter ? new Date(initialData.offering_letter) : null,
+      remark: initialData.remark || '',
+      group_id: initialData.group_id || '',
     }));
+    setSelectedGroupName(initialData.group_name || '');
     setSelectedCompanyName(initialData.company_name || '');
     setSelectedDeptName(initialData.department_name || '');
     setSelectedTitleName(initialData.title_name || '');
@@ -227,6 +255,12 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
       if (submitData.candidate_date_birth) {
         submitData.candidate_date_birth = dayjs(submitData.candidate_date_birth).format('YYYY-MM-DD') as unknown as Date;
       }
+      if (submitData.ptk_date) {
+        submitData.ptk_date = dayjs(submitData.ptk_date).format('YYYY-MM-DD') as unknown as Date;
+      }
+      if (submitData.offering_letter) {
+        submitData.offering_letter = dayjs(submitData.offering_letter).format('YYYY-MM-DD') as unknown as Date;
+      }
 
       if (isEdit) {
         await candidateService.updateMultipart(initialData!.candidate_id, buildFormData(submitData));
@@ -249,9 +283,8 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
     <form
       noValidate
       onSubmit={handleSubmit}
-      className={`${!isEdit ? 'p-6 bg-gray-50 rounded-xl border border-gray-200' : ''} ${
-        validated ? 'was-validated' : ''
-      }`}
+      className={`${!isEdit ? 'p-6 bg-gray-50 rounded-xl border border-gray-200' : ''} ${validated ? 'was-validated' : ''
+        }`}
     >
       {!isEdit && <h2 className="text-lg font-semibold mb-4">Create New Candidate</h2>}
 
@@ -311,6 +344,37 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
           />
         </div>
 
+        {/* Group */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Group</label>
+          <CustomSelect
+            name="group_id"
+            value={selectedGroupName ? { value: form.group_id, label: selectedGroupName } : null}
+            onChange={(opt) => {
+              const value = opt?.value || '';
+              const label = opt?.label || '';
+              setSelectedGroupName(label);
+              setSelectedCompanyName('');
+              setSelectedDeptName('');
+              setSelectedTitleName('');
+              setForm((prev) => ({
+                ...prev,
+                group_id: value,
+                company_id: '',
+                department_id: '',
+                title_id: '',
+              }));
+              setDepartments([]);
+              setJobTitles([]);
+            }}
+            options={[...groups].sort((a, b) => a.group_name.localeCompare(b.group_name)).map((g) => ({ value: g.group_id, label: g.group_name }))}
+            placeholder={loadingGroup ? 'Loading groups...' : '-- Choose Group --'}
+            disabled={loadingGroup}
+            isSearchable
+            isClearable
+          />
+        </div>
+
         {/* Company */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
@@ -322,7 +386,7 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
               setSelectedCompanyName(value);
               setSelectedDeptName('');
               setSelectedTitleName('');
-              setForm((prev) => ({ ...prev, department_id: '', title_id: '' }));
+              setForm((prev) => ({ ...prev, company_id: '', department_id: '', title_id: '' }));
               const selected = companies.find((c) => c.company_name === value);
               if (selected) {
                 setForm((prev) => ({ ...prev, company_id: selected.company_id }));
@@ -334,8 +398,8 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
               }
             }}
             options={[...companies].sort((a, b) => a.company_name.localeCompare(b.company_name)).map((c) => ({ value: c.company_name, label: c.company_name }))}
-            placeholder={loadingCompany ? 'Loading companies...' : '-- Choose Company --'}
-            isDisabled={loadingCompany}
+            placeholder={!selectedGroupName ? 'Select group first' : loadingCompany ? 'Loading companies...' : '-- Choose Company --'}
+            disabled={loadingCompany || !selectedGroupName}
             isSearchable
             isClearable
           />
@@ -364,7 +428,7 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
             }}
             options={[...departments].sort((a, b) => (a.department_name || '').localeCompare(b.department_name || '')).map((d) => ({ value: d.department_name, label: d.department_name }))}
             placeholder={!selectedCompanyName ? 'Select a company first' : loadingDept ? 'Loading departments...' : '-- Choose Department --'}
-            isDisabled={loadingDept || !selectedCompanyName}
+            disabled={loadingDept || !selectedCompanyName}
             isSearchable
             isClearable
           />
@@ -384,7 +448,7 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
             }}
             options={[...jobTitles].sort((a, b) => (a.title_name || '').localeCompare(b.title_name || '')).map((j) => ({ value: j.title_name, label: j.title_name }))}
             placeholder={!selectedDeptName ? 'Select a department first' : loadingJob ? 'Loading positions...' : '-- Choose Position --'}
-            isDisabled={loadingJob || !selectedDeptName}
+            disabled={loadingJob || !selectedDeptName}
             isSearchable
             isClearable
           />
@@ -409,7 +473,7 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
             name="candidate_gender"
             value={form.candidate_gender ? { value: form.candidate_gender, label: form.candidate_gender } : null}
             onChange={(opt) => setForm((prev) => ({ ...prev, candidate_gender: opt?.value || '' }))}
-            options={[ { value: 'Male', label: 'Male' }, { value: 'Female', label: 'Female' } ]}
+            options={[{ value: 'Male', label: 'Male' }, { value: 'Female', label: 'Female' }]}
             placeholder="-- Choose Gender --"
             isSearchable={false}
             isClearable
@@ -419,20 +483,60 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
         {/* Date of Birth */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-          <Input
-            type="date"
-            name="candidate_date_birth"
-            value={
-              form.candidate_date_birth instanceof Date
-                ? form.candidate_date_birth.toISOString().split('T')[0]
-                : ''
-            }
-            onChange={(e) =>
+          <DatePicker
+            id="candidate_date_birth"
+            placeholder="Select date of birth"
+            defaultDate={form.candidate_date_birth || undefined}
+            isStatic={true}
+            onChange={(dates) =>
               setForm((prev) => ({
                 ...prev,
-                candidate_date_birth: e.target.value ? new Date(e.target.value) : null,
+                candidate_date_birth: dates && dates.length > 0 ? dates[0] : null,
               }))
             }
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">PTK Date</label>
+          <DatePicker
+            id="ptk_date"
+            placeholder="Select PTK date"
+            defaultDate={form.ptk_date || undefined}
+            isStatic={true}
+            onChange={(dates) =>
+              setForm((prev) => ({
+                ...prev,
+                ptk_date: dates && dates.length > 0 ? dates[0] : null,
+              }))
+            }
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Offering Letter Date</label>
+          <DatePicker
+            id="offering_letter"
+            placeholder="Select offering letter date"
+            defaultDate={form.offering_letter || undefined}
+            isStatic={true}
+            onChange={(dates) =>
+              setForm((prev) => ({
+                ...prev,
+                offering_letter: dates && dates.length > 0 ? dates[0] : null,
+              }))
+            }
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Remark</label>
+          <TextArea
+            name="remark"
+            value={form.remark}
+            onChange={handleChange}
+            rows={3}
+            placeholder="Enter remark"
           />
         </div>
 
@@ -455,7 +559,7 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
             name="candidate_marital_status"
             value={form.candidate_marital_status ? { value: form.candidate_marital_status, label: form.candidate_marital_status } : null}
             onChange={(opt) => setForm((prev) => ({ ...prev, candidate_marital_status: opt?.value || '' }))}
-            options={[ { value: 'Single', label: 'Single' }, { value: 'Married', label: 'Married' }, { value: 'Divorced', label: 'Divorced' } ]}
+            options={[{ value: 'Single', label: 'Single' }, { value: 'Married', label: 'Married' }, { value: 'Divorced', label: 'Divorced' }]}
             placeholder="-- Choose --"
             isSearchable={false}
             isClearable

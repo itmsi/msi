@@ -8,6 +8,7 @@ import FormScoringCanvas from './FormScoringCanvas';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
+import DatePicker from '@/components/form/date-picker';
 import { motion, AnimatePresence } from 'framer-motion';
 import formatIndonesianDate from '../utils/date';
 
@@ -348,12 +349,30 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
             <h3 className="text-lg font-semibold mb-4">{editing ? 'Edit' : 'Add'} Interview Schedule</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                <Input type="date" value={form.date} onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))} />
+                <DatePicker
+                  id="interview-date"
+                  label="Date"
+                  placeholder="Select date"
+                  defaultDate={form.date ? new Date(form.date) : undefined}
+                  isStatic={true}
+                  onChange={(_, dateStr) => setForm(f => ({ ...f, date: dateStr }))}
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                <Input type="time" value={form.time} onChange={(e) => setForm(f => ({ ...f, time: e.target.value }))} />
+                <DatePicker
+                  id="interview-time"
+                  mode="time"
+                  label="Time"
+                  placeholder="Select time"
+                  defaultDate={form.time ? (() => {
+                      const d = new Date();
+                      const [h, m] = form.time.split(':');
+                      d.setHours(parseInt(h, 10), parseInt(m, 10), 0, 0);
+                      return d;
+                  })() : undefined}
+                  isStatic={true}
+                  onChange={(_, timeStr) => setForm(f => ({ ...f, time: timeStr }))}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>

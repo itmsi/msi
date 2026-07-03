@@ -151,13 +151,12 @@ const FormInterviewTab = ({ candidateId }: FormInterviewTabProps) => {
                     <td className="px-4 py-3">{f.date_created}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                          getBadgeVariant(f.status) === 'success'
-                            ? 'bg-green-100 text-green-700'
-                            : getBadgeVariant(f.status) === 'primary'
+                        className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${getBadgeVariant(f.status) === 'success'
+                          ? 'bg-green-100 text-green-700'
+                          : getBadgeVariant(f.status) === 'primary'
                             ? 'bg-blue-100 text-blue-700'
                             : 'bg-gray-100 text-gray-600'
-                        }`}
+                          }`}
                       >
                         {f.status}
                       </span>
@@ -241,11 +240,10 @@ const FormScoringCanvas = ({ candidateId, editingFormId, onBack }: FormScoringCa
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             variant="transparent"
-            className={`whitespace-nowrap border-b-2 rounded-none! ${
-              activeTab === tab.key
-                ? 'border-[#0253a5] text-[#0253a5]'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+            className={`whitespace-nowrap border-b-2 rounded-none! ${activeTab === tab.key
+              ? 'border-[#0253a5] text-[#0253a5]'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
           >
             {tab.label}
           </Button>
@@ -335,8 +333,16 @@ const ScoringForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
+    if (companyValue === 'SIAH') {
+      const isMissingRequired = aspects.some((a) => !form[a.key]?.point || !form[a.key]?.question?.trim());
+      if (isMissingRequired) {
+        toast.error('Specific point and Question are required for all aspects in SIAH.');
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
     try {
       const detailInterviews = aspects.map((a) => ({
         aspect: a.label,
@@ -376,12 +382,19 @@ const ScoringForm = ({
           allowMultiple
           items={aspects.map((aspect) => ({
             id: aspect.key,
-            judul: aspect.label,
+            judul: (
+              <>
+                {aspect.label}
+                {companyValue === 'SIAH' && <span className="text-red-500 ml-1">*</span>}
+              </>
+            ),
             konten: (
               <div className="space-y-3">
                 {/* Point Selector - full width */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Specific point</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Specific point {companyValue === 'SIAH' && <span className="text-red-500">*</span>}
+                  </label>
                   <CustomSelect
                     value={form[aspect.key]?.point ? { value: form[aspect.key].point, label: POINT_OPTIONS.find(o => o.value === form[aspect.key].point)?.label || form[aspect.key].point } : null}
                     onChange={(opt) =>
@@ -409,7 +422,9 @@ const ScoringForm = ({
                     </div>
                   </div>
                   <div className="md:col-span-5">
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Question</label>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                      Question {companyValue === 'SIAH' && <span className="text-red-500">*</span>}
+                    </label>
                     <TextArea
                       value={form[aspect.key]?.question || ''}
                       onChange={(e) =>
@@ -446,7 +461,7 @@ const ScoringForm = ({
 
       <div className="flex justify-end pt-2">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : `Save ${title.split(' ')[0]}`}
+          {isSubmitting ? 'Saving...' : `Save ${title.replace(' Assessment', '')}`}
         </Button>
       </div>
     </form>

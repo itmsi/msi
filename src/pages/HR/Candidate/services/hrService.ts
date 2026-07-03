@@ -45,8 +45,8 @@ export class candidateService {
 }
 
 export class hrGroupService {
-  static async getList(limit = 100): Promise<ApiListResponse<Group>> {
-    return unwrapList<Group>(`${GW}/sso/group/get`, { limit });
+  static async getList(body: Record<string, unknown> = { page: 1, limit: 10, search: '', sort_by: 'created_at', sort_order: 'desc' }): Promise<ApiListResponse<Group>> {
+    return unwrapList<Group>(`${GW}/sso/group/get`, body);
   }
 }
 
