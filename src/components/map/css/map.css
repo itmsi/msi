@@ -1,0 +1,104 @@
+.leaf-custom-blur .leaflet-popup-content-wrapper {
+    backdrop-filter: blur(var(--blur-md));
+    background-color: color-mix(in srgb, #ffffff 30%, transparent);
+}
+.leaf-custom-blur .leaflet-popup-tip {
+    background-color: color-mix(in srgb, #ffffff 30%, transparent);}
+    .leaflet-popup-close-button {color:#fff !important}
+
+/* =========== */
+.iup-popup-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+}
+
+.circle-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #fff;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.circle-btn svg {
+    font-size: 15px;
+    color: #666;
+}
+
+.circle-btn:hover {
+    background: #f5f5f5;
+}
+
+.circle-btn.accent {
+    border-color: #b5d4f4;
+}
+.circle-btn.accent svg {
+    color: #185fa5;
+}
+.circle-btn.accent:hover {
+    background: #e6f1fb;
+}
+
+.circle-btn.danger {
+    border-color: #f5c6c6;
+}
+.circle-btn.danger svg {
+    color: #b71c1c;
+}
+.circle-btn.danger:hover {
+    background: #fdecea;
+}
+
+/* src/styles/map-controls.css */
+.map-layer-switcher {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    overflow: hidden;
+}
+
+.map-layer-switcher button {
+    padding: 8px 12px;
+    border: none;
+    background: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    color: #555;
+}
+
+.map-layer-switcher button.active {
+    background: #185fa5;
+    color: #fff;
+    font-weight: 600;
+}
+
+.map-fallback-notice {
+    position: absolute;
+    top: 52px;
+    right: 10px;
+    z-index: 1000;
+    background: #fff3cd;
+    color: #7a5c00;
+    border: 1px solid #ffe08a;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    max-width: 220px;
+}

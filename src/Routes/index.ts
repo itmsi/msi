@@ -81,6 +81,9 @@ const EditCRMProject = lazy(() => import('@/pages/CRM/Project/EditProject'));
 const CustomerCRM = lazy(() => import('@/pages/CRM/Customer/Manage'));
 const CustomerDashboard = lazy(() => import('@/pages/CRM/Customer/Dashboard'));
 const ProjectSalesActivityCRM = lazy(() => import('@/pages/CRM/ProjectSalesActivity/Manage'));
+const IupTerritory = lazy(() => import('@/pages/CRM/IUPTerritory/Manage'));
+const CreateIup = lazy(() => import('@/pages/CRM/IUPTerritory/CreateIup'));
+const EditIup = lazy(() => import('@/pages/CRM/IUPTerritory/EditIup'));
 
 // ========================================
 // QUOTATION ITI
@@ -933,6 +936,33 @@ export const routes: TAppRoute[] = [
         requiredPermissions: ['update', 'read'],
         component: ProjectSalesActivityCRM,
         layout: AppLayout,
+    },
+    {
+        path: '/crm/iup',
+        name: 'IUP Territory CRM',
+        isProtected: true,
+        roles: ['IUP Territory CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: IupTerritory,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/iup/create',
+        name: 'IUP Territory CRM',
+        isProtected: true,
+        roles: ['IUP Territory CRM'],
+        requiredPermissions: ['create'],
+        component: CreateIup,
+        layout: AppLayout
+    },
+    {
+        path: '/crm/iup/edit/:id',
+        name: 'IUP Territory CRM',
+        isProtected: true,
+        roles: ['IUP Territory CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: EditIup,
+        layout: AppLayout
     },
     {
         path: '/netsuite/purchase-order',
