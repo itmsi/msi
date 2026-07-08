@@ -92,13 +92,13 @@ export interface DailyTaskHistoryListResponse {
 // Status column config for kanban — status "progress" sesuai API
 export const TASK_STATUSES = [
     { id: 'hold', title: 'Hold', color: 'bg-gray-100 border-gray-300' },
-    { id: 'open', title: 'Open', color: 'bg-blue-50 border-blue-300' },
-    { id: 'progress', title: 'Progress', color: 'bg-yellow-50 border-yellow-300' },
-    { id: 'done', title: 'Done', color: 'bg-green-50 border-green-300' },
+    { id: 'open', title: 'Open', color: 'bg-[#4F46E5] border-blue-300' },
+    { id: 'progress', title: 'Progress', color: 'bg-[#F59E0B] border-yellow-300' },
+    { id: 'done', title: 'Done', color: 'bg-[#22C55E] border-green-300' },
 ] as const;
 
 export const PRIORITY_OPTIONS = [
-    { value: 'high', label: 'High', color: 'text-red-600 bg-red-50' },
-    { value: 'medium', label: 'Medium', color: 'text-yellow-600 bg-yellow-50' },
-    { value: 'low', label: 'Low', color: 'text-green-600 bg-green-50' },
+    { value: 'high', label: 'High', color: 'text-red-600 bg-red-50 ring-red-600' },
+    { value: 'medium', label: 'Medium', color: 'text-yellow-600 bg-yellow-50 ring-yellow-600' },
+    { value: 'low', label: 'Low', color: 'text-green-600 bg-green-50 ring-green-600' },
 ] as const;
