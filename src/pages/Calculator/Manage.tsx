@@ -13,6 +13,7 @@ import { HaulingPriceItem } from './types/calculator';
 import { useCalculatorManagement } from './hooks/useCalculatorManagement';
 import { createByDateColumn } from '@/components/ui/table/columnUtils';
 import PageHeaderManage from '@/components/common/PageHeaderManage';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -164,13 +165,15 @@ export default function Manage() {
                         {
                         key: 'create',
                         element: (
-                            <Button
-                                onClick={() => navigate('/hauling-calculator/create')}
-                                className="flex items-center gap-2"
-                            >
-                                <MdAdd size={20} />
-                                <span>Create Hauling Price Calculation</span>
-                            </Button>
+                            <PermissionGate permission="create">
+                                <Button
+                                    onClick={() => navigate('/hauling-calculator/create')}
+                                    className="flex items-center gap-2"
+                                >
+                                    <MdAdd className="mr-2" size={20} />
+                                    Create Hauling Price Calculation
+                                </Button>
+                            </PermissionGate>
                         )}
                     ]}
                 />

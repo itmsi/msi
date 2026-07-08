@@ -5,17 +5,20 @@ import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
 import { MdAdd, MdSearch, MdClear } from 'react-icons/md';
-import CustomSelect from '@/components/form/select/CustomSelect';
 
+import { PermissionGate } from '@/components/common/PermissionComponents';
 import { useDailyTasks } from './hooks/useDailyTasks';
 import TaskFormModal from './components/TaskFormModal';
 import TaskDetailDrawer from './components/TaskDetailDrawer';
 import HistoryTimeline from './components/HistoryTimeline';
 import Badge from '@/components/ui/badge/Badge';
 import { usePermissions } from '@/hooks/usePermissions';
-import { PermissionGate } from '@/components/common/PermissionComponents';
 import { toast } from 'react-hot-toast';
 import { PRIORITY_OPTIONS } from './types/dailyTask';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
+import { ButtonSwitcher } from '@/components/ui/button/ButtonSwitcher';
+import Avatar from '@/components/common/Avatar';
+import moment from 'moment';
 
 // ConfigMap type - defined locally because it's not re-exported from react-kanban-kit
 interface CardRenderProps {
@@ -149,10 +152,17 @@ const DailyTaskActivity: React.FC = () => {
                     const priorityLabel = priority.charAt(0).toUpperCase() + priority.slice(1);
                     const borderLeftColor = priority === 'high' ? '#ef4444' : priority === 'medium' ? '#eab308' : '#22c55e';
 
+                    // const colors: Record<string, string> = {
+                    //     hold: 'border-gray-300 border-t-4',
+                    //     open: 'border-blue-600 border-t-4',
+                    //     progress: 'border-yellow-600 border-t-4',
+                    //     done: 'border-green-600 border-t-4',
+                    // };
+                    // const colorClass = colors[data.parentId || 'hold'];
                     return (
                         <div
-                            className="bg-white rounded-lg border border-gray-200 p-3 cursor-pointer hover:border-blue-300 transition-colors duration-150"
-                            style={{ borderLeft: `4px solid ${borderLeftColor}` }}
+                            className={`bg-white rounded-lg p-3 cursor-pointer transition-colors duration-150 `}
+                            style={{ backgroundColor: `${borderLeftColor}1A`, boxShadow: '0px 3px 10px -9px #6c6c6c' }}
                         >
                             <div className="flex items-start justify-between gap-2 mb-1.5">
                                 <h4 className="text-md font-medium text-gray-900 leading-snug line-clamp-2 flex-1">
@@ -169,23 +179,25 @@ const DailyTaskActivity: React.FC = () => {
                             )}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-1.5">
-                                    <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
-                                        <span className="text-[10px] font-medium text-gray-500">
-                                            {(data.content?.created_by || '?')[0]?.toUpperCase()}
-                                        </span>
-                                    </div>
-                                    <span className="text-xs text-gray-400 truncate max-w-[100px]">
+                                    <Avatar
+                                        src={null}
+                                        nama={(data.content?.created_by_name || 'gak')}
+                                        size={25}
+                                        fontSize={9}
+                                        alt="Profile Preview"
+                                    />
+                                    <span className="text-xs text-gray-400 truncate">
                                         {data.content?.created_by_name || data.content?.created_by?.substring(0, 6) || 'User'}
                                     </span>
                                 </div>
                                 {data.content?.status === 'done' && data.content?.done_date ? (
                                     <span className="text-xs text-gray-400">
-                                        {new Date(data.content.done_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                        {moment(data.content.done_date).format('D MMMM YYYY')}
                                     </span>
                                 ) : (
                                     <span className="text-xs text-gray-400">
                                         {data.content?.updated_at
-                                            ? new Date(data.content.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                                            ? moment(data.content.updated_at).format('D MMMM YYYY')
                                             : ''}
                                     </span>
                                 )}
@@ -226,15 +238,18 @@ const DailyTaskActivity: React.FC = () => {
     // Column header renderer — simple like demo
     const renderColumnHeader = useCallback((column: BoardItem) => {
         const colors: Record<string, string> = {
-            hold: 'bg-gray-100 text-gray-700 border-gray-300',
-            open: 'bg-blue-50 text-blue-700 border-blue-200',
-            progress: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-            done: 'bg-green-50 text-green-700 border-green-200',
+            hold: 'bg-[#6B7280] border-[#6B7280] font-primary-bold text-white',
+            open: 'bg-[#4F46E5] border-[#4F46E5] font-primary-bold text-white',
+            progress: 'bg-[#F59E0B] border-[#F59E0B] font-primary-bold text-white',
+            done: 'bg-[#22C55E] border-[#22C55E] font-primary-bold text-white',
         };
         const colorClass = colors[column.id] || colors.hold;
 
         return (
-            <div className={`px-3 py-2.5 rounded-lg ${colorClass} border border-${colorClass.split(' ')[2]}`}>
+            <div 
+                className={`px-3 py-2.5 rounded-lg ${colorClass} border border-${colorClass.split(' ')[2]}`}
+                style={{ boxShadow: '0px 3px 6px -3px #6c6c6c' }}
+            >
                 <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold">{column.title}</h3>
                     <span className="text-xs font-medium opacity-60">{column.totalChildrenCount}</span>
@@ -259,6 +274,44 @@ const DailyTaskActivity: React.FC = () => {
         [openCreateModal]
     );
 
+    const SearchAndFilters = useMemo(() => (
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+            <div className="flex-1">
+                <div className="relative flex">
+                    <div className="relative flex-1">
+                        <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                        <Input
+                            type="text"
+                            placeholder="Search tasks... (Press Enter)"
+                            value={localSearch}
+                            onChange={onSearchChange}
+                            onKeyPress={onSearchKeyPress}
+                            className={`pl-10 py-2 w-full ${localSearch ? 'pr-10' : 'pr-4'}`}
+                        />
+                        {localSearch && (
+                            <button
+                                onClick={onClearSearch}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                type="button"
+                            >
+                                <MdClear className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+            
+                <ButtonSwitcher
+                    options={[
+                        { value: '', label: 'All Priority' },
+                        ...PRIORITY_OPTIONS.map((p) => ({ value: p.value, label: p.label, color: p.color })),
+                    ]}
+                    value={prioritySearch || priorityValue || ''}
+                    onChange={(opt) => onPriorityChange({ value: opt.value, label: opt.label })}
+                />
+        </div>
+    ), [localSearch, onSearchChange, onSearchKeyPress, onClearSearch]);
+
     return (
         <>
             <PageMeta
@@ -267,60 +320,32 @@ const DailyTaskActivity: React.FC = () => {
                 image="/motor-sights-international.png"
             />
 
-            <div className="space-y-6">
+            <div className="space-y-3">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Daily Task Activity</h1>
-                        <p className="mt-1 text-sm text-gray-500">
-                            Manage and track your daily tasks with Kanban board
-                        </p>
-                    </div>
-                    <PermissionGate permission="create">
-                        <Button onClick={() => openCreateModal('open')} className="flex items-center gap-2">
-                            <MdAdd size={18} />
-                            New Task
-                        </Button>
-                    </PermissionGate>
-                </div>
-
-                {/* Search */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="relative flex-1 w-full">
-                        <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                        <Input
-                            type="text"
-                            placeholder="Search tasks... (Press Enter)"
-                            value={localSearch}
-                            onChange={onSearchChange}
-                            onKeyPress={onSearchKeyPress}
-                            className="pl-10"
-                        />
-                        {localSearch && (
-                            <button
-                                onClick={onClearSearch}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                            >
-                                <MdClear size={18} />
-                            </button>
+                <PageHeaderManage
+                    title={'Daily Task Activity'}
+                    subtitle={'Manage and track your daily tasks with Kanban board'}
+                    className="mb-3"
+                    actions={[
+                        {
+                        key: 'create',
+                        element: (
+                            <PermissionGate permission="create">
+                                <Button
+                                onClick={() => openCreateModal('open')}
+                                    className="flex items-center gap-2"
+                                >
+                                    <MdAdd className="mr-2" size={20} />
+                                    Create Task
+                                </Button>
+                            </PermissionGate>
                         )}
-                    </div>
-                    <div className="w-full sm:w-44">
-                        <CustomSelect
-                            options={[
-                                { value: '', label: 'All Priority' },
-                                ...PRIORITY_OPTIONS.map((p) => ({ value: p.value, label: p.label })),
-                            ]}
-                            value={
-                                [
-                                    { value: '', label: 'All Priority' },
-                                    ...PRIORITY_OPTIONS.map((p) => ({ value: p.value, label: p.label })),
-                                ].find((o) => o.value === (prioritySearch || priorityValue)) || null
-                            }
-                            onChange={onPriorityChange}
-                            isClearable={false}
-                        />
-                    </div>
+                    ]}
+                />
+
+                {/* Search & Filter */}
+                <div className="bg-white shadow rounded-lg px-6 py-4">
+                    {SearchAndFilters}
                 </div>
 
                 {/* Kanban Board */}
@@ -329,37 +354,40 @@ const DailyTaskActivity: React.FC = () => {
                         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
                     </div>
                 ) : (
-                    <div className="bg-gray-50/50 rounded-xl border border-gray-200 p-3">
-                        <Kanban
-                            dataSource={dataSource}
-                            configMap={configMap}
-                            onCardMove={onCardMove}
-                            onCardClick={handleCardClick}
-                            renderColumnHeader={renderColumnHeader}
-                            renderColumnFooter={canCreate ? renderColumnFooter : undefined}
-                            cardsGap={8}
-                            virtualization={true}
-                            loadMore={handleLoadMore}
-                            renderSkeletonCard={() => (
-                                <div className="bg-gray-50 rounded-lg border border-dashed border-gray-300 p-3 animate-pulse">
-                                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                                    <div className="h-3 bg-gray-200 rounded w-1/2" />
-                                </div>
-                            )}
-                            rootStyle={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(4, 1fr)',
-                                gap: '12px',
-                            }}
-                            columnWrapperStyle={() => ({
-                                flex: '1',
-                                width: '100%',
-                                maxWidth: '100%',
-                                maxHeight: '60vh',
-                                overflow: 'auto',
-                            })}
-                        />
-                    </div>
+                    <Kanban
+                        dataSource={dataSource}
+                        configMap={configMap}
+                        onCardMove={onCardMove}
+                        onCardClick={handleCardClick}
+                        renderColumnHeader={renderColumnHeader}
+                        renderColumnFooter={canCreate ? renderColumnFooter : undefined}
+                        cardsGap={8}
+                        virtualization={true}
+                        loadMore={handleLoadMore}
+                        renderSkeletonCard={() => (
+                            <div className="bg-gray-50 rounded-lg border border-dashed border-gray-300 p-3 animate-pulse">
+                                <div className="h-4 bg-white rounded w-3/4 mb-2" />
+                                <div className="h-3 bg-white rounded w-1/2" />
+                            </div>
+                        )}
+                        rootStyle={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(4, 1fr)',
+                            gap: '0px',
+                        }}
+                        columnStyle={() => ({
+                            backgroundColor: "#ffffff",
+                            boxShadow: "rgba(0, 0, 0, 0.2) 5px 5px 7px -5px",
+                        })}
+                        columnWrapperStyle={() => ({
+                            flex: '1',
+                            width: '100%',
+                            maxWidth: '100%',
+                            maxHeight: '60vh',
+                            overflow: 'auto',
+                            padding: "10px" 
+                        })}
+                    />
                 )}
 
                 {/* History Section */}

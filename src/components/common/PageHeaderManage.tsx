@@ -16,10 +16,10 @@ const PageHeaderManage: React.FC<PageHeaderCardProps> = ({
     title,
     subtitle,
     actions = [],
-    className = '',
+    className = 'mb-3',
 }) => {
     return (
-        <div className={`bg-white shadow rounded-lg mb-3 ${className}`}>
+        <div className={`bg-white shadow rounded-lg ${className}`}>
             <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex flex-col md:flex-row lg:justify-between lg:items-center">
                     

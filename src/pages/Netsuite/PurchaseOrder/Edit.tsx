@@ -719,7 +719,7 @@ export default function Edit() {
                                             </Button>
                                         </PermissionGate>
                                     )}
-                                    {poDetail?.approvalstatus === 2 && (poDetail?.po_status_label !== 'Pending Receipt' && poDetail?.po_status_label !== 'Pending Bill') && (
+                                    {poDetail?.approvalstatus === 2 &&  (poDetail?.po_status_label !== 'Pending Receipt' && poDetail?.po_status_label !== 'Pending Bill') || poDetail?.po_status_label === 'Pending Billing/Partially Received' && (
                                         <PermissionGate permission={["create", "update"]}>
                                             <Button
                                                 type="button"
