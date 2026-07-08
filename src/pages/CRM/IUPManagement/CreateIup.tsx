@@ -1,16 +1,15 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import PageMeta from '@/components/common/PageMeta';
-import Button from '@/components/ui/button/Button';
-import { MdKeyboardArrowLeft } from 'react-icons/md';
 import { useIupManagementCreate } from './hooks/useIupManagementCreate';
 import TerritoryInfoDisplay from './components/TerritoryInfoDisplay';
 import TerritorySelector from './components/TerritorySelector';
 import FormActions from '../../../components/form/FormActions';
 import IupInformtionsFormFields from './components/IupInformtionsFormFields';
+import PageHeader from '@/components/common/PageHeader';
+import useGoBack from '@/hooks/useGoBack';
 
 const CreateIup: React.FC = () => {
-    const navigate = useNavigate();
+    const goBack = useGoBack();
     const {
         selectedIsland,
         selectedGroup,
@@ -65,19 +64,10 @@ const CreateIup: React.FC = () => {
                 <div className="mx-auto">
 
                     {/* Header */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate('/crm/iup-management')}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                            >
-                                <MdKeyboardArrowLeft size={20} />
-                            </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Create IUP</h1>
-                        </div>
-                    </div>
+                    <PageHeader
+                        title={`Create IUP`}
+                        backPath={() => goBack('/crm/iup-management')}
+                    />
 
                     {/* Form */}
                     <TerritoryInfoDisplay selectedTerritory={selectedTerritoryInfo} />

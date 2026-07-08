@@ -1,17 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams, useLocation } from 'react-router-dom';
-import { ContractorServices } from '../services/contractorServices';
-import { Contractor, ContractorListRequest, Pagination } from '../types/contractor';
+import { ActivityServices } from '../services/projectSalesActivityServices';
+import { ProjectSalesActivityRequest, Pagination } from '../types/projectSalesActivity';
+import { useLocation, useSearchParams } from "react-router-dom";
 
 type FilterState = {
-    search: string;
-    mine_type: 'batu bara' | 'nikel' | 'lainnya' | '';
-    status: 'active' | 'inactive' | '';
-    sort_order: 'asc' | 'desc' | '';
-    segmentation_id: string;
+    search?: string;
+    sort_order?: 'asc' | 'desc';
+    project_id?: string;
+    iup_id?: string;
+    iup_customer_id?: string;
+    project_status?: string;
+    start_date?: string;
+    end_date?: string;
 };
 
-export const useContractors = () => {
+export const useProjectSalesActivity = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const location = useLocation(); 
 
@@ -20,16 +23,19 @@ export const useContractors = () => {
 
     const urlFilters: FilterState = {
         search: searchParams.get('search') || '',
-        mine_type: (searchParams.get('mine_type') as FilterState['mine_type']) || '',
-        status: (searchParams.get('status') as FilterState['status']) || '',
         sort_order: (searchParams.get('sort_order') as FilterState['sort_order']) || 'desc',
-        segmentation_id: searchParams.get('segmentation_id') || '',
+        project_id: (searchParams.get('project_id') as FilterState['project_id']) || '',
+        iup_id: (searchParams.get('iup_id') as FilterState['iup_id']) || '',
+        iup_customer_id: (searchParams.get('iup_customer_id') as FilterState['iup_customer_id']) || '',
+        start_date: (searchParams.get('start_date') as FilterState['start_date']) || '',
+        end_date: (searchParams.get('end_date') as FilterState['end_date']) || '',
+        project_status: (searchParams.get('project_status') as FilterState['project_status']) || '',
     };
 
     // Input search dipisah agar tidak memicu fetch saat user masih mengetik
     const [searchValue, setSearchValue] = useState(urlFilters.search);
 
-    const [contractors, setContractors] = useState<Contractor[]>([]);
+    const [activities, setActivities] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [pagination, setPagination] = useState<Pagination>({
@@ -53,25 +59,25 @@ export const useContractors = () => {
         setSearchParams(params);
     }, [setSearchParams]);
 
-    const fetchContractors = useCallback(async (overrideParams?: Partial<ContractorListRequest>) => {
+    // Fetch activities from API
+    const fetchProjectSalesActivity = useCallback(async (params?: Partial<ProjectSalesActivityRequest>) => {
         try {
             setLoading(true);
             setError(null);
-            
-            const requestParams: ContractorListRequest = {
+
+            const requestParams: ProjectSalesActivityRequest = {
                 page: urlPage,
                 limit: urlLimit,
                 ...urlFilters,
-                ...overrideParams // Nilai baru akan menimpa nilai state lama disini
+                ...params
             };
+            const response = await ActivityServices.getPSA(requestParams);
             
-            const response = await ContractorServices.getContractors(requestParams);
-            
-            setContractors(response.data);
+            setActivities(response.data);
             setPagination(response.pagination);
         } catch (err: any) {
-            setError(err?.message || 'Failed to fetch contractors');
-            console.error('Error fetching contractors:', err);
+            setError(err?.message || 'Failed to fetch Project Sales Activity data');
+            console.error('Error fetching Project Sales Activity data:', err);
         } finally {
             setLoading(false);
         }
@@ -79,9 +85,13 @@ export const useContractors = () => {
 
     const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
         const updatedFilters = { ...urlFilters, ...newFilters };
-        updateUrlParams(updatedFilters, 1, urlLimit); // Reset ke page 1 tiap filter berubah
+        console.log({
+            updatedFilters,
+            newFilters
+        })
+        updateUrlParams(updatedFilters, 1, urlLimit);
     }, [urlFilters, urlLimit, updateUrlParams]);
-
+    
     const handlePageChange = useCallback((page: number) => {
         updateUrlParams(urlFilters, page, urlLimit);
     }, [urlFilters, urlLimit, updateUrlParams]);
@@ -90,7 +100,6 @@ export const useContractors = () => {
         updateUrlParams(urlFilters, page, limit);
     }, [urlFilters, updateUrlParams]);
 
-    // Search functions
     const executeSearch = useCallback(() => {
         handleFilterChange({ search: searchValue });
     }, [handleFilterChange, searchValue]);
@@ -98,14 +107,14 @@ export const useContractors = () => {
     const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter') executeSearch();
     }, [executeSearch]);
-
+    
     const handleClearSearch = useCallback(() => {
         setSearchValue('');
         handleFilterChange({ search: '' });
     }, [handleFilterChange]);
 
     useEffect(() => {
-        fetchContractors();
+        fetchProjectSalesActivity();
         
         // Memastikan input text search ter-reset jika user memencet tombol Back
         setSearchValue(urlFilters.search);
@@ -113,25 +122,24 @@ export const useContractors = () => {
     }, [location.search]);
 
     return {
-        contractors,
+        // State
+        activities,
         loading,
         error,
         pagination,
-
+        
         filters: urlFilters,
         searchValue,
         setSearchValue,
         
         // Actions
-        fetchContractors,
+        fetchProjectSalesActivity,
         handlePageChange,
         handleRowsPerPageChange,
         handleFilterChange,
-        // Search functions
+
         executeSearch,
         handleKeyPress,
         handleClearSearch,
-        
-        refetch: fetchContractors
     };
 };

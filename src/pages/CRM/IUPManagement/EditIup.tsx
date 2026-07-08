@@ -1,18 +1,17 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import PageMeta from '@/components/common/PageMeta';
-import Button from '@/components/ui/button/Button';
-import { MdKeyboardArrowLeft } from 'react-icons/md';
 import LoadingSpinner from '@/components/common/Loading';
 import { useIupManagementEdit } from './hooks/useIupManagementEdit';
 import TerritorySelector from './components/TerritorySelector';
 import CustomerInformation from './components/CustomerInformation';
 import FormActions from '@/components/form/FormActions';
 import IupInformtionsFormFields from './components/IupInformtionsFormFields';
+import PageHeader from '@/components/common/PageHeader';
+import useGoBack from '@/hooks/useGoBack';
 
 
 const EditIupManagement: React.FC = () => {
-    const navigate = useNavigate();
+    const goBack = useGoBack();
     
     // Use custom hook for edit functionality
     const {
@@ -80,20 +79,10 @@ const EditIupManagement: React.FC = () => {
             />
             <div className="bg-gray-50 overflow-auto">
                 <div className="mx-auto px-4 sm:px-3">
-
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate('/crm/iup-management')}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                            >
-                                <MdKeyboardArrowLeft size={20} />
-                            </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit IUP Management</h1>
-                        </div>
-                    </div>
+                    <PageHeader
+                        title={`Edit IUP Management`}
+                        backPath={() => goBack('/crm/iup-management')}
+                    />
 
                     {/* <TerritoryDisplayReadonly territoryInfo={territoryInfo} /> */}
 

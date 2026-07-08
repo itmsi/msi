@@ -9,6 +9,7 @@ import {
     HorizontaLDots,
     UserIcon
 } from "@/icons";
+import { FaUsers } from 'react-icons/fa';
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "@/hooks/useAuth";
 import GridShape from "@/components/common/GridShape";
@@ -149,7 +150,9 @@ const AppSidebar: React.FC = () => {
                 'Customer CRM',
                 'User Management CRM',
                 'Project CRM',
-                'Division CRM'
+                'Division CRM',
+                'Project Sales Activity CRM',
+                'IUP Territory CRM'
             ],
             subItems: [
                 {
@@ -159,6 +162,11 @@ const AppSidebar: React.FC = () => {
                             name: "Area Structure",
                             path: buildPath("/crm/area-structure"),
                             allowedRoles: ['Area Structure CRM'] 
+                        },
+                        { 
+                            name: "Area IUP",
+                            path: buildPath("/crm/iup"),
+                            allowedRoles: ['IUP Territory CRM'] 
                         },
                         { 
                             name: "IUP",
@@ -207,6 +215,11 @@ const AppSidebar: React.FC = () => {
                     path: buildPath("/crm/user-management"),
                     allowedRoles: ['User Management CRM'] 
                 },
+                { 
+                    name: "Sales Activity",
+                    path: buildPath("/crm/project-sales-activity"),
+                    allowedRoles: ['Project Sales Activity CRM'] 
+                },
             ],
         },
         {
@@ -238,6 +251,16 @@ const AppSidebar: React.FC = () => {
         //         { name: "Manage Work Orders", path: "/workorders/manage"     },
         //     ],
         // }
+        {
+            name: "HRM",
+            icon: <FaUsers />,
+            allowedRoles: [
+                'Candidate HRM'
+            ],
+            subItems: [
+                { name: "Candidate Management", path: buildPath("/hr/candidate"), allowedRoles: ['Candidate HRM'] },
+            ],
+        }
     ], [buildPath]);
 
     const othersItems: NavItem[] = useMemo(() => [

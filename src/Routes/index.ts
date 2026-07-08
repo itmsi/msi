@@ -80,6 +80,10 @@ const CreateCRMProject = lazy(() => import('@/pages/CRM/Project/CreateProject'))
 const EditCRMProject = lazy(() => import('@/pages/CRM/Project/EditProject'));
 const CustomerCRM = lazy(() => import('@/pages/CRM/Customer/Manage'));
 const CustomerDashboard = lazy(() => import('@/pages/CRM/Customer/Dashboard'));
+const ProjectSalesActivityCRM = lazy(() => import('@/pages/CRM/ProjectSalesActivity/Manage'));
+const IupTerritory = lazy(() => import('@/pages/CRM/IUPTerritory/Manage'));
+const CreateIup = lazy(() => import('@/pages/CRM/IUPTerritory/CreateIup'));
+const EditIup = lazy(() => import('@/pages/CRM/IUPTerritory/EditIup'));
 
 // ========================================
 // QUOTATION ITI
@@ -143,6 +147,11 @@ const ManageWorkOrder = lazy(() => import('@/pages/WorkOrder/Manage'));
 
 // NANOGRID CALCULATOR
 const NanogridCalculator = lazy(() => import('@/pages/Nanogrid/Manage'));
+
+// ========================================
+// HR MODULE - Candidate/Interview
+const HRCandidateList = lazy(() => import('@/pages/HR/Candidate/index'));
+const HRCandidateCreate = lazy(() => import('@/pages/HR/Candidate/Create'));
 
 export type TAppRoute = {
     path: string;
@@ -920,6 +929,42 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
+        path: '/crm/project-sales-activity',
+        name: 'Project Sales Activity CRM',
+        isProtected: true,
+        roles: ['Project Sales Activity CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: ProjectSalesActivityCRM,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/iup',
+        name: 'IUP Territory CRM',
+        isProtected: true,
+        roles: ['IUP Territory CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: IupTerritory,
+        layout: AppLayout,
+    },
+    {
+        path: '/crm/iup/create',
+        name: 'IUP Territory CRM',
+        isProtected: true,
+        roles: ['IUP Territory CRM'],
+        requiredPermissions: ['create'],
+        component: CreateIup,
+        layout: AppLayout
+    },
+    {
+        path: '/crm/iup/edit/:id',
+        name: 'IUP Territory CRM',
+        isProtected: true,
+        roles: ['IUP Territory CRM'],
+        requiredPermissions: ['update', 'read'],
+        component: EditIup,
+        layout: AppLayout
+    },
+    {
         path: '/netsuite/purchase-order',
         name: 'Purchase Orders Netsuite',
         isProtected: true,
@@ -1121,6 +1166,34 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['ADMIN'],
         component: ManageWorkOrder,
+        layout: AppLayout,
+    },
+    // ========================================
+    // HR MODULE - Candidate Management
+    {
+        path: '/hr/candidate',
+        name: 'Candidate HRM',
+        isProtected: true,
+        roles: ['Candidate HRM'],
+        component: HRCandidateList,
+        layout: AppLayout,
+    },
+    {
+        path: '/hr/candidate/create',
+        name: 'Candidate HRM',
+        isProtected: true,
+        roles: ['Candidate HRM'],
+        requiredPermissions: ['create'],
+        component: HRCandidateCreate,
+        layout: AppLayout,
+    },
+    {
+        path: '/hr/candidate/:id',
+        name: 'Candidate HRM',
+        isProtected: true,
+        roles: ['Candidate HRM'],
+        requiredPermissions: ['update', 'read'],
+        component: HRCandidateList,
         layout: AppLayout,
     },
 ];

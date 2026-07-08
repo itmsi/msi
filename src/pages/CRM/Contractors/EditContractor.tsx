@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import PageMeta from '@/components/common/PageMeta';
-import Button from '@/components/ui/button/Button';
-import { MdKeyboardArrowLeft, MdTaskAlt } from 'react-icons/md';
+import { MdTaskAlt } from 'react-icons/md';
 import { useIupSelect } from '@/hooks/useIupSelect';
 import { useBrandSelect } from '@/hooks/useBrandSelect';
 import { useSegementationSelect } from '@/hooks/useSegmentSelect';
@@ -28,9 +27,11 @@ import ContractorProjectInformation from './components/ContractorProjectInformat
 import { TbTopologyStar3 } from 'react-icons/tb';
 import { GiChart } from 'react-icons/gi';
 import ContractorROEInformation from './components/ContractorROEInformation';
+import PageHeader from '@/components/common/PageHeader';
+import useGoBack from '@/hooks/useGoBack';
 
 const EditContractor: React.FC = () => {
-    const navigate = useNavigate();
+    const goBack = useGoBack();
     const location = useLocation();
     const listRoute = `/crm/contractors${location.search}`;
 
@@ -119,19 +120,11 @@ const EditContractor: React.FC = () => {
             <div className="bg-gray-50 overflow-auto">
                 <div className="mx-auto px-4 sm:px-3">
                     {/* Header dengan back button */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate(listRoute)}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                            >
-                                <MdKeyboardArrowLeft size={20} />
-                            </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit Contractor</h1>
-                        </div>
-                    </div>
+                    <PageHeader
+                        title={`Edit Contractor`}
+                        backPath={() => goBack(listRoute)}
+                        subtitle={"Update the company information or drag the pin to adjust the IUP location."}
+                    />
 
                     {/* Tab Navigation */}
                     <div className="border-b border-gray-200 mb-6 overflow-auto">

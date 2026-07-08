@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface PageHeaderProps {
     title: string;
-    backPath: string;
+    backPath: string | (() => void); // Bisa berupa string atau fungsi untuk navigasi kembali
     subtitle?: string | null;
 
     // Slot untuk konten kanan (badge, tombol, dll)
@@ -19,7 +19,13 @@ export default function PageHeader({ title, backPath, subtitle, actions }: PageH
             <div className="flex items-center gap-1 w-full">
                 <Button
                     variant="outline"
-                    onClick={() => navigate(backPath)}
+                    onClick={() => {
+                        if (typeof backPath === 'string') {
+                            navigate(backPath);
+                        } else if (typeof backPath === 'function') {
+                            backPath();
+                        }
+                    }}
                     className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
                 >
                     <MdKeyboardArrowLeft size={20} />

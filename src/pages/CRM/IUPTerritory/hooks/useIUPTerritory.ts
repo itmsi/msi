@@ -1,36 +1,35 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useLocation } from 'react-router-dom';
-import { ContractorServices } from '../services/contractorServices';
-import { Contractor, ContractorListRequest, Pagination } from '../types/contractor';
+import { IupItem, IupRequest, Pagination } from "../types/iupterritory";
+import { IupService } from "../services/iupTeritoryService";
+import toast from 'react-hot-toast';
 
 type FilterState = {
     search: string;
-    mine_type: 'batu bara' | 'nikel' | 'lainnya' | '';
-    status: 'active' | 'inactive' | '';
     sort_order: 'asc' | 'desc' | '';
-    segmentation_id: string;
+    iup_id?: string;
 };
 
-export const useContractors = () => {
+export const useIupTerritory = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const location = useLocation(); 
 
     const urlPage = Math.max(Number(searchParams.get('page')) || 1, 1);
-    const urlLimit = Math.max(Number(searchParams.get('limit')) || 10, 1);
+    const urlLimit = Math.max(Number(searchParams.get('limit')) || 100, 1);
 
     const urlFilters: FilterState = {
         search: searchParams.get('search') || '',
-        mine_type: (searchParams.get('mine_type') as FilterState['mine_type']) || '',
-        status: (searchParams.get('status') as FilterState['status']) || '',
         sort_order: (searchParams.get('sort_order') as FilterState['sort_order']) || 'desc',
-        segmentation_id: searchParams.get('segmentation_id') || '',
+        iup_id: searchParams.get('iup_id') || '',
     };
 
     // Input search dipisah agar tidak memicu fetch saat user masih mengetik
     const [searchValue, setSearchValue] = useState(urlFilters.search);
 
-    const [contractors, setContractors] = useState<Contractor[]>([]);
+    const [iupTerritories, setIupTerritories] = useState<IupItem[]>([]);
+    const [selectedIup, setSelectedIup] = useState<IupItem | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [pagination, setPagination] = useState<Pagination>({
         page: urlPage,
@@ -42,7 +41,7 @@ export const useContractors = () => {
     const updateUrlParams = useCallback((currentFilters: FilterState, page: number, limit: number) => {
         const params = new URLSearchParams();
         if (page > 1) params.set('page', String(page));
-        if (limit !== 10) params.set('limit', String(limit));
+        if (limit !== 100) params.set('limit', String(limit));
         
         Object.entries(currentFilters).forEach(([key, value]) => {
             if (value && value !== 'desc') {
@@ -53,25 +52,25 @@ export const useContractors = () => {
         setSearchParams(params);
     }, [setSearchParams]);
 
-    const fetchContractors = useCallback(async (overrideParams?: Partial<ContractorListRequest>) => {
+    const fetchIupTerritories = useCallback(async (overrideParams?: Partial<IupRequest>) => {
         try {
             setLoading(true);
             setError(null);
             
-            const requestParams: ContractorListRequest = {
+            const requestParams: IupRequest = {
                 page: urlPage,
                 limit: urlLimit,
                 ...urlFilters,
                 ...overrideParams // Nilai baru akan menimpa nilai state lama disini
             };
             
-            const response = await ContractorServices.getContractors(requestParams);
+            const response = await IupService.getIUPTerritory(requestParams);
             
-            setContractors(response.data);
-            setPagination(response.pagination);
+            setIupTerritories(response.data.items);
+            setPagination(response.data.pagination);
         } catch (err: any) {
-            setError(err?.message || 'Failed to fetch contractors');
-            console.error('Error fetching contractors:', err);
+            setError(err?.message || 'Failed to fetch IUP territories');
+            console.error('Error fetching IUP territories:', err);
         } finally {
             setLoading(false);
         }
@@ -104,8 +103,30 @@ export const useContractors = () => {
         handleFilterChange({ search: '' });
     }, [handleFilterChange]);
 
+    const handleDeleteConfirmation = (iup: IupItem) => {
+        setSelectedIup(iup);
+        setShowDeleteModal(true);
+    };
+
+    const handleDelete = async (iup: IupItem) => {
+        if (!selectedIup) return;
+        
+        try { 
+            await IupService.deleteIUPTerritory(iup.iup_selection_id);
+            fetchIupTerritories();
+            setShowDeleteModal(false);
+        } catch {
+            toast.error('Gagal menghapus data.');
+        }
+    };
+
+    const cancelDelete = () => {
+        setShowDeleteModal(false);
+        setSelectedIup(null);
+    }
+
     useEffect(() => {
-        fetchContractors();
+        fetchIupTerritories();
         
         // Memastikan input text search ter-reset jika user memencet tombol Back
         setSearchValue(urlFilters.search);
@@ -113,7 +134,7 @@ export const useContractors = () => {
     }, [location.search]);
 
     return {
-        contractors,
+        iupTerritories,
         loading,
         error,
         pagination,
@@ -123,7 +144,7 @@ export const useContractors = () => {
         setSearchValue,
         
         // Actions
-        fetchContractors,
+        fetchIupTerritories,
         handlePageChange,
         handleRowsPerPageChange,
         handleFilterChange,
@@ -132,6 +153,14 @@ export const useContractors = () => {
         handleKeyPress,
         handleClearSearch,
         
-        refetch: fetchContractors
+        refetch: fetchIupTerritories,
+
+        // modal delete
+        handleDeleteConfirmation,
+        handleDelete,
+        showDeleteModal,
+        selectedIup,
+        cancelDelete
+        
     };
 };
