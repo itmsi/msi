@@ -377,7 +377,7 @@ const DailyTaskActivity: React.FC = () => {
                         }}
                         columnStyle={() => ({
                             backgroundColor: "#ffffff",
-                            boxShadow: "rgba(0, 0, 0, 0.2) 5px 5px 7px -5px",
+                            boxShadow: "rgba(0, 0, 0, 0.2) 0px 3px 7px -2px",
                         })}
                         columnWrapperStyle={() => ({
                             flex: '1',

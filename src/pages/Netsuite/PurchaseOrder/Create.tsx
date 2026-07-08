@@ -33,8 +33,9 @@ export default function Create() {
         handleSubmit,
         handleAddProductItem,
         handleProductDelete,
+        handleProductCopy,
         handleUpdateProductItem,
-        handleAddFiles
+        handleAddFiles,
     } = usePurchaseOrderCreate();
 
     // Get subsidiary_id dari form data
@@ -340,6 +341,7 @@ export default function Create() {
                                         onDateChange={handleDateChange}
                                         onAddProductItem={handleAddProductItem}
                                         onProductDelete={handleProductDelete}
+                                        onProductCopy={handleProductCopy}
                                         onUpdateProductItem={handleUpdateProductItem}
 
                                         // Location props (is_parent = false)

@@ -265,6 +265,18 @@ export const usePurchaseOrderCreate = () => {
         }));
     };
 
+    const handleProductCopy = (productId: string) => {
+        setFormData(prev => {
+            const productToCopy = prev.items.find(item => item.id === productId);
+            if (!productToCopy) return prev;
+            const newItem = { ...productToCopy, id: `${productToCopy.id}-${Date.now()}` };
+            return {
+                ...prev,
+                items: [...prev.items, newItem]
+            };
+        });
+    };
+
     const handleUpdateProductItem = (index: number, field: string, value: any) => {
         setFormData(prev => {
             const updatedItems = [...prev.items];
@@ -301,6 +313,7 @@ export const usePurchaseOrderCreate = () => {
         // Product handlers
         handleAddProductItem,
         handleProductDelete,
+        handleProductCopy,
         handleUpdateProductItem,
         handleAddFiles
     };
