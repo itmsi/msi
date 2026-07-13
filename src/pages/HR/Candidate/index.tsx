@@ -9,7 +9,7 @@ import CreateCandidateForm from './CreateCandidateForm';
 import DetailCandidateOffcanvas from './components/DetailCandidateOffcanvas';
 import PageMeta from '@/components/common/PageMeta';
 import { toast } from 'react-hot-toast';
-import { MdAdd, MdFilterListAlt, MdExpandLess, MdExpandMore, MdSearch, MdClear } from 'react-icons/md';
+import { MdAdd, MdFilterListAlt, MdExpandLess, MdExpandMore, MdSearch, MdClear, MdPeople, MdCheckCircle, MdCancel, MdHelpOutline } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import Button from '@/components/ui/button/Button';
@@ -17,12 +17,13 @@ import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 
 const CandidatePage = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { id, groupId } = useParams<{ id?: string; groupId?: string }>();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [offeringCounts, setOfferingCounts] = useState<{ all?: number; ok?: number; not_ok?: number; null?: number }>({});
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
@@ -70,12 +71,15 @@ const CandidatePage = () => {
         assign_role: currentFilters.interviewer || '',
       };
 
-      const result = await candidateService.getList(payload as any);
+      const result = await candidateService.getListWithMeta(payload as any);
       setCandidates(result.data || []);
       if (result.pagination) {
         setTotal(result.pagination.total || 0);
         setTotalPages(result.pagination.totalPages || Math.ceil((result.pagination.total || 0) / (result.pagination.limit || limit)));
         setCurrentPage(result.pagination.page || page);
+      }
+      if (result.candidate_status_offering_count) {
+        setOfferingCounts(result.candidate_status_offering_count);
       }
     } catch (err) {
       setError(true);
@@ -144,6 +148,15 @@ const CandidatePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    setFilters((prev) => {
+      if ((groupId || '') === prev.group_id) {
+        return prev;
+      }
+      return { ...prev, group_id: groupId || '' };
+    });
+  }, [groupId]);
+
   // Open detail if id param exists
   useEffect(() => {
     if (id && candidates.length > 0) {
@@ -194,14 +207,18 @@ const CandidatePage = () => {
   const handleShowDetail = (candidate: Candidate) => {
     setSelectedCandidate(candidate);
     setShowDetail(true);
-    navigate(`/hr/candidate/${candidate.candidate_id}`, { replace: true });
+    const detailPath = groupId
+      ? `/hr/candidate/group/${groupId}/${candidate.candidate_id}`
+      : `/hr/candidate/${candidate.candidate_id}`;
+    navigate(detailPath, { replace: true });
   };
 
   const handleCloseDetail = () => {
     fetchCandidates();
     setShowDetail(false);
     setSelectedCandidate(null);
-    navigate('/hr/candidate', { replace: true });
+    const listPath = groupId ? `/hr/candidate/group/${groupId}` : '/hr/candidate';
+    navigate(listPath, { replace: true });
   };
 
   // Pagination
@@ -229,7 +246,7 @@ const CandidatePage = () => {
           <div className="flex justify-between items-center">
             <div>
               <h3 className="text-lg leading-6 font-primary-bold text-gray-900">Candidate Management</h3>
-              <p className="mt-1 text-sm text-gray-500">Manage interview candidates and their assessments</p>
+              <p className="mt-1 text-sm text-gray-500">Only passed records are displayed</p>
             </div>
             <Button onClick={() => setShowAddForm(true)} size="sm" startIcon={<MdAdd className="w-4 h-4" />}>
               Add Candidate
@@ -276,6 +293,65 @@ const CandidatePage = () => {
           ) : (
             <>
               {/* Filters */}
+              {/* Offering counts summary*/}
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
+                <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
+                  <div className="p-5">
+                    <div className="flex items-center">
+                      <div className="p-2 bg-gray-100 rounded-lg">
+                        <MdPeople className="w-5 h-5 text-gray-600" />
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-gray-600">All</p>
+                        <p className="text-2xl font-bold text-gray-900">{offeringCounts.all ?? total}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
+                  <div className="p-5">
+                    <div className="flex items-center">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <MdCheckCircle className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-green-600">OK</p>
+                        <p className="text-2xl font-bold text-green-900">{offeringCounts.ok ?? 0}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
+                  <div className="p-5">
+                    <div className="flex items-center">
+                      <div className="p-2 bg-red-100 rounded-lg">
+                        <MdCancel className="w-5 h-5 text-red-600" />
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-red-600">Not OK</p>
+                        <p className="text-2xl font-bold text-red-900">{offeringCounts.not_ok ?? 0}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
+                  <div className="p-5">
+                    <div className="flex items-center">
+                      <div className="p-2 bg-yellow-100 rounded-lg">
+                        <MdHelpOutline className="w-5 h-5 text-yellow-600" />
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-yellow-600">Missing</p>
+                        <p className="text-2xl font-bold text-yellow-900">{offeringCounts.null ?? 0}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-col md:flex-row gap-4 items-start md:items-center mb-4">
                 <div className="flex-1">
                   <div className="relative flex">

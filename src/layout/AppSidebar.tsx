@@ -17,6 +17,7 @@ import { useLanguage } from "@/components/lang/useLanguage";
 import { menuTranslations } from "@/components/lang/menuTranslations";
 import { TbTopologyStar3, TbReport } from "react-icons/tb";
 import { MdCalculate } from "react-icons/md";
+import { hrGroupService } from "@/pages/HR/Candidate/services/hrService";
 // import { LuClipboardList } from "react-icons/lu";
 
 type SubNavItem = {
@@ -37,16 +38,51 @@ type NavItem = {
     subItems?: SubNavItem[];
 };
 
+type SidebarGroup = {
+    group_id: string;
+    group_name: string;
+};
+
 const AppSidebar: React.FC = () => {
     const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
     const location = useLocation();
     const { menu: authMenu } = useAuth();
     const { lang, langField, buildPath } = useLanguage(menuTranslations);
+    const [hrGroups, setHrGroups] = useState<SidebarGroup[]>([]);
     
     const allowedMenuNames = useMemo(
         () => authMenu?.map(menu => menu.name) || [],
         [authMenu]
     );
+
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const res = await hrGroupService.getList({ page: 1, limit: 100, search: '', sort_by: 'created_at', sort_order: 'desc' });
+                if (mounted) {
+                    setHrGroups(res.data || []);
+                }
+            } catch {
+                if (mounted) {
+                    setHrGroups([]);
+                }
+            }
+        })();
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const candidateGroupSubItems = useMemo(() => [
+        { name: 'All Candidates', path: buildPath('/hr/candidate'), allowedRoles: ['Candidate HRM'] },
+        ...hrGroups.map((group) => ({
+            name: group.group_name,
+            path: buildPath(`/hr/candidate/group/${group.group_id}`),
+            allowedRoles: ['Candidate HRM'],
+        })),
+    ], [buildPath, hrGroups]);
 
     const navItems: NavItem[] = useMemo(() => [
         {
@@ -258,10 +294,14 @@ const AppSidebar: React.FC = () => {
                 'Candidate HRM'
             ],
             subItems: [
-                { name: "Candidate Management", path: buildPath("/hr/candidate"), allowedRoles: ['Candidate HRM'] },
+                {
+                    name: "Candidate Management",
+                    allowedRoles: ['Candidate HRM'],
+                    subItems: candidateGroupSubItems,
+                },
             ],
         }
-    ], [buildPath]);
+    ], [buildPath, candidateGroupSubItems]);
 
     const othersItems: NavItem[] = useMemo(() => [
         {
@@ -559,12 +599,15 @@ const AppSidebar: React.FC = () => {
                                                     <ul className="mt-1 space-y-1 ml-4">
                                                         {allowedNestedItems?.map((nestedItem, nestedIndex) => {
                                                             if (!nestedItem.path) return null;
+                                                            const isNestedItemActive = nestedItem.name === 'All Candidates'
+                                                                ? location.pathname === '/hr/candidate' || location.pathname === '/hr/candidate/'
+                                                                : isSubActive(nestedItem.path);
                                                             return (
                                                             <li key={`${subItemKey}:nested:${nestedIndex}`}>
                                                                 <Link
                                                                     to={nestedItem.path}
                                                                     className={`menu-dropdown-item text-sm ${
-                                                                        isSubActive(nestedItem.path)
+                                                                        isNestedItemActive
                                                                         ? "menu-dropdown-item-active"
                                                                         : "menu-dropdown-item-inactive"
                                                                     }`}

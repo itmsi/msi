@@ -1188,6 +1188,22 @@ export const routes: TAppRoute[] = [
         layout: AppLayout,
     },
     {
+        path: '/hr/candidate/group/:groupId',
+        name: 'Candidate HRM',
+        isProtected: true,
+        roles: ['Candidate HRM'],
+        component: HRCandidateList,
+        layout: AppLayout,
+    },
+    {
+        path: '/hr/candidate/group/:groupId/:id',
+        name: 'Candidate HRM',
+        isProtected: true,
+        roles: ['Candidate HRM'],
+        component: HRCandidateList,
+        layout: AppLayout,
+    },
+    {
         path: '/hr/candidate/:id',
         name: 'Candidate HRM',
         isProtected: true,
