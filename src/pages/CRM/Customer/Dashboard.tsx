@@ -160,20 +160,16 @@ export default function Dashboard() {
             <div className="space-y-5">
 
                 <PageHeader
-                    title="Customer Dashboard"
+                    title={customerInformation ? customerInformation.customer_name : 'Customer Dashboard'}
                     backPath={listRoute}
                 />
                 {/* Customer Information Card */}
                 {customerInformation && (<>
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2 text-slate-500">
-                            <LuBuilding2 className="h-8 w-8" />
-                            <h1 className="text-xl font-primary-bold text-slate-900">{customerInformation.customer_name}</h1>
-                        </div>
+                    <div className="flex justify-end items-center">
                         <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border shadow-sm">
                             <LuCalendar className="h-4 w-4 text-slate-400" />
                             <span className="text-sm text-slate-500">Data Terakhir:</span>
-                            <span className="text-sm font-semibold text-slate-700">Juni 2026</span>
+                            <span className="text-sm font-primary-bold text-slate-700">Juni 2026</span>
                         </div>
                     </div>
                     <div className="bg-white flex flex-col gap-6 rounded-xl border border-l-4 border-l-blue-500 shadow">

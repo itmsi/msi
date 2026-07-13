@@ -10,7 +10,7 @@ import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOVendorSelect } from '@/hooks/usePOVendorSelect';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { PermissionGate } from '@/components/common/PermissionComponents';
-import { FaReceipt, FaSave } from 'react-icons/fa';
+import { FaReceipt, FaRegFilePdf, FaSave } from 'react-icons/fa';
 import ModalApproval from './components/ModalApproval';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
@@ -52,6 +52,7 @@ export default function Edit() {
         handleSyncById,
         isSyncing,
         handleAddFiles,
+        handleDownloadInvoice,
     } = usePurchaseOrderEdit(listRoute);
 
     // Get subsidiary_id dari form data dengan defensive check
@@ -321,516 +322,523 @@ export default function Edit() {
                 image="/motor-sights-international.png"
             />
             
-            <div className="bg-gray-50">
-                <div className="mx-auto px-0">
-                    {(isLoading || loadingMasterData) ? (
-                        <LoadingOverlay
-                            message="Loading data..."
-                        />
-                    ) : ( <>
-                        {/* Header */}
-                        <PageHeader
-                            title="Edit Purchase Order"
-                            backPath={listRoute}
-                            subtitle={poDetail?.po_number || '-'}
-                            actions={
-                                <>
-                                    {(poDetail?.status_proccess !== 'PROCESSING' && poDetail?.status_proccess !== 'FAILED') && (
-                                        <PermissionGate permission="read">
-                                            <Button
-                                                onClick={() => handleSyncById(poDetail?.po_id)}
-                                                disabled={isSyncing}
-                                                className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600 py-2"
-                                                variant="outline"
-                                            >
-                                                <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
-                                                <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
-                                            </Button>
-                                        </PermissionGate>
-                                    )}
-                                    {poDetail?.po_number && (
-                                        <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
-                                            {formData.po_status_label}
-                                        </span>
-                                    )}
-                                </>
-                            }
-                        />
-
-                        <div className="space-y-6">
-                            {poDetail?.status_proccess === 'PROCESSING' && (
-                                <Alert variant='warning' title='Purchase Order Is Being Processed'>
-                                    <div className="space-y-4">
-                                        <p className="text-sm text-gray-500">
-                                            {
-                                                poDetail?.status_proccess_message ? (poDetail.status_proccess_message) : 
-                                                <>Your purchase order is currently being generated. Please allow some time for the process to complete. <br />
-                                                Click the refresh button below to check whether the data is already available.</>
-                                            } 
-                                        </p>
-                                        <ElemRefresh />
-                                    </div>
-                                </Alert>
-                            )}
-
-                            {poDetail?.status_proccess === 'FAILED' && (
-                                <Alert variant='error' title='Failed to Generate Purchase Order'>
-                                    <div className="space-y-4">
-                                        <p className="text-sm text-gray-500">
-                                            {
-                                                poDetail?.status_proccess_message ? (poDetail.status_proccess_message) : 
-                                                'We were unable to generate your purchase order at this time. Please try again by clicking the refresh button below. If the issue persists, contact support for further assistance.'
-                                            } 
-                                            
-                                        </p>
-                                    </div>
-                                </Alert>
-                            )}
-                            
-                            {/* Purchase Order Fields */}
-                            <PurchaseOrderFields
-                                formData={formData}
-                                modeEdit={true}
-                                errors={errors}
-                                masterData={masterData}
-                                loadingMasterData={loadingMasterData}
-                                subsidiaryId={formData.subsidiary}
-                                onInputChange={handleInputChange}
-                                onSelectChange={handleSelectChange}
-                                onDateChange={handleDateChange}
-
-                                // EDIT RECEIVE STATUS
-                                editReceive={editReceive}
-
-                                // Vendor props
-                                vendorOptions={POVendorOptions}
-                                vendorPagination={vendorPagination}
-                                vendorInputValue={vendorInputValue}
-                                onVendorInputChange={handleVendorInputChange}
-                                onVendorMenuScrollToBottom={handleVendorMenuScrollToBottom}
-                                selectedVendor={selectedVendor}
-                                onVendorChange={(option) => {
-                                    setSelectedVendor(option);
-                                    if (option && option.data) {
-                                        // Update formData dengan data vendor yang dipilih
-                                        handleSelectChange('vendorid', option.value);
-                                        handleSelectChange('vendor_name', option.data.companyName);
-                                    }
-                                    if (VendorSelectError) {
-                                        setVendorSelectError('');
-                                    }
-                                }}
-                                vendorError={errors.vendorid || VendorSelectError}
-
-                                // Term props
-                                termOptions={POTermOptions}
-                                termPagination={termPagination}
-                                termInputValue={termInputValue}
-                                onTermInputChange={handleTermInputChange}
-                                onTermMenuScrollToBottom={handleTermMenuScrollToBottom}
-                                selectedTerm={selectedTerm}
-                                onTermChange={(option) => {
-                                    setSelectedTerm(option);
-                                    if (option && option.data) {
-                                        // Update formData dengan data term yang dipilih
-                                        handleSelectChange('terms', option.value);
-                                        handleSelectChange('terms_name', option.data.name);
-                                    }
-                                    if (TermSelectError) {
-                                        setTermSelectError('');
-                                    }
-                                }}
-                                termError={errors.termid || TermSelectError}
-                                
-                                // Location props  
-                                locationOptions={POLocationOptions}
-                                locationPagination={locationPagination}
-                                locationInputValue={locationInputValue}
-                                onLocationInputChange={handleLocationInputChange}
-                                onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
-                                selectedLocation={selectedLocation}
-                                onLocationChange={(option) => {
-                                    setSelectedLocation(option);
-                                    if (option && option.data) {
-                                        // Update formData dengan data location yang dipilih
-                                        handleSelectChange('location', option.value);
-                                        handleSelectChange('location_name', option.data.name);
-                                    }
-                                    if (locationSelectError) {
-                                        setLocationSelectError('');
-                                    }
-                                }}
-                                locationError={errors.location || locationSelectError}
-                                
-                                // Class props  
-                                classOptions={POClassOptions}
-                                classPagination={itemClassPagination}
-                                classInputValue={itemClassInputValue}
-                                onClassInputChange={handleItemClassInputChange}
-                                onClassMenuScrollToBottom={handleItemClassScrollToBottom}
-                                selectedClass={selectedClass}
-                                onClassChange={(option) => {
-                                    setSelectedClass(option);
-                                    if (option && option.data) {
-                                        // Update formData dengan data class yang dipilih
-                                        handleSelectChange('class', option.value);
-                                        handleSelectChange('class_name', option.data.name);
-                                    }
-                                    if (classSelectError) {
-                                        setClassSelectError('');
-                                    }
-                                }}
-                                classError={errors.class || classSelectError}
-                                
-                                // Department props  
-                                departmentOptions={PODepartmentOptions}
-                                departmentPagination={itemDepartmentPagination}
-                                departmentInputValue={itemDepartmentInputValue}
-                                onDepartmentInputChange={handleItemDepartmentInputChange}
-                                onDepartmentMenuScrollToBottom={handleItemDepartmentScrollToBottom}
-                                selectedDepartment={selectedDepartment}
-                                onDepartmentChange={(option) => {
-                                    setSelectedDepartment(option);
-                                    if (option && option.data) {
-                                        // Update formData dengan data department yang dipilih
-                                        handleSelectChange('department', option.value);
-                                        handleSelectChange('department_name', option.data.name);
-                                    }
-                                    if (departmentSelectError) {
-                                        setDepartmentSelectError('');
-                                    }
-                                }}
-                                departmentError={errors.department || departmentSelectError}
-                            />
-
-                            <div>
-                                {/* Tab Navigation */}
-                                <div className="border-b border-gray-200 overflow-auto">
-                                    <nav className="flex space-x-2 overflow-auto">
-                                        <button
-                                            onClick={() => setActiveTab('items')}
-                                            className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                                activeTab === 'items'
-                                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            <MdInventory2 /> Items
-                                        </button>
-                                        <button
-                                            onClick={() => setActiveTab('files')}
-                                            className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                                activeTab === 'files'
-                                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            <MdOutlineAttachFile /> Files
-                                        </button>
-                                        <button
-                                            onClick={() => setActiveTab('usernotes')}
-                                            className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                                activeTab === 'usernotes'
-                                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            <MdOutlineComment /> User Notes
-                                        </button>
-                                        <button
-                                            onClick={() => setActiveTab('receipt')}
-                                            className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                                activeTab === 'receipt'
-                                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            <MdReceiptLong /> Receipt & Bill
-                                        </button>
-                                        <button
-                                            onClick={() => setActiveTab('historyreceipt')}
-                                            className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                                activeTab === 'historyreceipt'
-                                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                            }`}
-                                        >
-                                            <MdHistory /> History Receipt
-                                        </button>
-                                    </nav>
-                                </div>
-                                <div className='bg-white rounded-b-2xl shadow-sm'>
-                                    {/* Purchase Order Items */}
-                                    {activeTab === 'items' && (
-                                        <PurchaseOrderItemFields
-                                            formData={formData}
-                                            errors={errors}
-                                            masterData={masterData}
-                                            loadingMasterData={loadingMasterData}
-                                            onInputChange={handleInputChange}
-                                            onSelectChange={handleSelectChange}
-                                            onDateChange={handleDateChange}
-                                            onAddProductItem={handleAddProductItem}
-                                            onProductDelete={handleProductDelete}
-                                            onProductCopy={handleProductCopy}
-                                            onUpdateProductItem={handleUpdateProductItem}
-                                            
-                                            // EDIT RECIVE STATUS
-                                            editReceive={editReceive}
-
-                                            // Location props (shared dengan header)
-                                            locationOptions={POLocationOptions}
-                                            locationPagination={locationPagination}
-                                            locationInputValue={locationInputValue}
-                                            onLocationInputChange={handleLocationInputChange}
-                                            onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
-                                            selectedLocation={selectedLocation}
-                                            onLocationChange={(option) => {
-                                                setSelectedLocation(option);
-                                                if (option && option.data) {
-                                                    // Update formData dengan data location yang dipilih
-                                                    handleSelectChange('location', option.value);
-                                                    handleSelectChange('location_name', option.data.name);
-                                                }
-                                                if (locationSelectError) {
-                                                    setLocationSelectError('');
-                                                }
-                                            }}
-                                            locationError={locationSelectError}
-
-                                            // Class props  
-                                            classOptions={POClassOptions}
-                                            classPagination={itemClassPagination}
-                                            classInputValue={itemClassInputValue}
-                                            onClassInputChange={handleItemClassInputChange}
-                                            onClassMenuScrollToBottom={handleItemClassScrollToBottom}
-                                            selectedClass={selectedClass}
-                                            onClassChange={(option) => {
-                                                setSelectedClass(option);
-                                                if (option && option.data) {
-                                                    // Update formData dengan data class yang dipilih
-                                                    handleSelectChange('class', option.value);
-                                                    handleSelectChange('class_name', option.data.name);
-                                                }
-                                                if (classSelectError) {
-                                                    setClassSelectError('');
-                                                }
-                                            }}
-                                            classError={errors.class || classSelectError}
-                                            
-                                            // Department props  
-                                            departmentOptions={PODepartmentOptions}
-                                            departmentPagination={itemDepartmentPagination}
-                                            departmentInputValue={itemDepartmentInputValue}
-                                            onDepartmentInputChange={handleItemDepartmentInputChange}
-                                            onDepartmentMenuScrollToBottom={handleItemDepartmentScrollToBottom}
-                                            selectedDepartment={selectedDepartment}
-                                            onDepartmentChange={(option) => {
-                                                setSelectedDepartment(option);
-                                                if (option && option.data) {
-                                                    // Update formData dengan data department yang dipilih
-                                                    handleSelectChange('department', option.value);
-                                                    handleSelectChange('department_name', option.data.name);
-                                                }
-                                                if (departmentSelectError) {
-                                                    setDepartmentSelectError('');
-                                                }
-                                            }}
-                                            departmentError={errors.department || departmentSelectError}
-                                            serverTotal={poDetail?.foreigntotal}
-                                        />
-                                    )}
-                                    
-                                    {activeTab === 'files' && (
-                                        <FilesTab
-                                            formData={formData}
-                                            poId={poDetail?.po_id}
-                                            fileList={poDetail?.files || []}
-                                            pendingFiles={(formData.files || []).filter(
-                                                file => !(poDetail?.files || []).some(
-                                                    pf => (pf.fileUrl || '') === (file.fileUrl || '') &&
-                                                          (pf.fileName || '') === (file.fileName || '')
-                                                )
-                                            )}
-                                            deletedFileUrls={(poDetail?.files || [])
-                                                .filter(pf => !(formData.files || []).some(
-                                                    file => (file.fileUrl || '') === (pf.fileUrl || '') &&
-                                                            (file.fileName || '') === (pf.fileName || '')
-                                                ))
-                                                .map(pf => pf.fileUrl)
-                                            }
-                                            isLoading={loadingMasterData}
-                                            onAddFiles={handleAddFiles}
-                                        />
-                                    )}
-
-                                    {activeTab === 'usernotes' && (
-                                        <UserNoteTab
-                                            noteList={poDetail?.user_notes || []}
-                                            isLoading={historyLogLoading}
-                                        />
-                                    )}
-
-                                    {activeTab === 'receipt' && (
-                                        <ReceiptTab
-                                            poId={poDetail?.po_id}
-                                            receiptList={receiptList}
-                                            isLoading={receiptLoading}
-                                            pagination={receiptPagination}
-                                            onLoad={fetchReceipts}
-                                            onPageChange={(page) => fetchReceipts(page, receiptPagination.limit)}
-                                            onRowsPerPageChange={(rows, page) => fetchReceipts(page, rows)}
-                                        />
-                                    )}
-
-                                    {activeTab === 'historyreceipt' && (
-                                        <HistoryReceiptTab
-                                            poId={poDetail?.po_id}
-                                            logList={logList}
-                                            isLoading={historyLogLoading}
-                                            onLoad={fetchHistoryReceipts}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Form Actions */}
-                            <div className="flex justify-end gap-4 p-4 bg-white rounded-2xl shadow-sm mb-8">
+            <div className="mx-auto px-0">
+                {(isLoading || loadingMasterData) ? (
+                    <LoadingOverlay
+                        message="Loading data..."
+                    />
+                ) : ( <>
+                    {/* Header */}
+                    <PageHeader
+                        title="Edit Purchase Order"
+                        backPath={listRoute}
+                        subtitle={poDetail?.po_number || '-'}
+                        actions={
+                            <>
                                 <Button
-                                    type="button"
+                                    onClick={() => handleDownloadInvoice(poDetail?.po_id)}
                                     variant="outline"
-                                    onClick={handleCancel}
-                                    className="px-6 rounded-full"
-                                    disabled={isSubmitting}
+                                    size="sm"
+                                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 ring-blue-600 py-2"
                                 >
-                                    Cancel
+                                    <FaRegFilePdf className="w-4 h-4" />
+                                    Download Purchase Order
                                 </Button>
-                                {(poDetail?.status_proccess !== 'PROCESSING') && (<>
-                                    {((poDetail?.approvalstatus === 1 && poDetail.nextapprover === "") && poDetail?.status_proccess !== 'FAILED' ) && (
-                                        <PermissionGate permission={["create", "update"]}>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                onClick={() => handleApprovalOpen(poDetail.po_id)}
-                                                className="group px-6 rounded-full ring-1 ring-inset ring-green-600 text-green-600 hover:bg-green-600 hover:text-white hover:ring-green-600"
-                                                disabled={isSubmitting}
-                                            >
-                                                Submit Approval
-                                            </Button>
-                                        </PermissionGate>
-                                    )}
-                                    {poDetail?.approvalstatus === 2 &&  (poDetail?.po_status_label !== 'Pending Receipt' && poDetail?.po_status_label !== 'Pending Bill') || poDetail?.po_status_label === 'Pending Billing/Partially Received' && (
-                                        <PermissionGate permission={["create", "update"]}>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                onClick={() => handleApproval(poDetail.po_id)}
-                                                className="group rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
-                                                disabled={isSubmitting}
-                                            >
-                                                Re-Approval <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
-                                            </Button>
-                                        </PermissionGate>
-                                    )}
-                                    {poDetail?.approvalstatus === 3 && (
-                                        <PermissionGate permission={["create", "update"]}>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                onClick={() => handleOpenRejected(poDetail.po_id)}
-                                                className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
-                                                disabled={isSubmitting}
-                                            >
-                                                Re-Open <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
-                                            </Button>
-                                        </PermissionGate>
-                                    )}
-                                    {(((formData.approvalstatus === 1 || formData.approvalstatus === null) && (formData.nextapprover === null || formData.nextapprover === ''))) && (
-                                        <PermissionGate permission={["create", "update"]}>
-                                            <Button
-                                                onClick={handleSubmit}
-                                                className="px-6 flex items-center gap-2 rounded-full"
-                                                disabled={isSubmitting}
-                                            >
-                                                {isSubmitting ? (<>
-                                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                    </svg>
-                                                    Processing...
-                                                </>) : (<>
-                                                    <FaSave className={`mr-2 h-4 w-4 ${isSubmitting ? 'animate-spin' : ''}`} /> Update Purchase Order
-                                                </>)}
-                                            </Button>
-                                        </PermissionGate>
-                                    )}
-                                    
-                                    {((poDetail?.po_status_label === 'Pending Receipt' || poDetail?.po_status_label === 'Pending Billing/Partially Received') && poDetail?.po_id !== null && !editReceive) && (
-                                        <PermissionGate permission={["create", "update"]}>
-                                            <Button
-                                                type="button"
-                                                onClick={() => navigate(`/netsuite/purchase-order/${poDetail.po_id}/receive`)}
-                                                className="group px-6 rounded-full ring-1 bg-[#14B8A6] ring-inset ring-[#14B8A6] text-white hover:bg-[#0D9488] hover:ring-[#0D9488]"
-                                                disabled={isSubmitting}
-                                            >
-                                                Receive <FaReceipt className="mr-2 h-4 w-4" />
-                                            </Button>
-                                        </PermissionGate>
-                                    )}
-                                </>)}
+                                {(poDetail?.status_proccess !== 'PROCESSING' && poDetail?.status_proccess !== 'FAILED') && (
+                                    <PermissionGate permission="read">
+                                        <Button
+                                            onClick={() => handleSyncById(poDetail?.po_id)}
+                                            disabled={isSyncing}
+                                            className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600 py-2"
+                                            variant="outline"
+                                        >
+                                            <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                            <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                        </Button>
+                                    </PermissionGate>
+                                )}
+                                {poDetail?.po_number && (
+                                    <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
+                                        {formData.po_status_label}
+                                    </span>
+                                )}
+                            </>
+                        }
+                    />
 
-                                    {poDetail?.status_proccess === 'PROCESSING' && (
-                                        <ElemRefresh />
-                                    )}
+                    <div className="space-y-6">
+                        {poDetail?.status_proccess === 'PROCESSING' && (
+                            <Alert variant='warning' title='Purchase Order Is Being Processed'>
+                                <div className="space-y-4">
+                                    <p className="text-sm text-gray-500">
+                                        {
+                                            poDetail?.status_proccess_message ? (poDetail.status_proccess_message) : 
+                                            <>Your purchase order is currently being generated. Please allow some time for the process to complete. <br />
+                                            Click the refresh button below to check whether the data is already available.</>
+                                        } 
+                                    </p>
+                                    <ElemRefresh />
+                                </div>
+                            </Alert>
+                        )}
 
-                                {/*
-                                {(poDetail?.po_status_label === 'Pending Receipt' && editReceive) && (
+                        {poDetail?.status_proccess === 'FAILED' && (
+                            <Alert variant='error' title='Failed to Generate Purchase Order'>
+                                <div className="space-y-4">
+                                    <p className="text-sm text-gray-500">
+                                        {
+                                            poDetail?.status_proccess_message ? (poDetail.status_proccess_message) : 
+                                            'We were unable to generate your purchase order at this time. Please try again by clicking the refresh button below. If the issue persists, contact support for further assistance.'
+                                        } 
+                                        
+                                    </p>
+                                </div>
+                            </Alert>
+                        )}
+                        
+                        {/* Purchase Order Fields */}
+                        <PurchaseOrderFields
+                            formData={formData}
+                            modeEdit={true}
+                            errors={errors}
+                            masterData={masterData}
+                            loadingMasterData={loadingMasterData}
+                            subsidiaryId={formData.subsidiary}
+                            onInputChange={handleInputChange}
+                            onSelectChange={handleSelectChange}
+                            onDateChange={handleDateChange}
+
+                            // EDIT RECEIVE STATUS
+                            editReceive={editReceive}
+
+                            // Vendor props
+                            vendorOptions={POVendorOptions}
+                            vendorPagination={vendorPagination}
+                            vendorInputValue={vendorInputValue}
+                            onVendorInputChange={handleVendorInputChange}
+                            onVendorMenuScrollToBottom={handleVendorMenuScrollToBottom}
+                            selectedVendor={selectedVendor}
+                            onVendorChange={(option) => {
+                                setSelectedVendor(option);
+                                if (option && option.data) {
+                                    // Update formData dengan data vendor yang dipilih
+                                    handleSelectChange('vendorid', option.value);
+                                    handleSelectChange('vendor_name', option.data.companyName);
+                                }
+                                if (VendorSelectError) {
+                                    setVendorSelectError('');
+                                }
+                            }}
+                            vendorError={errors.vendorid || VendorSelectError}
+
+                            // Term props
+                            termOptions={POTermOptions}
+                            termPagination={termPagination}
+                            termInputValue={termInputValue}
+                            onTermInputChange={handleTermInputChange}
+                            onTermMenuScrollToBottom={handleTermMenuScrollToBottom}
+                            selectedTerm={selectedTerm}
+                            onTermChange={(option) => {
+                                setSelectedTerm(option);
+                                if (option && option.data) {
+                                    // Update formData dengan data term yang dipilih
+                                    handleSelectChange('terms', option.value);
+                                    handleSelectChange('terms_name', option.data.name);
+                                }
+                                if (TermSelectError) {
+                                    setTermSelectError('');
+                                }
+                            }}
+                            termError={errors.termid || TermSelectError}
+                            
+                            // Location props  
+                            locationOptions={POLocationOptions}
+                            locationPagination={locationPagination}
+                            locationInputValue={locationInputValue}
+                            onLocationInputChange={handleLocationInputChange}
+                            onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
+                            selectedLocation={selectedLocation}
+                            onLocationChange={(option) => {
+                                setSelectedLocation(option);
+                                if (option && option.data) {
+                                    // Update formData dengan data location yang dipilih
+                                    handleSelectChange('location', option.value);
+                                    handleSelectChange('location_name', option.data.name);
+                                }
+                                if (locationSelectError) {
+                                    setLocationSelectError('');
+                                }
+                            }}
+                            locationError={errors.location || locationSelectError}
+                            
+                            // Class props  
+                            classOptions={POClassOptions}
+                            classPagination={itemClassPagination}
+                            classInputValue={itemClassInputValue}
+                            onClassInputChange={handleItemClassInputChange}
+                            onClassMenuScrollToBottom={handleItemClassScrollToBottom}
+                            selectedClass={selectedClass}
+                            onClassChange={(option) => {
+                                setSelectedClass(option);
+                                if (option && option.data) {
+                                    // Update formData dengan data class yang dipilih
+                                    handleSelectChange('class', option.value);
+                                    handleSelectChange('class_name', option.data.name);
+                                }
+                                if (classSelectError) {
+                                    setClassSelectError('');
+                                }
+                            }}
+                            classError={errors.class || classSelectError}
+                            
+                            // Department props  
+                            departmentOptions={PODepartmentOptions}
+                            departmentPagination={itemDepartmentPagination}
+                            departmentInputValue={itemDepartmentInputValue}
+                            onDepartmentInputChange={handleItemDepartmentInputChange}
+                            onDepartmentMenuScrollToBottom={handleItemDepartmentScrollToBottom}
+                            selectedDepartment={selectedDepartment}
+                            onDepartmentChange={(option) => {
+                                setSelectedDepartment(option);
+                                if (option && option.data) {
+                                    // Update formData dengan data department yang dipilih
+                                    handleSelectChange('department', option.value);
+                                    handleSelectChange('department_name', option.data.name);
+                                }
+                                if (departmentSelectError) {
+                                    setDepartmentSelectError('');
+                                }
+                            }}
+                            departmentError={errors.department || departmentSelectError}
+                        />
+
+                        <div>
+                            {/* Tab Navigation */}
+                            <div className="border-b border-gray-200 overflow-auto">
+                                <nav className="flex space-x-2 overflow-auto">
+                                    <button
+                                        onClick={() => setActiveTab('items')}
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
+                                            activeTab === 'items'
+                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        <MdInventory2 /> Items
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('files')}
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
+                                            activeTab === 'files'
+                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        <MdOutlineAttachFile /> Files
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('usernotes')}
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
+                                            activeTab === 'usernotes'
+                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        <MdOutlineComment /> User Notes
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('receipt')}
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
+                                            activeTab === 'receipt'
+                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        <MdReceiptLong /> Receipt & Bill
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('historyreceipt')}
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
+                                            activeTab === 'historyreceipt'
+                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        <MdHistory /> History Receipt
+                                    </button>
+                                </nav>
+                            </div>
+                            <div className='bg-white rounded-b-2xl shadow-sm'>
+                                {/* Purchase Order Items */}
+                                {activeTab === 'items' && (
+                                    <PurchaseOrderItemFields
+                                        formData={formData}
+                                        errors={errors}
+                                        masterData={masterData}
+                                        loadingMasterData={loadingMasterData}
+                                        onInputChange={handleInputChange}
+                                        onSelectChange={handleSelectChange}
+                                        onDateChange={handleDateChange}
+                                        onAddProductItem={handleAddProductItem}
+                                        onProductDelete={handleProductDelete}
+                                        onProductCopy={handleProductCopy}
+                                        onUpdateProductItem={handleUpdateProductItem}
+                                        
+                                        // EDIT RECIVE STATUS
+                                        editReceive={editReceive}
+
+                                        // Location props (shared dengan header)
+                                        locationOptions={POLocationOptions}
+                                        locationPagination={locationPagination}
+                                        locationInputValue={locationInputValue}
+                                        onLocationInputChange={handleLocationInputChange}
+                                        onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
+                                        selectedLocation={selectedLocation}
+                                        onLocationChange={(option) => {
+                                            setSelectedLocation(option);
+                                            if (option && option.data) {
+                                                // Update formData dengan data location yang dipilih
+                                                handleSelectChange('location', option.value);
+                                                handleSelectChange('location_name', option.data.name);
+                                            }
+                                            if (locationSelectError) {
+                                                setLocationSelectError('');
+                                            }
+                                        }}
+                                        locationError={locationSelectError}
+
+                                        // Class props  
+                                        classOptions={POClassOptions}
+                                        classPagination={itemClassPagination}
+                                        classInputValue={itemClassInputValue}
+                                        onClassInputChange={handleItemClassInputChange}
+                                        onClassMenuScrollToBottom={handleItemClassScrollToBottom}
+                                        selectedClass={selectedClass}
+                                        onClassChange={(option) => {
+                                            setSelectedClass(option);
+                                            if (option && option.data) {
+                                                // Update formData dengan data class yang dipilih
+                                                handleSelectChange('class', option.value);
+                                                handleSelectChange('class_name', option.data.name);
+                                            }
+                                            if (classSelectError) {
+                                                setClassSelectError('');
+                                            }
+                                        }}
+                                        classError={errors.class || classSelectError}
+                                        
+                                        // Department props  
+                                        departmentOptions={PODepartmentOptions}
+                                        departmentPagination={itemDepartmentPagination}
+                                        departmentInputValue={itemDepartmentInputValue}
+                                        onDepartmentInputChange={handleItemDepartmentInputChange}
+                                        onDepartmentMenuScrollToBottom={handleItemDepartmentScrollToBottom}
+                                        selectedDepartment={selectedDepartment}
+                                        onDepartmentChange={(option) => {
+                                            setSelectedDepartment(option);
+                                            if (option && option.data) {
+                                                // Update formData dengan data department yang dipilih
+                                                handleSelectChange('department', option.value);
+                                                handleSelectChange('department_name', option.data.name);
+                                            }
+                                            if (departmentSelectError) {
+                                                setDepartmentSelectError('');
+                                            }
+                                        }}
+                                        departmentError={errors.department || departmentSelectError}
+                                        serverTotal={poDetail?.foreigntotal}
+                                    />
+                                )}
+                                
+                                {activeTab === 'files' && (
+                                    <FilesTab
+                                        formData={formData}
+                                        poId={poDetail?.po_id}
+                                        fileList={poDetail?.files || []}
+                                        pendingFiles={(formData.files || []).filter(
+                                            file => !(poDetail?.files || []).some(
+                                                pf => (pf.fileUrl || '') === (file.fileUrl || '') &&
+                                                        (pf.fileName || '') === (file.fileName || '')
+                                            )
+                                        )}
+                                        deletedFileUrls={(poDetail?.files || [])
+                                            .filter(pf => !(formData.files || []).some(
+                                                file => (file.fileUrl || '') === (pf.fileUrl || '') &&
+                                                        (file.fileName || '') === (pf.fileName || '')
+                                            ))
+                                            .map(pf => pf.fileUrl)
+                                        }
+                                        isLoading={loadingMasterData}
+                                        onAddFiles={handleAddFiles}
+                                    />
+                                )}
+
+                                {activeTab === 'usernotes' && (
+                                    <UserNoteTab
+                                        noteList={poDetail?.user_notes || []}
+                                        isLoading={historyLogLoading}
+                                    />
+                                )}
+
+                                {activeTab === 'receipt' && (
+                                    <ReceiptTab
+                                        poId={poDetail?.po_id}
+                                        receiptList={receiptList}
+                                        isLoading={receiptLoading}
+                                        pagination={receiptPagination}
+                                        onLoad={fetchReceipts}
+                                        onPageChange={(page) => fetchReceipts(page, receiptPagination.limit)}
+                                        onRowsPerPageChange={(rows, page) => fetchReceipts(page, rows)}
+                                    />
+                                )}
+
+                                {activeTab === 'historyreceipt' && (
+                                    <HistoryReceiptTab
+                                        poId={poDetail?.po_id}
+                                        logList={logList}
+                                        isLoading={historyLogLoading}
+                                        onLoad={fetchHistoryReceipts}
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Form Actions */}
+                        <div className="flex justify-end gap-4 p-4 bg-white rounded-2xl shadow-sm mb-8">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleCancel}
+                                className="px-6 rounded-full"
+                                disabled={isSubmitting}
+                            >
+                                Cancel
+                            </Button>
+                            {(poDetail?.status_proccess !== 'PROCESSING') && (<>
+                                {((poDetail?.approvalstatus === 1 && poDetail.nextapprover === "") && poDetail?.status_proccess !== 'FAILED' ) && (
                                     <PermissionGate permission={["create", "update"]}>
                                         <Button
                                             type="button"
-                                            onClick={() => handleSubmitReceive()}
+                                            variant="outline"
+                                            onClick={() => handleApprovalOpen(poDetail.po_id)}
+                                            className="group px-6 rounded-full ring-1 ring-inset ring-green-600 text-green-600 hover:bg-green-600 hover:text-white hover:ring-green-600"
+                                            disabled={isSubmitting}
+                                        >
+                                            Submit Approval
+                                        </Button>
+                                    </PermissionGate>
+                                )}
+                                {poDetail?.approvalstatus === 2 &&  (poDetail?.po_status_label !== 'Pending Receipt' && poDetail?.po_status_label !== 'Pending Bill') || poDetail?.po_status_label === 'Pending Billing/Partially Received' && (
+                                    <PermissionGate permission={["create", "update"]}>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => handleApproval(poDetail.po_id)}
+                                            className="group rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
+                                            disabled={isSubmitting}
+                                        >
+                                            Re-Approval <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
+                                        </Button>
+                                    </PermissionGate>
+                                )}
+                                {poDetail?.approvalstatus === 3 && (
+                                    <PermissionGate permission={["create", "update"]}>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => handleOpenRejected(poDetail.po_id)}
+                                            className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
+                                            disabled={isSubmitting}
+                                        >
+                                            Re-Open <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
+                                        </Button>
+                                    </PermissionGate>
+                                )}
+                                {(((formData.approvalstatus === 1 || formData.approvalstatus === null) && (formData.nextapprover === null || formData.nextapprover === ''))) && (
+                                    <PermissionGate permission={["create", "update"]}>
+                                        <Button
+                                            onClick={handleSubmit}
+                                            className="px-6 flex items-center gap-2 rounded-full"
+                                            disabled={isSubmitting}
+                                        >
+                                            {isSubmitting ? (<>
+                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Processing...
+                                            </>) : (<>
+                                                <FaSave className={`mr-2 h-4 w-4 ${isSubmitting ? 'animate-spin' : ''}`} /> Update Purchase Order
+                                            </>)}
+                                        </Button>
+                                    </PermissionGate>
+                                )}
+                                
+                                {((poDetail?.po_status_label === 'Pending Receipt' || poDetail?.po_status_label === 'Pending Billing/Partially Received') && poDetail?.po_id !== null && !editReceive) && (
+                                    <PermissionGate permission={["create", "update"]}>
+                                        <Button
+                                            type="button"
+                                            onClick={() => navigate(`/netsuite/purchase-order/${poDetail.po_id}/receive`)}
                                             className="group px-6 rounded-full ring-1 bg-[#14B8A6] ring-inset ring-[#14B8A6] text-white hover:bg-[#0D9488] hover:ring-[#0D9488]"
                                             disabled={isSubmitting}
                                         >
-                                            Submit Receive
+                                            Receive <FaReceipt className="mr-2 h-4 w-4" />
                                         </Button>
                                     </PermissionGate>
-                                )} */}
-                            </div>
-                        </div> 
-                    </>)}
+                                )}
+                            </>)}
 
-                    {/* // MODAL REOPEN SAAT STATUS APPROVAL = APPROVED */}
-                    <ModalApproval
-                        isOpen={isOpenApproval}
-                        onClose={() => setIsOpenApproval(false)}
-                        poId={selectedPoIdApproval ? parseInt(selectedPoIdApproval) : null}
-                        onSuccess={() => navigate('/netsuite/purchase-order/manage')}
-                        submit={true}
-                        titleModal="Submit Approval"
-                        descriptionModal="Masukkan catatan untuk proses approval"
-                    />
-                    {/* // MODAL REOPEN SAAT STATUS APPROVAL = APPROVED */}
-                    <ModalApproval
-                        isOpen={isOpen}
-                        onClose={() => setIsOpen(false)}
-                        poId={selectedPoId ? parseInt(selectedPoId) : null}
-                        onSuccess={() => navigate('/netsuite/purchase-order/manage')}
-                        reopen={true}
-                        titleModal="Re-Open Approval"
-                        descriptionModal="Masukkan catatan untuk proses re-open approval"
-                    />
-                    {/* // MODAL RESUBMIT SAAT STATUS REJECTED */}
-                    <ModalApproval
-                        isOpen={isOpenRejected}
-                        onClose={() => setIsOpenRejected(false)}
-                        poId={selectedPoIdRejected ? parseInt(selectedPoIdRejected) : null}
-                        onSuccess={() => navigate('/netsuite/purchase-order/manage')}
-                        resubmit={true}
-                        titleModal="Re-Submit Approval"
-                        descriptionModal="Masukkan catatan untuk proses re-submit approval"
-                    />
-                </div>
+                                {poDetail?.status_proccess === 'PROCESSING' && (
+                                    <ElemRefresh />
+                                )}
+
+                            {/*
+                            {(poDetail?.po_status_label === 'Pending Receipt' && editReceive) && (
+                                <PermissionGate permission={["create", "update"]}>
+                                    <Button
+                                        type="button"
+                                        onClick={() => handleSubmitReceive()}
+                                        className="group px-6 rounded-full ring-1 bg-[#14B8A6] ring-inset ring-[#14B8A6] text-white hover:bg-[#0D9488] hover:ring-[#0D9488]"
+                                        disabled={isSubmitting}
+                                    >
+                                        Submit Receive
+                                    </Button>
+                                </PermissionGate>
+                            )} */}
+                        </div>
+                    </div> 
+                </>)}
+
+                {/* // MODAL REOPEN SAAT STATUS APPROVAL = APPROVED */}
+                <ModalApproval
+                    isOpen={isOpenApproval}
+                    onClose={() => setIsOpenApproval(false)}
+                    poId={selectedPoIdApproval ? parseInt(selectedPoIdApproval) : null}
+                    onSuccess={() => navigate('/netsuite/purchase-order/manage')}
+                    submit={true}
+                    titleModal="Submit Approval"
+                    descriptionModal="Masukkan catatan untuk proses approval"
+                />
+                {/* // MODAL REOPEN SAAT STATUS APPROVAL = APPROVED */}
+                <ModalApproval
+                    isOpen={isOpen}
+                    onClose={() => setIsOpen(false)}
+                    poId={selectedPoId ? parseInt(selectedPoId) : null}
+                    onSuccess={() => navigate('/netsuite/purchase-order/manage')}
+                    reopen={true}
+                    titleModal="Re-Open Approval"
+                    descriptionModal="Masukkan catatan untuk proses re-open approval"
+                />
+                {/* // MODAL RESUBMIT SAAT STATUS REJECTED */}
+                <ModalApproval
+                    isOpen={isOpenRejected}
+                    onClose={() => setIsOpenRejected(false)}
+                    poId={selectedPoIdRejected ? parseInt(selectedPoIdRejected) : null}
+                    onSuccess={() => navigate('/netsuite/purchase-order/manage')}
+                    resubmit={true}
+                    titleModal="Re-Submit Approval"
+                    descriptionModal="Masukkan catatan untuk proses re-submit approval"
+                />
             </div>
         </>
     )

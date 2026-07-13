@@ -11,8 +11,8 @@ import { getProfile, formatTanggal, formatDateTime } from '@/helpers/generalHelp
 import { LoadingOverlay } from '@/components/common/Loading';
 import { useReceipt } from './hooks/useReceipt';
 import { ReceiptItem } from '../PurchaseOrder/types/purchaseorder';
-import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
 
 export default function Manage() {
     // const navigate = useNavigate();
@@ -160,36 +160,28 @@ export default function Manage() {
             
             <div className="space-y-6">
                 {/* Header */}
-                <div className="bg-white shadow rounded-lg mb-3">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Item Receips
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Manage Item Receipts and related information
-                                </p>
-                            </div>
-                            <div className="flex space-x-3">
-                                <PermissionGate permission="read">
-                                    <Button
-                                        onClick={() => handleSync()}
-                                        disabled={isSyncing}
-                                        className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
-                                        variant='outline'
-                                    >
-                                        <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
-                                        <div>
+                <PageHeaderManage
+                    title="Item Receipts"
+                    subtitle="Manage Item Receipts"
+                    actions={[
+                        {
+                            key: 'sync',
+                            element: (
+                                <Button
+                                    onClick={() => handleSync()}
+                                    disabled={isSyncing}
+                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                    variant='outline'
+                                >
+                                    <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                    <div>
                                         <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
-                                        
-                                        </div>
-                                    </Button>
-                                </PermissionGate>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                    </div>
+                                </Button>
+                            )
+                        }
+                    ]}
+                />
                 {
                     syncInfo && (<>
                         <span className='block text-xs text-green-600 pe-6 text-end mb-0'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
@@ -209,7 +201,7 @@ export default function Manage() {
                             </div>
                         )}
                         
-                        {loading ? (
+                        {loading ? (    
                             <div className="flex justify-center items-center py-12">
                                 <div className="text-center">
                                     <LoadingOverlay

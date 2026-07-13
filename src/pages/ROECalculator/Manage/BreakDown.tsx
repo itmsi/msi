@@ -676,378 +676,376 @@ export default function BreakdownROECalculator() {
                 image="/motor-sights-international.png"
             />
 
-            <div className="bg-gray-50 min-h-screen">
-                <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    {/* HEADER */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-6">
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate(`/roe-roa-calculator/manage?lang=${lang}`)}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                            >
-                                <MdKeyboardArrowLeft size={20} />
-                            </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <MdAdd size={20} className="text-green-600" />
-                            <div className='ms-2'>
-                                <h1 className="font-primary-bold font-normal text-xl">{langField('breakdownTitle')}</h1>
-                            </div>
-                        </div>
-                        
-                        <div className='flex gap-3'>
-                            <Button
-                                className="group rounded-lg w-full flex items-center justify-center gap-2 font-secondary py-2"
-                                onClick={() => navigate(buildPath(`/roe-roa-calculator/manage/edit/${calculatorId}?step=4`))}
-                            >
-                                <MdEdit size={20} className="group-hover:text-white" /> {langField('edit')}
-                            </Button>
+            <div className="mx-auto px-0">
+                {/* HEADER */}
+                <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-6">
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate(`/roe-roa-calculator/manage?lang=${lang}`)}
+                            className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
+                        >
+                            <MdKeyboardArrowLeft size={20} />
+                        </Button>
+                        <div className="border-l border-gray-300 h-6 mx-3"></div>
+                        <MdAdd size={20} className="text-green-600" />
+                        <div className='ms-2'>
+                            <h1 className="font-primary-bold font-normal text-xl">{langField('breakdownTitle')}</h1>
                         </div>
                     </div>
-
-                    <Alert
-                        variant='warning'
-                        title={langField('attentionTitle')}
-                     >
-                        <p className="text-sm text-gray-500">{langField('attentionDisclaimer')}</p>
-                    </Alert>
-
-                    {breakdownData && (
-                        <div className="space-y-6 mt-6">
-                            {/* Key Financial Metrics */}
-                            <div className="bg-white rounded-xl shadow-sm p-6">
-                                <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('keyFinancialMetrics')}</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                    <div className="bg-emerald-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('revenuePerMonth')}</p>
-                                        <p className="text-xl font-bold text-emerald-600">{formatCurrency(breakdownData.key_financial_metrics.revenue_per_bulan)}</p>
-                                    </div>
-                                    <div className="bg-red-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('totalExpensePerMonth')}</p>
-                                        <p className="text-xl font-bold text-red-600">{formatCurrency(breakdownData.key_financial_metrics.total_expense_per_bulan)}</p>
-                                    </div>
-                                    <div className="bg-blue-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('netProfitPerMonth')}</p>
-                                        <p className="text-xl font-bold text-blue-600">{formatCurrency(breakdownData.key_financial_metrics.net_profit_per_bulan)}</p>
-                                    </div>
-                                    <div className="bg-purple-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('profitMargin')}</p>
-                                        <p className="text-xl font-bold text-purple-600">{breakdownData.key_financial_metrics.profit_margin.toFixed(2)}%</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* ROE ROA Metrics */}
-                            <div className="bg-white rounded-xl shadow-sm p-6">
-                                <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('roeRoaAnalysis')}</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* ROE */}
-                                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-lg font-primary-bold font-normal text-green-800">{langField('returnOnEquity')}</h3>
-                                            <span className="text-3xl font-bold text-green-600">{breakdownData.roe_roa_metrics.roe.percentage}%</span>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <p className="text-sm text-green-700">{langField('roeDescription')}</p>
-                                            <div className="bg-white/50 p-3 rounded border">
-                                                <p className="text-xs text-gray-600 mb-1">{langField('formula')} (Net Profit/Equity) :</p>
-                                                <p className="text-sm font-mono text-green-800">
-                                                    {formatCurrency(breakdownData.roe_roa_metrics.roe.calculation.net_profit)} 
-                                                    / 
-                                                    {formatCurrency(breakdownData.roe_roa_metrics.roe.calculation.equity)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* ROA */}
-                                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-lg font-primary-bold font-normal text-blue-800">{langField('returnOnAssets')}</h3>
-                                            <span className="text-3xl font-bold text-blue-600">{breakdownData.roe_roa_metrics.roa.percentage}%</span>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <p className="text-sm text-blue-700">{langField('roaDescription')}</p>
-                                            <div className="bg-white/50 p-3 rounded border">
-                                                <p className="text-xs text-gray-600 mb-1">{langField('formula')} (Net Profit/Total Assets) :</p>
-                                                <p className="text-sm font-mono text-blue-800">
-                                                    {formatCurrency(breakdownData.roe_roa_metrics.roa.calculation.net_profit)} 
-                                                    / 
-                                                    {formatCurrency(breakdownData.roe_roa_metrics.roa.calculation.total_assets)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Charts Section */}
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                {/* Revenue Expense Profit Chart */}
-                                <div className="bg-white rounded-xl shadow-sm p-6">
-                                    <RevenueExpenseProfitChart data={breakdownData.charts_data.revenue_expense_profit} />
-                                </div>
-
-                                {/* Breakdown Biaya Doughnut Chart */}
-                                <div className="bg-white rounded-xl shadow-sm p-6">
-                                    <BreakdownBiayaChart data={breakdownData.charts_data.breakdown_biaya} />
-                                </div>
-                            </div>
-
-                            {/* Operational Metrics */}
-                            <div className="bg-white rounded-xl shadow-sm p-6">
-                                <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('operationalMetrics')}</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div className="bg-blue-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('tripsPerDay')}</p>
-                                        <p className="text-2xl font-bold text-blue-600">{breakdownData.metrik_operasional.ritase_per_hari}</p>
-                                    </div>
-                                    <div className="bg-green-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('tripsPerMonth')}</p>
-                                        <p className="text-2xl font-bold text-green-600">{breakdownData.metrik_operasional.ritase_per_bulan}</p>
-                                    </div>
-                                    <div className="bg-purple-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('tonnagePerMonth')}</p>
-                                        <p className="text-2xl font-bold text-purple-600">{breakdownData.metrik_operasional.tonnage_per_bulan.toLocaleString()}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Revenue Multiple Unit */}
-                            <div className="bg-white rounded-xl shadow-sm p-6">
-                                <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('revenueMultipleUnit')}</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('unitQuantityBreakdown')}</p>
-                                        <p className="text-xl font-bold text-gray-800">{breakdownData.revenue_multiple_unit.jumlah_unit}</p>
-                                    </div>
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('revenuePerUnit')}</p>
-                                        <p className="text-xl font-bold text-gray-800">{formatCurrency(breakdownData.revenue_multiple_unit.revenue_per_unit)}</p>
-                                    </div>
-                                    <div className="bg-emerald-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('totalRevenue')}</p>
-                                        <p className="text-xl font-bold text-emerald-600">{formatCurrency(breakdownData.revenue_multiple_unit.total_revenue)}</p>
-                                    </div>
-                                </div>
-                                {/* <div className="bg-blue-50 p-4 rounded-lg">
-                                    <p className="text-sm text-gray-600 mb-1">Formula</p>
-                                    <p className="text-sm font-mono text-blue-800">{breakdownData.revenue_multiple_unit.formula}</p>
-                                </div> */}
-                            </div>
-
-                            {/* BBM Metrics */}
-                            <div className="bg-white rounded-xl shadow-sm p-6">
-                                <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('fuelMetrics')}</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div className="bg-orange-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('fuelPerTrip')}</p>
-                                        <p className="text-2xl font-bold text-orange-600">{breakdownData.metrik_bbm.bbm_per_ritase}</p>
-                                    </div>
-                                    <div className="bg-red-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('fuelCostPerTrip')}</p>
-                                        <p className="text-xl font-bold text-red-600">{formatCurrency(breakdownData.metrik_bbm.biaya_bbm_per_ritase)}</p>
-                                    </div>
-                                    <div className="bg-yellow-50 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-600">{langField('fuelEfficiency')}</p>
-                                        <p className="text-2xl font-bold text-yellow-600">{breakdownData.metrik_bbm.efisiensi_l_km_ton}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Monthly Cost Breakdown */}
-                            <div className="bg-white rounded-xl shadow-sm p-6">
-                                <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('monthlyExpenseDetail')}</h2>
-                                <div className="space-y-4">
-                                    {breakdownData.charts_data.breakdown_biaya.map((item, index) => {
-                                        const colors = [
-                                            'bg-red-500',      // BBM
-                                            'bg-orange-500',   // Ban
-                                            'bg-yellow-500',   // Sparepart
-                                            'bg-green-500',    // Gaji Operator
-                                            'bg-blue-500',     // Depresiasi
-                                            'bg-indigo-500',   // Bunga
-                                            'bg-purple-500'    // Overhead
-                                        ];
-                                        
-                                        return (
-                                            <div key={item.title} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`w-4 h-4 rounded-full ${colors[index % colors.length]}`}></div>
-                                                    <span className="font-medium text-gray-900">{translateCostTitle(item.title)}</span>
-                                                </div>
-                                                <div className="flex items-center gap-4">
-                                                    <span className="text-sm text-gray-600">{item.persentase}%</span>
-                                                    <span className="font-bold text-gray-900">{formatCurrency(item.nominal)}</span>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                                
-                                {/* Total Expense */}
-                                <div className="mt-6 p-4 bg-red-50 rounded-lg border-2 border-red-200">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-lg font-bold text-red-800">{langField('totalExpense')}</span>
-                                        <span className="text-2xl font-bold text-red-600">{formatCurrency(breakdownData?.charts_data?.revenue_expense_profit?.[0]?.expense || '0')}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Compare Breakdown Section */}
-                    <CompareBreakdownSection />
-
-                    {/* Add Comparison Modal */}
-                    <Modal
-                        isOpen={isAddModalOpen}
-                        onClose={() => setIsAddModalOpen(false)}
-                        title={langField('addNewComparison')}
-                        className="max-w-xl"
-                    >
-                        <div className="p-6">
-                            <div className="space-y-4">
-                                <div>
-                                    <Label htmlFor="brand">{langField('brand')} *</Label>
-                                    <Input
-                                        id="brand"
-                                        name="brand"
-                                        type="text"
-                                        placeholder="Enter brand name"
-                                        value={compareFormData.brand}
-                                        onChange={(e) => handleCompareFormChange('brand', e.target.value)}
-                                        className={`mt-1 ${compareFormErrors.brand ? 'border-red-500 focus:border-red-500' : ''}`}
-                                        maxLength={50}
-                                    />
-                                    {compareFormErrors.brand && (
-                                        <p className="text-red-500 text-xs mt-1">{compareFormErrors.brand}</p>
-                                    )}
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="tonase">{langField('tonnagePerUnit')}</Label>
-                                        <Input
-                                            id="tonase"
-                                            value={compareFormData.tonase}
-                                            placeholder="0.00"
-                                            onChange={(e) => {
-                                                const rawValue = e.target.value;                                                
-                                                handleDecimalInput(
-                                                    rawValue,
-                                                    (validValue) => handleCompareFormChange('tonase', validValue),
-                                                    () => handleCompareFormChange('tonase', ''),
-                                                    true,
-                                                    7,
-                                                    4
-                                                );
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="ritase">{langField('tripsPerShift')}</Label>
-                                        <Input
-                                            id="ritase"
-                                            value={compareFormData.ritase}
-                                            placeholder="0.00"
-                                            onChange={(e) => {
-                                                const rawValue = e.target.value;                                                
-                                                handleDecimalInput(
-                                                    rawValue,
-                                                    (validValue) => handleCompareFormChange('ritase', validValue),
-                                                    () => handleCompareFormChange('ritase', ''),
-                                                    true,
-                                                    7,
-                                                    4
-                                                );
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="qty">{langField('unitQuantityQty')}</Label>
-                                        <Input
-                                            id="qty"
-                                            value={compareFormData.qty}
-                                            placeholder="0"
-                                            onChange={(e) => handleCompareFormChange('qty', e.target.value)}
-                                            onKeyPress={handleKeyPress}
-                                            maxLength={4}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="price_per_unit">{langField('pricePerUnit')}</Label>
-                                        <Input
-                                            id="price_per_unit"
-                                            type="text"
-                                            placeholder="0"
-                                            value={formatNumberInput(compareFormData.price_per_unit)}
-                                            onChange={(e) => {
-                                                const value = e.target.value.replace(/[^\d]/g, '');
-                                                handleCompareFormChange('price_per_unit', value);
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="fuel_consumption">{langField('fuelConsumption')} {breakdownData?.fuel_consumption_type || 'L/km'}</Label>
-                                        <Input
-                                            id="fuel_consumption"
-                                            placeholder="0.00"
-                                            value={compareFormData.fuel_consumption}
-                                            onChange={(e) => {
-                                                const rawValue = e.target.value;                                                
-                                                handleDecimalInput(
-                                                    rawValue,
-                                                    (validValue) => handleCompareFormChange('fuel_consumption', validValue),
-                                                    () => handleCompareFormChange('fuel_consumption', ''),
-                                                    true,
-                                                    7,
-                                                    4
-                                                );
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-end gap-3 pt-4 border-t">
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => setIsAddModalOpen(false)}
-                                        disabled={isAddingCompare}
-                                    >
-                                        {langField('cancel')}
-                                    </Button>
-                                    <Button
-                                        onClick={handleAddComparison}
-                                        disabled={isAddingCompare}
-                                    >
-                                        {isAddingCompare ? langField('adding') : langField('addComparison')}
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </Modal>
-
                     
-                    {/* Delete Confirmation Modal */}
-                    <ConfirmationModal
-                        isOpen={confirmDelete.show}
-                        onClose={cancelDelete}
-                        onConfirm={confirmdeleteCompetitor}
-                        title={`${langField('deleteCompetitor')}: ${confirmDelete.name}`}
-                        message={langField('deleteCompetitorConfirm')}
-                        confirmText={langField('delete')}
-                        cancelText={langField('cancel')}
-                        type="danger"
-                        loading={isDeletingCompare}
-                    />
+                    <div className='flex gap-3'>
+                        <Button
+                            className="group rounded-lg w-full flex items-center justify-center gap-2 font-secondary py-2"
+                            onClick={() => navigate(buildPath(`/roe-roa-calculator/manage/edit/${calculatorId}?step=4`))}
+                        >
+                            <MdEdit size={20} className="group-hover:text-white" /> {langField('edit')}
+                        </Button>
+                    </div>
                 </div>
+
+                <Alert
+                    variant='warning'
+                    title={langField('attentionTitle')}
+                    >
+                    <p className="text-sm text-gray-500">{langField('attentionDisclaimer')}</p>
+                </Alert>
+
+                {breakdownData && (
+                    <div className="space-y-6 mt-6">
+                        {/* Key Financial Metrics */}
+                        <div className="bg-white rounded-xl shadow-sm p-6">
+                            <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('keyFinancialMetrics')}</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div className="bg-emerald-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('revenuePerMonth')}</p>
+                                    <p className="text-xl font-bold text-emerald-600">{formatCurrency(breakdownData.key_financial_metrics.revenue_per_bulan)}</p>
+                                </div>
+                                <div className="bg-red-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('totalExpensePerMonth')}</p>
+                                    <p className="text-xl font-bold text-red-600">{formatCurrency(breakdownData.key_financial_metrics.total_expense_per_bulan)}</p>
+                                </div>
+                                <div className="bg-blue-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('netProfitPerMonth')}</p>
+                                    <p className="text-xl font-bold text-blue-600">{formatCurrency(breakdownData.key_financial_metrics.net_profit_per_bulan)}</p>
+                                </div>
+                                <div className="bg-purple-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('profitMargin')}</p>
+                                    <p className="text-xl font-bold text-purple-600">{breakdownData.key_financial_metrics.profit_margin.toFixed(2)}%</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ROE ROA Metrics */}
+                        <div className="bg-white rounded-xl shadow-sm p-6">
+                            <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('roeRoaAnalysis')}</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* ROE */}
+                                <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-primary-bold font-normal text-green-800">{langField('returnOnEquity')}</h3>
+                                        <span className="text-3xl font-bold text-green-600">{breakdownData.roe_roa_metrics.roe.percentage}%</span>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-sm text-green-700">{langField('roeDescription')}</p>
+                                        <div className="bg-white/50 p-3 rounded border">
+                                            <p className="text-xs text-gray-600 mb-1">{langField('formula')} (Net Profit/Equity) :</p>
+                                            <p className="text-sm font-mono text-green-800">
+                                                {formatCurrency(breakdownData.roe_roa_metrics.roe.calculation.net_profit)} 
+                                                / 
+                                                {formatCurrency(breakdownData.roe_roa_metrics.roe.calculation.equity)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ROA */}
+                                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-primary-bold font-normal text-blue-800">{langField('returnOnAssets')}</h3>
+                                        <span className="text-3xl font-bold text-blue-600">{breakdownData.roe_roa_metrics.roa.percentage}%</span>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-sm text-blue-700">{langField('roaDescription')}</p>
+                                        <div className="bg-white/50 p-3 rounded border">
+                                            <p className="text-xs text-gray-600 mb-1">{langField('formula')} (Net Profit/Total Assets) :</p>
+                                            <p className="text-sm font-mono text-blue-800">
+                                                {formatCurrency(breakdownData.roe_roa_metrics.roa.calculation.net_profit)} 
+                                                / 
+                                                {formatCurrency(breakdownData.roe_roa_metrics.roa.calculation.total_assets)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Charts Section */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Revenue Expense Profit Chart */}
+                            <div className="bg-white rounded-xl shadow-sm p-6">
+                                <RevenueExpenseProfitChart data={breakdownData.charts_data.revenue_expense_profit} />
+                            </div>
+
+                            {/* Breakdown Biaya Doughnut Chart */}
+                            <div className="bg-white rounded-xl shadow-sm p-6">
+                                <BreakdownBiayaChart data={breakdownData.charts_data.breakdown_biaya} />
+                            </div>
+                        </div>
+
+                        {/* Operational Metrics */}
+                        <div className="bg-white rounded-xl shadow-sm p-6">
+                            <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('operationalMetrics')}</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="bg-blue-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('tripsPerDay')}</p>
+                                    <p className="text-2xl font-bold text-blue-600">{breakdownData.metrik_operasional.ritase_per_hari}</p>
+                                </div>
+                                <div className="bg-green-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('tripsPerMonth')}</p>
+                                    <p className="text-2xl font-bold text-green-600">{breakdownData.metrik_operasional.ritase_per_bulan}</p>
+                                </div>
+                                <div className="bg-purple-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('tonnagePerMonth')}</p>
+                                    <p className="text-2xl font-bold text-purple-600">{breakdownData.metrik_operasional.tonnage_per_bulan.toLocaleString()}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Revenue Multiple Unit */}
+                        <div className="bg-white rounded-xl shadow-sm p-6">
+                            <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('revenueMultipleUnit')}</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div className="bg-gray-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('unitQuantityBreakdown')}</p>
+                                    <p className="text-xl font-bold text-gray-800">{breakdownData.revenue_multiple_unit.jumlah_unit}</p>
+                                </div>
+                                <div className="bg-gray-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('revenuePerUnit')}</p>
+                                    <p className="text-xl font-bold text-gray-800">{formatCurrency(breakdownData.revenue_multiple_unit.revenue_per_unit)}</p>
+                                </div>
+                                <div className="bg-emerald-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('totalRevenue')}</p>
+                                    <p className="text-xl font-bold text-emerald-600">{formatCurrency(breakdownData.revenue_multiple_unit.total_revenue)}</p>
+                                </div>
+                            </div>
+                            {/* <div className="bg-blue-50 p-4 rounded-lg">
+                                <p className="text-sm text-gray-600 mb-1">Formula</p>
+                                <p className="text-sm font-mono text-blue-800">{breakdownData.revenue_multiple_unit.formula}</p>
+                            </div> */}
+                        </div>
+
+                        {/* BBM Metrics */}
+                        <div className="bg-white rounded-xl shadow-sm p-6">
+                            <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('fuelMetrics')}</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="bg-orange-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('fuelPerTrip')}</p>
+                                    <p className="text-2xl font-bold text-orange-600">{breakdownData.metrik_bbm.bbm_per_ritase}</p>
+                                </div>
+                                <div className="bg-red-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('fuelCostPerTrip')}</p>
+                                    <p className="text-xl font-bold text-red-600">{formatCurrency(breakdownData.metrik_bbm.biaya_bbm_per_ritase)}</p>
+                                </div>
+                                <div className="bg-yellow-50 p-4 rounded-lg">
+                                    <p className="text-sm text-gray-600">{langField('fuelEfficiency')}</p>
+                                    <p className="text-2xl font-bold text-yellow-600">{breakdownData.metrik_bbm.efisiensi_l_km_ton}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Monthly Cost Breakdown */}
+                        <div className="bg-white rounded-xl shadow-sm p-6">
+                            <h2 className="text-xl font-primary-bold font-normal text-gray-900 mb-4">{langField('monthlyExpenseDetail')}</h2>
+                            <div className="space-y-4">
+                                {breakdownData.charts_data.breakdown_biaya.map((item, index) => {
+                                    const colors = [
+                                        'bg-red-500',      // BBM
+                                        'bg-orange-500',   // Ban
+                                        'bg-yellow-500',   // Sparepart
+                                        'bg-green-500',    // Gaji Operator
+                                        'bg-blue-500',     // Depresiasi
+                                        'bg-indigo-500',   // Bunga
+                                        'bg-purple-500'    // Overhead
+                                    ];
+                                    
+                                    return (
+                                        <div key={item.title} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                            <div className="flex items-center gap-4">
+                                                <div className={`w-4 h-4 rounded-full ${colors[index % colors.length]}`}></div>
+                                                <span className="font-medium text-gray-900">{translateCostTitle(item.title)}</span>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-sm text-gray-600">{item.persentase}%</span>
+                                                <span className="font-bold text-gray-900">{formatCurrency(item.nominal)}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            
+                            {/* Total Expense */}
+                            <div className="mt-6 p-4 bg-red-50 rounded-lg border-2 border-red-200">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-lg font-bold text-red-800">{langField('totalExpense')}</span>
+                                    <span className="text-2xl font-bold text-red-600">{formatCurrency(breakdownData?.charts_data?.revenue_expense_profit?.[0]?.expense || '0')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Compare Breakdown Section */}
+                <CompareBreakdownSection />
+
+                {/* Add Comparison Modal */}
+                <Modal
+                    isOpen={isAddModalOpen}
+                    onClose={() => setIsAddModalOpen(false)}
+                    title={langField('addNewComparison')}
+                    className="max-w-xl"
+                >
+                    <div className="p-6">
+                        <div className="space-y-4">
+                            <div>
+                                <Label htmlFor="brand">{langField('brand')} *</Label>
+                                <Input
+                                    id="brand"
+                                    name="brand"
+                                    type="text"
+                                    placeholder="Enter brand name"
+                                    value={compareFormData.brand}
+                                    onChange={(e) => handleCompareFormChange('brand', e.target.value)}
+                                    className={`mt-1 ${compareFormErrors.brand ? 'border-red-500 focus:border-red-500' : ''}`}
+                                    maxLength={50}
+                                />
+                                {compareFormErrors.brand && (
+                                    <p className="text-red-500 text-xs mt-1">{compareFormErrors.brand}</p>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="tonase">{langField('tonnagePerUnit')}</Label>
+                                    <Input
+                                        id="tonase"
+                                        value={compareFormData.tonase}
+                                        placeholder="0.00"
+                                        onChange={(e) => {
+                                            const rawValue = e.target.value;                                                
+                                            handleDecimalInput(
+                                                rawValue,
+                                                (validValue) => handleCompareFormChange('tonase', validValue),
+                                                () => handleCompareFormChange('tonase', ''),
+                                                true,
+                                                7,
+                                                4
+                                            );
+                                        }}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="ritase">{langField('tripsPerShift')}</Label>
+                                    <Input
+                                        id="ritase"
+                                        value={compareFormData.ritase}
+                                        placeholder="0.00"
+                                        onChange={(e) => {
+                                            const rawValue = e.target.value;                                                
+                                            handleDecimalInput(
+                                                rawValue,
+                                                (validValue) => handleCompareFormChange('ritase', validValue),
+                                                () => handleCompareFormChange('ritase', ''),
+                                                true,
+                                                7,
+                                                4
+                                            );
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="qty">{langField('unitQuantityQty')}</Label>
+                                    <Input
+                                        id="qty"
+                                        value={compareFormData.qty}
+                                        placeholder="0"
+                                        onChange={(e) => handleCompareFormChange('qty', e.target.value)}
+                                        onKeyPress={handleKeyPress}
+                                        maxLength={4}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="price_per_unit">{langField('pricePerUnit')}</Label>
+                                    <Input
+                                        id="price_per_unit"
+                                        type="text"
+                                        placeholder="0"
+                                        value={formatNumberInput(compareFormData.price_per_unit)}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/[^\d]/g, '');
+                                            handleCompareFormChange('price_per_unit', value);
+                                        }}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="fuel_consumption">{langField('fuelConsumption')} {breakdownData?.fuel_consumption_type || 'L/km'}</Label>
+                                    <Input
+                                        id="fuel_consumption"
+                                        placeholder="0.00"
+                                        value={compareFormData.fuel_consumption}
+                                        onChange={(e) => {
+                                            const rawValue = e.target.value;                                                
+                                            handleDecimalInput(
+                                                rawValue,
+                                                (validValue) => handleCompareFormChange('fuel_consumption', validValue),
+                                                () => handleCompareFormChange('fuel_consumption', ''),
+                                                true,
+                                                7,
+                                                4
+                                            );
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-4 border-t">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsAddModalOpen(false)}
+                                    disabled={isAddingCompare}
+                                >
+                                    {langField('cancel')}
+                                </Button>
+                                <Button
+                                    onClick={handleAddComparison}
+                                    disabled={isAddingCompare}
+                                >
+                                    {isAddingCompare ? langField('adding') : langField('addComparison')}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </Modal>
+
+                
+                {/* Delete Confirmation Modal */}
+                <ConfirmationModal
+                    isOpen={confirmDelete.show}
+                    onClose={cancelDelete}
+                    onConfirm={confirmdeleteCompetitor}
+                    title={`${langField('deleteCompetitor')}: ${confirmDelete.name}`}
+                    message={langField('deleteCompetitorConfirm')}
+                    confirmText={langField('delete')}
+                    cancelText={langField('cancel')}
+                    type="danger"
+                    loading={isDeletingCompare}
+                />
             </div>
         </>
     );

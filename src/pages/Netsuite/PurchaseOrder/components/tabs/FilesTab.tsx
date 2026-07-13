@@ -3,7 +3,7 @@ import { AttachFileItem, PurchaseOrderForm } from '../../types/purchaseorder';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { TableColumn } from 'react-data-table-component';
 import { FaExternalLinkAlt, FaPaperclip, FaPlus } from 'react-icons/fa';
-import { Link } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import Button from '@/components/ui/button/Button';
 import { MdDeleteOutline, MdEdit } from 'react-icons/md';
 import { PurchaseOrderService } from '../../services/purchaseOrderService';
@@ -48,6 +48,14 @@ const getDocumentIcon = (fileName: string) => {
         return <FaRegFile />;
     }
 };
+const sortById = (data : any, ascending = true) => {
+    return [...data].sort((a, b) => {
+        const idA = Number(a.id);
+        const idB = Number(b.id);
+        return ascending ? idA - idB : idB - idA;
+    });
+};
+
 const FilesTab: React.FC<FilesTabProps> = ({
     poId,
     fileList,
@@ -56,6 +64,9 @@ const FilesTab: React.FC<FilesTabProps> = ({
     isLoading,
     onAddFiles,
 }) => {
+    const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
+    const dataFiles = sortById(fileList, false);
     const [showForm, setShowForm] = useState(false);
     const [newFiles, setNewFiles] = useState<AttachFileItemLocal[]>(pendingFiles);
     const [deletedUrls, setDeletedUrls] = useState<Set<string>>(new Set(deletedFileUrls));
@@ -99,13 +110,13 @@ const FilesTab: React.FC<FilesTabProps> = ({
 
     // Gabungkan file dari server (minus yang dihapus) + file baru dengan flag isNew
     const allFiles: AttachFileItemLocal[] = useMemo(() => [
-        ...fileList.filter(f => !deletedUrls.has(f.fileUrl)).map(f => ({ ...f, isNew: false })),
+        ...dataFiles.filter(f => !deletedUrls.has(f.fileUrl)).map(f => ({ ...f, isNew: false })),
         ...newFiles.map(f => ({ ...f, isNew: true })),
-    ], [fileList, newFiles, deletedUrls]);
+    ], [dataFiles, newFiles, deletedUrls]);
 
     // Helper: kirim list lengkap (existing non-deleted + new) ke parent
     const notifyParent = (updatedNewFiles: AttachFileItem[], updatedDeletedUrls: Set<string>) => {
-        const existingFiles = fileList.filter(f => !updatedDeletedUrls.has(f.fileUrl));
+        const existingFiles = dataFiles.filter(f => !updatedDeletedUrls.has(f.fileUrl));
         onAddFiles?.([...existingFiles, ...updatedNewFiles]);
     };
 
@@ -141,47 +152,136 @@ const FilesTab: React.FC<FilesTabProps> = ({
 
         setIsUploading(true);
         try {
-            if (poId && editingFile) {
-                // Mode edit file yang sudah ada di server
-                const res = await PurchaseOrderService.attachFilePOUpdate({
-                    ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
-                    poId: String(poId),
-                    file_name: finalFileName,
-                    fileUrl: editingFile.fileUrl ?? 'kosong',
-                });
+            // if (poId && editingFile) {
+            //     console.log('bbb', { finalSelectedFile, finalFileName, poId, editingFile });
+            //     // Mode edit file yang sudah ada di server
+            //     const res = await PurchaseOrderService.attachFilePOUpdate({
+            //         ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
+            //         poId: String(poId),
+            //         file_name: finalFileName,
+            //         fileUrl: editingFile.fileUrl ?? 'kosong',
+            //     });
 
-                if (res.success) {
-                    const updatedEntry: AttachFileItem = {
-                        po_id: String(poId),
-                        fileUrl: res.data.fileUrl,
-                        fileName: res.data.fileName,
-                    };
-                    if (editingFile.isEdited) {
-                        // Edit ulang file yang sudah di-edit sebelumnya (ada di newFiles)
-                        const updated = newFiles.map(item =>
-                            item.fileUrl === editingFile.fileUrl && item.fileName === editingFile.fileName
-                                ? { ...updatedEntry, isEdited: true }
-                                : item
-                        );
-                        setNewFiles(updated);
-                        notifyParent(updated, deletedUrls);
+            //     if (res.success) {
+            //         const updatedEntry: AttachFileItem = {
+            //             po_id: String(poId),
+            //             fileUrl: res.data.fileUrl,
+            //             fileName: res.data.fileName,
+            //         };
+            //         if (editingFile.isEdited) {
+            //             // Edit ulang file yang sudah di-edit sebelumnya (ada di newFiles)
+            //             const updated = newFiles.map(item =>
+            //                 item.fileUrl === editingFile.fileUrl && item.fileName === editingFile.fileName
+            //                     ? { ...updatedEntry, isEdited: true }
+            //                     : item
+            //             );
+            //             setNewFiles(updated);
+            //             notifyParent(updated, deletedUrls);
+            //         } else {
+            //             // Edit file dari server: tandai url lama sebagai deleted, masukkan yang baru ke newFiles
+            //             const updatedDeleted = new Set(deletedUrls).add(editingFile.fileUrl ?? '');
+            //             const updated = [...newFiles, { ...updatedEntry, isEdited: true }];
+            //             setDeletedUrls(updatedDeleted);
+            //             setNewFiles(updated);
+            //             notifyParent(updated, updatedDeleted);
+            //         }
+            //         toast.success('File berhasil diupdate');
+            //         setShowForm(false);
+            //         setEntryError('');
+            //         setFileName('');
+            //     } else {
+            //         toast.error(res.message || 'Gagal mengupdate file');
+            //     }
+            //     setEditingFile(null);
+            // } else 
+                if (id) { // URL PO sudah ada, tapi tidak sedang edit file (mode tambah file baru)
+                // Mode tambah file baru (dengan atau tanpa poId)
+
+                if (poId && editingFile) {
+                    console.log('xxxx', { finalSelectedFile, finalFileName, poId, editingFile });
+                    // Mode edit file yang sudah ada di server
+                    const res = await PurchaseOrderService.attachFileUpdateDetailPO(
+                        {
+                        ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
+                            poId: String(poId),
+                            file_name: finalFileName,
+                            fileUrl: editingFile.fileUrl ?? 'kosong',
+                        }, String(poId));
+
+                    if (res.success) {
+                        const updatedEntry: AttachFileItem = {
+                            po_id: String(poId),
+                            fileUrl: res.data.fileUrl,
+                            fileName: res.data.fileName,
+                        };
+                        if (editingFile.isEdited) {
+                            // Edit ulang file yang sudah di-edit sebelumnya (ada di newFiles)
+                            const updated = newFiles.map(item =>
+                                item.fileUrl === editingFile.fileUrl && item.fileName === editingFile.fileName
+                                    ? { ...updatedEntry, isEdited: true }
+                                    : item
+                            );
+                            setNewFiles(updated);
+                            notifyParent(updated, deletedUrls);
+                        } else {
+                            // Edit file dari server: tandai url lama sebagai deleted, masukkan yang baru ke newFiles
+                            const updatedDeleted = new Set(deletedUrls).add(editingFile.fileUrl ?? '');
+                            const updated = [...newFiles, { ...updatedEntry, isEdited: true }];
+                            setDeletedUrls(updatedDeleted);
+                            setNewFiles(updated);
+                            notifyParent(updated, updatedDeleted);
+                        }
+                        toast.success('File berhasil diupdate');
+                        setShowForm(false);
+                        setEntryError('');
+                        setFileName('');
                     } else {
-                        // Edit file dari server: tandai url lama sebagai deleted, masukkan yang baru ke newFiles
-                        const updatedDeleted = new Set(deletedUrls).add(editingFile.fileUrl ?? '');
-                        const updated = [...newFiles, { ...updatedEntry, isEdited: true }];
-                        setDeletedUrls(updatedDeleted);
-                        setNewFiles(updated);
-                        notifyParent(updated, updatedDeleted);
+                        toast.error(res.message || 'Gagal mengupdate file');
                     }
-                    toast.success('File berhasil diupdate');
-                    setShowForm(false);
-                    setEntryError('');
-                    setFileName('');
+                    setEditingFile(null);
                 } else {
-                    toast.error(res.message || 'Gagal mengupdate file');
+
+
+
+
+
+                
+                        console.log('aaa', { finalSelectedFile, finalFileName, poId });
+                        if (!finalSelectedFile) {
+                            setEntryError('Pilih file terlebih dahulu');
+                            return;
+                        }
+
+                        const fileToUpload: File = finalSelectedFile;
+
+                        const res = await PurchaseOrderService.attachFileDetailPO({
+                            file: fileToUpload,
+                            file_name: finalFileName,
+                            po_id: String(poId ?? 'temp-' + Date.now()),
+                        });
+
+                        if (res.success) {
+                            const uploadedEntry: AttachFileItem = {
+                                po_id: res.poId,
+                                fileUrl: res.fileUrl,
+                                fileName: res.fileName,
+                            };
+                            const updated = [...newFiles, { ...uploadedEntry, isNew: true }];
+                            setNewFiles(updated);
+                            notifyParent(updated, deletedUrls);
+                            setSelectedFile(null);
+                            setFileName('');
+                            if (fileAttachRef.current) fileAttachRef.current.value = '';
+                            toast.success('File berhasil diupload');
+                            setShowForm(false);
+                            setEntryError('');
+                            setFileName('');
+                        } else {
+                            toast.error(res.message || 'Gagal mengupload file');
+                        }
                 }
-                setEditingFile(null);
             } else {
+                console.log('ccc', { finalSelectedFile, finalFileName, poId });
                 // Mode tambah file baru (dengan atau tanpa poId)
                 if (!finalSelectedFile) {
                     setEntryError('Pilih file terlebih dahulu');
@@ -250,7 +350,10 @@ const FilesTab: React.FC<FilesTabProps> = ({
     const handleDelete = async (row: AttachFileItemLocal) => {
         setLoadingDelete(true);
         try {
-            const res = await PurchaseOrderService.attachFilePODelete({ fileUrl: row.fileUrl });
+            
+            const res = id ? 
+                await PurchaseOrderService.attachFileDeleteDetailPO(String(poId ?? id)) : 
+                await PurchaseOrderService.attachFilePODelete({ fileUrl: row.fileUrl })
             if (res.success) {
                 if (row.isNew) {
                     const updated = newFiles.filter(

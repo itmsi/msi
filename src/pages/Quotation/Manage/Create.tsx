@@ -1053,289 +1053,276 @@ export default function CreateQuotation() {
                 image="/motor-sights-international.png"
             />
 
-            <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-4 sm:px-3">
-                    {/* Header */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate(buildPath(`/quotations/manage`))}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                            >
-                                <MdKeyboardArrowLeft size={20} />
-                            </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">{langField('createQuotation')}</h1>
-                        </div>
+            <div className="mx-auto px-0">
+                {/* Header */}
+                <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate(buildPath(`/quotations/manage`))}
+                            className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
+                        >
+                            <MdKeyboardArrowLeft size={20} />
+                        </Button>
+                        <div className="border-l border-gray-300 h-6 mx-3"></div>
+                        <h1 className="ms-2 font-primary-bold font-normal text-xl">{langField('createQuotation')}</h1>
                     </div>
+                </div>
 
-                    {/* Form */}
-                    <form onSubmit={(e) => handleSubmit(e, 'submit')} className="space-y-6">
-                        <div className='md:grid-cols-5 grid gap-6'>
-                            <div className="bg-white rounded-2xl shadow-sm p-6 lg:col-span-3">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('quotationDetail')}</h2>
-                                <div className='md:grid-cols-2 grid gap-x-5'>
-                                    <div className="md:col-span-1 space-y-3">
-                                        {/* INVOICE NUMBER */}
-                                        <div>
-                                            <Label htmlFor="quotation_number">{langField('quotationNumber')}</Label>
-                                            <Input
-                                                id="quotation_number"
-                                                type="text"
-                                                value={`###/${getCompanyName()}/${monthRoman}/${new Date().getFullYear()}`}
-                                                disabled={true}
-                                            />
-                                        </div>
-                                        {/* Quotation Date */}
-                                        <div>
-                                            <Label>{langField('quotationDate')}</Label>
-                                            <div className="relative" ref={invoiceDatePickerRef}>
-                                                <div
-                                                    className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 h-11"
-                                                    onClick={() => setShowInvoiceDatePicker(!showInvoiceDatePicker)}
-                                                >
-                                                    <span className="text-gray-700">
-                                                        {formatDate(invoiceDate)}
-                                                    </span>
-                                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                </div>
-
-                                                {showInvoiceDatePicker && (
-                                                    <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-                                                        <Calendar
-                                                            date={invoiceDate}
-                                                            onChange={handleInvoiceDateChange}
-                                                            color="#3b82f6"
-                                                            minDate={new Date()}
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {validationErrors.manage_quotation_date && (
-                                                <span className="text-sm text-red-500">
-                                                    {validationErrors.manage_quotation_date}
-                                                </span>
-                                            )}
-                                        </div>
-                                        {/* Due Date */}
-                                        <div>
-                                            <Label>{langField('quotationValidUntil')}</Label>
-                                            <div className="relative" ref={dueDatePickerRef}>
-                                                <div
-                                                    className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 h-11"
-                                                    onClick={() => setShowDueDatePicker(!showDueDatePicker)}
-                                                >
-                                                    <span className="text-gray-700">
-                                                        {formatDate(dueDate)}
-                                                    </span>
-                                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                </div>
-
-                                                {showDueDatePicker && (
-                                                    <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-                                                        <div className="p-3 border-b border-gray-200">
-                                                            <div className="text-sm text-gray-600 mb-2">{langField('quickSelect')}</div>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                <button
-                                                                    type="button"
-                                                                    className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
-                                                                    onClick={() => handleDueDateChange(new Date(invoiceDate.getTime() + 24 * 60 * 60 * 1000))}
-                                                                >
-                                                                    {langField('plus1Day')}
-                                                                </button>
-                                                                <button
-                                                                    type="button"
-                                                                    className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
-                                                                    onClick={() => handleDueDateChange(new Date(invoiceDate.getTime() + 7 * 24 * 60 * 60 * 1000))}
-                                                                >
-                                                                    {langField('plus7Days')}
-                                                                </button>
-                                                                <button
-                                                                    type="button"
-                                                                    className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
-                                                                    onClick={() => handleDueDateChange(new Date(invoiceDate.getTime() + 14 * 24 * 60 * 60 * 1000))}
-                                                                >
-                                                                    {langField('plus14Days')}
-                                                                </button>
-                                                                <button
-                                                                    type="button"
-                                                                    className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
-                                                                    onClick={() => handleDueDateChange(new Date(invoiceDate.getTime() + 30 * 24 * 60 * 60 * 1000))}
-                                                                >
-                                                                    {langField('plus30Days')}
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                        <Calendar
-                                                            date={dueDate}
-                                                            onChange={handleDueDateChange}
-                                                            color="#3b82f6"
-                                                            minDate={invoiceDate} // Due date cannot be before invoice date
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {validationErrors.manage_quotation_valid_date && (
-                                                <span className="text-sm text-red-500">
-                                                    {validationErrors.manage_quotation_valid_date}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        {/* Quotation For */}
-                                        <div>
-                                            <Label htmlFor="quotation_for">{langField('quotationFor')}</Label>
-                                            <CustomSelect
-                                                id="quotation_for"
-                                                value={
-                                                    formData.quotation_for === 'leasing'
-                                                        ? { value: 'leasing', label: 'Leasing' }
-                                                        : { value: 'customer', label: 'Customer' }
-                                                }
-                                                onChange={(selectedOption) => handleInputChange('quotation_for', selectedOption?.value || 'customer')}
-                                                options={[
-                                                    { value: 'customer', label: 'Customer' },
-                                                    { value: 'leasing', label: 'Leasing' }
-                                                ]}
-                                                placeholder="Select quotation for"
-                                                isClearable={false}
-                                                isSearchable={false}
-                                                className="w-full"
-                                            />
-                                        </div>
+                {/* Form */}
+                <form onSubmit={(e) => handleSubmit(e, 'submit')} className="space-y-6">
+                    <div className='md:grid-cols-5 grid gap-6'>
+                        <div className="bg-white rounded-2xl shadow-sm p-6 lg:col-span-3">
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('quotationDetail')}</h2>
+                            <div className='md:grid-cols-2 grid gap-x-5'>
+                                <div className="md:col-span-1 space-y-3">
+                                    {/* INVOICE NUMBER */}
+                                    <div>
+                                        <Label htmlFor="quotation_number">{langField('quotationNumber')}</Label>
+                                        <Input
+                                            id="quotation_number"
+                                            type="text"
+                                            value={`###/${getCompanyName()}/${monthRoman}/${new Date().getFullYear()}`}
+                                            disabled={true}
+                                        />
                                     </div>
-                                    <div className="md:col-span-1 space-y-3">
-                                        {/* Customer */}
-                                        <div>
-                                            <Label>{langField('selectCustomer')}</Label>
-                                            <CustomAsyncSelect
-                                                name="customer_id"
-                                                placeholder="Select customer..."
-                                                value={selectedCustomer}
-                                                error={validationErrors.customer_id}
-                                                defaultOptions={customerOptions}
-                                                loadOptions={handleCustomerInputChange}
-                                                onMenuScrollToBottom={handleCustomerMenuScrollToBottom}
-                                                isLoading={customerPagination.loading}
-                                                noOptionsMessage={() => "No customers found"}
-                                                loadingMessage={() => "Loading customers..."}
-                                                isSearchable={true}
-                                                inputValue={customerInputValue}
-                                                onInputChange={(inputValue) => {
-                                                    handleCustomerInputChange(inputValue);
-                                                }}
-                                                onChange={(option: any) => {
-                                                    setSelectedCustomer(option);
-                                                    handleInputChange('customer_id', option?.value || '');
-                                                }}
-                                            />
-                                            {validationErrors.customer_id && (
-                                                <span className="text-sm text-red-500">{validationErrors.customer_id}</span>
+                                    {/* Quotation Date */}
+                                    <div>
+                                        <Label>{langField('quotationDate')}</Label>
+                                        <div className="relative" ref={invoiceDatePickerRef}>
+                                            <div
+                                                className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 h-11"
+                                                onClick={() => setShowInvoiceDatePicker(!showInvoiceDatePicker)}
+                                            >
+                                                <span className="text-gray-700">
+                                                    {formatDate(invoiceDate)}
+                                                </span>
+                                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+
+                                            {showInvoiceDatePicker && (
+                                                <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                                                    <Calendar
+                                                        date={invoiceDate}
+                                                        onChange={handleInvoiceDateChange}
+                                                        color="#3b82f6"
+                                                        minDate={new Date()}
+                                                    />
+                                                </div>
                                             )}
                                         </div>
-                                        {/* Employee */}
-                                        <div>
-                                            <Label>{langField('selectSales')}</Label>
-                                            <CustomAsyncSelect
-                                                placeholder="Select employee..."
-                                                value={selectedEmployee}
-                                                error={validationErrors.employee_id}
-                                                defaultOptions={employeeOptions}
-                                                loadOptions={handleEmployeeInputChange}
-                                                onMenuScrollToBottom={handleEmployeeMenuScrollToBottom}
-                                                isLoading={employeePagination.loading}
-                                                noOptionsMessage={() => "No employees found"}
-                                                loadingMessage={() => "Loading employees..."}
-                                                isSearchable={true}
-                                                inputValue={employeeInputValue}
-                                                onInputChange={(inputValue) => {
-                                                    handleEmployeeInputChange(inputValue);
-                                                }}
-                                                onChange={(option: any) => {
-                                                    setSelectedEmployee(option);
-                                                    handleInputChange('employee_id', option?.value || '');
-                                                }}
-                                            />
-                                            {validationErrors.employee_id && (
-                                                <span className="text-sm text-red-500">{validationErrors.employee_id}</span>
+                                        {validationErrors.manage_quotation_date && (
+                                            <span className="text-sm text-red-500">
+                                                {validationErrors.manage_quotation_date}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {/* Due Date */}
+                                    <div>
+                                        <Label>{langField('quotationValidUntil')}</Label>
+                                        <div className="relative" ref={dueDatePickerRef}>
+                                            <div
+                                                className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 h-11"
+                                                onClick={() => setShowDueDatePicker(!showDueDatePicker)}
+                                            >
+                                                <span className="text-gray-700">
+                                                    {formatDate(dueDate)}
+                                                </span>
+                                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+
+                                            {showDueDatePicker && (
+                                                <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                                                    <div className="p-3 border-b border-gray-200">
+                                                        <div className="text-sm text-gray-600 mb-2">{langField('quickSelect')}</div>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <button
+                                                                type="button"
+                                                                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
+                                                                onClick={() => handleDueDateChange(new Date(invoiceDate.getTime() + 24 * 60 * 60 * 1000))}
+                                                            >
+                                                                {langField('plus1Day')}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
+                                                                onClick={() => handleDueDateChange(new Date(invoiceDate.getTime() + 7 * 24 * 60 * 60 * 1000))}
+                                                            >
+                                                                {langField('plus7Days')}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
+                                                                onClick={() => handleDueDateChange(new Date(invoiceDate.getTime() + 14 * 24 * 60 * 60 * 1000))}
+                                                            >
+                                                                {langField('plus14Days')}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
+                                                                onClick={() => handleDueDateChange(new Date(invoiceDate.getTime() + 30 * 24 * 60 * 60 * 1000))}
+                                                            >
+                                                                {langField('plus30Days')}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <Calendar
+                                                        date={dueDate}
+                                                        onChange={handleDueDateChange}
+                                                        color="#3b82f6"
+                                                        minDate={invoiceDate} // Due date cannot be before invoice date
+                                                    />
+                                                </div>
                                             )}
                                         </div>
+                                        {validationErrors.manage_quotation_valid_date && (
+                                            <span className="text-sm text-red-500">
+                                                {validationErrors.manage_quotation_valid_date}
+                                            </span>
+                                        )}
+                                    </div>
 
-                                        <div>
-                                            <Label>{langField('selectIsland')}</Label>
-                                            <CustomAsyncSelect
-                                                placeholder="Select Island..."
-                                                value={selectedIsland}
-                                                error={validationErrors.island_id}
-                                                defaultOptions={islandOptions}
-                                                loadOptions={handleIslandInputChange}
-                                                onMenuScrollToBottom={handleIslandMenuScrollToBottom}
-                                                isLoading={islandPagination.loading}
-                                                noOptionsMessage={() => "No islands found"}
-                                                loadingMessage={() => "Loading islands..."}
-                                                isSearchable={true}
-                                                inputValue={islandInputValue}
-                                                onInputChange={(inputValue) => {
-                                                    handleIslandInputChange(inputValue);
-                                                }}
-                                                onChange={async (option: any) => {
-                                                    setSelectedIsland(option);
-                                                    handleInputChange('island_id', option?.value || '');
+                                    {/* Quotation For */}
+                                    <div>
+                                        <Label htmlFor="quotation_for">{langField('quotationFor')}</Label>
+                                        <CustomSelect
+                                            id="quotation_for"
+                                            value={
+                                                formData.quotation_for === 'leasing'
+                                                    ? { value: 'leasing', label: 'Leasing' }
+                                                    : { value: 'customer', label: 'Customer' }
+                                            }
+                                            onChange={(selectedOption) => handleInputChange('quotation_for', selectedOption?.value || 'customer')}
+                                            options={[
+                                                { value: 'customer', label: 'Customer' },
+                                                { value: 'leasing', label: 'Leasing' }
+                                            ]}
+                                            placeholder="Select quotation for"
+                                            isClearable={false}
+                                            isSearchable={false}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="md:col-span-1 space-y-3">
+                                    {/* Customer */}
+                                    <div>
+                                        <Label>{langField('selectCustomer')}</Label>
+                                        <CustomAsyncSelect
+                                            name="customer_id"
+                                            placeholder="Select customer..."
+                                            value={selectedCustomer}
+                                            error={validationErrors.customer_id}
+                                            defaultOptions={customerOptions}
+                                            loadOptions={handleCustomerInputChange}
+                                            onMenuScrollToBottom={handleCustomerMenuScrollToBottom}
+                                            isLoading={customerPagination.loading}
+                                            noOptionsMessage={() => "No customers found"}
+                                            loadingMessage={() => "Loading customers..."}
+                                            isSearchable={true}
+                                            inputValue={customerInputValue}
+                                            onInputChange={(inputValue) => {
+                                                handleCustomerInputChange(inputValue);
+                                            }}
+                                            onChange={(option: any) => {
+                                                setSelectedCustomer(option);
+                                                handleInputChange('customer_id', option?.value || '');
+                                            }}
+                                        />
+                                        {validationErrors.customer_id && (
+                                            <span className="text-sm text-red-500">{validationErrors.customer_id}</span>
+                                        )}
+                                    </div>
+                                    {/* Employee */}
+                                    <div>
+                                        <Label>{langField('selectSales')}</Label>
+                                        <CustomAsyncSelect
+                                            placeholder="Select employee..."
+                                            value={selectedEmployee}
+                                            error={validationErrors.employee_id}
+                                            defaultOptions={employeeOptions}
+                                            loadOptions={handleEmployeeInputChange}
+                                            onMenuScrollToBottom={handleEmployeeMenuScrollToBottom}
+                                            isLoading={employeePagination.loading}
+                                            noOptionsMessage={() => "No employees found"}
+                                            loadingMessage={() => "Loading employees..."}
+                                            isSearchable={true}
+                                            inputValue={employeeInputValue}
+                                            onInputChange={(inputValue) => {
+                                                handleEmployeeInputChange(inputValue);
+                                            }}
+                                            onChange={(option: any) => {
+                                                setSelectedEmployee(option);
+                                                handleInputChange('employee_id', option?.value || '');
+                                            }}
+                                        />
+                                        {validationErrors.employee_id && (
+                                            <span className="text-sm text-red-500">{validationErrors.employee_id}</span>
+                                        )}
+                                    </div>
 
-                                                    if (option?.value) {
-                                                        // Fetch new accessories for the selected island
-                                                        try {
-                                                            const response = await QuotationService.getQuotationAccessories(option.value);
+                                    <div>
+                                        <Label>{langField('selectIsland')}</Label>
+                                        <CustomAsyncSelect
+                                            placeholder="Select Island..."
+                                            value={selectedIsland}
+                                            error={validationErrors.island_id}
+                                            defaultOptions={islandOptions}
+                                            loadOptions={handleIslandInputChange}
+                                            onMenuScrollToBottom={handleIslandMenuScrollToBottom}
+                                            isLoading={islandPagination.loading}
+                                            noOptionsMessage={() => "No islands found"}
+                                            loadingMessage={() => "Loading islands..."}
+                                            isSearchable={true}
+                                            inputValue={islandInputValue}
+                                            onInputChange={(inputValue) => {
+                                                handleIslandInputChange(inputValue);
+                                            }}
+                                            onChange={async (option: any) => {
+                                                setSelectedIsland(option);
+                                                handleInputChange('island_id', option?.value || '');
 
-                                                            if (response.data && response.data.status && response.data.data) {
-                                                                const accessories = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
+                                                if (option?.value) {
+                                                    // Fetch new accessories for the selected island
+                                                    try {
+                                                        const response = await QuotationService.getQuotationAccessories(option.value);
 
-                                                                // Check if accessories array has items
-                                                                if (accessories.length > 0) {
-                                                                    // Transform accessories to QuotationItemAccessory format
-                                                                    const transformedAccessories = accessories.map(accessory => ({
-                                                                        accessory_id: accessory.accessory_id,
-                                                                        accessory_part_number: accessory.accessory_part_number,
-                                                                        accessory_part_name: accessory.accessory_part_name,
-                                                                        accessory_brand: accessory.accessory_brand || '',
-                                                                        accessory_specification: accessory.accessory_specification || '',
-                                                                        quantity: accessory.accessories_island_detail_quantity || 1,
-                                                                        description: accessory.accessory_description || '',
-                                                                        accessory_description: accessory.accessory_description || '',
-                                                                        accessory_remark: accessory.accessory_remark || '',
-                                                                        accessory_region: accessory.accessory_region || ''
-                                                                    }));
+                                                        if (response.data && response.data.status && response.data.data) {
+                                                            const accessories = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
 
-                                                                    // Update accessories in all existing quotation items AND form level
-                                                                    setFormData(prev => ({
-                                                                        ...prev,
-                                                                        manage_quotation_item_accessories: transformedAccessories,
-                                                                        manage_quotation_items: prev.manage_quotation_items.map(item => ({
-                                                                            ...item,
-                                                                            manage_quotation_item_accessories: transformedAccessories
-                                                                        }))
-                                                                    }));
+                                                            // Check if accessories array has items
+                                                            if (accessories.length > 0) {
+                                                                // Transform accessories to QuotationItemAccessory format
+                                                                const transformedAccessories = accessories.map(accessory => ({
+                                                                    accessory_id: accessory.accessory_id,
+                                                                    accessory_part_number: accessory.accessory_part_number,
+                                                                    accessory_part_name: accessory.accessory_part_name,
+                                                                    accessory_brand: accessory.accessory_brand || '',
+                                                                    accessory_specification: accessory.accessory_specification || '',
+                                                                    quantity: accessory.accessories_island_detail_quantity || 1,
+                                                                    description: accessory.accessory_description || '',
+                                                                    accessory_description: accessory.accessory_description || '',
+                                                                    accessory_remark: accessory.accessory_remark || '',
+                                                                    accessory_region: accessory.accessory_region || ''
+                                                                }));
 
-                                                                    toast.success(`${transformedAccessories.length} accessories loaded for selected island`);
-                                                                } else {
-                                                                    // Clear accessories if data array is empty
-                                                                    setFormData(prev => ({
-                                                                        ...prev,
-                                                                        manage_quotation_item_accessories: [],
-                                                                        manage_quotation_items: prev.manage_quotation_items.map(item => ({
-                                                                            ...item,
-                                                                            manage_quotation_item_accessories: []
-                                                                        }))
-                                                                    }));
-                                                                    toast.success('No accessories found for selected island');
-                                                                }
+                                                                // Update accessories in all existing quotation items AND form level
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    manage_quotation_item_accessories: transformedAccessories,
+                                                                    manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                                                        ...item,
+                                                                        manage_quotation_item_accessories: transformedAccessories
+                                                                    }))
+                                                                }));
+
+                                                                toast.success(`${transformedAccessories.length} accessories loaded for selected island`);
                                                             } else {
-                                                                // Clear accessories if no data
+                                                                // Clear accessories if data array is empty
                                                                 setFormData(prev => ({
                                                                     ...prev,
                                                                     manage_quotation_item_accessories: [],
@@ -1346,10 +1333,8 @@ export default function CreateQuotation() {
                                                                 }));
                                                                 toast.success('No accessories found for selected island');
                                                             }
-                                                        } catch (error: any) {
-                                                            console.error('Error fetching accessories by island:', error);
-                                                            toast.error('Failed to load accessories for selected island');
-                                                            // Clear accessories on error
+                                                        } else {
+                                                            // Clear accessories if no data
                                                             setFormData(prev => ({
                                                                 ...prev,
                                                                 manage_quotation_item_accessories: [],
@@ -1358,9 +1343,12 @@ export default function CreateQuotation() {
                                                                     manage_quotation_item_accessories: []
                                                                 }))
                                                             }));
+                                                            toast.success('No accessories found for selected island');
                                                         }
-                                                    } else {
-                                                        // Clear accessories when no island selected
+                                                    } catch (error: any) {
+                                                        console.error('Error fetching accessories by island:', error);
+                                                        toast.error('Failed to load accessories for selected island');
+                                                        // Clear accessories on error
                                                         setFormData(prev => ({
                                                             ...prev,
                                                             manage_quotation_item_accessories: [],
@@ -1370,533 +1358,543 @@ export default function CreateQuotation() {
                                                             }))
                                                         }));
                                                     }
-                                                }}
-                                            />
-                                            {validationErrors.island_id && (
-                                                <span className="text-sm text-red-500">{validationErrors.island_id}</span>
-                                            )}
-                                        </div>
-
-                                        {/* Star */}
-                                        <div>
-                                            <Label htmlFor="star">{langField('star')}</Label>
-                                            <Input
-                                                id="star"
-                                                type="text"
-                                                value={formData.star || ''}
-                                                onChange={(e) => handleInputChange('star', e.target.value)}
-                                                placeholder={langField('placeholderStar')}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div className="bg-white rounded-2xl shadow-sm p-6 lg:col-span-2 space-y-3">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('beneficiaryDetails')}</h2>
-                                {/* GET BANK */}
-                                <div>
-                                    <Label>{langField('selectBank')}</Label>
-                                    <CustomAsyncSelect
-                                        placeholder="Select Bank..."
-                                        value={selectedBank}
-                                        error={validationErrors.bank_account_id}
-                                        defaultOptions={bankOptions}
-                                        loadOptions={handleBankInputChange}
-                                        onMenuScrollToBottom={handleBankMenuScrollToBottom}
-                                        isLoading={bankPagination.loading}
-                                        noOptionsMessage={() => "No banks found"}
-                                        loadingMessage={() => "Loading banks..."}
-                                        isSearchable={true}
-                                        inputValue={bankInputValue}
-                                        onInputChange={(inputValue) => {
-                                            handleBankInputChange(inputValue);
-                                        }}
-                                        onChange={(option: any) => {
-                                            setSelectedBank(option);
-                                            handleBankChange(option);
-                                        }}
-                                    />
-                                    {validationErrors.bank_account_id && (
-                                        <span className="text-sm text-red-500">{validationErrors.bank_account_id}</span>
-                                    )}
-                                </div>
-
-                                {/* Beneficiary Name */}
-                                <div>
-                                    <Label htmlFor="bank_account_name">{langField('beneficiaryName')}</Label>
-                                    <Input
-                                        id="bank_account_name"
-                                        type="text"
-                                        value={formData.bank_account_name || ''}
-                                        readonly={true}
-                                        placeholder={langField('autoFilledWhenBankSelected')}
-                                        className="bg-gray-100 cursor-not-allowed"
-                                    />
-                                </div>
-                                {/* Beneficiary Bank */}
-                                <div>
-                                    <Label htmlFor="bank_account_type">{langField('beneficiaryBank')}</Label>
-                                    <Input
-                                        id="bank_account_type"
-                                        type="text"
-                                        value={formData.bank_account_type || ''}
-                                        readonly={true}
-                                        placeholder={langField('autoFilledWhenBankSelected')}
-                                        className="bg-gray-100 cursor-not-allowed"
-                                    />
-                                </div>
-                                {/* Beneficiary Account */}
-                                <div>
-                                    <Label htmlFor="bank_account_number">{langField('beneficiaryAccount')}</Label>
-                                    <Input
-                                        id="bank_account_number"
-                                        type="text"
-                                        value={formData.bank_account_number || ''}
-                                        readonly={true}
-                                        placeholder={langField('autoFilledWhenBankSelected')}
-                                        className="bg-gray-100 cursor-not-allowed"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className='md:grid-cols-5 grid gap-6'>
-                            {/* Products Section */}
-                            <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5 col-span-1">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 pb-6 relative">
-                                    {langField('products')}
-                                    {!formData.island_id && (
-                                        <span className="text-sm text-orange-500 font-primary italic mt-1 block absolute bottom-0">{langField('selectIslandFirst')}</span>
-                                    )}
-                                </h2>
-
-                                {/* Add Product */}
-                                <div className="flex gap-4 mb-6">
-                                    <div className="flex-1">
-                                        <CustomAsyncSelect
-                                            name="product_select"
-                                            placeholder="Select product to add..."
-                                            value={selectedProduct}
-                                            error={productSelectError}
-                                            defaultOptions={productOptions}
-                                            loadOptions={handleProductInputChange}
-                                            onMenuScrollToBottom={handleProductMenuScrollToBottom}
-                                            isLoading={productPagination.loading}
-                                            noOptionsMessage={() => "No products found"}
-                                            loadingMessage={() => "Loading products..."}
-                                            isSearchable={true}
-                                            inputValue={productInputValue}
-                                            onInputChange={(inputValue) => {
-                                                handleProductInputChange(inputValue);
-                                            }}
-                                            onChange={(option: any) => {
-                                                if (option) {
-                                                    const completeOption = productOptions.find(p => p.value === option.value);
-                                                    setSelectedProduct(completeOption || option);
                                                 } else {
-                                                    setSelectedProduct(null);
-                                                }
-                                                // Clear error when user selects a product
-                                                if (option && productSelectError) {
-                                                    setProductSelectError('');
+                                                    // Clear accessories when no island selected
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        manage_quotation_item_accessories: [],
+                                                        manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                                            ...item,
+                                                            manage_quotation_item_accessories: []
+                                                        }))
+                                                    }));
                                                 }
                                             }}
                                         />
-                                        {productSelectError && (
-                                            <span className="text-sm text-red-500 mt-1 block">{productSelectError}</span>
+                                        {validationErrors.island_id && (
+                                            <span className="text-sm text-red-500">{validationErrors.island_id}</span>
                                         )}
                                     </div>
-                                    <Button
-                                        type="button"
-                                        onClick={addProductItem}
-                                        className="flex items-center gap-2"
-                                        disabled={!selectedProduct || !formData.island_id}
-                                    >
-                                        <MdAdd size={16} />
-                                        {langField('addProduct')}
-                                    </Button>
-                                </div>
 
-                                {/* Products Table */}
-                                {formData.manage_quotation_items.length > 0 && (
-                                    <div className="mt-6">
-                                        <CustomDataTable
-                                            columns={productColumns}
-                                            data={formData.manage_quotation_items}
-                                            pagination={false}
-                                            fixedHeader={false}
-                                            responsive
-                                            striped={false}
-                                            highlightOnHover
-                                            noDataComponent={
-                                                <div className="text-center py-8 text-gray-500">
-                                                    {langField('noProductsYet')}
-                                                </div>
-                                            }
+                                    {/* Star */}
+                                    <div>
+                                        <Label htmlFor="star">{langField('star')}</Label>
+                                        <Input
+                                            id="star"
+                                            type="text"
+                                            value={formData.star || ''}
+                                            onChange={(e) => handleInputChange('star', e.target.value)}
+                                            placeholder={langField('placeholderStar')}
                                         />
                                     </div>
-                                )}
+                                </div>
+                            </div>
 
-                                {validationErrors.manage_quotation_items && (
-                                    <span className="text-sm text-red-500">{validationErrors.manage_quotation_items}</span>
+                        </div>
+                        <div className="bg-white rounded-2xl shadow-sm p-6 lg:col-span-2 space-y-3">
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('beneficiaryDetails')}</h2>
+                            {/* GET BANK */}
+                            <div>
+                                <Label>{langField('selectBank')}</Label>
+                                <CustomAsyncSelect
+                                    placeholder="Select Bank..."
+                                    value={selectedBank}
+                                    error={validationErrors.bank_account_id}
+                                    defaultOptions={bankOptions}
+                                    loadOptions={handleBankInputChange}
+                                    onMenuScrollToBottom={handleBankMenuScrollToBottom}
+                                    isLoading={bankPagination.loading}
+                                    noOptionsMessage={() => "No banks found"}
+                                    loadingMessage={() => "Loading banks..."}
+                                    isSearchable={true}
+                                    inputValue={bankInputValue}
+                                    onInputChange={(inputValue) => {
+                                        handleBankInputChange(inputValue);
+                                    }}
+                                    onChange={(option: any) => {
+                                        setSelectedBank(option);
+                                        handleBankChange(option);
+                                    }}
+                                />
+                                {validationErrors.bank_account_id && (
+                                    <span className="text-sm text-red-500">{validationErrors.bank_account_id}</span>
                                 )}
                             </div>
+
+                            {/* Beneficiary Name */}
+                            <div>
+                                <Label htmlFor="bank_account_name">{langField('beneficiaryName')}</Label>
+                                <Input
+                                    id="bank_account_name"
+                                    type="text"
+                                    value={formData.bank_account_name || ''}
+                                    readonly={true}
+                                    placeholder={langField('autoFilledWhenBankSelected')}
+                                    className="bg-gray-100 cursor-not-allowed"
+                                />
+                            </div>
+                            {/* Beneficiary Bank */}
+                            <div>
+                                <Label htmlFor="bank_account_type">{langField('beneficiaryBank')}</Label>
+                                <Input
+                                    id="bank_account_type"
+                                    type="text"
+                                    value={formData.bank_account_type || ''}
+                                    readonly={true}
+                                    placeholder={langField('autoFilledWhenBankSelected')}
+                                    className="bg-gray-100 cursor-not-allowed"
+                                />
+                            </div>
+                            {/* Beneficiary Account */}
+                            <div>
+                                <Label htmlFor="bank_account_number">{langField('beneficiaryAccount')}</Label>
+                                <Input
+                                    id="bank_account_number"
+                                    type="text"
+                                    value={formData.bank_account_number || ''}
+                                    readonly={true}
+                                    placeholder={langField('autoFilledWhenBankSelected')}
+                                    className="bg-gray-100 cursor-not-allowed"
+                                />
+                            </div>
                         </div>
+                    </div>
 
-                        <div className='md:grid-cols-5 grid gap-6'>
+                    <div className='md:grid-cols-5 grid gap-6'>
+                        {/* Products Section */}
+                        <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-5 col-span-1">
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 pb-6 relative">
+                                {langField('products')}
+                                {!formData.island_id && (
+                                    <span className="text-sm text-orange-500 font-primary italic mt-1 block absolute bottom-0">{langField('selectIslandFirst')}</span>
+                                )}
+                            </h2>
 
-                            <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-3 space-y-6">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('termsConditions')}</h2>
-
-                                {/* Term Condition */}
-                                <div className="md:col-span-2">
-                                    <Label>{langField('termCondition')}</Label>
+                            {/* Add Product */}
+                            <div className="flex gap-4 mb-6">
+                                <div className="flex-1">
                                     <CustomAsyncSelect
-                                        name="term_condition"
-                                        placeholder="Select term condition..."
-                                        value={selectedTermCondition}
-                                        defaultOptions={termConditionOptions}
-                                        loadOptions={handleTermConditionInputChange}
-                                        onMenuScrollToBottom={handleTermConditionMenuScrollToBottom}
-                                        isLoading={termConditionPagination.loading}
-                                        noOptionsMessage={() => "No term conditions found"}
-                                        loadingMessage={() => "Loading term conditions..."}
+                                        name="product_select"
+                                        placeholder="Select product to add..."
+                                        value={selectedProduct}
+                                        error={productSelectError}
+                                        defaultOptions={productOptions}
+                                        loadOptions={handleProductInputChange}
+                                        onMenuScrollToBottom={handleProductMenuScrollToBottom}
+                                        isLoading={productPagination.loading}
+                                        noOptionsMessage={() => "No products found"}
+                                        loadingMessage={() => "Loading products..."}
                                         isSearchable={true}
-                                        inputValue={termConditionInputValue}
+                                        inputValue={productInputValue}
                                         onInputChange={(inputValue) => {
-                                            handleTermConditionInputChange(inputValue);
+                                            handleProductInputChange(inputValue);
                                         }}
                                         onChange={(option: any) => {
                                             if (option) {
-                                                const completeOption = termConditionOptions.find(t => t.value === option.value);
-                                                setSelectedTermCondition(completeOption || option);
-
-                                                if (completeOption) {
-                                                    handleInputChange('term_content_id', completeOption.value);
-                                                    fetchTermConditionContent(completeOption.value);
-                                                }
+                                                const completeOption = productOptions.find(p => p.value === option.value);
+                                                setSelectedProduct(completeOption || option);
                                             } else {
-                                                setSelectedTermCondition(null);
-                                                handleInputChange('term_content_id', '');
-                                                setTermConditionContent('');
-                                                handleInputChange('term_content_directory', '');
+                                                setSelectedProduct(null);
+                                            }
+                                            // Clear error when user selects a product
+                                            if (option && productSelectError) {
+                                                setProductSelectError('');
                                             }
                                         }}
                                     />
-                                </div>
-
-                                <div className="md:col-span-2">
-                                    <WysiwygEditor
-                                        id="wysiwyg-editor"
-                                        label={termConditionLoading ? langField('termContentLoading') : langField('termContent')}
-                                        value={termConditionContent}
-                                        onChange={(content) => {
-                                            setTermConditionContent(content);
-                                            handleInputChange('term_content_directory', content);
-                                        }}
-                                        placeholder={langField('selectTermCondition')}
-                                        minHeight="200px"
-                                        disabled={termConditionLoading}
-                                    />
-                                    <div className="text-xs text-gray-500 mt-1">
-                                        {langField('selected')}: {selectedTermCondition?.label || ''}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Totals Summary */}
-                            <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
-                                <div className="space-y-3">
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                        <Label htmlFor="manage_quotation_items" className='text-end'>{langField('subtotal')}</Label>
-                                        <Input
-                                            id="manage_quotation_items"
-                                            type="text"
-                                            onKeyPress={handleKeyPress}
-                                            value={(
-                                                formData.manage_quotation_items.reduce((sum: number, item) => sum + (parseFloat(item.total) || 0), 0)
-                                            ).toLocaleString('id-ID')}
-                                            readonly={true}
-                                            className="bg-gray-100 cursor-not-allowed"
-                                        />
-                                    </div>
-
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                                        <Label>
-                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center text-end'>
-                                                {langField('ppn')}
-                                                <div className="relative md:col-span-1">
-                                                    <Input
-                                                        id="manage_quotation_ppn"
-                                                        type="text"
-                                                        onKeyPress={handleKeyPress}
-                                                        min="0"
-                                                        max="100"
-                                                        maxLength={3}
-                                                        value={formData.manage_quotation_ppn}
-                                                        onChange={(e) => handlePercentageInputChange('manage_quotation_ppn', e.target.value)}
-                                                        placeholder="11"
-                                                        className="pr-8"
-                                                    />
-                                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                                        <span className="text-gray-500 text-sm">%</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            onKeyPress={handleKeyPress}
-                                            value={(() => {
-                                                const itemsTotal = formData.manage_quotation_items.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
-                                                const ppnPercentage = parseFloat(formData.manage_quotation_ppn || '11') || 11;
-                                                const ppnAmount = itemsTotal * (ppnPercentage / 100);
-                                                return ppnAmount.toLocaleString('id-ID');
-                                            })()}
-                                            readonly={true}
-                                            className="bg-gray-100 cursor-not-allowed"
-                                        />
-                                    </div>
-
-                                    {/* Delivery Fee */}
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                        <Label htmlFor="manage_quotation_delivery_fee" className='text-end mb-0'>{langField('deliveryFee')}</Label>
-                                        <Input
-                                            id="manage_quotation_delivery_fee"
-                                            type="text"
-                                            onKeyPress={handleKeyPress}
-                                            value={formatNumberInput(formData.manage_quotation_delivery_fee)}
-                                            maxLength={15}
-                                            onChange={(e) => handleNumericInputChange('manage_quotation_delivery_fee', e.target.value)}
-                                            placeholder="0"
-                                        />
-                                    </div>
-                                    {/* Other Fee */}
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                        <Label htmlFor="manage_quotation_other" className='text-end mb-0'>{langField('otherFee')}</Label>
-                                        <Input
-                                            id="manage_quotation_other"
-                                            type="text"
-                                            onKeyPress={handleKeyPress}
-                                            value={formatNumberInput(formData.manage_quotation_other)}
-                                            maxLength={15}
-                                            onChange={(e) => handleNumericInputChange('manage_quotation_other', e.target.value)}
-                                            placeholder="0"
-                                        />
-                                    </div>
-
-                                    {/* Mutation Type & Nominal */}
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center border-t border-gray-300 pt-4 mt-4'>
-                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                            <Label htmlFor="manage_quotation_mutation_type" className='text-end mb-0'>{langField('adjustmentType')}</Label>
-                                            <select
-                                                id="manage_quotation_mutation_type"
-                                                value={formData.manage_quotation_mutation_type || ''}
-                                                onChange={(e) => handleInputChange('manage_quotation_mutation_type', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            >
-                                                <option value="">{langField('noAdjustment')}</option>
-                                                <option value="plus">{langField('plus')}</option>
-                                                <option value="minus">{langField('minus')}</option>
-                                            </select>
-                                        </div>
-                                        <Input
-                                            id="manage_quotation_mutation_nominal"
-                                            value={formatNumberInputwithComma(formData.manage_quotation_mutation_nominal)}
-                                            disabled={!formData.manage_quotation_mutation_type}
-                                            onChange={(e) => {
-                                                const rawValue = e.target.value;
-
-                                                handleDecimalInputComma(
-                                                    rawValue,
-                                                    (validValue) => handleNumericCleanInput('manage_quotation_mutation_nominal', validValue),
-                                                    () => handleNumericCleanInput('manage_quotation_mutation_nominal', ''),
-                                                    true,
-                                                    20,
-                                                    5
-                                                );
-                                            }}
-                                        />
-                                    </div>
-
-                                    {formData.manage_quotation_mutation_type && (
-                                        <>
-                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                                <Label className='text-end mb-0 text-gray-600'>{langField('grandTotalBefore')}</Label>
-                                                <Input
-                                                    type="text"
-                                                    value={(parseFloat(formData.manage_quotation_grand_total_before || '0')).toLocaleString('id-ID')}
-                                                    readonly={true}
-                                                    className="bg-gray-50 cursor-not-allowed text-gray-600"
-                                                />
-                                            </div>
-                                        </>
+                                    {productSelectError && (
+                                        <span className="text-sm text-red-500 mt-1 block">{productSelectError}</span>
                                     )}
+                                </div>
+                                <Button
+                                    type="button"
+                                    onClick={addProductItem}
+                                    className="flex items-center gap-2"
+                                    disabled={!selectedProduct || !formData.island_id}
+                                >
+                                    <MdAdd size={16} />
+                                    {langField('addProduct')}
+                                </Button>
+                            </div>
 
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-300 pt-4 mt-4 items-center'>
-                                        <Label className='font-bold text-lg mb-0 text-end'>{langField('grandTotal')}</Label>
-                                        <Input
-                                            type="text"
-                                            onKeyPress={handleKeyPress}
-                                            value={(parseFloat(calculateGrandTotal(formData).grandTotal)).toLocaleString('id-ID')}
-                                            readonly={true}
-                                            className="font-bold text-lg cursor-not-allowed"
-                                        />
-                                    </div>
+                            {/* Products Table */}
+                            {formData.manage_quotation_items.length > 0 && (
+                                <div className="mt-6">
+                                    <CustomDataTable
+                                        columns={productColumns}
+                                        data={formData.manage_quotation_items}
+                                        pagination={false}
+                                        fixedHeader={false}
+                                        responsive
+                                        striped={false}
+                                        highlightOnHover
+                                        noDataComponent={
+                                            <div className="text-center py-8 text-gray-500">
+                                                {langField('noProductsYet')}
+                                            </div>
+                                        }
+                                    />
+                                </div>
+                            )}
 
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                                        <Label htmlFor="manage_quotation_payment_presentase" className='text-end mb-0'>
-                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center text-end'>
-                                                {langField('downPayment')}
-                                                <div className="relative md:col-span-1">
-                                                    <Input
-                                                        id="manage_quotation_payment_presentase"
-                                                        type="text"
-                                                        onKeyPress={(e) => {
-                                                            // Custom key press handler to allow comma
-                                                            if (!/[0-9,]/.test(e.key) && 
-                                                                !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'].includes(e.key) &&
-                                                                !(e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase()))
-                                                            ) {
-                                                                e.preventDefault();
-                                                            }
-                                                        }}
-                                                        min="0"
-                                                        max="100"
-                                                        maxLength={6}
-                                                        value={formData.manage_quotation_payment_presentase}
-                                                        onChange={(e) => handlePercentageInputChangeComma('manage_quotation_payment_presentase', e.target.value)}
-                                                        placeholder="50"
-                                                        className="pr-8"
-                                                    />
-                                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                                        <span className="text-gray-500 text-sm">%</span>
-                                                    </div>
+                            {validationErrors.manage_quotation_items && (
+                                <span className="text-sm text-red-500">{validationErrors.manage_quotation_items}</span>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className='md:grid-cols-5 grid gap-6'>
+
+                        <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-3 space-y-6">
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('termsConditions')}</h2>
+
+                            {/* Term Condition */}
+                            <div className="md:col-span-2">
+                                <Label>{langField('termCondition')}</Label>
+                                <CustomAsyncSelect
+                                    name="term_condition"
+                                    placeholder="Select term condition..."
+                                    value={selectedTermCondition}
+                                    defaultOptions={termConditionOptions}
+                                    loadOptions={handleTermConditionInputChange}
+                                    onMenuScrollToBottom={handleTermConditionMenuScrollToBottom}
+                                    isLoading={termConditionPagination.loading}
+                                    noOptionsMessage={() => "No term conditions found"}
+                                    loadingMessage={() => "Loading term conditions..."}
+                                    isSearchable={true}
+                                    inputValue={termConditionInputValue}
+                                    onInputChange={(inputValue) => {
+                                        handleTermConditionInputChange(inputValue);
+                                    }}
+                                    onChange={(option: any) => {
+                                        if (option) {
+                                            const completeOption = termConditionOptions.find(t => t.value === option.value);
+                                            setSelectedTermCondition(completeOption || option);
+
+                                            if (completeOption) {
+                                                handleInputChange('term_content_id', completeOption.value);
+                                                fetchTermConditionContent(completeOption.value);
+                                            }
+                                        } else {
+                                            setSelectedTermCondition(null);
+                                            handleInputChange('term_content_id', '');
+                                            setTermConditionContent('');
+                                            handleInputChange('term_content_directory', '');
+                                        }
+                                    }}
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <WysiwygEditor
+                                    id="wysiwyg-editor"
+                                    label={termConditionLoading ? langField('termContentLoading') : langField('termContent')}
+                                    value={termConditionContent}
+                                    onChange={(content) => {
+                                        setTermConditionContent(content);
+                                        handleInputChange('term_content_directory', content);
+                                    }}
+                                    placeholder={langField('selectTermCondition')}
+                                    minHeight="200px"
+                                    disabled={termConditionLoading}
+                                />
+                                <div className="text-xs text-gray-500 mt-1">
+                                    {langField('selected')}: {selectedTermCondition?.label || ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Totals Summary */}
+                        <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
+                            <div className="space-y-3">
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
+                                    <Label htmlFor="manage_quotation_items" className='text-end'>{langField('subtotal')}</Label>
+                                    <Input
+                                        id="manage_quotation_items"
+                                        type="text"
+                                        onKeyPress={handleKeyPress}
+                                        value={(
+                                            formData.manage_quotation_items.reduce((sum: number, item) => sum + (parseFloat(item.total) || 0), 0)
+                                        ).toLocaleString('id-ID')}
+                                        readonly={true}
+                                        className="bg-gray-100 cursor-not-allowed"
+                                    />
+                                </div>
+
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                    <Label>
+                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center text-end'>
+                                            {langField('ppn')}
+                                            <div className="relative md:col-span-1">
+                                                <Input
+                                                    id="manage_quotation_ppn"
+                                                    type="text"
+                                                    onKeyPress={handleKeyPress}
+                                                    min="0"
+                                                    max="100"
+                                                    maxLength={3}
+                                                    value={formData.manage_quotation_ppn}
+                                                    onChange={(e) => handlePercentageInputChange('manage_quotation_ppn', e.target.value)}
+                                                    placeholder="11"
+                                                    className="pr-8"
+                                                />
+                                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                                    <span className="text-gray-500 text-sm">%</span>
                                                 </div>
                                             </div>
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            onKeyPress={handleKeyPress}
-                                            value={(parseFloat(formData.manage_quotation_payment_nominal || '0')).toLocaleString('id-ID')}
-                                            readonly={true}
-                                            className="border-[#34c759] cursor-not-allowed"
-                                        />
-                                    </div>
+                                        </div>
+                                    </Label>
+                                    <Input
+                                        type="text"
+                                        onKeyPress={handleKeyPress}
+                                        value={(() => {
+                                            const itemsTotal = formData.manage_quotation_items.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
+                                            const ppnPercentage = parseFloat(formData.manage_quotation_ppn || '11') || 11;
+                                            const ppnAmount = itemsTotal * (ppnPercentage / 100);
+                                            return ppnAmount.toLocaleString('id-ID');
+                                        })()}
+                                        readonly={true}
+                                        className="bg-gray-100 cursor-not-allowed"
+                                    />
+                                </div>
+
+                                {/* Delivery Fee */}
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
+                                    <Label htmlFor="manage_quotation_delivery_fee" className='text-end mb-0'>{langField('deliveryFee')}</Label>
+                                    <Input
+                                        id="manage_quotation_delivery_fee"
+                                        type="text"
+                                        onKeyPress={handleKeyPress}
+                                        value={formatNumberInput(formData.manage_quotation_delivery_fee)}
+                                        maxLength={15}
+                                        onChange={(e) => handleNumericInputChange('manage_quotation_delivery_fee', e.target.value)}
+                                        placeholder="0"
+                                    />
+                                </div>
+                                {/* Other Fee */}
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
+                                    <Label htmlFor="manage_quotation_other" className='text-end mb-0'>{langField('otherFee')}</Label>
+                                    <Input
+                                        id="manage_quotation_other"
+                                        type="text"
+                                        onKeyPress={handleKeyPress}
+                                        value={formatNumberInput(formData.manage_quotation_other)}
+                                        maxLength={15}
+                                        onChange={(e) => handleNumericInputChange('manage_quotation_other', e.target.value)}
+                                        placeholder="0"
+                                    />
+                                </div>
+
+                                {/* Mutation Type & Nominal */}
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center border-t border-gray-300 pt-4 mt-4'>
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
-                                        <Label className='text-end mb-0'>
-                                            {langField('remainingPayment')}
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            onKeyPress={handleKeyPress}
-                                            value={(parseFloat(calculateGrandTotal(formData).remainingPayment)).toLocaleString('id-ID')}
-                                            readonly={true}
-                                            className="text-lg cursor-not-allowed border-red-500"
-                                        />
+                                        <Label htmlFor="manage_quotation_mutation_type" className='text-end mb-0'>{langField('adjustmentType')}</Label>
+                                        <select
+                                            id="manage_quotation_mutation_type"
+                                            value={formData.manage_quotation_mutation_type || ''}
+                                            onChange={(e) => handleInputChange('manage_quotation_mutation_type', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="">{langField('noAdjustment')}</option>
+                                            <option value="plus">{langField('plus')}</option>
+                                            <option value="minus">{langField('minus')}</option>
+                                        </select>
                                     </div>
+                                    <Input
+                                        id="manage_quotation_mutation_nominal"
+                                        value={formatNumberInputwithComma(formData.manage_quotation_mutation_nominal)}
+                                        disabled={!formData.manage_quotation_mutation_type}
+                                        onChange={(e) => {
+                                            const rawValue = e.target.value;
+
+                                            handleDecimalInputComma(
+                                                rawValue,
+                                                (validValue) => handleNumericCleanInput('manage_quotation_mutation_nominal', validValue),
+                                                () => handleNumericCleanInput('manage_quotation_mutation_nominal', ''),
+                                                true,
+                                                20,
+                                                5
+                                            );
+                                        }}
+                                    />
+                                </div>
+
+                                {formData.manage_quotation_mutation_type && (
+                                    <>
+                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
+                                            <Label className='text-end mb-0 text-gray-600'>{langField('grandTotalBefore')}</Label>
+                                            <Input
+                                                type="text"
+                                                value={(parseFloat(formData.manage_quotation_grand_total_before || '0')).toLocaleString('id-ID')}
+                                                readonly={true}
+                                                className="bg-gray-50 cursor-not-allowed text-gray-600"
+                                            />
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-300 pt-4 mt-4 items-center'>
+                                    <Label className='font-bold text-lg mb-0 text-end'>{langField('grandTotal')}</Label>
+                                    <Input
+                                        type="text"
+                                        onKeyPress={handleKeyPress}
+                                        value={(parseFloat(calculateGrandTotal(formData).grandTotal)).toLocaleString('id-ID')}
+                                        readonly={true}
+                                        className="font-bold text-lg cursor-not-allowed"
+                                    />
+                                </div>
+
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                    <Label htmlFor="manage_quotation_payment_presentase" className='text-end mb-0'>
+                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center text-end'>
+                                            {langField('downPayment')}
+                                            <div className="relative md:col-span-1">
+                                                <Input
+                                                    id="manage_quotation_payment_presentase"
+                                                    type="text"
+                                                    onKeyPress={(e) => {
+                                                        // Custom key press handler to allow comma
+                                                        if (!/[0-9,]/.test(e.key) && 
+                                                            !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'].includes(e.key) &&
+                                                            !(e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase()))
+                                                        ) {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    min="0"
+                                                    max="100"
+                                                    maxLength={6}
+                                                    value={formData.manage_quotation_payment_presentase}
+                                                    onChange={(e) => handlePercentageInputChangeComma('manage_quotation_payment_presentase', e.target.value)}
+                                                    placeholder="50"
+                                                    className="pr-8"
+                                                />
+                                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                                    <span className="text-gray-500 text-sm">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Label>
+                                    <Input
+                                        type="text"
+                                        onKeyPress={handleKeyPress}
+                                        value={(parseFloat(formData.manage_quotation_payment_nominal || '0')).toLocaleString('id-ID')}
+                                        readonly={true}
+                                        className="border-[#34c759] cursor-not-allowed"
+                                    />
+                                </div>
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
+                                    <Label className='text-end mb-0'>
+                                        {langField('remainingPayment')}
+                                    </Label>
+                                    <Input
+                                        type="text"
+                                        onKeyPress={handleKeyPress}
+                                        value={(parseFloat(calculateGrandTotal(formData).remainingPayment)).toLocaleString('id-ID')}
+                                        readonly={true}
+                                        className="text-lg cursor-not-allowed border-red-500"
+                                    />
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div className='md:grid-cols-5 grid gap-6'>
-                            <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-3 space-y-6">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('shippingTC')}</h2>
-                                <div className='md:grid-cols-3 grid gap-6'>
-                                    {/* Shipping Term */}
-                                    <div>
-                                        <Label htmlFor="manage_quotation_shipping_term">{langField('shippingTerm')}</Label>
-                                        <Input
-                                            id="manage_quotation_shipping_term"
-                                            type="text"
-                                            value={formData?.manage_quotation_shipping_term}
-                                            onChange={(e) => handleInputChange('manage_quotation_shipping_term', e.target.value)}
-                                            placeholder={langField('placeholderShippingTerm')}
-                                        />
-                                    </div>
-
-                                    {/* Franco */}
-                                    <div>
-                                        <Label htmlFor="manage_quotation_franco">{langField('franco')}</Label>
-                                        <Input
-                                            id="manage_quotation_franco"
-                                            type="text"
-                                            value={formData.manage_quotation_franco}
-                                            onChange={(e) => handleInputChange('manage_quotation_franco', e.target.value)}
-                                            placeholder={langField('placeholderFranco')}
-                                        />
-                                    </div>
-
-                                    {/* Lead Time */}
-                                    <div>
-                                        <Label htmlFor="manage_quotation_lead_time">{langField('leadTime')}</Label>
-                                        <Input
-                                            id="manage_quotation_lead_time"
-                                            type="text"
-                                            value={formData.manage_quotation_lead_time}
-                                            onChange={(e) => handleInputChange('manage_quotation_lead_time', e.target.value)}
-                                            placeholder={langField('placeholderLeadTime')}
-                                        />
-                                    </div>
+                    <div className='md:grid-cols-5 grid gap-6'>
+                        <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-3 space-y-6">
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('shippingTC')}</h2>
+                            <div className='md:grid-cols-3 grid gap-6'>
+                                {/* Shipping Term */}
+                                <div>
+                                    <Label htmlFor="manage_quotation_shipping_term">{langField('shippingTerm')}</Label>
+                                    <Input
+                                        id="manage_quotation_shipping_term"
+                                        type="text"
+                                        value={formData?.manage_quotation_shipping_term}
+                                        onChange={(e) => handleInputChange('manage_quotation_shipping_term', e.target.value)}
+                                        placeholder={langField('placeholderShippingTerm')}
+                                    />
                                 </div>
-                            </div>
-                            <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('additionalPages')}</h2>
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3">
-                                        <Checkbox
-                                            checked={formData.include_aftersales_page ?? true}
-                                            onChange={(checked) => handleInputChange('include_aftersales_page', checked)}
-                                            label={langField('includeAftersalesPage')}
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Checkbox
-                                            checked={formData.include_msf_page ?? false}
-                                            onChange={(checked) => handleInputChange('include_msf_page', checked)}
-                                            label={langField('includeMsfPage')}
-                                        />
-                                    </div>
+
+                                {/* Franco */}
+                                <div>
+                                    <Label htmlFor="manage_quotation_franco">{langField('franco')}</Label>
+                                    <Input
+                                        id="manage_quotation_franco"
+                                        type="text"
+                                        value={formData.manage_quotation_franco}
+                                        onChange={(e) => handleInputChange('manage_quotation_franco', e.target.value)}
+                                        placeholder={langField('placeholderFranco')}
+                                    />
+                                </div>
+
+                                {/* Lead Time */}
+                                <div>
+                                    <Label htmlFor="manage_quotation_lead_time">{langField('leadTime')}</Label>
+                                    <Input
+                                        id="manage_quotation_lead_time"
+                                        type="text"
+                                        value={formData.manage_quotation_lead_time}
+                                        onChange={(e) => handleInputChange('manage_quotation_lead_time', e.target.value)}
+                                        placeholder={langField('placeholderLeadTime')}
+                                    />
                                 </div>
                             </div>
                         </div>
-
-                        {/* Form Actions */}
-                        <div className="flex justify-end gap-4 p-6 bg-white rounded-2xl shadow-sm">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => navigate(buildPath(`/quotations/manage`))}
-                                className="px-6 rounded-full"
-                                disabled={isCreating}
-                            >
-                                {langField('cancel')}
-                            </Button>
-                            {/* <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => {
-                                    const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
-                                    handleSubmit(fakeEvent, 'draft');
-                                }}
-                                disabled={isCreating}
-                                className="flex items-center gap-2"
-                            >
-                                <MdSave size={16} />
-                                Save as Draft
-                            </Button> */}
-                            <Button
-                                type="submit"
-                                disabled={isCreating}
-                                className="px-6 flex items-center gap-2 rounded-full"
-                            >
-                                <MdSave size={16} />
-                                {isCreating ? langField('submitting') : langField('submitQuotation')}
-                            </Button>
+                        <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('additionalPages')}</h2>
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <Checkbox
+                                        checked={formData.include_aftersales_page ?? true}
+                                        onChange={(checked) => handleInputChange('include_aftersales_page', checked)}
+                                        label={langField('includeAftersalesPage')}
+                                    />
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Checkbox
+                                        checked={formData.include_msf_page ?? false}
+                                        onChange={(checked) => handleInputChange('include_msf_page', checked)}
+                                        label={langField('includeMsfPage')}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    {/* Form Actions */}
+                    <div className="flex justify-end gap-4 p-6 bg-white rounded-2xl shadow-sm">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => navigate(buildPath(`/quotations/manage`))}
+                            className="px-6 rounded-full"
+                            disabled={isCreating}
+                        >
+                            {langField('cancel')}
+                        </Button>
+                        {/* <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+                                handleSubmit(fakeEvent, 'draft');
+                            }}
+                            disabled={isCreating}
+                            className="flex items-center gap-2"
+                        >
+                            <MdSave size={16} />
+                            Save as Draft
+                        </Button> */}
+                        <Button
+                            type="submit"
+                            disabled={isCreating}
+                            className="px-6 flex items-center gap-2 rounded-full"
+                        >
+                            <MdSave size={16} />
+                            {isCreating ? langField('submitting') : langField('submitQuotation')}
+                        </Button>
+                    </div>
+                </form>
             </div>
 
             {/* Product Detail Offcanvas */}

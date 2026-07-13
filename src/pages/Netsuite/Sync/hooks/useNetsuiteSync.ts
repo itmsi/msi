@@ -90,6 +90,12 @@ const INITIAL_ITEMS: Omit<MasterDataItem, 'status' | 'lastSync' | 'errorMessage'
         description: 'Sync bill payments from NetSuite',
         icon: 'bill_payment',
     },
+    {
+        key: 'receives',
+        label: 'Receipts',
+        description: 'Sync receipts from NetSuite',
+        icon: 'receives',
+    },
 ];
 
 // ─── Hook ───────────────────────────────────────────────────────────────────
@@ -148,7 +154,6 @@ export function useNetsuiteSync() {
                         synced_by: record.created_by_name,
                         synced_at: record.updated_at,
                     };
-
                     return {
                         ...item,
                         lastSync,

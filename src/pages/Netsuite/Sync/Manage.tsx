@@ -304,7 +304,6 @@ function QueueIndicator({ items }: QueueIndicatorProps) {
 
 export default function NetSuiteSyncManage() {
     const { items, enqueueSync, enqueueAll, isAnyActive, isFetchingHistory } = useNetsuiteSync();
-
     return (
         <>
             <PageMeta

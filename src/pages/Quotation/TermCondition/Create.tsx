@@ -73,80 +73,78 @@ const CreateTermCondition: React.FC = () => {
                 image="/motor-sights-international.png"
             />
 
-            <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-4 sm:px-3">
-                    {/* Header */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate('/quotations/term-condition')}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                            >
-                                <MdKeyboardArrowLeft size={20} />
-                            </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Create Term & Condition Template</h1>
-                        </div>
+            <div className="mx-auto px-0">
+                {/* Header */}
+                <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate('/quotations/term-condition')}
+                            className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
+                        >
+                            <MdKeyboardArrowLeft size={20} />
+                        </Button>
+                        <div className="border-l border-gray-300 h-6 mx-3"></div>
+                        <h1 className="ms-2 font-primary-bold font-normal text-xl">Create Term & Condition Template</h1>
                     </div>
-                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3 ">
-                        {/* {error && (
-                            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-                                <p className="text-red-800">{error}</p>
-                            </div>
-                        )} */}
-                        
-                        <div className="md:col-span-3 p-8 relative space-y-6">
-                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-3">Terms & Conditions</h2>
+                </div>
+                <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3 ">
+                    {/* {error && (
+                        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                            <p className="text-red-800">{error}</p>
+                        </div>
+                    )} */}
+                    
+                    <div className="md:col-span-3 p-8 relative space-y-6">
+                        <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-3">Terms & Conditions</h2>
 
-                            <div>
-                                <label htmlFor="term_content_title" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Template Title *
-                                </label>
-                                <Input
-                                    id="term_content_title"
-                                    name="term_content_title"
-                                    type="text"
-                                    value={formData.term_content_title}
-                                    onChange={handleInputChange}
-                                    placeholder="Enter template title"
-                                    className="w-full"
-                                />
-                            </div>
-
-                            <WysiwygEditor
-                                label="Content *"
-                                value={formData.term_content_directory}
-                                onChange={(content) => setFormData(prev => ({ ...prev, term_content_directory: content }))}
-                                placeholder="Enter terms and conditions content..."
-                                minHeight="300px"
-                                error={error && !formData.term_content_directory.trim() ? "Content is required" : ""}
+                        <div>
+                            <label htmlFor="term_content_title" className="block text-sm font-medium text-gray-700 mb-2">
+                                Template Title *
+                            </label>
+                            <Input
+                                id="term_content_title"
+                                name="term_content_title"
+                                type="text"
+                                value={formData.term_content_title}
+                                onChange={handleInputChange}
+                                placeholder="Enter template title"
+                                className="w-full"
                             />
                         </div>
 
-                        <div className="flex justify-end gap-4 p-6 border-t border-gray-200 md:col-span-3">
+                        <WysiwygEditor
+                            label="Content *"
+                            value={formData.term_content_directory}
+                            onChange={(content) => setFormData(prev => ({ ...prev, term_content_directory: content }))}
+                            placeholder="Enter terms and conditions content..."
+                            minHeight="300px"
+                            error={error && !formData.term_content_directory.trim() ? "Content is required" : ""}
+                        />
+                    </div>
+
+                    <div className="flex justify-end gap-4 p-6 border-t border-gray-200 md:col-span-3">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => navigate('/quotations/term-condition')}
+                            className="px-6 rounded-full"
+                            disabled={loading}
+                        >
+                            Cancel
+                        </Button>
+                        <PermissionGate permission="create">
                             <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => navigate('/quotations/term-condition')}
-                                className="px-6 rounded-full"
+                                type="submit"
                                 disabled={loading}
+                                className="px-6 flex items-center gap-2 rounded-full"
                             >
-                                Cancel
+                                <MdSave className="h-4 w-4" />
+                                {loading ? 'Creating...' : 'Create Template'}
                             </Button>
-                            <PermissionGate permission="create">
-                                <Button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="px-6 flex items-center gap-2 rounded-full"
-                                >
-                                    <MdSave className="h-4 w-4" />
-                                    {loading ? 'Creating...' : 'Create Template'}
-                                </Button>
-                            </PermissionGate>
-                        </div>
-                    </form>
-                </div>
+                        </PermissionGate>
+                    </div>
+                </form>
             </div>
         </>
     );

@@ -55,136 +55,134 @@ const EditProject: React.FC = () => {
                 image="/motor-sights-international.png"
             />
 
-            <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-4 sm:px-3">
-                    {/* Header */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate(listRoute)}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                            >
-                                <MdKeyboardArrowLeft size={20} />
-                            </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit Project</h1>
-                        </div>
+            <div className="mx-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate(listRoute)}
+                            className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
+                        >
+                            <MdKeyboardArrowLeft size={20} />
+                        </Button>
+                        <div className="border-l border-gray-300 h-6 mx-3"></div>
+                        <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit Project</h1>
                     </div>
+                </div>
 
-                    {/* Project Information Overview */}
-                    {formData.project_name && (
-                        <div className="bg-white shadow rounded-lg p-6 mb-6">
-                            <h2 className="text-lg font-primary-bold text-gray-900 mb-4">Project Overview</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div>
-                                    <div className="text-sm font-medium text-gray-500 mb-1">Project Name</div>
-                                    <div className="text-base text-gray-900 font-secondary">{formData.project_name || '-'}</div>
-                                </div>
-                                <div>
-                                    <div className="text-sm font-medium text-gray-500 mb-1">Contractor</div>
-                                    <div className="text-base text-gray-900 font-secondary">{formData.customer_name || '-'}</div>
-                                </div>
-                                <div>
-                                    <div className="text-sm font-medium text-gray-500 mb-1">Sales</div>
-                                    <div className="text-base text-gray-900 font-secondary">{formData.employee_name || '-'}</div>
-                                </div>
-                                <div>
-                                    <div className="text-sm font-medium text-gray-500 mb-1">Status</div>
-                                    <ActivityTypeBadge
-                                        type={(formData?.status as 'Not Started' | 'Find' | 'Pull' | 'Survey' | 'BAST') || 'Not Started'}
-                                    />
-                                    {/* <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize min-w-[70px] inline-block text-center ${STATUS_PROJECT[formData.status] || 'bg-gray-100 text-gray-700'}`}>
-                                        {formData.status || 'Not Started'}
-                                    </span> */}
-                                </div>
+                {/* Project Information Overview */}
+                {formData.project_name && (
+                    <div className="bg-white shadow rounded-lg p-6 mb-6">
+                        <h2 className="text-lg font-primary-bold text-gray-900 mb-4">Project Overview</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                                <div className="text-sm font-medium text-gray-500 mb-1">Project Name</div>
+                                <div className="text-base text-gray-900 font-secondary">{formData.project_name || '-'}</div>
+                            </div>
+                            <div>
+                                <div className="text-sm font-medium text-gray-500 mb-1">Contractor</div>
+                                <div className="text-base text-gray-900 font-secondary">{formData.customer_name || '-'}</div>
+                            </div>
+                            <div>
+                                <div className="text-sm font-medium text-gray-500 mb-1">Sales</div>
+                                <div className="text-base text-gray-900 font-secondary">{formData.employee_name || '-'}</div>
+                            </div>
+                            <div>
+                                <div className="text-sm font-medium text-gray-500 mb-1">Status</div>
+                                <ActivityTypeBadge
+                                    type={(formData?.status as 'Not Started' | 'Find' | 'Pull' | 'Survey' | 'BAST') || 'Not Started'}
+                                />
+                                {/* <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize min-w-[70px] inline-block text-center ${STATUS_PROJECT[formData.status] || 'bg-gray-100 text-gray-700'}`}>
+                                    {formData.status || 'Not Started'}
+                                </span> */}
                             </div>
                         </div>
-                    )}
-                    {/* End Project Information Overview */}
-
-                    {/* Tab Navigation */}
-                    <div className="border-b border-gray-200 mb-6">
-                        <nav className="flex space-x-4">
-                            <button
-                                onClick={() => setActiveTab('project_overview')}
-                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                    activeTab === 'project_overview'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
-                            >
-                                <AiOutlineDashboard size={'1.5rem'} /> Project Overview
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('sales_tracking')}
-                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                    activeTab === 'sales_tracking'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
-                            >
-                                <HiOutlineTrendingUp size={'1.5rem'} /> Sales Tracking
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('division_overview')}
-                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                    activeTab === 'division_overview'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
-                            >
-                                <HiOutlineUserGroup size={'1.5rem'} /> Division Overview
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('task_division')}
-                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                    activeTab === 'task_division'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
-                            >
-                                <HiOutlineUserGroup size={'1.5rem'} /> Task Project Division
-                            </button>
-                        </nav>
                     </div>
+                )}
+                {/* End Project Information Overview */}
 
-                    {activeTab === 'project_overview' && id && (<>
-                        <ProjectForm
-                            formData={formData}
-                            errors={validationErrors}
-                            onChange={handleChange}
-                            onAttachmentChange={handleAttachmentChange}
-                            onRemoveExistingAttachment={handleRemoveExistingAttachment}
-                            isSubmitting={isSubmitting}
-                        />
-
-                        <FormActions
-                            onSubmit={handleSubmit}
-                            isSubmitting={isSubmitting}
-                            cancelRoute="/crm/project"
-                            submitText="Update Project"
-                            submittingText="Updating..."
-                        />
-                    </>)}
-                    {activeTab === 'sales_tracking' && (
-                        <SalesTrackingContainer 
-                            className='md:grid-cols-5 grid gap-6'
-                        />
-                    )}
-                    {activeTab === 'division_overview' && (
-                        <DivisionOverviewContainer 
-                            className='md:grid-cols-5 grid gap-6'
-                        />
-                    )}
-
-                    {activeTab === 'task_division' && id && (
-                        <TaskProjectDevisionTab
-                            project_id={id}
-                            onGoToDivision={() => setActiveTab('division_overview')}
-                        />
-                    )}
+                {/* Tab Navigation */}
+                <div className="border-b border-gray-200 mb-6">
+                    <nav className="flex space-x-4">
+                        <button
+                            onClick={() => setActiveTab('project_overview')}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                activeTab === 'project_overview'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            <AiOutlineDashboard size={'1.5rem'} /> Project Overview
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('sales_tracking')}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                activeTab === 'sales_tracking'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            <HiOutlineTrendingUp size={'1.5rem'} /> Sales Tracking
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('division_overview')}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                activeTab === 'division_overview'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            <HiOutlineUserGroup size={'1.5rem'} /> Division Overview
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('task_division')}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                activeTab === 'task_division'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            <HiOutlineUserGroup size={'1.5rem'} /> Task Project Division
+                        </button>
+                    </nav>
                 </div>
+
+                {activeTab === 'project_overview' && id && (<>
+                    <ProjectForm
+                        formData={formData}
+                        errors={validationErrors}
+                        onChange={handleChange}
+                        onAttachmentChange={handleAttachmentChange}
+                        onRemoveExistingAttachment={handleRemoveExistingAttachment}
+                        isSubmitting={isSubmitting}
+                    />
+
+                    <FormActions
+                        onSubmit={handleSubmit}
+                        isSubmitting={isSubmitting}
+                        cancelRoute="/crm/project"
+                        submitText="Update Project"
+                        submittingText="Updating..."
+                    />
+                </>)}
+                {activeTab === 'sales_tracking' && (
+                    <SalesTrackingContainer 
+                        className='md:grid-cols-5 grid gap-6'
+                    />
+                )}
+                {activeTab === 'division_overview' && (
+                    <DivisionOverviewContainer 
+                        className='md:grid-cols-5 grid gap-6'
+                    />
+                )}
+
+                {activeTab === 'task_division' && id && (
+                    <TaskProjectDevisionTab
+                        project_id={id}
+                        onGoToDivision={() => setActiveTab('division_overview')}
+                    />
+                )}
             </div>
         </>
     );

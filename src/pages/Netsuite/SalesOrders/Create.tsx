@@ -211,30 +211,142 @@ export default function Create() {
                 image="/motor-sights-international.png"
             />
 
-            <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-0">
-                    {/* Header */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate('/netsuite/sales-orders')}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                            >
-                                <MdKeyboardArrowLeft size={20} />
-                            </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Create Sales Order</h1>
-                        </div>
+            <div className="mx-auto px-0">
+                {/* Header */}
+                <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate('/netsuite/sales-orders')}
+                            className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
+                        >
+                            <MdKeyboardArrowLeft size={20} />
+                        </Button>
+                        <div className="border-l border-gray-300 h-6 mx-3"></div>
+                        <h1 className="ms-2 font-primary-bold font-normal text-xl">Create Sales Order</h1>
                     </div>
+                </div>
 
-                    {isSubmitting && (
-                        <LoadingOverlay message="Menyimpan Sales Order..." />
-                    )}
+                {isSubmitting && (
+                    <LoadingOverlay message="Menyimpan Sales Order..." />
+                )}
 
-                    <div className="space-y-6">
-                        {/* Sales Order Fields */}
-                        <SalesOrderFields
+                <div className="space-y-6">
+                    {/* Sales Order Fields */}
+                    <SalesOrderFields
+                        formData={formData}
+                        errors={errors}
+                        masterData={masterData}
+                        loadingMasterData={loadingMasterData}
+                        onInputChange={handleInputChange}
+                        onSelectChange={handleSelectChange}
+                        onDateChange={handleDateChange}
+                        onAddItem={handleAddItem}
+                        onRemoveItem={handleRemoveItem}
+                        onUpdateItem={handleUpdateItem}
+
+                        // Location Props
+                        locationOptions={locationOptions}
+                        locationPagination={locationPagination}
+                        locationInputValue={locationInputValue}
+                        onLocationInputChange={handleLocationInputChange}
+                        onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
+                        selectedLocation={selectedLocation}
+                        onLocationChange={(opt) => {
+                            setSelectedLocation(opt);
+                            handleSelectChange('location', opt ? Number(opt.value) : null);
+                            handleSelectChange('location_name', opt?.label || '');
+                        }}
+
+                        // Dept Props
+                        deptOptions={deptOptions}
+                        deptPagination={deptPagination}
+                        deptInputValue={deptInputValue}
+                        onDeptInputChange={handleDeptInputChange}
+                        onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
+                        selectedDepartment={selectedDepartment}
+                        onDepartmentChange={(opt) => {
+                            setSelectedDepartment(opt);
+                            handleSelectChange('department', opt ? Number(opt.value) : null);
+                            handleSelectChange('department_name', opt?.label || '');
+                        }}
+
+                        // Class Props
+                        classOptions={classOptions}
+                        classPagination={classPagination}
+                        classInputValue={classInputValue}
+                        onClassInputChange={handleClassInputChange}
+                        onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
+                        selectedClass={selectedClass}
+                        onClassChange={(opt) => {
+                            setSelectedClass(opt);
+                            handleSelectChange('class', opt ? Number(opt.value) : null);
+                            handleSelectChange('class_name', opt?.label || '');
+                        }}
+
+                        // Customer Props
+                        customerOptions={customerOptions}
+                        customerPagination={customerPagination}
+                        customerInput={customerInputValue}
+                        onCustomerInputChange={handleCustomerInputChange}
+                        onCustomerMenuScrollToBottom={handleCustomerMenuScrollToBottom}
+                        selectedCustomer={selectedCustomer}
+                        onCustomerChange={(opt) => {
+                            setSelectedCustomer(opt);
+                            if (opt) {
+                                handleSelectChange('entity', Number(opt.value));
+                                handleSelectChange('entity_name', opt.label);
+                            } else {
+                                handleSelectChange('entity', null);
+                                handleSelectChange('entity_name', '');
+                            }
+                        }}
+
+                        // Term Props
+                        termOptions={termOptions}
+                        termPagination={termPagination}
+                        termInput={termInputValue}
+                        onTermInputChange={handleTermInputChange}
+                        onTermMenuScrollToBottom={handleTermMenuScrollToBottom}
+                        selectedTerm={selectedTerm}
+                        onTermChange={(opt) => {
+                            setSelectedTerm(opt);
+                            handleSelectChange('terms', opt ? Number(opt.value) : null);
+                            handleSelectChange('terms_name', opt?.label || '');
+                        }}
+                        // Bank Props
+                        bankOptions={bankOptions}
+                        bankPagination={bankPagination}
+                        bankInput={bankInputValue}
+                        onBankInputChange={handleBankInputChange}
+                        onBankMenuScrollToBottom={handleBankMenuScrollToBottom}
+                        selectedBank={selectedBank}
+                        onBankChange={(opts) => {
+                            setSelectedBank(opts);
+                            handleSelectChange('custbody_msi_bank_payment_so', opts.map(o => Number(o.value)));
+                            handleSelectChange('custbody_msi_bank_payment_so_name', opts.map(o => o.label));
+                        }}
+                    />
+
+                    <div className='bg-white rounded-2xl shadow-sm'>
+                        {/* Sales Order Items */}
+                        <div className="px-6 pt-4">
+                            <h3 className="text-lg font-primary-bold font-medium text-gray-900 mb-4">Sales Order Items</h3>
+                            <div className="mb-4">
+                                <Label>Filter Item Type</Label>
+                                <CustomSelect
+                                    name="item_type_filter"
+                                    placeholder="All Item Types"
+                                    value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
+                                    options={itemTypeOptions}
+                                    isClearable={true}
+                                    onChange={(option: any) => {
+                                        handleItemTypeChange(option);
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <SalesOrderItemFields
                             formData={formData}
                             errors={errors}
                             masterData={masterData}
@@ -246,158 +358,44 @@ export default function Create() {
                             onRemoveItem={handleRemoveItem}
                             onUpdateItem={handleUpdateItem}
 
-                            // Location Props
-                            locationOptions={locationOptions}
-                            locationPagination={locationPagination}
-                            locationInputValue={locationInputValue}
-                            onLocationInputChange={handleLocationInputChange}
-                            onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
-                            selectedLocation={selectedLocation}
-                            onLocationChange={(opt) => {
-                                setSelectedLocation(opt);
-                                handleSelectChange('location', opt ? Number(opt.value) : null);
-                                handleSelectChange('location_name', opt?.label || '');
-                            }}
+                            // Item Select Props
+                            itemOptions={itemOptions}
+                            itemPagination={itemPagination}
+                            itemInput={itemInputValue}
+                            onItemInputChange={handleItemInputChange}
+                            onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
 
-                            // Dept Props
-                            deptOptions={deptOptions}
-                            deptPagination={deptPagination}
-                            deptInputValue={deptInputValue}
-                            onDeptInputChange={handleDeptInputChange}
-                            onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
-                            selectedDepartment={selectedDepartment}
-                            onDepartmentChange={(opt) => {
-                                setSelectedDepartment(opt);
-                                handleSelectChange('department', opt ? Number(opt.value) : null);
-                                handleSelectChange('department_name', opt?.label || '');
-                            }}
+                            // Location Props (for items)
+                            locationOptions={itemLocationOptions}
+                            locationPagination={itemLocationPagination}
+                            locationInput={itemLocationInputValue}
+                            onLocationInputChange={handleItemLocationInputChange}
+                            onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
 
                             // Class Props
                             classOptions={classOptions}
                             classPagination={classPagination}
-                            classInputValue={classInputValue}
+                            classInput={classInputValue}
                             onClassInputChange={handleClassInputChange}
                             onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
-                            selectedClass={selectedClass}
-                            onClassChange={(opt) => {
-                                setSelectedClass(opt);
-                                handleSelectChange('class', opt ? Number(opt.value) : null);
-                                handleSelectChange('class_name', opt?.label || '');
-                            }}
 
-                            // Customer Props
-                            customerOptions={customerOptions}
-                            customerPagination={customerPagination}
-                            customerInput={customerInputValue}
-                            onCustomerInputChange={handleCustomerInputChange}
-                            onCustomerMenuScrollToBottom={handleCustomerMenuScrollToBottom}
-                            selectedCustomer={selectedCustomer}
-                            onCustomerChange={(opt) => {
-                                setSelectedCustomer(opt);
-                                if (opt) {
-                                    handleSelectChange('entity', Number(opt.value));
-                                    handleSelectChange('entity_name', opt.label);
-                                } else {
-                                    handleSelectChange('entity', null);
-                                    handleSelectChange('entity_name', '');
-                                }
-                            }}
-
-                            // Term Props
-                            termOptions={termOptions}
-                            termPagination={termPagination}
-                            termInput={termInputValue}
-                            onTermInputChange={handleTermInputChange}
-                            onTermMenuScrollToBottom={handleTermMenuScrollToBottom}
-                            selectedTerm={selectedTerm}
-                            onTermChange={(opt) => {
-                                setSelectedTerm(opt);
-                                handleSelectChange('terms', opt ? Number(opt.value) : null);
-                                handleSelectChange('terms_name', opt?.label || '');
-                            }}
-                            // Bank Props
-                            bankOptions={bankOptions}
-                            bankPagination={bankPagination}
-                            bankInput={bankInputValue}
-                            onBankInputChange={handleBankInputChange}
-                            onBankMenuScrollToBottom={handleBankMenuScrollToBottom}
-                            selectedBank={selectedBank}
-                            onBankChange={(opts) => {
-                                setSelectedBank(opts);
-                                handleSelectChange('custbody_msi_bank_payment_so', opts.map(o => Number(o.value)));
-                                handleSelectChange('custbody_msi_bank_payment_so_name', opts.map(o => o.label));
-                            }}
-                        />
-
-                        <div className='bg-white rounded-2xl shadow-sm'>
-                            {/* Sales Order Items */}
-                            <div className="px-6 pt-4">
-                                <h3 className="text-lg font-primary-bold font-medium text-gray-900 mb-4">Sales Order Items</h3>
-                                <div className="mb-4">
-                                    <Label>Filter Item Type</Label>
-                                    <CustomSelect
-                                        name="item_type_filter"
-                                        placeholder="All Item Types"
-                                        value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
-                                        options={itemTypeOptions}
-                                        isClearable={true}
-                                        onChange={(option: any) => {
-                                            handleItemTypeChange(option);
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                            <SalesOrderItemFields
-                                formData={formData}
-                                errors={errors}
-                                masterData={masterData}
-                                loadingMasterData={loadingMasterData}
-                                onInputChange={handleInputChange}
-                                onSelectChange={handleSelectChange}
-                                onDateChange={handleDateChange}
-                                onAddItem={handleAddItem}
-                                onRemoveItem={handleRemoveItem}
-                                onUpdateItem={handleUpdateItem}
-
-                                // Item Select Props
-                                itemOptions={itemOptions}
-                                itemPagination={itemPagination}
-                                itemInput={itemInputValue}
-                                onItemInputChange={handleItemInputChange}
-                                onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
-
-                                // Location Props (for items)
-                                locationOptions={itemLocationOptions}
-                                locationPagination={itemLocationPagination}
-                                locationInput={itemLocationInputValue}
-                                onLocationInputChange={handleItemLocationInputChange}
-                                onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
-
-                                // Class Props
-                                classOptions={classOptions}
-                                classPagination={classPagination}
-                                classInput={classInputValue}
-                                onClassInputChange={handleClassInputChange}
-                                onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
-
-                                // Dept Props
-                                deptOptions={deptOptions}
-                                deptPagination={deptPagination}
-                                deptInput={deptInputValue}
-                                onDeptInputChange={handleDeptInputChange}
-                                onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
-                            />
-                        </div>
-
-                        {/* Form Actions */}
-                        <FormActions
-                            onSubmit={handleSubmit}
-                            isSubmitting={isSubmitting}
-                            cancelRoute="/netsuite/sales-orders"
-                            submitText="Create Sales Order"
-                            submittingText="Creating..."
+                            // Dept Props
+                            deptOptions={deptOptions}
+                            deptPagination={deptPagination}
+                            deptInput={deptInputValue}
+                            onDeptInputChange={handleDeptInputChange}
+                            onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
                         />
                     </div>
+
+                    {/* Form Actions */}
+                    <FormActions
+                        onSubmit={handleSubmit}
+                        isSubmitting={isSubmitting}
+                        cancelRoute="/netsuite/sales-orders"
+                        submitText="Create Sales Order"
+                        submittingText="Creating..."
+                    />
                 </div>
             </div>
         </>

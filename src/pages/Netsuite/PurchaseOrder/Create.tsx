@@ -175,7 +175,6 @@ export default function Create() {
                     </div>
                 </div>
             ) : (
-            <div className="bg-gray-50 overflow-auto">
                 <div className="mx-auto px-0">
                     {/* Header */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
@@ -428,7 +427,6 @@ export default function Create() {
                         />
                     </div>
                 </div>
-            </div>
             )}
         </>
     )

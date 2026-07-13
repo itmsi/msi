@@ -126,92 +126,90 @@ const EditTermCondition: React.FC = () => {
                 image="/motor-sights-international.png"
             />
 
-            <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-4 sm:px-3">
+            <div className="mx-auto px-0">
 
-                    {/* HEADER */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Link to="/quotations/term-condition">
-                                <Button
-                                    variant="outline"
-                                    className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                                >
-                                    <MdKeyboardArrowLeft size={20} />
-                                </Button>
-                            </Link>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit Term & Condition Template</h1>
-                        </div>
+                {/* HEADER */}
+                <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                    <div className="flex items-center gap-1">
+                        <Link to="/quotations/term-condition">
+                            <Button
+                                variant="outline"
+                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
+                            >
+                                <MdKeyboardArrowLeft size={20} />
+                            </Button>
+                        </Link>
+                        <div className="border-l border-gray-300 h-6 mx-3"></div>
+                        <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit Term & Condition Template</h1>
                     </div>
-                    {/* Form */}
-                    <form onSubmit={(e) => e.preventDefault()} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
-                        {/* Error Message */}
-                        {/* {error && (
-                            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-                                <p className="text-red-800">{error}</p>
-                            </div>
-                        )} */}
-                        <div className="md:col-span-3 p-8 relative">
-                            <div className="space-y-6">
-                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-4">Terms & Conditions</h2>
+                </div>
+                {/* Form */}
+                <form onSubmit={(e) => e.preventDefault()} className="bg-white rounded-2xl shadow-sm grid grid-cols-1 gap-2 md:grid-cols-3">
+                    {/* Error Message */}
+                    {/* {error && (
+                        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                            <p className="text-red-800">{error}</p>
+                        </div>
+                    )} */}
+                    <div className="md:col-span-3 p-8 relative">
+                        <div className="space-y-6">
+                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-4">Terms & Conditions</h2>
 
-                                {/* Template Title */}
-                                <div>
-                                    <label htmlFor="term_content_title" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Template Title *
-                                    </label>
-                                    <Input
-                                        id="term_content_title"
-                                        name="term_content_title"
-                                        type="text"
-                                        value={formData.term_content_title}
-                                        onChange={handleInputChange}
-                                        placeholder="Enter template title"
-                                        className="w-full"
-                                    />
-                                </div>
-
-                                {/* Content */}
-                                <WysiwygEditor
-                                    value={formData.term_content_directory}
-                                    onChange={updateEditorContent}
-                                    placeholder="Enter terms and conditions content..."
-                                    minHeight="200px"
-                                    disabled={saving}
-                                    error={error && !formData.term_content_directory.trim() ? 'Content is required' : undefined}
+                            {/* Template Title */}
+                            <div>
+                                <label htmlFor="term_content_title" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Template Title *
+                                </label>
+                                <Input
+                                    id="term_content_title"
+                                    name="term_content_title"
+                                    type="text"
+                                    value={formData.term_content_title}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter template title"
+                                    className="w-full"
                                 />
                             </div>
-                        </div>
 
-                        {/* Form Actions */}
-                        <div className="flex justify-end gap-4 p-6 border-t border-gray-200 md:col-span-3">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => navigate('/quotations/term-condition')}
+                            {/* Content */}
+                            <WysiwygEditor
+                                value={formData.term_content_directory}
+                                onChange={updateEditorContent}
+                                placeholder="Enter terms and conditions content..."
+                                minHeight="200px"
                                 disabled={saving}
-                                className="px-6 rounded-full"
-                            >
-                                Cancel
-                            </Button>
-                            <PermissionGate permission="update">
-                                <Button
-                                    type="submit"
-                                    onClick={() => {
-                                        const tipu = { preventDefault: () => {} } as React.FormEvent;
-                                        handleSubmit(tipu);
-                                    }}
-                                    disabled={saving}
-                                    className="px-6 flex items-center gap-2 rounded-full"
-                                >
-                                    <MdSave className="h-4 w-4" />
-                                    {saving ? 'Updating...' : 'Update Template'}
-                                </Button>
-                            </PermissionGate>
+                                error={error && !formData.term_content_directory.trim() ? 'Content is required' : undefined}
+                            />
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    {/* Form Actions */}
+                    <div className="flex justify-end gap-4 p-6 border-t border-gray-200 md:col-span-3">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => navigate('/quotations/term-condition')}
+                            disabled={saving}
+                            className="px-6 rounded-full"
+                        >
+                            Cancel
+                        </Button>
+                        <PermissionGate permission="update">
+                            <Button
+                                type="submit"
+                                onClick={() => {
+                                    const tipu = { preventDefault: () => {} } as React.FormEvent;
+                                    handleSubmit(tipu);
+                                }}
+                                disabled={saving}
+                                className="px-6 flex items-center gap-2 rounded-full"
+                            >
+                                <MdSave className="h-4 w-4" />
+                                {saving ? 'Updating...' : 'Update Template'}
+                            </Button>
+                        </PermissionGate>
+                    </div>
+                </form>
             </div>
         </>
     );

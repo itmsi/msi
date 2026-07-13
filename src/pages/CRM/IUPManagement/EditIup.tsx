@@ -77,51 +77,49 @@ const EditIupManagement: React.FC = () => {
                 description="Edit IUP management information and view customer details"
                 image="/motor-sights-international.png" 
             />
-            <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-4 sm:px-3">
-                    <PageHeader
-                        title={`Edit IUP Management`}
-                        backPath={() => goBack('/crm/iup-management')}
-                    />
+            <div className="mx-auto px-0">
+                <PageHeader
+                    title={`Edit IUP Management`}
+                    backPath={() => goBack('/crm/iup-management')}
+                />
 
-                    {/* <TerritoryDisplayReadonly territoryInfo={territoryInfo} /> */}
+                {/* <TerritoryDisplayReadonly territoryInfo={territoryInfo} /> */}
 
-                            
-                    <TerritorySelector
-                        formData={formData}
-                        errors={errors}
-                        onInputChange={handleInputChange}
-                        territories={territories}
-                        selection={territorySelection}
-                        loading={territoriesLoading}
-                        onIslandChange={handleIslandChange}
-                        onGroupChange={handleGroupChange}
-                        onAreaChange={handleAreaChange}
-                        onIupZoneChange={handleIupZoneChange}
-                        onIupSegmentationChange={handleIupSegmentationChange}
-                        getAvailableGroups={getAvailableGroups}
-                        getAvailableAreas={getAvailableAreas}
-                        getAvailableIupZones={getAvailableIupZones}
-                        getAvailableIupSegmentations={getAvailableIupSegmentations}
-                    />
-                    
-                    <IupInformtionsFormFields
-                        formData={formData}
-                        errors={errors}
-                        onInputChange={handleInputChange}
-                        onSelectChange={handleSelectChange}
-                    />
+                        
+                <TerritorySelector
+                    formData={formData}
+                    errors={errors}
+                    onInputChange={handleInputChange}
+                    territories={territories}
+                    selection={territorySelection}
+                    loading={territoriesLoading}
+                    onIslandChange={handleIslandChange}
+                    onGroupChange={handleGroupChange}
+                    onAreaChange={handleAreaChange}
+                    onIupZoneChange={handleIupZoneChange}
+                    onIupSegmentationChange={handleIupSegmentationChange}
+                    getAvailableGroups={getAvailableGroups}
+                    getAvailableAreas={getAvailableAreas}
+                    getAvailableIupZones={getAvailableIupZones}
+                    getAvailableIupSegmentations={getAvailableIupSegmentations}
+                />
+                
+                <IupInformtionsFormFields
+                    formData={formData}
+                    errors={errors}
+                    onInputChange={handleInputChange}
+                    onSelectChange={handleSelectChange}
+                />
 
-                    <CustomerInformation customers={customers} />
-                    
-                    <FormActions
-                        submitText={isSubmitting ? 'Updating...' : 'Update IUP'}
-                        cancelRoute="/crm/iup-management"
-                        onSubmit={handleSubmit}
-                        isSubmitting={isSubmitting}
-                    />
+                <CustomerInformation customers={customers} />
+                
+                <FormActions
+                    submitText={isSubmitting ? 'Updating...' : 'Update IUP'}
+                    cancelRoute="/crm/iup-management"
+                    onSubmit={handleSubmit}
+                    isSubmitting={isSubmitting}
+                />
 
-                </div>
             </div>
         </>
     );

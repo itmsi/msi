@@ -52,7 +52,7 @@ interface StatCardProps {
 
 function StatCard({ icon, label, count, bgClass }: StatCardProps) {
     return (
-        <div className={`rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-5 hover:shadow-md transition-shadow relative overflow-hidden justify-end ${bgClass}`}>
+        <div className={`rounded-2xl shadow-[0px_5px_4px_-2px_#d8d8d8] border border-gray-100 p-6 flex items-center gap-5 hover:shadow-md transition-shadow relative overflow-hidden justify-end ${bgClass}`}>
             <div className="xl:pl-[5rem]">
                 <p className="text-xs text-gray-500 mb-1">{label}</p>
                 <p className="text-6xl font-primary-bold text-gray-800">{count.toLocaleString()}</p>
@@ -182,7 +182,7 @@ interface POItemListProps {
 
 function POItemList({ title, items, loading, accentClass }: POItemListProps) {
     return (
-        <div className="bg-white shadow rounded-lg overflow-hidden h-full flex flex-col">
+        <div className="bg-white shadow-[0px_5px_10px_-1px_#c0c0c0] rounded-lg overflow-hidden h-full flex flex-col">
             <div className={`px-4 py-3 border-b border-gray-200 flex items-center justify-between ${accentClass}`}>
                 <h2 className="text-base font-secondary font-semibold text-gray-900">{title}</h2>
             </div>
@@ -368,15 +368,15 @@ export default function Dashboard() {
 
                 {/* Charts */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div className="bg-white shadow rounded-lg p-5">
+                    <div className="bg-white shadow-[0px_5px_7px_-2px_#c0c0c0] rounded-lg p-5">
                         <p className="text-base font-secondary font-semibold text-gray-900 mb-4">Pending Approval per Subsidiary</p>
                         <ApprovalStatusChart data={chartPendingApproval} loading={loading} />
                     </div>
-                    <div className="bg-white shadow rounded-lg p-5">
+                    <div className="bg-white shadow-[0px_5px_7px_-2px_#c0c0c0] rounded-lg p-5">
                         <p className="text-base font-secondary font-semibold text-gray-900 mb-4">Status PO per Subsidiary</p>
                         <POStatusChart data={poStatusChart} loading={loading} />
                     </div>
-                    <div className="bg-white shadow rounded-lg p-5">
+                    <div className="bg-white shadow-[0px_5px_7px_-2px_#c0c0c0] rounded-lg p-5">
                         <p className="text-base font-secondary font-semibold text-gray-900 mb-4">Total PO per Subsidiary</p>
                         <SubsidiaryChart data={subsidiaryChart} loading={loading} />
                     </div>

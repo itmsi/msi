@@ -270,329 +270,327 @@ export default function Edit() {
                 image="/motor-sights-international.png"
             />
 
-            <div className="bg-gray-50">
-                <div className="mx-auto px-0">
-                    {loadingDetail || loadingMasterData ? (
-                        <LoadingOverlay
-                            message={loadingMasterData ? "Loading master data..." : "Loading data..."}
-                        />
-                    ) : (<>
-                        {/* Header */}
-                        <PageHeader
-                            title="Edit Quotation"
-                            backPath="/netsuite/quotation"
-                            subtitle={tranid || '-'}
-                            actions={<>
-                                {(Boolean(quoInternalId) && syncInfo?.sync_status !== 'pending' && syncInfo?.sync_status !== 'failed') && (
-                                    <PermissionGate permission="read">
-                                        <Button
-                                            onClick={() => handleSyncById(String(quoInternalId))}
-                                            disabled={isSyncing}
-                                            className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600 py-2"
-                                            variant='outline'
-                                        >
-                                            <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
-                                            <div>
-                                                <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
-                                            </div>
-                                        </Button>
-                                    </PermissionGate>
-                                )}
-                                {tranid !== null && (
-                                    <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
-                                        {formData.custbody_me_approval_status_name || '-'}
-                                    </span>
-                                )}
-                            </>}
-                        />
-
-                        <div className="space-y-6">
-                            {statusName === 'PROCESSING' && (
-                                <Alert variant='warning' title='Quotation Is Being Processed'>
-                                    <div className="space-y-4">
-                                        <p className="text-sm text-gray-500">
-                                            Your Quotation sync is currently being processed. Please allow some time for the process to complete. <br />
-                                            Click the refresh button below to check whether the data is already available.
-                                        </p>
-                                        <ElemRefresh />
-                                    </div>
-                                </Alert>
-                            )}
-
-                            {statusName === 'FAILED' && (
-                                <Alert variant='error' title='Failed to Sync Quotation'>
-                                    <div className="space-y-4">
-                                        <p className="text-sm text-gray-500">
-                                            {messageError || 'Unknown error occurred during synchronization.'}
-                                        </p>
-                                        <ElemRefresh />
-                                    </div>
-                                </Alert>
-                            )}
-
-                            {/* Quotation Fields */}
-                            <QuotationFields
-                                formData={formData}
-                                errors={errors}
-                                masterData={masterData}
-                                loadingMasterData={loadingMasterData}
-                                onInputChange={handleInputChange}
-                                onSelectChange={handleSelectChange}
-                                onDateChange={handleDateChange}
-                                onAddItem={handleAddItem}
-                                onRemoveItem={handleRemoveItem}
-                                onUpdateItem={handleUpdateItem}
-
-                                // Location Props
-                                locationOptions={locationOptions}
-                                locationPagination={locationPagination}
-                                locationInputValue={locationInputValue}
-                                onLocationInputChange={handleLocationInputChange}
-                                onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
-                                selectedLocation={selectedLocation}
-                                onLocationChange={(opt) => {
-                                    setSelectedLocation(opt);
-                                    handleSelectChange('location', opt ? Number(opt.value) : null);
-                                    handleSelectChange('location_name', opt?.label || '');
-                                }}
-
-                                // Dept Props
-                                deptOptions={deptOptions}
-                                deptPagination={deptPagination}
-                                deptInputValue={deptInputValue}
-                                onDeptInputChange={handleDeptInputChange}
-                                onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
-                                selectedDepartment={selectedDepartment}
-                                onDepartmentChange={(opt) => {
-                                    setSelectedDepartment(opt);
-                                    handleSelectChange('department', opt ? Number(opt.value) : null);
-                                    handleSelectChange('department_name', opt?.label || '');
-                                }}
-
-                                // Class Props
-                                classOptions={classOptions}
-                                classPagination={classPagination}
-                                classInputValue={classInputValue}
-                                onClassInputChange={handleClassInputChange}
-                                onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
-                                selectedClass={selectedClass}
-                                onClassChange={(opt) => {
-                                    setSelectedClass(opt);
-                                    handleSelectChange('class', opt ? Number(opt.value) : null);
-                                    handleSelectChange('class_name', opt?.label || '');
-                                }}
-
-                                // Customer Props
-                                customerOptions={customerOptions}
-                                customerPagination={customerPagination}
-                                customerInput={customerInputValue}
-                                onCustomerInputChange={handleCustomerInputChange}
-                                onCustomerMenuScrollToBottom={handleCustomerMenuScrollToBottom}
-                                selectedCustomer={selectedCustomer}
-                                onCustomerChange={(opt) => {
-                                    setSelectedCustomer(opt);
-                                    if (opt) {
-                                        handleSelectChange('entity', Number(opt.value));
-                                        handleSelectChange('entity_name', opt.label);
-                                    } else {
-                                        handleSelectChange('entity', null);
-                                        handleSelectChange('entity_name', '');
-                                    }
-                                }}
-
-                                // Term Props
-                                termOptions={termOptions}
-                                termPagination={termPagination}
-                                termInput={termInputValue}
-                                onTermInputChange={handleTermInputChange}
-                                onTermMenuScrollToBottom={handleTermMenuScrollToBottom}
-                                selectedTerm={selectedTerm}
-                                onTermChange={(opt) => {
-                                    setSelectedTerm(opt);
-                                    handleSelectChange('terms', opt ? Number(opt.value) : null);
-                                }}
-
-                                // Bank Props
-                                bankOptions={bankOptions}
-                                bankPagination={bankPagination}
-                                bankInput={bankInputValue}
-                                onBankInputChange={handleBankInputChange}
-                                onBankMenuScrollToBottom={handleBankMenuScrollToBottom}
-                                selectedBank={selectedBank}
-                                onBankChange={(opts) => {
-                                    setSelectedBank(opts);
-                                    handleSelectChange('custbody_msi_bank_payment_so', opts.map(o => Number(o.value)));
-                                }}
-                            />
-
-                            <div>
-                                {/* Tab Navigation */}
-                                <div className="border-b border-gray-200 px-6 overflow-auto">
-                                    <nav className="flex space-x-8 overflow-auto">
-                                        <button
-                                            type="button"
-                                            onClick={() => setActiveTab('items')}
-                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${activeTab === 'items'
-                                                ? 'border-blue-500 text-blue-600'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                                }`}
-                                        >
-                                            Items
-                                        </button>
-                                        <button
-                                            onClick={() => setActiveTab('files')}
-                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${activeTab === 'files'
-                                                ? 'border-blue-500 text-blue-600'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                                }`}
-                                        >
-                                            Files
-                                        </button>
-                                        <button
-                                            onClick={() => setActiveTab('usernotes')}
-                                            className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${activeTab === 'usernotes'
-                                                ? 'border-blue-500 text-blue-600'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                                }`}
-                                        >
-                                            User Notes
-                                        </button>
-                                    </nav>
-                                </div>
-
-                                <div className='bg-white rounded-b-2xl shadow-sm'>
-                                    {/* Items Tab */}
-                                    {activeTab === 'items' && (
-                                        <>
-                                        <div className="px-6 pt-4">
-                                            <div className="mb-4">
-                                                <Label>Filter Item Type</Label>
-                                                <CustomSelect
-                                                    name="item_type_filter"
-                                                    placeholder="All Item Types"
-                                                    value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
-                                                    options={itemTypeOptions}
-                                                    isClearable={true}
-                                                    onChange={(option: any) => {
-                                                        handleItemTypeChange(option);
-                                                    }}
-                                                />
-                                            </div>
+            <div className="mx-auto px-0">
+                {loadingDetail || loadingMasterData ? (
+                    <LoadingOverlay
+                        message={loadingMasterData ? "Loading master data..." : "Loading data..."}
+                    />
+                ) : (<>
+                    {/* Header */}
+                    <PageHeader
+                        title="Edit Quotation"
+                        backPath="/netsuite/quotation"
+                        subtitle={tranid || '-'}
+                        actions={<>
+                            {(Boolean(quoInternalId) && syncInfo?.sync_status !== 'pending' && syncInfo?.sync_status !== 'failed') && (
+                                <PermissionGate permission="read">
+                                    <Button
+                                        onClick={() => handleSyncById(String(quoInternalId))}
+                                        disabled={isSyncing}
+                                        className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600 py-2"
+                                        variant='outline'
+                                    >
+                                        <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                        <div>
+                                            <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
                                         </div>
-                                        <QuotationItemFields
-                                            formData={formData}
-                                            errors={errors}
-                                            masterData={masterData}
-                                            loadingMasterData={loadingMasterData}
-                                            onInputChange={handleInputChange}
-                                            onSelectChange={handleSelectChange}
-                                            onDateChange={handleDateChange}
-                                            onAddItem={handleAddItem}
-                                            onRemoveItem={handleRemoveItem}
-                                            onUpdateItem={handleUpdateItem}
+                                    </Button>
+                                </PermissionGate>
+                            )}
+                            {tranid !== null && (
+                                <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
+                                    {formData.custbody_me_approval_status_name || '-'}
+                                </span>
+                            )}
+                        </>}
+                    />
 
-                                            // Item Select Props
-                                            itemOptions={itemOptions}
-                                            itemPagination={itemPagination}
-                                            itemInput={itemInputValue}
-                                            onItemInputChange={handleItemInputChange}
-                                            onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
-
-                                            // Location Props (for items)
-                                            locationOptions={itemLocationOptions}
-                                            locationPagination={itemLocationPagination}
-                                            locationInput={itemLocationInputValue}
-                                            onLocationInputChange={handleItemLocationInputChange}
-                                            onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
-
-                                            // Class Props
-                                            classOptions={classOptions}
-                                            classPagination={classPagination}
-                                            classInput={classInputValue}
-                                            onClassInputChange={handleClassInputChange}
-                                            onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
-
-                                            // Dept Props
-                                            deptOptions={deptOptions}
-                                            deptPagination={deptPagination}
-                                            deptInput={deptInputValue}
-                                            onDeptInputChange={handleDeptInputChange}
-                                            onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
-
-                                        />
-                                        </>
-                                    )}
-
-                                    {activeTab === 'files' && (
-                                        <FilesTab
-                                            soId={String(quoInternalId)}
-                                            fileList={formData?.files || []}
-                                            pendingFiles={(formData?.files || []).filter(
-                                                file => !(formData?.files || []).some(
-                                                    pf => (pf.fileUrl || '') === (file.fileUrl || '') &&
-                                                        (pf.fileName || '') === (file.fileName || '')
-                                                )
-                                            )}
-                                            deletedFileUrls={(formData?.files || [])
-                                                .filter(pf => !(formData.files || []).some(
-                                                    file => (file.fileUrl || '') === (pf.fileUrl || '') &&
-                                                        (file.fileName || '') === (pf.fileName || '')
-                                                ))
-                                                .map(pf => pf.fileUrl)
-                                            }
-                                            isLoading={loadingMasterData}
-                                            onAddFiles={handleAddFiles}
-                                        />
-                                    )}
-
-                                    {activeTab === 'usernotes' && (
-                                        <UserNoteTab
-                                            noteList={formData?.user_notes || []}
-                                            isLoading={loadingMasterData}
-                                        />
-                                    )}
+                    <div className="space-y-6">
+                        {statusName === 'PROCESSING' && (
+                            <Alert variant='warning' title='Quotation Is Being Processed'>
+                                <div className="space-y-4">
+                                    <p className="text-sm text-gray-500">
+                                        Your Quotation sync is currently being processed. Please allow some time for the process to complete. <br />
+                                        Click the refresh button below to check whether the data is already available.
+                                    </p>
+                                    <ElemRefresh />
                                 </div>
+                            </Alert>
+                        )}
+
+                        {statusName === 'FAILED' && (
+                            <Alert variant='error' title='Failed to Sync Quotation'>
+                                <div className="space-y-4">
+                                    <p className="text-sm text-gray-500">
+                                        {messageError || 'Unknown error occurred during synchronization.'}
+                                    </p>
+                                    <ElemRefresh />
+                                </div>
+                            </Alert>
+                        )}
+
+                        {/* Quotation Fields */}
+                        <QuotationFields
+                            formData={formData}
+                            errors={errors}
+                            masterData={masterData}
+                            loadingMasterData={loadingMasterData}
+                            onInputChange={handleInputChange}
+                            onSelectChange={handleSelectChange}
+                            onDateChange={handleDateChange}
+                            onAddItem={handleAddItem}
+                            onRemoveItem={handleRemoveItem}
+                            onUpdateItem={handleUpdateItem}
+
+                            // Location Props
+                            locationOptions={locationOptions}
+                            locationPagination={locationPagination}
+                            locationInputValue={locationInputValue}
+                            onLocationInputChange={handleLocationInputChange}
+                            onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
+                            selectedLocation={selectedLocation}
+                            onLocationChange={(opt) => {
+                                setSelectedLocation(opt);
+                                handleSelectChange('location', opt ? Number(opt.value) : null);
+                                handleSelectChange('location_name', opt?.label || '');
+                            }}
+
+                            // Dept Props
+                            deptOptions={deptOptions}
+                            deptPagination={deptPagination}
+                            deptInputValue={deptInputValue}
+                            onDeptInputChange={handleDeptInputChange}
+                            onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
+                            selectedDepartment={selectedDepartment}
+                            onDepartmentChange={(opt) => {
+                                setSelectedDepartment(opt);
+                                handleSelectChange('department', opt ? Number(opt.value) : null);
+                                handleSelectChange('department_name', opt?.label || '');
+                            }}
+
+                            // Class Props
+                            classOptions={classOptions}
+                            classPagination={classPagination}
+                            classInputValue={classInputValue}
+                            onClassInputChange={handleClassInputChange}
+                            onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
+                            selectedClass={selectedClass}
+                            onClassChange={(opt) => {
+                                setSelectedClass(opt);
+                                handleSelectChange('class', opt ? Number(opt.value) : null);
+                                handleSelectChange('class_name', opt?.label || '');
+                            }}
+
+                            // Customer Props
+                            customerOptions={customerOptions}
+                            customerPagination={customerPagination}
+                            customerInput={customerInputValue}
+                            onCustomerInputChange={handleCustomerInputChange}
+                            onCustomerMenuScrollToBottom={handleCustomerMenuScrollToBottom}
+                            selectedCustomer={selectedCustomer}
+                            onCustomerChange={(opt) => {
+                                setSelectedCustomer(opt);
+                                if (opt) {
+                                    handleSelectChange('entity', Number(opt.value));
+                                    handleSelectChange('entity_name', opt.label);
+                                } else {
+                                    handleSelectChange('entity', null);
+                                    handleSelectChange('entity_name', '');
+                                }
+                            }}
+
+                            // Term Props
+                            termOptions={termOptions}
+                            termPagination={termPagination}
+                            termInput={termInputValue}
+                            onTermInputChange={handleTermInputChange}
+                            onTermMenuScrollToBottom={handleTermMenuScrollToBottom}
+                            selectedTerm={selectedTerm}
+                            onTermChange={(opt) => {
+                                setSelectedTerm(opt);
+                                handleSelectChange('terms', opt ? Number(opt.value) : null);
+                            }}
+
+                            // Bank Props
+                            bankOptions={bankOptions}
+                            bankPagination={bankPagination}
+                            bankInput={bankInputValue}
+                            onBankInputChange={handleBankInputChange}
+                            onBankMenuScrollToBottom={handleBankMenuScrollToBottom}
+                            selectedBank={selectedBank}
+                            onBankChange={(opts) => {
+                                setSelectedBank(opts);
+                                handleSelectChange('custbody_msi_bank_payment_so', opts.map(o => Number(o.value)));
+                            }}
+                        />
+
+                        <div>
+                            {/* Tab Navigation */}
+                            <div className="border-b border-gray-200 px-6 overflow-auto">
+                                <nav className="flex space-x-8 overflow-auto">
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab('items')}
+                                        className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${activeTab === 'items'
+                                            ? 'border-blue-500 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                    >
+                                        Items
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('files')}
+                                        className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${activeTab === 'files'
+                                            ? 'border-blue-500 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                    >
+                                        Files
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('usernotes')}
+                                        className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${activeTab === 'usernotes'
+                                            ? 'border-blue-500 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                    >
+                                        User Notes
+                                    </button>
+                                </nav>
                             </div>
 
-                            {/* Form Actions */}
-                            <div className="flex justify-end gap-4 p-4 bg-white rounded-2xl shadow-sm mb-8">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => navigate('/netsuite/quotation')}
-                                    className="px-6 rounded-full"
-                                    disabled={isSubmitting}
-                                >
-                                    Cancel
-                                </Button>
-                                {(statusName !== 'PROCESSING') && (
-                                    <PermissionGate permission={["create", "update"]}>
-                                        <Button
-                                            onClick={handleSubmit}
-                                            className="px-6 flex items-center gap-2 rounded-full"
-                                            disabled={isSubmitting || statusName === 'pending' || statusName === 'failed'}
-                                        >
-                                            {isSubmitting ? (<>
-                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
-                                                Processing...
-                                            </>) : (<>
-                                                <FaSave className={`mr-2 h-4 w-4`} /> Update Quotation
-                                            </>)}
-                                        </Button>
-                                    </PermissionGate>
+                            <div className='bg-white rounded-b-2xl shadow-sm'>
+                                {/* Items Tab */}
+                                {activeTab === 'items' && (
+                                    <>
+                                    <div className="px-6 pt-4">
+                                        <div className="mb-4">
+                                            <Label>Filter Item Type</Label>
+                                            <CustomSelect
+                                                name="item_type_filter"
+                                                placeholder="All Item Types"
+                                                value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
+                                                options={itemTypeOptions}
+                                                isClearable={true}
+                                                onChange={(option: any) => {
+                                                    handleItemTypeChange(option);
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <QuotationItemFields
+                                        formData={formData}
+                                        errors={errors}
+                                        masterData={masterData}
+                                        loadingMasterData={loadingMasterData}
+                                        onInputChange={handleInputChange}
+                                        onSelectChange={handleSelectChange}
+                                        onDateChange={handleDateChange}
+                                        onAddItem={handleAddItem}
+                                        onRemoveItem={handleRemoveItem}
+                                        onUpdateItem={handleUpdateItem}
+
+                                        // Item Select Props
+                                        itemOptions={itemOptions}
+                                        itemPagination={itemPagination}
+                                        itemInput={itemInputValue}
+                                        onItemInputChange={handleItemInputChange}
+                                        onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
+
+                                        // Location Props (for items)
+                                        locationOptions={itemLocationOptions}
+                                        locationPagination={itemLocationPagination}
+                                        locationInput={itemLocationInputValue}
+                                        onLocationInputChange={handleItemLocationInputChange}
+                                        onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
+
+                                        // Class Props
+                                        classOptions={classOptions}
+                                        classPagination={classPagination}
+                                        classInput={classInputValue}
+                                        onClassInputChange={handleClassInputChange}
+                                        onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
+
+                                        // Dept Props
+                                        deptOptions={deptOptions}
+                                        deptPagination={deptPagination}
+                                        deptInput={deptInputValue}
+                                        onDeptInputChange={handleDeptInputChange}
+                                        onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
+
+                                    />
+                                    </>
                                 )}
-                                {(syncInfo?.sync_status === 'failed' || syncInfo?.sync_status === 'pending') && (
-                                    <ElemRefresh />
+
+                                {activeTab === 'files' && (
+                                    <FilesTab
+                                        soId={String(quoInternalId)}
+                                        fileList={formData?.files || []}
+                                        pendingFiles={(formData?.files || []).filter(
+                                            file => !(formData?.files || []).some(
+                                                pf => (pf.fileUrl || '') === (file.fileUrl || '') &&
+                                                    (pf.fileName || '') === (file.fileName || '')
+                                            )
+                                        )}
+                                        deletedFileUrls={(formData?.files || [])
+                                            .filter(pf => !(formData.files || []).some(
+                                                file => (file.fileUrl || '') === (pf.fileUrl || '') &&
+                                                    (file.fileName || '') === (pf.fileName || '')
+                                            ))
+                                            .map(pf => pf.fileUrl)
+                                        }
+                                        isLoading={loadingMasterData}
+                                        onAddFiles={handleAddFiles}
+                                    />
+                                )}
+
+                                {activeTab === 'usernotes' && (
+                                    <UserNoteTab
+                                        noteList={formData?.user_notes || []}
+                                        isLoading={loadingMasterData}
+                                    />
                                 )}
                             </div>
                         </div>
-                    </>)}
+
+                        {/* Form Actions */}
+                        <div className="flex justify-end gap-4 p-4 bg-white rounded-2xl shadow-sm mb-8">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => navigate('/netsuite/quotation')}
+                                className="px-6 rounded-full"
+                                disabled={isSubmitting}
+                            >
+                                Cancel
+                            </Button>
+                            {(statusName !== 'PROCESSING') && (
+                                <PermissionGate permission={["create", "update"]}>
+                                    <Button
+                                        onClick={handleSubmit}
+                                        className="px-6 flex items-center gap-2 rounded-full"
+                                        disabled={isSubmitting || statusName === 'pending' || statusName === 'failed'}
+                                    >
+                                        {isSubmitting ? (<>
+                                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Processing...
+                                        </>) : (<>
+                                            <FaSave className={`mr-2 h-4 w-4`} /> Update Quotation
+                                        </>)}
+                                    </Button>
+                                </PermissionGate>
+                            )}
+                            {(syncInfo?.sync_status === 'failed' || syncInfo?.sync_status === 'pending') && (
+                                <ElemRefresh />
+                            )}
+                        </div>
+                    </div>
+                </>)}
 
 
-                </div>
             </div>
         </>
     );

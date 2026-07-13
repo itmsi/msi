@@ -214,235 +214,233 @@ export default function Create() {
                 image="/motor-sights-international.png"
             />
 
-            <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-0">
-                    {/* Header */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate('/netsuite/quotation')}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                            >
-                                <MdKeyboardArrowLeft size={20} />
-                            </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Create Quotation</h1>
-                        </div>
+            <div className="mx-auto px-0">
+                {/* Header */}
+                <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate('/netsuite/quotation')}
+                            className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
+                        >
+                            <MdKeyboardArrowLeft size={20} />
+                        </Button>
+                        <div className="border-l border-gray-300 h-6 mx-3"></div>
+                        <h1 className="ms-2 font-primary-bold font-normal text-xl">Create Quotation</h1>
                     </div>
+                </div>
 
-                    {isSubmitting && (
-                        <LoadingOverlay message="Menyimpan Quotation..." />
-                    )}
+                {isSubmitting && (
+                    <LoadingOverlay message="Menyimpan Quotation..." />
+                )}
 
-                    <div className="space-y-6">
-                        {/* Quotation Fields */}
-                        <QuotationFields
-                            formData={formData}
-                            errors={errors}
-                            masterData={masterData}
-                            loadingMasterData={loadingMasterData}
-                            onInputChange={handleInputChange}
-                            onSelectChange={handleSelectChange}
-                            onDateChange={handleDateChange}
-                            onAddItem={handleAddItem}
-                            onRemoveItem={handleRemoveItem}
-                            onUpdateItem={handleUpdateItem}
+                <div className="space-y-6">
+                    {/* Quotation Fields */}
+                    <QuotationFields
+                        formData={formData}
+                        errors={errors}
+                        masterData={masterData}
+                        loadingMasterData={loadingMasterData}
+                        onInputChange={handleInputChange}
+                        onSelectChange={handleSelectChange}
+                        onDateChange={handleDateChange}
+                        onAddItem={handleAddItem}
+                        onRemoveItem={handleRemoveItem}
+                        onUpdateItem={handleUpdateItem}
 
-                            // Location Props
-                            locationOptions={locationOptions}
-                            locationPagination={locationPagination}
-                            locationInputValue={locationInputValue}
-                            onLocationInputChange={handleLocationInputChange}
-                            onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
-                            selectedLocation={selectedLocation}
-                            onLocationChange={(opt) => {
-                                setSelectedLocation(opt);
-                                handleSelectChange('location', opt ? Number(opt.value) : null);
-                                handleSelectChange('location_name', opt?.label || '');
-                            }}
+                        // Location Props
+                        locationOptions={locationOptions}
+                        locationPagination={locationPagination}
+                        locationInputValue={locationInputValue}
+                        onLocationInputChange={handleLocationInputChange}
+                        onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
+                        selectedLocation={selectedLocation}
+                        onLocationChange={(opt) => {
+                            setSelectedLocation(opt);
+                            handleSelectChange('location', opt ? Number(opt.value) : null);
+                            handleSelectChange('location_name', opt?.label || '');
+                        }}
 
-                            // Dept Props
-                            deptOptions={deptOptions}
-                            deptPagination={deptPagination}
-                            deptInputValue={deptInputValue}
-                            onDeptInputChange={handleDeptInputChange}
-                            onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
-                            selectedDepartment={selectedDepartment}
-                            onDepartmentChange={(opt) => {
-                                setSelectedDepartment(opt);
-                                handleSelectChange('department', opt ? Number(opt.value) : null);
-                                handleSelectChange('department_name', opt?.label || '');
-                            }}
+                        // Dept Props
+                        deptOptions={deptOptions}
+                        deptPagination={deptPagination}
+                        deptInputValue={deptInputValue}
+                        onDeptInputChange={handleDeptInputChange}
+                        onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
+                        selectedDepartment={selectedDepartment}
+                        onDepartmentChange={(opt) => {
+                            setSelectedDepartment(opt);
+                            handleSelectChange('department', opt ? Number(opt.value) : null);
+                            handleSelectChange('department_name', opt?.label || '');
+                        }}
 
-                            // Class Props
-                            classOptions={classOptions}
-                            classPagination={classPagination}
-                            classInputValue={classInputValue}
-                            onClassInputChange={handleClassInputChange}
-                            onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
-                            selectedClass={selectedClass}
-                            onClassChange={(opt) => {
-                                setSelectedClass(opt);
-                                handleSelectChange('class', opt ? Number(opt.value) : null);
-                                handleSelectChange('class_name', opt?.label || '');
-                            }}
+                        // Class Props
+                        classOptions={classOptions}
+                        classPagination={classPagination}
+                        classInputValue={classInputValue}
+                        onClassInputChange={handleClassInputChange}
+                        onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
+                        selectedClass={selectedClass}
+                        onClassChange={(opt) => {
+                            setSelectedClass(opt);
+                            handleSelectChange('class', opt ? Number(opt.value) : null);
+                            handleSelectChange('class_name', opt?.label || '');
+                        }}
 
-                            // Customer Props
-                            customerOptions={customerOptions}
-                            customerPagination={customerPagination}
-                            customerInput={customerInputValue}
-                            onCustomerInputChange={handleCustomerInputChange}
-                            onCustomerMenuScrollToBottom={handleCustomerMenuScrollToBottom}
-                            selectedCustomer={selectedCustomer}
-                            onCustomerChange={(opt) => {
-                                setSelectedCustomer(opt);
-                                if (opt) {
-                                    handleSelectChange('entity', Number(opt.value));
-                                    handleSelectChange('entity_name', opt.label);
-                                } else {
-                                    handleSelectChange('entity', null);
-                                    handleSelectChange('entity_name', '');
-                                }
-                            }}
+                        // Customer Props
+                        customerOptions={customerOptions}
+                        customerPagination={customerPagination}
+                        customerInput={customerInputValue}
+                        onCustomerInputChange={handleCustomerInputChange}
+                        onCustomerMenuScrollToBottom={handleCustomerMenuScrollToBottom}
+                        selectedCustomer={selectedCustomer}
+                        onCustomerChange={(opt) => {
+                            setSelectedCustomer(opt);
+                            if (opt) {
+                                handleSelectChange('entity', Number(opt.value));
+                                handleSelectChange('entity_name', opt.label);
+                            } else {
+                                handleSelectChange('entity', null);
+                                handleSelectChange('entity_name', '');
+                            }
+                        }}
 
-                            // Term Props
-                            termOptions={termOptions}
-                            termPagination={termPagination}
-                            termInput={termInputValue}
-                            onTermInputChange={handleTermInputChange}
-                            onTermMenuScrollToBottom={handleTermMenuScrollToBottom}
-                            selectedTerm={selectedTerm}
-                            onTermChange={(opt) => {
-                                setSelectedTerm(opt);
-                                handleSelectChange('terms', opt ? Number(opt.value) : null);
-                                handleSelectChange('terms_name', opt?.label || '');
-                            }}
-                            // Bank Props
-                            bankOptions={bankOptions}
-                            bankPagination={bankPagination}
-                            bankInput={bankInputValue}
-                            onBankInputChange={handleBankInputChange}
-                            onBankMenuScrollToBottom={handleBankMenuScrollToBottom}
-                            selectedBank={selectedBank}
-                            onBankChange={(opts) => {
-                                setSelectedBank(opts);
-                                handleSelectChange('custbody_msi_bank_payment_so', opts.map(o => Number(o.value)));
-                                handleSelectChange('custbody_msi_bank_payment_so_name', opts.map(o => o.label));
-                            }}
-                        />
+                        // Term Props
+                        termOptions={termOptions}
+                        termPagination={termPagination}
+                        termInput={termInputValue}
+                        onTermInputChange={handleTermInputChange}
+                        onTermMenuScrollToBottom={handleTermMenuScrollToBottom}
+                        selectedTerm={selectedTerm}
+                        onTermChange={(opt) => {
+                            setSelectedTerm(opt);
+                            handleSelectChange('terms', opt ? Number(opt.value) : null);
+                            handleSelectChange('terms_name', opt?.label || '');
+                        }}
+                        // Bank Props
+                        bankOptions={bankOptions}
+                        bankPagination={bankPagination}
+                        bankInput={bankInputValue}
+                        onBankInputChange={handleBankInputChange}
+                        onBankMenuScrollToBottom={handleBankMenuScrollToBottom}
+                        selectedBank={selectedBank}
+                        onBankChange={(opts) => {
+                            setSelectedBank(opts);
+                            handleSelectChange('custbody_msi_bank_payment_so', opts.map(o => Number(o.value)));
+                            handleSelectChange('custbody_msi_bank_payment_so_name', opts.map(o => o.label));
+                        }}
+                    />
 
-                        <div>
-                            {/* Tab Navigation */}
-                            <div className="border-b border-gray-200 px-6 overflow-auto">
-                                <nav className="flex space-x-8 overflow-auto">
-                                    <button
-                                        type="button"
-                                        onClick={() => setActiveTab('items')}
-                                        className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
-                                            activeTab === 'items'
-                                                ? 'border-blue-500 text-blue-600'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                        }`}
-                                    >
-                                        Items
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setActiveTab('files')}
-                                        className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
-                                            activeTab === 'files'
-                                                ? 'border-blue-500 text-blue-600'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                        }`}
-                                    >
-                                        Files
-                                    </button>
-                                </nav>
-                            </div>
+                    <div>
+                        {/* Tab Navigation */}
+                        <div className="border-b border-gray-200 px-6 overflow-auto">
+                            <nav className="flex space-x-8 overflow-auto">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('items')}
+                                    className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                        activeTab === 'items'
+                                            ? 'border-blue-500 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Items
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('files')}
+                                    className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                        activeTab === 'files'
+                                            ? 'border-blue-500 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Files
+                                </button>
+                            </nav>
+                        </div>
 
-                            <div className='bg-white rounded-b-2xl shadow-sm'>
-                                {/* Items Tab */}
-                                {activeTab === 'items' && (
-                                    <>
-                                    <div className="px-6 pt-4">
-                                        <div className="mb-4">
-                                            <Label>Filter Item Type</Label>
-                                            <CustomSelect
-                                                name="item_type_filter"
-                                                placeholder="All Item Types"
-                                                value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
-                                                options={itemTypeOptions}
-                                                isClearable={true}
-                                                onChange={(option: any) => {
-                                                    handleItemTypeChange(option);
-                                                }}
-                                            />
-                                        </div>
+                        <div className='bg-white rounded-b-2xl shadow-sm'>
+                            {/* Items Tab */}
+                            {activeTab === 'items' && (
+                                <>
+                                <div className="px-6 pt-4">
+                                    <div className="mb-4">
+                                        <Label>Filter Item Type</Label>
+                                        <CustomSelect
+                                            name="item_type_filter"
+                                            placeholder="All Item Types"
+                                            value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
+                                            options={itemTypeOptions}
+                                            isClearable={true}
+                                            onChange={(option: any) => {
+                                                handleItemTypeChange(option);
+                                            }}
+                                        />
                                     </div>
-                                    <QuotationItemFields
-                                        formData={formData}
-                                        errors={errors}
-                                        masterData={masterData}
-                                        loadingMasterData={loadingMasterData}
-                                        onInputChange={handleInputChange}
-                                        onSelectChange={handleSelectChange}
-                                        onDateChange={handleDateChange}
-                                        onAddItem={handleAddItem}
-                                        onRemoveItem={handleRemoveItem}
-                                        onUpdateItem={handleUpdateItem}
+                                </div>
+                                <QuotationItemFields
+                                    formData={formData}
+                                    errors={errors}
+                                    masterData={masterData}
+                                    loadingMasterData={loadingMasterData}
+                                    onInputChange={handleInputChange}
+                                    onSelectChange={handleSelectChange}
+                                    onDateChange={handleDateChange}
+                                    onAddItem={handleAddItem}
+                                    onRemoveItem={handleRemoveItem}
+                                    onUpdateItem={handleUpdateItem}
 
-                                        // Item Select Props
-                                        itemOptions={itemOptions}
-                                        itemPagination={itemPagination}
-                                        itemInput={itemInputValue}
-                                        onItemInputChange={handleItemInputChange}
-                                        onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
+                                    // Item Select Props
+                                    itemOptions={itemOptions}
+                                    itemPagination={itemPagination}
+                                    itemInput={itemInputValue}
+                                    onItemInputChange={handleItemInputChange}
+                                    onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
 
-                                        // Location Props (for items)
-                                        locationOptions={itemLocationOptions}
-                                        locationPagination={itemLocationPagination}
-                                        locationInput={itemLocationInputValue}
-                                        onLocationInputChange={handleItemLocationInputChange}
-                                        onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
+                                    // Location Props (for items)
+                                    locationOptions={itemLocationOptions}
+                                    locationPagination={itemLocationPagination}
+                                    locationInput={itemLocationInputValue}
+                                    onLocationInputChange={handleItemLocationInputChange}
+                                    onLocationMenuScrollToBottom={handleItemLocationScrollToBottom}
 
-                                        // Class Props
-                                        classOptions={classOptions}
-                                        classPagination={classPagination}
-                                        classInput={classInputValue}
-                                        onClassInputChange={handleClassInputChange}
-                                        onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
+                                    // Class Props
+                                    classOptions={classOptions}
+                                    classPagination={classPagination}
+                                    classInput={classInputValue}
+                                    onClassInputChange={handleClassInputChange}
+                                    onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
 
-                                        // Dept Props
-                                        deptOptions={deptOptions}
-                                        deptPagination={deptPagination}
-                                        deptInput={deptInputValue}
-                                        onDeptInputChange={handleDeptInputChange}
-                                        onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
-                                    />
-                                    </>
-                                )}
+                                    // Dept Props
+                                    deptOptions={deptOptions}
+                                    deptPagination={deptPagination}
+                                    deptInput={deptInputValue}
+                                    onDeptInputChange={handleDeptInputChange}
+                                    onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
+                                />
+                                </>
+                            )}
 
-                                {/* Files Tab */}
-                                {activeTab === 'files' && (
-                                    <FilesTab
-                                        fileList={formData?.files || []}
-                                        isLoading={false}
-                                        onAddFiles={handleAddFiles}
-                                    />
-                                )}
-                            </div>
+                            {/* Files Tab */}
+                            {activeTab === 'files' && (
+                                <FilesTab
+                                    fileList={formData?.files || []}
+                                    isLoading={false}
+                                    onAddFiles={handleAddFiles}
+                                />
+                            )}
                         </div>
-
-                        {/* Form Actions */}
-                        <FormActions
-                            onSubmit={handleSubmit}
-                            isSubmitting={isSubmitting}
-                            cancelRoute="/netsuite/quotation"
-                            submitText="Create Quotation"
-                            submittingText="Creating..."
-                        />
                     </div>
+
+                    {/* Form Actions */}
+                    <FormActions
+                        onSubmit={handleSubmit}
+                        isSubmitting={isSubmitting}
+                        cancelRoute="/netsuite/quotation"
+                        submitText="Create Quotation"
+                        submittingText="Creating..."
+                    />
                 </div>
             </div>
         </>

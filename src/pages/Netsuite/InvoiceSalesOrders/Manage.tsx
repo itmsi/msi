@@ -2,13 +2,12 @@ import { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useInvoiceSalesOrder } from './hooks/useInvoiceSalesOrder';
-import { formatCurrencyID, getStatusBadge, formatDateTime } from '@/helpers/generalHelper';
-import { MdClear, MdSearch, MdEdit, MdFileDownload, MdFilterListAlt, MdExpandLess, MdExpandMore, MdOutlineSync, MdDoneAll } from 'react-icons/md';
+import { formatCurrencyID, formatDateTime } from '@/helpers/generalHelper';
+import { MdClear, MdSearch, MdEdit, MdFilterListAlt, MdExpandLess, MdExpandMore, MdOutlineSync, MdDoneAll } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import Switch from '@/components/form/switch/Switch';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
-import { PermissionGate } from '@/components/common/PermissionComponents';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { InvoiceSalesOrder } from './types/invoiceSalesOrder';
 import { FakturService } from './services/fakturService';
@@ -16,6 +15,9 @@ import toast from 'react-hot-toast';
 import Button from '@/components/ui/button/Button';
 import { generateFakturXML } from './utils/fakturExportUtils';
 import FilterSection from './components/FilterSection';
+import { BsFiletypeXml } from 'react-icons/bs';
+import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
 
 // Helper: export single invoice row as XML
 const exportRowAsXML = async (row: InvoiceSalesOrder) => {
@@ -179,15 +181,19 @@ export default function Manage() {
 
     const columns: TableColumn<InvoiceSalesOrder>[] = [
         {
-            name: 'SiId',
-            selector: row => row.id || '-',
+            name: 'Document Number',
+            selector: row => row.tranid || '-',
             cell: row => (
                 <div className="items-center py-2">
-                    <div className='block text-sm text-gray-900'>{row.id}</div>
+                    <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
+                    <div className="block text-sm text-gray-500">{formatDateTime(row.trandate || '-')}</div><div className="text-xs text-gray-500">
+                        SI ID: {row.id || '-'}
+                    </div>
                 </div>
             ),
             wrap: true,
-            minWidth: '140px',
+            minWidth: '180px',
+            pinned: 'left',
         },
         {
             name: 'Import Status',
@@ -218,19 +224,13 @@ export default function Manage() {
             name: 'Subsidiary',
             selector: row => row.subsidiary_display || row.subsidiary || '-',
             wrap: true,
-            minWidth: '180px',
+            width: '350px'
         },
         {
-            name: 'Document Number',
-            selector: row => row.tranid || '-',
-            cell: row => (
-                <div className="items-center py-2">
-                    <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
-                    <div className="block text-sm text-gray-500">{formatDateTime(row.trandate || '-')}</div>
-                </div>
-            ),
+            name: 'Memo',
+            selector: row => row.memo || '-',
             wrap: true,
-            minWidth: '180px',
+            width: '300px'
         },
         {
             name: 'Tx Date Faktur',
@@ -266,26 +266,20 @@ export default function Manage() {
                 );
             },
             wrap: true,
-            minWidth: '220px',
+            width: '350px'
         },
         {
             name: 'Status',
             selector: row => row.approvalstatus || '-',
             cell: row => {
-                let statusKey = 'draft';
-                let statusLabel = row.approvalstatus || '-';
-
-                if (row.approvalstatus === '1') { statusKey = 'pending'; statusLabel = row.approvalstatus_display || 'Pending Approval'; }
-                else if (row.approvalstatus === '2') { statusKey = 'approved'; statusLabel = row.approvalstatus_display || 'Approved'; }
-                else if (row.approvalstatus === '3') { statusKey = 'rejected'; statusLabel = row.approvalstatus_display || 'Rejected'; }
-
-                const badge = getStatusBadge(statusKey);
                 return (
-                    
                 <div className="items-center capitalize">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>
-                        {statusLabel}
-                    </span>
+                    {row.approvalstatus ? (
+                        <StatusTypeBadge
+                            type={Number(row.approvalstatus) as 1 | 2 | 3} 
+                            label={row.approvalstatus_display || undefined}
+                        />
+                        ) : '-'}
                 </div>
                 );
             },
@@ -321,12 +315,6 @@ export default function Manage() {
             minWidth: '180px',
         },
         {
-            name: 'Memo',
-            selector: row => row.memo || '-',
-            wrap: true,
-            minWidth: '200px',
-        },
-        {
             name: 'Modified Date',
             selector: row => row.faktur_updated_at || '-',
             cell: row => (
@@ -335,6 +323,9 @@ export default function Manage() {
                     <div className="block text-sm text-gray-500">
                         {formatDateTime(row.faktur_updated_at || '-')}
                     </div>
+                    <span className="text-xs text-gray-500">
+                        SI ID: {row.id || '-'}
+                    </span>
                 </div>
             ),
             wrap: true,
@@ -344,15 +335,15 @@ export default function Manage() {
             {
                 icon: MdEdit,
                 onClick: (row: InvoiceSalesOrder) => navigate(`/netsuite/invoice-sales-order/edit/${row.fakture_id}`),
-                className: 'text-amber-600 hover:text-amber-700 hover:bg-amber-50',
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'Edit',
                 permission: 'update',
             },
             {
-                icon: MdFileDownload,
+                icon: BsFiletypeXml,
                 onClick: (row: InvoiceSalesOrder) => exportRowAsXML(row),
                 className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
-                tooltip: 'Export XML',
+                tooltip: 'Download XML',
                 permission: 'read',
             },
         ])
@@ -455,32 +446,29 @@ export default function Manage() {
             
             <div className="space-y-6">
                 {/* Header */}
-                <div className="bg-white shadow rounded-lg mb-3">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Sales Invoice
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Manage Sales Invoice and related information
-                                </p>
-                            </div>
-                            <div className="flex space-x-3">
-                                <PermissionGate permission="read">
-                                    <Button
-                                        onClick={() => handleSync()}
-                                        disabled={isSyncing}
-                                        className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
-                                        variant="outline"
-                                    >
-                                        <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
-                                        <div>
-                                            <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
-                                        </div>
-                                    </Button>
-                                </PermissionGate>
-
+                <PageHeaderManage
+                    title="Sales Invoice"
+                    subtitle="Manage Sales Invoice"
+                    actions={[
+                        {
+                            key: 'sync',
+                            element: (
+                                <Button
+                                    onClick={() => handleSync()}
+                                    disabled={isSyncing}
+                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                    variant='outline'
+                                >
+                                    <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                    <div>
+                                        <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                    </div>
+                                </Button>
+                            )
+                        },
+                        {
+                            key: 'save_status',
+                            element: (
                                 <Button
                                     onClick={handleBulkUpdateStatus}
                                     variant="outline"
@@ -490,20 +478,24 @@ export default function Manage() {
                                     <MdDoneAll size={20} />
                                     Save Status ({Object.keys(statusChanges).length})
                                 </Button>
-
+                            )
+                        },
+                        {
+                            key: 'download_xml',
+                            element: (
                                 <Button
                                     onClick={handleExportSelected}
                                     variant="outline"
                                     className="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-50"
                                     disabled={loading || selectedRows.length === 0}
                                 >
-                                    <MdFileDownload size={20} />
-                                    Export Selected (XML)
+                                    <BsFiletypeXml size={20} />
+                                    Download Selected (XML)
                                 </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            )
+                        }
+                    ]}
+                />
 
                 {syncInfo && (
                     <span className="block text-xs text-green-600 pe-6 text-end mb-0">
