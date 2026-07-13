@@ -3,7 +3,7 @@ import { AttachFileItem, PurchaseOrderForm } from '../../types/purchaseorder';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { TableColumn } from 'react-data-table-component';
 import { FaExternalLinkAlt, FaPaperclip, FaPlus } from 'react-icons/fa';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import Button from '@/components/ui/button/Button';
 import { MdDeleteOutline, MdEdit } from 'react-icons/md';
 import { PurchaseOrderService } from '../../services/purchaseOrderService';
@@ -64,7 +64,6 @@ const FilesTab: React.FC<FilesTabProps> = ({
     isLoading,
     onAddFiles,
 }) => {
-    const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const dataFiles = sortById(fileList, false);
     const [showForm, setShowForm] = useState(false);

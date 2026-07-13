@@ -41,8 +41,6 @@ const sortById = (data : any, ascending = true) => {
 
 // Mapping response API (PODetailData) ke format form (PurchaseOrderForm)
 const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
-    const firstLine = detail.lines?.[0];
-
     // Filter hanya item bukan TaxItem
     const productLines = (detail.lines || []).filter(line => line.itemtype !== 'TaxItem');
     const fileLines = (detail.files || []);
