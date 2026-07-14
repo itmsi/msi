@@ -172,10 +172,10 @@ const EditIupManagement: React.FC = () => {
                     />
                 </>)}
                 {activeTab === 'contractor_unit' && (<>
-                    <TabContractorUnit formData={formData} />
+                    <TabContractorUnit />
                 </>)}
                 {activeTab === 'zone_iup' && (<>
-                    <TabZoneArea customerID={formData.id} />
+                    <TabZoneArea />
                 </>)}
                 {activeTab === 'history_visit' && (<></>)}
             </div>

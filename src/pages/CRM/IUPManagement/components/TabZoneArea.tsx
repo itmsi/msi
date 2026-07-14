@@ -1,16 +1,17 @@
 import React from 'react';
-import ZoneArea from '@/components/zonearea/ZoneArea';
+import ZoneArea from '@/pages/CRM/IUPManagement/components/zonearea/ZoneArea';
+import { useIupZoneSIte } from '../hooks/useIupZoneSIte';
 
-interface TabZoneAreaProps {
-    customerID: string;
-}
 
-const TabZoneArea: React.FC<TabZoneAreaProps> = ({ customerID: _customerID }) => {
-    const handleChange = (_updatedZones: any[]) => {
-        // zones tersimpan di state parent jika diperlukan
-    };
+const TabZoneArea: React.FC = () => {
 
-    return (
+    const {
+        zones,
+        handleZonesChange,
+        handleSubmitZone
+    } = useIupZoneSIte();
+
+    return (<>
         <div className="bg-white rounded-2xl shadow-sm mb-8">
             <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
@@ -21,14 +22,13 @@ const TabZoneArea: React.FC<TabZoneAreaProps> = ({ customerID: _customerID }) =>
             </div>
             
             <div className="p-6 font-secondary">
-                {/* {error && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-red-600 text-sm">{error}</p>
-                    </div>
-                )} */}
-                <ZoneArea onChange={handleChange} />
+                <ZoneArea 
+                    zones={zones}
+                    onChange={handleZonesChange}
+                    onSubmitZone={handleSubmitZone}
+                />
             </div>
         </div>
-    );
+    </>);
 }
 export default TabZoneArea;

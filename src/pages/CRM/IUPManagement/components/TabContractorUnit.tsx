@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ZoneArea from '@/components/zonearea/ZoneArea';
+import ZoneArea from '@/pages/CRM/IUPManagement/components/zonearea/ZoneArea';
 import { GiMineTruck } from 'react-icons/gi';
 import { MdAdd } from 'react-icons/md';
 import { RkabSection, UnitsSection } from '../../Contractors/components';

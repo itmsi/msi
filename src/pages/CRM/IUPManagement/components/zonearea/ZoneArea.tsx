@@ -1,30 +1,30 @@
 import React, { useState } from 'react';
 import { LuX, LuPlus, LuCheck, LuChevronDown, LuChevronRight, LuTrash2 } from 'react-icons/lu';
-import Button from '../ui/button/Button';
+import Button from '../../../../../components/ui/button/Button';
 import { EvidenceForm } from './EvidenceForm';
 
-interface Evidence {
-  lat: string;
-  long: string;
-  salesName: string;
+export interface Evidence {
+  iup_zona_site_date_last_survey: string;
   keterangan: string;
   fileLinks: string[];
 }
 
-interface Zone {
+export interface Zone {
   id: string;
+  iup_zona_site_id?: string;
   name: string;
   evidence: Evidence;
 }
 
 interface ZoneAreaProps {
-  initialZones?: Zone[];
-  onChange?: (zones: Zone[]) => void;
+  zones: Zone[];
+  onChange: (zones: Zone[]) => void;
+  onSubmitZone: (zone: Zone) => void;
 }
 
-const EMPTY_EVIDENCE: Evidence = { lat: '', long: '', salesName: '', keterangan: '', fileLinks: [''] };
+const EMPTY_EVIDENCE: Evidence = { iup_zona_site_date_last_survey: '', keterangan: '', fileLinks: [''] };
 
-const DEFAULT_ZONES: Zone[] = [
+export const DEFAULT_ZONES: Zone[] = [
     "PIT (Area Tambang)",
     "MHR (Main Haul Road)",
     "ETO (Exportable Transit Ore)",
@@ -37,21 +37,15 @@ const DEFAULT_ZONES: Zone[] = [
 ].map((name, i) => ({ id: `zone-${i}`, name, evidence: { ...EMPTY_EVIDENCE, fileLinks: [''] } }));
 
 let idCounter = 1000;
-const genId = (prefix: any) => `${prefix}-${idCounter++}`;
+const genId = (prefix: string) => `${prefix}-${idCounter++}`;
 
-const ZoneArea: React.FC<ZoneAreaProps> = ({ initialZones = DEFAULT_ZONES, onChange }) => {
+const ZoneArea: React.FC<ZoneAreaProps> = ({ zones, onChange, onSubmitZone }) => {
 
-    const [zones, setZones] = useState<Zone[]>(
-        initialZones && initialZones.length ? initialZones : DEFAULT_ZONES
-    );
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
     const [showAddZone, setShowAddZone] = useState(false);
     const [newZoneName, setNewZoneName] = useState("");
 
-    const updateZones = (next: Zone[]) => {
-        setZones(next);
-        if (onChange) onChange(next);
-    };
+    const updateZones = (next: Zone[]) => onChange(next);
 
     const toggleZone = (zoneId: string) => {
         setExpanded((prev) => ({ ...prev, [zoneId]: !prev[zoneId] }));
@@ -113,7 +107,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = ({ initialZones = DEFAULT_ZONES, onCha
 
 
     return (
-        <div className="w-full rounded-2xl border border-slate-300 overflow-hidden">
+        <div className="w-full rounded-2xl border border-slate-300">
 
             {/* Daftar zona */}
             <div className="divide-y divide-slate-300">
@@ -152,6 +146,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = ({ initialZones = DEFAULT_ZONES, onCha
                                     onChangeFileLink={(idx, value) => updateFileLink(zone.id, idx, value)}
                                     onAddFileLink={() => addFileLinkRow(zone.id)}
                                     onRemoveFileLink={(idx) => removeFileLinkRow(zone.id, idx)}
+                                    handleSubmit={() => onSubmitZone(zone)}
                                 />
                             </div>
                         )}

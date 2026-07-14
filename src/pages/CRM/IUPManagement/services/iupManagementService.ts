@@ -1,5 +1,5 @@
 import { apiGet, apiPost, apiPut, ApiResponse } from '@/helpers/apiHelper';
-import { IupItemDetails, IupRequest, IupListResponse, IupManagementFormData, IupZonaSiteRequest, IupZonaSiteResponse } from '../types/iupmanagement';
+import { IupItemDetails, IupRequest, IupListResponse, IupManagementFormData, IupZonaSiteRequest, IupZonaSiteResponse, ZonaSitePayload } from '../types/iupmanagement';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_IS_ADMIN = import.meta.env.VITE_PARAM_IS_ADMIN;
@@ -49,4 +49,15 @@ export class IupService {
         const response = await apiPost(`${API_BASE_URL}/crm/iup_zona_site/get`, requestData as Record<string, any>);
         return response.data as IupZonaSiteResponse;
     }
+
+    static async createIupZonaSite(data: ZonaSitePayload): Promise<any> {
+        const response = await apiPost(`${API_BASE_URL}/crm/iup_zona_site/create`, data as Record<string, any>);
+        return response.data;
+    }
+
+    static async updateIupZonaSite(id: string, data: ZonaSitePayload): Promise<any> {
+        const response = await apiPut(`${API_BASE_URL}/crm/iup_zona_site/${id}`, data as Record<string, any>);
+        return response.data;
+    }
+
 }

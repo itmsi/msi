@@ -135,6 +135,7 @@ export interface IupManagementFormData {
     area_name?: string;
     iup_zone_name?: string;
     iup_segment_id?: string;
+    iup_id?: string;
 }
 export interface Contractor {
     iup_customer_id: string;
@@ -154,13 +155,13 @@ export interface IupZonaSiteRequest {
 }
 // Reusable audit fields
 export interface AuditFields {
-    created_at: string;
-    created_by: string | null;
-    updated_at: string;
-    updated_by: string | null;
-    deleted_at: string | null;
-    deleted_by: string | null;
-    is_delete: boolean;
+    created_at?: string;
+    created_by?: string | null;
+    updated_at?: string;
+    updated_by?: string | null;
+    deleted_at?: string | null;
+    deleted_by?: string | null;
+    is_delete?: boolean;
 }
 
 // File item
@@ -183,3 +184,42 @@ export interface IupZonaSiteResponse {
     data: IupZonaSiteItem[];
     pagination: Pagination;
 }
+
+// ==================
+// GET ZONE
+export interface ZonaSiteFile {
+    file_link: string;
+}
+export interface ZonaSite extends AuditFields {
+    iup_zona_site_id: string;
+    iup_id: string;
+    iup_zona_site_name: string;
+    iup_zona_site_date_last_survey: string; // ISO string
+    iup_zona_site_file: ZonaSiteFile[];
+}
+export interface ZonaSiteListResponse {
+    success: boolean;
+    data: ZonaSite[];
+    pagination: Pagination;
+}
+export interface ZonaSiteView {
+    id: string;
+    iupId: string;
+    name: string;
+    lastSurveyDate: Date;
+    files: string[];
+}
+
+// ==================
+// payload Create GET ZONE
+export interface ZonaSiteFilePayload {
+    file_link: string;
+}
+
+export interface ZonaSitePayload {
+    iup_id: string;
+    iup_zona_site_name: string;
+    iup_zona_site_date_last_survey: string; // format: YYYY-MM-DD
+    iup_zona_site_file: ZonaSiteFilePayload[];
+}
+
