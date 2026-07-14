@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { FaPencilAlt, FaCheck, FaTimes } from 'react-icons/fa';
 import TinyMceEditor from './TinyMceEditor';
+import Label from '../Label';
 
 interface EditableFieldProps {
     value: string;
@@ -46,9 +47,9 @@ const EditableField: React.FC<EditableFieldProps> = ({
         return (
             <div>
                 <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-sm text-gray-700 font-medium">
+                    <Label>
                         {label}
-                    </label>
+                    </Label>
                     {!disabled && (
                         <button
                             type="button"

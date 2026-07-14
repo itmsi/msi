@@ -141,3 +141,45 @@ export interface Contractor {
     customer_iup_name: string;
     customer_name?: string;
 }
+
+// ================================
+// ZONE AREA
+export interface IupZonaSiteRequest {
+    page: number;
+    limit: number;
+    sort_order: 'asc' | 'desc' | '';
+    sort_by?: 'updated_at' | 'created_at' | '';
+    search?: string;
+    iup_id?: string;
+}
+// Reusable audit fields
+export interface AuditFields {
+    created_at: string;
+    created_by: string | null;
+    updated_at: string;
+    updated_by: string | null;
+    deleted_at: string | null;
+    deleted_by: string | null;
+    is_delete: boolean;
+}
+
+// File item
+export interface IupZonaSiteFile {
+    file_link: string;
+}
+
+// Main item
+export interface IupZonaSiteItem extends AuditFields {
+    iup_zona_site_id: string;
+    iup_id: string;
+    iup_zona_site_name: string;
+    iup_zona_site_date_last_survey: string;
+    iup_zona_site_file: IupZonaSiteFile[];
+}
+
+// Final response
+export interface IupZonaSiteResponse {
+    success: boolean;
+    data: IupZonaSiteItem[];
+    pagination: Pagination;
+}
