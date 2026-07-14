@@ -1,4 +1,4 @@
-import { apiPost, apiGet, ApiResponse, apiPut, apiPostMultipart, apiDelete } from '@/helpers/apiHelper';
+import { apiPost, apiGet, ApiResponse, apiPut, apiPostMultipart, apiDelete, apiPutMultipart } from '@/helpers/apiHelper';
 import { ComponentsDataResponse, GetPurchaseOrderListResponse, HistoryLogResponse, ItemReceiptPayload, ItemTypeResponse, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, POAttachment, POAttachmentDelete, POAttachmentResponse, POAttachmentUpdate, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, POItemsSelectRequest, PostReceiptResponse, PurchaseOrderDashboardRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, ResponseAttachUpdateItem, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -233,7 +233,7 @@ export class PurchaseOrderService {
     static async attachFilePOUpdate(payload: POAttachmentUpdate): Promise<ResponseAttachUpdateItem> {
         const fd = new FormData();
         if (payload.file) fd.append('file', payload.file);
-        fd.append('po_id', payload.poId ?? '');
+        fd.append('po_id', payload.netsuite_id ?? '');
         fd.append('file_name', payload.file_name);
         fd.append('fileUrl', payload.fileUrl);
         const response = await apiPostMultipart<ResponseAttachUpdateItem>(`${API_BASE_URL}/netsuite/purchasing-orders/upload-update`, fd);
@@ -252,7 +252,9 @@ export class PurchaseOrderService {
     static async attachFileDetailPO(payload: POAttachment): Promise<POAttachmentResponse> {
         const fd = new FormData();
         fd.append('file', payload.file);
+        fd.append('type', 'purchase_order');
         fd.append('file_name', payload.file_name);
+        fd.append('created_by_api', payload.created_by_api ?? '');
         fd.append('netsuite_id', payload.po_id);
         const response = await apiPostMultipart<POAttachmentResponse>(`${API_BASE_URL}/netsuite/attach_file`, fd);
         return response.data;
@@ -261,10 +263,12 @@ export class PurchaseOrderService {
     static async attachFileUpdateDetailPO(payload: POAttachmentUpdate, id: string): Promise<ResponseAttachUpdateItem> {
         const fd = new FormData();
         if (payload.file) fd.append('file', payload.file);
-        fd.append('po_id', payload.poId ?? '');
-        fd.append('file_name', payload.file_name);
+        fd.append('type', 'purchase_order');
         fd.append('fileUrl', payload.fileUrl);
-        const response = await apiPostMultipart<ResponseAttachUpdateItem>(`${API_BASE_URL}/netsuite/attach_file/${id}`, fd);
+        fd.append('file_name', payload.file_name);
+        fd.append('netsuite_id', payload.netsuite_id ?? '');
+        fd.append('created_by_api', payload.created_by_api ?? '');
+        const response = await apiPutMultipart<ResponseAttachUpdateItem>(`${API_BASE_URL}/netsuite/attach_file/${id}`, fd);
         return response.data;
     }
 

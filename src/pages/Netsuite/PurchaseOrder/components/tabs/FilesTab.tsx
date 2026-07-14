@@ -10,6 +10,7 @@ import { PurchaseOrderService } from '../../services/purchaseOrderService';
 import toast from 'react-hot-toast';
 
 import { FaFileExcel, FaFilePowerpoint, FaFileWord, FaRegFile, FaRegFilePdf } from 'react-icons/fa6';
+import { getProfile } from '@/helpers/generalHelper';
 
 interface AttachFileItemLocal extends AttachFileItem {
     isNew?: boolean;
@@ -65,6 +66,9 @@ const FilesTab: React.FC<FilesTabProps> = ({
     onAddFiles,
 }) => {
     const { id } = useParams<{ id: string }>();
+    
+    const profileSSO = getProfile() as any;
+    const profileSSOEmail = profileSSO?.email || 'no-email';
     const dataFiles = sortById(fileList, false);
     const [showForm, setShowForm] = useState(false);
     const [newFiles, setNewFiles] = useState<AttachFileItemLocal[]>(pendingFiles);
@@ -107,10 +111,10 @@ const FilesTab: React.FC<FilesTabProps> = ({
         // }
     };
 
-    // Gabungkan file dari server (minus yang dihapus) + file baru dengan flag isNew
+    // Gabungkan file dari server (minus yang dihapus) + file baru/edited, yang baru ditaruh paling atas
     const allFiles: AttachFileItemLocal[] = useMemo(() => [
-        ...dataFiles.filter(f => !deletedUrls.has(f.fileUrl)).map(f => ({ ...f, isNew: false })),
         ...newFiles.map(f => ({ ...f, isNew: true })),
+        ...dataFiles.filter(f => !deletedUrls.has(f.fileUrl)).map(f => ({ ...f, isNew: false })),
     ], [dataFiles, newFiles, deletedUrls]);
 
     // Helper: kirim list lengkap (existing non-deleted + new) ke parent
@@ -151,70 +155,31 @@ const FilesTab: React.FC<FilesTabProps> = ({
 
         setIsUploading(true);
         try {
-            // if (poId && editingFile) {
-            //     console.log('bbb', { finalSelectedFile, finalFileName, poId, editingFile });
-            //     // Mode edit file yang sudah ada di server
-            //     const res = await PurchaseOrderService.attachFilePOUpdate({
-            //         ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
-            //         poId: String(poId),
-            //         file_name: finalFileName,
-            //         fileUrl: editingFile.fileUrl ?? 'kosong',
-            //     });
-
-            //     if (res.success) {
-            //         const updatedEntry: AttachFileItem = {
-            //             po_id: String(poId),
-            //             fileUrl: res.data.fileUrl,
-            //             fileName: res.data.fileName,
-            //         };
-            //         if (editingFile.isEdited) {
-            //             // Edit ulang file yang sudah di-edit sebelumnya (ada di newFiles)
-            //             const updated = newFiles.map(item =>
-            //                 item.fileUrl === editingFile.fileUrl && item.fileName === editingFile.fileName
-            //                     ? { ...updatedEntry, isEdited: true }
-            //                     : item
-            //             );
-            //             setNewFiles(updated);
-            //             notifyParent(updated, deletedUrls);
-            //         } else {
-            //             // Edit file dari server: tandai url lama sebagai deleted, masukkan yang baru ke newFiles
-            //             const updatedDeleted = new Set(deletedUrls).add(editingFile.fileUrl ?? '');
-            //             const updated = [...newFiles, { ...updatedEntry, isEdited: true }];
-            //             setDeletedUrls(updatedDeleted);
-            //             setNewFiles(updated);
-            //             notifyParent(updated, updatedDeleted);
-            //         }
-            //         toast.success('File berhasil diupdate');
-            //         setShowForm(false);
-            //         setEntryError('');
-            //         setFileName('');
-            //     } else {
-            //         toast.error(res.message || 'Gagal mengupdate file');
-            //     }
-            //     setEditingFile(null);
-            // } else 
-                if (id) { // URL PO sudah ada, tapi tidak sedang edit file (mode tambah file baru)
-                // Mode tambah file baru (dengan atau tanpa poId)
-
-                if (poId && editingFile) {
-                    console.log('xxxx', { finalSelectedFile, finalFileName, poId, editingFile });
+            if (id) {
+                if (editingFile) {
+                    const activePOId = String(poId || id);
                     // Mode edit file yang sudah ada di server
                     const res = await PurchaseOrderService.attachFileUpdateDetailPO(
                         {
                         ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
-                            poId: String(poId),
-                            file_name: finalFileName,
+                            type: 'purchase_order',
+                            id: editingFile.id,
+                            file_name: finalSelectedFile === undefined ? finalFileName : editingFile.fileName,
+                            created_by_api: profileSSOEmail,
+                            file: finalSelectedFile,
                             fileUrl: editingFile.fileUrl ?? 'kosong',
-                        }, String(poId));
+                            netsuite_id: activePOId,
+                        }, String(editingFile.id));
 
                     if (res.success) {
                         const updatedEntry: AttachFileItem = {
-                            po_id: String(poId),
+                            po_id: activePOId,
+                            id: res.data.id,
                             fileUrl: res.data.fileUrl,
                             fileName: res.data.fileName,
                         };
-                        if (editingFile.isEdited) {
-                            // Edit ulang file yang sudah di-edit sebelumnya (ada di newFiles)
+                        if (editingFile.isNew || editingFile.isEdited) {
+                            // File masih berada di newFiles (baru diinsert / sudah pernah diedit) -> replace di tempat
                             const updated = newFiles.map(item =>
                                 item.fileUrl === editingFile.fileUrl && item.fileName === editingFile.fileName
                                     ? { ...updatedEntry, isEdited: true }
@@ -239,80 +204,111 @@ const FilesTab: React.FC<FilesTabProps> = ({
                     }
                     setEditingFile(null);
                 } else {
+                    if (!finalSelectedFile) {
+                        setEntryError('Pilih file terlebih dahulu');
+                        return;
+                    }
 
+                    const fileToUpload: File = finalSelectedFile;
 
+                    const res = await PurchaseOrderService.attachFileDetailPO({
+                        type: 'purchase_order',
+                        file: fileToUpload,
+                        created_by_api: profileSSOEmail,
+                        file_name: finalFileName,
+                        po_id: String(poId ?? 'temp-' + Date.now()),
+                    });
 
-
-
-                
-                        console.log('aaa', { finalSelectedFile, finalFileName, poId });
-                        if (!finalSelectedFile) {
-                            setEntryError('Pilih file terlebih dahulu');
-                            return;
-                        }
-
-                        const fileToUpload: File = finalSelectedFile;
-
-                        const res = await PurchaseOrderService.attachFileDetailPO({
-                            file: fileToUpload,
-                            file_name: finalFileName,
-                            po_id: String(poId ?? 'temp-' + Date.now()),
-                        });
-
-                        if (res.success) {
-                            const uploadedEntry: AttachFileItem = {
-                                po_id: res.poId,
-                                fileUrl: res.fileUrl,
-                                fileName: res.fileName,
-                            };
-                            const updated = [...newFiles, { ...uploadedEntry, isNew: true }];
-                            setNewFiles(updated);
-                            notifyParent(updated, deletedUrls);
-                            setSelectedFile(null);
-                            setFileName('');
-                            if (fileAttachRef.current) fileAttachRef.current.value = '';
-                            toast.success('File berhasil diupload');
-                            setShowForm(false);
-                            setEntryError('');
-                            setFileName('');
-                        } else {
-                            toast.error(res.message || 'Gagal mengupload file');
-                        }
+                    if (res.success) {
+                        const uploadedEntry: AttachFileItem = {
+                            po_id: res.poId,
+                            id: res.id,
+                            fileUrl: res.fileUrl,
+                            fileName: res.fileName,
+                        };
+                        const updated = [...newFiles, { ...uploadedEntry, isNew: true }];
+                        setNewFiles(updated);
+                        notifyParent(updated, deletedUrls);
+                        setSelectedFile(null);
+                        if (fileAttachRef.current) fileAttachRef.current.value = '';
+                        toast.success('File berhasil diupload');
+                        setShowForm(false);
+                        setEntryError('');
+                        setFileName('');
+                    } else {
+                        toast.error(res.message || 'Gagal mengupload file');
+                    }
                 }
             } else {
-                console.log('ccc', { finalSelectedFile, finalFileName, poId });
-                // Mode tambah file baru (dengan atau tanpa poId)
-                if (!finalSelectedFile) {
-                    setEntryError('Pilih file terlebih dahulu');
-                    return;
-                }
+                if (editingFile) {
+                    // Mode edit file pending (PO belum tersimpan, belum ada id) -> update di tempat
+                    const res = await PurchaseOrderService.attachFilePOUpdate({
+                        ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
+                        type: 'purchase_order',
+                        file_name: finalFileName,
+                        created_by_api: profileSSOEmail,
+                        fileUrl: editingFile.fileUrl ?? 'kosong',
+                        netsuite_id: String(poId ?? ''),
+                    });
 
-                const fileToUpload: File = finalSelectedFile;
-
-                const res = await PurchaseOrderService.attachFilePO({
-                    file: fileToUpload,
-                    file_name: finalFileName,
-                    po_id: String(poId ?? 'temp-' + Date.now()),
-                });
-
-                if (res.success) {
-                    const uploadedEntry: AttachFileItem = {
-                        po_id: res.poId,
-                        fileUrl: res.fileUrl,
-                        fileName: res.fileName,
-                    };
-                    const updated = [...newFiles, { ...uploadedEntry, isNew: true }];
-                    setNewFiles(updated);
-                    notifyParent(updated, deletedUrls);
-                    setSelectedFile(null);
-                    setFileName('');
-                    if (fileAttachRef.current) fileAttachRef.current.value = '';
-                    toast.success('File berhasil diupload');
-                    setShowForm(false);
-                    setEntryError('');
-                    setFileName('');
+                    if (res.success) {
+                        const updatedEntry: AttachFileItem = {
+                            po_id: editingFile.po_id ?? String(poId ?? ''),
+                            fileUrl: res.data.fileUrl,
+                            fileName: res.data.fileName,
+                        };
+                        const updated = newFiles.map(item =>
+                            item.fileUrl === editingFile.fileUrl && item.fileName === editingFile.fileName
+                                ? { ...updatedEntry, isEdited: true }
+                                : item
+                        );
+                        setNewFiles(updated);
+                        notifyParent(updated, deletedUrls);
+                        setSelectedFile(null);
+                        if (fileAttachRef.current) fileAttachRef.current.value = '';
+                        toast.success('File berhasil diupdate');
+                        setShowForm(false);
+                        setEntryError('');
+                        setFileName('');
+                    } else {
+                        toast.error(res.message || 'Gagal mengupdate file');
+                    }
+                    setEditingFile(null);
                 } else {
-                    toast.error(res.message || 'Gagal mengupload file');
+                    // Mode tambah file baru (dengan atau tanpa poId)
+                    if (!finalSelectedFile) {
+                        setEntryError('Pilih file terlebih dahulu');
+                        return;
+                    }
+
+                    const fileToUpload: File = finalSelectedFile;
+
+                    const res = await PurchaseOrderService.attachFilePO({
+                        type: 'purchase_order',
+                        file: fileToUpload,
+                        file_name: finalFileName,
+                        created_by_api: profileSSOEmail,
+                        po_id: String(poId ?? 'temp-' + Date.now()),
+                    });
+
+                    if (res.success) {
+                        const uploadedEntry: AttachFileItem = {
+                            po_id: res.poId,
+                            fileUrl: res.fileUrl,
+                            fileName: res.fileName,
+                        };
+                        const updated = [...newFiles, { ...uploadedEntry, isNew: true }];
+                        setNewFiles(updated);
+                        notifyParent(updated, deletedUrls);
+                        setSelectedFile(null);
+                        if (fileAttachRef.current) fileAttachRef.current.value = '';
+                        toast.success('File berhasil diupload');
+                        setShowForm(false);
+                        setEntryError('');
+                        setFileName('');
+                    } else {
+                        toast.error(res.message || 'Gagal mengupload file');
+                    }
                 }
             }
         } finally {
@@ -330,7 +326,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
         if (fileAttachRef.current) {
             fileAttachRef.current.value = '';
         }
-        setEntry({ po_id: row.po_id ?? '', fileUrl: row.fileUrl, fileName: row.fileName });
+        setEntry({ po_id: row.id ?? '', fileUrl: row.fileUrl, fileName: row.fileName });
         setShowForm(true);
         setEntryError('');
     };
@@ -351,7 +347,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
         try {
             
             const res = id ? 
-                await PurchaseOrderService.attachFileDeleteDetailPO(String(poId ?? id)) : 
+                await PurchaseOrderService.attachFileDeleteDetailPO(String(row.id)) : 
                 await PurchaseOrderService.attachFilePODelete({ fileUrl: row.fileUrl })
             if (res.success) {
                 if (row.isNew) {

@@ -337,7 +337,7 @@ export default function Manage() {
                             element: (
                                 <PermissionGate permission="create">
                                     <Button
-                                        onClick={() => navigate('/netsuite/purchase-order/create')}
+                                        onClick={() => navigate(`/netsuite/purchase-order/create${location.search}`)}
                                         className="flex items-center gap-2"
                                     >
                                         <MdAdd className="mr-2" size={20} />
