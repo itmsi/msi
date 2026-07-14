@@ -34,6 +34,7 @@ export default function Edit() {
     
     const {
         isSubmitting,
+        setIsSubmitting,
         isLoading,
         formData,
         errors,
@@ -652,6 +653,7 @@ export default function Edit() {
                                 
                                 {activeTab === 'files' && (
                                     <FilesTab
+                                        key={`files-${poDetail?.po_id}-${poDetail?.last_modified}`}
                                         formData={formData}
                                         poId={poDetail?.po_id}
                                         fileList={poDetail?.files || []}
@@ -669,6 +671,8 @@ export default function Edit() {
                                             .map(pf => pf.fileUrl)
                                         }
                                         isLoading={loadingMasterData}
+                                        isSubmitting={isSubmitting}
+                                        setIsSubmitting={setIsSubmitting}
                                         onAddFiles={handleAddFiles}
                                     />
                                 )}

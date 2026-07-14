@@ -24,6 +24,8 @@ interface FilesTabProps {
     pendingFiles?: AttachFileItem[];
     deletedFileUrls?: string[];
     isLoading: boolean;
+    isSubmitting: boolean;
+    setIsSubmitting: (loading: boolean) => void;
     onAddFiles?: (files: AttachFileItem[]) => void;
 }
 
@@ -63,6 +65,8 @@ const FilesTab: React.FC<FilesTabProps> = ({
     pendingFiles = [],
     deletedFileUrls = [],
     isLoading,
+    isSubmitting,
+    setIsSubmitting,
     onAddFiles,
 }) => {
     const { id } = useParams<{ id: string }>();
@@ -80,7 +84,6 @@ const FilesTab: React.FC<FilesTabProps> = ({
     const fileAttachRef = useRef<HTMLInputElement>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileName, setFileName] = useState<string>('');
-    const [isUploading, setIsUploading] = useState(false);
     const [loadingDelete, setLoadingDelete] = useState(false);
 
     const allowedExtensions = ['.jpg', '.jpeg', '.png', '.doc', '.docx', '.pdf'];
@@ -153,7 +156,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
             return;
         }
 
-        setIsUploading(true);
+        setIsSubmitting(true);
         try {
             if (id) {
                 if (editingFile) {
@@ -312,7 +315,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
                 }
             }
         } finally {
-            setIsUploading(false);
+            setIsSubmitting(false);
         }
 
         setEntry(emptyEntry);
@@ -495,10 +498,10 @@ const FilesTab: React.FC<FilesTabProps> = ({
                             <Button
                                 type="button"
                                 onClick={handleAddEntry}
-                                disabled={isUploading}
+                                disabled={isSubmitting}
                                 className="flex items-center gap-1 rounded-lg px-3 py-2 text-xs text-white min-h-[38px] disabled:opacity-60"
                             >
-                                <FaPlus size={10} /> {isUploading ? 'Uploading...' : editingFile ? 'Save' : 'Add'}
+                                <FaPlus size={10} /> {isSubmitting ? 'Uploading...' : editingFile ? 'Save' : 'Add'}
                             </Button>
                             {editingFile && (
                                 <Button

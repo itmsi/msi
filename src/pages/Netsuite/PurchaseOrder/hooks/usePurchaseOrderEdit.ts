@@ -476,6 +476,7 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
 
     return {
         isSubmitting,
+        setIsSubmitting,
         isLoading,
         formData,
         errors,
