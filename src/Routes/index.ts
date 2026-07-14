@@ -74,6 +74,9 @@ const EditActivities = lazy(() => import('@/pages/CRM/Activity/EditActivity'));
 // CRM - Daily Task Activity
 const DailyTaskActivity = lazy(() => import('@/pages/CRM/DailyTaskActivity/DailyTaskActivity'));
 
+// CRM - Sales Stage
+const SalesStage = lazy(() => import('@/pages/CRM/SalesStage/SalesStage'));
+
 // CRM - Projects
 const ManageCRMProject = lazy(() => import('@/pages/CRM/Project/Manage'));
 const CreateCRMProject = lazy(() => import('@/pages/CRM/Project/CreateProject'));
@@ -899,6 +902,16 @@ export const routes: TAppRoute[] = [
         roles: ['Daily Task Activity CRM'],
         requiredPermissions: ['read'],
         component: DailyTaskActivity,
+        layout: AppLayout,
+    },
+    // CRM - Sales Stage
+    {
+        path: '/crm/sales-stage',
+        name: 'Sales Stage CRM',
+        isProtected: true,
+        roles: ['Sales Stage CRM'],
+        requiredPermissions: ['read'],
+        component: SalesStage,
         layout: AppLayout,
     },
     {

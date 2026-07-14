@@ -188,7 +188,8 @@ const AppSidebar: React.FC = () => {
                 'Project CRM',
                 'Division CRM',
                 'Project Sales Activity CRM',
-                'IUP Territory CRM'
+                'IUP Territory CRM',
+                'Sales Stage CRM'
             ],
             subItems: [
                 {
@@ -256,6 +257,11 @@ const AppSidebar: React.FC = () => {
                     path: buildPath("/crm/project-sales-activity"),
                     allowedRoles: ['Project Sales Activity CRM'] 
                 },
+                { 
+                    name: "Sales Stage",
+                    path: buildPath("/crm/sales-stage"),
+                    allowedRoles: ['Sales Stage CRM'] 
+                }
             ],
         },
         {
