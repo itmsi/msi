@@ -21,21 +21,21 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({ formData, onChangeFi
         onChangeField(name, value);
     };
     return (
-        <div className="rounded-lg border bg-gray-50 border-slate-300 p-3 space-y-3">
+        <div className="rounded-lg border bg-gray-50 border-slate-300 p-3 space-y-3 font-primary">
             <div>
                 <Label>
                     Link File
                 </Label>
-                <div className="space-y-1.5 flex">
+                <div className="space-y-1.5">
                     {formData.fileLinks.map((link: string, idx: number) => (
                         <div key={idx} className="flex items-center gap-1.5">
-                            <Input
+                            <input
                                 placeholder="https://drive.google.com/..."
                                 value={link}
-                                className="bg-white"
+                                className="bg-white flex-1 font-secondary h-11 rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3:text-white/30"
                                 onChange={(e) => onChangeFileLink(idx, e.target.value)}
                             />
-                            {link && (
+                            {/* {link && ( */}
                             <Button
                                 type="button"
                                 variant="outline"
@@ -44,7 +44,7 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({ formData, onChangeFi
                             >
                                 <LuX size={14} />
                             </Button>
-                            )}
+                            {/* )} */}
                         </div>
                     ))}
                 </div>
@@ -59,6 +59,17 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({ formData, onChangeFi
                 </Button>
             </div>
             <div>
+                <EditableField
+                    id="keterangan"
+                    label="Keterangan"
+                    value={formData.keterangan}
+                    onChange={(value: string) => onChangeField('keterangan', value)}
+                    placeholder="Catatan tambahan..."
+                    disabled={isSubmitting}
+                    // error={errors.keterangan}
+                />
+            </div>
+            <div className="grid lg:grid-cols-5 md:grid-cols-2 gap-4">
                 <DatePickerField
                     name="iup_zona_site_date_last_survey"
                     label="Tanggal Kunjungan"
@@ -72,20 +83,12 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({ formData, onChangeFi
                     formatReadOnlyValue={(date) => moment(date).format('DD MMMM YYYY')}
                 />
             </div>
-            <div>
-                <EditableField
-                    id="keterangan"
-                    label="Keterangan"
-                    value={formData.keterangan}
-                    onChange={(value: string) => onChangeField('keterangan', value)}
-                    placeholder="Catatan tambahan..."
-                    disabled={isSubmitting}
-                    // error={errors.keterangan}
-                />
-            </div>
 
-            <div className="flex items-center gap-2 pt-1">
-                <Button onClick={handleSubmit}>
+            <div className="flex items-center justify-end gap-2 pt-1">
+                <Button 
+                    onClick={handleSubmit}
+                    className="px-6 flex items-center gap-2 rounded-full"
+                >
                     <LuCheck size={14} />
                     Simpan
                 </Button>
