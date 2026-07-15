@@ -23,6 +23,7 @@ export default function Create() {
 
     const {
         isSubmitting,
+        setIsSubmitting,
         formData,
         errors,
         masterData,
@@ -402,6 +403,8 @@ export default function Create() {
                                         fileList={[]}
                                         pendingFiles={formData.files || []}
                                         isLoading={loadingMasterData}
+                                        isSubmitting={isSubmitting}
+                                        setIsSubmitting={setIsSubmitting}
                                         onAddFiles={handleAddFiles}
                                     />
                                 )}
