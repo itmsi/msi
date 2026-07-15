@@ -43,6 +43,7 @@ export interface OpportunitySubTask {
     updated_by: string | null;
     deleted_at: string | null;
     is_delete: boolean;
+    is_custom: boolean;
 }
 
 export interface OpportunitySubTaskCreateRequest {

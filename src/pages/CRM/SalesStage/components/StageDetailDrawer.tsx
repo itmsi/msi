@@ -12,7 +12,7 @@ import type {
     OpportunityAssignmentSolution,
     OpportunityReviewHypercare,
 } from '../types/salesStage';
-import { SOLUTION_COLORS, DEFAULT_CHECKLISTS } from '../types/salesStage';
+import { SOLUTION_COLORS } from '../types/salesStage';
 import { SalesStageServices } from '../services/salesStageService';
 import { toast } from 'react-hot-toast';
 
@@ -70,39 +70,19 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
     const [removedEvidence, setRemovedEvidence] = useState<Record<string, Set<number>>>({});
     const [subtaskNotes, setSubtaskNotes] = useState<Record<string, string>>({});
     const [savingSubTask, setSavingSubTask] = useState<string | null>(null);
-    const [virtualTasks, setVirtualTasks] = useState<Record<string, {
-        tempId: string;
-        title: string;
-        isCustom: boolean;
-        status: string;
-        evidence: string[];
-        note: string;
-    }[]>>({});
     const [newReviewImpact, setNewReviewImpact] = useState('positive');
     const [newReviewDesc, setNewReviewDesc] = useState('');
     const [editActualValue, setEditActualValue] = useState('');
 
     // ─── ALL HOOKS MUST BE BEFORE EARLY RETURN ───
-    const handleToggleSubTask = useCallback(async (st: any) => {
-        // st bisa saved (punya opportunity_sub_task_id) atau virtual (punya tempId)
-        if (st.opportunity_sub_task_id) {
-            const newStatus = st.opportunity_sub_task_status === 'done' ? 'pending' : 'done';
-            try {
-                await SalesStageServices.updateSubTask(st.opportunity_sub_task_id, { opportunity_sub_task_status: newStatus } as any);
-                toast.success(newStatus === 'done' ? 'Sub-task selesai' : 'Sub-task dibatalkan');
-                onRefresh();
-            } catch { toast.error('Gagal update sub-task'); }
-        } else if (st.tempId && opportunity) {
-            // Virtual task: toggle locally
-            const stage = opportunity.stage;
-            setVirtualTasks(prev => ({
-                ...prev,
-                [stage]: (prev[stage] || []).map(v =>
-                    v.tempId === st.tempId ? { ...v, status: v.status === 'done' ? 'pending' : 'done' } : v
-                )
-            }));
-        }
-    }, [onRefresh, opportunity]);
+    const handleToggleSubTask = useCallback(async (st: OpportunitySubTask) => {
+        const newStatus = st.opportunity_sub_task_status === 'done' ? 'pending' : 'done';
+        try {
+            await SalesStageServices.updateSubTask(st.opportunity_sub_task_id, { opportunity_sub_task_status: newStatus } as any);
+            toast.success(newStatus === 'done' ? 'Sub-task selesai' : 'Sub-task dibatalkan');
+            onRefresh();
+        } catch { toast.error('Gagal update sub-task'); }
+    }, [onRefresh]);
 
     const handleLocalAddEvidence = useCallback((stId: string) => {
         const val = (evidenceInput[stId] || '').trim();
@@ -129,59 +109,30 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
         }
     }, []);
 
-    const handleSaveSubTask = useCallback(async (st: any) => {
-        // st bisa saved (punya opportunity_sub_task_id) atau virtual (punya tempId)
-        if (st.opportunity_sub_task_id) {
-            // UPDATE existing saved sub-task
-            setSavingSubTask(st.opportunity_sub_task_id);
-            try {
-                const savedFiles: string[] = Array.isArray(st.opportunity_sub_task_file) ? st.opportunity_sub_task_file : [];
-                const removedSet = removedEvidence[st.opportunity_sub_task_id] || new Set();
-                const filteredSaved = savedFiles.filter((_, i) => !removedSet.has(i));
-                const pending = pendingEvidence[st.opportunity_sub_task_id] || [];
-                const mergedFiles = [...filteredSaved, ...pending];
-                const note = subtaskNotes[st.opportunity_sub_task_id];
+    const handleSaveSubTask = useCallback(async (st: OpportunitySubTask) => {
+        setSavingSubTask(st.opportunity_sub_task_id);
+        try {
+            const savedFiles: string[] = Array.isArray(st.opportunity_sub_task_file) ? st.opportunity_sub_task_file : [];
+            const removedSet = removedEvidence[st.opportunity_sub_task_id] || new Set();
+            const filteredSaved = savedFiles.filter((_, i) => !removedSet.has(i));
+            const pending = pendingEvidence[st.opportunity_sub_task_id] || [];
+            const mergedFiles = [...filteredSaved, ...pending];
+            const note = subtaskNotes[st.opportunity_sub_task_id];
 
-                const updateData: Record<string, any> = {};
-                updateData.opportunity_sub_task_file = mergedFiles;
-                if (note !== undefined) {
-                    updateData.opportunity_sub_task_description = note;
-                }
+            const updateData: Record<string, any> = {};
+            updateData.opportunity_sub_task_file = mergedFiles;
+            if (note !== undefined) {
+                updateData.opportunity_sub_task_description = note;
+            }
 
-                await SalesStageServices.updateSubTask(st.opportunity_sub_task_id, updateData as any);
-                setPendingEvidence(prev => ({ ...prev, [st.opportunity_sub_task_id]: [] }));
-                setRemovedEvidence(prev => ({ ...prev, [st.opportunity_sub_task_id]: new Set() }));
-                toast.success('Sub-task disimpan');
-                onRefresh();
-            } catch { toast.error('Gagal menyimpan sub-task'); }
-            finally { setSavingSubTask(null); }
-        } else if (st.tempId && opportunity) {
-            // CREATE new sub-task from virtual
-            setSavingSubTask(st.tempId);
-            try {
-                const pending = pendingEvidence[st.tempId] || [];
-                const note = subtaskNotes[st.tempId];
-                await SalesStageServices.createSubTask({
-                    opportunity_id: opportunity.opportunity_id,
-                    opportunity_stage: opportunity.stage,
-                    opportunity_sub_task_title: st.title,
-                    opportunity_sub_task_status: st.status,
-                    opportunity_sub_task_file: pending.length > 0 ? pending : undefined,
-                    opportunity_sub_task_description: note || undefined,
-                } as any);
-                // Remove from virtual
-                const stage = opportunity.stage;
-                setVirtualTasks(prev => ({
-                    ...prev,
-                    [stage]: (prev[stage] || []).filter(v => v.tempId !== st.tempId)
-                }));
-                setPendingEvidence(prev => ({ ...prev, [st.tempId]: [] }));
-                toast.success('Sub-task disimpan');
-                onRefresh();
-            } catch { toast.error('Gagal menyimpan sub-task'); }
-            finally { setSavingSubTask(null); }
-        }
-    }, [pendingEvidence, removedEvidence, subtaskNotes, virtualTasks, opportunity, onRefresh]);
+            await SalesStageServices.updateSubTask(st.opportunity_sub_task_id, updateData as any);
+            setPendingEvidence(prev => ({ ...prev, [st.opportunity_sub_task_id]: [] }));
+            setRemovedEvidence(prev => ({ ...prev, [st.opportunity_sub_task_id]: new Set() }));
+            toast.success('Sub-task disimpan');
+            onRefresh();
+        } catch { toast.error('Gagal menyimpan sub-task'); }
+        finally { setSavingSubTask(null); }
+    }, [pendingEvidence, removedEvidence, subtaskNotes, onRefresh]);
 
     const handleAddSubTask = useCallback(async () => {
         if (!newTaskTitle.trim() || !opportunity) return;
@@ -199,23 +150,12 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
     }, [newTaskTitle, opportunity, onRefresh]);
 
     const handleDeleteSubTask = useCallback(async (id: string) => {
-        // id bisa opportunity_sub_task_id (saved) atau tempId (virtual)
-        if (id.startsWith('default_') || id.startsWith('custom_')) {
-            if (!opportunity) return;
-            const stage = opportunity.stage;
-            setVirtualTasks(prev => ({
-                ...prev,
-                [stage]: (prev[stage] || []).filter(v => v.tempId !== id)
-            }));
+        try {
+            await SalesStageServices.deleteSubTask(id);
             toast.success('Sub-task dihapus');
-        } else {
-            try {
-                await SalesStageServices.deleteSubTask(id);
-                toast.success('Sub-task dihapus');
-                onRefresh();
-            } catch { toast.error('Gagal hapus sub-task'); }
-        }
-    }, [onRefresh, opportunity]);
+            onRefresh();
+        } catch { toast.error('Gagal hapus sub-task'); }
+    }, [onRefresh]);
 
     // ─── ASSIGNMENT HANDLERS ───
     const [newAssContractor, setNewAssContractor] = useState('');
@@ -278,51 +218,6 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
         }
     }, [opportunity]);
 
-    // Initialize default virtual sub-tasks when opportunity/subTasks change
-    React.useEffect(() => {
-        if (!opportunity) return;
-        const stage = opportunity.stage;
-        if (stage === 'hypercare') return;
-        
-        const defaults = DEFAULT_CHECKLISTS[stage] || [];        const existingVirt = virtualTasks[stage] || [];
-
-        // Only show defaults if there are NO saved sub-tasks at all
-        if (subTasks.length === 0 && existingVirt.length === 0) {
-            setVirtualTasks(prev => ({
-                ...prev,
-                [stage]: defaults.map((title, i) => ({
-                    tempId: `default_${i}`,
-                    title,
-                    isCustom: false,
-                    status: 'pending',
-                    evidence: [],
-                    note: '',
-                }))
-            }));
-        }
-    }, [opportunity?.opportunity_id, subTasks.length]);
-
-    // ─── HELPER: get all sub-tasks (saved + virtual) ───
-    const getAllSubTasks = useCallback(() => {
-        if (!opportunity) return [];
-        const stage = opportunity.stage;
-        const saved = subTasks;
-        const defaultsForStage = DEFAULT_CHECKLISTS[stage] || [];
-        const virt = virtualTasks[stage] || [];
-        
-        // Pisahkan saved: default vs custom
-        const savedDefaults = saved.filter(s => defaultsForStage.includes(s.opportunity_sub_task_title));
-        const savedCustom = saved.filter(s => !defaultsForStage.includes(s.opportunity_sub_task_title));
-        
-        // Virtual yang belum tersimpan
-        const virtDefaults = virt.filter(v => 
-            defaultsForStage.includes(v.title) && !saved.some(s => s.opportunity_sub_task_title === v.title)
-        );
-        
-        // Urutan: saved default → virtual default → saved custom
-        return [...savedDefaults, ...virtDefaults, ...savedCustom];
-    }, [subTasks, virtualTasks, opportunity]);
-
     // ─── ACTUAL VALUE ───
     const handleSaveActual = useCallback(async () => {
         if (!opportunity) return;
@@ -343,23 +238,20 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
     const nextStageMap: Record<string, string> = { find: 'Survey', survey: 'Pull', pull: 'Deal', deal: 'Hypercare' };
     const nextStageLabel = nextStageMap[stage];
     const isLastStage = stage === 'hypercare';
-    const allSubTaskItems = getAllSubTasks();
 
     // ─── RENDER HELPERS ───
-    const renderSubTask = (st: any) => {
-        const isVirtual = !st.opportunity_sub_task_id;
-        const taskId = st.opportunity_sub_task_id || st.tempId;
+    const renderSubTask = (st: OpportunitySubTask) => {
+        const taskId = st.opportunity_sub_task_id;
         const isOpen = expandedSubTask === taskId;
-        const isDone = (st.opportunity_sub_task_status || st.status) === 'done';
-        const savedFiles: string[] = isVirtual ? [] : (Array.isArray(st.opportunity_sub_task_file) ? st.opportunity_sub_task_file : []);
+        const isDone = st.opportunity_sub_task_status === 'done';
+        const savedFiles: string[] = Array.isArray(st.opportunity_sub_task_file) ? st.opportunity_sub_task_file : [];
         const removedSet = removedEvidence[taskId] || new Set();
         const filteredSaved = savedFiles.filter((_, i) => !removedSet.has(i));
         const pending = pendingEvidence[taskId] || [];
         const allFiles = [...filteredSaved, ...pending];
-        const noteVal = subtaskNotes[taskId] ?? (isVirtual ? st.note : (st.opportunity_sub_task_description || ''));
+        const noteVal = subtaskNotes[taskId] ?? st.opportunity_sub_task_description ?? '';
         const isSaving = savingSubTask === taskId;
-        const defaultsForStage = DEFAULT_CHECKLISTS[stage] || [];
-        const isCustom = isVirtual ? st.isCustom : !defaultsForStage.includes(st.opportunity_sub_task_title);
+        const isCustom = st.is_custom;
         return (
             <div key={taskId} className="border-b border-gray-100 py-2.5 last:border-0">
                 <div className="flex items-start gap-2.5 p-1">
@@ -374,13 +266,13 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 rounded px-1 -mx-1 py-0.5 cursor-pointer hover:bg-blue-50" onClick={() => setExpandedSubTask(isOpen ? null : taskId)}>
                             <span className={`text-sm ${isDone ? 'line-through text-gray-400' : 'text-gray-800'}`}>
-                                {st.title || st.opportunity_sub_task_title}
+                                {st.opportunity_sub_task_title}
                                 {isCustom && <span className="mfc-custom-tag ml-1.5 text-[9px] uppercase text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full font-bold">Custom</span>}
                             </span>
                             <span className="text-[10px] font-mono text-gray-400 ml-auto flex-none">
                                 {isOpen ? 'TUTUP ▲' : 'DETAIL ▼'}
                             </span>
-                            {canDelete && (
+                            {canDelete && isCustom && (
                                 <button
                                     onClick={(e) => { e.stopPropagation(); handleDeleteSubTask(taskId); }}
                                     className="text-red-500 hover:text-red-700 flex-none"
@@ -443,15 +335,17 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
                                     />
                                 </div>
                                 <div className="flex justify-end gap-2 pt-1">
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleDeleteSubTask(taskId)}
-                                        className="text-red-600 border-red-300 hover:bg-red-50"
-                                    >
-                                        <MdDelete size={12} className="mr-1" />
-                                        Hapus
-                                    </Button>
+                                    {isCustom && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handleDeleteSubTask(taskId)}
+                                            className="text-red-600 border-red-300 hover:bg-red-50"
+                                        >
+                                            <MdDelete size={12} className="mr-1" />
+                                            Hapus
+                                        </Button>
+                                    )}
                                     <Button
                                         size="sm"
                                         onClick={() => handleSaveSubTask(st)}
@@ -586,15 +480,15 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
                                 <span className="text-xs text-gray-400 ml-2">— {STAGE_LABEL[stage]}</span>
                             </div>
                             <span className="text-[11px] text-gray-400">
-                                {(allSubTaskItems as any[]).filter((s: any) => (s.opportunity_sub_task_status || s.status) === 'done').length}/{allSubTaskItems.length} selesai
+                                {subTasks.filter(s => s.opportunity_sub_task_status === 'done').length}/{subTasks.length} selesai
                             </span>
                         </div>
                         {detailLoading ? (
                             <p className="text-xs text-gray-400 italic">Loading...</p>
-                        ) : allSubTaskItems.length === 0 ? (
+                        ) : subTasks.length === 0 ? (
                             <p className="text-xs text-gray-400 italic">Belum ada sub-task.</p>
                         ) : (
-                            (allSubTaskItems as any[]).map(renderSubTask)
+                            subTasks.map(renderSubTask)
                         )}
                         {canUpdate && (
                             <div className="flex gap-2 pt-2 border-t border-dashed border-gray-200">
