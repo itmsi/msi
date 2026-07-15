@@ -108,9 +108,13 @@ const FilesTab: React.FC<FilesTabProps> = ({
         setSelectedFile(file);
         setFileName(file.name.replace(/\.[^/.]+$/, ''));
         setEntryError('');
-        setEntry(prev => ({ ...prev, fileName: file.name.replace(/\.[^/.]+$/, '') }));
+        setEntry(prev => ({ ...prev, fileName: !editingFile ? file.name.replace(/\.[^/.]+$/, '') : editingFile.fileName.trim() }));
+        console.log('Selected file:', editingFile);
         // if (!editingFile) {
-            handleAddEntry({ selectedFile: file, fileName: file.name.replace(/\.[^/.]+$/, '') });
+            handleAddEntry({ 
+                selectedFile: file, 
+                fileName: !editingFile ? file.name.replace(/\.[^/.]+$/, '') : editingFile.fileName.trim()
+            });
         // }
     };
 
