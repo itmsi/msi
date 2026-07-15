@@ -272,8 +272,8 @@ export class PurchaseOrderService {
         return response.data;
     }
 
-    static async attachFileDeleteDetailPO(id: string): Promise<any> {
-        const response = await apiDelete(`${API_BASE_URL}/netsuite/attach_file/${id}`);
+    static async attachFileDeleteDetailPO(id: string, poId: string): Promise<any> {
+        const response = await apiDelete(`${API_BASE_URL}/netsuite/attach_file/${id}/${poId}`);
         return response.data;
     }
     static async getDashboardPurchaseOrders(params: Partial<PurchaseOrderDashboardRequest> = {}): Promise<GetPurchaseOrderListResponse> {

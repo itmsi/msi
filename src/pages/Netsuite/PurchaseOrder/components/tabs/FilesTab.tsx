@@ -350,7 +350,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
         try {
             
             const res = id ? 
-                await PurchaseOrderService.attachFileDeleteDetailPO(String(row.id)) : 
+                await PurchaseOrderService.attachFileDeleteDetailPO(String(row.id), String(poId || id)) : 
                 await PurchaseOrderService.attachFilePODelete({ fileUrl: row.fileUrl })
             if (res.success) {
                 if (row.isNew) {
@@ -467,17 +467,17 @@ const FilesTab: React.FC<FilesTabProps> = ({
                             />
                             <label
                                 htmlFor="po-file-upload"
-                                className="flex items-center justify-center gap-2 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 min-h-[38px] w-[160px]"
+                                className="flex items-center justify-center gap-2 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 h-[38px] w-[190px]"
                             >
-                                <FaPaperclip size={12} />
-                                <span>
+                                <FaPaperclip size={20} />
+                                <span className="truncate break-all" title={fileName}>
                                     {fileName || 'Attach file'}
                                 </span>
                             </label>
                             {fileName && (
                                 <div className="flex items-center gap-1 text-xs text-gray-500">
                                     <span className="text-lg">{getDocumentIcon(fileName)}</span>
-                                    <span className="truncate max-w-[160px]" title={fileName}>{fileName}</span>
+                                    <span className="truncate max-w-[160px] truncate break-all" title={fileName}>{fileName}</span>
                                 </div>
                             )}
                         </div>
@@ -492,6 +492,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
                                 }}
                                 onKeyDown={e => e.key === 'Enter' && handleAddEntry()}
                                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                disabled={isSubmitting}
                             />
                         </div>
                         <div className="flex gap-1 self-start">
