@@ -25,27 +25,27 @@ export const useSalesStage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [solutionFilter, setSolutionFilter] = useState('');
     const [columns, setColumns] = useState<Record<string, ColumnState>>({
-        pull: initialColumnState(),
+        find: initialColumnState(),
         survey: initialColumnState(),
-        pitch: initialColumnState(),
+        pull: initialColumnState(),
         deal: initialColumnState(),
         hypercare: initialColumnState(),
     });
     const [formModalOpen, setFormModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<SalesStageOpportunity | null>(null);
-    const [defaultStage, setDefaultStage] = useState<string>('pull');
+    const [defaultStage, setDefaultStage] = useState<string>('find');
     const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState<SalesStageOpportunity | null>(null);
     const [allOpportunities, setAllOpportunities] = useState<SalesStageOpportunity[]>([]);
 
     const buildBoardData = useCallback((_cols: Record<string, ColumnState>, opps: SalesStageOpportunity[], canDrag: boolean = false): BoardData => {
         const colsMap: Record<string, string[]> = {
-            pull: [], survey: [], pitch: [], deal: [], hypercare: []
+            find: [], survey: [], pull: [], deal: [], hypercare: []
         };
         const boardItems: Record<string, any> = {};
 
         opps.forEach((task) => {
-            const s = task.stage || 'pull';
+            const s = task.stage || 'find';
             if (colsMap[s]) colsMap[s].push(task.opportunity_id);
             boardItems[task.opportunity_id] = {
                 id: task.opportunity_id,
@@ -75,7 +75,7 @@ export const useSalesStage = () => {
         });
 
         return {
-            root: { id: 'root', title: 'Root', parentId: null, children: ['pull', 'survey', 'pitch', 'deal', 'hypercare'], totalChildrenCount: 5 },
+            root: { id: 'root', title: 'Root', parentId: null, children: ['find', 'survey', 'pull', 'deal', 'hypercare'], totalChildrenCount: 5 },
             ...columnItems,
             ...boardItems,
         } as any;
@@ -103,15 +103,15 @@ export const useSalesStage = () => {
             setStats(response.stats);
 
             const newCols: Record<string, ColumnState> = {
-                pull: initialColumnState(),
+                find: initialColumnState(),
                 survey: initialColumnState(),
-                pitch: initialColumnState(),
+                pull: initialColumnState(),
                 deal: initialColumnState(),
                 hypercare: initialColumnState(),
             };
 
             allOpps.forEach((opp) => {
-                const s = opp.stage || 'pull';
+                const s = opp.stage || 'find';
                 if (newCols[s]) {
                     newCols[s].tasks.push(opp);
                 }
@@ -180,7 +180,7 @@ export const useSalesStage = () => {
 
     // Advance stage (move to next stage) — used from detail drawer
     const handleAdvanceStage = useCallback(async (opportunity: SalesStageOpportunity) => {
-        const stageOrder = ['pull', 'survey', 'pitch', 'deal', 'hypercare'];
+        const stageOrder = ['find', 'survey', 'pull', 'deal', 'hypercare'];
         const currentIdx = stageOrder.indexOf(opportunity.stage);
         if (currentIdx >= stageOrder.length - 1) {
             toast.error('Already at final stage');
@@ -277,6 +277,7 @@ export const useSalesStage = () => {
         detailLoading,
         searchValue,
         solutionFilter,
+        searchTerm,
         setSearchValue,
         setFormModalOpen,
         setEditingTask,
@@ -290,8 +291,10 @@ export const useSalesStage = () => {
         handleCardMove,
         handleDeleteTask,
         fetchDetail,
+        fetchData,
         setDetailSubTasks,
         setDetailAssignments,
         setDetailReviews,
     };
 };
+

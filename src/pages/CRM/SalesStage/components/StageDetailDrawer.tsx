@@ -22,11 +22,11 @@ const fmt = (v: string | null) => {
 };
 
 const STAGE_CODE: Record<string, string> = {
-    pull: 'STAGE 01', survey: 'STAGE 02', pitch: 'STAGE 03',
+    find: 'STAGE 01', survey: 'STAGE 02', pull: 'STAGE 03',
     deal: 'STAGE 04', hypercare: 'STAGE 05',
 };
 const STAGE_LABEL: Record<string, string> = {
-    pull: 'Find', survey: 'Survey', pitch: 'Pull', deal: 'Deal', hypercare: 'Hypercare',
+    find: 'Find', survey: 'Survey', pull: 'Pull', deal: 'Deal', hypercare: 'Hypercare',
 };
 
 const checkSvg = '<svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -340,7 +340,7 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
     const isSurvey = opportunity.stage === 'survey';
     const isDeal = opportunity.stage === 'deal';
     const stage = opportunity.stage;
-    const nextStageMap: Record<string, string> = { pull: 'Survey', survey: 'Pull', pitch: 'Deal', deal: 'Hypercare' };
+    const nextStageMap: Record<string, string> = { find: 'Survey', survey: 'Pull', pull: 'Deal', deal: 'Hypercare' };
     const nextStageLabel = nextStageMap[stage];
     const isLastStage = stage === 'hypercare';
     const allSubTaskItems = getAllSubTasks();
@@ -494,9 +494,9 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
                     <div><p className="text-[10px] uppercase text-gray-400">RKAB</p><p className="text-xs font-semibold">-</p></div>
                     <div><p className="text-[10px] uppercase text-gray-400">Unit Existing</p><p className="text-xs font-semibold">-</p></div>
                     <div><p className="text-[10px] uppercase text-gray-400">Kontak</p><p className="text-xs">{opportunity.contact || '-'}</p></div>
-                    <div><p className="text-[10px] uppercase text-gray-400">Kontraktor</p><p className="text-xs">{opportunity.contractor || '-'}</p></div>
                     <div><p className="text-[10px] uppercase text-gray-400">Sales Kami</p><p className="text-xs">{opportunity.sales_name || '-'}</p></div>
                     <div><p className="text-[10px] uppercase text-gray-400">Estimasi Nilai</p><p className="text-xs font-semibold">{fmt(opportunity.value)}</p></div>
+                    <div><p className="text-[10px] uppercase text-gray-400">Stage Saat Ini</p><p className="text-xs font-semibold">{STAGE_LABEL[stage]}</p></div>
                 </div>
                 {opportunity.solution && (
                     <div><Badge color={solutionColor as any} variant="light">{opportunity.solution}</Badge></div>

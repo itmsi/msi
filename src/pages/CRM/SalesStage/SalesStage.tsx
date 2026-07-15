@@ -70,6 +70,8 @@ const SalesStage: React.FC = () => {
         handleCardMove,
         handleDeleteTask,
         fetchDetail,
+        fetchData,
+        searchTerm,
         solutionFilter,
     } = useSalesStage();
 
@@ -119,12 +121,13 @@ const SalesStage: React.FC = () => {
         [handleAdvanceStage, canUpdate]
     );
 
-    // Refresh detail after sub-task/assignment/review changes
+    // Refresh detail + board after sub-task/assignment/review changes
     const handleRefreshDetail = useCallback(() => {
         if (selectedTask) {
             fetchDetail(selectedTask.opportunity_id);
         }
-    }, [selectedTask, fetchDetail]);
+        fetchData(searchTerm, solutionFilter);
+    }, [selectedTask, fetchDetail, fetchData, searchTerm, solutionFilter]);
 
     // Open edit modal from drawer
     const handleEditOpportunity = useCallback(
@@ -169,7 +172,7 @@ const SalesStage: React.FC = () => {
                     const content = data.content || {};
                     const stage = content.stage || 'pull';
                     const borderColors: Record<string, string> = {
-                        pull: '#6B7280', survey: '#4F46E5', pitch: '#F59E0B',
+                        find: '#6B7280', survey: '#4F46E5', pull: '#F59E0B',
                         deal: '#22C55E', hypercare: '#BE185D',
                     };
                     const borderColor = borderColors[stage] || borderColors.pull;
@@ -277,16 +280,16 @@ const SalesStage: React.FC = () => {
     // Column header renderer
     const renderColumnHeader = useCallback((column: BoardItem) => {
         const colors: Record<string, string> = {
-            pull: 'bg-[#6B7280]',
+            find: 'bg-[#6B7280]',
             survey: 'bg-[#4F46E5]',
-            pitch: 'bg-[#F59E0B]',
+            pull: 'bg-[#F59E0B]',
             deal: 'bg-[#22C55E]',
             hypercare: 'bg-[#BE185D]',
         };
         const colorClass = colors[column.id] || colors.pull;
 
         const stageCodes: Record<string, string> = {
-            pull: 'STAGE 01', survey: 'STAGE 02', pitch: 'STAGE 03',
+            find: 'STAGE 01', survey: 'STAGE 02', pull: 'STAGE 03',
             deal: 'STAGE 04', hypercare: 'STAGE 05',
         };
 

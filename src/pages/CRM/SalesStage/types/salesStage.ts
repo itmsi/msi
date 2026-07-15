@@ -10,7 +10,7 @@ export interface SalesStageOpportunity {
     employee_id: string;
     sales_name: string | null;
     sales_title: string | null;
-    stage: 'pull' | 'survey' | 'pitch' | 'deal' | 'hypercare';
+    stage: 'pull' | 'survey' | 'pull' | 'deal' | 'hypercare';
     contractor: string | null;
     solution: string | null;
     value: string | null;
@@ -157,9 +157,9 @@ export interface SalesStageListResponse {
     success: boolean;
     stats: SalesStageStats;
     stages: {
-        pull: SalesStageGroup;
+        find: SalesStageGroup;
         survey: SalesStageGroup;
-        pitch: SalesStageGroup;
+        pull: SalesStageGroup;
         deal: SalesStageGroup;
         hypercare: SalesStageGroup;
     };
@@ -187,9 +187,9 @@ export interface SalesStageDeleteResponse {
 
 // Stage column config for kanban
 export const STAGE_STATUSES = [
-    { id: 'pull',      title: 'Find',      color: 'bg-[#6B7280]', subtitle: 'STAGE 01' },
+    { id: 'find', title: 'Find',      color: 'bg-[#6B7280]', subtitle: 'STAGE 01' },
     { id: 'survey',    title: 'Survey',    color: 'bg-[#4F46E5]', subtitle: 'STAGE 02' },
-    { id: 'pitch',     title: 'Pull',      color: 'bg-[#F59E0B]', subtitle: 'STAGE 03' },
+    { id: 'pull',     title: 'Pull',      color: 'bg-[#F59E0B]', subtitle: 'STAGE 03' },
     { id: 'deal',      title: 'Deal',      color: 'bg-[#22C55E]', subtitle: 'STAGE 04' },
     { id: 'hypercare', title: 'Hypercare', color: 'bg-[#BE185D]', subtitle: 'STAGE 05' },
 ] as const;
@@ -219,7 +219,7 @@ export const SOLUTION_COLORS: Record<string, string> = {
 
 // Default checklist sub-tasks per stage (dari prototipe)
 export const DEFAULT_CHECKLISTS: Record<string, string[]> = {
-    pull: [
+    find: [
         'Data jumlah & kondisi unit existing',
         'Data brand unit yang terpasang',
         'Data RKAB tahun berjalan',
@@ -235,7 +235,7 @@ export const DEFAULT_CHECKLISTS: Record<string, string[]> = {
         'Analisa utilisasi & downtime unit existing',
         'Draft rekomendasi solusi per kontraktor',
     ],
-    pitch: [
+    pull: [
         'Proposal solusi tersusun',
         'Presentasi ke manajemen kontraktor',
         'Presentasi ke tim lapangan kontraktor',
@@ -252,3 +252,5 @@ export const DEFAULT_CHECKLISTS: Record<string, string[]> = {
         'Serah terima & dokumentasi unit',
     ],
 };
+
+
