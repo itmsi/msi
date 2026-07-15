@@ -14,6 +14,7 @@ export interface User {
   role_name: string;
   employee_id: string;
   employee_name: string;
+  employee_foto: string;
   created_at: string;
   updated_at: string | null;
 }

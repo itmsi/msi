@@ -464,92 +464,90 @@ const EditUserAccess: React.FC = () => {
                 description="Modify employee territory access permissions"
                 image="/motor-sights-international.png"
             />
-            <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-4 sm:px-3">
+            <div className="mx-auto">
 
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate('/crm/user-management')}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                            >
-                                <MdKeyboardArrowLeft size={20} />
-                            </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit User Access</h1>
-                        </div>
-                    </div>
-                    
-                    <div className="bg-white rounded-2xl shadow-sm p-6 space-y-6">
-                        <div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-4">Employee Information</h3>
-                        </div>
-                        <div>
-                            <Label>
-                                Select Employee *
-                            </Label>
-                            <CustomAsyncSelect
-                                placeholder="Select employee..."
-                                value={selectedEmployee}
-                                error={validationErrors.employee_id}
-                                defaultOptions={employeeOptions}
-                                loadOptions={handleEmployeeInputChange}
-                                onMenuScrollToBottom={handleEmployeeMenuScrollToBottom}
-                                isLoading={employeePagination.loading}
-                                noOptionsMessage={() => "No employees found"}
-                                loadingMessage={() => "Loading employees..."}
-                                isSearchable={true}
-                                inputValue={employeeInputValue}
-                                onInputChange={(inputValue) => {
-                                    handleEmployeeInputChange(inputValue);
-                                }}
-                                onChange={(option: any) => {
-                                    setSelectedEmployee(option);
-                                    handleInputChange('employee_id', option?.value || '');
-                                }}
-                            />
-                            {validationErrors.employee_id && (
-                                <p className="text-sm text-red-600">{validationErrors.employee_id}</p>
-                            )}
-                        </div>
-                    </div>
-                    
-                    <div className="bg-white rounded-2xl shadow-sm p-6 space-y-6 font-secondary my-5">
-                        <TerritorySelectionTable
-                            territories={territories}
-                            loading={territoriesLoading}
-                            selectedTerritories={new Set(formData.selectedTerritories.keys())}
-                            disabledTerritories={getDisabledTerritories()}
-                            preExpandedTerritories={getExpandedTerritories()}
-                            currentTerritories={currentTerritories}
-                            userTerritories={allowedTerritories}
-                            onTerritoryToggle={handleTerritoryToggle}
-                            disabled={isSubmitting}
-                        />
-                    </div>
-                    
-                    <div className="flex justify-end gap-4 p-4 bg-white rounded-2xl shadow-sm my-5">
+                <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                    <div className="flex items-center gap-1">
                         <Button
-                            type="button"
                             variant="outline"
                             onClick={() => navigate('/crm/user-management')}
-                            className="px-6 rounded-full"
+                            className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
+                        >
+                            <MdKeyboardArrowLeft size={20} />
+                        </Button>
+                        <div className="border-l border-gray-300 h-6 mx-3"></div>
+                        <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit User Access</h1>
+                    </div>
+                </div>
+                
+                <div className="bg-white rounded-2xl shadow-sm p-6 space-y-6">
+                    <div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-4">Employee Information</h3>
+                    </div>
+                    <div>
+                        <Label>
+                            Select Employee *
+                        </Label>
+                        <CustomAsyncSelect
+                            placeholder="Select employee..."
+                            value={selectedEmployee}
+                            error={validationErrors.employee_id}
+                            defaultOptions={employeeOptions}
+                            loadOptions={handleEmployeeInputChange}
+                            onMenuScrollToBottom={handleEmployeeMenuScrollToBottom}
+                            isLoading={employeePagination.loading}
+                            noOptionsMessage={() => "No employees found"}
+                            loadingMessage={() => "Loading employees..."}
+                            isSearchable={true}
+                            inputValue={employeeInputValue}
+                            onInputChange={(inputValue) => {
+                                handleEmployeeInputChange(inputValue);
+                            }}
+                            onChange={(option: any) => {
+                                setSelectedEmployee(option);
+                                handleInputChange('employee_id', option?.value || '');
+                            }}
+                        />
+                        {validationErrors.employee_id && (
+                            <p className="text-sm text-red-600">{validationErrors.employee_id}</p>
+                        )}
+                    </div>
+                </div>
+                
+                <div className="bg-white rounded-2xl shadow-sm p-6 space-y-6 font-secondary my-5">
+                    <TerritorySelectionTable
+                        territories={territories}
+                        loading={territoriesLoading}
+                        selectedTerritories={new Set(formData.selectedTerritories.keys())}
+                        disabledTerritories={getDisabledTerritories()}
+                        preExpandedTerritories={getExpandedTerritories()}
+                        currentTerritories={currentTerritories}
+                        userTerritories={allowedTerritories}
+                        onTerritoryToggle={handleTerritoryToggle}
+                        disabled={isSubmitting}
+                    />
+                </div>
+                
+                <div className="flex justify-end gap-4 p-4 bg-white rounded-2xl shadow-sm my-5">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => navigate('/crm/user-management')}
+                        className="px-6 rounded-full"
+                        disabled={isSubmitting}
+                    >
+                        Cancel
+                    </Button>
+                    <PermissionGate permission="create">
+                        <Button
+                            onClick={handleUpdate}
+                            className="px-6 flex items-center gap-2 rounded-full"
                             disabled={isSubmitting}
                         >
-                            Cancel
+                            <FaSave className={`mr-2 h-4 w-4 ${isSubmitting ? 'animate-spin' : ''}`} />
+                            {isSubmitting ? 'Updating...' : 'Update Access'}
                         </Button>
-                        <PermissionGate permission="create">
-                            <Button
-                                onClick={handleUpdate}
-                                className="px-6 flex items-center gap-2 rounded-full"
-                                disabled={isSubmitting}
-                            >
-                                <FaSave className={`mr-2 h-4 w-4 ${isSubmitting ? 'animate-spin' : ''}`} />
-                                {isSubmitting ? 'Updating...' : 'Update Access'}
-                            </Button>
-                        </PermissionGate>
-                    </div>
+                    </PermissionGate>
                 </div>
             </div>
         </>

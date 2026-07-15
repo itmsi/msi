@@ -116,179 +116,177 @@ const EditContractor: React.FC = () => {
                 description="Edit contractor with customer data and IUP information"
                 image="/motor-sights-international.png"
             />
-            
-            <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-4 sm:px-3">
-                    {/* Header dengan back button */}
-                    <PageHeader
-                        title={`Edit Contractor`}
-                        backPath={() => goBack(listRoute)}
-                        subtitle={"Update the company information or drag the pin to adjust the IUP location."}
-                    />
+        
+            <div className="mx-auto">
+                {/* Header dengan back button */}
+                <PageHeader
+                    title={`Edit Contractor`}
+                    backPath={() => goBack(listRoute)}
+                    subtitle={"Update the company information or drag the pin to adjust the IUP location."}
+                />
 
-                    {/* Tab Navigation */}
-                    <div className="border-b border-gray-200 mb-6 overflow-auto">
-                        <nav className="flex justify-between w-[910px] xl:w-full">
+                {/* Tab Navigation */}
+                <div className="border-b border-gray-200 mb-6 overflow-auto">
+                    <nav className="flex justify-between w-[910px] xl:w-full">
+                        <button
+                            onClick={() => setActiveTab('info_contractor')}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                activeTab === 'info_contractor'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            <AiOutlineIdcard size={'1.5rem'} /> Detail Contractor
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('survey')}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                activeTab === 'survey'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            <MdTaskAlt size={'1.5rem'} /> Survey
+                        </button>
+                        {quotationPermissions.canRead && (
                             <button
-                                onClick={() => setActiveTab('info_contractor')}
+                                onClick={() => setActiveTab('quotation')}
                                 className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                    activeTab === 'info_contractor'
+                                    activeTab === 'quotation'
                                         ? 'border-blue-500 text-blue-600'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                             >
-                                <AiOutlineIdcard size={'1.5rem'} /> Detail Contractor
+                                <GrDocumentVerified size={'1.5rem'} /> Quotation
                             </button>
-                            <button
-                                onClick={() => setActiveTab('survey')}
-                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                    activeTab === 'survey'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
-                            >
-                                <MdTaskAlt size={'1.5rem'} /> Survey
-                            </button>
-                            {quotationPermissions.canRead && (
-                                <button
-                                    onClick={() => setActiveTab('quotation')}
-                                    className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                        activeTab === 'quotation'
-                                            ? 'border-blue-500 text-blue-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
-                                >
-                                    <GrDocumentVerified size={'1.5rem'} /> Quotation
-                                </button>
-                            )}
-                            <button
-                                onClick={() => setActiveTab('roe')}
-                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                    activeTab === 'roe'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
-                            >
-                                <GiChart size={'1.5rem'} /> Return of Equity
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('project')}
-                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                    activeTab === 'project'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
-                            >
-                                <TbTopologyStar3 size={'1.5rem'} /> Projects
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('activity')}
-                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                    activeTab === 'activity'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
-                            >
-                                <AiOutlineHistory size={'1.5rem'} /> Activity
-                            </button>
-                        </nav>
-                    </div>
-                    {activeTab === 'info_contractor' && (
-                        <div>
-                            {/* Customer Info Form */}
-                            <CustomerInfoSection
-                                formData={formData}
-                                errors={validationErrors}
-                                onChange={handleCustomerChange}
-                                onAddContact={handleAddContact}
-                                onRemoveContact={handleRemoveContact}
-                                onContactChange={handleContactChange}
-                            />
-
-                            {/* IUP Customer Info Form */}
-                            <IupInfoSection
-                                formData={formData}
-                                errors={validationErrors}
-                                onChange={handleIupChange}
-                                iupOptions={iupOptions}
-                                iupInputValue={iupInputValue}
-                                onIupInputChange={handleIupInputChange}
-                                onIupMenuScroll={handleIupMenuScrollToBottom}
-                                onIupSelect={handleIupSelect}
-
-                                segementationOptions={segementationOptions}
-                                segementationPagination={segementationPagination}
-                                segementationInputValue={segementationInputValue}
-                                onSegementationInputChange={handleSegementationInputChange}
-                                onSegementationMenuScroll={handleSegementationMenuScrollToBottom}
-                                onSegementationSelect={handleSegementationSelect}
-                            />
-
-                            {/* RKAB Management */}
-                            <RkabSection
-                                rkabEntries={formData.iup_customers.properties}
-                                errors={validationErrors}
-                                onAddRkab={handleAddRkab}
-                                onRemoveRkab={handleRemoveRkab}
-                                onRkabChange={handleRkabChange}
-                            />
-
-                            {/* Units Management */}
-                            <UnitsSection
-                                units={formData.iup_customers.units}
-                                errors={validationErrors}
-                                onAddUnit={handleAddUnit}
-                                onRemoveUnit={handleRemoveUnit}
-                                onUnitChange={handleUnitChange}
-                                brandOptions={brandOptions}
-                                brandPagination={brandPagination}
-                                brandInputValues={brandInputValues}
-                                onBrandInputChange={handleUnitBrandInputChange}
-                                onBrandMenuScroll={handleBrandMenuScrollToBottom}
-                                onBrandSelect={handleBrandSelect}
-                            />
-                    
-                            <ActivitySelections
-                                formData={formData.iup_customers.activity_status}
-                                onInputChange={handleActivitySelectionChange}
-                            />
-
-                            {/* Form Actions */}
-                            <FormActions
-                                isSubmitting={isSubmitting}
-                                cancelRoute={listRoute}
-                                onSubmit={handleSubmit}
-                                submitText={isSubmitting ? 'Updating...' : 'Update Contractor'}
-                            />
-                        </div>
-                    )}
-                    {/* Survey Tab */}
-                    {activeTab === 'survey' && (
-                        <ContractorSurveyInformation />
-                    )}
-                    {/* Quotation Tab */}
-                    {activeTab === 'quotation' && quotationPermissions.canRead && (
-                        <ContractorQuotationInformation 
-                            customerID={formData.customer_data.customer_id || ''}
-                        />
-                    )}
-                    {activeTab === 'roe' && quotationPermissions.canRead && (
-                        <ContractorROEInformation 
-                            iup_customer_id={formData.iup_customers.iup_customer_id || ''}
-                        />
-                    )}
-                    {/* Activity Tab */}
-                    {activeTab === 'project' && (
-                        <ContractorProjectInformation 
-                            iup_customer_id={formData.iup_customers.iup_customer_id || ''}
-                        />
-                    )}
-                    {activeTab === 'activity' && (
-                        <ContractorActivityInformation 
-                            activityData={formData.iup_customers.activity_data || []}
-                        />
-                    )}
+                        )}
+                        <button
+                            onClick={() => setActiveTab('roe')}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                activeTab === 'roe'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            <GiChart size={'1.5rem'} /> Return of Equity
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('project')}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                activeTab === 'project'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            <TbTopologyStar3 size={'1.5rem'} /> Projects
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('activity')}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                activeTab === 'activity'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            <AiOutlineHistory size={'1.5rem'} /> Activity
+                        </button>
+                    </nav>
                 </div>
+                {activeTab === 'info_contractor' && (
+                    <div>
+                        {/* Customer Info Form */}
+                        <CustomerInfoSection
+                            formData={formData}
+                            errors={validationErrors}
+                            onChange={handleCustomerChange}
+                            onAddContact={handleAddContact}
+                            onRemoveContact={handleRemoveContact}
+                            onContactChange={handleContactChange}
+                        />
+
+                        {/* IUP Customer Info Form */}
+                        <IupInfoSection
+                            formData={formData}
+                            errors={validationErrors}
+                            onChange={handleIupChange}
+                            iupOptions={iupOptions}
+                            iupInputValue={iupInputValue}
+                            onIupInputChange={handleIupInputChange}
+                            onIupMenuScroll={handleIupMenuScrollToBottom}
+                            onIupSelect={handleIupSelect}
+
+                            segementationOptions={segementationOptions}
+                            segementationPagination={segementationPagination}
+                            segementationInputValue={segementationInputValue}
+                            onSegementationInputChange={handleSegementationInputChange}
+                            onSegementationMenuScroll={handleSegementationMenuScrollToBottom}
+                            onSegementationSelect={handleSegementationSelect}
+                        />
+
+                        {/* RKAB Management */}
+                        <RkabSection
+                            rkabEntries={formData.iup_customers.properties}
+                            errors={validationErrors}
+                            onAddRkab={handleAddRkab}
+                            onRemoveRkab={handleRemoveRkab}
+                            onRkabChange={handleRkabChange}
+                        />
+
+                        {/* Units Management */}
+                        <UnitsSection
+                            units={formData.iup_customers.units}
+                            errors={validationErrors}
+                            onAddUnit={handleAddUnit}
+                            onRemoveUnit={handleRemoveUnit}
+                            onUnitChange={handleUnitChange}
+                            brandOptions={brandOptions}
+                            brandPagination={brandPagination}
+                            brandInputValues={brandInputValues}
+                            onBrandInputChange={handleUnitBrandInputChange}
+                            onBrandMenuScroll={handleBrandMenuScrollToBottom}
+                            onBrandSelect={handleBrandSelect}
+                        />
+                
+                        <ActivitySelections
+                            formData={formData.iup_customers.activity_status}
+                            onInputChange={handleActivitySelectionChange}
+                        />
+
+                        {/* Form Actions */}
+                        <FormActions
+                            isSubmitting={isSubmitting}
+                            cancelRoute={listRoute}
+                            onSubmit={handleSubmit}
+                            submitText={isSubmitting ? 'Updating...' : 'Update Contractor'}
+                        />
+                    </div>
+                )}
+                {/* Survey Tab */}
+                {activeTab === 'survey' && (
+                    <ContractorSurveyInformation />
+                )}
+                {/* Quotation Tab */}
+                {activeTab === 'quotation' && quotationPermissions.canRead && (
+                    <ContractorQuotationInformation 
+                        customerID={formData.customer_data.customer_id || ''}
+                    />
+                )}
+                {activeTab === 'roe' && quotationPermissions.canRead && (
+                    <ContractorROEInformation 
+                        iup_customer_id={formData.iup_customers.iup_customer_id || ''}
+                    />
+                )}
+                {/* Activity Tab */}
+                {activeTab === 'project' && (
+                    <ContractorProjectInformation 
+                        iup_customer_id={formData.iup_customers.iup_customer_id || ''}
+                    />
+                )}
+                {activeTab === 'activity' && (
+                    <ContractorActivityInformation 
+                        activityData={formData.iup_customers.activity_data || []}
+                    />
+                )}
             </div>
         </>
     );

@@ -144,79 +144,77 @@ export default function HaulingPriceCalculatorCreate() {
                 description="Kalkulasi penyesuaian harga hauling berbasis perubahan harga solar"
                 image="/motor-sights-international.png"
             />
-            <div className="bg-gray-50 min-h-screen">
-                <div className="mx-auto px-4 sm:px-3">
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
+            <div className="mx-auto px-0">
+                <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate('/hauling-calculator')}
+                            className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
+                        >
+                            <MdKeyboardArrowLeft size={20} />
+                        </Button>
+                        <div className="border-l border-gray-300 h-6 mx-3"></div>
+                        <h1 className="font-primary-bold font-normal text-xl">
+                            Create Hauling Cost Calculator Based on Diesel Price
+                        </h1>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+                    <div className="lg:col-span-3 space-y-6">
+                        <SeksiInfoDasar
+                            form={form}
+                            iupValue={iupValue}
+                            contractorValue={contractorValue}
+                            onIupChange={handleIupChange}
+                            onContractorChange={handleContractorChange}
+                            onUpdate={handleUpdate}
+                        />
+                        <SeksiDataHarga form={form} onUpdate={handleUpdate} />
+                        <SeksiMetodePenyesuaian
+                            form={form}
+                            onUpdate={handleUpdate}
+                            onMetodeChange={handleMetodeChange}
+                        />
+
+                        <div className="flex gap-3">
                             <Button
-                                variant="outline"
-                                onClick={() => navigate('/hauling-calculator')}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
+                                type="button"
+                                variant="primary"
+                                startIcon={<MdCalculate className="h-4 w-4" />}
+                                onClick={() => hitungHarga()}
+                                className="px-6 rounded-full"
                             >
-                                <MdKeyboardArrowLeft size={20} />
+                                Hitung Harga
                             </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="font-primary-bold font-normal text-xl">
-                                Create Hauling Cost Calculator Based on Diesel Price
-                            </h1>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                startIcon={<MdSave className="h-4 w-4" />}
+                                onClick={handleSimpan}
+                                disabled={transaction.isLoading}
+                                className="px-6 rounded-full"
+                            >
+                                {transaction.isLoading ? 'Menyimpan...' : 'Simpan'}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                startIcon={<MdRefresh className="h-4 w-4" />}
+                                onClick={resetForm}
+                                className="px-6 rounded-full"
+                            >
+                                Reset
+                            </Button>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-                        <div className="lg:col-span-3 space-y-6">
-                            <SeksiInfoDasar
-                                form={form}
-                                iupValue={iupValue}
-                                contractorValue={contractorValue}
-                                onIupChange={handleIupChange}
-                                onContractorChange={handleContractorChange}
-                                onUpdate={handleUpdate}
-                            />
-                            <SeksiDataHarga form={form} onUpdate={handleUpdate} />
-                            <SeksiMetodePenyesuaian
-                                form={form}
-                                onUpdate={handleUpdate}
-                                onMetodeChange={handleMetodeChange}
-                            />
-
-                            <div className="flex gap-3">
-                                <Button
-                                    type="button"
-                                    variant="primary"
-                                    startIcon={<MdCalculate className="h-4 w-4" />}
-                                    onClick={() => hitungHarga()}
-                                    className="px-6 rounded-full"
-                                >
-                                    Hitung Harga
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    startIcon={<MdSave className="h-4 w-4" />}
-                                    onClick={handleSimpan}
-                                    disabled={transaction.isLoading}
-                                    className="px-6 rounded-full"
-                                >
-                                    {transaction.isLoading ? 'Menyimpan...' : 'Simpan'}
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    startIcon={<MdRefresh className="h-4 w-4" />}
-                                    onClick={resetForm}
-                                    className="px-6 rounded-full"
-                                >
-                                    Reset
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="lg:col-span-2">
-                            <div className="sticky top-6 space-y-4">
-                                <PanelRingkasan form={form} />
-                                <PanelHasilKalkulasi form={form} hasil={hasil} />
-                                {hasil && <PanelSummaryCompare form={form} hasil={hasil} />}
-                            </div>
+                    <div className="lg:col-span-2">
+                        <div className="sticky top-6 space-y-4">
+                            <PanelRingkasan form={form} />
+                            <PanelHasilKalkulasi form={form} hasil={hasil} />
+                            {hasil && <PanelSummaryCompare form={form} hasil={hasil} />}
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,5 @@
 import React from 'react';
 import DataTable, { TableColumn, TableStyles, ConditionalStyles } from 'react-data-table-component';
-import { StyleSheetManager } from 'styled-components';
 
 interface CustomDataTableProps<T> {
     columns: TableColumn<T>[];
@@ -130,12 +129,20 @@ const CustomDataTable = <T extends Record<string, any>>({
     className = '',
     ...props 
 }: CustomDataTableProps<T>) => {
+    const wrapperClassName = ['msi-rdt', className].filter(Boolean).join(' ');
     
     // Default custom styles with customization options
     const defaultCustomStyles: TableStyles = {
+        tableWrapper: {
+            style: {
+                width: 'max-content',
+                minWidth: '100%',
+            },
+        },
         headRow: {
             style: {
-                backgroundColor: headerBackground,
+                // backgroundColor: headerBackground,
+                backgroundColor: 'transparent',
                 borderRadius: borderRadius,
                 minHeight: dense ? '40px' : '48px',
                 fontSize: '14px',
@@ -143,6 +150,7 @@ const CustomDataTable = <T extends Record<string, any>>({
                 color: '#374151',
                 // borderBottom: '1px solid #e5e7eb',
                 borderBottom: 'transparent',
+                zIndex: 2,
             },
         },
         headCells: {
@@ -161,9 +169,9 @@ const CustomDataTable = <T extends Record<string, any>>({
                 color: '#374151',
                 borderBottom: '1px solid #ededed !important',  
                 position: 'relative',
-                '&:last-of-type': {
-                    borderBottomWidth: '0px',
-                },
+                // '&:last-of-type': {
+                //     borderBottomWidth: '0px',
+                // },
             },
             highlightOnHoverStyle: {
                 backgroundColor: hoverBackground,
@@ -197,18 +205,18 @@ const CustomDataTable = <T extends Record<string, any>>({
                 transition: 'all 0.2s',
                 backgroundColor: 'transparent',
                 fill: '#6b7280',
-                '&:disabled': {
-                    cursor: 'unset',
-                    fill: '#d1d5db',
-                },
-                '&:hover:not(:disabled)': {
-                    backgroundColor: '#ededed !important',
-                    fill: '#374151',
-                },
-                '&:focus': {
-                    outline: '2px solid #3b82f6',
-                    outlineOffset: '2px',
-                },
+                // '&:disabled': {
+                //     cursor: 'unset',
+                //     fill: '#d1d5db',
+                // },
+                // '&:hover:not(:disabled)': {
+                //     backgroundColor: '#ededed !important',
+                //     fill: '#374151',
+                // },
+                // '&:focus': {
+                //     outline: '2px solid #3b82f6',
+                //     outlineOffset: '2px',
+                // },
             },
         },
         noData: {
@@ -285,66 +293,76 @@ const CustomDataTable = <T extends Record<string, any>>({
     );
 
     return (
-        <div className={`bg-white overflow-hidden ${className}`}>
-            <StyleSheetManager shouldForwardProp={(prop) => !['center', 'allowOverflow'].includes(prop)}>
-                <DataTable
-                    {...props}
-                    columns={columns}
-                    data={data}
-                    progressPending={loading}
-                    
-                    // Pagination
-                    pagination={pagination}
-                    paginationServer={paginationServer}
-                    paginationTotalRows={paginationTotalRows}
-                    paginationPerPage={paginationPerPage}
-                    paginationDefaultPage={paginationDefaultPage}
-                    onChangePage={onChangePage}
-                    onChangeRowsPerPage={onChangeRowsPerPage}
-                    paginationRowsPerPageOptions={paginationRowsPerPageOptions || [10, 25, 50, 100]}
-                    
-                    // Selection
-                    selectableRows={selectableRows}
-                    selectableRowSelected={selectableRowSelected}
-                    onSelectedRowsChange={onSelectedRowsChange}
-                    clearSelectedRows={clearSelectedRows}
-                    
-                    // Row events
-                    onRowClicked={onRowClicked}
-                    onRowDoubleClicked={onRowDoubleClicked}
-                    onRowMouseEnter={onRowMouseEnter}
-                    onRowMouseLeave={onRowMouseLeave}
-                    
-                    // Search
-                    subHeader={subHeader}
-                    subHeaderComponent={subHeaderComponent}
-                    
-                    // Styling
-                    theme={theme}
-                    customStyles={mergedStyles}
-                    striped={striped}
-                    highlightOnHover={highlightOnHover}
-                    responsive={responsive}
-                    persistTableHead={persistTableHead}
-                    
-                    // Additional
-                    noDataComponent={noDataComponent || defaultNoDataComponent}
-                    progressComponent={progressComponent || defaultProgressComponent}
-                    expandableRows={expandableRows}
-                    expandableRowsComponent={expandableRowsComponent}
-                    conditionalRowStyles={conditionalRowStyles}
-                    
-                    // Density
-                    dense={dense}
-                    
-                    // Fixed header
-                    fixedHeader={fixedHeader}
-                    fixedHeaderScrollHeight={fixedHeaderScrollHeight}
+        <div className={`bg-white ${wrapperClassName} relative`}>
+            <div style={{ 
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: 0,
+                backgroundColor: headerBackground,
+                height: mergedStyles.headRow?.style?.minHeight ?? (dense ? '40px' : '48px'),
+                zIndex: 2,
+                borderRadius: borderRadius,
+             }} />
+            <DataTable
+                {...props}
+                columns={columns}
+                data={data}
+                progressPending={loading}
+                
+                // Pagination
+                pagination={pagination}
+                paginationServer={paginationServer}
+                paginationTotalRows={paginationTotalRows}
+                paginationPerPage={paginationPerPage}
+                paginationDefaultPage={paginationDefaultPage}
+                onChangePage={onChangePage}
+                onChangeRowsPerPage={onChangeRowsPerPage}
+                paginationRowsPerPageOptions={paginationRowsPerPageOptions || [10, 25, 50, 100]}
+                
+                // Selection
+                selectableRows={selectableRows}
+                selectableRowSelected={selectableRowSelected}
+                onSelectedRowsChange={onSelectedRowsChange}
+                clearSelectedRows={clearSelectedRows}
+                
+                // Row events
+                onRowClicked={onRowClicked}
+                onRowDoubleClicked={onRowDoubleClicked}
+                onRowMouseEnter={onRowMouseEnter}
+                onRowMouseLeave={onRowMouseLeave}
+                
+                // Search
+                subHeader={subHeader}
+                // subHeaderComponent={subHeaderComponent}
+                
+                // Styling
+                theme={theme}
+                customStyles={mergedStyles}
+                striped={striped}
+                highlightOnHover={highlightOnHover}
+                responsive={responsive}
+                persistTableHead={persistTableHead}
+                
+                // Additional
+                noDataComponent={noDataComponent || defaultNoDataComponent}
+                progressComponent={progressComponent || defaultProgressComponent}
+                expandableRows={expandableRows}
+                expandableRowsComponent={expandableRowsComponent}
+                conditionalRowStyles={conditionalRowStyles}
+                
+                // Density
+                dense={dense}
+                
+                // Fixed header
+                fixedHeader={fixedHeader}
+                fixedHeaderScrollHeight={fixedHeaderScrollHeight}
 
-                    // Row identity
-                    keyField={keyField}
-                />
-            </StyleSheetManager>
+                // Row identity
+                keyField={keyField}
+                headerSeparator={false}
+                columnSeparator={false}
+            />
         </div>
     );
 };

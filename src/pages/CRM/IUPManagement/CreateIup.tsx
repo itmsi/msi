@@ -60,50 +60,48 @@ const CreateIup: React.FC = () => {
                 image="/motor-sights-international.png"
             />
             
-            <div className="bg-gray-50">
-                <div className="mx-auto">
+            <div className="mx-auto">
 
-                    {/* Header */}
-                    <PageHeader
-                        title={`Create IUP`}
-                        backPath={() => goBack('/crm/iup-management')}
-                    />
+                {/* Header */}
+                <PageHeader
+                    title={`Create IUP`}
+                    backPath={() => goBack('/crm/iup-management')}
+                />
 
-                    {/* Form */}
-                    <TerritoryInfoDisplay selectedTerritory={selectedTerritoryInfo} />
-                    
-                    <TerritorySelector
-                        formData={formData}
-                        errors={errors}
-                        onInputChange={handleInputChange}
-                        territories={territories}
-                        selection={territorySelection}
-                        loading={territoriesLoading}
-                        onIslandChange={handleIslandChange}
-                        onGroupChange={handleGroupChange}
-                        onAreaChange={handleAreaChange}
-                        onIupZoneChange={handleIupZoneChange}
-                        onIupSegmentationChange={handleIupSegmentationChange}
-                        getAvailableGroups={getAvailableGroups}
-                        getAvailableAreas={getAvailableAreas}
-                        getAvailableIupZones={getAvailableIupZones}
-                        getAvailableIupSegmentations={getAvailableIupSegmentations}
-                    />
-                    
-                    <IupInformtionsFormFields
-                        formData={formData}
-                        errors={errors}
-                        onInputChange={handleInputChange}
-                        onSelectChange={handleSelectChange}
-                        onDateChange={handleDateChange}
-                    />
+                {/* Form */}
+                <TerritoryInfoDisplay selectedTerritory={selectedTerritoryInfo} />
+                
+                <TerritorySelector
+                    formData={formData}
+                    errors={errors}
+                    onInputChange={handleInputChange}
+                    territories={territories}
+                    selection={territorySelection}
+                    loading={territoriesLoading}
+                    onIslandChange={handleIslandChange}
+                    onGroupChange={handleGroupChange}
+                    onAreaChange={handleAreaChange}
+                    onIupZoneChange={handleIupZoneChange}
+                    onIupSegmentationChange={handleIupSegmentationChange}
+                    getAvailableGroups={getAvailableGroups}
+                    getAvailableAreas={getAvailableAreas}
+                    getAvailableIupZones={getAvailableIupZones}
+                    getAvailableIupSegmentations={getAvailableIupSegmentations}
+                />
+                
+                <IupInformtionsFormFields
+                    formData={formData}
+                    errors={errors}
+                    onInputChange={handleInputChange}
+                    onSelectChange={handleSelectChange}
+                    onDateChange={handleDateChange}
+                />
 
-                    {/* Action Buttons */}
-                    <FormActions
-                        onSubmit={handleSubmit}
-                        isSubmitting={isSubmitting}
-                    />
-                </div>
+                {/* Action Buttons */}
+                <FormActions
+                    onSubmit={handleSubmit}
+                    isSubmitting={isSubmitting}
+                />
             </div>
         </>
     );

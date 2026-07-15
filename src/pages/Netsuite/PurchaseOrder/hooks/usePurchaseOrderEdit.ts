@@ -30,14 +30,20 @@ const calcLineAmounts = (line: PODetailLine) => {
 
     return { qty, rate, amount, taxAmount, grossAmount };
 };
+
+const sortById = (data : any, ascending = true) => {
+    return [...data].sort((a, b) => {
+        const idA = Number(a.id);
+        const idB = Number(b.id);
+        return ascending ? idA - idB : idB - idA;
+    });
+};
+
 // Mapping response API (PODetailData) ke format form (PurchaseOrderForm)
 const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
-    const firstLine = detail.lines?.[0];
-
     // Filter hanya item bukan TaxItem
     const productLines = (detail.lines || []).filter(line => line.itemtype !== 'TaxItem');
     const fileLines = (detail.files || []);
-
     const files: AttachFileItem[] = fileLines.map((line) => ({
         id: line.id ?? '',
         poId: line.poId ?? '',
@@ -77,7 +83,8 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         purchasedate: detail.po_date,
         subsidiary: detail.subsidiary ?? 0,
         subsidiary_display: detail.subsidiary_display || '',
-        location: firstLine?.location ?? null,
+        location: Number(detail?.location) ?? null,
+        location_name: detail.location_display || '',
         memo: detail.memo || '',
         currency: detail.currency_id,
         currency_symbol: detail.currency_symbol || '',
@@ -101,7 +108,7 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         foreigntotal: detail.foreigntotal,
         // description: detail.custbody_me_description || null,
         items,
-        files
+        files: sortById(files, false),
     };
 };
 
@@ -189,7 +196,6 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
     useEffect(() => {
         loadData();
     }, [loadData]);
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
 
@@ -275,7 +281,7 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
 
         return true;
     };
-
+    
     const handleSubmit = async () => {
         if (!validateForm()) return;
 
@@ -323,14 +329,15 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
                     gross_amount: Number(item.gross_amount || 0),
                     description: item.description || ''
                 })),
-                files: formData.files || []
+                files: sortById(formData.files || [], false),
             };
 
             const response = await PurchaseOrderService.updatePurchaseOrder(requestData);
             if (response.success) {
                 toast.success('Purchase Order berhasil diupdate');
+                loadData();
                 // navigate('/netsuite/purchase-order/edit/' + id);
-                window.location.href = '/netsuite/purchase-order/edit/' + id;
+                // window.location.href = '/netsuite/purchase-order/edit/' + id;
             } else {
                 toast.error(response.message || 'Gagal mengupdate Purchase Order');
             }
@@ -357,12 +364,12 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
             rate: 0,
             amount: 0,
             total: 0,
-            department: formData?.items?.[0]?.department || 0,
-            department_name: formData?.items?.[0]?.department_name || '',
-            class: formData?.items?.[0]?.class || 0,
-            class_name: formData?.items?.[0]?.class_name || '',
-            location: formData?.items?.[0]?.location || 0,
-            location_name: formData?.items?.[0]?.location_name || '',
+            department: formData?.department || 0,
+            department_name: formData?.department_name || '',
+            class: formData?.class || 0,
+            class_name: formData?.class_name || '',
+            location: formData?.location || 0,
+            location_name: formData?.location_name || '',
             taxcode: 5, // Default taxcode, bisa disesuaikan
             taxcode_name: '',
             tax_rate: '',
@@ -434,8 +441,42 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
         }
     }, [isSyncing, loadData]);
 
+    const handleDownloadInvoice = useCallback(async (po_id: any) => {
+        if (!po_id) return;
+        const toastId = toast.loading(`Mengunduh invoice PO: ${po_id}...`);
+        try {
+            const response = await PurchaseOrderService.downloadInvoice({
+                recId: Number(po_id),
+            });
+
+            if (response?.fileContent && response?.fileName) {
+                const byteChars = atob(response.fileContent);
+                const byteArr = new Uint8Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) {
+                    byteArr[i] = byteChars.charCodeAt(i);
+                }
+                const blob = new Blob([byteArr], { type: response.mimeType || 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = response.fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                toast.success('Invoice berhasil diunduh', { id: toastId });
+            } else {
+                toast.error('Gagal mengunduh invoice', { id: toastId });
+            }
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal mengunduh invoice', { id: toastId });
+        }
+    }, []);
+
     return {
         isSubmitting,
+        setIsSubmitting,
         isLoading,
         formData,
         errors,
@@ -457,6 +498,7 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
         handleUpdateProductItem,
         // File handlers
         handleAddFiles,
+        handleDownloadInvoice,
         loadData
     };
 };

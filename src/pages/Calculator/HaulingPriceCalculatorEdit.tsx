@@ -152,82 +152,80 @@ export default function HaulingPriceCalculatorEdit() {
                 description="Edit kalkulasi penyesuaian harga hauling berbasis perubahan harga solar"
                 image="/motor-sights-international.png"
             />
-            <div className="bg-gray-50 min-h-screen">
-                <div className="mx-auto px-4 sm:px-3">
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => navigate('/hauling-calculator')}
-                                className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+            <div className="mx-auto px-0">
+                <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => navigate('/hauling-calculator')}
+                            className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+                        >
+                            <MdArrowBack size={20} />
+                        </button>
+                        <div>
+                            <h1 className="font-primary-bold font-normal text-xl">
+                                Edit Hauling Cost Calculator
+                            </h1>
+                            <p className="text-gray-600 text-sm">
+                                Perbarui data kalkulasi harga hauling
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+                    <div className="lg:col-span-3 space-y-6">
+                        <SeksiInfoDasar
+                            form={resolvedForm}
+                            iupValue={iupValue}
+                            contractorValue={contractorValue}
+                            onIupChange={handleIupChange}
+                            onContractorChange={handleContractorChange}
+                            onUpdate={handleUpdate}
+                        />
+                        <SeksiDataHarga form={resolvedForm} onUpdate={handleUpdate} />
+                        <SeksiMetodePenyesuaian
+                            form={resolvedForm}
+                            onUpdate={handleUpdate}
+                            onMetodeChange={handleMetodeChange}
+                        />
+
+                        <div className="flex gap-3">
+                            <Button
+                                type="button"
+                                variant="primary"
+                                startIcon={<MdCalculate className="h-4 w-4" />}
+                                onClick={() => hitungHarga()}
+                                className="px-6 rounded-full"
                             >
-                                <MdArrowBack size={20} />
-                            </button>
-                            <div>
-                                <h1 className="font-primary-bold font-normal text-xl">
-                                    Edit Hauling Cost Calculator
-                                </h1>
-                                <p className="text-gray-600 text-sm">
-                                    Perbarui data kalkulasi harga hauling
-                                </p>
-                            </div>
+                                Hitung Harga
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                startIcon={<MdSave className="h-4 w-4" />}
+                                onClick={handleSimpan}
+                                disabled={transaction.isLoading}
+                                className="px-6 rounded-full"
+                            >
+                                {transaction.isLoading ? 'Menyimpan...' : 'Update'}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                startIcon={<MdRefresh className="h-4 w-4" />}
+                                onClick={handleReset}
+                                className="px-6 rounded-full"
+                            >
+                                Reset
+                            </Button>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-                        <div className="lg:col-span-3 space-y-6">
-                            <SeksiInfoDasar
-                                form={resolvedForm}
-                                iupValue={iupValue}
-                                contractorValue={contractorValue}
-                                onIupChange={handleIupChange}
-                                onContractorChange={handleContractorChange}
-                                onUpdate={handleUpdate}
-                            />
-                            <SeksiDataHarga form={resolvedForm} onUpdate={handleUpdate} />
-                            <SeksiMetodePenyesuaian
-                                form={resolvedForm}
-                                onUpdate={handleUpdate}
-                                onMetodeChange={handleMetodeChange}
-                            />
-
-                            <div className="flex gap-3">
-                                <Button
-                                    type="button"
-                                    variant="primary"
-                                    startIcon={<MdCalculate className="h-4 w-4" />}
-                                    onClick={() => hitungHarga()}
-                                    className="px-6 rounded-full"
-                                >
-                                    Hitung Harga
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    startIcon={<MdSave className="h-4 w-4" />}
-                                    onClick={handleSimpan}
-                                    disabled={transaction.isLoading}
-                                    className="px-6 rounded-full"
-                                >
-                                    {transaction.isLoading ? 'Menyimpan...' : 'Update'}
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    startIcon={<MdRefresh className="h-4 w-4" />}
-                                    onClick={handleReset}
-                                    className="px-6 rounded-full"
-                                >
-                                    Reset
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="lg:col-span-2">
-                            <div className="sticky top-6 space-y-4">
-                                <PanelRingkasan form={resolvedForm} />
-                                <PanelHasilKalkulasi form={resolvedForm} hasil={hasil} />
-                                {hasil && <PanelSummaryCompare form={resolvedForm} hasil={hasil} />}
-                            </div>
+                    <div className="lg:col-span-2">
+                        <div className="sticky top-6 space-y-4">
+                            <PanelRingkasan form={resolvedForm} />
+                            <PanelHasilKalkulasi form={resolvedForm} hasil={hasil} />
+                            {hasil && <PanelSummaryCompare form={resolvedForm} hasil={hasil} />}
                         </div>
                     </div>
                 </div>

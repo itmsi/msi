@@ -33,7 +33,8 @@ export default function UserDropdown() {
     // Fallback data jika user tidak tersedia
     const userData = user || {
         employee_name: 'Guest User',
-        email: 'guest@example.com'
+        email: 'guest@example.com',
+        employee_foto: '/images/avatar.png',
     };
     
     return (
@@ -43,7 +44,7 @@ export default function UserDropdown() {
                 className="flex items-center text-gray-700 dropdown-toggle"
             >
                 <span className="mr-3 overflow-hidden rounded-full h-8 w-8 lg:h-11 lg:w-11">
-                    <img src="/images/avatar.png" alt="User" />
+                    <img className="w-full h-full object-cover" src={userData.employee_foto || '/images/avatar.png'} alt="User" />
                 </span>
 
                 <span className="block mr-1 font-medium text-theme-sm lg:flex hidden">

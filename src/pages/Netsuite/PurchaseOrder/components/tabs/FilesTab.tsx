@@ -3,13 +3,14 @@ import { AttachFileItem, PurchaseOrderForm } from '../../types/purchaseorder';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { TableColumn } from 'react-data-table-component';
 import { FaExternalLinkAlt, FaPaperclip, FaPlus } from 'react-icons/fa';
-import { Link } from 'react-router';
+import { Link, useParams } from 'react-router';
 import Button from '@/components/ui/button/Button';
 import { MdDeleteOutline, MdEdit } from 'react-icons/md';
 import { PurchaseOrderService } from '../../services/purchaseOrderService';
 import toast from 'react-hot-toast';
 
 import { FaFileExcel, FaFilePowerpoint, FaFileWord, FaRegFile, FaRegFilePdf } from 'react-icons/fa6';
+import { getProfile } from '@/helpers/generalHelper';
 
 interface AttachFileItemLocal extends AttachFileItem {
     isNew?: boolean;
@@ -23,6 +24,8 @@ interface FilesTabProps {
     pendingFiles?: AttachFileItem[];
     deletedFileUrls?: string[];
     isLoading: boolean;
+    isSubmitting: boolean;
+    setIsSubmitting: (loading: boolean) => void;
     onAddFiles?: (files: AttachFileItem[]) => void;
 }
 
@@ -48,14 +51,29 @@ const getDocumentIcon = (fileName: string) => {
         return <FaRegFile />;
     }
 };
+const sortById = (data : any, ascending = true) => {
+    return [...data].sort((a, b) => {
+        const idA = Number(a.id);
+        const idB = Number(b.id);
+        return ascending ? idA - idB : idB - idA;
+    });
+};
+
 const FilesTab: React.FC<FilesTabProps> = ({
     poId,
     fileList,
     pendingFiles = [],
     deletedFileUrls = [],
     isLoading,
+    isSubmitting,
+    setIsSubmitting,
     onAddFiles,
 }) => {
+    const { id } = useParams<{ id: string }>();
+    
+    const profileSSO = getProfile() as any;
+    const profileSSOEmail = profileSSO?.email || 'no-email';
+    const dataFiles = sortById(fileList, false);
     const [showForm, setShowForm] = useState(false);
     const [newFiles, setNewFiles] = useState<AttachFileItemLocal[]>(pendingFiles);
     const [deletedUrls, setDeletedUrls] = useState<Set<string>>(new Set(deletedFileUrls));
@@ -66,7 +84,6 @@ const FilesTab: React.FC<FilesTabProps> = ({
     const fileAttachRef = useRef<HTMLInputElement>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileName, setFileName] = useState<string>('');
-    const [isUploading, setIsUploading] = useState(false);
     const [loadingDelete, setLoadingDelete] = useState(false);
 
     const allowedExtensions = ['.jpg', '.jpeg', '.png', '.doc', '.docx', '.pdf'];
@@ -91,21 +108,25 @@ const FilesTab: React.FC<FilesTabProps> = ({
         setSelectedFile(file);
         setFileName(file.name.replace(/\.[^/.]+$/, ''));
         setEntryError('');
-        setEntry(prev => ({ ...prev, fileName: file.name.replace(/\.[^/.]+$/, '') }));
+        setEntry(prev => ({ ...prev, fileName: !editingFile ? file.name.replace(/\.[^/.]+$/, '') : editingFile.fileName.trim() }));
+        console.log('Selected file:', editingFile);
         // if (!editingFile) {
-            handleAddEntry({ selectedFile: file, fileName: file.name.replace(/\.[^/.]+$/, '') });
+            handleAddEntry({ 
+                selectedFile: file, 
+                fileName: !editingFile ? file.name.replace(/\.[^/.]+$/, '') : editingFile.fileName.trim()
+            });
         // }
     };
 
-    // Gabungkan file dari server (minus yang dihapus) + file baru dengan flag isNew
+    // Gabungkan file dari server (minus yang dihapus) + file baru/edited, yang baru ditaruh paling atas
     const allFiles: AttachFileItemLocal[] = useMemo(() => [
-        ...fileList.filter(f => !deletedUrls.has(f.fileUrl)).map(f => ({ ...f, isNew: false })),
         ...newFiles.map(f => ({ ...f, isNew: true })),
-    ], [fileList, newFiles, deletedUrls]);
+        ...dataFiles.filter(f => !deletedUrls.has(f.fileUrl)).map(f => ({ ...f, isNew: false })),
+    ], [dataFiles, newFiles, deletedUrls]);
 
     // Helper: kirim list lengkap (existing non-deleted + new) ke parent
     const notifyParent = (updatedNewFiles: AttachFileItem[], updatedDeletedUrls: Set<string>) => {
-        const existingFiles = fileList.filter(f => !updatedDeletedUrls.has(f.fileUrl));
+        const existingFiles = dataFiles.filter(f => !updatedDeletedUrls.has(f.fileUrl));
         onAddFiles?.([...existingFiles, ...updatedNewFiles]);
     };
 
@@ -139,25 +160,110 @@ const FilesTab: React.FC<FilesTabProps> = ({
             return;
         }
 
-        setIsUploading(true);
+        setIsSubmitting(true);
         try {
-            if (poId && editingFile) {
-                // Mode edit file yang sudah ada di server
-                const res = await PurchaseOrderService.attachFilePOUpdate({
-                    ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
-                    poId: String(poId),
-                    file_name: finalFileName,
-                    fileUrl: editingFile.fileUrl ?? 'kosong',
-                });
+            if (id) {
+                if (editingFile) {
+                    const activePOId = String(poId || id);
+                    // Mode edit file yang sudah ada di server
+                    const res = await PurchaseOrderService.attachFileUpdateDetailPO(
+                        {
+                        ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
+                            type: 'purchase_order',
+                            id: editingFile.id,
+                            file_name: finalSelectedFile === undefined ? finalFileName : editingFile.fileName,
+                            created_by_api: profileSSOEmail,
+                            file: finalSelectedFile,
+                            fileUrl: editingFile.fileUrl ?? 'kosong',
+                            netsuite_id: activePOId,
+                        }, String(editingFile.id));
 
-                if (res.success) {
-                    const updatedEntry: AttachFileItem = {
-                        po_id: String(poId),
-                        fileUrl: res.data.fileUrl,
-                        fileName: res.data.fileName,
-                    };
-                    if (editingFile.isEdited) {
-                        // Edit ulang file yang sudah di-edit sebelumnya (ada di newFiles)
+                    if (res.success) {
+                        const updatedEntry: AttachFileItem = {
+                            po_id: activePOId,
+                            id: res.data.id,
+                            fileUrl: res.data.fileUrl,
+                            fileName: res.data.fileName,
+                        };
+                        if (editingFile.isNew || editingFile.isEdited) {
+                            // File masih berada di newFiles (baru diinsert / sudah pernah diedit) -> replace di tempat
+                            const updated = newFiles.map(item =>
+                                item.fileUrl === editingFile.fileUrl && item.fileName === editingFile.fileName
+                                    ? { ...updatedEntry, isEdited: true }
+                                    : item
+                            );
+                            setNewFiles(updated);
+                            notifyParent(updated, deletedUrls);
+                        } else {
+                            // Edit file dari server: tandai url lama sebagai deleted, masukkan yang baru ke newFiles
+                            const updatedDeleted = new Set(deletedUrls).add(editingFile.fileUrl ?? '');
+                            const updated = [...newFiles, { ...updatedEntry, isEdited: true }];
+                            setDeletedUrls(updatedDeleted);
+                            setNewFiles(updated);
+                            notifyParent(updated, updatedDeleted);
+                        }
+                        toast.success('File berhasil diupdate');
+                        setShowForm(false);
+                        setEntryError('');
+                        setFileName('');
+                    } else {
+                        toast.error(res.message || 'Gagal mengupdate file');
+                    }
+                    setEditingFile(null);
+                } else {
+                    if (!finalSelectedFile) {
+                        setEntryError('Pilih file terlebih dahulu');
+                        return;
+                    }
+
+                    const fileToUpload: File = finalSelectedFile;
+
+                    const res = await PurchaseOrderService.attachFileDetailPO({
+                        type: 'purchase_order',
+                        file: fileToUpload,
+                        created_by_api: profileSSOEmail,
+                        file_name: finalFileName,
+                        po_id: String(poId ?? 'temp-' + Date.now()),
+                    });
+
+                    if (res.success) {
+                        const uploadedEntry: AttachFileItem = {
+                            po_id: res.poId,
+                            id: res.id,
+                            fileUrl: res.fileUrl,
+                            fileName: res.fileName,
+                        };
+                        const updated = [...newFiles, { ...uploadedEntry, isNew: true }];
+                        setNewFiles(updated);
+                        notifyParent(updated, deletedUrls);
+                        setSelectedFile(null);
+                        if (fileAttachRef.current) fileAttachRef.current.value = '';
+                        toast.success('File berhasil diupload');
+                        setShowForm(false);
+                        setEntryError('');
+                        setFileName('');
+                    } else {
+                        toast.error(res.message || 'Gagal mengupload file');
+                    }
+                }
+            } else {
+                if (editingFile) {
+                    // Mode edit file pending (PO belum tersimpan, belum ada id) -> update di tempat
+                    const res = await PurchaseOrderService.attachFilePOUpdate({
+                        ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
+                        type: 'purchase_order',
+                        file_name: finalFileName,
+                        created_by_api: profileSSOEmail,
+                        fileUrl: editingFile.fileUrl ?? 'kosong',
+                        netsuite_id: String(poId ?? ''),
+                    });
+
+                    if (res.success) {
+                        const updatedEntry: AttachFileItem = {
+                            po_id: editingFile.po_id ?? String(poId ?? ''),
+                            fileUrl: res.data.fileUrl,
+                            fileName: res.data.fileName,
+                        };
                         const updated = newFiles.map(item =>
                             item.fileUrl === editingFile.fileUrl && item.fileName === editingFile.fileName
                                 ? { ...updatedEntry, isEdited: true }
@@ -165,59 +271,55 @@ const FilesTab: React.FC<FilesTabProps> = ({
                         );
                         setNewFiles(updated);
                         notifyParent(updated, deletedUrls);
+                        setSelectedFile(null);
+                        if (fileAttachRef.current) fileAttachRef.current.value = '';
+                        toast.success('File berhasil diupdate');
+                        setShowForm(false);
+                        setEntryError('');
+                        setFileName('');
                     } else {
-                        // Edit file dari server: tandai url lama sebagai deleted, masukkan yang baru ke newFiles
-                        const updatedDeleted = new Set(deletedUrls).add(editingFile.fileUrl ?? '');
-                        const updated = [...newFiles, { ...updatedEntry, isEdited: true }];
-                        setDeletedUrls(updatedDeleted);
-                        setNewFiles(updated);
-                        notifyParent(updated, updatedDeleted);
+                        toast.error(res.message || 'Gagal mengupdate file');
                     }
-                    toast.success('File berhasil diupdate');
-                    setShowForm(false);
-                    setEntryError('');
-                    setFileName('');
+                    setEditingFile(null);
                 } else {
-                    toast.error(res.message || 'Gagal mengupdate file');
-                }
-                setEditingFile(null);
-            } else {
-                // Mode tambah file baru (dengan atau tanpa poId)
-                if (!finalSelectedFile) {
-                    setEntryError('Pilih file terlebih dahulu');
-                    return;
-                }
+                    // Mode tambah file baru (dengan atau tanpa poId)
+                    if (!finalSelectedFile) {
+                        setEntryError('Pilih file terlebih dahulu');
+                        return;
+                    }
 
-                const fileToUpload: File = finalSelectedFile;
+                    const fileToUpload: File = finalSelectedFile;
 
-                const res = await PurchaseOrderService.attachFilePO({
-                    file: fileToUpload,
-                    file_name: finalFileName,
-                    po_id: String(poId ?? 'temp-' + Date.now()),
-                });
+                    const res = await PurchaseOrderService.attachFilePO({
+                        type: 'purchase_order',
+                        file: fileToUpload,
+                        file_name: finalFileName,
+                        created_by_api: profileSSOEmail,
+                        po_id: String(poId ?? 'temp-' + Date.now()),
+                    });
 
-                if (res.success) {
-                    const uploadedEntry: AttachFileItem = {
-                        po_id: res.poId,
-                        fileUrl: res.fileUrl,
-                        fileName: res.fileName,
-                    };
-                    const updated = [...newFiles, { ...uploadedEntry, isNew: true }];
-                    setNewFiles(updated);
-                    notifyParent(updated, deletedUrls);
-                    setSelectedFile(null);
-                    setFileName('');
-                    if (fileAttachRef.current) fileAttachRef.current.value = '';
-                    toast.success('File berhasil diupload');
-                    setShowForm(false);
-                    setEntryError('');
-                    setFileName('');
-                } else {
-                    toast.error(res.message || 'Gagal mengupload file');
+                    if (res.success) {
+                        const uploadedEntry: AttachFileItem = {
+                            po_id: res.poId,
+                            fileUrl: res.fileUrl,
+                            fileName: res.fileName,
+                        };
+                        const updated = [...newFiles, { ...uploadedEntry, isNew: true }];
+                        setNewFiles(updated);
+                        notifyParent(updated, deletedUrls);
+                        setSelectedFile(null);
+                        if (fileAttachRef.current) fileAttachRef.current.value = '';
+                        toast.success('File berhasil diupload');
+                        setShowForm(false);
+                        setEntryError('');
+                        setFileName('');
+                    } else {
+                        toast.error(res.message || 'Gagal mengupload file');
+                    }
                 }
             }
         } finally {
-            setIsUploading(false);
+            setIsSubmitting(false);
         }
 
         setEntry(emptyEntry);
@@ -231,7 +333,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
         if (fileAttachRef.current) {
             fileAttachRef.current.value = '';
         }
-        setEntry({ po_id: row.po_id ?? '', fileUrl: row.fileUrl, fileName: row.fileName });
+        setEntry({ po_id: row.id ?? '', fileUrl: row.fileUrl, fileName: row.fileName });
         setShowForm(true);
         setEntryError('');
     };
@@ -250,7 +352,10 @@ const FilesTab: React.FC<FilesTabProps> = ({
     const handleDelete = async (row: AttachFileItemLocal) => {
         setLoadingDelete(true);
         try {
-            const res = await PurchaseOrderService.attachFilePODelete({ fileUrl: row.fileUrl });
+            
+            const res = id ? 
+                await PurchaseOrderService.attachFileDeleteDetailPO(String(row.id), String(poId || id)) : 
+                await PurchaseOrderService.attachFilePODelete({ fileUrl: row.fileUrl })
             if (res.success) {
                 if (row.isNew) {
                     const updated = newFiles.filter(
@@ -366,17 +471,17 @@ const FilesTab: React.FC<FilesTabProps> = ({
                             />
                             <label
                                 htmlFor="po-file-upload"
-                                className="flex items-center justify-center gap-2 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 min-h-[38px] w-[160px]"
+                                className="flex items-center justify-center gap-2 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 h-[38px] w-[190px]"
                             >
-                                <FaPaperclip size={12} />
-                                <span>
+                                <FaPaperclip size={20} />
+                                <span className="truncate break-all" title={fileName}>
                                     {fileName || 'Attach file'}
                                 </span>
                             </label>
                             {fileName && (
                                 <div className="flex items-center gap-1 text-xs text-gray-500">
                                     <span className="text-lg">{getDocumentIcon(fileName)}</span>
-                                    <span className="truncate max-w-[160px]" title={fileName}>{fileName}</span>
+                                    <span className="truncate max-w-[160px] truncate break-all" title={fileName}>{fileName}</span>
                                 </div>
                             )}
                         </div>
@@ -391,16 +496,17 @@ const FilesTab: React.FC<FilesTabProps> = ({
                                 }}
                                 onKeyDown={e => e.key === 'Enter' && handleAddEntry()}
                                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                disabled={isSubmitting}
                             />
                         </div>
                         <div className="flex gap-1 self-start">
                             <Button
                                 type="button"
                                 onClick={handleAddEntry}
-                                disabled={isUploading}
+                                disabled={isSubmitting}
                                 className="flex items-center gap-1 rounded-lg px-3 py-2 text-xs text-white min-h-[38px] disabled:opacity-60"
                             >
-                                <FaPlus size={10} /> {isUploading ? 'Uploading...' : editingFile ? 'Save' : 'Add'}
+                                <FaPlus size={10} /> {isSubmitting ? 'Uploading...' : editingFile ? 'Save' : 'Add'}
                             </Button>
                             {editingFile && (
                                 <Button

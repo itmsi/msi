@@ -52,31 +52,29 @@ const CreateIup: React.FC = () => {
                 image="/motor-sights-international.png"
             />
             
-            <div className="bg-gray-50">
-                <div className="mx-auto px-0">
-                    <PageHeader
-                        title="Add new IUP"
-                        backPath={listRoute}
-                        subtitle={"Fill in the company details and mark the IUP location on the map"}
+            <div className="mx-auto px-0">
+                <PageHeader
+                    title="Add new IUP"
+                    backPath={listRoute}
+                    subtitle={"Fill in the company details and mark the IUP location on the map"}
+                />
+
+                <div className="space-y-6">
+                    <IUPForm
+                        formData={formData}
+                        errors={errors}
+                        onSelectChange={handleSelectChange}
                     />
+                    <IUPMapForm initialGeo={initialGeo} onChange={handleGeoChange} />
+                    <FormActions
+                        onSubmit={handleSubmit}
+                        isSubmitting={isSubmitting}
+                        cancelRoute={listRoute}
+                        submitText="Create IUP"
+                        submittingText="Creating"
+                    />
+                </div> 
 
-                    <div className="space-y-6">
-                        <IUPForm
-                            formData={formData}
-                            errors={errors}
-                            onSelectChange={handleSelectChange}
-                        />
-                        <IUPMapForm initialGeo={initialGeo} onChange={handleGeoChange} />
-                        <FormActions
-                            onSubmit={handleSubmit}
-                            isSubmitting={isSubmitting}
-                            cancelRoute={listRoute}
-                            submitText="Create IUP"
-                            submittingText="Creating"
-                        />
-                    </div> 
-
-                </div>
             </div>
         </>
     );

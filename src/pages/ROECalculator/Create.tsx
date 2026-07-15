@@ -192,96 +192,95 @@ export default function CreateROECalculator() {
                 image="/motor-sights-international.png"
             />
 
-            <div className="bg-gray-50 min-h-screen">
-                <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    {/* HEADER */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate(buildPath(`/roe-roa-calculator/manage`))}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                            >
-                                <MdKeyboardArrowLeft size={20} />
-                            </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            {isEditMode ? <MdEdit size={20} className="text-primary" /> : <MdAdd size={20} className="text-green-600" />}
-                            <div className='ms-2'>
-                                <h1 className="font-primary-bold font-normal text-xl">{isEditMode ? langField('editCalculator') : langField('createCalculator')}</h1>
-                                <p className="text-gray-600 text-sm">
-                                    {langField('step')} {currentStep} {langField('of')} {STEPS.length}: {STEPS[currentStep - 1]?.title}
-                                </p>
-                            </div>
+            
+            <div className="mx-auto px-0">
+                {/* HEADER */}
+                <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate(buildPath(`/roe-roa-calculator/manage`))}
+                            className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
+                        >
+                            <MdKeyboardArrowLeft size={20} />
+                        </Button>
+                        <div className="border-l border-gray-300 h-6 mx-3"></div>
+                        {isEditMode ? <MdEdit size={20} className="text-primary" /> : <MdAdd size={20} className="text-green-600" />}
+                        <div className='ms-2'>
+                            <h1 className="font-primary-bold font-normal text-xl">{isEditMode ? langField('editCalculator') : langField('createCalculator')}</h1>
+                            <p className="text-gray-600 text-sm">
+                                {langField('step')} {currentStep} {langField('of')} {STEPS.length}: {STEPS[currentStep - 1]?.title}
+                            </p>
                         </div>
                     </div>
+                </div>
 
-                    {/* Step Indicator */}
-                    {renderStepIndicator()}
+                {/* Step Indicator */}
+                {renderStepIndicator()}
 
-                    {/* Step Content */}
-                    
-                    <div className="bg-white rounded-2xl shadow-sm grid lg:grid-cols-3 gap-2 md:gap-2">
-                        <div className="md:col-span-3 p-8 relative">
-                            {renderStepContent()}
+                {/* Step Content */}
+                
+                <div className="bg-white rounded-2xl shadow-sm grid lg:grid-cols-3 gap-2 md:gap-2">
+                    <div className="md:col-span-3 p-8 relative">
+                        {renderStepContent()}
+                    </div>
+
+                    {/* Step Navigation */}
+                    <div className="flex justify-between gap-4 p-6 border-t border-gray-200 md:col-span-3">
+                        <div className="flex items-center gap-3">
+                            {currentStep > 1 && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handlePrevious}
+                                    disabled={loading}
+                                    className="px-6 rounded-full"
+                                >
+                                    <MdArrowBack size={16} />
+                                    {langField('previous')}
+                                </Button>
+                            )}
                         </div>
 
-                        {/* Step Navigation */}
-                        <div className="flex justify-between gap-4 p-6 border-t border-gray-200 md:col-span-3">
-                            <div className="flex items-center gap-3">
-                                {currentStep > 1 && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={handlePrevious}
-                                        disabled={loading}
-                                        className="px-6 rounded-full"
-                                    >
-                                        <MdArrowBack size={16} />
-                                        {langField('previous')}
-                                    </Button>
-                                )}
-                            </div>
+                        <div className="flex items-center gap-3">
+                            <PermissionGate permission={["create", "update"]}>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleSaveOnly}
+                                    disabled={loading}
+                                    className="px-6 rounded-full"
+                                >
+                                    <MdSave size={16} />
+                                    {langField('saveOnly')}
+                                </Button>
+                            </PermissionGate>
 
-                            <div className="flex items-center gap-3">
+                            {currentStep < 5 ? (
                                 <PermissionGate permission={["create", "update"]}>
                                     <Button
                                         type="button"
-                                        variant="outline"
-                                        onClick={handleSaveOnly}
+                                        onClick={handleSaveAndNext}
                                         disabled={loading}
                                         className="px-6 rounded-full"
                                     >
-                                        <MdSave size={16} />
-                                        {langField('saveOnly')}
+                                        {loading ? langField('savingData') : langField('saveAndNext')}
+                                        <MdArrowForward size={16} />
                                     </Button>
                                 </PermissionGate>
-
-                                {currentStep < 5 ? (
-                                    <PermissionGate permission={["create", "update"]}>
-                                        <Button
-                                            type="button"
-                                            onClick={handleSaveAndNext}
-                                            disabled={loading}
-                                            className="px-6 rounded-full"
-                                        >
-                                            {loading ? langField('savingData') : langField('saveAndNext')}
-                                            <MdArrowForward size={16} />
-                                        </Button>
-                                    </PermissionGate>
-                                ) : (
-                                    <PermissionGate permission={["create", "update"]}>
-                                        <Button
-                                            type="button"
-                                            onClick={handleSaveOnly}
-                                            disabled={loading}
-                                        className="px-6 rounded-full"
-                                        >
-                                            <MdSave size={16} />
-                                            {loading ? 'Saving...' : 'Complete'}
-                                        </Button>
-                                    </PermissionGate>
-                                )}
-                            </div>
+                            ) : (
+                                <PermissionGate permission={["create", "update"]}>
+                                    <Button
+                                        type="button"
+                                        onClick={handleSaveOnly}
+                                        disabled={loading}
+                                    className="px-6 rounded-full"
+                                    >
+                                        <MdSave size={16} />
+                                        {loading ? 'Saving...' : 'Complete'}
+                                    </Button>
+                                </PermissionGate>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -187,7 +187,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     className="px-4 py-2 bg-transparent hover:bg-gray-100 text-gray-600 border border-gray-300"
                     size="sm"
                 >
-                    Clear All Filters
+                    Clear All
                 </Button>
             </div>
         </div>

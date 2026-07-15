@@ -726,14 +726,19 @@ export interface POAttachment {
     po_id: string;
     file_name: string;
     file: File;
+    type: string;
+    created_by_api?: string;
 }
 
 export interface POAttachmentUpdate {
-    file?: File;
-    poId?: string;
+    file?: File ;
+    id?: string;
+    type: string;
     file_name: string;
     fileUrl: string;
     file_id?: string;
+    created_by_api: string;
+    netsuite_id?: string;
 }
 
 export interface POAttachmentDelete {

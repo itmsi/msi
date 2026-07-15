@@ -1,8 +1,6 @@
 import PageMeta from '@/components/common/PageMeta'
-import Button from '@/components/ui/button/Button'
 import { useEffect, useState } from 'react'
-import { MdKeyboardArrowLeft } from 'react-icons/md'
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { usePurchaseOrderCreate } from './hooks/usePurchaseOrderCreate';
 import PurchaseOrderFields from './components/purchaseOrderFields';
 import PurchaseOrderItemFields from './components/purchaseOrderItemsFields';
@@ -15,14 +13,17 @@ import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
 import { getProfile } from '@/helpers/generalHelper';
 import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 import FilesTab from './components/tabs/FilesTab';
+import PageHeader from '@/components/common/PageHeader';
 
 export default function Create() {
-    const navigate = useNavigate();
+    const location = useLocation();
+    const listRoute = `/netsuite/purchase-order/manage${location.search}`;
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
 
     const {
         isSubmitting,
+        setIsSubmitting,
         formData,
         errors,
         masterData,
@@ -175,22 +176,12 @@ export default function Create() {
                     </div>
                 </div>
             ) : (
-            <div className="bg-gray-50 overflow-auto">
                 <div className="mx-auto px-0">
-                    {/* Header */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outline"
-                                onClick={() => navigate('/netsuite/purchase-order')}
-                                className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                            >
-                                <MdKeyboardArrowLeft size={20} />
-                            </Button>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Create Purchase Order</h1>
-                        </div>
-                    </div>
+                    {/* Header */}{/* Header */}
+                    <PageHeader
+                        title="Create Purchase Order"
+                        backPath={listRoute}
+                    />
 
                     <div className="space-y-6">
                         {/* Purchase Order Fields */}
@@ -412,6 +403,8 @@ export default function Create() {
                                         fileList={[]}
                                         pendingFiles={formData.files || []}
                                         isLoading={loadingMasterData}
+                                        isSubmitting={isSubmitting}
+                                        setIsSubmitting={setIsSubmitting}
                                         onAddFiles={handleAddFiles}
                                     />
                                 )}
@@ -422,13 +415,12 @@ export default function Create() {
                         <FormActions
                             onSubmit={handleSubmit}
                             isSubmitting={isSubmitting}
-                            cancelRoute="/netsuite/purchase-order"
+                            cancelRoute={listRoute}
                             submitText="Create Purchase Order"
                             submittingText="Creating..."
                         />
                     </div>
                 </div>
-            </div>
             )}
         </>
     )

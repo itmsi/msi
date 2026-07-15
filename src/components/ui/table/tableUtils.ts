@@ -127,9 +127,6 @@ export const tableStyles = {
                 fontSize: '14px',
                 color: '#374151',
                 borderBottom: '1px solid #f3f4f6',
-                '&:nth-of-type(even)': {
-                    backgroundColor: '#f9fafb',
-                },
             },
             highlightOnHoverStyle: {
                 backgroundColor: theme.hoverBackground,

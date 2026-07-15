@@ -15,10 +15,10 @@ import { PurchaseOrderItem } from './types/purchaseorder';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 import { getProfile, formatCurrencyDynamic, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import FilterSection from './components/FilterSection';
-import { LoadingOverlay } from '@/components/common/Loading';
 import { createByDateColumn } from '@/components/ui/table/columnUtils';
 import { FaRegFilePdf } from 'react-icons/fa6';
 import NavigationPO from './components/NavigationPO';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
 
 export default function Manage() {
     const location = useLocation();
@@ -59,17 +59,9 @@ export default function Manage() {
         handleRowsPerPageChange(limitBaru, halamanBaru);
     }, [pagination?.page, pagination?.limit, handleRowsPerPageChange]);
 
-    
-    // const [isOpen, setIsOpen] = useState(false);
-    // const [selectedPoId, setSelectedPoId] = useState<number | null>(null);
-
-    // const handleApproval = (row: PurchaseOrderItem) => {
-    //     setSelectedPoId(row.id);
-    //     setIsOpen(true);
-    // };
-
     const columns: TableColumn<PurchaseOrderItem>[] = [
         {
+            id: 'doc_number',
             name: 'Document Number',
             selector: row => row.po_number || '-',
             cell: row => (<>
@@ -77,16 +69,17 @@ export default function Manage() {
                     href={`/netsuite/purchase-order/edit/${row.po_id ? row.po_id : row.id}${location.search}`}
                     className="absolute inset-0"
                 />
-                
                 <div className="items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">{row.po_number || '-'}</div>
                     <div className="block text-sm text-gray-500">{formatTanggal(row.po_date)}</div>
                 </div>
             </>),
             wrap: true,
-            width: '230px'
+            width: '230px',
+            pinned: 'left'
         },
         {
+            id: 'pr_number',
             name: 'PR Number',
             selector: row => row.custbody_me_pr_number || '-',
             wrap: true,
@@ -94,36 +87,46 @@ export default function Manage() {
             center: true
         },
         {
+            id: 'vendor_name',
             name: 'Vendor Name',
             selector: row => row.vendor_name || '-',
             wrap: true,
             width: '350px'
         },
         {
+            id: 'memo',
             name: 'Memo',
             selector: row => row.memo || '-',
             wrap: true,
             width: '300px'
         },
         {
+            id: 'location',
             name: 'Location',
             selector: row => row.location_display || '-',
             wrap: true,
             width: '220px',
             center: true,
-            cell: row => (
+            cell: row => (<>
+                <a
+                    href={`/netsuite/purchase-order/edit/${row.po_id ? row.po_id : row.id}${location.search}`}
+                    className="absolute inset-0"
+                />
                 <div className="items-start capitalize w-full">
                     {row.location_display || '-'}
                 </div>
+            </>
             ),
         },
         {
+            id: 'total_amount',
             name: 'Total Amount',
             selector: row => row.total ? formatCurrencyDynamic(row.total, row.currency_symbol) : '-',
             wrap: true,
             width: '240px'
         },
         {
+            id: 'next_approval',
             name: 'Next Approval',
             selector: row => Number(row.approvalstatus) === 1 ? row.nextapprover || '-' : '-',
             wrap: true,
@@ -131,6 +134,7 @@ export default function Manage() {
             center: true
         },
         {
+            id: 'approval_status',
             name: 'Approval Status',
             selector: row => row.po_status || '-',
             cell: row => (
@@ -147,6 +151,7 @@ export default function Manage() {
             width: '200px'
         },
         {
+            id: 'po_status',
             name: 'Status',
             selector: row => row.po_status || '-',
             cell: row => (
@@ -164,6 +169,7 @@ export default function Manage() {
             width: '250px'
         },
         {
+            id: 'created_by',
             name: 'Created By',
             selector: (row: any) => row.po_id,
             cell: row => (
@@ -268,7 +274,7 @@ export default function Manage() {
                 <div className="flex items-center gap-2">
                     <Button
                         onClick={handleToggleFilter}
-                        className={`h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700'} border border-gray-300 relative`}
+                        className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
                         size="sm"
                     >
                         <MdFilterListAlt className="w-4 h-4 mr-2" />
@@ -306,45 +312,42 @@ export default function Manage() {
             <NavigationPO />
             <div className="space-y-6">
                 {/* Header */}
-                <div className="bg-white shadow rounded-lg mb-3">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex flex-col md:flex-row lg:justify-between lg:items-center ">
-                            <div>
-                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Purchase Orders
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Manage Purchase Orders
-                                </p>
-                            </div>
-                            <div className="flex space-x-3 lg:mt-0 mt-3">
-                                <PermissionGate permission="read">
-                                    <Button
-                                        onClick={() => handleSync()}
-                                        disabled={isSyncing}
-                                        className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
-                                        variant='outline'
-                                    >
-                                        <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
-                                        <div>
+                <PageHeaderManage
+                    title="Purchase Orders"
+                    subtitle="Manage Purchase Orders"
+                    actions={[
+                        {
+                            key: 'sync',
+                            element: (
+                                <Button
+                                    onClick={() => handleSync()}
+                                    disabled={isSyncing}
+                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                    variant='outline'
+                                >
+                                    <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                    <div>
                                         <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
-                                        
-                                        </div>
-                                    </Button>
-                                </PermissionGate>
+                                    </div>
+                                </Button>
+                            )
+                        },
+                        {
+                            key: 'create',
+                            element: (
                                 <PermissionGate permission="create">
                                     <Button
-                                        onClick={() => navigate('/netsuite/purchase-order/create')}
+                                        onClick={() => navigate(`/netsuite/purchase-order/create${location.search}`)}
                                         className="flex items-center gap-2"
                                     >
-                                        <MdAdd size={20} />
-                                        <span>Create Purchase Order</span>
+                                        <MdAdd className="mr-2" size={20} />
+                                        Create Purchase Order
                                     </Button>
                                 </PermissionGate>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            )
+                        }
+                    ]}
+                />
                 {
                     syncInfo && (<>
                         <span className='block text-xs text-green-600 pe-6 text-end mb-0'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
@@ -363,37 +366,26 @@ export default function Manage() {
                                 <p className="text-red-600">{error}</p>
                             </div>
                         )}
-                        
-                        {loading ? (
-                            <div className="flex justify-center items-center py-12">
-                                <div className="text-center">
-                                    <LoadingOverlay
-                                        message="Loading data purchase order..."
-                                    />
-                                </div>
-                            </div>
-                        ) : (
-                            <CustomDataTable
-                                columns={columns}
-                                data={purchaseOrders}
-                                loading={loading}
-                                pagination
-                                paginationServer
-                                paginationTotalRows={pagination?.total || 0}
-                                paginationPerPage={pagination?.limit || 10}
-                                paginationDefaultPage={pagination?.page || 1}
-                                paginationRowsPerPageOptions={[10, 20, 50, 100]}
-                                onChangePage={handlePageChangeAman}
-                                onChangeRowsPerPage={handleRowsPerPageAman}
-                                fixedHeader={true}
-                                fixedHeaderScrollHeight="625px"
-                                responsive
-                                highlightOnHover
-                                striped={false}
-                                persistTableHead
-                                borderRadius="8px"
-                            />
-                        )}
+                        <CustomDataTable
+                            columns={columns}
+                            data={purchaseOrders}
+                            loading={loading}
+                            pagination
+                            paginationServer
+                            paginationTotalRows={pagination?.total || 0}
+                            paginationPerPage={pagination?.limit || 10}
+                            paginationDefaultPage={pagination?.page || 1}
+                            paginationRowsPerPageOptions={[10, 20, 50, 100]}
+                            onChangePage={handlePageChangeAman}
+                            onChangeRowsPerPage={handleRowsPerPageAman}
+                            fixedHeader={true}
+                            fixedHeaderScrollHeight="625px"
+                            responsive
+                            highlightOnHover
+                            striped={false}
+                            persistTableHead
+                            borderRadius="8px"
+                        />
                     </div>
                 </div>
 

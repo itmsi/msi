@@ -118,6 +118,7 @@ export const createByDateColumn = (
             </span>
         </div>
     ),
+    id: `${name}-${dateField}-${createdByField}`,
     center: false,
     wrap: true,
     width,
@@ -159,6 +160,7 @@ export const createActionsColumn = (actions: Array<{
     ),
     width: actions[0]?.width || '200px',
     center: true,
+    id: `actions-${actions.map(a => a.title).join('-')}`,
     ignoreRowClick: true,
 });
 // Badge component for status display

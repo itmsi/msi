@@ -64,33 +64,26 @@ export default function Manage() {
 
     const columns: TableColumn<BillPayment>[] = [
         {
-            name: 'ID',
-            selector: row => row.netsuite_id?.toString() || '-',
-            cell: row => (
-                <div className="items-center py-2">
-                    <div className="block text-sm text-gray-900">{row.netsuite_id || '-'}</div>
-                </div>
-            ),
-            wrap: true,
-            minWidth: '80px',
-        },
-        {
-            name: 'Subsidiary',
-            selector: row => row.subsidiary_display || '-',
-            wrap: true,
-            minWidth: '300px',
-        },
-        {
             name: 'Doc Number',
             selector: row => row.transactionnumber || '-',
             cell: row => (
                 <div className="items-center py-2">
                     <div className="font-medium text-gray-900">{row.transactionnumber || '-'}</div>
                     <div className="block text-sm text-gray-500">{row.trandate ? formatDateLocal(row.trandate) : '-'}</div>
+                    <span className="text-xs text-gray-500">
+                        Bill ID: {row.netsuite_id?.toString() || '-'}
+                    </span>
                 </div>
             ),
             wrap: true,
             minWidth: '220px',
+            pinned: 'left',
+        },
+        {
+            name: 'Subsidiary',
+            selector: row => row.subsidiary_display || '-',
+            wrap: true,
+            minWidth: '300px',
         },
         {
             name: 'Vendor Name',

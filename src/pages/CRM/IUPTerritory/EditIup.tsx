@@ -51,31 +51,29 @@ const EditIup: React.FC = () => {
                 image="/motor-sights-international.png"
             />
             
-            <div className="bg-gray-50">
-                <div className="mx-auto px-0">
-                    <PageHeader
-                        title={`Edit IUP${formData.company_name ? ` — ${formData.company_name}` : ''}`}
-                        backPath={listRoute}
-                        subtitle={"Update the company information or drag the pin to adjust the IUP location."}
+            <div className="mx-auto px-0">
+                <PageHeader
+                    title={`Edit IUP${formData.company_name ? ` — ${formData.company_name}` : ''}`}
+                    backPath={listRoute}
+                    subtitle={"Update the company information or drag the pin to adjust the IUP location."}
+                />
+
+                <div className="space-y-6">
+                    <IUPForm
+                        formData={formData}
+                        errors={errors}
+                        onSelectChange={handleSelectChange}
                     />
+                    <IUPMapForm initialGeo={initialGeo} onChange={handleGeoChange} />
+                    <FormActions
+                        onSubmit={handleSubmit}
+                        isSubmitting={isSubmitting}
+                        cancelRoute={listRoute}
+                        submitText="Update IUP"
+                        submittingText="Updating"
+                    />
+                </div> 
 
-                    <div className="space-y-6">
-                        <IUPForm
-                            formData={formData}
-                            errors={errors}
-                            onSelectChange={handleSelectChange}
-                        />
-                        <IUPMapForm initialGeo={initialGeo} onChange={handleGeoChange} />
-                        <FormActions
-                            onSubmit={handleSubmit}
-                            isSubmitting={isSubmitting}
-                            cancelRoute={listRoute}
-                            submitText="Update IUP"
-                            submittingText="Updating"
-                        />
-                    </div> 
-
-                </div>
             </div>
         </>
     );

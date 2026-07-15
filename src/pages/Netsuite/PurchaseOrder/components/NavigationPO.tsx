@@ -9,7 +9,7 @@ export default function NavigationPO() {
   return (
     <div className="flex-1 flex flex-col w-full mx-auto">
         {/* Pill Navigation */}
-        <nav className="inline-flex items-center gap-1 bg-gray-100 rounded-full p-1 mb-3 self-start">
+        <nav className="inline-flex items-center gap-1 bg-[#dfe8f2] shadow-sm rounded-full p-1 mb-3 self-start">
         {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
                 key={to}

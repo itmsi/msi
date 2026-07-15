@@ -21,6 +21,7 @@ import Button from '@/components/ui/button/Button';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 import { createByDateColumn } from '@/components/ui/table/columnUtils';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
 
 const SO_STATUS_OPTIONS = [
     { value: 'A', label: 'Pending Approval' },
@@ -95,12 +96,6 @@ export default function Manage() {
 
     const columns: TableColumn<SalesOrder>[] = [
         {
-            name: 'SO ID',
-            selector: row => row.customer_id || '-',
-            wrap: true,
-            width: '100px'
-        },
-        {
             name: 'Document Number',
             selector: row => row.tranid || '-',
             cell: row => (<>
@@ -111,20 +106,28 @@ export default function Manage() {
                 <div className="items-center py-2">
                     <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
                     <div className="block text-sm text-gray-500">{formatDateID(row.tran_date || '-')}</div>
+                    <div className="text-xs text-gray-500">
+                        SO ID: {row.customer_id || '-'}
+                    </div>
                 </div>
             </>),
             wrap: true,
-            width: '230px'
+            width: '230px',
+            pinned: 'left',
         },
         {
             name: 'Customer',
             selector: row => row.customer_name || '-',
-            cell: row => (
+            cell: row => (<>
+                <a
+                    href={`/netsuite/sales-orders/edit/${row.netsuite_id || row.id}`}
+                    className="absolute inset-0"
+                />
                 <div className="items-center py-2">
                     <div className="font-medium text-gray-900">{row.customer_name || '-'}</div>
                     {/* <div className="block text-xs text-gray-400">ID: {row.customer_id || '-'}</div> */}
                 </div>
-            ),
+            </>),
             wrap: true,
             width: '310px'
         },
@@ -331,7 +334,7 @@ export default function Manage() {
                                 className="bg-transparent border border-red-300 text-red-600 hover:bg-red-50"
                             >
                                 <MdClear className="w-4 h-4 mr-1" />
-                                Clear All Filters
+                                Clear All
                             </Button>
                         </div>
                     )}
@@ -350,49 +353,46 @@ export default function Manage() {
 
             <div className="space-y-6">
                 {/* Header */}
-                <div className="bg-white shadow rounded-lg">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Sales Orders
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Manage NetSuite Sales Orders and related information
-                                </p>
-                            </div>
-                            <div className="flex space-x-3">
-                                <PermissionGate permission="read">
-                                    <Button
-                                        onClick={() => handleSync()}
-                                        disabled={isSyncing}
-                                        className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
-                                        variant='outline'
-                                        size="sm"
-                                    >
-                                        <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
-                                        <div>
+                <PageHeaderManage
+                    title="Sales Orders"
+                    subtitle="Manage Sales Orders"
+                    actions={[
+                        {
+                            key: 'sync',
+                            element: (
+                                <Button
+                                    onClick={() => handleSync()}
+                                    disabled={isSyncing}
+                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                    variant='outline'
+                                >
+                                    <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                    <div>
                                         <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
-                                        </div>
-                                    </Button>
-                                </PermissionGate>
+                                    </div>
+                                </Button>
+                            )
+                        },
+                        {
+                            key: 'create',
+                            element: (
                                 <PermissionGate permission="create">
                                     <Button
                                         onClick={() => navigate('/netsuite/sales-orders/create')}
                                         className="flex items-center gap-2"
                                     >
-                                        <MdAdd size={20} />
-                                        <span>Create Sales Order</span>
+                                        <MdAdd className="mr-2" size={20} />
+                                        Create Sales Order
                                     </Button>
                                 </PermissionGate>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            )
+                        }
+                    ]}
+                />
 
                 {
                     syncInfo && (<>
-                        <span className='block text-xs text-green-600 pe-6 text-end mb-0 mt-[-10px]'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
+                        <span className='block text-xs text-green-600 pe-6 text-end mb-0'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
                     </>)
                 }
 
