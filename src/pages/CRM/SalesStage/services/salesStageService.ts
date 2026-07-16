@@ -99,4 +99,9 @@ export class SalesStageServices {
         const response = await apiDelete(`${API_BASE_URL}/crm/opportunity_review_hypercare/${id}`);
         return response.data;
     }
+
+    static async updateReview(id: string, data: Partial<ReviewHypercareCreateRequest>): Promise<any> {
+        const response = await apiPut(`${API_BASE_URL}/crm/opportunity_review_hypercare/${id}`, data as Record<string, any>);
+        return response.data;
+    }
 }

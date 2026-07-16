@@ -88,6 +88,7 @@ export interface OpportunityReviewHypercare {
     opportunity_review_hypercare_description: string | null;
     created_at: string;
     created_by: string | null;
+    created_by_name: string | null;
     updated_at: string;
     updated_by: string | null;
     deleted_at: string | null;

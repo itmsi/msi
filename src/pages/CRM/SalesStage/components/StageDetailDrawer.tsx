@@ -72,7 +72,15 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
     const [savingSubTask, setSavingSubTask] = useState<string | null>(null);
     const [newReviewImpact, setNewReviewImpact] = useState('positive');
     const [newReviewDesc, setNewReviewDesc] = useState('');
+    const [newReviewDate, setNewReviewDate] = useState(new Date().toISOString().split('T')[0]);
     const [editActualValue, setEditActualValue] = useState('');
+    const [expandedReview, setExpandedReview] = useState<string | null>(null);
+    const [editReviewData, setEditReviewData] = useState<Record<string, {
+        reviewer: string;
+        date: string;
+        impact: string;
+        description: string;
+    }>>({});
 
     // ─── ALL HOOKS MUST BE BEFORE EARLY RETURN ───
     const handleToggleSubTask = useCallback(async (st: OpportunitySubTask) => {
@@ -193,15 +201,17 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
         try {
             await SalesStageServices.createReview({
                 opportunity_id: opportunity.opportunity_id,
-                opportunity_review_hypercare_date: new Date().toISOString().split('T')[0],
+                opportunity_review_hypercare_date: newReviewDate || new Date().toISOString().split('T')[0],
                 opportunity_review_hypercare_impact: newReviewImpact,
                 opportunity_review_hypercare_description: newReviewDesc || undefined,
             });
             setNewReviewDesc('');
+            setNewReviewDate(new Date().toISOString().split('T')[0]);
+            setNewReviewImpact('positive');
             toast.success('Review ditambahkan');
             onRefresh();
         } catch { toast.error('Gagal tambah review'); }
-    }, [newReviewImpact, newReviewDesc, opportunity, onRefresh]);
+    }, [newReviewImpact, newReviewDesc, newReviewDate, opportunity, onRefresh]);
 
     const handleDeleteReview = useCallback(async (id: string) => {
         try {
@@ -210,6 +220,21 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
             onRefresh();
         } catch { toast.error('Gagal hapus review'); }
     }, [onRefresh]);
+
+    const handleUpdateReview = useCallback(async (rv: OpportunityReviewHypercare) => {
+        const editData = editReviewData[rv.opportunity_review_hypercare_id];
+        if (!editData) return;
+        try {
+            await SalesStageServices.updateReview(rv.opportunity_review_hypercare_id, {
+                opportunity_review_hypercare_date: editData.date || undefined,
+                opportunity_review_hypercare_impact: editData.impact,
+                opportunity_review_hypercare_description: editData.description || undefined,
+            });
+            toast.success('Review diupdate');
+            setExpandedReview(null);
+            onRefresh();
+        } catch { toast.error('Gagal update review'); }
+    }, [editReviewData, onRefresh]);
 
     // Sync actual value when opportunity changes
     React.useEffect(() => {
@@ -238,6 +263,7 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
     const nextStageMap: Record<string, string> = { find: 'Survey', survey: 'Pull', pull: 'Deal', deal: 'Hypercare' };
     const nextStageLabel = nextStageMap[stage];
     const isLastStage = stage === 'hypercare';
+    const stageSubTasks = subTasks.filter(st => st.opportunity_stage === stage);
 
     // ─── RENDER HELPERS ───
     const renderSubTask = (st: OpportunitySubTask) => {
@@ -425,46 +451,167 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
                         ) : reviews.length === 0 ? (
                             <p className="text-xs text-gray-400 italic">Belum ada review dampak.</p>
                         ) : (
-                            reviews.slice().reverse().map((rv) => (
-                                <div key={rv.opportunity_review_hypercare_id} className="border-b border-gray-100 pb-2.5 last:border-0">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <span className="text-xs text-gray-500">{rv.opportunity_review_hypercare_date || '-'}</span>
-                                        <span className="text-xs font-medium">{rv.opportunity_review_hypercare_description?.slice(0, 60) || ''}</span>
-                                        {impactBadge(rv.opportunity_review_hypercare_impact)}
-                                        {canDelete && (
+                            reviews.slice().sort((a, b) => ((b.opportunity_review_hypercare_date || '') > (a.opportunity_review_hypercare_date || '') ? 1 : -1)).map((rv) => {
+                                const revId = rv.opportunity_review_hypercare_id;
+                                const isOpen = expandedReview === revId;
+                                const reviewerName = rv.created_by_name || rv.employee_id?.slice(0, 8) || '-';
+                                const rvDate = rv.opportunity_review_hypercare_date || '';
+                                const rvDesc = rv.opportunity_review_hypercare_description || '';
+                                const preview = rvDesc.length > 60 ? rvDesc.slice(0, 60) + '…' : rvDesc;
+                                const editData = editReviewData[revId] || {
+                                    reviewer: reviewerName,
+                                    date: rvDate,
+                                    impact: rv.opportunity_review_hypercare_impact || 'positive',
+                                    description: rvDesc,
+                                };
+                                const currentImpact = editData.impact || rv.opportunity_review_hypercare_impact || 'positive';
+                                return (
+                                    <div key={revId} className="border border-gray-100 rounded-lg overflow-hidden">
+                                        <div className="flex items-center gap-2 px-3 py-2.5">
+                                            <span className="text-xs text-gray-500">📅 {rvDate || '-'}</span>
+                                            <span className="text-xs font-medium text-gray-800 whitespace-nowrap">· {reviewerName}</span>
+                                            {impactBadge(rv.opportunity_review_hypercare_impact)}
+                                            {!isOpen && preview && (
+                                                <span className="text-[11px] text-gray-400 truncate flex-1 min-w-0 ml-1">— {preview}</span>
+                                            )}
                                             <button
-                                                onClick={() => handleDeleteReview(rv.opportunity_review_hypercare_id)}
-                                                className="text-red-500 hover:text-red-700 ml-auto"
-                                                title="Hapus review"
+                                                onClick={() => {
+                                                    if (isOpen) {
+                                                        setExpandedReview(null);
+                                                    } else {
+                                                        setEditReviewData(prev => ({
+                                                            ...prev,
+                                                            [revId]: {
+                                                                reviewer: reviewerName,
+                                                                date: rvDate,
+                                                                impact: rv.opportunity_review_hypercare_impact || 'positive',
+                                                                description: rvDesc,
+                                                            }
+                                                        }));
+                                                        setExpandedReview(revId);
+                                                    }
+                                                }}
+                                                className="text-[10px] font-mono text-gray-400 hover:text-blue-600 flex-none"
                                             >
-                                                <MdDelete size={14} />
+                                                {isOpen ? 'TUTUP ▲' : 'DETAIL ▼'}
                                             </button>
+                                            {canDelete && (
+                                                <button
+                                                    onClick={() => handleDeleteReview(revId)}
+                                                    className="text-red-400 hover:text-red-600 flex-none"
+                                                    title="Hapus review"
+                                                >
+                                                    🗑
+                                                </button>
+                                            )}
+                                        </div>
+                                        {isOpen && (
+                                            <div className="border-t border-gray-100 bg-gray-50 px-3 py-3 space-y-2.5">
+                                                <div className="grid grid-cols-2 gap-2.5">
+                                                    <div>
+                                                        <p className="text-[10px] uppercase text-gray-400 mb-1">Reviewer</p>
+                                                        <p className="text-xs font-medium text-gray-700 py-1.5">{editData.reviewer}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] uppercase text-gray-400 mb-1">Tanggal Review</p>
+                                                        <Input
+                                                            type="date"
+                                                            value={editData.date}
+                                                            onChange={(e) => setEditReviewData(prev => ({
+                                                                ...prev,
+                                                                [revId]: { ...prev[revId], date: e.target.value }
+                                                            }))}
+                                                            className="w-full text-xs"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] uppercase text-gray-400 mb-1">Dampak</p>
+                                                    <CustomSelect
+                                                        options={[
+                                                            { value: 'positive', label: 'Positif' },
+                                                            { value: 'neutral', label: 'Netral' },
+                                                            { value: 'followup', label: 'Perlu Tindak Lanjut' },
+                                                        ]}
+                                                        value={{
+                                                            value: currentImpact,
+                                                            label: currentImpact === 'positive' ? 'Positif' : currentImpact === 'neutral' ? 'Netral' : 'Perlu Tindak Lanjut'
+                                                        }}
+                                                        onChange={(val) => setEditReviewData(prev => ({
+                                                            ...prev,
+                                                            [revId]: { ...prev[revId], impact: val?.value || 'positive' }
+                                                        }))}
+                                                        isSearchable={false}
+                                                        isClearable={false}
+                                                        placeholder="Pilih impact..."
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] uppercase text-gray-400 mb-1">Keterangan</p>
+                                                    <textarea
+                                                        rows={3}
+                                                        placeholder="Deskripsi hasil review..."
+                                                        value={editData.description}
+                                                        onChange={(e) => setEditReviewData(prev => ({
+                                                            ...prev,
+                                                            [revId]: { ...prev[revId], description: e.target.value }
+                                                        }))}
+                                                        className="w-full bg-white border border-gray-200 rounded px-2 py-1.5 text-xs outline-none focus:border-blue-400 resize-none"
+                                                    />
+                                                </div>
+                                                <div className="flex justify-end pt-1">
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => handleUpdateReview(rv)}
+                                                    >
+                                                        Simpan
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                         {canUpdate && (
-                            <div className="space-y-2 pt-1">
-                                <CustomSelect
-                                    options={[
-                                        { value: 'positive', label: 'Positif' },
-                                        { value: 'neutral', label: 'Netral' },
-                                        { value: 'followup', label: 'Perlu Tindak Lanjut' },
-                                    ]}
-                                    value={{ value: newReviewImpact, label: newReviewImpact === 'positive' ? 'Positif' : newReviewImpact === 'neutral' ? 'Netral' : 'Perlu Tindak Lanjut' }}
-                                    onChange={(val) => setNewReviewImpact(val?.value || 'positive')}
-                                    isSearchable={false}
-                                    isClearable={false}
-                                    placeholder="Pilih impact..."
-                                />
-                                <TextArea
-                                    rows={2}
-                                    placeholder="Deskripsi review..."
-                                    value={newReviewDesc}
-                                    onChange={(e) => setNewReviewDesc(e.target.value)}
-                                    className="w-full text-xs resize-none"
-                                />
+                            <div className="border-t border-dashed border-gray-200 pt-3 space-y-2.5">
+                                <p className="text-xs font-semibold text-gray-700">Tambah Review Baru</p>
+                                <div className="grid grid-cols-2 gap-2.5">
+                                    <div>
+                                        <p className="text-[10px] uppercase text-gray-400 mb-1">Tanggal Review</p>
+                                        <Input
+                                            type="date"
+                                            value={newReviewDate}
+                                            onChange={(e) => setNewReviewDate(e.target.value)}
+                                            className="w-full text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] uppercase text-gray-400 mb-1">Dampak</p>
+                                        <CustomSelect
+                                            options={[
+                                                { value: 'positive', label: 'Positif' },
+                                                { value: 'neutral', label: 'Netral' },
+                                                { value: 'followup', label: 'Perlu Tindak Lanjut' },
+                                            ]}
+                                            value={{ value: newReviewImpact, label: newReviewImpact === 'positive' ? 'Positif' : newReviewImpact === 'neutral' ? 'Netral' : 'Perlu Tindak Lanjut' }}
+                                            onChange={(val) => setNewReviewImpact(val?.value || 'positive')}
+                                            isSearchable={false}
+                                            isClearable={false}
+                                            placeholder="Pilih impact..."
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] uppercase text-gray-400 mb-1">Keterangan</p>
+                                    <TextArea
+                                        rows={2}
+                                        placeholder="Deskripsi hasil review..."
+                                        value={newReviewDesc}
+                                        onChange={(e) => setNewReviewDesc(e.target.value)}
+                                        className="w-full text-xs resize-none"
+                                    />
+                                </div>
                                 <Button size="sm" onClick={handleAddReview}>+ Tambah Review</Button>
                             </div>
                         )}
@@ -480,15 +627,15 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
                                 <span className="text-xs text-gray-400 ml-2">— {STAGE_LABEL[stage]}</span>
                             </div>
                             <span className="text-[11px] text-gray-400">
-                                {subTasks.filter(s => s.opportunity_sub_task_status === 'done').length}/{subTasks.length} selesai
+                                {stageSubTasks.filter(s => s.opportunity_sub_task_status === 'done').length}/{stageSubTasks.length} selesai
                             </span>
                         </div>
                         {detailLoading ? (
                             <p className="text-xs text-gray-400 italic">Loading...</p>
-                        ) : subTasks.length === 0 ? (
+                        ) : stageSubTasks.length === 0 ? (
                             <p className="text-xs text-gray-400 italic">Belum ada sub-task.</p>
                         ) : (
-                            subTasks.map(renderSubTask)
+                            stageSubTasks.map(renderSubTask)
                         )}
                         {canUpdate && (
                             <div className="flex gap-2 pt-2 border-t border-dashed border-gray-200">
