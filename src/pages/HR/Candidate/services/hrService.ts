@@ -29,6 +29,16 @@ export class candidateService {
     return unwrapList<Candidate>(`${HRM}/candidates/get`, (req || {}) as Record<string, unknown>);
   }
 
+  static async getListWithMeta(req?: CandidateListRequest): Promise<{ data: Candidate[]; pagination?: any; candidate_status_offering_count?: Record<string, number> }>{
+    const raw = await apiPost<any>(`${HRM}/candidates/get`, (req || {}) as Record<string, unknown>);
+    const d = raw?.data?.data;
+    return {
+      data: d?.data || [],
+      pagination: d?.pagination,
+      candidate_status_offering_count: d?.candidate_status_offering_count,
+    };
+  }
+
   static async createMultipart(formData: FormData): Promise<ApiDetailResponse<Candidate>> {
     const response = await apiPostMultipart<ApiDetailResponse<Candidate>>(`${HRM}/candidates/create`, formData);
     return response.data;
