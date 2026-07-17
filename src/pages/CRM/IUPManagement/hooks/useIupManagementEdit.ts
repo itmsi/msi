@@ -249,6 +249,7 @@ export const useIupManagementEdit = () => {
                     area_name: iup.area_name || '',
                     iup_zone_name: iup.iup_zone_name || '',
                     iup_segment_id: iup.iup_segment_id || '',
+                    iup_id: iup.iup_id || id,
                 });
                 
             } else {

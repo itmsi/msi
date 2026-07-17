@@ -27,6 +27,7 @@ interface IupContractorSelectProps {
     disabled?: boolean;
     disabledContractor?: boolean;
     className?: string;
+    hideIup?: boolean;
     
     // Layout props
     layout?: 'horizontal' | 'vertical';
@@ -62,6 +63,7 @@ const IupContractorSelect: React.FC<IupContractorSelectProps> = ({
     disabled = false,
     disabledContractor = true,
     className = "",
+    hideIup = false,
     
     // Layout props
     layout = 'horizontal',
@@ -215,7 +217,7 @@ const IupContractorSelect: React.FC<IupContractorSelectProps> = ({
     return (
         <div className={wrapperClass}>
             {/* IUP Selection */}
-            <div>
+            <div className={`${hideIup ? 'hidden' : ''}`}>
                 {iupLabel !== '' && (
                     <Label>
                         {iupLabel} {iupRequired && <span className="text-red-500">*</span>}

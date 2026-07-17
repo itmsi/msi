@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import { FaPencilAlt, FaCheck, FaTimes } from 'react-icons/fa';
 import TinyMceEditor from './TinyMceEditor';
+import Label from '../Label';
+import Button from '@/components/ui/button/Button';
 
 interface EditableFieldProps {
     value: string;
@@ -46,21 +48,21 @@ const EditableField: React.FC<EditableFieldProps> = ({
         return (
             <div>
                 <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-sm text-gray-700 font-medium">
+                    <Label>
                         {label}
-                    </label>
+                    </Label>
                     {!disabled && (
-                        <button
-                            type="button"
+                        <Button
+                            variant="outline"
                             onClick={handleEdit}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 hover:text-gray-800 transition-colors"
+                            className="gap-2 px-2.5 py-1 text-xs font-medium text-primary border border-primary rounded-md hover:bg-primary/20 transition-colors"
                         >
                             <FaPencilAlt className="w-3 h-3" />
                             Edit
-                        </button>
+                        </Button>
                     )}
                 </div>
-                <div className="w-full min-h-[100px] p-4 bg-gray-50 border border-gray-200 rounded-lg prose prose-sm max-w-none text-gray-700">
+                <div className="w-full min-h-[100px] p-4 bg-gray-50 border border-gray-200 rounded-lg prose max-w-none text-gray-700 reset-content">
                     {value ? (
                         <div dangerouslySetInnerHTML={{ __html: value }} />
                     ) : (
@@ -79,22 +81,22 @@ const EditableField: React.FC<EditableFieldProps> = ({
                     {label}
                 </label>
                 <div className="flex items-center gap-2">
-                    <button
-                        type="button"
+                    <Button
+                        variant="outline"
                         onClick={handleCancel}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-gray-100 transition-colors"
+                        className="gap-2 px-2.5 py-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:text-red-800 transition-colors"
                     >
                         <FaTimes className="w-3 h-3" />
                         Cancel
-                    </button>
-                    <button
-                        type="button"
+                    </Button>
+                    <Button
+                        variant="outline"
                         onClick={handleDone}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 transition-colors"
+                        className="gap-2 px-2.5 py-1 text-xs font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:text-green-800 transition-colors"
                     >
                         <FaCheck className="w-3 h-3" />
                         Done
-                    </button>
+                    </Button>
                 </div>
             </div>
             <TinyMceEditor

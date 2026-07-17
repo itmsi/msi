@@ -1032,3 +1032,22 @@ p {
 .checkbox input[type=checkbox]:checked + svg .check {
   stroke-dashoffset: 0;
 }
+.reset-content h1,
+.reset-content h2,
+.reset-content h3 {
+  font-size: revert;
+  font-weight: revert;
+  margin: revert;
+  font-family: var(--font-primary-bold);
+}
+
+.reset-content ul,
+.reset-content ol {
+  list-style: revert;
+  padding-left: 1.5rem;
+  font-family: var(--font-primary);
+}
+
+.reset-content p {
+  font-family: var(--font-primary);
+}
