@@ -98,8 +98,11 @@ export default function IUPForm({ formData, errors, onSelectChange }: IUPFormPro
                 <div>
                     <Label>Latitude</Label>
                     <Input
+                        name="iup_latitude"
+                        type="number"
+                        step={0.000001}
                         value={formData.iup_latitude || ''}
-                        readonly
+                        onChange={(e) => onSelectChange('iup_latitude', e.target.value)}
                         placeholder="Pin location from map"
                     />
                 </div>
@@ -107,8 +110,11 @@ export default function IUPForm({ formData, errors, onSelectChange }: IUPFormPro
                 <div>
                     <Label>Longitude</Label>
                     <Input
+                        name="iup_longitude"
+                        type="number"
+                        step={0.000001}
                         value={formData.iup_longitude || ''}
-                        readonly
+                        onChange={(e) => onSelectChange('iup_longitude', e.target.value)}
                         placeholder="Pin location from map"
                     />
                 </div>

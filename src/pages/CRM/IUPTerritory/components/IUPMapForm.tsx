@@ -59,7 +59,7 @@ export default function IUPMapForm({ initialGeo, onChange }: Props) {
             </div>
             <BaseMap
                 center={center}
-                height="40vh"
+                height="700px"
                 zoom={pin ? 14 : DEFAULT_ZOOM}
             >
                 <ClickToPlacePin onPlace={handlePlacePin} />

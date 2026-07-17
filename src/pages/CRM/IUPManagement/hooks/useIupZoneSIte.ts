@@ -39,6 +39,7 @@ export const useIupZoneSIte = () => {
                         name: item.iup_zona_site_name,
                         evidence: {
                             iup_zona_site_date_last_survey: item.iup_zona_site_date_last_survey?.slice(0, 10) ?? '',
+                            iup_zona_site_name: item.iup_zona_site_name ?? '',
                             iup_zona_site_description: item.iup_zona_site_description ?? '',
                             fileLinks: item.iup_zona_site_file?.length
                                 ? item.iup_zona_site_file.map(f => f.file_link)
@@ -84,7 +85,7 @@ export const useIupZoneSIte = () => {
 
             const payload: ZonaSitePayload = {
                 iup_id: id,
-                iup_zona_site_name: zone.name,
+                iup_zona_site_name: zone?.evidence?.iup_zona_site_name || zone.name,
                 iup_zona_site_description: zone.evidence.iup_zona_site_description,
                 iup_zona_site_date_last_survey: zone.evidence.iup_zona_site_date_last_survey,
                 iup_zona_site_file: zone.evidence.fileLinks

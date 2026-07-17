@@ -5,6 +5,7 @@ import EditableField from '@/components/form/editor/EditableField';
 import { DatePickerField } from '@/components/datepicker/DatePickerField';
 import { LuX, LuPlus, LuCheck } from 'react-icons/lu';
 import moment from 'moment';
+import Input from '@/components/form/input/InputField';
 
 interface EvidenceFormProps {
     formData: any;
@@ -24,6 +25,19 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({ formData, onChangeFi
 
     return (
         <div className="rounded-lg border border-slate-300 p-3 space-y-3 font-primary">
+            <div>
+                <Label htmlFor="name" className="gap-1">
+                    Zone Name
+                </Label>
+                <Input
+                    id="name"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-slate-500 placeholder:text-slate-600"
+                    placeholder="Zone Title"
+                    value={formData.iup_zona_site_name}
+                    onChange={(e) => onChangeField("iup_zona_site_name", e.target.value)}
+                    hint={errors.iup_zona_site_name}
+                />
+            </div>
             <div>
                 <Label>
                     Link File

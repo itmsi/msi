@@ -1036,7 +1036,7 @@ p {
 .reset-content h2,
 .reset-content h3 {
   font-size: revert;
-  font-weight: revert;
+  font-weight: normal;
   margin: revert;
   font-family: var(--font-primary-bold);
 }
@@ -1050,4 +1050,8 @@ p {
 
 .reset-content p {
   font-family: var(--font-primary);
+}
+.reset-content strong {
+  font-weight: normal;
+  font-family: var(--font-primary-bold);
 }
