@@ -159,8 +159,7 @@ export const useIupVisit = () => {
         setLoading(true);
         try {
             const res: VisitHistoryResponse = await IupService.getIupVisit({
-                // iup_id: id,
-                iup_id: '',
+                iup_id: id,
                 sort_by: 'updated_at',
                 sort_order: 'desc'
             });
