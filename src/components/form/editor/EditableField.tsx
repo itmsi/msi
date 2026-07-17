@@ -13,6 +13,8 @@ interface EditableFieldProps {
     disabled?: boolean;
     error?: string;
     id: string;
+    showAction?: boolean;
+    editing?: boolean;
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({
@@ -24,8 +26,10 @@ const EditableField: React.FC<EditableFieldProps> = ({
     disabled = false,
     error,
     id,
+    showAction = true,
+    editing = false
 }) => {
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(editing);
     const snapshotRef = useRef<string>('');
 
     const handleEdit = () => {
@@ -76,6 +80,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
 
     return (
         <div>
+            {showAction && (
             <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-sm text-gray-700 font-medium">
                     {label}
@@ -99,6 +104,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
                     </Button>
                 </div>
             </div>
+            )}
             <TinyMceEditor
                 id={id}
                 value={value}

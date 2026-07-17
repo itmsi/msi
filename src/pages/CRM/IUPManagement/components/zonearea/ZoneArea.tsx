@@ -9,6 +9,7 @@ import { useIupZoneSIte } from '../../hooks/useIupZoneSIte';
 export interface Evidence {
     iup_zona_site_date_last_survey: string;
     iup_zona_site_description: string;
+    iup_zona_site_name?: string;
     fileLinks: string[];
 }
 
@@ -19,7 +20,7 @@ export interface Zone {
     evidence: Evidence;
 }
 
-const EMPTY_EVIDENCE: Evidence = { iup_zona_site_date_last_survey: '', iup_zona_site_description: '', fileLinks: [''] };
+const EMPTY_EVIDENCE: Evidence = { iup_zona_site_date_last_survey: '', iup_zona_site_description: '', iup_zona_site_name: '', fileLinks: [''] };
 
 export const DEFAULT_ZONES: Zone[] = [
     "PIT (Area Tambang)",
