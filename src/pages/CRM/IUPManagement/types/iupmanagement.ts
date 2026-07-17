@@ -145,14 +145,6 @@ export interface Contractor {
 
 // ================================
 // ZONE AREA
-export interface IupZonaSiteRequest {
-    page: number;
-    limit: number;
-    sort_order: 'asc' | 'desc' | '';
-    sort_by?: 'updated_at' | 'created_at' | '';
-    search?: string;
-    iup_id?: string;
-}
 // Reusable audit fields
 export interface AuditFields {
     created_at?: string;
@@ -175,6 +167,7 @@ export interface IupZonaSiteItem extends AuditFields {
     iup_id: string;
     iup_zona_site_name: string;
     iup_zona_site_date_last_survey: string;
+    iup_zona_site_description: string;
     iup_zona_site_file: IupZonaSiteFile[];
 }
 
@@ -219,7 +212,194 @@ export interface ZonaSiteFilePayload {
 export interface ZonaSitePayload {
     iup_id: string;
     iup_zona_site_name: string;
+    iup_zona_site_description: string;
     iup_zona_site_date_last_survey: string; // format: YYYY-MM-DD
     iup_zona_site_file: ZonaSiteFilePayload[];
 }
+export interface ZoneValidationErrors {
+    iup_zona_site_date_last_survey?: string;
+}
+// ============================================
+// Types untuk modul IUP RKAB
+// ============================================
+
+export interface IupRkab {
+    iup_rkab_id: string;
+    iup_id: string;
+    iup_rkab_year: string;
+    iup_rkab_current_production: string;
+    iup_rkab_target_production: string;
+    created_at?: string;
+    created_by?: string;
+    updated_at?: string;
+    updated_by?: string;
+    deleted_at?: string | null;
+    deleted_by?: string | null;
+    is_delete?: boolean;
+}
+
+
+// ---------- GET (list) ----------
+export interface payloadRequest {
+    page: number;
+    limit: number;
+    sort_order: 'asc' | 'desc' | '';
+    sort_by?: 'updated_at' | 'created_at' | '';
+    search?: string;
+    iup_id?: string;
+}
+
+export interface GetIupRkabResponse {
+    success: boolean;
+    data: IupRkab[];
+    pagination: Pagination;
+}
+
+// ---------- CREATE ----------
+export interface CreateIupRkabPayload {
+    iup_id: string;
+    iup_rkab_year: string;
+    iup_rkab_current_production: string;
+    iup_rkab_target_production: string;
+}
+
+// ---------- UPDATE ----------
+// Struktur body sama dengan create, dibuat alias agar jelas maksudnya
+export type UpdateIupRkabPayload = CreateIupRkabPayload;
+
+// Form state type — new entries belum punya iup_rkab_id
+export interface IupRkabFormItem {
+    iup_rkab_id?: string;
+    iup_rkab_year: string;
+    iup_rkab_current_production: string;
+    iup_rkab_target_production: string;
+}
+
+// ---------- Response generik untuk create/update/delete ----------
+export interface IupRkabResponse {
+    success: boolean;
+    message?: string;
+    data?: IupRkab;
+}
+// ============================================
+// Types untuk modul IUP RKAB UNIT
+// ============================================
+export interface IupBrandUnit {
+    iup_brand_unit_id: string;
+    iup_id: string;
+    company_name: string | null;
+    iup_brand_unit_name: string;
+    iup_brand_unit_qty: string;
+}
+
+export interface IupRkab {
+    iup_rkab_id: string;
+    iup_id: string;
+    iup_rkab_year: string;
+    iup_rkab_current_production: string;
+    iup_rkab_target_production: string;
+}
+
+export interface IupContractor {
+    iup_contractor_id: string;
+    iup_id: string;
+    iup_contractor_name: string;
+}
+
+export interface IupRkabUnitResponse {
+    success: boolean;
+    iup_brand_units: IupBrandUnit[];
+    iup_rkabs: IupRkab[];
+    iup_contractors: IupContractor[];
+}
+export interface BrandUnitForm {
+    name: string;
+    qty: number;
+}
+export interface ContractorForm {
+    id?: string;
+    name: string;
+}
+
+export interface RkabForm {
+    year: number;
+    currentProduction: number;
+    targetProduction: number;
+}
+
+export interface BrandUnitFormPayload {
+    iup_brand_unit_name: string;
+    iup_brand_unit_qty: number;
+}
+export interface RkabFormPayload {
+    iup_rkab_year: number;
+    iup_rkab_current_production: number;
+    iup_rkab_target_production: number;
+}
+export interface ContractorFormPayload {
+    iup_contractor_id?: string;
+    iup_contractor_name: string;
+}
+export interface IupRkabUnitForm {
+    iup_id: string;
+    iup_brand_units: BrandUnitFormPayload[];
+    iup_rkabs: RkabFormPayload[];
+    iup_contractors: ContractorFormPayload[];
+}
+export interface BrandUnitErrors {
+    name?: string;
+    qty?: string;
+}
+
+export interface RkabErrors {
+    year?: string;
+    currentProduction?: string;
+    targetProduction?: string;
+}
+export interface ContractorErrors {
+    name?: string;
+}
+
+// ============================
+// HISTORY VISIT
+
+export interface VisitImage {
+    file_link: string;
+}
+ 
+export interface VisitHistoryItem {
+    iup_visit_history_id: string;
+    iup_id: string;
+    employee_id: string | null;
+    employee_name: string;
+    date: string;
+    title: string;
+    phone_number: string;
+    image: VisitImage[];
+    description: string;
+    latitude: string | null;
+    longitude: string | null;
+}
+ 
+export interface VisitPayload {
+    iup_visit_history_id?: string;
+    iup_id: string;
+    title: string;
+    date: string;
+    employee_id: string;
+    phone_number: string;
+    latitude: string;
+    longitude: string;
+    image: VisitImage[];
+    description: string;
+}
+ 
+export interface VisitHistoryResponse {
+    success: boolean;
+    data: VisitHistoryItem[];
+    pagination: Pagination;
+}
+
+
+
 

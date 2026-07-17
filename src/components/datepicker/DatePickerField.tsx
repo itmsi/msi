@@ -80,7 +80,7 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
                             onClick={() => setShowDatePicker(!showDatePicker)}
                         >
                             <span className={currentDate ? 'text-gray-700' : 'text-gray-400'}>
-                                {currentDate ? formatDisplayValue(String(value)) : (placeholder || `Pilih ${label.toLowerCase()}`)}
+                                {currentDate ? formatDisplayValue(String(value)) : (placeholder || `Select ${label.toLowerCase()}`)}
                             </span>
                             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -97,7 +97,7 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = ({
                             </div>
                         )}
                     </div>
-                    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+                    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
                 </>
             )}
         </div>

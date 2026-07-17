@@ -1,4 +1,4 @@
-import Input from '@/components/form/input/InputField';
+import React from 'react';
 import Label from '@/components/form/Label';
 import Button from '@/components/ui/button/Button';
 import EditableField from '@/components/form/editor/EditableField';
@@ -14,14 +14,16 @@ interface EvidenceFormProps {
     onRemoveFileLink: (idx: number) => void;
     handleSubmit: () => void;
     isSubmitting?: boolean;
+    errors?: Record<string, string>;
 }
 
-export const EvidenceForm: React.FC<EvidenceFormProps> = ({ formData, onChangeField, onChangeFileLink, onAddFileLink, onRemoveFileLink, isSubmitting, handleSubmit }) => {
+export const EvidenceForm: React.FC<EvidenceFormProps> = ({ formData, onChangeField, onChangeFileLink, onAddFileLink, onRemoveFileLink, isSubmitting, handleSubmit, errors = {} }) => {
     const handleDateChange = (name: string, value: string) => {
         onChangeField(name, value);
     };
+
     return (
-        <div className="rounded-lg border bg-gray-50 border-slate-300 p-3 space-y-3 font-primary">
+        <div className="rounded-lg border border-slate-300 p-3 space-y-3 font-primary">
             <div>
                 <Label>
                     Link File
@@ -55,27 +57,27 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({ formData, onChangeFi
                     className="mt-1.5 flex items-center gap-1 text-xs hover:bg-transparent p-0 text-green-700"
                 >
                     <LuPlus size={12} />
-                    Tambah link file
+                    Add file link
                 </Button>
             </div>
             <div>
                 <EditableField
-                    id="keterangan"
-                    label="Keterangan"
-                    value={formData.keterangan}
-                    onChange={(value: string) => onChangeField('keterangan', value)}
-                    placeholder="Catatan tambahan..."
+                    id="iup_zona_site_description"
+                    label="Remarks"
+                    value={formData.iup_zona_site_description}
+                    onChange={(value: string) => onChangeField('iup_zona_site_description', value)}
+                    placeholder="Remarks..."
                     disabled={isSubmitting}
                     // error={errors.keterangan}
                 />
             </div>
-            <div className="grid lg:grid-cols-5 md:grid-cols-2 gap-4">
+            <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-4">
                 <DatePickerField
                     name="iup_zona_site_date_last_survey"
-                    label="Tanggal Kunjungan"
+                    label="Visit Date"
                     required
                     value={formData.iup_zona_site_date_last_survey}
-                    // error={errors.iup_zona_site_date_last_survey}
+                    error={errors.iup_zona_site_date_last_survey}
                     onChange={handleDateChange}
                     parseValueToDate={(val) => moment(val, 'YYYY-MM-DD').isValid() ? moment(val, 'YYYY-MM-DD').toDate() : null}
                     convertDateToValue={(date) => moment(date).format('YYYY-MM-DD')}
@@ -87,10 +89,11 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({ formData, onChangeFi
             <div className="flex items-center justify-end gap-2 pt-1">
                 <Button 
                     onClick={handleSubmit}
-                    className="px-6 flex items-center gap-2 rounded-full"
+                    disabled={isSubmitting}
+                    className="rounded-[50px] focus:ring-2 focus:ring-offset-2 py-2"
                 >
                     <LuCheck size={14} />
-                    Simpan
+                    Save
                 </Button>
             </div>
         </div>

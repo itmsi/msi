@@ -12,6 +12,7 @@ import { FaIndustry, FaMapMarkedAlt, FaHistory } from 'react-icons/fa';
 import TabZoneArea from './components/TabZoneArea';
 import { GiMineTruck } from 'react-icons/gi';
 import TabContractorUnit from './components/TabContractorUnit';
+import TabHistoryVisit from './components/TabHistoryVisit';
 
 
 const EditIupManagement: React.FC = () => {
@@ -48,7 +49,7 @@ const EditIupManagement: React.FC = () => {
         handleSubmit
     } = useIupManagementEdit();
 
-    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit'>('zone_iup');
+    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit'>('history_visit');
 
     // Show loading spinner while data is loading
     if (isLoading) {
@@ -177,7 +178,9 @@ const EditIupManagement: React.FC = () => {
                 {activeTab === 'zone_iup' && (<>
                     <TabZoneArea />
                 </>)}
-                {activeTab === 'history_visit' && (<></>)}
+                {activeTab === 'history_visit' && (<>
+                    <TabHistoryVisit />
+                </>)}
             </div>
         </>
     );
