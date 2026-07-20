@@ -1,5 +1,5 @@
 import { apiDelete, apiGet, apiPost, apiPut, ApiResponse } from '@/helpers/apiHelper';
-import { IupItemDetails, IupRequest, IupListResponse, IupManagementFormData, IupZonaSiteResponse, ZonaSitePayload, payloadRequest, GetIupRkabResponse, CreateIupRkabPayload, IupRkabUnitResponse, IupRkabUnitForm, VisitHistoryResponse, VisitPayload } from '../types/iupmanagement';
+import { IupItemDetails, IupRequest, IupListResponse, IupManagementFormData, IupZonaSiteResponse, ZonaSitePayload, payloadRequest, GetIupRkabResponse, CreateIupRkabPayload, IupRkabUnitResponse, IupRkabUnitForm, VisitHistoryResponse, VisitPayload, GetIupBrandUnitResponse, IupBrandUnitPayload } from '../types/iupmanagement';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_IS_ADMIN = import.meta.env.VITE_PARAM_IS_ADMIN;
@@ -138,6 +138,34 @@ export class IupService {
     
     static async deleteIupVisit(id: string): Promise<any> {
         return await apiDelete(`${API_BASE_URL}/crm/iup_visit_history/${id}`);
+    }
+    
+    // Unit
+    static async getIupUnit(params: Partial<payloadRequest> = {}): Promise<GetIupBrandUnitResponse> {
+        const requestData: payloadRequest = {
+            page: 1,
+            limit: 10,
+            sort_by: "updated_at",
+            sort_order: 'desc',
+            ...params
+        };
+        
+        const response = await apiPost(`${API_BASE_URL}/crm/iup_brand_unit/get`, requestData as Record<string, any>);
+        return response.data as GetIupBrandUnitResponse;
+    }
+
+    static async createIupUnit(data: IupBrandUnitPayload): Promise<any> {
+        const response = await apiPost(`${API_BASE_URL}/crm/iup_brand_unit/create`, data as Record<string, any>);
+        return response.data;
+    }
+
+    static async updateIupUnit(id: string, data: IupBrandUnitPayload): Promise<any> {
+        const response = await apiPut(`${API_BASE_URL}/crm/iup_brand_unit/${id}`, data as Record<string, any>);
+        return response.data;
+    }
+    
+    static async deleteIupUnit(id: string): Promise<any> {
+        return await apiDelete(`${API_BASE_URL}/crm/iup_brand_unit/${id}`);
     }
 
 }

@@ -238,21 +238,6 @@ export interface ZoneValidationErrors {
 // Types untuk modul IUP RKAB
 // ============================================
 
-export interface IupRkab {
-    iup_rkab_id: string;
-    iup_id: string;
-    iup_rkab_year: string;
-    iup_rkab_current_production: string;
-    iup_rkab_target_production: string;
-    created_at?: string;
-    created_by?: string;
-    updated_at?: string;
-    updated_by?: string;
-    deleted_at?: string | null;
-    deleted_by?: string | null;
-    is_delete?: boolean;
-}
-
 
 // ---------- GET (list) ----------
 export interface payloadRequest {
@@ -272,10 +257,11 @@ export interface GetIupRkabResponse {
 
 // ---------- CREATE ----------
 export interface CreateIupRkabPayload {
+    iup_rkab_id?: string;
     iup_id: string;
     iup_rkab_year: string;
-    iup_rkab_current_production: string;
-    iup_rkab_target_production: string;
+    iup_rkab_current_production: string | number;
+    iup_rkab_target_production: string | number;
 }
 
 // ---------- UPDATE ----------
@@ -286,8 +272,8 @@ export type UpdateIupRkabPayload = CreateIupRkabPayload;
 export interface IupRkabFormItem {
     iup_rkab_id?: string;
     iup_rkab_year: string;
-    iup_rkab_current_production: string;
-    iup_rkab_target_production: string;
+    iup_rkab_current_production: string | number;
+    iup_rkab_target_production: string | number;
 }
 
 // ---------- Response generik untuk create/update/delete ----------
@@ -416,5 +402,30 @@ export interface VisitHistoryResponse {
 }
 
 
+export type IupBrandUnitItem = {
+    iup_brand_unit_id: string;
+    iup_id: string;
+    company_name: string | null;
+    iup_brand_unit_name: string;
+    iup_brand_unit_qty: string;
+};
 
+export type GetIupBrandUnitResponse = {
+    success: boolean;
+    data: IupBrandUnitItem[];
+    pagination: Pagination;
+};
+
+export type IupBrandUnitPayload = {
+    iup_brand_unit_id?: string;
+    iup_id: string;
+    iup_brand_unit_name: string;
+    iup_brand_unit_qty: string | number;
+};
+export type IupBrandUnitForm = {
+    brandId?: string;
+    iupId: string;
+    name: string;
+    qty: number;
+};
 

@@ -198,6 +198,7 @@ export const useIupVisit = () => {
             }
         },[visits.length, page, fetchVisits]
     );
+    
     const fillCurrentLocation = useCallback(() => {
         if (!navigator.geolocation) {
             toast.error("Geolocation tidak didukung oleh browser ini.");
