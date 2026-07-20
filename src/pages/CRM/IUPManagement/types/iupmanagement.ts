@@ -162,13 +162,14 @@ export interface IupZonaSiteFile {
 }
 
 // Main item
-export interface IupZonaSiteItem extends AuditFields {
+// export interface IupZonaSiteItem extends AuditFields {
+export interface IupZonaSiteItem {
     iup_zona_site_id: string;
     iup_id: string;
     iup_zona_site_name: string;
     iup_zona_site_date_last_survey: string;
     iup_zona_site_description: string;
-    iup_zona_site_file: IupZonaSiteFile[];
+    iup_zona_site_file: IupZonaSiteFile[] | [];
 }
 
 // Final response
@@ -202,6 +203,19 @@ export interface ZonaSiteView {
     lastSurveyDate: Date;
     files: string[];
 }
+export interface Evidence {
+    iup_zona_site_date_last_survey: string;
+    iup_zona_site_description: string;
+    iup_zona_site_name?: string;
+    fileLinks: { file_link: string }[];
+}
+
+export interface Zone {
+    id: string;
+    iup_zona_site_id?: string;
+    name: string;
+    evidence: Evidence;
+}
 
 // ==================
 // payload Create GET ZONE
@@ -210,6 +224,7 @@ export interface ZonaSiteFilePayload {
 }
 
 export interface ZonaSitePayload {
+    iup_zona_site_id?: string;
     iup_id: string;
     iup_zona_site_name: string;
     iup_zona_site_description: string;

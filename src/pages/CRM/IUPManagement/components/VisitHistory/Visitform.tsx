@@ -94,7 +94,7 @@ const VisitForm: React.FC<VisitFormProps> = ({
                     Cancel
                 </Button>
             </div>
-            <div className="relative px-5 py-4 space-y-3">
+            <div className="relative px-10 py-4 space-y-3">
                 <div>
                     <Label htmlFor="title">Title</Label>
                     <Input
