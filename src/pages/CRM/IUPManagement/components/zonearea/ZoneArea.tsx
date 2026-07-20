@@ -1,118 +1,40 @@
-import React, { useState } from 'react';
-import { LuX, LuPlus, LuCheck, LuChevronDown, LuChevronRight, LuTrash2 } from 'react-icons/lu';
-import Button from '../../../../../components/ui/button/Button';
+import React from 'react';
+import { LuPlus } from 'react-icons/lu';
 import { EvidenceForm } from './EvidenceForm';
-import LoadingSpinner from '@/components/common/Loading';
-import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import { useIupZoneSIte } from '../../hooks/useIupZoneSIte';
-
-export interface Evidence {
-    iup_zona_site_date_last_survey: string;
-    iup_zona_site_description: string;
-    iup_zona_site_name?: string;
-    fileLinks: string[];
-}
-
-export interface Zone {
-    id: string;
-    iup_zona_site_id?: string;
-    name: string;
-    evidence: Evidence;
-}
-
-const EMPTY_EVIDENCE: Evidence = { iup_zona_site_date_last_survey: '', iup_zona_site_description: '', iup_zona_site_name: '', fileLinks: [''] };
-
-export const DEFAULT_ZONES: Zone[] = [
-    "PIT (Area Tambang)",
-    "MHR (Main Haul Road)",
-    "ETO (Exportable Transit Ore)",
-    "EFO (Exportable From Ore)",
-    "Jetty (Dermaga Muat)",
-    "Service Workshop",
-    "Warehouse",
-    "Residential Area",
-    "Unit Parking Lot",
-].map((name, i) => ({ id: `zone-${i}`, name, evidence: { ...EMPTY_EVIDENCE, fileLinks: [''] } }));
-
-let idCounter = 1000;
-const genId = (prefix: string) => `${prefix}-${idCounter++}`;
+import Zonecard from './Zonecard';
 
 const ZoneArea: React.FC = () => {
     const {
         zones,
-        updateZones,
-        removeZone,
-        isLoading,
-        handleSubmitZone,
-        handleConfirmDeleted,
-        confirmDelete, 
-        setConfirmDelete,
-        isSubmitting,
-        zoneErrors,
+        // pagination,
+        // page,
+        // setPage,
+        // loading,
+        submitting,
+        deletingId,
+        deleteZone,
+
+        showForm,
+        editingId,
+        form,
+        errors,
+        openCreateForm,
+        openEditForm,
+        closeForm,
+        updateField,
+        updateFileLink,
+        addFileLinkRow,
+        removeFileLinkRow,
+
+        submitForm,
     } = useIupZoneSIte();
 
-    const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-    const [showAddZone, setShowAddZone] = useState(false);
-    const [newZoneName, setNewZoneName] = useState("");
-    
-
-    const toggleZone = (zoneId: string) => {
-        setExpanded((prev) => ({ ...prev, [zoneId]: !prev[zoneId] }));
-    };
-
-    const addZone = () => {
-        const name = newZoneName.trim();
-        if (!name) return;
-        updateZones([...zones, { id: genId('zone'), name, evidence: { ...EMPTY_EVIDENCE, fileLinks: [''] } }]);
-        setNewZoneName('');
-        setShowAddZone(false);
-    };
-
-    // ---- Evidence (langsung update field di zona terkait) ----
-    const updateEvidenceField = (zoneId: string, field: string, value: string) => {
-        updateZones(
-            zones.map((z) =>
-                z.id === zoneId ? { ...z, evidence: { ...z.evidence, [field]: value } } : z
-            )
-        );
-    };
-
-    const updateFileLink = (zoneId: string, idx: number, value: string) => {
-        updateZones(
-            zones.map((z) => {
-                if (z.id !== zoneId) return z;
-                const links = [...z.evidence.fileLinks];
-                links[idx] = value;
-                return { ...z, evidence: { ...z.evidence, fileLinks: links } };
-            })
-        );
-    };
-
-    const addFileLinkRow = (zoneId: string) => {
-        updateZones(
-            zones.map((z) =>
-                z.id === zoneId
-                ? { ...z, evidence: { ...z.evidence, fileLinks: [...z.evidence.fileLinks, ''] } }
-                : z
-            )
-        );
-    };
-
-    const removeFileLinkRow = (zoneId: string, idx: number) => {
-        updateZones(
-            zones.map((z) => {
-                if (z.id !== zoneId) return z;
-                const links = z.evidence.fileLinks.filter((_, i) => i !== idx);
-                return { ...z, evidence: { ...z.evidence, fileLinks: links.length ? links : [''] } };
-            })
-        );
-    };
-
-    if (isLoading) {
-        return <div className="bg-white w-full rounded-2xl border border-slate-300 min-h-60 flex items-center justify-center relative">
-            <LoadingSpinner />
-        </div>;
-    }
+    // if (loading) {
+    //     return <div className="bg-white w-full rounded-2xl border border-slate-300 min-h-60 flex items-center justify-center relative">
+    //         <LoadingSpinner />
+    //     </div>;
+    // }
 
 
     return (
@@ -130,55 +52,69 @@ const ZoneArea: React.FC = () => {
                 </p>
             </div>
 
-            {/* Daftar zona */}
-            <div className="divide-y divide-slate-300">
-                {zones.map((zone) => {
-                    const isOpen = !!expanded[zone.id];
-                    return (
-                        <div key={zone.id}>
-                            {/* Zone header row */}
-                            <div
-                                className={`pointer flex items-center justify-between gap-2 px-5 py-3 ${isOpen ? 'bg-primary hover:bg-primary text-white ' : ''} hover:bg-primary transition-colors hover:*:text-white cursor-pointer`}
-                                onClick={() => toggleZone(zone.id)}
-                            >
-                                {isOpen ? (
-                                    <LuChevronDown size={16} className={`${isOpen ? 'text-white' : 'text-slate-500'} shrink-0`} />
-                                ) : (
-                                    <LuChevronRight size={16} className={`${isOpen ? 'text-white' : 'text-slate-500'} shrink-0`}  />
-                                )}
-                                <span className="flex-1 text-sm font-medium">{zone.name}</span>
-                                <div onClick={(e) => e.stopPropagation()} title="Hapus zona">
-                                    <Button
-                                        variant="transparent"
-                                        onClick={() => removeZone(zone)}
-                                        className={`p-1 rounded hover:bg-red-500/10 hover:text-red-400 transition-colors ${isOpen ? 'text-white' : 'text-slate-600'} shrink-0`}
-                                    >
-                                        <LuTrash2 size={14} />
-                                    </Button>
-                                </div>
-                            </div>
+            {(!zones || zones.length === 0) ? (
+                <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
+                    No zona area available. Click &ldquo;Add zone&rdquo; to add one.
+                </div>
+            ) : (
+                <div className="divide-y divide-slate-300">
+                    {zones.map((zone) =>
+                        showForm && editingId === zone.iup_zona_site_id ? (
+                            <EvidenceForm
+                                key={zone.iup_zona_site_id}
+                                editingId={editingId}
+                                form={form}
+                                errors={errors}
+                                submitting={submitting}
+                                updateField={updateField}
+                                updateFileLink={updateFileLink}
+                                addFileLinkRow={addFileLinkRow}
+                                removeFileLinkRow={removeFileLinkRow}
+                                submitForm={submitForm}
+                                closeForm={closeForm}
+                            />
+                        ) : (
+                            <Zonecard
+                                key={zone.iup_zona_site_id}
+                                zone={zone}
+                                onEdit={openEditForm}
+                                onDelete={deleteZone}
+                                isDeleting={deletingId === zone.iup_zona_site_id}
+                            />
+                        )
+                    )}
+                </div>
+            )}
 
-                            {isOpen && (
-                                <div className="px-5 py-4">
-                                    <EvidenceForm
-                                        formData={zone.evidence}
-                                        onChangeField={(field, value) => updateEvidenceField(zone.id, field, value)}
-                                        onChangeFileLink={(idx, value) => updateFileLink(zone.id, idx, value)}
-                                        onAddFileLink={() => addFileLinkRow(zone.id)}
-                                        onRemoveFileLink={(idx) => removeFileLinkRow(zone.id, idx)}
-                                        handleSubmit={() => handleSubmitZone(zone)}
-                                        isSubmitting={isSubmitting}
-                                        errors={zoneErrors?.[zone.id]}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
+            {showForm && !editingId && (<></>
+                // <EvidenceForm
+                //     editingId={editingId}
+                //     form={form}
+                //     errors={errors}
+                //     submitting={submitting}
+                //     updateField={updateField}
+                //     updateFileLink={updateFileLink}
+                //     addFileLinkRow={addFileLinkRow}
+                //     removeFileLinkRow={removeFileLinkRow}
+                //     submitForm={submitForm}
+                //     closeForm={closeForm}
+                // />
+            )}
+            {!showForm && !editingId && (
+            <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl">
+                <button
+                    type="button"
+                    onClick={openCreateForm}
+                    className="flex items-center gap-1.5 text-sm font-medium"
+                >
+                    <LuPlus size={16} className="text-primary" />
+                    Add Zona
+                </button>
             </div>
+            )}
 
             {/* Tambah zona */}
-            <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl ">
+            {/* <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl ">
                 {showAddZone ? (
                 <div className="flex items-center gap-2">
                     <input
@@ -217,9 +153,9 @@ const ZoneArea: React.FC = () => {
                     Tambah Zona
                 </button>
                 )}
-            </div>
+            </div> */}
 
-            <ConfirmationModal
+            {/* <ConfirmationModal
                 isOpen={confirmDelete.show}
                 onClose={() => setConfirmDelete({ show: false })}
                 onConfirm={handleConfirmDeleted}
@@ -230,7 +166,7 @@ const ZoneArea: React.FC = () => {
                 loading={isSubmitting}
                 size="md"
                 showIcon={false}
-            />
+            /> */}
         </div>
     );
 };

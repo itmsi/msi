@@ -167,7 +167,7 @@ export const useIupVisit = () => {
             setPagination(res.pagination);
         } catch (err) {
             console.error(err);
-            toast.error("Gagal memuat riwayat kunjungan.");
+            toast.error("Failed to load visit history.");
         } finally {
             setLoading(false);
         }
@@ -298,7 +298,7 @@ export const useIupVisit = () => {
         const validationResult = validateVisitForm(form);
         setErrors(validationResult);
         if (hasFormErrors(validationResult)) {
-            toast.error("Periksa kembali form, ada isian yang belum valid.");
+            toast.error("Please check the form, there are invalid fields.");
             return false;
         }
 

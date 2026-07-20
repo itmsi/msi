@@ -1,25 +1,19 @@
 import React, { useState } from "react";
-import { LuUser, LuPhone, LuMapPin, LuLink2, LuLoaderCircle, LuChevronDown, LuChevronRight, } from "react-icons/lu";
-import { VisitHistoryItem } from "../../types/iupmanagement";
+import { LuLink2, LuLoaderCircle, LuChevronDown, LuChevronRight, } from "react-icons/lu";
 import Button from "@/components/ui/button/Button";
 import { MdEdit, MdDeleteOutline } from "react-icons/md";
+import moment from "moment";
+import { IupZonaSiteItem } from "../../types/iupmanagement";
 
-const formatDate = (iso: string): string => {
-    if (!iso) return "-";
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
-};
-
-export interface VisitCardProps {
-    visit: VisitHistoryItem;
-    onEdit: (visit: VisitHistoryItem) => void;
+export interface ZonecardProps {
+    zone: IupZonaSiteItem;
+    onEdit: (zone: IupZonaSiteItem) => void;
     onDelete: (id: string) => void;
     isDeleting?: boolean;
 }
 
-const VisitCard: React.FC<VisitCardProps> = ({ 
-    visit, 
+const Zonecard: React.FC<ZonecardProps> = ({ 
+    zone, 
     onEdit, 
     onDelete, 
     isDeleting = false
@@ -28,14 +22,14 @@ const VisitCard: React.FC<VisitCardProps> = ({
     const toggleZone = (id: string) => {
         setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
     };
-    const isOpen = !!expanded[visit.iup_visit_history_id];
+    const isOpen = !!expanded[zone.iup_zona_site_id];
     return (
         <div className={`${
             isDeleting ? 'border-red-300 bg-red-50' : ''
         }`}>
             {/* Header — judul sebagai toggle accordion */}
             <div
-                onClick={() => toggleZone(visit.iup_visit_history_id)}
+                onClick={() => toggleZone(zone.iup_zona_site_id)}
                 className={`pointer flex items-center justify-between gap-2 px-5 py-3 ${isOpen ? 'bg-primary hover:bg-primary text-white ' : ''} group hover:bg-primary transition-colors hover:*:text-white cursor-pointer`}
             >
                 <div className="flex items-center gap-2 min-w-0">
@@ -45,8 +39,8 @@ const VisitCard: React.FC<VisitCardProps> = ({
                         <LuChevronRight size={20} className={`group-hover:text-white ${isOpen ? 'text-white' : 'text-slate-600'} shrink-0`}  />
                     )}
                     <div className={`min-w-0 group-hover:text-white ${isOpen ? 'text-white' : 'text-slate-600'}`}>
-                        <p className="flex-1 text-sm font-primary-bold">{visit.title}</p>
-                        <p className="flex-1 text-xs font-secondary">{formatDate(visit.date)}</p>
+                        <p className="flex-1 text-sm font-primary-bold">{zone.iup_zona_site_name}</p>
+                        <p className="flex-1 text-xs font-secondary">{moment(zone.iup_zona_site_date_last_survey).format("DD MMMM YYYY")}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
@@ -54,7 +48,7 @@ const VisitCard: React.FC<VisitCardProps> = ({
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                            onEdit(visit);
+                            onEdit(zone);
                         }}
                         className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-slate-800 text-slate-500 hover:text-slate-200 ${isOpen ? 'text-white' : 'text-slate-600'}`}
                     >
@@ -63,7 +57,7 @@ const VisitCard: React.FC<VisitCardProps> = ({
                     <Button
                         variant="outline"
                         onClick={() => {
-                            if (!isDeleting) onDelete(visit.iup_visit_history_id);
+                            if (!isDeleting) onDelete(zone.iup_zona_site_id);
                         }}
                         className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-red-500/10 text-slate-500 hover:text-red-400 ${isOpen ? 'text-white' : 'text-slate-600'}`}
                     >
@@ -75,35 +69,18 @@ const VisitCard: React.FC<VisitCardProps> = ({
             {isOpen && (
                 <div className="px-10 py-4 space-y-3">
                     <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-md text-slate-600">
-                        {(visit.employee_name || visit.employee_id) && (
+                        {(zone.iup_zona_site_name || '-') && (
                             <span className="flex items-center gap-1 text-gray-800 font-primary-bold text-md">
-                                <LuUser size={15}  />
-                                {visit.employee_name || visit.employee_id}
+                                {zone.iup_zona_site_name || '-'}
                             </span>
-                        )}
-                        {visit.phone_number && (
-                            <span className="flex items-center gap-1 text-slate-800 font-primary text-md">
-                                <LuPhone size={15} />
-                                {visit.phone_number}
-                            </span>
-                        )}
-                        {(visit.latitude || visit.longitude) && (
-                            <a 
-                                href={`https://www.google.com/maps/search/?api=1&query=${visit.latitude},${visit.longitude}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`flex items-center justify-center gap-1 px-3 py-1 text-md text-gray-800`}
-                            >
-                                <LuMapPin /> View Location
-                            </a>
                         )}
                     </div>
                     <div className="w-full min-h-[100px] p-4 bg-gray-50 border border-gray-200 rounded-lg prose max-w-none text-gray-700 reset-content">
-                        {visit.description && <div dangerouslySetInnerHTML={{ __html: visit.description }}></div>}
+                        {zone.iup_zona_site_description && <div dangerouslySetInnerHTML={{ __html: zone.iup_zona_site_description }}></div>}
                     </div>
-                    {visit.image.length > 0 && (
+                    {zone.iup_zona_site_file?.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
-                            {visit.image.map((img, i) => (
+                            {zone.iup_zona_site_file.map((img, i) => (
                                 <a
                                     key={i}
                                     href={img.file_link}
@@ -123,4 +100,4 @@ const VisitCard: React.FC<VisitCardProps> = ({
     );
 };
 
-export default VisitCard;
+export default Zonecard;

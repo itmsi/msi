@@ -1050,6 +1050,7 @@ p {
 
 .reset-content p {
   font-family: var(--font-primary);
+  margin: revert;
 }
 .reset-content strong {
   font-weight: normal;
