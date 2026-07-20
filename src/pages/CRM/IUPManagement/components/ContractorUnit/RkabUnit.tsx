@@ -1,32 +1,39 @@
 import React from "react";
 import { useIupRkabUnit } from "../../hooks/useIupRkabUnit";
 import BrandUnitSection from "./UnitSection";
-import RkabSection from "./RkabSection";
-import ContractorSection from "./ContractorSection";
+import RkabSection from "./RKAB_SINGLE";
+// import ContractorSection from "./ContractorSection";
 import FormActions from "@/components/form/FormActions";
 import { LoadingSpinner } from "@/components/common/Loading";
 
-const RkabUnit: React.FC = () => {
+import { CustomerInfo } from '../../types/iupmanagement';
+import CustomerInformation from "../CustomerInformation";
+// import RkabSection from "./RkabSection";
+interface RkabUnitProps {
+    customers: CustomerInfo[];
+}
+
+const RkabUnit: React.FC<RkabUnitProps> = ({ customers }) => {
     const {
         brandUnits,
-        rkabs,
+        // rkabs,
         brandUnitErrors,
-        rkabErrors,
+        // rkabErrors,
         loading,
         submitting,
         addBrandUnit,
         removeBrandUnit,
         updateBrandUnit,
-        addRkab,
-        removeRkab,
-        updateRkab,
+        // addRkab,
+        // removeRkab,
+        // updateRkab,
         handleSubmit,
 
-        contractors,
-        contractorErrors,
-        addContractor,
-        removeContractor,
-        updateContractor,
+        // contractors,
+        // contractorErrors,
+        // addContractor,
+        // removeContractor,
+        // updateContractor,
     } = useIupRkabUnit();
 
     if (loading) {
@@ -41,6 +48,8 @@ const RkabUnit: React.FC = () => {
         <div className="space-y-8">
             {/* {error && <p className="text-red-500 text-sm">{error}</p>} */}
 
+            {/* ===== Contractor Section ===== */}
+            <CustomerInformation customers={customers} /> 
             {/* ===== Brand Unit Section ===== */}
             <BrandUnitSection
                 brandUnits={brandUnits}
@@ -51,22 +60,22 @@ const RkabUnit: React.FC = () => {
             />
 
             {/* ===== RKAB Section ===== */}
-            <RkabSection
+            {/* <RkabSection
                 rkabs={rkabs}
                 rkabErrors={rkabErrors}
                 addRkab={addRkab}
                 removeRkab={removeRkab}
                 updateRkab={updateRkab}
-            />
+            /> */}
+            <RkabSection />
 
-            {/* ===== Contractor Section ===== */}
-            <ContractorSection
+            {/* <ContractorSection
                 contractors={contractors}
                 contractorErrors={contractorErrors}
                 addContractor={addContractor}
                 removeContractor={removeContractor}
                 updateContractor={updateContractor}
-            />
+            /> */}
 
             
             <FormActions

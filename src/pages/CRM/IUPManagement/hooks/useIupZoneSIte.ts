@@ -72,7 +72,10 @@ export const useIupZoneSIte = () => {
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    // const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; iup_zona_site_id?: string; name?: string }>({ show: false });
+    const [confirmDelete, setConfirmDelete] = useState<{ 
+        show: boolean; 
+        iup_zona_site_id?: string; 
+        name?: string }>({ show: false });
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const [showForm, setShowForm] = useState(false);
@@ -104,32 +107,31 @@ export const useIupZoneSIte = () => {
         fetchZoneSiteData();
     }, [fetchZoneSiteData]);
 
-    const deleteZone = useCallback(
-        async (id: string): Promise<boolean> => {
-            
-            // if (!confirmDelete.iup_zona_site_id) {
-            //     toast.error('Zona Area not found');
-            //     return;
-            // }
-            try {
-                setDeletingId(id);
-                await IupService.deleteIupZonaSite(id);
-                toast.success("Zone site has been deleted successfully.");
-                if (zones.length === 1 && page > 1) {
-                    setPage((p) => p - 1);
-                } else {
-                    await fetchZoneSiteData();
-                }
-                return true;
-            } catch (err) {
-                console.error(err);
-                toast.error("Failed to delete zone site.");
-                return false;
-            } finally {
-                setDeletingId(null);
+    const handleConfirmDeleted = async (): Promise<void> => {
+        console.log(confirmDelete)
+        if (!confirmDelete.iup_zona_site_id) {
+            toast.error('Zona Area not found');
+            return;
+        }
+        try {
+            setDeletingId(confirmDelete.iup_zona_site_id);
+            await IupService.deleteIupZonaSite(confirmDelete.iup_zona_site_id);
+            toast.success("Zone site has been deleted successfully.");
+            if (zones.length === 1 && page > 1) {
+                setPage((p) => p - 1);
+            } else {
+                await fetchZoneSiteData();
             }
-        },[zones.length, page, fetchZoneSiteData]
-    );
+            setConfirmDelete({show: false});
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to delete zone site.");
+            setConfirmDelete({show: false});
+        } finally {
+            setConfirmDelete({show: false});
+            setDeletingId(null);
+        }
+    };
 
     // ---- form helpers ----
     const openCreateForm = () => {
@@ -144,8 +146,8 @@ export const useIupZoneSIte = () => {
         setForm({
             title: zone.iup_zona_site_name ?? "",
             description: zone.iup_zona_site_description ?? "",
-            date: zone.iup_zona_site_date_last_survey ?? "",
-            fileLink: zone.iup_zona_site_file.length ? zone.iup_zona_site_file.map((i) => i.file_link) : [""],
+            date: zone.iup_zona_site_date_last_survey ?? new Date().toISOString().slice(0, 10),
+            fileLink: zone.iup_zona_site_file?.length ? zone.iup_zona_site_file.map((i) => i.file_link) : [],
         });
         setErrors({});
         setShowForm(true);
@@ -158,7 +160,7 @@ export const useIupZoneSIte = () => {
         setErrors({});
     };
     
-    const updateField = <K extends keyof Omit<ZoneFormState, "imageLinks">>(
+    const updateField = <K extends keyof Omit<ZoneFormState, "fileLink">>(
         field: K,
         value: ZoneFormState[K]
     ) => {
@@ -228,10 +230,10 @@ export const useIupZoneSIte = () => {
         }
     };
 
-
-    // const removeZone = useCallback((zone: any) => {
-    //     setConfirmDelete({ show: true, iup_zona_site_id: zone.id, name: zone.name });
-    // },[]);
+    const deleteZone = useCallback((zone: IupZonaSiteItem) => {
+        console.log('handleConfirmDeleted', zone)
+        setConfirmDelete({ show: true, iup_zona_site_id: zone.iup_zona_site_id, name: zone.iup_zona_site_name });
+    },[confirmDelete]);
 
     // const handleConfirmDeleted = useCallback(async () => {
     //     if (!confirmDelete.iup_zona_site_id) {
@@ -273,6 +275,9 @@ export const useIupZoneSIte = () => {
         deletingId,
         refetch: fetchZoneSiteData,
         deleteZone,
+        handleConfirmDeleted,
+        confirmDelete,
+        setConfirmDelete,
 
         showForm,
         editingId,

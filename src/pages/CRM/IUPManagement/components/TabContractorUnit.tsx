@@ -1,9 +1,12 @@
 import React from 'react';
 import RkabUnit from './ContractorUnit/RkabUnit';
-
-const TabContractorUnit: React.FC = () => {
+import { CustomerInfo } from '../types/iupmanagement';
+interface CustomerInformationProps {
+    customers: CustomerInfo[];
+}
+const TabContractorUnit: React.FC<CustomerInformationProps> = ({ customers }) => {
     return (
-        <RkabUnit />
+        <RkabUnit customers={customers} />
     );
 };
 
