@@ -239,12 +239,12 @@ const VisitForm: React.FC<VisitFormProps> = ({
                 </div>
                 <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-2">
                     <DatePickerField
-                        name="iup_zona_site_date_last_survey"
+                        name="date"
                         label="Visit Date"
                         required
                         value={form.date}
                         error={errors.date}
-                        onChange={(value) => updateField("date", value)}
+                        onChange={(_, value) => updateField("date", value)}
                         parseValueToDate={(val) => moment(val, 'YYYY-MM-DD').isValid() ? moment(val, 'YYYY-MM-DD').toDate() : null}
                         convertDateToValue={(date) => moment(date).format('YYYY-MM-DD')}
                         formatDisplayValue={(val) => moment(val, 'YYYY-MM-DD').format('DD MMMM YYYY')}

@@ -3,6 +3,8 @@ import { LuPlus } from 'react-icons/lu';
 import { EvidenceForm } from './EvidenceForm';
 import { useIupZoneSIte } from '../../hooks/useIupZoneSIte';
 import Zonecard from './Zonecard';
+import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import LoadingSpinner from '@/components/common/Loading';
 
 const ZoneArea: React.FC = () => {
     const {
@@ -13,6 +15,8 @@ const ZoneArea: React.FC = () => {
         // loading,
         submitting,
         deletingId,
+        loading,
+        handleConfirmDeleted,
         deleteZone,
 
         showForm,
@@ -26,16 +30,17 @@ const ZoneArea: React.FC = () => {
         updateFileLink,
         addFileLinkRow,
         removeFileLinkRow,
+        confirmDelete,
+        setConfirmDelete,
 
         submitForm,
     } = useIupZoneSIte();
 
-    // if (loading) {
-    //     return <div className="bg-white w-full rounded-2xl border border-slate-300 min-h-60 flex items-center justify-center relative">
-    //         <LoadingSpinner />
-    //     </div>;
-    // }
-
+    if (loading) {
+        return <div className="bg-white w-full rounded-2xl border border-slate-300 min-h-60 flex items-center justify-center relative">
+            <LoadingSpinner />
+        </div>;
+    }
 
     return (
         <div className="w-full rounded-2xl border border-slate-300 bg-white">
@@ -86,19 +91,19 @@ const ZoneArea: React.FC = () => {
                 </div>
             )}
 
-            {showForm && !editingId && (<></>
-                // <EvidenceForm
-                //     editingId={editingId}
-                //     form={form}
-                //     errors={errors}
-                //     submitting={submitting}
-                //     updateField={updateField}
-                //     updateFileLink={updateFileLink}
-                //     addFileLinkRow={addFileLinkRow}
-                //     removeFileLinkRow={removeFileLinkRow}
-                //     submitForm={submitForm}
-                //     closeForm={closeForm}
-                // />
+            {showForm && !editingId && (
+                <EvidenceForm
+                    editingId={editingId}
+                    form={form}
+                    errors={errors}
+                    submitting={submitting}
+                    updateField={updateField}
+                    updateFileLink={updateFileLink}
+                    addFileLinkRow={addFileLinkRow}
+                    removeFileLinkRow={removeFileLinkRow}
+                    submitForm={submitForm}
+                    closeForm={closeForm}
+                />
             )}
             {!showForm && !editingId && (
             <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl">
@@ -155,7 +160,7 @@ const ZoneArea: React.FC = () => {
                 )}
             </div> */}
 
-            {/* <ConfirmationModal
+            <ConfirmationModal
                 isOpen={confirmDelete.show}
                 onClose={() => setConfirmDelete({ show: false })}
                 onConfirm={handleConfirmDeleted}
@@ -163,10 +168,10 @@ const ZoneArea: React.FC = () => {
                 message="Are you sure you want to delete this zone? This action cannot be undone."
                 confirmText="Delete"
                 cancelText="Cancel"
-                loading={isSubmitting}
+                loading={submitting}
                 size="md"
                 showIcon={false}
-            /> */}
+            />
         </div>
     );
 };

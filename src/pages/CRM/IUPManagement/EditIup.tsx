@@ -3,7 +3,7 @@ import PageMeta from '@/components/common/PageMeta';
 import LoadingSpinner from '@/components/common/Loading';
 import { useIupManagementEdit } from './hooks/useIupManagementEdit';
 import TerritorySelector from './components/TerritorySelector';
-import CustomerInformation from './components/CustomerInformation';
+// import CustomerInformation from './components/CustomerInformation';
 import FormActions from '@/components/form/FormActions';
 import IupInformtionsFormFields from './components/IupInformtionsFormFields';
 import PageHeader from '@/components/common/PageHeader';
@@ -49,7 +49,7 @@ const EditIupManagement: React.FC = () => {
         handleSubmit
     } = useIupManagementEdit();
 
-    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit'>('history_visit');
+    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit'>('info_iup');
 
     // Show loading spinner while data is loading
     if (isLoading) {
@@ -163,7 +163,7 @@ const EditIupManagement: React.FC = () => {
                         onSelectChange={handleSelectChange}
                     />
 
-                    <CustomerInformation customers={customers} />
+                    {/* <CustomerInformation customers={customers} /> */}
                     
                     <FormActions
                         submitText={isSubmitting ? 'Updating...' : 'Update IUP'}
@@ -173,7 +173,7 @@ const EditIupManagement: React.FC = () => {
                     />
                 </>)}
                 {activeTab === 'contractor_unit' && (<>
-                    <TabContractorUnit />
+                    <TabContractorUnit customers={customers} />
                 </>)}
                 {activeTab === 'zone_iup' && (<>
                     <TabZoneArea />

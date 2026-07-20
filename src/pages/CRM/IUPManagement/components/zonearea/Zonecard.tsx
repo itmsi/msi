@@ -8,7 +8,7 @@ import { IupZonaSiteItem } from "../../types/iupmanagement";
 export interface ZonecardProps {
     zone: IupZonaSiteItem;
     onEdit: (zone: IupZonaSiteItem) => void;
-    onDelete: (id: string) => void;
+    onDelete: (zone: IupZonaSiteItem) => void;
     isDeleting?: boolean;
 }
 
@@ -27,7 +27,6 @@ const Zonecard: React.FC<ZonecardProps> = ({
         <div className={`${
             isDeleting ? 'border-red-300 bg-red-50' : ''
         }`}>
-            {/* Header — judul sebagai toggle accordion */}
             <div
                 onClick={() => toggleZone(zone.iup_zona_site_id)}
                 className={`pointer flex items-center justify-between gap-2 px-5 py-3 ${isOpen ? 'bg-primary hover:bg-primary text-white ' : ''} group hover:bg-primary transition-colors hover:*:text-white cursor-pointer`}
@@ -57,7 +56,7 @@ const Zonecard: React.FC<ZonecardProps> = ({
                     <Button
                         variant="outline"
                         onClick={() => {
-                            if (!isDeleting) onDelete(zone.iup_zona_site_id);
+                            if (!isDeleting) onDelete(zone);
                         }}
                         className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-red-500/10 text-slate-500 hover:text-red-400 ${isOpen ? 'text-white' : 'text-slate-600'}`}
                     >

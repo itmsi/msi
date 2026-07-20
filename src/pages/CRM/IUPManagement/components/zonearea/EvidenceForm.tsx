@@ -13,7 +13,7 @@ interface EvidenceFormProps {
     form: ZoneFormState;
     errors: ZoneFormErrors;
     submitting: boolean;
-    updateField: <K extends keyof Omit<ZoneFormState, "imageLinks">>(
+    updateField: <K extends keyof Omit<ZoneFormState, "fileLink">>(
         field: K,
         value: ZoneFormState[K]
     ) => void;
@@ -40,7 +40,7 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({
         <div className={`transition-all duration-200 ${!editingId ? ' border border-green-300' : ''}`}>
             <div className={`flex justify-between gap-2 px-12 py-3 group-hover:text-white bg-primary hover:bg-primary text-white`}>
                 <div className="flex flex-col min-w-0">
-                    <p className="text-sm block font-primary-bold">{editingId ? `Edit ${form.title}` : "New Visit"}</p>
+                    <p className="text-sm block font-primary-bold">{editingId ? `Edit ${form.title}` : "New Zone Site"}</p>
                     {editingId && <p className="block text-xs font-secondary">{moment(form.date).format('DD MMMM YYYY')}</p>}
                 </div>
             
@@ -124,7 +124,7 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({
                         required
                         value={form.date}
                         error={errors.date}
-                        onChange={(value: string) => updateField('date', value)}
+                        onChange={(_, value) => updateField("date", value)}
                         parseValueToDate={(val) => moment(val, 'YYYY-MM-DD').isValid() ? moment(val, 'YYYY-MM-DD').toDate() : null}
                         convertDateToValue={(date) => moment(date).format('YYYY-MM-DD')}
                         formatDisplayValue={(val) => moment(val, 'YYYY-MM-DD').format('DD MMMM YYYY')}
