@@ -1,10 +1,6 @@
 import React from "react";
-import { useIupRkabUnit } from "../../hooks/useIupRkabUnit";
 import BrandUnitSection from "./UnitSection";
 import RkabSection from "./RKAB_SINGLE";
-// import ContractorSection from "./ContractorSection";
-import FormActions from "@/components/form/FormActions";
-import { LoadingSpinner } from "@/components/common/Loading";
 
 import { CustomerInfo } from '../../types/iupmanagement';
 import CustomerInformation from "../CustomerInformation";
@@ -14,76 +10,18 @@ interface RkabUnitProps {
 }
 
 const RkabUnit: React.FC<RkabUnitProps> = ({ customers }) => {
-    const {
-        brandUnits,
-        // rkabs,
-        brandUnitErrors,
-        // rkabErrors,
-        loading,
-        submitting,
-        addBrandUnit,
-        removeBrandUnit,
-        updateBrandUnit,
-        // addRkab,
-        // removeRkab,
-        // updateRkab,
-        handleSubmit,
 
-        // contractors,
-        // contractorErrors,
-        // addContractor,
-        // removeContractor,
-        // updateContractor,
-    } = useIupRkabUnit();
-
-    if (loading) {
-        return(
-            <div className="flex justify-center items-center h-screen">
-                <LoadingSpinner />
-            </div>
-        );
-    }
 
     return (
         <div className="space-y-8">
-            {/* {error && <p className="text-red-500 text-sm">{error}</p>} */}
 
             {/* ===== Contractor Section ===== */}
             <CustomerInformation customers={customers} /> 
             {/* ===== Brand Unit Section ===== */}
-            <BrandUnitSection
-                brandUnits={brandUnits}
-                brandUnitErrors={brandUnitErrors}
-                addBrandUnit={addBrandUnit}
-                removeBrandUnit={removeBrandUnit}
-                updateBrandUnit={updateBrandUnit}
-            />
+            <BrandUnitSection />
 
             {/* ===== RKAB Section ===== */}
-            {/* <RkabSection
-                rkabs={rkabs}
-                rkabErrors={rkabErrors}
-                addRkab={addRkab}
-                removeRkab={removeRkab}
-                updateRkab={updateRkab}
-            /> */}
             <RkabSection />
-
-            {/* <ContractorSection
-                contractors={contractors}
-                contractorErrors={contractorErrors}
-                addContractor={addContractor}
-                removeContractor={removeContractor}
-                updateContractor={updateContractor}
-            /> */}
-
-            
-            <FormActions
-                submitText={submitting ? 'Updating...' : 'Save'}
-                cancelRoute="/crm/iup-management"
-                onSubmit={handleSubmit}
-                isSubmitting={submitting}
-            />
         </div>
     );
 }
