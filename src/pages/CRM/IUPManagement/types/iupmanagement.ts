@@ -49,6 +49,7 @@ export interface IupItemDetails {
     segmentation_name_en: string;
     province_name: string;
     iup_code: string;
+    iup_name_code: string;
     pic: string;
     mine_location: string;
     area_size_ha: string;
@@ -75,6 +76,8 @@ export interface IupItemDetails {
 export interface IupItem {
     iup_id: string;
     iup_name: string;
+    iup_name_code: string;
+    iup_code: string | null;
     iup_status: string;
     iup_zone_name: string;
     segmentation_name: string;

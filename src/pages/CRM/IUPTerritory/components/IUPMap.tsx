@@ -38,7 +38,9 @@ export default function IUPMap({ iupList, handleDeleteItem }: IUPMapProps) {
                                     <FaIndustry size={20} className="text-primary" />
                                 </div>
 
-                                <p className="font-secondary font-semibold text-white">{iup.company_name}</p>
+                                <p className="font-secondary font-semibold text-white">
+                                    {iup.iup_code ? `${iup.iup_code} - ` : ''} {iup.company_name}
+                                </p>
 
                                 <div className="flex gap-2 justify-center relative">
                                 

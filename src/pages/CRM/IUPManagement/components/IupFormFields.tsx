@@ -5,6 +5,7 @@ import { handleKeyPress } from '@/helpers/generalHelper';
 
 interface IupFormData {
     company_name: string;
+    iup_code: string;
 }
 
 interface IupFormFieldsProps {
@@ -48,6 +49,8 @@ const IupFormFields: React.FC<IupFormFieldsProps> = ({
     return (
         <>
             {renderInput('company_name', 'IUP Name', 'text', true)}
+            {/* IUP Segmentation Selection */}
+            {renderInput('iup_code', 'IUP Code', 'text', false)}
         </>
     );
 };
