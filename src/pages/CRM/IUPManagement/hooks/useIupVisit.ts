@@ -148,6 +148,10 @@ export const useIupVisit = () => {
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState<{ 
+        show: boolean; 
+        iup_visit_history_id?: string;
+        name?: string }>({ show: false });
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const [showForm, setShowForm] = useState(false);
@@ -177,28 +181,36 @@ export const useIupVisit = () => {
         fetchVisits();
     }, [fetchVisits]);
 
-    const deleteVisit = useCallback(
-        async (id: string): Promise<boolean> => {
+    // const deleteVisit = useCallback(
+    //     async (id: string): Promise<boolean> => {
+    const handleConfirmDeleted = async (): Promise<void> => {
+        if (!confirmDelete.iup_visit_history_id) return;
+        const id = confirmDelete.iup_visit_history_id;
+        try {
             setDeletingId(id);
-            try {
-                await IupService.deleteIupVisit(id);
-                toast.success("Kunjungan berhasil dihapus.");
-                if (visits.length === 1 && page > 1) {
-                    setPage((p) => p - 1);
-                } else {
-                    await fetchVisits();
-                }
-                return true;
-            } catch (err) {
-                console.error(err);
-                toast.error("Gagal menghapus kunjungan.");
-                return false;
-            } finally {
-                setDeletingId(null);
+            await IupService.deleteIupVisit(id);
+            toast.success("Kunjungan berhasil dihapus.");
+            if (visits.length === 1 && page > 1) {
+                setPage((p) => p - 1);
+            } else {
+                await fetchVisits();
             }
-        },[visits.length, page, fetchVisits]
-    );
+            setConfirmDelete({show: false});
+        } catch (err) {
+            console.error(err);
+            toast.error("Gagal menghapus kunjungan.");
+            setConfirmDelete({show: false});
+        } finally {
+            setDeletingId(null);
+            setConfirmDelete({ show: false });
+        }
+    };
     
+    const deleteVisit = useCallback((zone: VisitHistoryItem) => {
+        console.log('handleConfirmDeleted', zone)
+        setConfirmDelete({ show: true, iup_visit_history_id: zone.iup_visit_history_id, name: zone.title });
+    },[confirmDelete]);
+
     const fillCurrentLocation = useCallback(() => {
         if (!navigator.geolocation) {
             toast.error("Geolocation tidak didukung oleh browser ini.");
@@ -335,6 +347,10 @@ export const useIupVisit = () => {
         deletingId,
         refetch: fetchVisits,
         deleteVisit,
+        handleConfirmDeleted,
+        
+        confirmDelete,
+        setConfirmDelete,
 
         showForm,
         editingId,

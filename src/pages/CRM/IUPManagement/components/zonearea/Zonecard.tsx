@@ -42,7 +42,7 @@ const Zonecard: React.FC<ZonecardProps> = ({
                         <p className="flex-1 text-xs font-secondary">{moment(zone.iup_zona_site_date_last_survey).format("DD MMMM YYYY")}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                     <Button
                         variant="outline"
                         size="sm"
@@ -74,7 +74,7 @@ const Zonecard: React.FC<ZonecardProps> = ({
                             </span>
                         )}
                     </div>
-                    <div className="w-full min-h-[100px] p-4 bg-gray-50 border border-gray-200 rounded-lg prose max-w-none text-gray-700 reset-content">
+                    <div className="w-full min-h-25 p-4 bg-gray-50 border border-gray-200 rounded-lg prose max-w-none text-gray-700 reset-content">
                         {zone.iup_zona_site_description && <div dangerouslySetInnerHTML={{ __html: zone.iup_zona_site_description }}></div>}
                     </div>
                     {zone.iup_zona_site_file?.length > 0 && (

@@ -4,6 +4,7 @@ import {
 } from "react-icons/lu";
 import VisitCard from "./Visitcard";
 import VisitForm from "./Visitform";
+import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 
 // const formatDate = (iso: string): string => {
 //     if (!iso) return "-";
@@ -27,6 +28,7 @@ const HistoryVisitManager = () => {
         submitting,
         deletingId,
         deleteVisit,
+        handleConfirmDeleted,
 
         showForm,
         editingId,
@@ -40,6 +42,8 @@ const HistoryVisitManager = () => {
         addImageLinkRow,
         removeImageLinkRow,
         fillCurrentLocation,
+        confirmDelete,
+        setConfirmDelete,
 
         submitForm,
     } = useIupVisit();
@@ -66,8 +70,10 @@ const HistoryVisitManager = () => {
             </div>
 
             {(!visits || visits.length === 0) ? (
-                <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
-                    No visit history available. Click &ldquo;Add Visit&rdquo; to add one.
+                <div className="p-8">
+                    <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
+                        No visit history available. Click &ldquo;Add Visit&rdquo; to add one.
+                    </div>
                 </div>
             ) : (
                 <div className="divide-slate-300 divide-y">
@@ -129,6 +135,19 @@ const HistoryVisitManager = () => {
             </div>
             )}
         </div>
+        
+        <ConfirmationModal
+            isOpen={confirmDelete.show}
+            onClose={() => setConfirmDelete({ show: false })}
+            onConfirm={handleConfirmDeleted}
+            title={`Confirm delete ${confirmDelete.name ?? ''}`}
+            message="Are you sure you want to delete this zone? This action cannot be undone."
+            confirmText="Delete"
+            cancelText="Cancel"
+            loading={submitting}
+            size="md"
+            showIcon={false}
+        />
 
 
 

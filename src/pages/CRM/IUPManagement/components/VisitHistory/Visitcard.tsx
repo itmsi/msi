@@ -14,7 +14,7 @@ const formatDate = (iso: string): string => {
 export interface VisitCardProps {
     visit: VisitHistoryItem;
     onEdit: (visit: VisitHistoryItem) => void;
-    onDelete: (id: string) => void;
+    onDelete: (visit: VisitHistoryItem) => void;
     isDeleting?: boolean;
 }
 
@@ -49,7 +49,7 @@ const VisitCard: React.FC<VisitCardProps> = ({
                         <p className="flex-1 text-xs font-secondary">{formatDate(visit.date)}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                     <Button
                         variant="outline"
                         size="sm"
@@ -63,7 +63,7 @@ const VisitCard: React.FC<VisitCardProps> = ({
                     <Button
                         variant="outline"
                         onClick={() => {
-                            if (!isDeleting) onDelete(visit.iup_visit_history_id);
+                            if (!isDeleting) onDelete(visit);
                         }}
                         className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-red-500/10 text-slate-500 hover:text-red-400 ${isOpen ? 'text-white' : 'text-slate-600'}`}
                     >

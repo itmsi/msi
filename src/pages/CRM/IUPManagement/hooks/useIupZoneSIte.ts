@@ -108,7 +108,6 @@ export const useIupZoneSIte = () => {
     }, [fetchZoneSiteData]);
 
     const handleConfirmDeleted = async (): Promise<void> => {
-        console.log(confirmDelete)
         if (!confirmDelete.iup_zona_site_id) {
             toast.error('Zona Area not found');
             return;
