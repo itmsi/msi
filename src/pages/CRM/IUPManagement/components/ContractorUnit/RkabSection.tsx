@@ -25,9 +25,6 @@ export default function RkabSection({
                         <h2 className="font-primary-bold text-md tracking-wide">RKAB</h2>
                     </div>
                 </div>
-                <p className="mt-1.5 text-xs text-slate-700 leading-relaxed">
-                    Rencana Kerja Anggaran Biaya (RKAB) is a document outlining production plans and targets for each year. Each RKAB must include a valid year, current production, and production target.
-                </p>
             </div>
 
             {(!rkabs || rkabs.length === 0) ? (

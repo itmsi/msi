@@ -40,7 +40,7 @@ export class IupService {
     static async getIupZonaSite(params: Partial<payloadRequest> = {}): Promise<IupZonaSiteResponse> {
         const requestData: payloadRequest = {
             page: 1,
-            limit: 10,
+            limit: 100,
             sort_by: "updated_at",
             sort_order: 'desc',
             ...params
@@ -68,7 +68,7 @@ export class IupService {
     static async getIupRkab(params: Partial<payloadRequest> = {}): Promise<GetIupRkabResponse> {
         const requestData: payloadRequest = {
             page: 1,
-            limit: 10,
+            limit: 100,
             sort_by: "updated_at",
             sort_order: 'desc',
             ...params
@@ -96,7 +96,7 @@ export class IupService {
     static async getIupRkabUnit(params: Partial<payloadRequest> = {}): Promise<IupRkabUnitResponse> {
         const requestData: payloadRequest = {
             page: 1,
-            limit: 10,
+            limit: 100,
             sort_by: "updated_at",
             sort_order: 'desc',
             ...params
@@ -116,7 +116,7 @@ export class IupService {
     static async getIupVisit(params: Partial<payloadRequest> = {}): Promise<VisitHistoryResponse> {
         const requestData: payloadRequest = {
             page: 1,
-            limit: 10,
+            limit: 100,
             sort_by: "updated_at",
             sort_order: 'desc',
             ...params
@@ -144,7 +144,7 @@ export class IupService {
     static async getIupUnit(params: Partial<payloadRequest> = {}): Promise<GetIupBrandUnitResponse> {
         const requestData: payloadRequest = {
             page: 1,
-            limit: 10,
+            limit: 100,
             sort_by: "updated_at",
             sort_order: 'desc',
             ...params

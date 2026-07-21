@@ -194,9 +194,6 @@ const UnitSection: React.FC = () => {
                         <h2 className="font-primary-bold text-md tracking-wide">Brand Unit</h2>
                     </div>
                 </div>
-                <p className="mt-1.5 text-xs text-slate-700 leading-relaxed">
-                    List of brand units owned by the contractor. Each brand unit must have a valid name and unit count.
-                </p>
             </div>
 
             {loading ? (

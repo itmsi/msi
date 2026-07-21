@@ -114,7 +114,7 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
             <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-lg font-semibold text-gray-800">Customer Information</h2>
+                        <h2 className="font-primary-bold text-md tracking-wide">Customer Information</h2>
                     </div>
                 </div>
             </div>
