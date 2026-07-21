@@ -14,13 +14,17 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
             name: 'Customer Name',
             selector: (row: CustomerInfo) => row.customer_name || '-',
             wrap: true,
-            cell: (row: CustomerInfo) => (
+            cell: (row: CustomerInfo) => (<>
+                <a
+                    href={`/crm/contractors/edit/${row.iup_customer_id}`}
+                    className="absolute inset-0"
+                />
                 <div className="py-2">
                     <p className="font-medium text-gray-900 text-sm">
                         {row.customer_name || '-'}
                     </p>
                 </div>
-            ),
+            </>),
         },
         {
             name: 'Phone Number',
@@ -132,7 +136,6 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
                     persistTableHead
                     headerBackground="rgba(2, 83, 165, 0.1)"
                     hoverBackground="rgba(223, 232, 242, 0.3)"
-                    onRowClicked={(row) => window.open(`/crm/contractors/edit/${row.iup_customer_id}`, '_blank')}
                 />
             </div>
         </div>
