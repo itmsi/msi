@@ -14,13 +14,17 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
             name: 'Customer Name',
             selector: (row: CustomerInfo) => row.customer_name || '-',
             wrap: true,
-            cell: (row: CustomerInfo) => (
+            cell: (row: CustomerInfo) => (<>
+                <a
+                    href={`/crm/contractors/edit/${row.iup_customer_id}`}
+                    className="absolute inset-0"
+                />
                 <div className="py-2">
                     <p className="font-medium text-gray-900 text-sm">
                         {row.customer_name || '-'}
                     </p>
                 </div>
-            ),
+            </>),
         },
         {
             name: 'Phone Number',
@@ -110,11 +114,11 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
     // }
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm mb-8">
-            <div className="p-6 border-b border-gray-200">
+        <div className="w-full rounded-2xl border border-slate-300 bg-white">
+            <div className="px-5 py-4 border-b border-slate-300">
                 <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-lg font-semibold text-gray-800">Customer Information</h2>
+                    <div className="flex items-center gap-2">
+                        <h2 className="font-primary-bold text-md tracking-wide">Customer Information</h2>
                     </div>
                 </div>
             </div>
@@ -132,7 +136,6 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
                     persistTableHead
                     headerBackground="rgba(2, 83, 165, 0.1)"
                     hoverBackground="rgba(223, 232, 242, 0.3)"
-                    onRowClicked={(row) => window.open(`/crm/contractors/edit/${row.iup_customer_id}`, '_blank')}
                 />
             </div>
         </div>

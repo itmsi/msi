@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import "../../../../components/map/css/map.css";
 import { FaIndustry, FaRegBuilding, FaRegEdit, FaRegTrashAlt } from 'react-icons/fa';
 import { PermissionGate } from '@/components/common/PermissionComponents';
+import { iupIcon } from './createMarkerIcon';
 
 interface IUPMapProps {
     iupList: IupItem[];
@@ -25,7 +26,11 @@ export default function IUPMap({ iupList, handleDeleteItem }: IUPMapProps) {
                 }
 
                 return (
-                    <Marker key={iup.iup_selection_id} position={[latitude, longitude]}>
+                    <Marker 
+                        key={iup.iup_selection_id} 
+                        position={[latitude, longitude]}
+                        icon={iupIcon}
+                    >
 
                         <Popup className="iup-popup-custom leaf-custom-blur">
                             <div className="iup-popup">
@@ -33,7 +38,9 @@ export default function IUPMap({ iupList, handleDeleteItem }: IUPMapProps) {
                                     <FaIndustry size={20} className="text-primary" />
                                 </div>
 
-                                <p className="font-secondary font-semibold text-white">{iup.company_name}</p>
+                                <p className="font-secondary font-semibold text-white">
+                                    {iup.iup_code ? `${iup.iup_code} - ` : ''} {iup.company_name}
+                                </p>
 
                                 <div className="flex gap-2 justify-center relative">
                                 

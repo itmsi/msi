@@ -3,25 +3,24 @@ import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { handleKeyPress } from '@/helpers/generalHelper';
 
-interface IupFormData {
+interface EvidenceFormData {
     company_name: string;
-    iup_code: string;
 }
 
-interface IupFormFieldsProps {
-    formData: IupFormData;
+interface EvidenceFormProps {
+    formData: EvidenceFormData;
     errors: Record<string, string>;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const IupFormFields: React.FC<IupFormFieldsProps> = ({
+const EvidenceForm: React.FC<EvidenceFormProps> = ({
     formData,
     errors,
     onInputChange
 }) => {
     // Helper function untuk render input field dengan consistent styling
     const renderInput = (
-        name: keyof IupFormData,
+        name: keyof EvidenceFormData,
         label: string,
         type: string = 'text',
         required: boolean = false
@@ -49,10 +48,8 @@ const IupFormFields: React.FC<IupFormFieldsProps> = ({
     return (
         <>
             {renderInput('company_name', 'IUP Name', 'text', true)}
-            {/* IUP Segmentation Selection */}
-            {renderInput('iup_code', 'IUP Code', 'text', false)}
         </>
     );
 };
 
-export default IupFormFields;
+export default EvidenceForm;

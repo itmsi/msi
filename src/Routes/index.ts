@@ -74,6 +74,9 @@ const EditActivities = lazy(() => import('@/pages/CRM/Activity/EditActivity'));
 // CRM - Daily Task Activity
 const DailyTaskActivity = lazy(() => import('@/pages/CRM/DailyTaskActivity/DailyTaskActivity'));
 
+// CRM - Sales Stage
+const SalesStage = lazy(() => import('@/pages/CRM/SalesStage/SalesStage'));
+
 // CRM - Projects
 const ManageCRMProject = lazy(() => import('@/pages/CRM/Project/Manage'));
 const CreateCRMProject = lazy(() => import('@/pages/CRM/Project/CreateProject'));
@@ -901,6 +904,16 @@ export const routes: TAppRoute[] = [
         component: DailyTaskActivity,
         layout: AppLayout,
     },
+    // CRM - Sales Stage
+    {
+        path: '/crm/sales-stage',
+        name: 'Sales Stage CRM',
+        isProtected: true,
+        roles: ['Sales Stage CRM'],
+        requiredPermissions: ['read'],
+        component: SalesStage,
+        layout: AppLayout,
+    },
     {
         path: '/crm/manage-division',
         name: 'Division CRM',
@@ -1185,6 +1198,22 @@ export const routes: TAppRoute[] = [
         roles: ['Candidate HRM'],
         requiredPermissions: ['create'],
         component: HRCandidateCreate,
+        layout: AppLayout,
+    },
+    {
+        path: '/hr/candidate/group/:groupId',
+        name: 'Candidate HRM',
+        isProtected: true,
+        roles: ['Candidate HRM'],
+        component: HRCandidateList,
+        layout: AppLayout,
+    },
+    {
+        path: '/hr/candidate/group/:groupId/:id',
+        name: 'Candidate HRM',
+        isProtected: true,
+        roles: ['Candidate HRM'],
+        component: HRCandidateList,
         layout: AppLayout,
     },
     {

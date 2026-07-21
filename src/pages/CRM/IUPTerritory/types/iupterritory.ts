@@ -18,6 +18,7 @@ export interface IupItem extends AuditFields {
     iup_selection_id: string;
     iup_id: string;
     company_name: string;
+    iup_code: string;
     iup_longitude: string;
     iup_latitude: string;
     iup_address: string | null;

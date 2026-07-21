@@ -2,6 +2,7 @@ import React from 'react';
 import Label from '@/components/form/Label';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import IupFormFields from './IupFormFields';
+import { IupManagementFormData } from '../types/iupmanagement';
 
 interface TerritoryOption {
     id: string;
@@ -18,11 +19,11 @@ interface TerritorySelection {
     iupZone: TerritoryOption | null;
     iupSegmentation: TerritoryOption | null;
 }
-interface IupFormData {
-    company_name: string;
-}
+// interface IupFormData {
+//     company_name: string;
+// }
 interface TerritorySelectorProps {
-    formData: IupFormData;
+    formData: IupManagementFormData;
     errors: Record<string, string>;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     territories: TerritoryOption[];
@@ -68,7 +69,6 @@ const TerritorySelector: React.FC<TerritorySelectorProps> = ({
             No {childType}s available in "{parentName}" {parentType}
         </p>
     );
-
     return (
         <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
             <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Territory Information</h3>
@@ -182,6 +182,7 @@ const TerritorySelector: React.FC<TerritorySelectorProps> = ({
                     errors={errors}
                     onInputChange={onInputChange}
                 />
+
             </div>
         </div>
     );

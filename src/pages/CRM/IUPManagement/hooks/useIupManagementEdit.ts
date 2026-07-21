@@ -58,6 +58,7 @@ export const useIupManagementEdit = () => {
         area_name: '',
         iup_zone_name: '',
         iup_segment_id: '',
+        iup_code: '',
     });
 
     // Load territories and IUP data when component mounts
@@ -229,6 +230,7 @@ export const useIupManagementEdit = () => {
                     segmentation_id: iup.segmentation_id || '',
                     segmentation_name_en: iup.segmentation_name_en || '',
                     province_name: iup.province_name || '',
+                    iup_code: iup.iup_code || '',
                     pic: iup.pic || '',
                     mine_location: iup.mine_location || '',
                     area_size_ha: iup.area_size_ha || '',
@@ -249,6 +251,7 @@ export const useIupManagementEdit = () => {
                     area_name: iup.area_name || '',
                     iup_zone_name: iup.iup_zone_name || '',
                     iup_segment_id: iup.iup_segment_id || '',
+                    iup_id: iup.iup_id || id,
                 });
                 
             } else {

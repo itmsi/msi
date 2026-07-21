@@ -817,3 +817,26 @@ export const parseNumberUS = (value: string): number => {
     const num = parseFloat(cleaned);
     return isNaN(num) ? 0 : num;
 };
+
+const FIELD_LABEL_MAP: Record<string, string> = {
+    iup_id: 'IUP',
+    iup_brand_unit_name: 'Brand Unit',
+    iup_brand_unit_qty: 'Qty Brand Unit',
+    iup_rkab_year: 'Tahun RKAB',
+    iup_rkab_current_production: 'Produksi Saat Ini',
+    iup_rkab_target_production: 'Target Produksi',
+};
+
+const translateErrorMessage = (message: string): string => {
+    let translated = message;
+    for (const [field, label] of Object.entries(FIELD_LABEL_MAP)) {
+        // ganti semua kemunculan field name dengan label-nya
+        translated = translated.split(field).join(label);
+    }
+    return translated;
+};
+
+export const translateErrorMessages = (messages: string | string[]): string => {
+    const list = Array.isArray(messages) ? messages : [messages];
+    return list.map(translateErrorMessage).join(', ');
+};

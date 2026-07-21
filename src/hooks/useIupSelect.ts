@@ -43,7 +43,8 @@ export const useIupSelect = () => {
             if (response.success) {
                 const newOptions = response.data.map((iup: IupItem) => ({
                     value: iup.iup_id,
-                    label: iup.iup_name
+                    // label: iup.iup_code ? iup.iup_name : `${iup.iup_name} - ${iup.iup_name_code}`
+                    label: iup.iup_code ? iup.iup_name_code : iup.iup_name
                 }));
 
                 const updatedOptions = reset ? newOptions : [...loadedOptions, ...newOptions];
@@ -95,7 +96,7 @@ export const useIupSelect = () => {
 
             if (response.data?.data) {
                 const iup = response.data.data;
-                return { value: iup.iup_id, label: iup.iup_name };
+                return { value: iup.iup_id, label: iup.iup_code ? iup.iup_name_code : iup.iup_name };
             }
         } catch (error) {
             console.error('Error fetching IUP by ID:', error);

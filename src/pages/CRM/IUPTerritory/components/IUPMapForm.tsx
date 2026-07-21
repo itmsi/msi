@@ -4,6 +4,7 @@ import { INDONESIA_CENTER, DEFAULT_ZOOM, isInsideIndonesia, BaseMap } from '../.
 import '../../../../components/map/lib/leaflet';
 import { GeoData } from '../types/iupterritory';
 import Alert from '@/components/ui/alert/Alert';
+import { iupIcon } from './createMarkerIcon';
 
 function ClickToPlacePin({ onPlace }: { onPlace: (lat: number, lng: number) => void }) {
     useMapEvents({
@@ -59,7 +60,7 @@ export default function IUPMapForm({ initialGeo, onChange }: Props) {
             </div>
             <BaseMap
                 center={center}
-                height="40vh"
+                height="700px"
                 zoom={pin ? 14 : DEFAULT_ZOOM}
             >
                 <ClickToPlacePin onPlace={handlePlacePin} />
@@ -68,6 +69,7 @@ export default function IUPMapForm({ initialGeo, onChange }: Props) {
                         position={[pin.lat, pin.lng]}
                         draggable
                         eventHandlers={{ dragend: handleDragEnd }}
+                        icon={iupIcon}
                     />
                 )}
             </BaseMap>
