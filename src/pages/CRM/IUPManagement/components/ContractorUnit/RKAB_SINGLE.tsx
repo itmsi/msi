@@ -223,7 +223,6 @@ const RkabSection: React.FC = () => {
                         <h2 className="font-primary-bold text-md tracking-wide">RKAB</h2>
                     </div>
                 </div>
-                <p className="mt-1.5 text-xs text-slate-700 leading-relaxed">Rencana Kerja Anggaran Biaya</p>
             </div>
 
             {loading ? (
