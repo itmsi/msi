@@ -745,6 +745,7 @@ export default function Edit() {
                                         </Button>
                                     </PermissionGate>
                                 )}
+                                {/* {(poDetail?.approvalstatus === 3 || poDetail?.po_status_label === 'Pending Receipt') && ( */}
                                 {poDetail?.approvalstatus === 3 && (
                                     <PermissionGate permission={["create", "update"]}>
                                         <Button
@@ -792,23 +793,10 @@ export default function Edit() {
                                 )}
                             </>)}
 
-                                {poDetail?.status_proccess === 'PROCESSING' && (
-                                    <ElemRefresh />
-                                )}
+                            {poDetail?.status_proccess === 'PROCESSING' && (
+                                <ElemRefresh />
+                            )}
 
-                            {/*
-                            {(poDetail?.po_status_label === 'Pending Receipt' && editReceive) && (
-                                <PermissionGate permission={["create", "update"]}>
-                                    <Button
-                                        type="button"
-                                        onClick={() => handleSubmitReceive()}
-                                        className="group px-6 rounded-full ring-1 bg-[#14B8A6] ring-inset ring-[#14B8A6] text-white hover:bg-[#0D9488] hover:ring-[#0D9488]"
-                                        disabled={isSubmitting}
-                                    >
-                                        Submit Receive
-                                    </Button>
-                                </PermissionGate>
-                            )} */}
                         </div>
                     </div> 
                 </>)}
@@ -818,7 +806,8 @@ export default function Edit() {
                     isOpen={isOpenApproval}
                     onClose={() => setIsOpenApproval(false)}
                     poId={selectedPoIdApproval ? parseInt(selectedPoIdApproval) : null}
-                    onSuccess={() => navigate('/netsuite/purchase-order/manage')}
+                    // onSuccess={() => navigate('/netsuite/purchase-order/manage')}
+                    onSuccess={loadData}
                     submit={true}
                     titleModal="Submit Approval"
                     descriptionModal="Masukkan catatan untuk proses approval"
@@ -828,7 +817,8 @@ export default function Edit() {
                     isOpen={isOpen}
                     onClose={() => setIsOpen(false)}
                     poId={selectedPoId ? parseInt(selectedPoId) : null}
-                    onSuccess={() => navigate('/netsuite/purchase-order/manage')}
+                    // onSuccess={() => navigate('/netsuite/purchase-order/manage')}
+                    onSuccess={loadData}
                     reopen={true}
                     titleModal="Re-Open Approval"
                     descriptionModal="Masukkan catatan untuk proses re-open approval"
@@ -838,10 +828,11 @@ export default function Edit() {
                     isOpen={isOpenRejected}
                     onClose={() => setIsOpenRejected(false)}
                     poId={selectedPoIdRejected ? parseInt(selectedPoIdRejected) : null}
-                    onSuccess={() => navigate('/netsuite/purchase-order/manage')}
+                    // onSuccess={() => navigate('/netsuite/purchase-order/manage')}
+                    onSuccess={loadData}
                     resubmit={true}
-                    titleModal="Re-Submit Approval"
-                    descriptionModal="Masukkan catatan untuk proses re-submit approval"
+                    titleModal="Re-Open"
+                    descriptionModal={`Masukkan catatan untuk proses re-open ${poDetail?.po_number || ''}`}
                 />
             </div>
         </>

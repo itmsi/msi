@@ -98,7 +98,7 @@ const VisitCard: React.FC<VisitCardProps> = ({
                             </a>
                         )}
                     </div>
-                    <div className="w-full min-h-[100px] p-4 bg-gray-50 border border-gray-200 rounded-lg prose max-w-none text-gray-700 reset-content">
+                    <div className="w-full min-h-25 p-4 bg-gray-50 border border-gray-200 rounded-lg prose max-w-none text-gray-700 reset-content">
                         {visit.description && <div dangerouslySetInnerHTML={{ __html: visit.description }}></div>}
                     </div>
                     {visit.image.length > 0 && (

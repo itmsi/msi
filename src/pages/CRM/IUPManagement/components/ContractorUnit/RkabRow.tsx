@@ -41,7 +41,7 @@ export default function RkabRow({
                 </Button>
             </div>
             <div className="flex gap-4 items-end">
-                <div className="flex-1 min-h-[90px]">
+                <div className="flex-1 min-h-22.5">
                     <Label htmlFor={`year-${index}`} className="block text-sm mb-1">Year</Label>
                     <Input
                         id={`year-${index}`}

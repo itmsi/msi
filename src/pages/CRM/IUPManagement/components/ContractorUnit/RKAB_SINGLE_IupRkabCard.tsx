@@ -47,7 +47,7 @@ const IupRkabCard: React.FC<IupRkabCardProps> = ({
             </div>
 
             <div className="flex gap-4 items-end">
-                <div className="flex-1 min-h-[90px]">
+                <div className="flex-1 min-h-22.5">
                     <Label htmlFor={`rkab_year_${index}`}>Tahun *</Label>
                     <Input
                         id={`rkab_year_${index}`}
@@ -63,7 +63,7 @@ const IupRkabCard: React.FC<IupRkabCardProps> = ({
                     )}
                 </div>
 
-                <div className="flex-1 min-h-[90px]">
+                <div className="flex-1 min-h-22.5">
                     <Label htmlFor={`rkab_current_${index}`}>Current Production *</Label>
                     <Input
                         id={`rkab_current_${index}`}
@@ -88,7 +88,7 @@ const IupRkabCard: React.FC<IupRkabCardProps> = ({
                     )}
                 </div>
 
-                <div className="flex-1 min-h-[90px]">
+                <div className="flex-1 min-h-22.5">
                     <Label htmlFor={`rkab_target_${index}`}>Target Production *</Label>
                     <Input
                         id={`rkab_target_${index}`}
@@ -112,7 +112,7 @@ const IupRkabCard: React.FC<IupRkabCardProps> = ({
                         <p className="text-red-500 text-xs mt-1">{errors.iup_rkab_target_production}</p>
                     )}
                 </div>
-                <div className="min-h-[90px] pb-[20px] flex items-end">
+                <div className="min-h-22.5 pb-[20px] flex items-end">
                     <Button
                         type="button"
                         variant="primary"
