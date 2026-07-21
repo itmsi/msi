@@ -2,6 +2,9 @@ import React from 'react';
 import Label from '@/components/form/Label';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import IupFormFields from './IupFormFields';
+import Input from '@/components/form/input/InputField';
+import { IupManagementFormData } from '../types/iupmanagement';
+import { allowOnlyNumeric } from '@/helpers/generalHelper';
 
 interface TerritoryOption {
     id: string;
@@ -22,7 +25,7 @@ interface IupFormData {
     company_name: string;
 }
 interface TerritorySelectorProps {
-    formData: IupFormData;
+    formData: IupManagementFormData;
     errors: Record<string, string>;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     territories: TerritoryOption[];
@@ -68,7 +71,32 @@ const TerritorySelector: React.FC<TerritorySelectorProps> = ({
             No {childType}s available in "{parentName}" {parentType}
         </p>
     );
-
+    const renderInput = (
+            name: keyof IupManagementFormData,
+            label: string,
+            type: string = 'text',
+            required: boolean = false
+        ) => (
+            <div>
+                <Label>
+                    {label} {required && '*'}
+                </Label>
+                <Input
+                    type={'text'}
+                    name={name}
+                    value={formData[name]}
+                    onKeyPress={type === 'number' ? allowOnlyNumeric : undefined}
+                    onChange={onInputChange}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors[name] ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    min={type === 'number' ? "1" : "10000"}
+                />
+                {errors[name] && (
+                    <p className="text-red-500 text-sm mt-1">{errors[name]}</p>
+                )}
+            </div>
+        );
     return (
         <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
             <h3 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Territory Information</h3>
@@ -182,6 +210,9 @@ const TerritorySelector: React.FC<TerritorySelectorProps> = ({
                     errors={errors}
                     onInputChange={onInputChange}
                 />
+
+                {/* IUP Segmentation Selection */}
+                {renderInput('iup_code', 'IUP Code', 'text', false)}
             </div>
         </div>
     );

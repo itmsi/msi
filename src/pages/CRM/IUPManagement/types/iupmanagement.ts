@@ -48,6 +48,7 @@ export interface IupItemDetails {
     segmentation_id: string;
     segmentation_name_en: string;
     province_name: string;
+    iup_code: string;
     pic: string;
     mine_location: string;
     area_size_ha: string;
@@ -125,6 +126,7 @@ export interface IupManagementFormData {
     sk_effective_date: string;
     company_full_name: string;
     rkab: string;
+    iup_code:string;
     status: string;
     // Territory selection fields
     island_id?: string;
