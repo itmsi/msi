@@ -21,9 +21,9 @@ interface TerritorySelection {
     iupZone: TerritoryOption | null;
     iupSegmentation: TerritoryOption | null;
 }
-interface IupFormData {
-    company_name: string;
-}
+// interface IupFormData {
+//     company_name: string;
+// }
 interface TerritorySelectorProps {
     formData: IupManagementFormData;
     errors: Record<string, string>;
