@@ -69,6 +69,7 @@ export default function ModalApproval({
 
             toast.success(response.message || 'Approval berhasil disubmit');
             handleClose();
+            console.log('Approval response:', response);
             onSuccess?.();
         } catch (err: any) {
             const msg = err?.response?.data?.message || err?.message || 'Gagal submit approval';
@@ -120,7 +121,7 @@ export default function ModalApproval({
                         disabled={isSubmitting}
                         className="px-6 rounded-full"
                     >
-                        {isSubmitting ? 'Submitting...' : 'Submit Approval'}
+                        {isSubmitting ? 'Submitting...' : resubmit ? 'Submit Re-Open' : 'Submit Approval'}
                     </Button>
                 </div>
             </div>
