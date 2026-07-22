@@ -303,7 +303,8 @@ export default function Edit() {
     const ElemRefresh = () => (
         <PermissionGate permission="read">
             <Button
-                onClick={() => loadData()}
+                // onClick={() => loadData()}
+                onClick={() => handleSyncById(poDetail?.po_id)}
                 className="flex rounded-full items-center py-1 gap-2 text-green-600 bg-transparent hover:text-green-700 hover:bg-green-50 ring-green-600"
                 variant='outline'
             >
@@ -732,7 +733,8 @@ export default function Edit() {
                                         </Button>
                                     </PermissionGate>
                                 )}
-                                {poDetail?.approvalstatus === 2 &&  (poDetail?.po_status_label !== 'Pending Receipt' && poDetail?.po_status_label !== 'Pending Bill') || poDetail?.po_status_label === 'Pending Billing/Partially Received' && (
+                                {/* {poDetail?.approvalstatus === 2 &&  (poDetail?.po_status_label !== 'Pending Receipt' && poDetail?.po_status_label !== 'Pending Bill') || poDetail?.po_status_label === 'Pending Billing/Partially Received' && ( */}
+                                {(poDetail?.approvalstatus === 2 || poDetail?.po_status_label === 'Pending Receipt') && (
                                     <PermissionGate permission={["create", "update"]}>
                                         <Button
                                             type="button"
@@ -741,12 +743,11 @@ export default function Edit() {
                                             className="group rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
                                             disabled={isSubmitting}
                                         >
-                                            Re-Approval <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
+                                            Re-Open <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
                                         </Button>
                                     </PermissionGate>
                                 )}
-                                {/* {(poDetail?.approvalstatus === 3 || poDetail?.po_status_label === 'Pending Receipt') && ( */}
-                                {poDetail?.approvalstatus === 3 && (
+                                {(poDetail?.approvalstatus === 3) && (
                                     <PermissionGate permission={["create", "update"]}>
                                         <Button
                                             type="button"
@@ -755,7 +756,7 @@ export default function Edit() {
                                             className="group px-6 rounded-full ring-1 ring-inset ring-[#003061] text-[#003061] hover:bg-[#003061] hover:text-white hover:ring-[#003061]"
                                             disabled={isSubmitting}
                                         >
-                                            Re-Open <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
+                                            Re-Submit <MdVerified className="w-4 h-4 text-[#003061]  group-hover:text-white" />
                                         </Button>
                                     </PermissionGate>
                                 )}
@@ -820,8 +821,8 @@ export default function Edit() {
                     // onSuccess={() => navigate('/netsuite/purchase-order/manage')}
                     onSuccess={loadData}
                     reopen={true}
-                    titleModal="Re-Open Approval"
-                    descriptionModal="Masukkan catatan untuk proses re-open approval"
+                    titleModal="Re-Open"
+                    descriptionModal={`Masukkan catatan untuk proses re-open ${poDetail?.po_number || ''}`}
                 />
                 {/* // MODAL RESUBMIT SAAT STATUS REJECTED */}
                 <ModalApproval
@@ -831,8 +832,8 @@ export default function Edit() {
                     // onSuccess={() => navigate('/netsuite/purchase-order/manage')}
                     onSuccess={loadData}
                     resubmit={true}
-                    titleModal="Re-Open"
-                    descriptionModal={`Masukkan catatan untuk proses re-open ${poDetail?.po_number || ''}`}
+                    titleModal="Re-Submit"
+                    descriptionModal={`Masukkan catatan untuk proses re-submit ${poDetail?.po_number || ''}`}
                 />
             </div>
         </>

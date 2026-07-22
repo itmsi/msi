@@ -78,7 +78,13 @@ export default function ModalApproval({
             setIsSubmitting(false);
         }
     };
-
+    const getButtonLabel = () => {
+        if (isSubmitting) return 'Submitting...'
+        if (reopen) return 'Re-Open'
+        if (resubmit) return 'Re-Submit'
+        if (submit) return 'Submit Approval'
+        return 'Submit'
+    }
     return (
         <Modal
             isOpen={isOpen}
@@ -121,7 +127,7 @@ export default function ModalApproval({
                         disabled={isSubmitting}
                         className="px-6 rounded-full"
                     >
-                        {isSubmitting ? 'Submitting...' : resubmit ? 'Submit Re-Open' : 'Submit Approval'}
+                        {getButtonLabel()}
                     </Button>
                 </div>
             </div>
