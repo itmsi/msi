@@ -3,14 +3,17 @@ import {
     ChatRequest, 
     ChatResponse, 
     AiHistoryResponse, 
-    AiClearHistoryResponse 
+    AiClearHistoryResponse,
+    AiHistoryListResponse 
 } from '@/types/aiAssistant';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export class AIAssistantService {
     private static readonly CHAT_ENDPOINT = `${API_BASE_URL}/mosa/ai-assistant/chat`;
+    // private static readonly CHAT_ENDPOINT = `http://localhost:9587/api/mosa/ai-assistant/chat`;
     private static readonly HISTORY_ENDPOINT = `${API_BASE_URL}/mosa/ai-assistant/history`;
+    // private static readonly HISTORY_ENDPOINT = `http://localhost:9587/api/mosa/ai-assistant/history`;
 
     /**
      * Send message to Mosa
@@ -100,6 +103,30 @@ export class AIAssistantService {
                 throw new Error(error.message);
             }
             throw new Error('An unexpected error occurred while clearing history');
+        }
+    }
+
+    /**
+     * List all conversation sessions for the logged-in user
+     */
+    static async listHistoryByUser(userId?: string): Promise<AiHistoryListResponse> {
+        try {
+            const endpoint = `${this.HISTORY_ENDPOINT}/list`;
+            const body: Record<string, string> = {};
+            if (userId) body.user_id = userId;
+
+            const response = await apiPost<AiHistoryListResponse>(endpoint, body);
+
+            if (!response.data.success) {
+                throw new Error(response.data.message || 'Failed to list conversation history');
+            }
+
+            return response.data;
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new Error(error.message);
+            }
+            throw new Error('An unexpected error occurred while listing history');
         }
     }
 }
