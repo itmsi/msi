@@ -303,8 +303,8 @@ export default function Edit() {
     const ElemRefresh = () => (
         <PermissionGate permission="read">
             <Button
-                // onClick={() => loadData()}
-                onClick={() => handleSyncById(poDetail?.po_id)}
+                onClick={() => loadData()}
+                // onClick={() => handleSyncById(poDetail?.po_id)}
                 className="flex rounded-full items-center py-1 gap-2 text-green-600 bg-transparent hover:text-green-700 hover:bg-green-50 ring-green-600"
                 variant='outline'
             >
