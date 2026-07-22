@@ -26,6 +26,8 @@ export default function AIChatPage() {
   const [threads, setThreads] = useState<ThreadItem[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sendCount, setSendCount] = useState(0);
 
   // Refs for cancel/abort streaming
   const abortRef = useRef<AbortController | null>(null);
@@ -241,8 +243,14 @@ export default function AIChatPage() {
   }, [threads, activeThreadId]);
 
   const handleSendMessage = useCallback(
-    async (messageText: string) => {
+    async (messageText: string, contextTags?: string[]) => {
       if (!messageText.trim() || !activeThreadId) return;
+
+      // Prepending tags as context hints for the AI
+      const activeTags = contextTags ?? selectedTags;
+      const finalMessage = activeTags.length > 0
+        ? `[Context: ${activeTags.join(", ")}]\n${messageText}`
+        : messageText;
 
       // Add user message immediately
       const userMessage: ChatMessage = {
@@ -376,7 +384,7 @@ export default function AIChatPage() {
 
             // Send message immediately via Socket.IO event
             s.emit("chat:send", {
-              message: messageText,
+              message: finalMessage,
               sessionId: activeThreadSession,
               system: systemArray,
               userId: employeeId,
@@ -451,7 +459,7 @@ export default function AIChatPage() {
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({
-              message: messageText,
+              message: finalMessage,
               sessionId: activeThreadSession,
               system: systemArray,
               userId: employeeId,
@@ -533,15 +541,17 @@ export default function AIChatPage() {
         setIsSending(false);
         socketRef.current = null;
         abortRef.current = null;
+        // Increment sendCount to trigger tag collapse in ContextTags
+        setSendCount((c) => c + 1);
       }
     },
-    [activeThreadId, threads]
+    [activeThreadId, threads, selectedTags]
   );
 
   // Runtime adapter for assistant-ui
   const handleNewMessage = useCallback(
-    async (content: string) => {
-      await handleSendMessage(content);
+    async (content: string, contextTags?: string[]) => {
+      await handleSendMessage(content, contextTags);
     },
     [handleSendMessage]
   );
@@ -557,7 +567,7 @@ export default function AIChatPage() {
             : message.content
                 .map((p) => (typeof p === "string" ? p : "text" in p ? p.text : ""))
                 .join("");
-        await handleNewMessage(text);
+        await handleNewMessage(text, selectedTags);
       },
     }),
     [convertedMessages, isSending, isLoadingHistory, handleNewMessage]
@@ -666,7 +676,14 @@ export default function AIChatPage() {
         <div className="flex-1 min-h-0">
           {activeThreadId ? (
             <AssistantRuntimeProvider runtime={runtime}>
-              <Thread onSendMessage={handleSendMessage} isSending={isSending} onCancel={handleCancel} />
+              <Thread
+                onSendMessage={handleSendMessage}
+                isSending={isSending}
+                onCancel={handleCancel}
+                selectedTags={selectedTags}
+                onTagsChange={setSelectedTags}
+                sendCount={sendCount}
+              />
             </AssistantRuntimeProvider>
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-gray-400">
