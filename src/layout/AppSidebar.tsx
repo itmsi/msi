@@ -17,6 +17,7 @@ import { useLanguage } from "@/components/lang/useLanguage";
 import { menuTranslations } from "@/components/lang/menuTranslations";
 import { TbTopologyStar3, TbReport } from "react-icons/tb";
 import { MdCalculate } from "react-icons/md";
+import { IconAIAtomOrbit } from "@/icons";
 import { hrGroupService } from "@/pages/HR/Candidate/services/hrService";
 // import { LuClipboardList } from "react-icons/lu";
 
@@ -85,6 +86,12 @@ const AppSidebar: React.FC = () => {
     ], [buildPath, hrGroups]);
 
     const navItems: NavItem[] = useMemo(() => [
+        {
+            name: "Mosa AI Assistant",
+            icon: <IconAIAtomOrbit size={24} />,
+            allowedRoles: ['Chat AI'],
+            path: buildPath("/chat-ai"),             
+        },
         {
             icon: <GridIcon />,
             name: "Dashboard",
@@ -306,7 +313,7 @@ const AppSidebar: React.FC = () => {
                     subItems: candidateGroupSubItems,
                 },
             ],
-        }
+        },
     ], [buildPath, candidateGroupSubItems]);
 
     const othersItems: NavItem[] = useMemo(() => [

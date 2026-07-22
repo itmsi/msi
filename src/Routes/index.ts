@@ -156,6 +156,9 @@ const NanogridCalculator = lazy(() => import('@/pages/Nanogrid/Manage'));
 const HRCandidateList = lazy(() => import('@/pages/HR/Candidate/index'));
 const HRCandidateCreate = lazy(() => import('@/pages/HR/Candidate/Create'));
 
+// AI Chat
+const AIChatPage = lazy(() => import('@/pages/AIChat'));
+
 export type TAppRoute = {
     path: string;
     name: string;
@@ -1223,6 +1226,14 @@ export const routes: TAppRoute[] = [
         roles: ['Candidate HRM'],
         requiredPermissions: ['update', 'read'],
         component: HRCandidateList,
+        layout: AppLayout,
+    },
+    {
+        path: '/chat-ai',
+        name: 'Chat AI',
+        isProtected: true,
+        roles: ['Chat AI'],
+        component: AIChatPage,
         layout: AppLayout,
     },
 ];
