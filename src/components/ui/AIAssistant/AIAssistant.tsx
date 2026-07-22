@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { MdClose, MdSmartToy, MdDelete, MdMinimize } from 'react-icons/md';
+import { MdClose, MdDelete, MdMinimize } from 'react-icons/md';
+import { IconAIAtomOrbit } from '@/icons';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
@@ -84,10 +85,10 @@ export default function AIAssistant() {
             {!isOpen && (
                 <button
                     onClick={handleToggle}
-                    className="fixed bottom-6 left-6 z-[999999] flex items-center justify-center w-14 h-14 bg-[#0253a5] hover:bg-[#003061] text-white rounded-full shadow-theme-lg transition-all duration-300 hover:scale-110"
+                    className="fixed bottom-6 left-6 z-[999999] flex items-center justify-center w-14 h-14 bg-[#e7eaee] text-white rounded-full shadow-theme-lg transition-all duration-300 hover:scale-110 border border-blue-300"
                     title="Open Mosa"
                 >
-                    <MdSmartToy className="w-7 h-7" />
+                    <IconAIAtomOrbit size={40} />
                 </button>
             )}
 
@@ -101,7 +102,7 @@ export default function AIAssistant() {
                             className="fixed bottom-6 left-6 z-[999999] flex items-center justify-center w-14 h-14 bg-[#0253a5] hover:bg-[#003061] text-white rounded-full shadow-theme-lg transition-all duration-300 hover:scale-110"
                             title="Expand Mosa"
                         >
-                            <MdSmartToy className="w-7 h-7" />
+                            <IconAIAtomOrbit size={40}/>
                             {unreadCount > 0 && (
                                 <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-xs font-bold rounded-full animate-pulse">
                                     {unreadCount > 9 ? '9+' : unreadCount}
@@ -116,7 +117,7 @@ export default function AIAssistant() {
                     {/* Header */}
                     <div className="bg-[#0253a5] text-white px-4 py-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <MdSmartToy className="w-6 h-6" />
+                            <IconAIAtomOrbit size={34} className="brightness-170" />
                             <div>
                                 <h3 className="font-primary-bold text-sm">Mosa</h3>
                                 <p className="text-xs opacity-90">Tanyakan apapun tentang sistem</p>
@@ -154,7 +155,7 @@ export default function AIAssistant() {
                         {messages.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full px-2">
                                 <div className="text-center text-gray-400 mb-6">
-                                    <MdSmartToy className="w-16 h-16 mx-auto mb-3 opacity-30" />
+                                    <IconAIAtomOrbit size={64} className="mx-auto mb-3 opacity-30" />
                                     <p className="text-sm font-secondary mb-1">
                                         Mulai percakapan dengan Mosa
                                     </p>

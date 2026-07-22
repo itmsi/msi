@@ -56,8 +56,10 @@ import { ReactComponent as AlertHexaIcon } from "./alert-hexa.svg?react";
 import { ReactComponent as ErrorHexaIcon } from "./info-hexa.svg?react";
 import { ReactComponent as Part } from "./137762.svg?react";
 import { ReactComponent as DC98259800002 } from "./DC98259800002.svg?react";
+import { IconAIAtomOrbit } from "./ai-icon";
 
 export {
+  IconAIAtomOrbit,
   ErrorHexaIcon,
   AlertHexaIcon,
   MoreDotIcon,
