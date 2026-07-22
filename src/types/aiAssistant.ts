@@ -46,6 +46,29 @@ export interface AiClearHistoryResponse {
     data: AiClearHistoryResponseData;
 }
 
+// History List by User
+export interface AiHistorySessionItem {
+    session_id: string;
+    user_id: string;
+    message_count: number;
+    last_message_at: string;
+    created_at: string;
+    updated_at: string;
+    first_message?: string; // First user message content for sidebar preview
+}
+
+export interface AiHistoryListResponseData {
+    userId: string;
+    total: number;
+    conversations: AiHistorySessionItem[];
+}
+
+export interface AiHistoryListResponse {
+    success: boolean;
+    message: string;
+    data: AiHistoryListResponseData;
+}
+
 // Error Response
 export interface AiErrorResponse {
     success: false;
