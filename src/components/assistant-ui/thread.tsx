@@ -9,8 +9,27 @@ import {
 import { MdSend, MdStop, MdPerson, MdContentCopy } from "react-icons/md";
 import { IconAIAtomOrbit } from "@/icons";
 import { MarkdownText } from "./markdown-text";
-import { type FC, useRef, useEffect, useState, type ReactNode } from "react";
-import { motion } from "framer-motion";
+import { type FC, useRef, useEffect, useState, useCallback, type ReactNode } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+// ─── Context Tags ────────────────────────────────────────────────────────────
+
+interface ContextTagDef {
+  id: string;
+  label: string;
+  icon?: string;
+}
+
+const CONTEXT_TAGS: ContextTagDef[] = [
+  { id: "quotation", label: "Quotation", icon: "📄" },
+  { id: "crm", label: "CRM", icon: "👥" },
+  { id: "hr", label: "HR", icon: "👤" },
+  { id: "po", label: "Purchase Order", icon: "📦" },
+  { id: "territory", label: "Territory/IUP", icon: "🗺️" },
+  { id: "dashboard", label: "Dashboard", icon: "📊" },
+  { id: "calculator", label: "Calculator", icon: "🔢" },
+  { id: "sales-order", label: "Sales Order", icon: "📋" },
+];
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -21,6 +40,12 @@ interface ThreadProps {
   isSending?: boolean;
   /** Called when the user wants to cancel/stop the stream */
   onCancel?: () => void;
+  /** Currently selected context tags */
+  selectedTags?: string[];
+  /** Called when tags are toggled */
+  onTagsChange?: (tags: string[]) => void;
+  /** Incremented after each send to trigger tag collapse */
+  sendCount?: number;
 }
 
 // ─── SVG Icons ───────────────────────────────────────────────────────────────
@@ -79,7 +104,15 @@ const SUGGESTED_PROMPTS = [
 
 // ─── Main Thread ─────────────────────────────────────────────────────────────
 
-export const Thread: FC<ThreadProps> = ({ onSendMessage, isSending, onCancel }) => {
+export const Thread: FC<ThreadProps> = ({ onSendMessage, isSending, onCancel, selectedTags, onTagsChange, sendCount }) => {
+  const handleToggleTag = useCallback((tagId: string) => {
+    const current = selectedTags ?? [];
+    const next = current.includes(tagId)
+      ? current.filter((id) => id !== tagId)
+      : [...current, tagId];
+    onTagsChange?.(next);
+  }, [selectedTags, onTagsChange]);
+
   return (
     <ThreadPrimitive.Root className="flex h-full flex-col bg-gradient-to-b from-white to-gray-50/50">
       <ThreadPrimitive.Viewport className="flex flex-1 flex-col overflow-y-auto scroll-smooth">
@@ -99,6 +132,13 @@ export const Thread: FC<ThreadProps> = ({ onSendMessage, isSending, onCancel }) 
           <div className="relative">
             <ThreadScrollToBottom />
             <Composer isSending={isSending} onCancel={onCancel} />
+            <ContextTags
+              tags={CONTEXT_TAGS}
+              selected={selectedTags ?? []}
+              onToggle={handleToggleTag}
+              disabled={isSending}
+              sendCount={sendCount}
+            />
           </div>
         </ThreadPrimitive.ViewportFooter>
       </ThreadPrimitive.Viewport>
@@ -365,6 +405,116 @@ interface ComposerProps {
   onCancel?: () => void;
 }
 
+// ─── Context Tags Component ───────────────────────────────────────────────────
+
+interface ContextTagsProps {
+  tags: ContextTagDef[];
+  selected: string[];
+  onToggle: (tagId: string) => void;
+  disabled?: boolean;
+  sendCount?: number;
+}
+
+const ContextTags: FC<ContextTagsProps> = ({ tags, selected, onToggle, disabled, sendCount = 0 }) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const prevSendCount = useRef(sendCount);
+
+  // Collapse unselected tags after a message is sent
+  useEffect(() => {
+    if (sendCount > prevSendCount.current && selected.length > 0) {
+      setIsExpanded(false);
+    }
+    prevSendCount.current = sendCount;
+  }, [sendCount, selected.length]);
+
+  if (tags.length === 0) return null;
+
+  const hasSelection = selected.length > 0;
+  const hiddenTags = tags.filter((t) => !selected.includes(t.id));
+  const hiddenCount = hiddenTags.length;
+
+  // Render a single tag button
+  const renderTag = (tag: ContextTagDef) => {
+    const isActive = selected.includes(tag.id);
+    return (
+      <motion.button
+        key={tag.id}
+        type="button"
+        disabled={disabled}
+        onClick={() => onToggle(tag.id)}
+        whileHover={{ scale: disabled ? 1 : 1.05 }}
+        whileTap={{ scale: disabled ? 1 : 0.95 }}
+        layout
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-secondary leading-none transition-colors duration-200 ${
+          isActive
+            ? "bg-[#0253a5] text-white shadow-sm shadow-[#0253a5]/20 ring-1 ring-[#0253a5]/30"
+            : "bg-gray-100/80 text-gray-500 hover:text-gray-700 hover:bg-gray-200/80 ring-1 ring-gray-200/50"
+        } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+      >
+        <span className="text-sm">{tag.icon}</span>
+        <span>{tag.label}</span>
+        {isActive && (
+          <svg className="w-3.5 h-3.5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        )}
+      </motion.button>
+    );
+  };
+
+  // Visible tags: if collapsed with selection, show only selected tags + expand button
+  const visibleTags = hasSelection && !isExpanded
+    ? tags.filter((t) => selected.includes(t.id))
+    : tags;
+
+  return (
+    <div className="flex flex-wrap gap-2 px-0.5 pt-3 pb-0 items-center">
+      <AnimatePresence mode="popLayout" initial={false}>
+        {visibleTags.map((tag) => (
+          <motion.div
+            key={tag.id}
+            layout
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          >
+            {renderTag(tag)}
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
+      {/* Expand / Collapse button — only show when there's a selection */}
+      {hasSelection && hiddenCount > 0 && (
+        <motion.button
+          type="button"
+          disabled={disabled}
+          onClick={() => setIsExpanded(!isExpanded)}
+          layout
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-secondary leading-none bg-gray-100/80 text-gray-500 hover:text-gray-700 hover:bg-gray-200/80 ring-1 ring-gray-200/50 transition-colors duration-200 cursor-pointer"
+        >
+          {isExpanded ? (
+            <>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <span className="text-[11px] text-gray-400">Sembunyikan</span>
+            </>
+          ) : (
+            <>
+              <span className="text-sm font-medium">+{hiddenCount}</span>
+              <span className="text-[11px] text-gray-400">lainnya</span>
+            </>
+          )}
+        </motion.button>
+      )}
+    </div>
+  );
+};
+
 const Composer: FC<ComposerProps> = ({ isSending, onCancel }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -388,17 +538,15 @@ const Composer: FC<ComposerProps> = ({ isSending, onCancel }) => {
         />
         <div className="flex items-center gap-1.5 pr-1 pb-1">
           {isSending ? (
-            /* ── Pause button (visible only when streaming) ── */
             <button
               type="button"
               onClick={onCancel}
-              className="flex items-center justify-center w-9 h-9 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md hover:shadow-red-500/25 shrink-0 animate-pulse"
+              className="flex items-center justify-center w-9 h-9 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md hover:shadow-red-500/25 shrink-0"
               title="Hentikan streaming"
             >
               <MdStop className="w-4 h-4" />
             </button>
           ) : (
-            /* ── Send button (visible only when idle) ── */
             <ComposerPrimitive.Send asChild>
               <button className="flex items-center justify-center w-9 h-9 bg-[#0253a5] hover:bg-[#003061] disabled:bg-gray-200 disabled:text-gray-400 text-white rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md hover:shadow-[#0253a5]/25 shrink-0">
                 <MdSend className="w-4 h-4" />
