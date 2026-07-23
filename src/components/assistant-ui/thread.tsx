@@ -9,7 +9,7 @@ import {
 import { MdSend, MdStop, MdPerson, MdContentCopy } from "react-icons/md";
 import { IconAIAtomOrbit } from "@/icons";
 import { MarkdownText } from "./markdown-text";
-import { type FC, useRef, useEffect, useState, useCallback, type ReactNode } from "react";
+import { type FC, useRef, useEffect, useState, useCallback, useMemo, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Context Tags ────────────────────────────────────────────────────────────
@@ -102,6 +102,22 @@ const SUGGESTED_PROMPTS = [
   "Apa yang bisa kamu bantu?",
 ];
 
+// ─── Filter tags based on auth_system from localStorage ───────────────────────
+
+function getAvailableTags(): ContextTagDef[] {
+  try {
+    const storedSystem = localStorage.getItem('auth_system');
+    if (!storedSystem) return CONTEXT_TAGS;
+    const systemArray: string[] = JSON.parse(storedSystem);
+    if (!Array.isArray(systemArray) || systemArray.length === 0) return CONTEXT_TAGS;
+    // Only show tags whose id matches an entry in auth_system
+    const systemSet = new Set(systemArray.map((s) => s.toLowerCase()));
+    return CONTEXT_TAGS.filter((tag) => systemSet.has(tag.id));
+  } catch {
+    return CONTEXT_TAGS;
+  }
+}
+
 // ─── Main Thread ─────────────────────────────────────────────────────────────
 
 export const Thread: FC<ThreadProps> = ({ onSendMessage, isSending, onCancel, selectedTags, onTagsChange, sendCount }) => {
@@ -112,6 +128,8 @@ export const Thread: FC<ThreadProps> = ({ onSendMessage, isSending, onCancel, se
       : [...current, tagId];
     onTagsChange?.(next);
   }, [selectedTags, onTagsChange]);
+
+  const availableTags = useMemo(() => getAvailableTags(), []);
 
   return (
     <ThreadPrimitive.Root className="flex h-full flex-col bg-gradient-to-b from-white to-gray-50/50">
@@ -133,7 +151,7 @@ export const Thread: FC<ThreadProps> = ({ onSendMessage, isSending, onCancel, se
             <ThreadScrollToBottom />
             <Composer isSending={isSending} onCancel={onCancel} />
             <ContextTags
-              tags={CONTEXT_TAGS}
+              tags={availableTags}
               selected={selectedTags ?? []}
               onToggle={handleToggleTag}
               disabled={isSending}
