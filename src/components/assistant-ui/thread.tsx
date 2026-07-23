@@ -9,7 +9,7 @@ import {
 import { MdSend, MdStop, MdPerson, MdContentCopy } from "react-icons/md";
 import { IconAIAtomOrbit } from "@/icons";
 import { MarkdownText } from "./markdown-text";
-import { type FC, useRef, useEffect, useState, useCallback, type ReactNode } from "react";
+import { type FC, useRef, useEffect, useState, useCallback, useMemo, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Context Tags ────────────────────────────────────────────────────────────
@@ -20,16 +20,20 @@ interface ContextTagDef {
   icon?: string;
 }
 
-const CONTEXT_TAGS: ContextTagDef[] = [
-  { id: "quotation", label: "Quotation", icon: "📄" },
-  { id: "crm", label: "CRM", icon: "👥" },
-  { id: "hr", label: "HR", icon: "👤" },
-  { id: "po", label: "Purchase Order", icon: "📦" },
-  { id: "territory", label: "Territory/IUP", icon: "🗺️" },
-  { id: "dashboard", label: "Dashboard", icon: "📊" },
-  { id: "calculator", label: "Calculator", icon: "🔢" },
-  { id: "sales-order", label: "Sales Order", icon: "📋" },
-];
+// Mapping from auth_system values (as stored in localStorage) to context tag definitions
+const AUTH_SYSTEM_TO_TAG: Record<string, ContextTagDef> = {
+  "CRM":              { id: "crm",           label: "CRM",              icon: "👥" },
+  "Quotation ITI":    { id: "quotation",     label: "Quotation",        icon: "📄" },
+  "AI":               { id: "ai",            label: "AI",               icon: "🤖" },
+  "User Management":  { id: "user-management", label: "User Management", icon: "👥" },
+  "Netsuite":         { id: "netsuite",      label: "Netsuite",         icon: "📋" },
+  "ROA ROE Calculate": { id: "calculator",   label: "Calculator",       icon: "🔢" },
+  "Power BI":         { id: "dashboard",     label: "Dashboard",        icon: "📊" },
+  "HRM":              { id: "hr",            label: "HRM",              icon: "👤" },
+  "Purchase Order":   { id: "po",            label: "Purchase Order",    icon: "📦" },
+  "Sales Order":      { id: "sales-order",   label: "Sales Order",      icon: "📋" },
+  "Territory/IUP":    { id: "territory",     label: "Territory/IUP",     icon: "🗺️" },
+};
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -102,6 +106,44 @@ const SUGGESTED_PROMPTS = [
   "Apa yang bisa kamu bantu?",
 ];
 
+// ─── Generate tags from auth_system localStorage ───────────────────────────
+
+function getAvailableTags(): ContextTagDef[] {
+  try {
+    const storedSystem = localStorage.getItem('auth_system');
+    if (!storedSystem) {
+      // Fallback: show all known tags
+      return Object.values(AUTH_SYSTEM_TO_TAG);
+    }
+    const systemArray: string[] = JSON.parse(storedSystem);
+    if (!Array.isArray(systemArray) || systemArray.length === 0) {
+      return Object.values(AUTH_SYSTEM_TO_TAG);
+    }
+
+    const tags: ContextTagDef[] = [];
+    const seen = new Set<string>();
+
+    for (const sys of systemArray) {
+      const mapped = AUTH_SYSTEM_TO_TAG[sys];
+      if (mapped && !seen.has(mapped.id)) {
+        tags.push(mapped);
+        seen.add(mapped.id);
+      } else if (!mapped) {
+        // For unknown auth_system values, create a default tag
+        const fallbackId = sys.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        if (!seen.has(fallbackId)) {
+          tags.push({ id: fallbackId, label: sys, icon: '🔧' });
+          seen.add(fallbackId);
+        }
+      }
+    }
+
+    return tags;
+  } catch {
+    return Object.values(AUTH_SYSTEM_TO_TAG);
+  }
+}
+
 // ─── Main Thread ─────────────────────────────────────────────────────────────
 
 export const Thread: FC<ThreadProps> = ({ onSendMessage, isSending, onCancel, selectedTags, onTagsChange, sendCount }) => {
@@ -112,6 +154,8 @@ export const Thread: FC<ThreadProps> = ({ onSendMessage, isSending, onCancel, se
       : [...current, tagId];
     onTagsChange?.(next);
   }, [selectedTags, onTagsChange]);
+
+  const availableTags = useMemo(() => getAvailableTags(), []);
 
   return (
     <ThreadPrimitive.Root className="flex h-full flex-col bg-gradient-to-b from-white to-gray-50/50">
@@ -133,7 +177,7 @@ export const Thread: FC<ThreadProps> = ({ onSendMessage, isSending, onCancel, se
             <ThreadScrollToBottom />
             <Composer isSending={isSending} onCancel={onCancel} />
             <ContextTags
-              tags={CONTEXT_TAGS}
+              tags={availableTags}
               selected={selectedTags ?? []}
               onToggle={handleToggleTag}
               disabled={isSending}
