@@ -362,9 +362,10 @@ export default function AIChatPage() {
           let settled = false;
           const s = io(SOCKET_BASE, {
             path: SOCKET_PATH,
-            transports: ["websocket"],        // Skip long-polling, straight to WebSocket
+            transports: ["websocket", "polling"], // WebSocket with polling fallback
             reconnection: false,               // One-shot per message
             timeout: 10000,                    // Connection timeout
+            auth: { token },                   // Send auth token during handshake
           });
 
           const timeout = setTimeout(() => {
@@ -442,9 +443,60 @@ export default function AIChatPage() {
             socket.on("disconnect", (reason: string) => {
               if (!finished) {
                 finished = true;
-                if (reason !== "io client disconnect") {
-                  reject(new Error(`Socket disconnected: ${reason}`));
+
+                if (reason === "ping timeout" || reason === "transport close" || reason === "transport error") {
+                  // ── Transport issue — server is probably busy with a long tool call ──
+                  // Don't reject — the backend saves the conversation server-side.
+                  // Try to recover by polling the backend history if we have a sessionId.
+                  console.warn(`[Socket] Transport disconnected during streaming: ${reason}. Server may still be processing.`);
+
+                  socketRef.current = null;
+
+                  // Try to fetch the completed response from backend history
+                  // with retries (tool execution can take 20s+)
+                  const sidToPoll = newSessionId || activeThreadSession;
+                  if (sidToPoll) {
+                    const pollHistory = async (attempt: number) => {
+                      if (attempt > 10) return; // max 10 attempts (~30s)
+                      try {
+                        const historyRes = await AIAssistantService.getHistory(sidToPoll);
+                        if (historyRes.success && historyRes.data?.conversationHistory) {
+                          const lastAssistant = [...historyRes.data.conversationHistory]
+                            .reverse()
+                            .find((m: ChatMessage) => m.role === "assistant");
+                          if (lastAssistant?.content) {
+                            setThreads((prev) =>
+                              prev.map((t) =>
+                                t.id === activeThreadId
+                                  ? {
+                                      ...t,
+                                      sessionId: sidToPoll,
+                                      messages: t.messages.map((m, i) =>
+                                        i === t.messages.length - 1
+                                          ? { ...m, content: lastAssistant.content }
+                                          : m
+                                      ),
+                                    }
+                                  : t
+                              )
+                            );
+                            return; // success — stop polling
+                          }
+                        }
+                      } catch { /* poll failed — will retry */ }
+                      setTimeout(() => pollHistory(attempt + 1), 3000);
+                    };
+                    setTimeout(() => pollHistory(1), 3000);
+                  }
+
+                  resolve();
+                } else if (reason === "io server disconnect") {
+                  // Server explicitly kicked us
+                  socketRef.current = null;
+                  reject(new Error(`Disconnected by server: ${reason}`));
                 } else {
+                  // "io client disconnect" — we cancelled ourselves
+                  socketRef.current = null;
                   resolve();
                 }
               }
