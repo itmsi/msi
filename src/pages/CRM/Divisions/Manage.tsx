@@ -96,7 +96,7 @@ export default function ManageDivision() {
             />
 
 
-            <div className="space-y-6">
+            <div className="space-y-3">
 
                 <div className="bg-white shadow rounded-lg">
                     <div className="px-6 py-4 border-b border-gray-200">
@@ -186,7 +186,7 @@ export default function ManageDivision() {
                             paginationTotalRows={pagination?.total || 0}
                             paginationPerPage={pagination?.limit || 10}
                             paginationDefaultPage={pagination?.page || 1}
-                            paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
+                            paginationRowsPerPageOptions={[10, 20, 50, 100]}
                             onChangePage={handlePageChange}
                             onChangeRowsPerPage={(newPerPage) => {
                                 fetchDivisions(1, newPerPage);

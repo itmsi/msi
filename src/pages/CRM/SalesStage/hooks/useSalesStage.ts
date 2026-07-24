@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { BoardData } from 'react-kanban-kit';
 import { SalesStageServices } from '../services/salesStageService';
 import type {
@@ -8,9 +8,20 @@ import type {
 } from '../types/salesStage';
 import { STAGE_STATUSES } from '../types/salesStage';
 import { toast } from 'react-hot-toast';
+import { useSearchParams } from 'react-router-dom';
 
 type ColumnState = {
     tasks: SalesStageOpportunity[];
+};
+export type FilterState = {
+    search: string;
+    sort_order: 'asc' | 'desc' | '';
+    sort_by: 'created_at' | 'updated_at' | '';
+    iup_id: string;
+    contractor: string;
+    employee_id: string;
+    solution: string;
+    stage?: string;
 };
 
 const initialColumnState = (): ColumnState => ({
@@ -18,12 +29,26 @@ const initialColumnState = (): ColumnState => ({
 });
 
 export const useSalesStage = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchValue, setSearchValue] = useState('');
+
+    const urlFilters: FilterState = useMemo(() => ({
+        search: searchParams.get('search') || '',
+        sort_order: (searchParams.get('sort_order') as FilterState['sort_order']) || 'desc',
+        sort_by: (searchParams.get('sort_by') as FilterState['sort_by']) || 'created_at',
+        iup_id: searchParams.get('iup_id') || '',
+        contractor: searchParams.get('contractor') || '',
+        employee_id: searchParams.get('employee_id') || '',
+        solution: searchParams.get('solution') || '',
+        stage: searchParams.get('stage') || '',
+    }), [searchParams]);
+
     const [dataSource, setDataSource] = useState<BoardData | null>(null);
     const [initialLoading, setInitialLoading] = useState(false);
     const [stats, setStats] = useState<SalesStageStats | null>(null);
-    const [searchValue, setSearchValue] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [solutionFilter, setSolutionFilter] = useState('');
+    
+    const [searchTerm] = useState('');
+    const [solutionFilter] = useState('');
     const [columns, setColumns] = useState<Record<string, ColumnState>>({
         find: initialColumnState(),
         survey: initialColumnState(),
@@ -31,6 +56,7 @@ export const useSalesStage = () => {
         deal: initialColumnState(),
         hypercare: initialColumnState(),
     });
+
     const [formModalOpen, setFormModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<SalesStageOpportunity | null>(null);
     const [defaultStage, setDefaultStage] = useState<string>('find');
@@ -81,17 +107,35 @@ export const useSalesStage = () => {
         } as any;
     }, []);
 
+    const updateUrlParams = useCallback((currentFilters: FilterState) => {
+        const params = new URLSearchParams();
+        
+        Object.entries(currentFilters).forEach(([key, value]) => {
+            if (value && value !== 'desc') { // Jangan masukkan nilai kosong atau default sort
+                params.set(key, value);
+            }
+        });
+        
+        setSearchParams(params);
+    }, [setSearchParams]);
+
     // Fetch all data
-    const fetchData = useCallback(async (search = searchTerm, solution = solutionFilter) => {
+    const fetchData = useCallback(async (overrides: Partial<FilterState> = {}) => {
+        const filters: FilterState = { ...urlFilters, ...overrides };
+
         setInitialLoading(true);
         try {
             const response = await SalesStageServices.getList({
                 page: 1,
                 limit: 100,
-                search: search,
-                solution: solution,
-                sort_by: 'created_at',
-                sort_order: 'desc',
+                search: filters.search,
+                solution: filters.solution,
+                iup_id: filters.iup_id,
+                contractor: filters.contractor,
+                employee_id: filters.employee_id,
+                stage: filters.stage,
+                sort_by: filters.sort_by || 'created_at',
+                sort_order: filters.sort_order || 'desc',
             });
 
             const allOpps: SalesStageOpportunity[] = [];
@@ -119,29 +163,46 @@ export const useSalesStage = () => {
 
             setColumns(newCols);
             setDataSource(buildBoardData(newCols, allOpps, false));
+
+            // Sinkronkan URL dengan filter yang baru dipakai
+            updateUrlParams(filters);
         } catch (error: any) {
             console.error('[SalesStage] Error fetching data:', error);
             toast.error(error?.message || 'Gagal memuat data');
         } finally {
             setInitialLoading(false);
         }
-    }, [buildBoardData, searchTerm, solutionFilter]);
+    }, [buildBoardData, urlFilters, updateUrlParams]);
 
     useEffect(() => {
-        fetchData('', '');
+        fetchData();
     }, []);
 
     // Search handler
     const handleSearch = useCallback((value: string) => {
-        setSearchTerm(value);
-        fetchData(value, solutionFilter);
-    }, [fetchData, solutionFilter]);
+        setSearchValue(value);
+        fetchData({ search: value });
+    }, [fetchData]);
 
-    // Solution filter handler
+    const handleClearAllFilters = useCallback(() => {
+        fetchData({
+            search: '',
+            iup_id: '',
+            contractor: '',
+            employee_id: '',
+            solution: '',
+            stage: '',
+        });
+    }, [fetchData]);
+
     const handleSolutionChange = useCallback((value: string) => {
-        setSolutionFilter(value);
-        fetchData(searchTerm, value);
-    }, [fetchData, searchTerm]);
+        fetchData({ solution: value });
+    }, [fetchData]);
+
+    // Generic handler untuk filter lain: iup_id, contractor, employee_id, stage, sort_by, sort_order
+    const handleFilterChange = useCallback((overrides: Partial<FilterState>) => {
+        fetchData(overrides);
+    }, [fetchData]);
 
     // Open create modal
     const openCreateModal = useCallback((stage: string) => {
@@ -171,7 +232,7 @@ export const useSalesStage = () => {
             }
             setFormModalOpen(false);
             setEditingTask(null);
-            await fetchData(searchTerm, solutionFilter);
+            await fetchData();
         } catch (error: any) {
             console.error('[SalesStage] Error submitting form:', error);
             toast.error(error?.message || 'Gagal menyimpan data');
@@ -203,14 +264,14 @@ export const useSalesStage = () => {
         try {
             await SalesStageServices.update(opp.opportunity_id, { stage: targetStage } as any);
             toast.success(`Pindah ke ${targetStage}`);
-            await fetchData(searchTerm, solutionFilter);
+            await fetchData();
             if (selectedTask?.opportunity_id === opp.opportunity_id) {
                 setSelectedTask({ ...opp, stage: targetStage as any });
             }
         } catch (error: any) {
             toast.error(error?.message || 'Gagal pindah stage');
         }
-    }, [fetchData, searchTerm, solutionFilter, selectedTask]);
+    }, [fetchData, selectedTask]);
 
     // Delete opportunity
     const handleDeleteTask = useCallback(async (id: string) => {
@@ -218,11 +279,11 @@ export const useSalesStage = () => {
             await SalesStageServices.delete(id);
             toast.success('Opportunity berhasil dihapus');
             closeDetailDrawer();
-            await fetchData(searchTerm, solutionFilter);
+            await fetchData();
         } catch (error: any) {
             toast.error(error?.message || 'Gagal menghapus data');
         }
-    }, [fetchData, searchTerm, solutionFilter, closeDetailDrawer]);
+    }, [fetchData, closeDetailDrawer]);
 
     const updateBoardWithDrag = useCallback((canDrag: boolean) => {
         if (columns && allOpportunities.length > 0) {
@@ -244,9 +305,12 @@ export const useSalesStage = () => {
                 setDetailSubTasks(res.data.opportunity_sub_tasks || []);
                 setDetailAssignments(res.data.opportunity_assignment_solutions || []);
                 setDetailReviews(res.data.opportunity_review_hypercares || []);
+            } else {
+                toast.error('Gagal memuat detail opportunity');
             }
         } catch (e: any) {
             console.error('[SalesStage] Error fetching detail:', e);
+            toast.error('Gagal memuat detail opportunity');
         } finally {
             setDetailLoading(false);
         }
@@ -295,6 +359,9 @@ export const useSalesStage = () => {
         setDetailSubTasks,
         setDetailAssignments,
         setDetailReviews,
+        handleClearAllFilters,
+        handleFilterChange,
+        urlFilters,
     };
 };
 

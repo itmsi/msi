@@ -15,6 +15,7 @@ import type {
 import { SOLUTION_COLORS } from '../types/salesStage';
 import { SalesStageServices } from '../services/salesStageService';
 import { toast } from 'react-hot-toast';
+import { LoadingOverlay } from '@/components/common/Loading';
 
 const fmt = (v: string | null) => {
     const n = parseInt((v || '').replace(/\D/g, ''), 10);
@@ -397,7 +398,14 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
     const solutionColor = opportunity.solution ? SOLUTION_COLORS[opportunity.solution] || 'info' : 'dark';
 
     return (
-        <Offcanvas isOpen={isOpen} onClose={onClose} title="Detail Opportunity" position="right" width="lg">
+        <Offcanvas 
+            isOpen={isOpen} 
+            onClose={onClose} 
+            title="Detail Opportunity" 
+            position="right" 
+            width="xl"
+        >
+            {detailLoading ? <LoadingOverlay /> : (
             <div className="p-4 space-y-4 text-sm">
                 {/* Header */}
                 <div>
@@ -731,6 +739,7 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
                     )}
                 </div>
             </div>
+            )}
         </Offcanvas>
     );
 };

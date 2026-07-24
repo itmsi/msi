@@ -1,32 +1,23 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import { Kanban } from 'react-kanban-kit';
 import type { BoardItem } from 'react-kanban-kit';
+import Tooltip from '@/components/ui/tooltip/Tooltip';
 import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
-import { MdAdd, MdSearch, MdClear, MdBusiness, MdListAlt, MdAttachMoney, MdHandshake, MdTrendingUp } from 'react-icons/md';
+import { MdAdd, MdSearch, MdClear, MdBusiness, MdListAlt, MdAttachMoney, MdHandshake, MdTrendingUp, MdExpandLess, MdExpandMore, MdFilterListAlt } from 'react-icons/md';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import { useSalesStage } from './hooks/useSalesStage';
 import OpportunityModal from './components/OpportunityModal';
 import StageDetailDrawer from './components/StageDetailDrawer';
-import Badge from '@/components/ui/badge/Badge';
+import OpportunityCard from './components/OpportunityCard';
 import { usePermissions } from '@/hooks/usePermissions';
 import { toast } from 'react-hot-toast';
-import { SOLUTION_OPTIONS, SOLUTION_COLORS } from './types/salesStage';
 import PageHeaderManage from '@/components/common/PageHeaderManage';
-
-const fmtCard = (v: string | null) => {
-    const n = parseInt((v || '').replace(/\D/g, ''), 10);
-    return isNaN(n) ? (v || '-') : `Rp ${fmtShort(n)}`;
-};
-
-const fmtShort = (v: number) => {
-    if (v >= 1_000_000_000_000) return `${(v / 1_000_000_000_000).toFixed(v % 1_000_000_000_000 === 0 ? 0 : 1)} T`;
-    if (v >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(v % 1_000_000_000 === 0 ? 0 : 1)} M`;
-    if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(v % 1_000_000 === 0 ? 0 : 1)} Jt`;
-    if (v >= 1_000) return `${(v / 1_000).toFixed(v % 1_000 === 0 ? 0 : 1)} Rb`;
-    return v.toString();
-};
+import StatCard, { StatCardProps } from '@/components/ui/summaryCard/Statcard';
+import { stageStyles } from './constants/stageIupStyles';
+import { fmtShort } from './utils/formatters';
+import FilterSection from './components/FilterSection';
 
 interface CardRenderProps {
     data: BoardItem;
@@ -71,18 +62,31 @@ const SalesStage: React.FC = () => {
         handleDeleteTask,
         fetchDetail,
         fetchData,
-        searchTerm,
-        solutionFilter,
+        urlFilters,
+        handleFilterChange,
+        handleClearAllFilters,
     } = useSalesStage();
 
     const { canCreate, canUpdate, canDelete } = usePermissions();
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    
+
+    const handleClearFilters = () => {
+        handleClearAllFilters();
+        setLocalSearch(''); // biar search box ikut kereset juga
+    };
+
+    // Toggle filter collapse
+    const handleToggleFilter = () => {
+        setShowAdvancedFilters(prev => !prev);
+    };
 
     // Enable/disable drag based on permission
     React.useEffect(() => {
         updateBoardWithDrag(canUpdate);
     }, [canUpdate, updateBoardWithDrag]);
 
-    const [localSearch, setLocalSearch] = useState('');
+    const [localSearch, setLocalSearch] = useState(urlFilters.search);
 
     const guardedSubmitForm = useCallback(
         async (data: import('../SalesStage/types/salesStage').SalesStageCreateRequest) => {
@@ -126,8 +130,8 @@ const SalesStage: React.FC = () => {
         if (selectedTask) {
             fetchDetail(selectedTask.opportunity_id);
         }
-        fetchData(searchTerm, solutionFilter);
-    }, [selectedTask, fetchDetail, fetchData, searchTerm, solutionFilter]);
+        fetchData();
+    }, [selectedTask, fetchDetail, fetchData]);
 
     // Open edit modal from drawer
     const handleEditOpportunity = useCallback(
@@ -168,98 +172,9 @@ const SalesStage: React.FC = () => {
     const configMap: ConfigMap = useMemo(
         () => ({
             card: {
-                render: ({ data }: CardRenderProps) => {
-                    const content = data.content || {};
-                    const stage = content.stage || 'pull';
-                    const borderColors: Record<string, string> = {
-                        find: '#6B7280', survey: '#4F46E5', pull: '#F59E0B',
-                        deal: '#22C55E', hypercare: '#BE185D',
-                    };
-                    const borderColor = borderColors[stage] || borderColors.pull;
-                    const secondary = content.contractor ? `IUP: ${content.iup_name}` : (content.province || '');
-
-                    return (
-                        <div
-                            className="bg-white rounded-lg p-3 cursor-pointer transition-all duration-150 hover:shadow-md"
-                            style={{ borderLeft: `4px solid ${borderColor}`, boxShadow: '0px 3px 10px -9px #6c6c6c' }}
-                        >
-                            {/* Top: nama utama + commodity chip */}
-                            <div className="flex items-start justify-between gap-2 mb-1">
-                                <h4 className="text-sm font-bold text-gray-900 leading-snug line-clamp-2 flex-1">
-                                    {data.title}
-                                </h4>
-                                {content.commodity === 'nikel' ? (
-                                    <Badge color="indigo" variant="light" size="sm">NIKEL</Badge>
-                                ) : content.commodity === 'batubara' ? (
-                                    <Badge color="dark" variant="light" size="sm">BATUBARA</Badge>
-                                ) : null}
-                            </div>
-                            {/* Secondary: IUP name or location */}
-                            <p className="text-[11px] text-gray-400 mb-1">{secondary}</p>
-                            {/* Sales name with dot */}
-                            <div className="flex items-center gap-1.5 mb-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-gray-300 inline-block"></span>
-                                <span className="text-[10.5px] text-gray-500">{content.sales_name || '-'}</span>
-                            </div>
-                            {/* Solution tag */}
-                            {content.solution && (
-                                <div className="mb-1.5">
-                                    <Badge
-                                        color={(SOLUTION_COLORS[content.solution] || 'info') as any}
-                                        variant="light"
-                                        size="sm"
-                                    >
-                                        {content.solution}
-                                    </Badge>
-                                </div>
-                            )}
-                            {!content.solution && stage !== 'pull' && stage !== 'survey' && (
-                                <div className="mb-1.5">
-                                    <Badge color="warning" variant="light" size="sm">
-                                        <MdSearch size={12} className="inline mr-0.5" />
-                                        Analyzing...
-                                    </Badge>
-                                </div>
-                            )}
-                            {!content.solution && (stage === 'pull' || stage === 'survey') && (
-                                <div className="mb-1.5">
-                                    <Badge color="dark" variant="light" size="sm">
-                                        Pending
-                                    </Badge>
-                                </div>
-                            )}
-                            {/* Footer: value + progress or hypercare info */}
-                            <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                                {stage === 'hypercare' ? (
-                                    <>
-                                        <span className="text-[11px] text-gray-400">{content.total_reviews || 0} review</span>
-                                        <Badge color="success" variant="light" size="sm">Positif</Badge>
-                                    </>
-                                ) : stage === 'deal' && content.actual_value ? (
-                                    <>
-                                        <span className="text-[11px] font-semibold text-green-600">{fmtCard(content.actual_value)}</span>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="text-[11px] text-gray-400">{fmtCard(content.value)}</span>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <span className="text-[11px] text-gray-500 font-medium">{fmtCard(content.value)}</span>
-                                        <div className="w-8 h-8 rounded-full relative flex-none"
-                                            style={{
-                                                background: `conic-gradient(var(--primary-600, #1E4FA0) ${content.progress_pct || 0}%, #e5e7eb 0)`
-                                            }}
-                                        >
-                                            <div className="absolute inset-[3px] rounded-full bg-white flex items-center justify-center">
-                                                <span className="text-[8px] font-mono font-bold">{content.progress_pct || 0}%</span>
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    );
-                },
+                render: ({ data }: CardRenderProps) => (
+                    <OpportunityCard title={data.title} content={data.content || {}} />
+                ),
                 isDraggable: canUpdate,
             },
         }),
@@ -279,89 +194,79 @@ const SalesStage: React.FC = () => {
 
     // Column header renderer
     const renderColumnHeader = useCallback((column: BoardItem) => {
-        const colors: Record<string, string> = {
-            find: 'bg-[#6B7280]',
-            survey: 'bg-[#4F46E5]',
-            pull: 'bg-[#F59E0B]',
-            deal: 'bg-[#22C55E]',
-            hypercare: 'bg-[#BE185D]',
-        };
-        const colorClass = colors[column.id] || colors.pull;
-
+        const style = stageStyles[column.id] ?? stageStyles.find;
         const stageCodes: Record<string, string> = {
             find: 'STAGE 01', survey: 'STAGE 02', pull: 'STAGE 03',
             deal: 'STAGE 04', hypercare: 'STAGE 05',
         };
-
         return (
-            <div className={`px-3 py-2.5 rounded-lg ${colorClass} text-white`}
-                style={{ boxShadow: '0px 3px 6px -3px #6c6c6c' }}
-            >
-                <div className="flex items-center justify-between">
+            <div className={`pt-2.5 px-3 bg-white`}>
+                <div className={`flex items-center justify-between ${style.text}`}>
                     <div>
                         <span className="text-[10px] opacity-70 font-mono">{stageCodes[column.id]}</span>
-                        <h3 className="text-sm font-semibold">{column.title}</h3>
+                        <h3 className="text-md font-primary-bold">{column.title}</h3>
                     </div>
-                    <span className="text-xs font-medium opacity-60">{column.totalChildrenCount}</span>
+                    <PermissionGate permission={["create", "update"]}>
+                        <Tooltip content={`Create Task ${column.title}`} position="top">
+                            <Button
+                                variant="transparent"
+                                onClick={() => openCreateModal(column.id)}
+                                className={`p-1.5 hover:text-white ${style.hoverBg} transition-all duration-150`}
+                            >
+                                <MdAdd size={16} />
+                            </Button>
+                        </Tooltip>
+                    </PermissionGate>
                 </div>
             </div>
         );
-    }, []);
+    }, [openCreateModal]);
 
-    // Column footer — add button
-    const renderColumnFooter = useCallback(
-        (column: BoardItem) => (
-            <div className="px-3 py-3 border-t border-gray-200">
-                <button
-                    onClick={() => openCreateModal(column.id)}
-                    className="w-full flex items-center justify-center gap-1.5 py-2.5 border-2 border-dashed border-gray-300 text-sm text-gray-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50/50 rounded-lg transition-all duration-200"
-                >
-                    <MdAdd size={16} />
-                    Add Opportunity
-                </button>
-            </div>
-        ),
-        [openCreateModal]
-    );
-
-    // Stats cards
+    // SUMMARY CARDS
     const StatsCards = useMemo(() => {
         if (!stats) return null;
-        const cards = [
-            { icon: <MdBusiness size={20} />, label: 'IUP', value: stats.total_iup.toString(), color: 'primary' },
-            { icon: <MdListAlt size={20} />, label: 'Opportunity', value: stats.total_opportunity.toString(), color: 'success' },
-            { icon: <MdAttachMoney size={20} />, label: 'Total nilai', value: `Rp ${fmtShort(stats.total_value)}`, color: 'warning' },
-            { icon: <MdHandshake size={20} />, label: 'Deal', value: stats.deal_count.toString(), color: 'purple' },
-            { icon: <MdTrendingUp size={20} />, label: 'Rata-rata progres', value: `${stats.avg_progress}%`, color: 'dark' },
+        const cards: StatCardProps[] = [
+            {
+                icon: MdBusiness,
+                label: "IUP",
+                value: stats.total_iup.toString(),
+                color: "blue",
+            },
+            {
+                icon: MdListAlt,
+                label: "Opportunity",
+                value: stats.total_opportunity.toString(),
+                color: "green",
+            },
+            {
+                icon: MdAttachMoney,
+                label: "Total nilai",
+                value: `Rp ${fmtShort(stats.total_value)}`,
+                color: "amber",
+            },
+            {
+                icon: MdHandshake,
+                label: "Deal",
+                value: stats.deal_count.toString(),
+                color: "purple",
+            },
+            {
+                icon: MdTrendingUp,
+                label: "Rata-rata progres",
+                value: `${stats.avg_progress}%`,
+                color: "gray",
+            },
         ];
-
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                {cards.map((card, idx) => {
-                    const colorMap: Record<string, string> = {
-                        primary: 'bg-blue-50 text-blue-700',
-                        success: 'bg-green-50 text-green-700',
-                        warning: 'bg-amber-50 text-amber-700',
-                        purple: 'bg-purple-50 text-purple-700',
-                        dark: 'bg-gray-100 text-gray-700',
-                    };
-                    return (
-                        <div key={idx} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg ${colorMap[card.color]}`}>
-                                {card.icon}
-                            </div>
-                            <div>
-                                <div className="text-lg font-bold text-gray-900">{card.value}</div>
-                                <div className="text-xs text-gray-500">{card.label}</div>
-                            </div>
-                        </div>
-                    );
-                })}
+                {cards.map((card) => (
+                    <StatCard key={card.label} {...card} />
+                ))}
             </div>
         );
     }, [stats]);
 
-    const SearchAndFilters = useMemo(() => (
+    const SearchAndFilters = useMemo(() => (<>
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
             <div className="flex-1">
                 <div className="relative flex">
@@ -387,17 +292,33 @@ const SalesStage: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <select
-                value={solutionFilter}
-                onChange={onSolutionChange}
-                className="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            >
-                {SOLUTION_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-            </select>
+            <div className="flex items-center gap-2">
+                <Button
+                    onClick={handleToggleFilter}
+                    className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
+                    size="sm"
+                >
+                    <MdFilterListAlt className="w-4 h-4 mr-2" />
+                    Filter
+                    {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                </Button>
+            </div>
         </div>
-    ), [localSearch, onSearchChange, onSearchKeyPress, onClearSearch, onSolutionChange, solutionFilter]);
+        
+        {/* Advanced Filters Collapse */}
+        {showAdvancedFilters && (
+            <FilterSection
+                onFilterChange={(field, value) => handleFilterChange({ [field]: value })}
+                onClearFilters={handleClearFilters}
+                urlFilters={urlFilters}
+            />
+        )}
+    </>), [
+            localSearch, onSearchChange, onSearchKeyPress, onClearSearch,
+            onSolutionChange, urlFilters.solution, showAdvancedFilters,
+            handleToggleFilter, handleFilterChange, handleClearFilters,
+        ]);
+    
 
     return (
         <>
@@ -412,22 +333,6 @@ const SalesStage: React.FC = () => {
                     title="Sales Stage"
                     subtitle="Monitor tahapan sales dari Find sampai Deal"
                     className="mb-3"
-                    actions={[
-                        {
-                            key: 'create',
-                            element: (
-                                <PermissionGate permission="create">
-                                    <Button
-                                        onClick={() => openCreateModal('pull')}
-                                        className="flex items-center gap-2"
-                                    >
-                                        <MdAdd className="mr-2" size={20} />
-                                        Tambah Opportunity
-                                    </Button>
-                                </PermissionGate>
-                            ),
-                        },
-                    ]}
                 />
 
                 {/* Stats Cards */}
@@ -444,39 +349,47 @@ const SalesStage: React.FC = () => {
                         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
                     </div>
                 ) : (
-                    <Kanban
-                        dataSource={dataSource}
-                        configMap={configMap}
-                        onCardClick={handleCardClick}
-                        onCardMove={canUpdate ? handleCardMove : undefined}
-                        renderColumnHeader={renderColumnHeader}
-                        renderColumnFooter={canCreate ? renderColumnFooter : undefined}
-                        cardsGap={8}
-                        virtualization={true}
-                        renderSkeletonCard={() => (
-                            <div className="bg-gray-50 rounded-lg border border-dashed border-gray-300 p-3 animate-pulse">
-                                <div className="h-4 bg-white rounded w-3/4 mb-2" />
-                                <div className="h-3 bg-white rounded w-1/2" />
-                            </div>
-                        )}
-                        rootStyle={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(5, 1fr)',
-                            gap: '0px',
-                        }}
-                        columnStyle={() => ({
-                            backgroundColor: '#ffffff',
-                            boxShadow: 'rgba(0, 0, 0, 0.2) 0px 3px 7px -2px',
-                        })}
-                        columnWrapperStyle={() => ({
-                            flex: '1',
-                            width: '100%',
-                            maxWidth: '100%',
-                            maxHeight: '60vh',
-                            overflow: 'auto',
-                            padding: '10px',
-                        })}
-                    />
+                    <div className="[&_.rkk-column-wrapper]:gap-0!">
+                        <Kanban
+                            dataSource={dataSource}
+                            configMap={configMap}
+                            onCardClick={handleCardClick}
+                            onCardMove={canUpdate ? handleCardMove : undefined}
+                            renderColumnHeader={renderColumnHeader}
+                            cardsGap={8}
+                            virtualization={true}
+                            renderSkeletonCard={() => (
+                                <div className="bg-gray-50 rounded-lg border border-dashed border-gray-300 p-3 animate-pulse">
+                                    <div className="h-4 bg-white rounded w-3/4 mb-2" />
+                                    <div className="h-3 bg-white rounded w-1/2" />
+                                </div>
+                            )}
+                            rootStyle={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(5, 1fr)',
+                                gap: '15px',
+                                padding: '0px'
+                            }}
+                            cardWrapperStyle={() => ({
+                                gap: '0px',
+                            })}
+                            columnListContentStyle={() => ({
+                                padding: '10px',
+                            })}
+                            columnStyle={() => ({
+                                backgroundColor: '#ffffff',
+                                boxShadow: 'rgba(0, 0, 0, 0.2) 0px 3px 7px -2px',
+                                padding: '0px',
+                            })}
+                            columnWrapperStyle={() => ({
+                                flex: '1',
+                                width: '100%',
+                                maxWidth: '100%',
+                                maxHeight: '60vh',
+                                overflow: 'auto',
+                            })}
+                        />
+                    </div>
                 )}
 
                 {/* Modals */}

@@ -52,6 +52,7 @@ export interface GeoData {
 export interface IupDetail {
     iup_id: string;
     company_name: string;
+    iup_code: string;
     // iup_address?: string | null;
     iup_latitude: string | null;
     iup_longitude: string | null;
