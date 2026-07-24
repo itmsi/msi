@@ -50,9 +50,24 @@ export interface UserAccessData {
   employee_title: string;
   territories: UserAccessTerritory[];
   current_territories: UserAccessTerritory[];
+  island_territories: UserAccessTerritory[];
 }
 
 export interface GetUserAccessByIdResponse {
   success: boolean;
   data: UserAccessData;
+}
+
+export interface EmployeeCRMRequest {
+    search: string;
+    employee_id: string;
+}
+export interface EmployeeCRMItem {
+    employee_id: string;
+    employee_name: string;
+}
+export interface EmployeeCRMResponse {
+  success: boolean;
+  data: EmployeeCRMItem[];
+  pagination: Pagination;
 }

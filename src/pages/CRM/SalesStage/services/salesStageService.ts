@@ -21,7 +21,7 @@ export class SalesStageServices {
             page: params.page || 1,
             limit: params.limit || 50,
             sort_order: params.sort_order || 'desc',
-            sort_by: params.sort_by || 'created_at',
+            sort_by: 'created_at',
             search: params.search || '',
             iup_id: params.iup_id || '',
             contractor: params.contractor || '',

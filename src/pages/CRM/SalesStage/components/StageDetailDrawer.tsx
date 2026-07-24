@@ -658,7 +658,7 @@ const StageDetailDrawer: React.FC<OpportunityDetailDrawerProps> = ({
                                 </div>
                                 <button
                                     onClick={handleAddSubTask}
-                                    className="text-xs text-blue-600 font-semibold whitespace-nowrap hover:text-blue-800 border border-blue-600 rounded px-3 py-1.5"
+                                    className="text-xs text-blue-600 font-primary whitespace-nowrap hover:text-blue-800 border border-blue-600 rounded px-3 py-1.5"
                                 >+ Tambah Sub-task</button>
                             </div>
                         )}

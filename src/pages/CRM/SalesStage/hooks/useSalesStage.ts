@@ -9,6 +9,7 @@ import type {
 import { STAGE_STATUSES } from '../types/salesStage';
 import { toast } from 'react-hot-toast';
 import { useSearchParams } from 'react-router-dom';
+import { getProfile } from '@/helpers/generalHelper';
 
 type ColumnState = {
     tasks: SalesStageOpportunity[];
@@ -16,7 +17,6 @@ type ColumnState = {
 export type FilterState = {
     search: string;
     sort_order: 'asc' | 'desc' | '';
-    sort_by: 'created_at' | 'updated_at' | '';
     iup_id: string;
     contractor: string;
     employee_id: string;
@@ -29,16 +29,17 @@ const initialColumnState = (): ColumnState => ({
 });
 
 export const useSalesStage = () => {
+    const profileSSO = getProfile() as any;
+    const profileSSOId = profileSSO?.employee_id || null;
     const [searchParams, setSearchParams] = useSearchParams();
     const [searchValue, setSearchValue] = useState('');
 
     const urlFilters: FilterState = useMemo(() => ({
         search: searchParams.get('search') || '',
         sort_order: (searchParams.get('sort_order') as FilterState['sort_order']) || 'desc',
-        sort_by: (searchParams.get('sort_by') as FilterState['sort_by']) || 'created_at',
         iup_id: searchParams.get('iup_id') || '',
         contractor: searchParams.get('contractor') || '',
-        employee_id: searchParams.get('employee_id') || '',
+        employee_id: profileSSOId,
         solution: searchParams.get('solution') || '',
         stage: searchParams.get('stage') || '',
     }), [searchParams]);
@@ -132,9 +133,8 @@ export const useSalesStage = () => {
                 solution: filters.solution,
                 iup_id: filters.iup_id,
                 contractor: filters.contractor,
-                employee_id: filters.employee_id,
+                employee_id: profileSSOId,
                 stage: filters.stage,
-                sort_by: filters.sort_by || 'created_at',
                 sort_order: filters.sort_order || 'desc',
             });
 
@@ -364,4 +364,3 @@ export const useSalesStage = () => {
         urlFilters,
     };
 };
-
