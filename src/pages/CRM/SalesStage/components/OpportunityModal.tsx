@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Modal } from '@/components/ui/modal';
 import Button from '@/components/ui/button/Button';
 import { toast } from 'react-hot-toast';
-import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
-import { useIupSelect } from '@/hooks/useIupSelect';
-import { useEmployeeSelect } from '@/hooks/useEmployeeSelect';
 import type { SalesStageOpportunity, SalesStageCreateRequest } from '../types/salesStage';
+import IUPAreaSelectField from '@/components/form/select/IUPAreaSelectField';
+import IUPEmployeeCRMSelectField from '@/components/form/select/IUPEmployeeCRMSelectField';
 
 interface OpportunityModalProps {
     isOpen: boolean;
@@ -28,37 +27,6 @@ const OpportunityModal: React.FC<OpportunityModalProps> = ({
     const [value, setValue] = useState('');
     const [stage, setStage] = useState(defaultStage);
     const [submitting, setSubmitting] = useState(false);
-    const initialized = useRef(false);
-
-    const {
-        iupOptions,
-        handleInputChange: handleIupInputChange,
-        handleMenuScrollToBottom: handleIupScroll,
-        initializeOptions: initIup,
-        loadIupOptions,
-    } = useIupSelect();
-
-    const {
-        employeeOptions,
-        setActiveSales,
-        handleInputChange: handleEmpInputChange,
-        handleMenuScrollToBottom: handleEmpScroll,
-        initializeOptions: initEmp,
-        loadEmployeeOptions,
-    } = useEmployeeSelect();
-
-    // Set sales filter & initialize on modal open
-    useEffect(() => {
-        if (isOpen && !initialized.current) {
-            initialized.current = true;
-            setActiveSales(true);
-            initIup();
-            initEmp();
-        }
-        if (!isOpen) {
-            initialized.current = false;
-        }
-    }, [isOpen, initIup, initEmp, setActiveSales]);
 
     useEffect(() => {
         if (editingTask) {
@@ -95,19 +63,13 @@ const OpportunityModal: React.FC<OpportunityModalProps> = ({
             setSubmitting(false);
         }
     }, [iupId, employeeId, contact, value, stage, editingTask, onSubmit]);
-
-    const selectedIup = iupOptions.find(o => o.value === iupId) || null;
-    const selectedEmp = employeeOptions.find(o => o.value === employeeId) || null;
-
-    // loadOptions functions for CustomAsyncSelect
-    const loadIupForSelect = useCallback(async (inputValue: string) => {
-        return await loadIupOptions(inputValue, [], 1, true);
-    }, [loadIupOptions]);
-
-    const loadEmpForSelect = useCallback(async (inputValue: string) => {
-        return await loadEmployeeOptions(inputValue, [], 1, true, true);
-    }, [loadEmployeeOptions]);
-
+    
+    const handleIupChange = (iupId: string) => {
+        setIupId(iupId);
+    };
+    const handleEmployeeChange = (employeeId: string) => {
+        setEmployeeId(employeeId);
+    }
     return (
         <Modal
             isOpen={isOpen}
@@ -116,42 +78,18 @@ const OpportunityModal: React.FC<OpportunityModalProps> = ({
             className="max-w-lg"
         >
             <form onSubmit={handleSubmit} className="space-y-4 m-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        IUP <span className="text-red-500">*</span>
-                    </label>
-                    <CustomAsyncSelect
-                        defaultOptions={iupOptions}
-                        loadOptions={loadIupForSelect}
-                        value={selectedIup}
-                        onChange={(option) => setIupId(option?.value || '')}
-                        onInputChange={handleIupInputChange}
-                        onMenuScrollToBottom={handleIupScroll}
-                        placeholder="Cari & pilih IUP..."
-                        noOptionsMessage={() => 'IUP tidak ditemukan'}
-                        loadingMessage={() => 'Mencari IUP...'}
-                        isClearable
-                        isSearchable
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Sales Employee <span className="text-red-500">*</span>
-                    </label>
-                    <CustomAsyncSelect
-                        defaultOptions={employeeOptions}
-                        loadOptions={loadEmpForSelect}
-                        value={selectedEmp}
-                        onChange={(option) => setEmployeeId(option?.value || '')}
-                        onInputChange={handleEmpInputChange}
-                        onMenuScrollToBottom={handleEmpScroll}
-                        placeholder="Cari & pilih sales..."
-                        noOptionsMessage={() => 'Sales tidak ditemukan'}
-                        loadingMessage={() => 'Mencari sales...'}
-                        isClearable
-                        isSearchable
-                    />
-                </div>
+                <IUPAreaSelectField
+                    value={iupId}
+                    onChange={handleIupChange}
+                    required
+                />
+                <IUPEmployeeCRMSelectField
+                    value={employeeId}
+                    onChange={handleEmployeeChange}
+                    required
+                    label="Sales Employee"
+                    placeholder="Cari & pilih sales..."
+                />
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Kontak

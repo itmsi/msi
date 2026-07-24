@@ -328,12 +328,23 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
                     );
                 }
                 
-                // Show special state for current territories (already has access)
+                const finalDisabled = isDisabled || (!isSelected && hasConflict);
                 if (isCurrentTerritory) {
                     return (
-                        <div className="p-2 text-blue-500" title="Current territory access">
-                            <MdCheckBox className="text-xl" />
-                        </div>
+                        <Button
+                            onClick={() => handleTerritoryClick(row)}
+                            variant='transparent'
+                            disabled={finalDisabled}
+                            className={`p-2 rounded-md text-sm font-medium transition-colors ${
+                                finalDisabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-100'
+                            }`}
+                        >
+                            {isSelected ? (
+                                <MdCheckBox className={`text-xl ${finalDisabled ? 'text-gray-400' : 'text-blue-600'}`} />
+                            ) : (
+                                <MdCheckBoxOutlineBlank className={`text-xl ${finalDisabled ? 'text-gray-400' : 'text-gray-400 hover:text-gray-600'}`} />
+                            )}
+                        </Button>
                     );
                 }
                 
@@ -347,7 +358,6 @@ const TerritorySelectionTable: React.FC<TerritorySelectionTableProps> = ({
                 }
                 
                 // Disable if has conflict and not currently selected
-                const finalDisabled = isDisabled || (!isSelected && hasConflict);
                 
                 return (
                     <Button

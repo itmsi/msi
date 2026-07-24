@@ -1,13 +1,13 @@
-import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
+
 import Button from '@/components/ui/button/Button';
-import { useEmployeeSelect } from '@/hooks/useEmployeeSelect';
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useSearchParams } from 'react-router-dom';
 import IUPAreaSelectField from '@/components/form/select/IUPAreaSelectField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import Label from '@/components/form/Label';
 import { SOLUTION_OPTIONS } from '../types/salesStage';
 import { FilterState } from '../hooks/useSalesStage';
+import IUPEmployeeCRMSelectField from '@/components/form/select/IUPEmployeeCRMSelectField';
 
 interface FilterSectionProps {
     onFilterChange: (field: string, value: string) => void;
@@ -26,23 +26,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         onFilterChange('iup_id', iupId);
     };
 
-    const {
-        employeeOptions,
-        pagination: employeePagination,
-        inputValue: employeeInputValue,
-        setUserNetsuite,
-        handleInputChange: handleEmployeeInputChange,
-        handleMenuScrollToBottom: handleEmployeeMenuScrollToBottom,
-        initializeOptions: initializeEmployeeOptions
-    } = useEmployeeSelect();
-
     const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
-    const [employeeSelectError, setEmployeeSelectError] = useState<string>('');
-
-    useEffect(() => {
-        setUserNetsuite(true);
-        initializeEmployeeOptions();
-    }, [initializeEmployeeOptions]);
+    const handleEmployeeChange = (employeeId: string) => {
+        setSelectedEmployee(employeeId);
+        onFilterChange('employee_id', employeeId);
+    };
 
     const handleClearAll = () => {
         setSelectedIupId('');
@@ -79,34 +67,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     required={false}
                 />
                 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Employee</label>
-                    <CustomAsyncSelect
-                        id="employee_id"
-                        placeholder="Select employee..."
-                        value={selectedEmployee}
-                        defaultOptions={employeeOptions}
-                        loadOptions={handleEmployeeInputChange}
-                        onMenuScrollToBottom={handleEmployeeMenuScrollToBottom}
-                        isLoading={employeePagination.loading}
-                        noOptionsMessage={() => "No employees found"}
-                        loadingMessage={() => "Loading employees..."}
-                        isSearchable={true}
-                        inputValue={employeeInputValue}
-                        onInputChange={(inputValue) => {
-                            handleEmployeeInputChange(inputValue);
-                        }}
-                        onChange={
-                            (option) => {
-                                setSelectedEmployee(option);
-                                onFilterChange('employee_id', option?.value || '');
-                                if (employeeSelectError) {
-                                    setEmployeeSelectError('');
-                                }
-                            }
-                        }
-                    />
-                </div>
+                <IUPEmployeeCRMSelectField
+                    value={selectedEmployee}
+                    onChange={handleEmployeeChange}
+                    required={false}
+                    label="Sales Employee"
+                    placeholder="Search sales..."
+                />
             </div>
             
             {/* Filter actions */}

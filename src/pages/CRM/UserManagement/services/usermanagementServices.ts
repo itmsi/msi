@@ -1,5 +1,5 @@
 import { apiDelete, apiGet, apiPost, apiPut } from '@/helpers/apiHelper';
-import { EmployeeTerritoryRequest, EmployeeTerritoryResponse, GetUserAccessByIdResponse } from '../types/usermanagement';
+import { EmployeeCRMRequest, EmployeeCRMResponse, EmployeeTerritoryRequest, EmployeeTerritoryResponse, GetUserAccessByIdResponse } from '../types/usermanagement';
 import { AuthService } from '@/services/authService';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -67,6 +67,25 @@ export class UsermanagementServices {
     
     static async deleteUserAccess(id: string): Promise<{ status: number }> {
         return await apiDelete(`${API_BASE_URL}/crm/employee-data-access/${id}`);
+    }
+
+    static async getUserEmployeeCRM(params: Partial<EmployeeCRMRequest> = {}): Promise<EmployeeCRMResponse> {
+        const requestData: EmployeeCRMRequest = {
+            employee_id: '',
+            search: '',
+            ...params
+        };
+        
+        const response = await apiPost(`${API_BASE_URL}/crm/employee-data-access/get-employee`, requestData as Record<string, any>);
+        const responseData = response.data as EmployeeCRMResponse;
+        
+        return responseData;
+    }
+    
+    // Get existing user access by ID
+    static async getUserEmployeeIdCRM(id: string): Promise<GetUserAccessByIdResponse> {
+        const response = await apiGet<GetUserAccessByIdResponse>(`${API_BASE_URL}/crm/employee-data-access/get-employee/${id}`);
+        return response.data;
     }
     
 }
