@@ -97,6 +97,68 @@ const StreamingCursor: FC = () => (
   />
 );
 
+// ─── Typing Text (progressive reveal) ────────────────────────────────────────
+// Smoothly reveals text character-by-character during streaming.
+// Uses requestAnimationFrame for efficient rendering.
+
+const TypingText: FC<{ content: string; isRunning: boolean }> = ({ content, isRunning }) => {
+  const [visibleLen, setVisibleLen] = useState(0);
+  const contentRef = useRef(content);
+  const lastTimeRef = useRef(0);
+  const SPEED = 18; // ms per character — lower = faster typing
+
+  // Reset when a new message starts (content gets shorter or empty)
+  useEffect(() => {
+    if (content.length < contentRef.current.length) {
+      setVisibleLen(0);
+    }
+    contentRef.current = content;
+  }, [content]);
+
+  // Progressive reveal — runs during streaming
+  useEffect(() => {
+    if (!isRunning) {
+      setVisibleLen(content.length);
+      return;
+    }
+
+    // Don't restart if already fully revealed
+    if (visibleLen >= content.length && content.length > 0) return;
+
+    lastTimeRef.current = 0;
+    let rafId: number;
+    let currentLen = visibleLen;
+
+    const animate = (timestamp: number) => {
+      if (!lastTimeRef.current) lastTimeRef.current = timestamp;
+      const elapsed = timestamp - lastTimeRef.current;
+
+      if (elapsed >= SPEED) {
+        lastTimeRef.current = timestamp;
+        currentLen = Math.min(currentLen + 1, content.length);
+        setVisibleLen(currentLen);
+      }
+
+      if (currentLen < content.length) {
+        rafId = requestAnimationFrame(animate);
+      }
+    };
+
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRunning, content]);
+
+  const displayText = content.slice(0, Math.min(visibleLen, content.length));
+
+  return (
+    <>
+      <MarkdownText content={displayText} />
+      {isRunning && <StreamingCursor />}
+    </>
+  );
+};
+
 // ─── Suggested Prompts ───────────────────────────────────────────────────────
 
 const SUGGESTED_PROMPTS = [
@@ -411,13 +473,8 @@ const AssistantMessage: FC = () => {
                 return (
                   <>
                     <div className="px-4">
-                      <MarkdownText content={text} />
+                      <TypingText content={text} isRunning={isRunning} />
                     </div>
-                    {isRunning && (
-                      <div className="px-4">
-                        <StreamingCursor />
-                      </div>
-                    )}
                     <div className="flex items-center gap-1 px-4 mt-2">
                       {isRunning ? (
                         <TypingIndicator />
