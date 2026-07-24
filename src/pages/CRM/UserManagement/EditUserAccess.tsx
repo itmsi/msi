@@ -71,7 +71,6 @@ const EditUserAccess: React.FC = () => {
         try {
             setIsLoading(true);
             const response = await UsermanagementServices.getUserAccessById(userId);
-            
             if (response.success && response.data) {
                 const { data } = response;
                 
@@ -94,7 +93,6 @@ const EditUserAccess: React.FC = () => {
                 
                 const newSelectedTerritories = new Map();
                 const newCurrentTerritories = new Set<string>();
-                
                 if (data.current_territories) {
                     data.current_territories.forEach(territoryAccess => {
                         newCurrentTerritories.add(territoryAccess.id_territory);
@@ -121,6 +119,22 @@ const EditUserAccess: React.FC = () => {
                             ref_id: territoryAccess.id_territory,
                             name: territory.name,
                             type: territory.type
+                        });
+
+                        const childrenIds = getAllChildren(territoryAccess.id_territory, territory.type);
+                        childrenIds.forEach(childId => {
+                            if (!newSelectedTerritories.has(childId)) {
+                                const childTerritory = findTerritoryById(childId);
+                                if (childTerritory) {
+                                    newSelectedTerritories.set(childId, {
+                                        access_level: childTerritory.type.toUpperCase(),
+                                        ref_id: childId,
+                                        name: childTerritory.name,
+                                        type: childTerritory.type,
+                                        ui_only: true
+                                    });
+                                }
+                            }
                         });
                     }
                 });
@@ -354,7 +368,8 @@ const EditUserAccess: React.FC = () => {
     };
 
     const handleTerritoryToggle = (territoryId: string, territoryData: ExpandableRowData) => {
-        if (allowedTerritories.size > 0 && !allowedTerritories.has(territoryId)) {
+        const isAlreadySelected = formData.selectedTerritories.has(territoryId);
+        if (!isAlreadySelected && allowedTerritories.size > 0 && !allowedTerritories.has(territoryId)) {
             console.warn(`Territory ${territoryId} is not allowed for current user`);
             return;
         }
@@ -521,6 +536,7 @@ const EditUserAccess: React.FC = () => {
                         selectedTerritories={new Set(formData.selectedTerritories.keys())}
                         disabledTerritories={getDisabledTerritories()}
                         preExpandedTerritories={getExpandedTerritories()}
+                        // currentTerritories={new Set()}
                         currentTerritories={currentTerritories}
                         userTerritories={allowedTerritories}
                         onTerritoryToggle={handleTerritoryToggle}
