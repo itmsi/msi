@@ -76,7 +76,7 @@ const UserManagement: React.FC = () => {
                 description="Manage employee access and territory assignments"
                 image="/motor-sights-international.png"
             />
-            <div className="space-y-6">
+            <div className="space-y-3">
                 
                 <div className="bg-white shadow rounded-lg">
                     <div className="px-6 py-4 border-b border-gray-200">

@@ -155,7 +155,7 @@ export default function ManageBrand() {
                         paginationTotalRows={pagination?.total || 0}
                         paginationPerPage={pagination?.limit || 10}
                         paginationDefaultPage={pagination?.page || 1}
-                        paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
+                        paginationRowsPerPageOptions={[10, 20, 50, 100]}
                         onChangePage={handlePageChange}
                         onChangeRowsPerPage={(newPerPage) => {
                             fetchBrands(1, newPerPage);

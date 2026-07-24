@@ -216,7 +216,7 @@ export default function CategoryPowerBi() {
                         paginationTotalRows={categoryPagination?.total || 0}
                         paginationPerPage={categoryPagination?.limit || 10}
                         paginationDefaultPage={categoryPagination?.page || 1}
-                        paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
+                        paginationRowsPerPageOptions={[10, 20, 50, 100]}
                         onChangePage={handleCategoryPageChange}
                         onChangeRowsPerPage={(_newPerPage) => {
                             // Handle rows per page change for categories

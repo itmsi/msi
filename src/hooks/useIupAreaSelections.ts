@@ -1,0 +1,118 @@
+import { useState, useCallback } from 'react';
+// import { IupService } from '@/pages/CRM/IUPManagement/services/iupManagementService';
+import { IupItem } from '@/pages/CRM/IUPTerritory/types/iupterritory';
+import { IupService } from '@/pages/CRM/IUPTerritory/services/iupTeritoryService';
+
+export interface IupSelectOption {
+    value: string;
+    label: string;
+}
+
+export interface IupPaginationState {
+    page: number;
+    hasMore: boolean;
+    loading: boolean;
+}
+
+export const useIupAreaSelections = () => {
+    const [iupOptions, setIupOptions] = useState<IupSelectOption[]>([]);
+    const [pagination, setPagination] = useState<IupPaginationState>({
+        page: 1,
+        hasMore: true,
+        loading: false
+    });
+    const [inputValue, setInputValue] = useState('');
+
+    const loadIupOptions = useCallback(async (
+        inputValue: string = '', 
+        loadedOptions: IupSelectOption[] = [],
+        page: number = 1,
+        reset: boolean = false
+    ) => {
+        try {
+            if (pagination.loading && !reset) return loadedOptions;
+
+            setPagination(prev => ({ ...prev, loading: true }));
+
+            const response = await IupService.getIUPTerritory({
+                search: inputValue,
+                page: page,
+                limit: 20,
+                sort_order: 'desc'
+            });
+
+            if (response.success) {
+                const newOptions = response.data.items.map((iup: IupItem) => ({
+                    value: iup.iup_id,
+                    // label: iup.iup_code ? iup.iup_name : `${iup.iup_name} - ${iup.iup_name_code}`
+                    label: iup.iup_code ? iup.iup_code + ' - ' + iup.company_name : iup.company_name
+                }));
+
+                const updatedOptions = reset ? newOptions : [...loadedOptions, ...newOptions];
+                setIupOptions(updatedOptions);
+                
+                const hasMoreData = response.data.pagination.page < response.data.pagination.totalPages;
+                
+                setPagination({
+                    page: response.data.pagination.page,
+                    hasMore: hasMoreData,
+                    loading: false
+                });
+
+                return updatedOptions;
+            }
+        } catch (error) {
+            console.error('Error loading term conditions:', error);
+            setPagination(prev => ({ ...prev, loading: false }));
+        }
+
+        return loadedOptions;
+    }, [pagination.loading]);
+
+    // Handle input change
+    const handleInputChange = useCallback(async (inputValue: string) => {
+        setInputValue(inputValue);
+        setIupOptions([]);
+        setPagination({ page: 1, hasMore: true, loading: false });
+        
+        return await loadIupOptions(inputValue, [], 1, true);
+    }, [loadIupOptions]);
+
+    const handleMenuScrollToBottom = useCallback(() => {
+        if (pagination.hasMore && !pagination.loading) {
+            loadIupOptions(inputValue, iupOptions, pagination.page + 1, false);
+        }
+    }, [pagination, iupOptions, inputValue, loadIupOptions]);
+
+
+    const initializeOptions = useCallback(async () => {
+        if (iupOptions.length === 0) {
+            await loadIupOptions('', [], 1, true);
+        }
+    }, [iupOptions.length, loadIupOptions]);
+
+    const getIupById = useCallback(async (iupId: string): Promise<IupSelectOption | null> => {
+        try {
+            const response = await IupService.getIupById(iupId);
+
+            if (response.data?.data) {
+                const iup = response.data.data;
+                return { value: iup.iup_id, label: iup.iup_code ? iup.iup_code + ' - ' + iup.company_name : iup.company_name };
+            }
+        } catch (error) {
+            console.error('Error fetching IUP by ID:', error);
+        }
+        return null;
+    }, []);
+
+    return {
+        iupOptions,
+        pagination,
+        inputValue,
+        handleInputChange,
+        handleMenuScrollToBottom,
+        initializeOptions,
+        loadIupOptions,
+        getIupById
+    };
+};

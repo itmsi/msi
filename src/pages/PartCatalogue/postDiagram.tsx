@@ -400,7 +400,7 @@ export default function ExplodedView() {
                                 loading={false}
                                 pagination={false}
                                 paginationServer
-                                paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
+                                paginationRowsPerPageOptions={[10, 20, 50, 100]}
                                 responsive
                                 highlightOnHover
                                 striped={false}

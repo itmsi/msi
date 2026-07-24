@@ -26,6 +26,8 @@ export default function AIChatPage() {
   const [threads, setThreads] = useState<ThreadItem[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sendCount, setSendCount] = useState(0);
 
   // Refs for cancel/abort streaming
   const abortRef = useRef<AbortController | null>(null);
@@ -241,8 +243,14 @@ export default function AIChatPage() {
   }, [threads, activeThreadId]);
 
   const handleSendMessage = useCallback(
-    async (messageText: string) => {
+    async (messageText: string, contextTags?: string[]) => {
       if (!messageText.trim() || !activeThreadId) return;
+
+      // Prepending tags as context hints for the AI
+      const activeTags = contextTags ?? selectedTags;
+      const finalMessage = activeTags.length > 0
+        ? `[Context: ${activeTags.join(", ")}]\n${messageText}`
+        : messageText;
 
       // Add user message immediately
       const userMessage: ChatMessage = {
@@ -354,9 +362,10 @@ export default function AIChatPage() {
           let settled = false;
           const s = io(SOCKET_BASE, {
             path: SOCKET_PATH,
-            transports: ["websocket"],        // Skip long-polling, straight to WebSocket
+            transports: ["websocket", "polling"], // WebSocket with polling fallback
             reconnection: false,               // One-shot per message
             timeout: 10000,                    // Connection timeout
+            auth: { token },                   // Send auth token during handshake
           });
 
           const timeout = setTimeout(() => {
@@ -376,7 +385,7 @@ export default function AIChatPage() {
 
             // Send message immediately via Socket.IO event
             s.emit("chat:send", {
-              message: messageText,
+              message: finalMessage,
               sessionId: activeThreadSession,
               system: systemArray,
               userId: employeeId,
@@ -434,9 +443,60 @@ export default function AIChatPage() {
             socket.on("disconnect", (reason: string) => {
               if (!finished) {
                 finished = true;
-                if (reason !== "io client disconnect") {
-                  reject(new Error(`Socket disconnected: ${reason}`));
+
+                if (reason === "ping timeout" || reason === "transport close" || reason === "transport error") {
+                  // ── Transport issue — server is probably busy with a long tool call ──
+                  // Don't reject — the backend saves the conversation server-side.
+                  // Try to recover by polling the backend history if we have a sessionId.
+                  console.warn(`[Socket] Transport disconnected during streaming: ${reason}. Server may still be processing.`);
+
+                  socketRef.current = null;
+
+                  // Try to fetch the completed response from backend history
+                  // with retries (tool execution can take 20s+)
+                  const sidToPoll = newSessionId || activeThreadSession;
+                  if (sidToPoll) {
+                    const pollHistory = async (attempt: number) => {
+                      if (attempt > 10) return; // max 10 attempts (~30s)
+                      try {
+                        const historyRes = await AIAssistantService.getHistory(sidToPoll);
+                        if (historyRes.success && historyRes.data?.conversationHistory) {
+                          const lastAssistant = [...historyRes.data.conversationHistory]
+                            .reverse()
+                            .find((m: ChatMessage) => m.role === "assistant");
+                          if (lastAssistant?.content) {
+                            setThreads((prev) =>
+                              prev.map((t) =>
+                                t.id === activeThreadId
+                                  ? {
+                                      ...t,
+                                      sessionId: sidToPoll,
+                                      messages: t.messages.map((m, i) =>
+                                        i === t.messages.length - 1
+                                          ? { ...m, content: lastAssistant.content }
+                                          : m
+                                      ),
+                                    }
+                                  : t
+                              )
+                            );
+                            return; // success — stop polling
+                          }
+                        }
+                      } catch { /* poll failed — will retry */ }
+                      setTimeout(() => pollHistory(attempt + 1), 3000);
+                    };
+                    setTimeout(() => pollHistory(1), 3000);
+                  }
+
+                  resolve();
+                } else if (reason === "io server disconnect") {
+                  // Server explicitly kicked us
+                  socketRef.current = null;
+                  reject(new Error(`Disconnected by server: ${reason}`));
                 } else {
+                  // "io client disconnect" — we cancelled ourselves
+                  socketRef.current = null;
                   resolve();
                 }
               }
@@ -451,7 +511,7 @@ export default function AIChatPage() {
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({
-              message: messageText,
+              message: finalMessage,
               sessionId: activeThreadSession,
               system: systemArray,
               userId: employeeId,
@@ -533,15 +593,17 @@ export default function AIChatPage() {
         setIsSending(false);
         socketRef.current = null;
         abortRef.current = null;
+        // Increment sendCount to trigger tag collapse in ContextTags
+        setSendCount((c) => c + 1);
       }
     },
-    [activeThreadId, threads]
+    [activeThreadId, threads, selectedTags]
   );
 
   // Runtime adapter for assistant-ui
   const handleNewMessage = useCallback(
-    async (content: string) => {
-      await handleSendMessage(content);
+    async (content: string, contextTags?: string[]) => {
+      await handleSendMessage(content, contextTags);
     },
     [handleSendMessage]
   );
@@ -557,7 +619,7 @@ export default function AIChatPage() {
             : message.content
                 .map((p) => (typeof p === "string" ? p : "text" in p ? p.text : ""))
                 .join("");
-        await handleNewMessage(text);
+        await handleNewMessage(text, selectedTags);
       },
     }),
     [convertedMessages, isSending, isLoadingHistory, handleNewMessage]
@@ -666,7 +728,14 @@ export default function AIChatPage() {
         <div className="flex-1 min-h-0">
           {activeThreadId ? (
             <AssistantRuntimeProvider runtime={runtime}>
-              <Thread onSendMessage={handleSendMessage} isSending={isSending} onCancel={handleCancel} />
+              <Thread
+                onSendMessage={handleSendMessage}
+                isSending={isSending}
+                onCancel={handleCancel}
+                selectedTags={selectedTags}
+                onTagsChange={setSelectedTags}
+                sendCount={sendCount}
+              />
             </AssistantRuntimeProvider>
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-gray-400">

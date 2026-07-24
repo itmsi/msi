@@ -259,7 +259,7 @@ export default function ManageRole() {
                         paginationTotalRows={pagination?.total || 0}
                         paginationPerPage={pagination?.per_page || 10}
                         paginationDefaultPage={pagination?.current_page || 1}
-                        paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 50]}
+                        paginationRowsPerPageOptions={[10, 20, 50, 100]}
                         onChangePage={handlePageChange}
                         onChangeRowsPerPage={handleLimitChange}
                         responsive
