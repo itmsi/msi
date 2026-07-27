@@ -297,7 +297,7 @@ export default function AIChatPage() {
 
         // ─── Streaming via Socket.IO with HTTP fallback ─────────
         const SOCKET_BASE = import.meta.env.VITE_API_BASE_URL;
-        const SOCKET_PATH = "/mosa/ai-assistant/websocket";
+        const SOCKET_PATH = "/api/mosa/ai-assistant";
         const HTTP_URL =  `${import.meta.env.VITE_API_BASE_URL}/mosa/ai-assistant/chat/stream`;
         let accumulatedText = "";
         let newSessionId: string | undefined = activeThreadSession;
@@ -406,104 +406,107 @@ export default function AIChatPage() {
 
         if (socket) {
           // ── Socket.IO connected — stream via events ──
-          await new Promise<void>((resolve, reject) => {
-            let finished = false;
+          try {
+            await new Promise<void>((resolve, reject) => {
+              let finished = false;
 
-            // Listen for abort signal
-            abortController.signal.addEventListener("abort", () => {
-              if (!finished) {
-                finished = true;
-                socket.disconnect();
-                socketRef.current = null;
-                resolve();
-              }
-            });
-
-            socket.on("chat:chunk", (data: { text: string }) => {
-              if (abortController.signal.aborted) return;
-              if (data.text) {
-                accumulatedText += data.text;
-                updateStreamText(accumulatedText);
-              }
-            });
-
-            socket.on("chat:done", (data: { sessionId?: string }) => {
-              if (data?.sessionId) newSessionId = data.sessionId;
-              if (!finished) { finished = true; resolve(); }
-              socketRef.current = null;
-              socket.disconnect();
-            });
-
-            socket.on("chat:error", (data: { message?: string }) => {
-              if (!finished) { finished = true; reject(new Error(data?.message || "Socket.IO stream error")); }
-              socketRef.current = null;
-              socket.disconnect();
-            });
-
-            socket.on("disconnect", (reason: string) => {
-              if (!finished) {
-                finished = true;
-
-                if (reason === "ping timeout" || reason === "transport close" || reason === "transport error") {
-                  // ── Transport issue — server is probably busy with a long tool call ──
-                  // Don't reject — the backend saves the conversation server-side.
-                  // Try to recover by polling the backend history if we have a sessionId.
-                  console.warn(`[Socket] Transport disconnected during streaming: ${reason}. Server may still be processing.`);
-
-                  socketRef.current = null;
-
-                  // Try to fetch the completed response from backend history
-                  // with retries (tool execution can take 20s+)
-                  const sidToPoll = newSessionId || activeThreadSession;
-                  if (sidToPoll) {
-                    const pollHistory = async (attempt: number) => {
-                      if (attempt > 10) return; // max 10 attempts (~30s)
-                      try {
-                        const historyRes = await AIAssistantService.getHistory(sidToPoll);
-                        if (historyRes.success && historyRes.data?.conversationHistory) {
-                          const lastAssistant = [...historyRes.data.conversationHistory]
-                            .reverse()
-                            .find((m: ChatMessage) => m.role === "assistant");
-                          if (lastAssistant?.content) {
-                            setThreads((prev) =>
-                              prev.map((t) =>
-                                t.id === activeThreadId
-                                  ? {
-                                      ...t,
-                                      sessionId: sidToPoll,
-                                      messages: t.messages.map((m, i) =>
-                                        i === t.messages.length - 1
-                                          ? { ...m, content: lastAssistant.content }
-                                          : m
-                                      ),
-                                    }
-                                  : t
-                              )
-                            );
-                            return; // success — stop polling
-                          }
-                        }
-                      } catch { /* poll failed — will retry */ }
-                      setTimeout(() => pollHistory(attempt + 1), 3000);
-                    };
-                    setTimeout(() => pollHistory(1), 3000);
-                  }
-
-                  resolve();
-                } else if (reason === "io server disconnect") {
-                  // Server explicitly kicked us
-                  socketRef.current = null;
-                  reject(new Error(`Disconnected by server: ${reason}`));
-                } else {
-                  // "io client disconnect" — we cancelled ourselves
+              // Listen for abort signal
+              abortController.signal.addEventListener("abort", () => {
+                if (!finished) {
+                  finished = true;
+                  socket.disconnect();
                   socketRef.current = null;
                   resolve();
                 }
-              }
+              });
+
+              socket.on("chat:chunk", (data: { text: string }) => {
+                if (abortController.signal.aborted) return;
+                if (data.text) {
+                  accumulatedText += data.text;
+                  updateStreamText(accumulatedText);
+                }
+              });
+
+              socket.on("chat:done", (data: { sessionId?: string }) => {
+                if (data?.sessionId) newSessionId = data.sessionId;
+                if (!finished) { finished = true; resolve(); }
+                socketRef.current = null;
+                socket.disconnect();
+              });
+
+              socket.on("chat:error", () => {
+                if (!finished) { finished = true; reject(new Error("Socket stream error")); }
+                socketRef.current = null;
+                socket.disconnect();
+              });
+
+              socket.on("disconnect", (reason: string) => {
+                if (!finished) {
+                  finished = true;
+
+                  if (reason === "ping timeout" || reason === "transport close" || reason === "transport error") {
+                    console.warn(`[Socket] Transport disconnected during streaming: ${reason}. Server may still be processing.`);
+                    socketRef.current = null;
+
+                    const sidToPoll = newSessionId || activeThreadSession;
+                    if (sidToPoll) {
+                      const pollHistory = async (attempt: number) => {
+                        if (attempt > 10) return;
+                        try {
+                          const historyRes = await AIAssistantService.getHistory(sidToPoll);
+                          if (historyRes.success && historyRes.data?.conversationHistory) {
+                            const lastAssistant = [...historyRes.data.conversationHistory]
+                              .reverse()
+                              .find((m: ChatMessage) => m.role === "assistant");
+                            if (lastAssistant?.content) {
+                              setThreads((prev) =>
+                                prev.map((t) =>
+                                  t.id === activeThreadId
+                                    ? {
+                                        ...t,
+                                        sessionId: sidToPoll,
+                                        messages: t.messages.map((m, i) =>
+                                          i === t.messages.length - 1
+                                            ? { ...m, content: lastAssistant.content }
+                                            : m
+                                        ),
+                                      }
+                                    : t
+                                )
+                              );
+                              return;
+                            }
+                          }
+                        } catch { /* poll failed — retry */ }
+                        setTimeout(() => pollHistory(attempt + 1), 3000);
+                      };
+                      setTimeout(() => pollHistory(1), 3000);
+                    }
+                    resolve();
+                  } else if (reason === "io server disconnect") {
+                    socketRef.current = null;
+                    reject(new Error(`Disconnected by server: ${reason}`));
+                  } else {
+                    socketRef.current = null;
+                    resolve();
+                  }
+                }
+              });
             });
-          });
+          } catch {
+            // ── Socket stream failed — fall back to HTTP streaming ──
+            console.warn("[Socket] Stream failed, falling back to HTTP SSE");
+            socketRef.current = null;
+            await httpStreamFallback();
+          }
         } else {
           // ── Socket.IO unavailable — fall back to HTTP streaming ──
+          await httpStreamFallback();
+        }
+
+        // ── Shared HTTP SSE streaming logic ──
+        async function httpStreamFallback() {
           const response = await fetch(HTTP_URL, {
             method: "POST",
             headers: {
@@ -528,16 +531,11 @@ export default function AIChatPage() {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-
-            // Check if cancelled
             if (abortController.signal.aborted) break;
 
             buffer += decoder.decode(value, { stream: true });
-
-            // Normalize all line endings (\r\n, \r, \n) to just \n
             buffer = buffer.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
             const lines = buffer.split("\n");
-            // Keep the last (possibly incomplete) line in the buffer
             buffer = lines.pop() || "";
 
             for (const line of lines) {
