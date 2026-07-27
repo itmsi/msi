@@ -26,6 +26,7 @@ export class SalesStageServices {
             iup_id: params.iup_id || '',
             contractor: params.contractor || '',
             employee_id: params.employee_id || '',
+            opportunity_employee_id: params.opportunity_employee_id || '',
             solution: params.solution || '',
             stage: params.stage || '',
         };

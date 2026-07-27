@@ -19,30 +19,25 @@ import FilterSection from './components/FilterSection';
 export default function ManageIUPManagement() {
     
     const navigate = useNavigate();
-    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    
+    const params = new URLSearchParams(location.search);
+    const filterKeys = ['search', 'sort_order', 'sort_by', 'segmentation_id', 'island_id', 'group_id', 'area_id', 'iup_zone_id', 'iup_segment_id', 'status', 'is_contractor_count'];
+    const hasActiveFilter = filterKeys.some(key => params.has(key) && params.get(key) !== '');
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(hasActiveFilter ? true : false);
     const {
         // State
         iup,
+        summary,
         loading,
         error,
         pagination,
-        summary,
+        filters,
         searchValue,
-        sortOrder,
-        sortModify,
         setSearchValue,
-        statusFilter,
-        segmentationFilter,
-
         // Actions
         handlePageChange,
         handleRowsPerPageChange,
-        
-        // Filter actions
         handleFilterChange,
-        handleTerritoryFilterChange,
-        
-        // Search functions
         handleKeyPress,
         handleClearSearch,
     } = useIupManagement();
@@ -54,18 +49,20 @@ export default function ManageIUPManagement() {
     // Clear filters handler
     const handleClearFilters = () => {
         // Reset filter biasa
-        handleFilterChange('status', '');
-        handleFilterChange('segmentation', '');
-        handleFilterChange('sort_by', '');
+        // handleFilterChange('status', '');
+        // handleFilterChange('segmentation', '');
+        // handleFilterChange('sort_by', '');
         
-        // Reset territory filters dalam satu batch call
-        handleTerritoryFilterChange({
-            island_id: '',
-            group_id: '',
-            area_id: '',
-            iup_zone_id: '',
-            iup_segment_id: ''
-        });
+        // // Reset territory filters dalam satu batch call
+        // handleTerritoryFilterChange({
+        //     island_id: '',
+        //     group_id: '',
+        //     area_id: '',
+        //     iup_zone_id: '',
+        //     iup_segment_id: ''
+        // });
+
+        handleClearSearch();
     };
 
     // Definisi kolom untuk DataTable
@@ -187,12 +184,12 @@ export default function ManageIUPManagement() {
                 <CustomSelect
                     id="sort_order"
                     name="sort_order"
-                    value={sortOrder ? { 
-                        value: sortOrder, 
-                        label: sortOrder === 'asc' ? 'Ascending' : 'Descending' 
+                    value={filters.sort_order ? { 
+                        value: filters.sort_order, 
+                        label: filters.sort_order === 'asc' ? 'Ascending' : 'Descending' 
                     } : null}
                     onChange={(selectedOption) => 
-                        handleFilterChange('sort_order', selectedOption?.value || '')
+                        handleFilterChange({ sort_order: (selectedOption?.value as 'asc' | 'desc') || 'desc' })
                     }
                     options={[
                         { value: 'asc', label: 'Ascending' },
@@ -208,7 +205,7 @@ export default function ManageIUPManagement() {
             <div className="flex items-center gap-2">
                 <Button
                     onClick={handleToggleFilter}
-                    className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
+                    className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
                     size="sm"
                 >
                     <MdFilterListAlt className="w-4 h-4 mr-2" />
@@ -220,13 +217,14 @@ export default function ManageIUPManagement() {
         
         {showAdvancedFilters && (
             <FilterSection
+                // onFilterChange={(field, value) => handleFilterChange({ [field]: value })}
                 onFilterChange={handleFilterChange}
-                onTerritoryFilterChange={handleTerritoryFilterChange}
                 onClearFilters={handleClearFilters}
             />
         )}
     </>);
-    }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, handleTerritoryFilterChange, showAdvancedFilters, handleClearFilters]);
+    }, [searchValue, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, filters]);
+    // }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, handleTerritoryFilterChange, showAdvancedFilters, handleClearFilters]);
     
     return (
         <>
