@@ -151,6 +151,61 @@ export const useIupManagement = () => {
     }, [location.search]);
 
     // Territory batch filter - untuk menghindari multiple API calls
+    // const handleFilterChange = useCallback((filterType: string, value: string) => {
+    //     if (filterType === 'status') {
+    //         setStatusFilter(value);
+    //     } else if (filterType === 'segmentation') {
+    //         setSegmentationFilter(value);
+    //     } else if (filterType === 'sort_by') {
+    //         setSortModify(value as 'updated_at' | 'created_at' | '');
+    //     } else if (filterType === 'sort_order') {
+    //         setSortOrder(value as 'asc' | 'desc' | '');
+    //     } else if (filterType === 'island_id') {
+    //         setIslandFilter(value);
+    //     } else if (filterType === 'group_id') {
+    //         setGroupFilter(value);
+    //     } else if (filterType === 'area_id') {
+    //         setAreaFilter(value);
+    //     } else if (filterType === 'iup_zone_id') {
+    //         setIupZoneFilter(value);
+    //     } else if (filterType === 'iup_segment_id') {
+    //         setIupSegmentFilter(value);
+    //     } else if (filterType === 'is_contractor_count') {
+    //         setContractorCountFilter(value);
+    //     }
+        
+    //     setPagination(prev => ({ ...prev, page: 1 }));
+        
+    //     const params: any = { page: 1 };
+    //     if (filterType === 'status') {
+    //         params.status = value;
+    //     } else if (filterType === 'segmentation') {
+    //         params.segmentation_id = value;
+    //     } else if (filterType === 'sort_by') {
+    //         params.sort_by = value;
+    //     } else if (filterType === 'sort_order') {
+    //         params.sort_order = value;
+    //     } else if (filterType === 'island_id') {
+    //         params.island_id = value;
+    //     } else if (filterType === 'group_id') {
+    //         params.group_id = value;
+    //     } else if (filterType === 'area_id') {
+    //         params.area_id = value;
+    //     } else if (filterType === 'iup_zone_id') {
+    //         params.iup_zone_id = value;
+    //     } else if (filterType === 'iup_segment_id') {
+    //         params.iup_segment_id = value;
+    //     } else if (filterType === 'is_contractor_count') {
+    //         params.is_contractor_count = value || null;
+    //     }
+        
+    //     fetchIup(params);
+    // }, [fetchIup]);
+
+    // const handleFilters = useCallback((filters: { search?: string; mine_type?: string; status?: string }) => {
+    //     setPagination(prev => ({ ...prev, page: 1 }));
+    //     fetchIup({ ...filters, page: 1 });
+    // }, [fetchIup]);
     // interface TerritoryFilters {
     //     island_id?: string;
     //     group_id?: string;
