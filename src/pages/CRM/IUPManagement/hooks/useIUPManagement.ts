@@ -8,13 +8,13 @@ type FilterState = {
     sort_order: 'asc' | 'desc' | '';
     search: string;
     status: string;
-    segmentation_id: string;
-    island_id: string;
-    group_id: string;
-    area_id: string;
-    iup_zone_id: string;
-    iup_segment_id: string;
-    is_contractor_count: string;
+    segmentation_id?: string;
+    island_id?: string;
+    group_id?: string;
+    area_id?: string;
+    iup_zone_id?: string;
+    iup_segment_id?: string;
+    is_contractor_count?: string;
 };
 export const useIupManagement = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -91,7 +91,7 @@ export const useIupManagement = () => {
                 page: params?.page || pagination.page,
                 limit: params?.limit || pagination.limit,
                 sort_by: params?.sort_by || "",
-                sort_order: params?.sort_order || 'desc',
+                ...urlFilters,
                 ...params
             });
             

@@ -13,6 +13,8 @@ import TabZoneArea from './components/TabZoneArea';
 import { GiMineTruck } from 'react-icons/gi';
 import TabContractorUnit from './components/TabContractorUnit';
 import TabHistoryVisit from './components/TabHistoryVisit';
+import TabSurvey from './components/TabSurvey';
+import { AiOutlineHistory } from 'react-icons/ai';
 
 
 const EditIupManagement: React.FC = () => {
@@ -49,7 +51,7 @@ const EditIupManagement: React.FC = () => {
         handleSubmit
     } = useIupManagementEdit();
 
-    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit'>('info_iup');
+    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit' | 'survey'>('survey');
 
     // Show loading spinner while data is loading
     if (isLoading) {
@@ -134,6 +136,16 @@ const EditIupManagement: React.FC = () => {
                         >
                             <FaHistory size={'1.2rem'} /> History Visit
                         </button>
+                        <button
+                            onClick={() => setActiveTab('survey')}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
+                                activeTab === 'survey'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            <AiOutlineHistory size={'1.2rem'} /> Activity
+                        </button>
                     </nav>
                 </div>
 
@@ -180,6 +192,9 @@ const EditIupManagement: React.FC = () => {
                 </>)}
                 {activeTab === 'history_visit' && (<>
                     <TabHistoryVisit />
+                </>)}
+                {activeTab === 'survey' && (<>
+                    <TabSurvey />
                 </>)}
             </div>
         </>

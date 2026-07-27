@@ -19,7 +19,11 @@ import FilterSection from './components/FilterSection';
 export default function ManageIUPManagement() {
     
     const navigate = useNavigate();
-    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    
+    const params = new URLSearchParams(location.search);
+    const filterKeys = ['search', 'sort_order', 'sort_by', 'segmentation_id', 'island_id', 'group_id', 'area_id', 'iup_zone_id', 'iup_segment_id', 'status', 'is_contractor_count'];
+    const hasActiveFilter = filterKeys.some(key => params.has(key) && params.get(key) !== '');
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(hasActiveFilter ? true : false);
     const {
         // State
         iup,
@@ -213,13 +217,14 @@ export default function ManageIUPManagement() {
         
         {showAdvancedFilters && (
             <FilterSection
+                // onFilterChange={(field, value) => handleFilterChange({ [field]: value })}
                 onFilterChange={handleFilterChange}
-                onTerritoryFilterChange={handleTerritoryFilterChange}
                 onClearFilters={handleClearFilters}
             />
         )}
     </>);
-    }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, handleTerritoryFilterChange, showAdvancedFilters, handleClearFilters]);
+    }, [searchValue, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, filters]);
+    // }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, handleTerritoryFilterChange, showAdvancedFilters, handleClearFilters]);
     
     return (
         <>

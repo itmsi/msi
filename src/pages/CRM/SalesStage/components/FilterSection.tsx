@@ -29,7 +29,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
     const handleEmployeeChange = (employeeId: string) => {
         setSelectedEmployee(employeeId);
-        onFilterChange('employee_id', employeeId);
+        onFilterChange('opportunity_employee_id', employeeId);
     };
 
     const handleClearAll = () => {
@@ -41,7 +41,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     // Check if any filters are active
     
     const [searchParams] = useSearchParams();
-    const checkToggleFilter = searchParams.get('iup_id') || searchParams.get('employee_id') || searchParams.get('solution');
+    const checkToggleFilter = searchParams.get('iup_id') || searchParams.get('opportunity_employee_id') || searchParams.get('solution');
     const hasActiveFilters = checkToggleFilter !== null && checkToggleFilter !== '';
 
     return (

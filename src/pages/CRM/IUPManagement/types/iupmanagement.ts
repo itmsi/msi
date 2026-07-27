@@ -434,3 +434,41 @@ export type IupBrandUnitForm = {
     qty: number;
 };
 
+export type IupSurveyItem = {
+    iup_survey_id: string;
+    iup_id: string;
+
+    user_phone: string;
+    user_name: string;
+
+    chat_date: string;
+    source_type: 'Voice' | 'Chat' | 'Location' | string;
+
+    source_link: string;
+    file_name: string;
+
+    description: string;
+
+    created_at: string;
+    created_by: string | null;
+
+    updated_at: string;
+    updated_by: string | null;
+};
+export type GetIupSurveyResponse = {
+    success: boolean;
+    data: IupSurveyItem[];
+    pagination: Pagination;
+};
+
+export type IupSurveyPayload = {
+    iup_survey_id?: string;
+    iup_id: string;
+    user_phone: string;
+    user_name: string;
+    chat_date: string;
+    source_type: 'WhatsApp' | 'Email' | 'Call' | string;
+    source_link?: string;
+    file_name?: string;
+    description?: string;
+};
