@@ -11,6 +11,9 @@ export interface ZoneFormState {
     date: string;
     description: string;
     fileLink: string[];
+    summaryPrompt?: string;
+    summaryResponse?: string;
+    sessionId?: string;
 }
 
 export interface ZoneFormErrors {
@@ -147,6 +150,9 @@ export const useIupZoneSIte = () => {
             description: zone.iup_zona_site_description ?? "",
             date: zone.iup_zona_site_date_last_survey ?? new Date().toISOString().slice(0, 10),
             fileLink: zone.iup_zona_site_file?.length ? zone.iup_zona_site_file.map((i) => i.file_link) : [],
+            summaryPrompt: zone.summary_prompt_ai ?? undefined,
+            summaryResponse: zone.summary_response_ai ?? undefined,
+            sessionId: zone.session_id ?? undefined,
         });
         setErrors({});
         setShowForm(true);
@@ -196,6 +202,9 @@ export const useIupZoneSIte = () => {
             .map((l) => l.trim())
             .filter(Boolean)
             .map((file_link) => ({ file_link })),
+        summary_prompt_ai: form.summaryPrompt,
+        summary_response_ai: form.summaryResponse,
+        session_id: form.sessionId,
     });
 
     /** Validasi form, lalu kirim create/update ke API. Return true kalau sukses. */

@@ -175,6 +175,9 @@ export interface IupZonaSiteItem {
     iup_zona_site_date_last_survey: string;
     iup_zona_site_description: string;
     iup_zona_site_file: IupZonaSiteFile[] | [];
+    summary_prompt_ai?: string;
+    summary_response_ai?: string;
+    session_id?: string;
 }
 
 // Final response
@@ -234,8 +237,10 @@ export interface ZonaSitePayload {
     iup_zona_site_name: string;
     iup_zona_site_description: string;
     iup_zona_site_date_last_survey: string; // format: YYYY-MM-DD
-    iup_zona_site_file: ZonaSiteFilePayload[];
-}
+    iup_zona_site_file: ZonaSiteFilePayload[];    
+    summary_prompt_ai?: string;
+    summary_response_ai?: string;
+    session_id?: string;}
 export interface ZoneValidationErrors {
     iup_zona_site_date_last_survey?: string;
 }

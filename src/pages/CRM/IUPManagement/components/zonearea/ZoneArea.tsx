@@ -6,7 +6,10 @@ import Zonecard from './Zonecard';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import LoadingSpinner from '@/components/common/Loading';
 
-const ZoneArea: React.FC = () => {
+interface ZoneAreaProps {
+}
+
+const ZoneArea: React.FC<ZoneAreaProps> = () => {
     const {
         zones,
         // pagination,
