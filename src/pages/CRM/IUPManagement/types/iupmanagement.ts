@@ -460,6 +460,10 @@ export type IupSurveyItem = {
 
     description: string;
 
+    summary_prompt_ai?: string;
+    summary_response_ai?: string;
+    session_id?: string;
+
     created_at: string;
     created_by: string | null;
 
@@ -482,4 +486,7 @@ export type IupSurveyPayload = {
     source_link?: string;
     file_name?: string;
     description?: string;
+    summary_prompt_ai?: string;
+    summary_response_ai?: string;
+    session_id?: string;
 };
