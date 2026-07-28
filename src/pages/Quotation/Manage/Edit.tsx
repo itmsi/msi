@@ -467,7 +467,7 @@ export default function EditQuotation() {
 
         const deliveryFee = parseFloat(currentFormData.manage_quotation_delivery_fee || '0') || 0;
         const otherFee = parseFloat(currentFormData.manage_quotation_other || '0') || 0;
-        const ppnPercentage = parseFloat(currentFormData.manage_quotation_ppn || '11') || 11;
+        const ppnPercentage = parseFloat(currentFormData.manage_quotation_ppn || '11') || 0;
 
         const ppn = itemsTotal * (ppnPercentage / 100);
         let grandTotal = itemsTotal + ppn + deliveryFee + otherFee;
@@ -514,7 +514,7 @@ export default function EditQuotation() {
                 );
                 const deliveryFee = parseFloat(newFormData.manage_quotation_delivery_fee || '0') || 0;
                 const otherFee = parseFloat(newFormData.manage_quotation_other || '0') || 0;
-                const ppnPercentage = parseFloat(newFormData.manage_quotation_ppn || '11') || 11;
+                const ppnPercentage = parseFloat(newFormData.manage_quotation_ppn || '11') || 0;
                 const ppn = itemsTotal * (ppnPercentage / 100);
                 const baseGrandTotal = itemsTotal + ppn + deliveryFee + otherFee;
 
@@ -1843,7 +1843,7 @@ export default function EditQuotation() {
                                         onKeyPress={handleKeyPress}
                                         value={(() => {
                                             const itemsTotal = formData.manage_quotation_items.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
-                                            const ppnPercentage = parseFloat(formData.manage_quotation_ppn || '11') || 11;
+                                            const ppnPercentage = parseFloat(formData.manage_quotation_ppn || '11') || 0;
                                             const ppnAmount = itemsTotal * (ppnPercentage / 100);
                                             return ppnAmount.toLocaleString('id-ID');
                                         })()}

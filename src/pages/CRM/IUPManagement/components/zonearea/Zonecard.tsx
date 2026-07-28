@@ -1,12 +1,10 @@
 import React, { useState, useCallback, useRef } from "react";
 import { LuLink2, LuLoaderCircle, LuChevronDown, LuChevronRight, LuSparkles } from "react-icons/lu";
 import Button from "@/components/ui/button/Button";
-import TextArea from "@/components/form/input/TextArea";
 import { MdEdit, MdDeleteOutline } from "react-icons/md";
 import moment from "moment";
 import { IupZonaSiteItem } from "../../types/iupmanagement";
 import { IupService } from "../../services/iupManagementService";
-import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import toast from "react-hot-toast";
 import { PermissionGate } from "@/components/common/PermissionComponents";
 import { AiSummaryPanel } from "@/components/assistant-ui/Aisummarypanel";
@@ -213,12 +211,13 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
             {isOpen && (
                 <div className="px-10 py-4 space-y-3">
                     {(hasEverGenerated || summaryResponse || summaryLoading) && (
-                    <AiSummaryPanel
-                        summary={summaryResponse || ''}
-                        textPrompt={summaryPrompt}
-                        onGenerate={handleGenerateSummary}
-                        isGenerating={summaryLoading}
-                    />
+                        <AiSummaryPanel
+                            summary={summaryResponse || ''}
+                            prompt={summaryPrompt}
+                            setPrompt={setSummaryPrompt}
+                            onGenerate={handleGenerateSummary}
+                            isGenerating={summaryLoading || isZoneDataEmpty}
+                        />
                     )}
                     <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-md text-slate-600">
                         <span className="flex items-center gap-1 text-gray-800 font-primary-bold text-md">
@@ -259,7 +258,7 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                     {/* ── Prompt & Summary (hanya jika sudah pernah generate) ── */}
                     {(hasEverGenerated || summaryResponse || summaryLoading) && (
                     <div className="border-t border-purple-200 pt-4 mt-4">
-                     {(summaryResponse || summaryLoading) && (
+                        {/* {(summaryResponse || summaryLoading) && (
                             <div className="mt-3 bg-white border border-purple-100 rounded-lg p-4">
                                 <div className="flex items-center gap-1.5 mb-2">
                                     <LuSparkles size={14} className="text-purple-600" />
@@ -269,8 +268,8 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                                     <MarkdownText content={summaryResponse || ''} />
                                 </div>
                             </div>
-                        )}
-                        <div className="mb-2">
+                        )} */}
+                        {/* <div className="mb-2">
                             <label className="text-xs font-medium text-purple-700">Prompt Summary</label>
                             <TextArea
                                 value={summaryPrompt}
@@ -279,7 +278,7 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                                 placeholder="Masukkan prompt untuk summary..."
                                 className="mt-1 border-purple-200 focus:ring-purple-300"
                             />
-                        </div>
+                        </div> */}
                         <div className="flex justify-end">
                             <Button
                                 size="sm"

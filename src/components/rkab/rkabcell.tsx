@@ -1,4 +1,3 @@
-import React from "react";
 
 interface RkabCellProps {
     year: number;
