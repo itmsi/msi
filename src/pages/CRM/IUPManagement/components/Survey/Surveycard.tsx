@@ -9,6 +9,7 @@ import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import toast from "react-hot-toast";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 export interface SurveyCardProps {
     survey: IupSurveyItem;
@@ -198,25 +199,30 @@ Buatlah summary yang hanya berdasarkan data survey di atas, jangan menambahkan i
                     </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                            onEdit(survey);
-                        }}
-                        className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-slate-800 text-slate-500 hover:text-slate-200 ${isOpen ? 'text-white' : 'text-slate-600'}`}
-                    >
-                        <MdEdit size={15} />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => {
-                            if (!isDeleting) onDelete(survey);
-                        }}
-                        className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-red-500/10 text-slate-500 hover:text-red-400 ${isOpen ? 'text-white' : 'text-slate-600'}`}
-                    >
-                        {isDeleting ? <LuLoaderCircle size={15} className="animate-spin" /> : <MdDeleteOutline size={15} />}
-                    </Button>
+                    <PermissionGate permission={["create", "update"]}>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                onEdit(survey);
+                            }}
+                            className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-slate-800 text-slate-500 hover:text-slate-200 ${isOpen ? 'text-white' : 'text-slate-600'}`}
+                        >
+                            <MdEdit size={15} />
+                        </Button>
+                    </PermissionGate>
+                    
+                    <PermissionGate permission="delete">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                if (!isDeleting) onDelete(survey);
+                            }}
+                            className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-red-500/10 text-slate-500 hover:text-red-400 ${isOpen ? 'text-white' : 'text-slate-600'}`}
+                        >
+                            {isDeleting ? <LuLoaderCircle size={15} className="animate-spin" /> : <MdDeleteOutline size={15} />}
+                        </Button>
+                    </PermissionGate>
                 </div>
             </div>
             {/* Detail — hanya tampil saat accordion terbuka */}

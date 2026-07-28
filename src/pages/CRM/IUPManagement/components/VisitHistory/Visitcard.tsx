@@ -3,6 +3,7 @@ import { LuUser, LuPhone, LuMapPin, LuLink2, LuLoaderCircle, LuChevronDown, LuCh
 import { VisitHistoryItem } from "../../types/iupmanagement";
 import Button from "@/components/ui/button/Button";
 import { MdEdit, MdDeleteOutline } from "react-icons/md";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 const formatDate = (iso: string): string => {
     if (!iso) return "-";
@@ -50,25 +51,29 @@ const VisitCard: React.FC<VisitCardProps> = ({
                     </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                            onEdit(visit);
-                        }}
-                        className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-slate-800 text-slate-500 hover:text-slate-200 ${isOpen ? 'text-white' : 'text-slate-600'}`}
-                    >
-                        <MdEdit size={15} />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => {
-                            if (!isDeleting) onDelete(visit);
-                        }}
-                        className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-red-500/10 text-slate-500 hover:text-red-400 ${isOpen ? 'text-white' : 'text-slate-600'}`}
-                    >
-                        {isDeleting ? <LuLoaderCircle size={15} className="animate-spin" /> : <MdDeleteOutline size={15} />}
-                    </Button>
+                    <PermissionGate permission={["create", "update"]}>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                onEdit(visit);
+                            }}
+                            className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-slate-800 text-slate-500 hover:text-slate-200 ${isOpen ? 'text-white' : 'text-slate-600'}`}
+                        >
+                            <MdEdit size={15} />
+                        </Button>
+                    </PermissionGate>
+                    <PermissionGate permission="delete">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                if (!isDeleting) onDelete(visit);
+                            }}
+                            className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-red-500/10 text-slate-500 hover:text-red-400 ${isOpen ? 'text-white' : 'text-slate-600'}`}
+                        >
+                            {isDeleting ? <LuLoaderCircle size={15} className="animate-spin" /> : <MdDeleteOutline size={15} />}
+                        </Button>
+                    </PermissionGate>
                 </div>
             </div>
             {/* Detail — hanya tampil saat accordion terbuka */}

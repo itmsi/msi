@@ -160,7 +160,7 @@ export default function Dashboard() {
             <div className="space-y-5">
 
                 <PageHeader
-                    title={customerInformation ? customerInformation.customer_name : 'Customer Dashboard'}
+                    title={customerInformation?.customer_name ? `${customerInformation.customer_code ? `${customerInformation.customer_code} - ` : ''} ${customerInformation.customer_name} ` : 'Customer Dashboard'}
                     backPath={listRoute}
                 />
                 {/* Customer Information Card */}

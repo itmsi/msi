@@ -5,6 +5,7 @@ import {
 import VisitCard from "./Visitcard";
 import VisitForm from "./Visitform";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 // const formatDate = (iso: string): string => {
 //     if (!iso) return "-";
@@ -64,8 +65,7 @@ const HistoryVisitManager = () => {
                     {/* <span className="text-xs text-slate-500">{visits.length} kunjungan</span> */}
                 </div>
                 <p className="mt-1.5 text-xs text-slate-700 leading-relaxed">
-                    Catatan riwayat kunjungan tim ke lokasi IUP, lengkap dengan penanggung
-                    jawab, kontak, koordinat, dan dokumentasi setiap kunjungan.
+                   A record of the team's visit history to the IUP location, including the person in charge, contact details, coordinates, and documentation for each visit.
                 </p>
             </div>
 
@@ -124,14 +124,16 @@ const HistoryVisitManager = () => {
             )}
             {!showForm && !editingId && (
             <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl">
-                <button
-                    type="button"
-                    onClick={openCreateForm}
-                    className="flex items-center gap-1.5 text-sm font-medium"
-                >
-                    <LuPlus size={16} className="text-primary" />
-                    Add Visit
-                </button>
+                <PermissionGate permission="create">
+                    <button
+                        type="button"
+                        onClick={openCreateForm}
+                        className="flex items-center gap-1.5 text-sm font-medium"
+                    >
+                        <LuPlus size={16} className="text-primary" />
+                        Add Visit
+                    </button>
+                </PermissionGate>
             </div>
             )}
         </div>

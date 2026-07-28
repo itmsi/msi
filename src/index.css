@@ -1049,10 +1049,92 @@ p {
 }
 
 .reset-content p {
-  font-family: var(--font-primary);
-  margin: revert;
+    font-family: var(--font-primary);
+    margin: revert;
 }
 .reset-content strong {
-  font-weight: normal;
-  font-family: var(--font-primary-bold);
+    font-weight: normal;
+    font-family: var(--font-primary-bold);
+}
+.ai-border-wrapper {
+    position: relative;
+    padding: 1.5px;
+    overflow: hidden;
+}
+.ai-border-static {
+    background: #ede9fe; /* purple-100, garis diam saat idle */
+}
+.ai-border-spinning {
+    background: transparent;
+}
+.ai-border-spinning::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        #c4b5fd 40deg,
+        #a78bfa 90deg,
+        #ec4899 140deg,
+        transparent 200deg,
+        transparent 360deg
+    );
+    animation: aiBorderSpin 1.6s linear infinite;
+}
+@keyframes aiBorderSpin {
+    to { transform: rotate(360deg); }
+}
+.ai-border-spinning .ai-summary-gradient {
+    position: relative;
+    z-index: 1;
+}
+.ai-summary-gradient {
+    background: linear-gradient(
+        120deg,
+        rgb(245, 243, 255) 0%,
+        rgb(237, 233, 254) 25%,
+        rgb(243, 232, 255) 50%,
+        rgb(237, 233, 254) 75%,
+        rgb(245, 243, 255) 100%
+    );
+    background-size: 300% 300%;
+    animation: aiGradientShift 8s ease-in-out infinite;
+}
+@keyframes aiGradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ai-summary-gradient { animation: none; }
+    .ai-border-spinning::before { animation: none; }
+    .ai-generate-btn, .ai-generate-btn svg { transition: none; }
+    .ai-generate-btn:hover:not(:disabled) { transform: none; }
+}
+.ai-generate-btn {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 45%, #ec4899 100%);
+    background-size: 200% 200%;
+    background-position: 0% 0%;
+    box-shadow: 0 1px 2px rgba(139, 92, 246, 0.3);
+    transition: background-position 0.5s ease, box-shadow 0.25s ease, transform 0.2s ease;
+}
+.ai-generate-btn:hover:not(:disabled) {
+    background-position: 100% 100%;
+    box-shadow: 0 4px 14px rgba(168, 85, 247, 0.5);
+    transform: translateY(-1px) scale(1.03);
+}
+.ai-generate-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+}
+.ai-generate-btn:disabled {
+    background: #d1d5db;
+}
+.ai-generate-btn svg {
+    transition: transform 0.35s ease;
+}
+.ai-generate-btn:hover:not(:disabled) svg {
+    transform: rotate(20deg) scale(1.15);
 }

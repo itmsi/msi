@@ -2,6 +2,8 @@ import React from 'react';
 import { TableColumn } from 'react-data-table-component';
 import CustomDataTable from '@/components/ui/table/CustomDataTable';
 import { CustomerInfo } from '../types/iupmanagement';
+import { Link } from 'react-router-dom';
+import { RkabCell } from '@/components/rkab/rkabcell';
 
 interface CustomerInformationProps {
     customers: CustomerInfo[];
@@ -15,26 +17,39 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
             selector: (row: CustomerInfo) => row.customer_name || '-',
             wrap: true,
             cell: (row: CustomerInfo) => (<>
-                <a
-                    href={`/crm/contractors/edit/${row.iup_customer_id}`}
+                <Link
+                    to={`/crm/contractors/edit/${row.iup_customer_id}`}
                     className="absolute inset-0"
                 />
-                <div className="py-2">
-                    <p className="font-medium text-gray-900 text-sm">
-                        {row.customer_name || '-'}
-                    </p>
+                <div className="flex items-center gap-2">
+                    <div className="font-medium text-gray-900">
+                        {row?.customer_name || ''}
+                    </div>
+                    <span className="text-md font-secondary font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-600">
+                        {row.customer_code || '-'}
+                    </span>
                 </div>
             </>),
-        },
-        {
-            name: 'Phone Number',
-            selector: (row: CustomerInfo) => row.customer_phone || '-',
+        },{
+            name: 'RKAB',
+            selector: (row: CustomerInfo) => row.rkab?.year || '-',
+            width: '200px',
             wrap: true,
             cell: (row: CustomerInfo) => (
+                <RkabCell year={Number(row.rkab?.year) || 0} target={Number(row.rkab?.target_production) || 0} current={Number(row.rkab?.current_production) || 0} />
+            ),
+        },
+        {
+            name: 'Fleet Count',
+            selector: (row: CustomerInfo) => row.number_of_fleet || '0',
+            width: '160px',
+            wrap: true,
+            center: true,
+            cell: (row: CustomerInfo) => (
                 <div className="py-2">
-                    <p className="text-gray-700 text-sm">
-                        {row.customer_phone || '-'}
-                    </p>
+                    <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-gray-800 border border-gray-200 rounded-md">
+                        {row.number_of_fleet || '0'}
+                    </span>
                 </div>
             ),
         },
@@ -51,29 +66,14 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
             ),
         },
         {
-            name: 'Segmentation',
-            selector: (row: CustomerInfo) => row.segmentation_name_en || '-',
-            width: '160px',
+            name: 'Phone Number',
+            selector: (row: CustomerInfo) => row.customer_phone || '-',
             wrap: true,
             cell: (row: CustomerInfo) => (
                 <div className="py-2">
                     <p className="text-gray-700 text-sm">
-                        {row.segmentation_name_en || '-'}
+                        {row.customer_phone || '-'}
                     </p>
-                </div>
-            ),
-        },
-        {
-            name: 'Fleet Count',
-            selector: (row: CustomerInfo) => row.number_of_fleet || '0',
-            width: '160px',
-            wrap: true,
-            center: true,
-            cell: (row: CustomerInfo) => (
-                <div className="py-2">
-                    <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-gray-800 border border-gray-200 rounded-md">
-                        {row.number_of_fleet || '0'}
-                    </span>
                 </div>
             ),
         },

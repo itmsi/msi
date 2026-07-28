@@ -7,6 +7,7 @@ import { LuX, LuPlus, LuCheck } from 'react-icons/lu';
 import moment from 'moment';
 import Input from '@/components/form/input/InputField';
 import { ZoneFormErrors, ZoneFormState } from '../../hooks/useIupZoneSIte';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 
 interface EvidenceFormProps {
     editingId: string | null;
@@ -133,14 +134,16 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-1">
-                    <Button 
-                        onClick={submitForm}
-                        disabled={submitting}
-                        className="rounded-[50px] focus:ring-2 focus:ring-offset-2 py-2"
-                    >
-                        <LuCheck size={14} />
-                        Save
-                    </Button>
+                    <PermissionGate permission={["create", "update"]}>
+                        <Button 
+                            onClick={submitForm}
+                            disabled={submitting}
+                            className="rounded-[50px] focus:ring-2 focus:ring-offset-2 py-2"
+                        >
+                            <LuCheck size={14} />
+                            Save
+                        </Button>
+                    </PermissionGate>
                 </div>
             </div>
         </div>

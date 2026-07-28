@@ -16,6 +16,7 @@ import { useEmployeeSelect } from "@/pages/QuotationITI/hooks/useEmployeeSelect"
 import CustomAsyncSelect from "@/components/form/select/CustomAsyncSelect";
 import EditableField from "@/components/form/editor/EditableField";
 import { formatDate } from "@/helpers/generalHelper";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 export interface VisitFormProps {
     editingId: string | null;
@@ -262,15 +263,18 @@ const VisitForm: React.FC<VisitFormProps> = ({
                     >
                         Cancel
                     </Button>
-                    <Button
-                        type="button"
-                        onClick={submitForm}
-                        disabled={submitting}
-                        className="rounded-[50px] focus:ring-2 focus:ring-offset-2 py-2"
-                    >
-                        {submitting ? <LuLoaderCircle size={14} className="animate-spin" /> : <LuCheck size={14} />}
-                        Save
-                    </Button>
+                    
+                    <PermissionGate permission={["create", "update"]}>
+                        <Button
+                            type="button"
+                            onClick={submitForm}
+                            disabled={submitting}
+                            className="rounded-[50px] focus:ring-2 focus:ring-offset-2 py-2"
+                        >
+                            {submitting ? <LuLoaderCircle size={14} className="animate-spin" /> : <LuCheck size={14} />}
+                            Save
+                        </Button>
+                    </PermissionGate>
                 </div>
             </div>
         </div>

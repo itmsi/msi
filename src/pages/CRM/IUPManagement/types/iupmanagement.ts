@@ -36,8 +36,14 @@ export interface CustomerInfo {
     segmentation_name_en: string;
     number_of_fleet: string;
     status: string;
+    rkab?: IupCustomerRkabItem;
+    customer_code?: string;
 }
-
+export interface IupCustomerRkabItem {
+    year: string;
+    target_production: string | number;
+    current_production: string | number;
+}
 export interface IupItemDetails {
     iup_id: string;
     iup_name: string;

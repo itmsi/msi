@@ -5,6 +5,7 @@ import { useIupZoneSIte } from '../../hooks/useIupZoneSIte';
 import Zonecard from './Zonecard';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import LoadingSpinner from '@/components/common/Loading';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 
 interface ZoneAreaProps {
 }
@@ -55,8 +56,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                     {/* <span className="text-xs text-slate-500">{zones.length} zona</span> */}
                 </div>
                 <p className="mt-1.5 text-xs text-slate-700 leading-relaxed">
-                    Daftar area yang perlu disurvey oleh tim di lapangan sebagai acuan data
-                    dan dokumentasi riset Izin Usaha Pertambangan (IUP).
+                    List of areas that need to be surveyed by the field team as a reference for data collection and documentation for Mining Business Permit (IUP) research.
                 </p>
             </div>
 
@@ -110,14 +110,16 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
             )}
             {!showForm && !editingId && (
             <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl">
-                <button
-                    type="button"
-                    onClick={openCreateForm}
-                    className="flex items-center gap-1.5 text-sm font-medium"
-                >
-                    <LuPlus size={16} className="text-primary" />
-                    Add Zona
-                </button>
+                <PermissionGate permission="create">
+                    <button
+                        type="button"
+                        onClick={openCreateForm}
+                        className="flex items-center gap-1.5 text-sm font-medium"
+                    >
+                        <LuPlus size={16} className="text-primary" />
+                        Add Zona
+                    </button>
+                </PermissionGate>
             </div>
             )}
 

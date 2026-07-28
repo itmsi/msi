@@ -201,8 +201,10 @@ const UnitSection: React.FC = () => {
                     <LoadingSpinner />
                 </div>
             ) : (!dataUnit || dataUnit.length === 0) ? (
-                <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
-                    No brand unit data available. Click &ldquo;Add Unit&rdquo; to add one.
+                <div className="p-8">
+                    <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
+                        No brand unit data available. Click &ldquo;Add Unit&rdquo; to add one.
+                    </div>
                 </div>
             ) : (
                 <div className="p-6 font-secondary">
