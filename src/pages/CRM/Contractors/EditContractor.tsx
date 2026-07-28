@@ -108,7 +108,12 @@ const EditContractor: React.FC = () => {
             </div>
         );
     }
-
+console.log({
+    goBack,
+    a: window.history.state,
+    b: window.history.state.idx,
+    c: window.history.state.navigationType
+})
     return (
         <>
             <PageMeta 
@@ -121,7 +126,7 @@ const EditContractor: React.FC = () => {
                 {/* Header dengan back button */}
                 <PageHeader
                     title={`Edit Contractor`}
-                    backPath={() => goBack(listRoute)}
+                    backPath={() => goBack(`/crm/contractors${location.search}`)}
                     subtitle={"Update the company information or drag the pin to adjust the IUP location."}
                 />
 

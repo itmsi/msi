@@ -5,6 +5,7 @@ import { useIupZoneSIte } from '../../hooks/useIupZoneSIte';
 import Zonecard from './Zonecard';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import LoadingSpinner from '@/components/common/Loading';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 
 interface ZoneAreaProps {
 }
@@ -110,14 +111,16 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
             )}
             {!showForm && !editingId && (
             <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl">
-                <button
-                    type="button"
-                    onClick={openCreateForm}
-                    className="flex items-center gap-1.5 text-sm font-medium"
-                >
-                    <LuPlus size={16} className="text-primary" />
-                    Add Zona
-                </button>
+                <PermissionGate permission="create">
+                    <button
+                        type="button"
+                        onClick={openCreateForm}
+                        className="flex items-center gap-1.5 text-sm font-medium"
+                    >
+                        <LuPlus size={16} className="text-primary" />
+                        Add Zona
+                    </button>
+                </PermissionGate>
             </div>
             )}
 

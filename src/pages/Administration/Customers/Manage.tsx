@@ -88,11 +88,17 @@ const ManageCustomers: React.FC<{
                         href={`${urlPath}${row.customer_id}${location.search}`}
                         className="absolute inset-0"
                     />
+                    
                     <div className="py-2">
-                        <div className="font-medium text-gray-900">
-                            {row?.customer_name ?? '-'}
+                        <div className="flex items-center gap-2">
+                            <div className="font-medium text-gray-900">
+                                {row?.customer_name || ''}
+                            </div>
+                            <span className="text-xs font-secondary font-medium px-2 py-0.5 rounded bg-slate-200 text-slate-600">
+                                {row.customer_code || '-'}
+                            </span>
                         </div>
-                        <div className="text-sm text-gray-500">{row?.contact_person ?? '-'}{row?.customer_code ? ` - ${row.customer_code}` : ''}</div>
+                        <div className="text-sm text-gray-500">{row?.contact_person ?? '-'}</div>
                     </div>
                 </>);
             }

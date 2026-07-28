@@ -5,6 +5,7 @@ import LoadingSpinner from '@/components/common/Loading';
 import SurveyCard from './Surveycard';
 import { useIupSurvey } from '../../hooks/useIupSurvey';
 import { SurveyForm } from './SurveyForm';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 
 const SurveyManagement: React.FC = () => {
     const {
@@ -39,12 +40,12 @@ const SurveyManagement: React.FC = () => {
             <div className="px-5 py-4 border-b border-slate-300">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <h2 className="font-primary-bold text-md tracking-wide">Activity</h2>
+                        <h2 className="font-primary-bold text-md tracking-wide">Survey</h2>
                     </div>
                     {/* <span className="text-xs text-slate-500">{zones.length} zona</span> */}
                 </div>
                 <p className="mt-1.5 text-xs text-slate-700 leading-relaxed">
-                    Daftar activity yang telah dilakukan oleh kontraktor terkait IUP ini. Anda dapat menambahkan, mengedit, atau menghapus activity sesuai kebutuhan.
+                    Daftar survey yang telah dilakukan oleh kontraktor terkait IUP ini. Anda dapat menambahkan, mengedit, atau menghapus survey sesuai kebutuhan.
                 </p>
             </div>
 
@@ -53,7 +54,7 @@ const SurveyManagement: React.FC = () => {
                 {!showForm && (
                 <div className="p-8">
                     <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
-                        No activity available. Click &ldquo;Add Activity&rdquo; to add one.
+                        No survey available. Click &ldquo;Add Survey&rdquo; to add one.
                     </div>
                 </div>
                 )}
@@ -128,14 +129,16 @@ const SurveyManagement: React.FC = () => {
             )}
             {!showForm && !editingId && (
             <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl">
-                <button
-                    type="button"
-                    onClick={openCreateForm}
-                    className="flex items-center gap-1.5 text-sm font-medium"
-                >
-                    <LuPlus size={16} className="text-primary" />
-                    Add Activity
-                </button>
+                <PermissionGate permission="create">
+                    <button
+                        type="button"
+                        onClick={openCreateForm}
+                        className="flex items-center gap-1.5 text-sm font-medium"
+                    >
+                        <LuPlus size={16} className="text-primary" />
+                        Add Survey
+                    </button>
+                </PermissionGate>
             </div>
             )}
 
