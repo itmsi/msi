@@ -230,8 +230,10 @@ const RkabSection: React.FC = () => {
                     <LoadingSpinner />
                 </div>
             ) : (!dataRkab || dataRkab.length === 0) ? (
-                <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
-                    Belum ada data RKAB. Klik &ldquo;Add RKAB&rdquo; untuk menambah.
+                <div className="p-8">
+                    <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
+                        No RKAB data available. Click &ldquo;Add RKAB&rdquo; to add one.
+                    </div>
                 </div>
             ) : (
                 <div className="p-6 font-secondary">

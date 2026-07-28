@@ -164,7 +164,7 @@ export const useIupVisit = () => {
         try {
             const res: VisitHistoryResponse = await IupService.getIupVisit({
                 iup_id: id,
-                sort_by: 'updated_at',
+                sort_by: 'created_at',
                 sort_order: 'desc'
             });
             setVisits(res.data);

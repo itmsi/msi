@@ -28,8 +28,10 @@ export default function RkabSection({
             </div>
 
             {(!rkabs || rkabs.length === 0) ? (
-                <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
-                    No RKAB data available. Click &ldquo;Add RKAB&rdquo; to add one.
+                <div className="p-8">
+                    <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
+                        No RKAB data available. Click &ldquo;Add RKAB&rdquo; to add one.
+                    </div>
                 </div>
             ) : (
                 <div className="divide-slate-300 divide-y">

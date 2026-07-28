@@ -228,7 +228,7 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                                 size="sm"
                                 onClick={handleGenerateSummary}
                                 disabled={summaryLoading || isZoneDataEmpty}
-                                className="inline-flex items-center gap-1.5 text-xs font-medium disabled:opacity-50"
+                                className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-3.5 py-1.5 rounded-full shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
                             >
                                 {summaryLoading ? <LuLoaderCircle size={13} className="animate-spin" /> : <LuSparkles size={13} />}
                                 {summaryLoading ? 'Generating...' : 'Summary by Mosa AI'}
@@ -256,9 +256,9 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                     )}
 
                     {/* ── Prompt & Summary (hanya jika sudah pernah generate) ── */}
-                    {(hasEverGenerated || summaryResponse || summaryLoading) && (
+                    {/* {(hasEverGenerated || summaryResponse || summaryLoading) && (
                     <div className="border-t border-purple-200 pt-4 mt-4">
-                        {/* {(summaryResponse || summaryLoading) && (
+                        {(summaryResponse || summaryLoading) && (
                             <div className="mt-3 bg-white border border-purple-100 rounded-lg p-4">
                                 <div className="flex items-center gap-1.5 mb-2">
                                     <LuSparkles size={14} className="text-purple-600" />
@@ -268,8 +268,8 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                                     <MarkdownText content={summaryResponse || ''} />
                                 </div>
                             </div>
-                        )} */}
-                        {/* <div className="mb-2">
+                        )}
+                        <div className="mb-2">
                             <label className="text-xs font-medium text-purple-700">Prompt Summary</label>
                             <TextArea
                                 value={summaryPrompt}
@@ -278,20 +278,20 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                                 placeholder="Masukkan prompt untuk summary..."
                                 className="mt-1 border-purple-200 focus:ring-purple-300"
                             />
-                        </div> */}
+                        </div>
                         <div className="flex justify-end">
                             <Button
                                 size="sm"
                                 onClick={handleGenerateSummary}
                                 disabled={summaryLoading || isZoneDataEmpty}
-                                className="inline-flex items-center gap-1.5 disabled:opacity-50"
+                                className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-3.5 py-1.5 rounded-full shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
                             >
                                 {summaryLoading ? <LuLoaderCircle size={13} className="animate-spin" /> : <LuSparkles size={15} />}
                                 {summaryLoading ? 'Generating...' : 'Summary by Mosa AI'}
                             </Button>
                         </div>
                     </div>
-                    )}
+                    )} */}
                 </div>
             )}
         </div>

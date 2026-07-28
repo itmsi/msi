@@ -89,7 +89,7 @@ const EditIupManagement: React.FC = () => {
             />
             <div className="mx-auto px-0">
                 <PageHeader
-                    title={`Edit IUP Management`}
+                    title={`Edit IUP ${formData.company_name ? `- ${formData.company_name}` : ''}`}
                     backPath={() => goBack('/crm/iup-management')}
                 />
 
