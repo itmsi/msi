@@ -1,5 +1,5 @@
 import { apiDelete, apiGet, apiPost, apiPut, ApiResponse } from '@/helpers/apiHelper';
-import { IupItemDetails, IupRequest, IupListResponse, IupManagementFormData, IupZonaSiteResponse, ZonaSitePayload, payloadRequest, GetIupRkabResponse, CreateIupRkabPayload, IupRkabUnitResponse, IupRkabUnitForm, VisitHistoryResponse, VisitPayload, GetIupBrandUnitResponse, IupBrandUnitPayload } from '../types/iupmanagement';
+import { IupItemDetails, IupRequest, IupListResponse, IupManagementFormData, IupZonaSiteResponse, ZonaSitePayload, payloadRequest, GetIupRkabResponse, CreateIupRkabPayload, IupRkabUnitResponse, IupRkabUnitForm, VisitHistoryResponse, VisitPayload, GetIupBrandUnitResponse, IupBrandUnitPayload, GetIupSurveyResponse, IupSurveyPayload } from '../types/iupmanagement';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_IS_ADMIN = import.meta.env.VITE_PARAM_IS_ADMIN;
@@ -166,6 +166,34 @@ export class IupService {
     
     static async deleteIupUnit(id: string): Promise<any> {
         return await apiDelete(`${API_BASE_URL}/crm/iup_brand_unit/${id}`);
+    }
+    
+    // SURVEY
+    static async getIupSurvey(params: Partial<payloadRequest> = {}): Promise<GetIupSurveyResponse> {
+        const requestData: payloadRequest = {
+            page: 1,
+            limit: 100,
+            sort_by: "updated_at",
+            sort_order: 'desc',
+            ...params
+        };
+        
+        const response = await apiPost(`${API_BASE_URL}/crm/iup_survey/get`, requestData as Record<string, any>);
+        return response.data as GetIupSurveyResponse;
+    }
+
+    static async createIupSurvey(data: IupSurveyPayload): Promise<any> {
+        const response = await apiPost(`${API_BASE_URL}/crm/iup_survey/create`, data as Record<string, any>);
+        return response.data;
+    }
+
+    static async updateIupSurvey(id: string, data: IupSurveyPayload): Promise<any> {
+        const response = await apiPut(`${API_BASE_URL}/crm/iup_survey/${id}`, data as Record<string, any>);
+        return response.data;
+    }
+    
+    static async deleteIupSurvey(id: string): Promise<any> {
+        return await apiDelete(`${API_BASE_URL}/crm/iup_survey/${id}`);
     }
 
 }

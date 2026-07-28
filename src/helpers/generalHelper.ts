@@ -840,3 +840,7 @@ export const translateErrorMessages = (messages: string | string[]): string => {
     const list = Array.isArray(messages) ? messages : [messages];
     return list.map(translateErrorMessage).join(', ');
 };
+export const parseSortBy = (value: string | null): '' | 'updated_at' | 'created_at' => {
+    if (value === 'updated_at' || value === 'created_at') return value;
+    return '';
+};

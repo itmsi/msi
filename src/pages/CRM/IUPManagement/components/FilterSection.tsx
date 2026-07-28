@@ -5,9 +5,13 @@ import Button from '@/components/ui/button/Button';
 // import { useSegementationSelect } from '@/hooks/useSegmentSelect';
 // import { SegmentSelectOption } from './IupInformtionsFormFields';
 import { Area, Group, Island, IUPSegmentation, IUPZone, useTerritory } from '../../Territory';
+import { parseSortBy } from '@/helpers/generalHelper';
 // import Label from '@/components/form/Label';
 
 interface TerritoryFilters {
+    status?: string;
+    sort_by?: '' | 'updated_at' | 'created_at'
+    is_contractor_count?: string;
     island_id?: string;
     group_id?: string;
     area_id?: string;
@@ -16,15 +20,11 @@ interface TerritoryFilters {
 }
 
 interface FilterSectionProps {
-    onFilterChange: (field: string, value: string) => void;
-    onTerritoryFilterChange: (filters: TerritoryFilters) => void;
+    onFilterChange: (filters: TerritoryFilters) => void;
+    // onFilterChange: (field: string, value: string) => void;
+    // onTerritoryFilterChange: (filters: TerritoryFilters) => void;
     onClearFilters: () => void;
     onApplyFilters?: () => void;
-}
-
-interface FilterOption {
-    value: string;
-    label: string;
 }
 
 // Config filter - mudah untuk extend dengan field baru
@@ -63,7 +63,7 @@ const filterConfigs = [
 
 const FilterSection: React.FC<FilterSectionProps> = ({
     onFilterChange,
-    onTerritoryFilterChange,
+    // onTerritoryFilterChange,
     onClearFilters,
     onApplyFilters
 }) => {
@@ -81,16 +81,19 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     // const [selectedSegment, setSelectedSegment] = useState<SegmentSelectOption | null>(null);
     
     // State for other filter values
-    const [filterValues, setFilterValues] = useState<{[key: string]: string}>({
-        status: '',
-        sort_by: ''
-    });
+    const [filters, setFilters] = useState<TerritoryFilters>({});
+    // const [filterValues, setFilterValues] = useState<{[key: string]: string}>({
+    //     status: '',
+    //     sort_by: ''
+    // });
 
     // Initialize segmentation options
     // useEffect(() => {
     //     initializeSegementationOptions();
     // }, [initializeSegementationOptions]);
     
+    const params = new URLSearchParams(location.search);
+
     
     // TERRITORY SELECTION LOGIC
     const {
@@ -109,6 +112,47 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     useEffect(() => {
         fetchTerritories();
     }, []);
+    useEffect(() => {
+        if (!territories.length) return;
+
+        const island = territories.find(t => t.id === params.get('island_id')) || null;
+        if (island) {
+            setSelectedIsland(island);
+            
+            if (params.get('group_id')) {
+                const group = island.children?.find(g => g.id === params.get('group_id')) || null;
+                if (group) {
+                    setSelectedGroup(group);
+                    
+                    if (params.get('area_id')) {
+                        const area = group.children?.find(a => a.id === params.get('area_id'));
+                        if (area) {
+                            setSelectedArea(area);
+                            
+                            if (params.get('iup_zone_id')) {
+                                const iupZone = area.children?.find(z => z.id === params.get('iup_zone_id')) || null;
+                                if (iupZone) {
+                                    setSelectedIupZone(iupZone);
+                                    
+                                    if (params.get('iup_segment_id')) {
+                                        const iupSegmentation = iupZone.children?.find(s => s.id === params.get('iup_segment_id')) || null;
+                                        if (iupSegmentation) {
+                                            setSelectedIupSegmentation(iupSegmentation);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        setFilters({
+            status: params.get('status') || '',
+            is_contractor_count: params.get('is_contractor_count') || '',
+            sort_by: parseSortBy(params.get('sort_by'))
+        });
+    }, [location.search]);
 
     // Get available groups based on selected island
     const getAvailableGroups = (): Group[] => {
@@ -141,15 +185,15 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         setSelectedArea(null);
         setSelectedIupZone(null);
         setSelectedIupSegmentation(null);
-        
-        // Batch update territory filters - kirim semua value sekaligus
-        onTerritoryFilterChange({
+        const newFilters = {
             island_id: option?.value || '',
             group_id: '',
             area_id: '',
             iup_zone_id: '',
             iup_segment_id: ''
-        });
+        };
+        setFilters(newFilters);
+        onFilterChange(newFilters);
     };
 
     const handleGroupChange = (option: { value: string; label: string; } | null) => {
@@ -158,14 +202,18 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         setSelectedArea(null);
         setSelectedIupZone(null);
         setSelectedIupSegmentation(null);
-        
-        // Batch update - group berubah, reset children
-        onTerritoryFilterChange({
+
+        const newFilters = {
+            ...filters,
             group_id: option?.value || '',
             area_id: '',
             iup_zone_id: '',
             iup_segment_id: ''
-        });
+        };
+        setFilters(newFilters);
+        onFilterChange(newFilters);
+
+        // onFilterChange('group_id', option?.value || '');
     };
 
     const handleAreaChange = (option: { value: string; label: string; } | null) => {
@@ -173,35 +221,39 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         setSelectedArea(area);
         setSelectedIupZone(null);
         setSelectedIupSegmentation(null);
-        
-        // Batch update - area berubah, reset children
-        onTerritoryFilterChange({
+        const newFilters = {
+            ...filters,
             area_id: option?.value || '',
             iup_zone_id: '',
             iup_segment_id: ''
-        });
+        };
+        setFilters(newFilters);
+        onFilterChange(newFilters);
     };
 
     const handleIupZoneChange = (option: { value: string; label: string; } | null) => {
         const iupZone = getAvailableIupZones().find(z => z.id === option?.value) || null;
         setSelectedIupZone(iupZone);
         setSelectedIupSegmentation(null);
-        
-        // Batch update - iup zone berubah, reset children
-        onTerritoryFilterChange({
+        const newFilters = {
+            ...filters,
             iup_zone_id: option?.value || '',
             iup_segment_id: ''
-        });
+        };
+        setFilters(newFilters);
+        onFilterChange(newFilters);
     };
 
     const handleIupSegmentationChange = (option: { value: string; label: string; } | null) => {
         const iupSegmentation = getAvailableIupSegmentations().find(s => s.id === option?.value) || null;
         setSelectedIupSegmentation(iupSegmentation);
         
-        // Update filter
-        onTerritoryFilterChange({
+        const newFilters = {
+            ...filters,
             iup_segment_id: option?.value || ''
-        });
+        };
+        setFilters(newFilters);
+        onFilterChange(newFilters);
     };
 
     const { island, group, area, iupZone, iupSegmentation } = {
@@ -222,34 +274,42 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         </p>
     );
 
-    const getCurrentValue = (filterId: string): { value: string; label: string } | null => {
-        const value = filterValues[filterId];
-        if (!value) return null;
+    // const getCurrentValue = (filterId: string): { value: string; label: string } | null => {
+    //     const value = filterValues[filterId];
+    //     if (!value) return null;
         
-        const config = filterConfigs.find(config => config.id === filterId);
-        const option = config?.options.find(opt => opt.value === value);
+    //     const config = filterConfigs.find(config => config.id === filterId);
+    //     const option = config?.options.find(opt => opt.value === value);
         
-        return option || null;
+    //     return option || null;
+    // };
+    const getCurrentValue = (id: string) => {
+        const value = filters[id as keyof typeof filters];
+
+        const config = filterConfigs.find((c) => c.id === id);
+
+        if (!config) return null;
+
+        return config.options.find((opt) => opt.value === value) || null;
     };
 
-    const handleFilterChangeInternal = (filterId: string, selectedOption: FilterOption | null) => {
-        // if (filterId === 'segmentation') {
-        //     const segment = segementationOptions.find(opt => opt.value === selectedOption?.value) || null;
-        //     setSelectedSegment(segment);
-        // } else {
-            setFilterValues(prev => ({
+    const handleFilterChangeInternal = (updated: Partial<TerritoryFilters>) => {
+        setFilters((prev) => {
+            const newFilters = {
                 ...prev,
-                [filterId]: selectedOption?.value || ''
-            }));
-        // }
-        
-        onFilterChange(filterId, selectedOption?.value || '');
+                ...updated
+            };
+            onFilterChange(newFilters);
+            // setFilterValues(prev => ({
+            //     ...prev,
+            //     [filterId]: selectedOption?.value || ''
+            // }));
+            return newFilters;
+        });
     };
     
     const handleClearAllFilters = () => {
-        // Reset segmentation & other filters
-        // setSelectedSegment(null);
-        setFilterValues({
+        setFilters({
             status: '',
             sort_by: ''
         });
@@ -299,6 +359,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                             label: island.name
                         }))}
                         value={island ? { value: island.id, label: island.name } : null}
+                        // value={getSelectValue(filters.island_id, islandOptions)}
                         onChange={handleIslandChange}
                         placeholder="Select Island"
                         isLoading={territoriesLoading}
@@ -396,7 +457,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                             id={config.id}
                             name={config.id}
                             value={getCurrentValue(config.id)}
-                            onChange={(selectedOption) => handleFilterChangeInternal(config.id, selectedOption)}
+                            // onChange={(selectedOption) => handleFilterChangeInternal(config.id, selectedOption)}
+                            onChange={(selectedOption) =>
+                                handleFilterChangeInternal({
+                                    [config.id]: selectedOption?.value || ''
+                                })
+                            }
                             options={config.options}
                             placeholder={config.placeholder}
                             isClearable={true}

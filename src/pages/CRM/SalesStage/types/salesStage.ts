@@ -149,6 +149,7 @@ export interface SalesStageListRequest {
     iup_id?: string;
     contractor?: string;
     employee_id?: string;
+    opportunity_employee_id?: string;
     solution?: string;
     stage?: string;
     sort_by?: string;

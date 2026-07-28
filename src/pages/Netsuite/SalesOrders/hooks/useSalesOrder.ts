@@ -4,6 +4,15 @@ import toast from 'react-hot-toast';
 import { SalesOrderService } from '../services/salesOrderService';
 import { NetSuiteSyncService } from '../../Sync/services/netSuiteSyncService';
 
+// type FilterState = {
+//     search: string;
+//     sort_order: 'asc' | 'desc' | '';
+//     po_status: string;
+//     subsidiary: string;
+//     location: string;
+//     approvalstatus: string | null;
+//     created_by?: string;
+// };
 export const useSalesOrder = () => {
     const [searchValue, setSearchValue] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');

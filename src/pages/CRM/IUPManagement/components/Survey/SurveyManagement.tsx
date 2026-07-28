@@ -1,26 +1,19 @@
 import React from 'react';
 import { LuPlus } from 'react-icons/lu';
-import { EvidenceForm } from './EvidenceForm';
-import { useIupZoneSIte } from '../../hooks/useIupZoneSIte';
-import Zonecard from './Zonecard';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import LoadingSpinner from '@/components/common/Loading';
+import SurveyCard from './Surveycard';
+import { useIupSurvey } from '../../hooks/useIupSurvey';
+import { SurveyForm } from './SurveyForm';
 
-interface ZoneAreaProps {
-}
-
-const ZoneArea: React.FC<ZoneAreaProps> = () => {
+const SurveyManagement: React.FC = () => {
     const {
-        zones,
-        // pagination,
-        // page,
-        // setPage,
-        // loading,
+        surveys,
         submitting,
         deletingId,
         loading,
         handleConfirmDeleted,
-        deleteZone,
+        deleteSurvey,
 
         showForm,
         editingId,
@@ -30,80 +23,105 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
         openEditForm,
         closeForm,
         updateField,
-        updateFileLink,
-        addFileLinkRow,
-        removeFileLinkRow,
         confirmDelete,
         setConfirmDelete,
 
         submitForm,
-    } = useIupZoneSIte();
+    } = useIupSurvey();
 
     if (loading) {
         return <div className="bg-white w-full rounded-2xl border border-slate-300 min-h-60 flex items-center justify-center relative">
             <LoadingSpinner />
         </div>;
     }
-
     return (
         <div className="w-full rounded-2xl border border-slate-300 bg-white">
             <div className="px-5 py-4 border-b border-slate-300">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <h2 className="font-primary-bold text-md tracking-wide">Zona &amp; Evidence</h2>
+                        <h2 className="font-primary-bold text-md tracking-wide">Activity</h2>
                     </div>
                     {/* <span className="text-xs text-slate-500">{zones.length} zona</span> */}
                 </div>
                 <p className="mt-1.5 text-xs text-slate-700 leading-relaxed">
-                    Daftar area yang perlu disurvey oleh tim di lapangan sebagai acuan data
-                    dan dokumentasi riset Izin Usaha Pertambangan (IUP).
+                    Daftar activity yang telah dilakukan oleh kontraktor terkait IUP ini. Anda dapat menambahkan, mengedit, atau menghapus activity sesuai kebutuhan.
                 </p>
             </div>
 
-            {(!zones || zones.length === 0) ? (
-                <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
-                    No zona area available. Click &ldquo;Add zone&rdquo; to add one.
+            {(!surveys || surveys.length === 0) ? (
+                <>
+                {!showForm && (
+                <div className="p-8">
+                    <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
+                        No activity available. Click &ldquo;Add Activity&rdquo; to add one.
+                    </div>
                 </div>
+                )}
+                </>
             ) : (
                 <div className="divide-y divide-slate-300">
-                    {zones.map((zone) =>
-                        showForm && editingId === zone.iup_zona_site_id ? (
-                            <EvidenceForm
-                                key={zone.iup_zona_site_id}
+                    {surveys.map((survey) =>
+                        showForm && editingId === survey.iup_survey_id ? (
+                            <SurveyForm
+                                key={survey.iup_survey_id}
                                 editingId={editingId}
                                 form={form}
                                 errors={errors}
                                 submitting={submitting}
                                 updateField={updateField}
-                                updateFileLink={updateFileLink}
-                                addFileLinkRow={addFileLinkRow}
-                                removeFileLinkRow={removeFileLinkRow}
+                                // updateFileLink={updateFileLink}
+                                // addFileLinkRow={addFileLinkRow}
+                                // removeFileLinkRow={removeFileLinkRow}
                                 submitForm={submitForm}
                                 closeForm={closeForm}
                             />
                         ) : (
-                            <Zonecard
-                                key={zone.iup_zona_site_id}
-                                zone={zone}
+                            <SurveyCard
+                                key={survey.iup_survey_id}
+                                survey={survey}
                                 onEdit={openEditForm}
-                                onDelete={deleteZone}
-                                isDeleting={deletingId === zone.iup_zona_site_id}
+                                onDelete={deleteSurvey}
+                                isDeleting={deletingId === survey.iup_survey_id}
                             />
                         )
                     )}
                 </div>
             )}
 
+            {/* <CustomDataTable
+                columns={columns}
+                data={surveys}
+                loading={loading}
+                pagination={false}
+                noDataComponent={
+                    <div className="py-8 text-center text-gray-500">
+                        <FaMapMarkerAlt className="mx-auto text-4xl mb-4 text-gray-300" />
+                        <p>No territory data available</p>
+                    </div>
+                }
+                responsive
+                highlightOnHover
+                striped={false}
+                persistTableHead
+                headerBackground="rgba(2, 83, 165, 0.1)"
+                hoverBackground="rgba(223, 232, 242, 0.3)"
+                borderRadius="8px"
+                
+                expandableRows
+                expandableRowsComponent={ExpandedRow}
+                // expandableRowDisabled={disableLocked ? r => r.locked : undefined}
+            /> */}
+
             {showForm && !editingId && (
-                <EvidenceForm
+                <SurveyForm
                     editingId={editingId}
                     form={form}
                     errors={errors}
                     submitting={submitting}
                     updateField={updateField}
-                    updateFileLink={updateFileLink}
-                    addFileLinkRow={addFileLinkRow}
-                    removeFileLinkRow={removeFileLinkRow}
+                    // updateFileLink={updateFileLink}
+                    // addFileLinkRow={addFileLinkRow}
+                    // removeFileLinkRow={removeFileLinkRow}
                     submitForm={submitForm}
                     closeForm={closeForm}
                 />
@@ -116,7 +134,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                     className="flex items-center gap-1.5 text-sm font-medium"
                 >
                     <LuPlus size={16} className="text-primary" />
-                    Add Zona
+                    Add Activity
                 </button>
             </div>
             )}
@@ -168,7 +186,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                 onClose={() => setConfirmDelete({ show: false })}
                 onConfirm={handleConfirmDeleted}
                 title={`Confirm delete ${confirmDelete.name ?? ''}`}
-                message="Are you sure you want to delete this zone? This action cannot be undone."
+                message="Are you sure you want to delete this survey? This action cannot be undone."
                 confirmText="Delete"
                 cancelText="Cancel"
                 loading={submitting}
@@ -179,4 +197,4 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
     );
 };
 
-export default ZoneArea;
+export default SurveyManagement;

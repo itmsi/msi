@@ -20,6 +20,7 @@ export type FilterState = {
     iup_id: string;
     contractor: string;
     employee_id: string;
+    opportunity_employee_id: string;
     solution: string;
     stage?: string;
 };
@@ -40,6 +41,7 @@ export const useSalesStage = () => {
         iup_id: searchParams.get('iup_id') || '',
         contractor: searchParams.get('contractor') || '',
         employee_id: profileSSOId,
+        opportunity_employee_id: searchParams.get('opportunity_employee_id') || '',
         solution: searchParams.get('solution') || '',
         stage: searchParams.get('stage') || '',
     }), [searchParams]);
@@ -134,6 +136,7 @@ export const useSalesStage = () => {
                 iup_id: filters.iup_id,
                 contractor: filters.contractor,
                 employee_id: profileSSOId,
+                opportunity_employee_id: filters.opportunity_employee_id,
                 stage: filters.stage,
                 sort_order: filters.sort_order || 'desc',
             });
@@ -189,7 +192,8 @@ export const useSalesStage = () => {
             search: '',
             iup_id: '',
             contractor: '',
-            employee_id: '',
+            employee_id: profileSSOId,
+            opportunity_employee_id: '',
             solution: '',
             stage: '',
         });
