@@ -5,6 +5,7 @@ import Button from '@/components/ui/button/Button';
 // import { useSegementationSelect } from '@/hooks/useSegmentSelect';
 // import { SegmentSelectOption } from './IupInformtionsFormFields';
 import { Area, Group, Island, IUPSegmentation, IUPZone, useTerritory } from '../../Territory';
+import { parseSortBy } from '@/helpers/generalHelper';
 // import Label from '@/components/form/Label';
 
 interface TerritoryFilters {
@@ -146,24 +147,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 }
             }
         }
-        const allowedSort: Array<'' | 'updated_at' | 'created_at'> = [
-            '',
-            'updated_at',
-            'created_at'
-        ];
-        setFilters((prev) => {
-            const sortValue = params?.get('sort_by') || '';
-
-            return {
-                ...prev,
-                status: params?.get('status') || '',
-                is_contractor_count: params?.get('is_contractor_count') || '',
-                sort_by: allowedSort.includes(sortValue as any)
-                    ? (sortValue as '' | 'updated_at' | 'created_at')
-                    : ''
-            };
+        setFilters({
+            status: params.get('status') || '',
+            is_contractor_count: params.get('is_contractor_count') || '',
+            sort_by: parseSortBy(params.get('sort_by'))
         });
-    }, [territories, params]);
+    }, [location.search]);
 
     // Get available groups based on selected island
     const getAvailableGroups = (): Group[] => {
