@@ -5,6 +5,7 @@ import {
 import VisitCard from "./Visitcard";
 import VisitForm from "./Visitform";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 // const formatDate = (iso: string): string => {
 //     if (!iso) return "-";
@@ -124,14 +125,16 @@ const HistoryVisitManager = () => {
             )}
             {!showForm && !editingId && (
             <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl">
-                <button
-                    type="button"
-                    onClick={openCreateForm}
-                    className="flex items-center gap-1.5 text-sm font-medium"
-                >
-                    <LuPlus size={16} className="text-primary" />
-                    Add Visit
-                </button>
+                <PermissionGate permission="create">
+                    <button
+                        type="button"
+                        onClick={openCreateForm}
+                        className="flex items-center gap-1.5 text-sm font-medium"
+                    >
+                        <LuPlus size={16} className="text-primary" />
+                        Add Visit
+                    </button>
+                </PermissionGate>
             </div>
             )}
         </div>

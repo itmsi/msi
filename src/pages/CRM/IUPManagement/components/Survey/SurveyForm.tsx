@@ -7,6 +7,7 @@ import { LuCheck } from 'react-icons/lu';
 import moment from 'moment';
 import Input from '@/components/form/input/InputField';
 import { SurveyFormErrors, SurveyFormState } from '../../hooks/useIupSurvey';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 
 interface SurveyFormProps {
     editingId: string | null;
@@ -128,14 +129,16 @@ export const SurveyForm: React.FC<SurveyFormProps> = ({
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-1">
-                    <Button 
-                        onClick={submitForm}
-                        disabled={submitting}
-                        className="rounded-[50px] focus:ring-2 focus:ring-offset-2 py-2"
-                    >
-                        <LuCheck size={14} />
-                        Save
-                    </Button>
+                    <PermissionGate permission={["create", "update"]}>
+                        <Button 
+                            onClick={submitForm}
+                            disabled={submitting}
+                            className="rounded-[50px] focus:ring-2 focus:ring-offset-2 py-2"
+                        >
+                            <LuCheck size={14} />
+                            Save
+                        </Button>
+                    </PermissionGate>
                 </div>
             </div>
         </div>

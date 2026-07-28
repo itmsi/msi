@@ -144,7 +144,7 @@ const EditIupManagement: React.FC = () => {
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                             }`}
                         >
-                            <AiOutlineHistory size={'1.2rem'} /> Activity
+                            <AiOutlineHistory size={'1.2rem'} /> Survey
                         </button>
                     </nav>
                 </div>

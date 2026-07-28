@@ -8,6 +8,8 @@ import { IupZonaSiteItem } from "../../types/iupmanagement";
 import { IupService } from "../../services/iupManagementService";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import toast from "react-hot-toast";
+import { PermissionGate } from "@/components/common/PermissionComponents";
+import { AiSummaryPanel } from "@/components/assistant-ui/Aisummarypanel";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -73,16 +75,16 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
             ? zone.iup_zona_site_file.map(f => f.file_link).join('\n')
             : '(tidak ada file)';
         const message = `DATA ZONE SITE:
-Nama Zone: ${zone.iup_zona_site_name}
-Deskripsi: ${zone.iup_zona_site_description || '(tidak ada deskripsi)'}
-Tanggal Survey: ${zone.iup_zona_site_date_last_survey || '-'}
-File Terkait:
-${fileList}
+            Nama Zone: ${zone.iup_zona_site_name}
+            Deskripsi: ${zone.iup_zona_site_description || '(tidak ada deskripsi)'}
+            Tanggal Survey: ${zone.iup_zona_site_date_last_survey || '-'}
+            File Terkait:
+            ${fileList}
 
-INSTRUKSI:
-${summaryPrompt}
+            INSTRUKSI:
+            ${summaryPrompt}
 
-Buatlah summary yang hanya berdasarkan data zone site di atas, jangan menambahkan informasi dari luar data tersebut.`;
+            Buatlah summary yang hanya berdasarkan data zone site di atas, jangan menambahkan informasi dari luar data tersebut.`;
 
         try {
             const response = await fetch(`${API_BASE_URL}/mosa/ai-assistant/chat/stream`, {
@@ -185,27 +187,38 @@ Buatlah summary yang hanya berdasarkan data zone site di atas, jangan menambahka
                     </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                    
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEdit(zone)}
-                        className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-slate-800 text-slate-500 hover:text-slate-200 ${isOpen ? 'text-white' : 'text-slate-600'}`}
-                    >
-                        <MdEdit size={15} />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => { if (!isDeleting) onDelete(zone); }}
-                        className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-red-500/10 text-slate-500 hover:text-red-400 ${isOpen ? 'text-white' : 'text-slate-600'}`}
-                    >
-                        {isDeleting ? <LuLoaderCircle size={15} className="animate-spin" /> : <MdDeleteOutline size={15} />}
-                    </Button>
+                    <PermissionGate permission={["create", "update"]}>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onEdit(zone)}
+                            className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-slate-800 text-slate-500 hover:text-slate-200 ${isOpen ? 'text-white' : 'text-slate-600'}`}
+                        >
+                            <MdEdit size={15} />
+                        </Button>
+                    </PermissionGate>
+                    <PermissionGate permission="delete">
+                        <Button
+                            variant="outline"
+                            onClick={() => { if (!isDeleting) onDelete(zone); }}
+                            className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-red-500/10 text-slate-500 hover:text-red-400 ${isOpen ? 'text-white' : 'text-slate-600'}`}
+                        >
+                            {isDeleting ? <LuLoaderCircle size={15} className="animate-spin" /> : <MdDeleteOutline size={15} />}
+                        </Button>
+                    </PermissionGate>
                 </div>
             </div>
             {/* Detail — hanya tampil saat accordion terbuka */}
             {isOpen && (
                 <div className="px-10 py-4 space-y-3">
+                    {(hasEverGenerated || summaryResponse || summaryLoading) && (
+                    <AiSummaryPanel
+                        summary={summaryResponse || ''}
+                        textPrompt={summaryPrompt}
+                        onGenerate={handleGenerateSummary}
+                        isGenerating={summaryLoading}
+                    />
+                    )}
                     <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-md text-slate-600">
                         <span className="flex items-center gap-1 text-gray-800 font-primary-bold text-md">
                             {zone.iup_zona_site_name || '-'}
