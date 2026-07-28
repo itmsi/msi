@@ -40,6 +40,7 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
     const [sessionId, setSessionId] = useState<string>(zone.session_id ?? '');
     const abortRef = useRef<AbortController | null>(null);
     const hasEverGenerated = !!zone.summary_response_ai;
+    const isZoneDataEmpty = !zone.iup_zona_site_description && (!zone.iup_zona_site_file || zone.iup_zona_site_file.length === 0);
 
     const toggleZone = (id: string) => {
         setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -214,7 +215,7 @@ Buatlah summary yang hanya berdasarkan data zone site di atas, jangan menambahka
                             <Button
                                 size="sm"
                                 onClick={handleGenerateSummary}
-                                disabled={summaryLoading}
+                                disabled={summaryLoading || isZoneDataEmpty}
                                 className="inline-flex items-center gap-1.5 text-xs font-medium disabled:opacity-50"
                             >
                                 {summaryLoading ? <LuLoaderCircle size={13} className="animate-spin" /> : <LuSparkles size={13} />}
@@ -270,7 +271,7 @@ Buatlah summary yang hanya berdasarkan data zone site di atas, jangan menambahka
                             <Button
                                 size="sm"
                                 onClick={handleGenerateSummary}
-                                disabled={summaryLoading}
+                                disabled={summaryLoading || isZoneDataEmpty}
                                 className="inline-flex items-center gap-1.5 disabled:opacity-50"
                             >
                                 {summaryLoading ? <LuLoaderCircle size={13} className="animate-spin" /> : <LuSparkles size={15} />}
