@@ -8,7 +8,6 @@ import { IupService } from "../../services/iupManagementService";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import SurveyChatHistory from "./SurveyChatHistory";
 import toast from "react-hot-toast";
-import { PermissionGate } from "@/components/common/PermissionComponents";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -201,30 +200,57 @@ Buatlah summary yang hanya berdasarkan data survey di atas, jangan menambahkan i
                     </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <PermissionGate permission={["create", "update"]}>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                                onEdit(survey);
+                    {!hasEverGenerated && !summaryResponse ? (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleGenerateSummary();
                             }}
-                            className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-slate-800 text-slate-500 hover:text-slate-200 ${isOpen ? 'text-white' : 'text-slate-600'}`}
+                            disabled={summaryLoading || isSurveyDataEmpty}
+                            className={`p-1 rounded transition-all border ${
+                                isOpen ? 'text-white/80 hover:text-white border-white/20 hover:border-white/40' : 'text-slate-500 group-hover:text-white border-gray-300 group-hover:border-white/40'
+                            } hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed`}
+                            title="Generate Summary by Mosa AI"
                         >
-                            <MdEdit size={15} />
-                        </Button>
-                    </PermissionGate>
-                    
-                    <PermissionGate permission="delete">
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                if (!isDeleting) onDelete(survey);
+                            {summaryLoading ? (
+                                <LuLoaderCircle size={15} className="animate-spin" />
+                            ) : (
+                                <LuSparkles size={15} />
+                            )}
+                        </button>
+                    ) : sessionId && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowChatHistory(true);
                             }}
-                            className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-red-500/10 text-slate-500 hover:text-red-400 ${isOpen ? 'text-white' : 'text-slate-600'}`}
+                            className={`p-1 rounded transition-all border ${
+                                isOpen ? 'text-white/80 hover:text-white border-white/20 hover:border-white/40' : 'text-slate-500 group-hover:text-white border-gray-300 group-hover:border-white/40'
+                            } hover:bg-slate-800`}
+                            title="View Chat History"
                         >
-                            {isDeleting ? <LuLoaderCircle size={15} className="animate-spin" /> : <MdDeleteOutline size={15} />}
-                        </Button>
-                    </PermissionGate>
+                            <LuMessageCircle size={15} />
+                        </button>
+                    )}
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                            onEdit(survey);
+                        }}
+                        className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-slate-800 text-slate-500 hover:text-slate-200 ${isOpen ? 'text-white' : 'text-slate-600'}`}
+                    >
+                        <MdEdit size={15} />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            if (!isDeleting) onDelete(survey);
+                        }}
+                        className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-red-500/10 text-slate-500 hover:text-red-400 ${isOpen ? 'text-white' : 'text-slate-600'}`}
+                    >
+                        {isDeleting ? <LuLoaderCircle size={15} className="animate-spin" /> : <MdDeleteOutline size={15} />}
+                    </Button>
                 </div>
             </div>
             {/* Detail — hanya tampil saat accordion terbuka */}
