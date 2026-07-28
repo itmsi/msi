@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { LuLink2, LuLoaderCircle, LuChevronDown, LuChevronRight, LuSparkles } from "react-icons/lu";
+import { LuLink2, LuLoaderCircle, LuChevronDown, LuChevronRight, LuSparkles, LuMessageCircle } from "react-icons/lu";
 import Button from "@/components/ui/button/Button";
 import { MdEdit, MdDeleteOutline } from "react-icons/md";
 import moment from "moment";
 import { IupSurveyItem } from "../../types/iupmanagement";
 import { IupService } from "../../services/iupManagementService";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
+import SurveyChatHistory from "./SurveyChatHistory";
 import toast from "react-hot-toast";
 import { PermissionGate } from "@/components/common/PermissionComponents";
 
@@ -38,6 +39,7 @@ Tanggal: ${moment(survey.chat_date).format("DD MMMM YYYY")}
 Buatlah ringkasan yang informatif tentang survey ini saja.`
     );
     const [sessionId, setSessionId] = useState<string>(survey.session_id ?? '');
+    const [showChatHistory, setShowChatHistory] = useState(false);
     const abortRef = useRef<AbortController | null>(null);
     const promptRef = useRef<HTMLTextAreaElement>(null);
     const hasEverGenerated = !!survey.summary_response_ai;
@@ -236,7 +238,7 @@ Buatlah summary yang hanya berdasarkan data survey di atas, jangan menambahkan i
                             <button
                                 onClick={handleGenerateSummary}
                                 disabled={summaryLoading || isSurveyDataEmpty}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full shadow-sm shadow-purple-200 hover:shadow-md hover:shadow-purple-300 hover:scale-105 active:scale-95 transition-all duration-200 ease-out disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-primary via-blue-600 to-cyan-600 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 active:scale-95 transition-all duration-300 ease-out disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
                             >
                                 {summaryLoading ? (
                                     <>
@@ -273,25 +275,25 @@ Buatlah summary yang hanya berdasarkan data survey di atas, jangan menambahkan i
                     {(hasEverGenerated || summaryResponse || summaryLoading) && (
                     <div className="relative mt-6 pt-6">
                         {/* Gradient divider */}
-                        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-300 to-transparent" />
+                        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
 
                         {/* ── AI Summary Card ── */}
                         {(summaryResponse || summaryLoading) && (
                             <div className="relative group mb-5">
                                 {/* Glow effect */}
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-400/20 via-indigo-400/20 to-purple-400/20 rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/10 via-cyan-400/20 to-blue-500/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 {/* Card with glassmorphism */}
-                                <div className="relative bg-white/80 backdrop-blur-sm border border-purple-100/60 rounded-xl p-5 shadow-sm shadow-purple-100/50 transition-all duration-300">
+                                <div className="relative bg-white/80 backdrop-blur-sm border border-primary/10 rounded-xl p-5 shadow-sm shadow-primary/10 transition-all duration-300">
                                     {/* Header badge */}
                                     <div className="flex items-center justify-between mb-3">
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100/50 rounded-full">
-                                            <LuSparkles size={13} className="text-purple-600" />
-                                            <span className="text-[11px] font-semibold bg-gradient-to-r from-purple-700 to-indigo-700 bg-clip-text text-transparent">
+                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-50 via-primary/5 to-cyan-50 border border-primary/10 rounded-full">
+                                            <LuSparkles size={13} className="text-primary" />
+                                            <span className="text-[11px] font-semibold bg-gradient-to-r from-primary via-blue-600 to-cyan-600 bg-clip-text text-transparent">
                                                 AI Summary
                                             </span>
                                         </div>
                                         {summaryResponse && (
-                                            <span className="text-[10px] text-gray-400 font-medium">
+                                            <span className="text-[12px] text-gray-400 font-medium">
                                                 Generated by Mosa AI
                                             </span>
                                         )}
@@ -300,13 +302,13 @@ Buatlah summary yang hanya berdasarkan data survey di atas, jangan menambahkan i
                                     {/* Content / Loading skeleton */}
                                     {summaryLoading && !summaryResponse ? (
                                         <div className="space-y-2.5 animate-pulse">
-                                            <div className="h-3 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-full w-3/4" />
-                                            <div className="h-3 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-full w-1/2" />
-                                            <div className="h-3 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-full w-5/6" />
-                                            <div className="h-3 bg-gradient-to-r from-purple-100 to-indigo-100 rounded-full w-2/3" />
+                                            <div className="h-3 bg-gradient-to-r from-blue-100 to-primary/20 rounded-full w-3/4" />
+                                            <div className="h-3 bg-gradient-to-r from-blue-100 to-primary/20 rounded-full w-1/2" />
+                                            <div className="h-3 bg-gradient-to-r from-blue-100 to-primary/20 rounded-full w-5/6" />
+                                            <div className="h-3 bg-gradient-to-r from-blue-100 to-primary/20 rounded-full w-2/3" />
                                         </div>
                                     ) : (
-                                        <div className="prose prose-sm max-w-none prose-headings:text-purple-900 prose-a:text-purple-600 transition-all duration-500">
+                                        <div className="prose prose-sm max-w-none prose-headings:text-primary prose-a:text-primary transition-all duration-500">
                                             <MarkdownText content={summaryResponse || ''} />
                                         </div>
                                     )}
@@ -318,7 +320,7 @@ Buatlah summary yang hanya berdasarkan data survey di atas, jangan menambahkan i
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <label className="text-xs font-semibold text-gray-600 flex items-center gap-1.5">
-                                    <svg className="w-3.5 h-3.5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <svg className="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                     Prompt
@@ -337,17 +339,26 @@ Buatlah summary yang hanya berdasarkan data survey di atas, jangan menambahkan i
                                     onInput={resizePrompt}
                                     rows={1}
                                     placeholder="Masukkan prompt untuk summary..."
-                                    className="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg bg-white/60 backdrop-blur-sm focus:border-purple-300 focus:ring-2 focus:ring-purple-100 transition-all duration-200 placeholder:text-gray-300 resize-none overflow-hidden"
+                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white/60 backdrop-blur-sm focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all duration-200 placeholder:text-gray-300 resize-none overflow-hidden"
                                 />
                             </div>
                         </div>
 
                         {/* ── Generate Button ── */}
-                        <div className="flex justify-end mt-3">
+                        <div className="flex items-center justify-end mt-3">
+                            {sessionId && (
+                                <button
+                                    onClick={() => setShowChatHistory(true)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-primary bg-blue-50 border border-primary/20 rounded-lg hover:bg-blue-100 hover:shadow-sm active:scale-[0.98] transition-all"
+                                >
+                                    <LuMessageCircle size={14} />
+                                    Chat History
+                                </button>
+                            )}
                             <button
                                 onClick={handleGenerateSummary}
                                 disabled={summaryLoading || isSurveyDataEmpty}
-                                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg shadow-sm shadow-purple-200 hover:shadow-md hover:shadow-purple-300 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ease-out disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                className="inline-flex items-center gap-1.5  ml-2 px-4 py-2 text-xs font-medium text-white bg-gradient-to-r from-primary via-blue-600 to-cyan-600 rounded-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-out disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
                             >
                                 {summaryLoading ? (
                                     <>
@@ -368,6 +379,18 @@ Buatlah summary yang hanya berdasarkan data survey di atas, jangan menambahkan i
                     </div>
                     )}
                 </div>
+            )}
+
+            {/* ── AI Chat History Panel ── */}
+            {showChatHistory && sessionId && (
+                <SurveyChatHistory
+                    sessionId={sessionId}
+                    surveyId={survey.iup_survey_id}
+                    iupId={survey.iup_id}
+                    surveyName={survey.user_name}
+                    chatDate={survey.chat_date}
+                    onClose={() => setShowChatHistory(false)}
+                />
             )}
         </div>
     );
