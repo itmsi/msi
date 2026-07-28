@@ -51,7 +51,7 @@ const EditIupManagement: React.FC = () => {
         handleSubmit
     } = useIupManagementEdit();
 
-    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit' | 'survey'>('survey');
+    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit' | 'survey'>('info_iup');
 
     // Show loading spinner while data is loading
     if (isLoading) {
