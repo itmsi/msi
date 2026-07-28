@@ -45,7 +45,7 @@ const SurveyManagement: React.FC = () => {
                     {/* <span className="text-xs text-slate-500">{zones.length} zona</span> */}
                 </div>
                 <p className="mt-1.5 text-xs text-slate-700 leading-relaxed">
-                    Daftar survey yang telah dilakukan oleh kontraktor terkait IUP ini. Anda dapat menambahkan, mengedit, atau menghapus survey sesuai kebutuhan.
+                    List of surveys conducted by contractors related to this IUP. You can add, edit, or delete surveys as needed
                 </p>
             </div>
 

@@ -91,7 +91,7 @@ export const useIupZoneSIte = () => {
             setLoading(true);
             const response = await IupService.getIupZonaSite({
                 iup_id: id,
-                sort_by: 'updated_at',
+                sort_by: 'created_at',
                 sort_order: 'desc'
             });
 

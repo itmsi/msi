@@ -25,7 +25,7 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
                     <div className="font-medium text-gray-900">
                         {row?.customer_name || ''}
                     </div>
-                    <span className="text-xs font-secondary font-medium px-2 py-0.5 rounded bg-slate-200 text-slate-600">
+                    <span className="text-md font-secondary font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-600">
                         {row.customer_code || '-'}
                     </span>
                 </div>

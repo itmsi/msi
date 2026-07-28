@@ -56,8 +56,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                     {/* <span className="text-xs text-slate-500">{zones.length} zona</span> */}
                 </div>
                 <p className="mt-1.5 text-xs text-slate-700 leading-relaxed">
-                    Daftar area yang perlu disurvey oleh tim di lapangan sebagai acuan data
-                    dan dokumentasi riset Izin Usaha Pertambangan (IUP).
+                    List of areas that need to be surveyed by the field team as a reference for data collection and documentation for Mining Business Permit (IUP) research.
                 </p>
             </div>
 
