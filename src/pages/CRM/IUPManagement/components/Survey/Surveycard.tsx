@@ -7,9 +7,9 @@ import { IupSurveyItem } from "../../types/iupmanagement";
 import { IupService } from "../../services/iupManagementService";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import toast from "react-hot-toast";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-import { PermissionGate } from "@/components/common/PermissionComponents";
 
 export interface SurveyCardProps {
     survey: IupSurveyItem;
