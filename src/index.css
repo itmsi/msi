@@ -870,6 +870,10 @@ span.flatpickr-weekday,
 .font-primary {
   font-family: var(--font-primary);
 }
+.font-primary-italic {
+  font-family: var(--font-main-italic);
+  font-style: italic;
+}
 .font-secondary {
   font-family: var(--font-secondary);
 }

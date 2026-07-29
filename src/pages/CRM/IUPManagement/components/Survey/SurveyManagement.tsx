@@ -1,201 +1,134 @@
-import React from 'react';
-import { LuPlus } from 'react-icons/lu';
-import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
-import LoadingSpinner from '@/components/common/Loading';
-import SurveyCard from './Surveycard';
+import React, { useRef, useEffect } from 'react';
+import { LuSearch, LuX, LuLoaderCircle } from 'react-icons/lu';
 import { useIupSurvey } from '../../hooks/useIupSurvey';
-import { SurveyForm } from './SurveyForm';
-import { PermissionGate } from '@/components/common/PermissionComponents';
+import { SkeletonCard } from './DriveImage';
+import { classifyEntry, TYPE_CONFIG, formatDateHeading } from './Surveyutils';
+import SurveyEntryCard from './Surveyentrycard';
+import Input from '@/components/form/input/InputField';
 
 const SurveyManagement: React.FC = () => {
     const {
         surveys,
-        submitting,
-        deletingId,
+        groupedSurveys,
+        searchInput,
+        setSearchInput,
+        executeSearch,
+        handleKeyPress,
+        handleClearSearch,
+        isSearching,
+        hasMore,
+        loadMore,
         loading,
-        handleConfirmDeleted,
-        deleteSurvey,
-
-        showForm,
-        editingId,
-        form,
-        errors,
-        openCreateForm,
-        openEditForm,
-        closeForm,
-        updateField,
-        confirmDelete,
-        setConfirmDelete,
-
-        submitForm,
+        loadingMore,
     } = useIupSurvey();
 
-    if (loading) {
-        return <div className="bg-white w-full rounded-2xl border border-slate-300 min-h-60 flex items-center justify-center relative">
-            <LoadingSpinner />
-        </div>;
-    }
-    return (
-        <div className="w-full rounded-2xl border border-slate-300 bg-white">
-            <div className="px-5 py-4 border-b border-slate-300">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <h2 className="font-primary-bold text-md tracking-wide">Survey</h2>
-                    </div>
-                    {/* <span className="text-xs text-slate-500">{zones.length} zona</span> */}
-                </div>
-                <p className="mt-1.5 text-xs text-slate-700 leading-relaxed">
-                    List of surveys conducted by contractors related to this IUP. You can add, edit, or delete surveys as needed
-                </p>
-            </div>
+    const sentinelRef = useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+        const el = sentinelRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            (observed) => {
+                if (observed[0].isIntersecting && hasMore && !loadingMore && !loading) {
+                    loadMore();
+                }
+            },
+            { rootMargin: '250px' }
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [hasMore, loadingMore, loading, loadMore]);
 
-            {(!surveys || surveys.length === 0) ? (
-                <>
-                {!showForm && (
-                <div className="p-8">
-                    <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
-                        No survey available. Click &ldquo;Add Survey&rdquo; to add one.
-                    </div>
+    return (
+        <div className="w-full rounded-2xl bg-white shadow-sm">
+            <div className="rounded-t-2xl border-b-2 border-slate-200 px-5 py-4">
+                <div className="flex items-center justify-between">
+                        <h2 className="font-primary-bold text-md tracking-wide">Survey</h2>
                 </div>
-                )}
-                </>
-            ) : (
-                <div className="divide-y divide-slate-300">
-                    {surveys.map((survey) =>
-                        showForm && editingId === survey.iup_survey_id ? (
-                            <SurveyForm
-                                key={survey.iup_survey_id}
-                                editingId={editingId}
-                                form={form}
-                                errors={errors}
-                                submitting={submitting}
-                                updateField={updateField}
-                                // updateFileLink={updateFileLink}
-                                // addFileLinkRow={addFileLinkRow}
-                                // removeFileLinkRow={removeFileLinkRow}
-                                submitForm={submitForm}
-                                closeForm={closeForm}
-                            />
-                        ) : (
-                            <SurveyCard
-                                key={survey.iup_survey_id}
-                                survey={survey}
-                                onEdit={openEditForm}
-                                onDelete={deleteSurvey}
-                                isDeleting={deletingId === survey.iup_survey_id}
-                            />
-                        )
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-700">
+                    List of surveys conducted by contractors related to this IUP.
+                </p>
+
+                {/* <div className="mt-3 flex max-w-[420px] items-center gap-2 rounded-lg border  bg-white px-3 py-2 shadow-inner">
+                    <LuSearch
+                        size={15}
+                        className="cursor-pointer text-slate-400"
+                        onClick={executeSearch}
+                    /> */}
+                    
+                <div className="relative flex-1 mt-3 ">
+                    <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Input
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Search sales name or report content, then press Enter…"
+                        className={`pl-10 py-2 w-full ${searchInput ? 'pr-10' : 'pr-4'}`}
+                    />
+                    {searchInput && (
+                        <button
+                            onClick={handleClearSearch}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                            type="button"
+                        >
+                            <LuX className="h-4 w-4" />
+                        </button>
                     )}
                 </div>
-            )}
-
-            {/* <CustomDataTable
-                columns={columns}
-                data={surveys}
-                loading={loading}
-                pagination={false}
-                noDataComponent={
-                    <div className="py-8 text-center text-gray-500">
-                        <FaMapMarkerAlt className="mx-auto text-4xl mb-4 text-gray-300" />
-                        <p>No territory data available</p>
-                    </div>
-                }
-                responsive
-                highlightOnHover
-                striped={false}
-                persistTableHead
-                headerBackground="rgba(2, 83, 165, 0.1)"
-                hoverBackground="rgba(223, 232, 242, 0.3)"
-                borderRadius="8px"
-                
-                expandableRows
-                expandableRowsComponent={ExpandedRow}
-                // expandableRowDisabled={disableLocked ? r => r.locked : undefined}
-            /> */}
-
-            {showForm && !editingId && (
-                <SurveyForm
-                    editingId={editingId}
-                    form={form}
-                    errors={errors}
-                    submitting={submitting}
-                    updateField={updateField}
-                    // updateFileLink={updateFileLink}
-                    // addFileLinkRow={addFileLinkRow}
-                    // removeFileLinkRow={removeFileLinkRow}
-                    submitForm={submitForm}
-                    closeForm={closeForm}
-                />
-            )}
-            {!showForm && !editingId && (
-            <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl">
-                <PermissionGate permission="create">
-                    <button
-                        type="button"
-                        onClick={openCreateForm}
-                        className="flex items-center gap-1.5 text-sm font-medium"
-                    >
-                        <LuPlus size={16} className="text-primary" />
-                        Add Survey
-                    </button>
-                </PermissionGate>
             </div>
-            )}
 
-            {/* Tambah zona */}
-            {/* <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl ">
-                {showAddZone ? (
-                <div className="flex items-center gap-2">
-                    <input
-                        autoFocus
-                        value={newZoneName}
-                        onChange={(e) => setNewZoneName(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && addZone()}
-                        placeholder="Nama zona baru..."
-                        className="flex-1 bg-white border border-slate-500 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500"
-                    />
-                    <Button
-                        variant="outline"
-                        onClick={addZone}
-                        className="p-2 rounded-md text-sm font-medium transition-colors relative text-green-600 hover:text-green-700 hover:bg-red-50"
-                    >
-                        <LuCheck size={16} />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => {
-                            setShowAddZone(false);
-                            setNewZoneName("");
-                        }}
-                        className="p-2 rounded-md text-sm font-medium transition-colors relative text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                        <LuX size={16} />
-                    </Button>
-                </div>
-                ) : (
-                <button
-                    type="button"
-                    onClick={() => setShowAddZone(true)}
-                    className="flex items-center gap-1.5 text-sm font-medium"
-                >
-                    <LuPlus size={16} className="text-primary" />
-                    Tambah Zona
-                </button>
+            <div className="relative rounded-b-2xl px-5 py-4">
+                {loading && (
+                    <div className="space-y-4 pl-6">
+                        <SkeletonCard />
+                        <SkeletonCard />
+                        <SkeletonCard />
+                    </div>
                 )}
-            </div> */}
 
-            <ConfirmationModal
-                isOpen={confirmDelete.show}
-                onClose={() => setConfirmDelete({ show: false })}
-                onConfirm={handleConfirmDeleted}
-                title={`Confirm delete ${confirmDelete.name ?? ''}`}
-                message="Are you sure you want to delete this survey? This action cannot be undone."
-                confirmText="Delete"
-                cancelText="Cancel"
-                loading={submitting}
-                size="md"
-                showIcon={false}
-            />
+                {!loading && groupedSurveys.length === 0 && (
+                    <div className="py-16 text-center text-sm text-slate-400">
+                        {searchInput ? `No entries match "${searchInput}".` : 'No survey entries yet.'}
+                    </div>
+                )}
+
+                {!loading &&
+                    groupedSurveys.map(([dateKey, dayEntries]) => (
+                        <div key={dateKey} className="mb-8">
+                            <div className="sticky top-0 z-10 mb-3 inline-flex items-center gap-2 rounded-full bg-slate-700 px-3 py-1 text-xs font-secondary font-medium text-white">
+                                {formatDateHeading(dayEntries[0].chat_date)}
+                            </div>
+                            <div className="relative pl-6">
+                                <div className="absolute bottom-1 left-[7px] top-1 w-0.5 bg-slate-300" />
+                                <div className="space-y-4">
+                                    {dayEntries.map((entry) => {
+                                        const cfg = TYPE_CONFIG[classifyEntry(entry)];
+                                        return (
+                                            <div key={entry.iup_survey_id} className="relative">
+                                                <div
+                                                    className={`absolute left-[-21px] top-4 h-[10px] w-[10px] rounded-full border-2 border-white shadow ring-1 ring-slate-300 ${cfg.dot}`}
+                                                />
+                                                <SurveyEntryCard entry={entry} />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+
+                {/* sentinel: triggers fetching the next page when it enters the viewport */}
+                {!loading && <div ref={sentinelRef} style={{ height: 1 }} />}
+
+                {loadingMore && (
+                    <div className="mt-2 space-y-4 pl-6">
+                        <SkeletonCard />
+                    </div>
+                )}
+
+                {!loading && !hasMore && surveys.length > 0 && (
+                    <div className="py-6 text-center text-xs text-slate-400">— All entries shown —</div>
+                )}
+            </div>
         </div>
     );
 };
