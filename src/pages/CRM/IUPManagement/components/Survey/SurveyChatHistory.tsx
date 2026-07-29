@@ -5,8 +5,6 @@ import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import type { ChatMessage } from "@/types/aiAssistant";
 import toast from "react-hot-toast";
 import { IconAIAtomOrbit } from "@/icons";
-import moment from "moment";
-import { IupService } from "../../services/iupManagementService";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -15,16 +13,17 @@ interface SurveyChatHistoryProps {
     surveyId: string;
     iupId: string;
     surveyName: string;
+    iupName: string;
     chatDate: string;
     onClose: () => void;
 }
 
 const SurveyChatHistory: React.FC<SurveyChatHistoryProps> = ({
     sessionId,
-    surveyId,
-    iupId,
-    surveyName,
-    chatDate,
+    surveyId: _surveyId,
+    iupId: _iupId,
+    iupName,
+    chatDate: _chatDate,
     onClose,
 }) => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -166,22 +165,6 @@ const SurveyChatHistory: React.FC<SurveyChatHistoryProps> = ({
             };
             setMessages((prev) => [...prev, assistantMsg]);
             setStreamText("");
-
-            // Save summary to API so parent card stays in sync
-            try {
-                await IupService.updateIupSurvey(surveyId, {
-                    iup_id: iupId,
-                    user_phone: '',
-                    user_name: surveyName,
-                    chat_date: moment(chatDate).format("YYYY-MM-DD") || moment().format("YYYY-MM-DD"),
-                    source_type: '',
-                    summary_prompt_ai: text,
-                    summary_response_ai: accumulatedText,
-                    session_id: sessionId,
-                });
-            } catch {
-                // Non-critical
-            }
         } catch (err: any) {
             if (err.name !== "AbortError") {
                 toast.error(err.message || "Gagal mengirim pesan");
@@ -218,7 +201,7 @@ const SurveyChatHistory: React.FC<SurveyChatHistoryProps> = ({
                             <h3 className="text-sm font-semibold text-gray-800 truncate">
                                 Mosa AI Chat History
                             </h3>
-                            <p className="text-[11px] text-gray-500 truncate">{surveyName} {chatDate}</p>
+                            <p className="text-[11px] text-gray-500 truncate">survey - {iupName}</p>
                         </div>
                     </div>
                     <button
