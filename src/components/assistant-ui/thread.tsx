@@ -8,7 +8,7 @@ import {
 } from "@assistant-ui/react";
 import { MdSend, MdStop, MdPerson, MdContentCopy } from "react-icons/md";
 import { IconAIAtomOrbit } from "@/icons";
-import { MarkdownText } from "./markdown-text";
+import { TypingText } from "./typing-text";
 import { type FC, useRef, useEffect, useState, useCallback, useMemo, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -87,74 +87,7 @@ const TypingIndicator: FC = () => (
   </div>
 );
 
-// ─── Pulsing cursor (for streaming) ───────────────────────────────────────────
 
-const StreamingCursor: FC = () => (
-  <motion.span
-    className="inline-block w-[3px] h-[14px] bg-[#0253a5] ml-0.5 rounded-full align-middle"
-    animate={{ opacity: [1, 0] }}
-    transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-  />
-);
-
-// ─── Typing Text (progressive reveal) ────────────────────────────────────────
-
-const TypingText: FC<{ content: string; isRunning: boolean }> = ({ content, isRunning }) => {
-  const [visibleLen, setVisibleLen] = useState(0);
-  const rafRef = useRef<number>(0);
-  const visibleLenRef = useRef(0);
-  const contentRef = useRef(content);
-
-  contentRef.current = content;
-
-  useEffect(() => {
-    if (visibleLenRef.current >= content.length) return;
-    if (rafRef.current) return;
-
-    let lastTime = 0;
-
-    const animate = (timestamp: number) => {
-      const target = contentRef.current.length;
-      const current = visibleLenRef.current;
-
-      if (current >= target) {
-        rafRef.current = 0;
-        return;
-      }
-
-      if (!lastTime) lastTime = timestamp;
-      const elapsed = timestamp - lastTime;
-
-      const interval = 5
-
-      if (elapsed >= interval) {
-        lastTime = timestamp;
-        visibleLenRef.current = current + 1;
-        setVisibleLen(current + 1);
-      }
-
-      rafRef.current = requestAnimationFrame(animate);
-    };
-
-    rafRef.current = requestAnimationFrame(animate);
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = 0;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content.length]);
-
-  const displayText = content.slice(0, visibleLen);
-  const isAnimating = visibleLen < content.length;
-  const showCursor = isRunning || isAnimating;
-
-  return (
-    <>
-      <MarkdownText content={displayText} />
-      {showCursor && <StreamingCursor />}
-    </>
-  );
-};
 
 // ─── Suggested Prompts ───────────────────────────────────────────────────────
 

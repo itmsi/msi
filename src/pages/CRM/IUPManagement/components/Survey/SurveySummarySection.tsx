@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { LuSparkles, LuCopy, LuCheck, LuLoaderCircle, LuChevronDown, LuMessageCircle } from "react-icons/lu";
-import { MarkdownText } from "@/components/assistant-ui/markdown-text";
+import { TypingText } from "@/components/assistant-ui/typing-text";
 import SurveyChatHistory from "./SurveyChatHistory";
 import toast from "react-hot-toast";
 import moment from "moment";
@@ -404,9 +404,7 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
                                                 ))}
                                             </div>
                                         ) : (
-                                            <div className="prose prose-sm max-w-none prose-headings:text-slate-800 prose-p:text-slate-600 prose-a:text-primary prose-code:text-primary prose-code:bg-blue-50/80 prose-code:px-1 prose-code:rounded prose-pre:bg-slate-50 prose-pre:border prose-pre:border-slate-200 leading-relaxed">
-                                                <MarkdownText content={summaryResponse || ''} />
-                                            </div>
+                                        <TypingText content={summaryResponse || ''} isRunning={summaryLoading} />
                                         )}
                                     </div>
 
