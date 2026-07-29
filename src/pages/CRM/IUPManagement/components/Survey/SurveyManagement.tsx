@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { LuSearch, LuX, LuLoaderCircle } from 'react-icons/lu';
+import SurveySummarySection from './SurveySummarySection';
 import { useIupSurvey } from '../../hooks/useIupSurvey';
 import { SkeletonCard } from './DriveImage';
 import { classifyEntry, TYPE_CONFIG, formatDateHeading } from './Surveyutils';
@@ -74,60 +75,65 @@ const SurveyManagement: React.FC = () => {
                         </button>
                     )}
                 </div>
-            </div>
-
-            <div className="relative rounded-b-2xl px-5 py-4">
-                {loading && (
-                    <div className="space-y-4 pl-6">
-                        <SkeletonCard />
-                        <SkeletonCard />
-                        <SkeletonCard />
+                <div className="divide-y divide-slate-300">
+                    <SurveySummarySection
+                        surveys={surveys}
+                        iupId={surveys[0]?.iup_id || ''}
+                    />
                     </div>
-                )}
+                <div className="relative rounded-b-2xl px-5 py-4">
+                    {loading && (
+                        <div className="space-y-4 pl-6">
+                            <SkeletonCard />
+                            <SkeletonCard />
+                            <SkeletonCard />
+                        </div>
+                    )}
 
-                {!loading && groupedSurveys.length === 0 && (
-                    <div className="py-16 text-center text-sm text-slate-400">
-                        {searchInput ? `No entries match "${searchInput}".` : 'No survey entries yet.'}
-                    </div>
-                )}
+                    {!loading && groupedSurveys.length === 0 && (
+                        <div className="py-16 text-center text-sm text-slate-400">
+                            {searchInput ? `No entries match "${searchInput}".` : 'No survey entries yet.'}
+                        </div>
+                    )}
 
-                {!loading &&
-                    groupedSurveys.map(([dateKey, dayEntries]) => (
-                        <div key={dateKey} className="mb-8">
-                            <div className="sticky top-0 z-10 mb-3 inline-flex items-center gap-2 rounded-full bg-slate-700 px-3 py-1 text-xs font-secondary font-medium text-white">
-                                {formatDateHeading(dayEntries[0].chat_date)}
-                            </div>
-                            <div className="relative pl-6">
-                                <div className="absolute bottom-1 left-[7px] top-1 w-0.5 bg-slate-300" />
-                                <div className="space-y-4">
-                                    {dayEntries.map((entry) => {
-                                        const cfg = TYPE_CONFIG[classifyEntry(entry)];
-                                        return (
-                                            <div key={entry.iup_survey_id} className="relative">
-                                                <div
-                                                    className={`absolute left-[-21px] top-4 h-[10px] w-[10px] rounded-full border-2 border-white shadow ring-1 ring-slate-300 ${cfg.dot}`}
-                                                />
-                                                <SurveyEntryCard entry={entry} />
-                                            </div>
-                                        );
-                                    })}
+                    {!loading &&
+                        groupedSurveys.map(([dateKey, dayEntries]) => (
+                            <div key={dateKey} className="mb-8">
+                                <div className="sticky top-0 z-10 mb-3 inline-flex items-center gap-2 rounded-full bg-slate-700 px-3 py-1 text-xs font-secondary font-medium text-white">
+                                    {formatDateHeading(dayEntries[0].chat_date)}
+                                </div>
+                                <div className="relative pl-6">
+                                    <div className="absolute bottom-1 left-[7px] top-1 w-0.5 bg-slate-300" />
+                                    <div className="space-y-4">
+                                        {dayEntries.map((entry) => {
+                                            const cfg = TYPE_CONFIG[classifyEntry(entry)];
+                                            return (
+                                                <div key={entry.iup_survey_id} className="relative">
+                                                    <div
+                                                        className={`absolute left-[-21px] top-4 h-[10px] w-[10px] rounded-full border-2 border-white shadow ring-1 ring-slate-300 ${cfg.dot}`}
+                                                    />
+                                                    <SurveyEntryCard entry={entry} />
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             </div>
+                        ))}
+
+                    {/* sentinel: triggers fetching the next page when it enters the viewport */}
+                    {!loading && <div ref={sentinelRef} style={{ height: 1 }} />}
+
+                    {loadingMore && (
+                        <div className="mt-2 space-y-4 pl-6">
+                            <SkeletonCard />
                         </div>
-                    ))}
+                    )}
 
-                {/* sentinel: triggers fetching the next page when it enters the viewport */}
-                {!loading && <div ref={sentinelRef} style={{ height: 1 }} />}
-
-                {loadingMore && (
-                    <div className="mt-2 space-y-4 pl-6">
-                        <SkeletonCard />
-                    </div>
-                )}
-
-                {!loading && !hasMore && surveys.length > 0 && (
-                    <div className="py-6 text-center text-xs text-slate-400">— All entries shown —</div>
-                )}
+                    {!loading && !hasMore && surveys.length > 0 && (
+                        <div className="py-6 text-center text-xs text-slate-400">— All entries shown —</div>
+                    )}
+                </div>
             </div>
         </div>
     );

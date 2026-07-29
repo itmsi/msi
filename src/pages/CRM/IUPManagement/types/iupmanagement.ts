@@ -460,6 +460,10 @@ export type IupSurveyItem = {
 
     description: string;
 
+    summary_prompt_ai?: string;
+    summary_response_ai?: string;
+    session_id?: string;
+
     created_at: string;
     created_by: string | null;
 
@@ -482,4 +486,52 @@ export type IupSurveyPayload = {
     source_link?: string;
     file_name?: string;
     description?: string;
+    summary_prompt_ai?: string;
+    summary_response_ai?: string;
+    session_id?: string;
+};
+
+// ─── Iup Summary AI ────────────────────────────────────────────
+
+export type IupSummaryAiItem = {
+    iup_summary_ai_id: string;
+    iup_id: string;
+    session_id: string;
+    summary_type: string;
+    summary_prompt_ai: string;
+    summary_response_ai: string;
+    created_at: string;
+    created_by: string | null;
+    updated_at: string;
+    updated_by: string | null;
+    deleted_at: string | null;
+    deleted_by: string | null;
+    is_delete: boolean;
+};
+
+export type IupSummaryAiListResponse = {
+    success: boolean;
+    data: {
+        items: IupSummaryAiItem[];
+        pagination: Pagination;
+    };
+    pagination?: Pagination;
+};
+
+export type IupSummaryAiRequest = {
+    page: number;
+    limit: number;
+    search?: string;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+    iup_id: string;
+    summary_type: string;
+};
+
+export type IupSummaryAiCreatePayload = {
+    iup_id: string;
+    session_id: string;
+    summary_type: string;
+    summary_prompt_ai: string;
+    summary_response_ai: string;
 };

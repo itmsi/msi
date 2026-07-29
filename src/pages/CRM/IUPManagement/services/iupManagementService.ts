@@ -1,5 +1,5 @@
 import { apiDelete, apiGet, apiPost, apiPut, ApiResponse } from '@/helpers/apiHelper';
-import { IupItemDetails, IupRequest, IupListResponse, IupManagementFormData, IupZonaSiteResponse, ZonaSitePayload, payloadRequest, GetIupRkabResponse, CreateIupRkabPayload, IupRkabUnitResponse, IupRkabUnitForm, VisitHistoryResponse, VisitPayload, GetIupBrandUnitResponse, IupBrandUnitPayload, GetIupSurveyResponse, IupSurveyPayload } from '../types/iupmanagement';
+import { IupItemDetails, IupRequest, IupListResponse, IupManagementFormData, IupZonaSiteResponse, ZonaSitePayload, payloadRequest, GetIupRkabResponse, CreateIupRkabPayload, IupRkabUnitResponse, IupRkabUnitForm, VisitHistoryResponse, VisitPayload, GetIupBrandUnitResponse, IupBrandUnitPayload, GetIupSurveyResponse, IupSurveyPayload, IupSummaryAiListResponse, IupSummaryAiCreatePayload, IupSummaryAiRequest } from '../types/iupmanagement';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_IS_ADMIN = import.meta.env.VITE_PARAM_IS_ADMIN;
@@ -194,6 +194,31 @@ export class IupService {
     
     static async deleteIupSurvey(id: string): Promise<any> {
         return await apiDelete(`${API_BASE_URL}/crm/iup_survey/${id}`);
+    }
+
+    // ─── Iup Summary AI ────────────────────────────────────────
+
+    static async getIupSummaryAi(params: IupSummaryAiRequest): Promise<IupSummaryAiListResponse> {
+        const response = await apiPost(`${API_BASE_URL}/crm/iup_summary_ai/get`, params as Record<string, any>);
+        return response.data as IupSummaryAiListResponse;
+    }
+
+    static async createIupSummaryAi(data: IupSummaryAiCreatePayload): Promise<any> {
+        const response = await apiPost(`${API_BASE_URL}/crm/iup_summary_ai/create`, data as Record<string, any>);
+        return response.data;
+    }
+
+    static async getIupSummaryAiById(id: string): Promise<any> {
+        return await apiGet(`${API_BASE_URL}/crm/iup_summary_ai/${id}`);
+    }
+
+    static async updateIupSummaryAi(id: string, data: IupSummaryAiCreatePayload): Promise<any> {
+        const response = await apiPut(`${API_BASE_URL}/crm/iup_summary_ai/${id}`, data as Record<string, any>);
+        return response.data;
+    }
+
+    static async deleteIupSummaryAi(id: string): Promise<any> {
+        return await apiDelete(`${API_BASE_URL}/crm/iup_summary_ai/${id}`);
     }
 
 }

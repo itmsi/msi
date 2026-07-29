@@ -139,26 +139,23 @@ export default function AIChatPage() {
   const isLoadingHistory = activeThread?.isLoadingHistory || false;
 
   // Convert ChatMessage to ThreadMessage for assistant-ui runtime
-  const convertToThreadMessage = useCallback(
-    (msg: ChatMessage, idx: number): any => {
-      const isLast = idx === threadMessages.length - 1;
-      return {
-        id: `msg-${idx}`,
-        role: msg.role === "user" ? "user" : "assistant",
-        content: [{ type: "text" as const, text: msg.content }],
-        createdAt: new Date(msg.timestamp),
-        metadata: {},
-        status: isLast && isSending
-          ? { type: "running" as const }
-          : { type: "complete" as const, reason: "stop" as const },
-      };
-    },
-    [threadMessages.length, isSending]
-  );
-
+  // Use stable ID from timestamp so assistant-ui doesn't remount on every chunk
   const convertedMessages = useMemo(
-    () => threadMessages.map(convertToThreadMessage),
-    [threadMessages, convertToThreadMessage]
+    () =>
+      threadMessages.map((msg, idx) => {
+        const isLast = idx === threadMessages.length - 1;
+        return {
+          id: `msg-${msg.timestamp}`,
+          role: msg.role === "user" ? "user" : "assistant",
+          content: [{ type: "text" as const, text: msg.content }],
+          createdAt: new Date(msg.timestamp),
+          metadata: {},
+          status: isLast && isSending
+            ? { type: "running" as const }
+            : { type: "complete" as const, reason: "stop" as const },
+        };
+      }),
+    [threadMessages, isSending]
   );
 
   const selectThread = useCallback((threadId: string) => {
@@ -253,17 +250,19 @@ export default function AIChatPage() {
         : messageText;
 
       // Add user message immediately
+      const now = Date.now();
       const userMessage: ChatMessage = {
         role: "user",
         content: messageText,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(now).toISOString(),
       };
 
       // Add empty assistant message placeholder for streaming
+      // Use now+1 to guarantee a different timestamp (avoid duplicate ID in assistant-ui)
       const assistantPlaceholder: ChatMessage = {
         role: "assistant",
         content: "",
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(now + 1).toISOString(),
       };
 
       setIsSending(true);
