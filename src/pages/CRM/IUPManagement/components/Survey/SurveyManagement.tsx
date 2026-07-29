@@ -3,6 +3,7 @@ import { LuPlus } from 'react-icons/lu';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import LoadingSpinner from '@/components/common/Loading';
 import SurveyCard from './Surveycard';
+import SurveySummarySection from './SurveySummarySection';
 import { useIupSurvey } from '../../hooks/useIupSurvey';
 import { SurveyForm } from './SurveyForm';
 import { PermissionGate } from '@/components/common/PermissionComponents';
@@ -61,6 +62,10 @@ const SurveyManagement: React.FC = () => {
                 </>
             ) : (
                 <div className="divide-y divide-slate-300">
+                    <SurveySummarySection
+                        surveys={surveys}
+                        iupId={surveys[0]?.iup_id || ''}
+                    />
                     {surveys.map((survey) =>
                         showForm && editingId === survey.iup_survey_id ? (
                             <SurveyForm
