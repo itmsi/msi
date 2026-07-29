@@ -92,7 +92,6 @@ export const useIupSurvey = () => {
         executeSearch,
         handleKeyPress,
         handleClearSearch,
-        isSearching: searchInput.trim() !== search,
 
         hasMore,
         loadMore,
