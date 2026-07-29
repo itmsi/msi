@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { LuSearch, LuX, LuLoaderCircle } from 'react-icons/lu';
+import { LuSearch, LuX } from 'react-icons/lu';
 import SurveySummarySection from './SurveySummarySection';
 import { useIupSurvey } from '../../hooks/useIupSurvey';
 import { SkeletonCard } from './DriveImage';
