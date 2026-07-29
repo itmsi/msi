@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { LuSparkles, LuCopy, LuCheck, LuLoaderCircle, LuChevronDown, LuMessageCircle } from "react-icons/lu";
+import { LuSparkles, LuCopy, LuCheck, LuLoaderCircle, LuMessageCircle } from "react-icons/lu";
 import { TypingText } from "@/components/assistant-ui/typing-text";
 import SurveyChatHistory from "./SurveyChatHistory";
 import toast from "react-hot-toast";
