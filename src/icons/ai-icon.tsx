@@ -20,13 +20,13 @@ export const IconAIAtomOrbit: React.FC<IconAIAtomOrbitProps> = ({ size = 24, cla
     >
       <defs>
         <linearGradient id="coreGradReact" x1="10%" y1="0%" x2="90%" y2="100%">
-          <stop offset="0%" stopColor="#00F2FE" />
-          <stop offset="50%" stopColor="#4FACFE" />
-          <stop offset="100%" stopColor="#9333EA" />
+          <stop offset="0%" stopColor="#60a5fa" />
+          <stop offset="50%" stopColor="#0253a5" />
+          <stop offset="100%" stopColor="#1e40af" />
         </linearGradient>
         <linearGradient id="accentGradReact" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#38BDF8" />
-          <stop offset="100%" stopColor="#C084FC" />
+          <stop offset="0%" stopColor="#93c5fd" />
+          <stop offset="100%" stopColor="#0253a5" />
         </linearGradient>
       </defs>
 
