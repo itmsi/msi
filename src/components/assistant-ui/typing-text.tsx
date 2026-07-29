@@ -11,30 +11,18 @@ export const StreamingCursor: FC = () => (
         transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
     />
 );
-const completedTexts = new Set<string>();
 
 export const TypingText: FC<{ content: string; isRunning: boolean }> = ({ content, isRunning }) => {
-    const alreadyComplete = completedTexts.has(content);
-    const [visibleLen, setVisibleLen] = useState(alreadyComplete ? content.length : 0);
+    const initialFull = !isRunning;
+    const [visibleLen, setVisibleLen] = useState(initialFull ? content.length : 0);
     const rafRef = useRef<number>(0);
-    const visibleLenRef = useRef(alreadyComplete ? content.length : 0);
+    const visibleLenRef = useRef(initialFull ? content.length : 0);
     const contentRef = useRef(content);
 
     contentRef.current = content;
 
     useEffect(() => {
-        if (completedTexts.has(content)) {
-            if (visibleLenRef.current !== content.length) {
-                visibleLenRef.current = content.length;
-                setVisibleLen(content.length);
-            }
-            return;
-        }
-
-        if (visibleLenRef.current >= content.length) {
-            if (!isRunning) completedTexts.add(content);
-            return;
-        }
+        if (visibleLenRef.current >= content.length) return;
         if (rafRef.current) return;
 
         const animate = () => {
@@ -43,7 +31,6 @@ export const TypingText: FC<{ content: string; isRunning: boolean }> = ({ conten
 
             if (current >= target) {
                 rafRef.current = 0;
-                if (!isRunning) completedTexts.add(contentRef.current);
                 return;
             }
 
