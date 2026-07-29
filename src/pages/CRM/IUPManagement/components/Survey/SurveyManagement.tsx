@@ -38,14 +38,24 @@ const SurveyManagement: React.FC = () => {
     }, [hasMore, loadingMore, loading, loadMore]);
 
     return (
+    <div className="space-y-6">
+        <div className="divide-y divide-slate-300">
+            <SurveySummarySection
+                surveys={surveys}
+                iupId={surveys[0]?.iup_id || ''}
+            />
+        </div>
+
         <div className="w-full rounded-2xl bg-white shadow-sm">
             <div className="rounded-t-2xl border-b-2 border-slate-200 px-5 py-4">
-                <div className="flex items-center justify-between">
+                <div>
+                    <div className="flex items-center justify-between">
                         <h2 className="font-primary-bold text-md tracking-wide">Survey</h2>
+                    </div>
+                    <p className="mt-1.5 text-xs leading-relaxed text-slate-700">
+                        List of surveys conducted by contractors related to this IUP.
+                    </p>
                 </div>
-                <p className="mt-1.5 text-xs leading-relaxed text-slate-700">
-                    List of surveys conducted by contractors related to this IUP.
-                </p>
 
                 {/* <div className="mt-3 flex max-w-[420px] items-center gap-2 rounded-lg border  bg-white px-3 py-2 shadow-inner">
                     <LuSearch
@@ -73,12 +83,6 @@ const SurveyManagement: React.FC = () => {
                         </button>
                     )}
                 </div>
-                <div className="divide-y divide-slate-300">
-                    <SurveySummarySection
-                        surveys={surveys}
-                        iupId={surveys[0]?.iup_id || ''}
-                    />
-                    </div>
                 <div className="relative rounded-b-2xl px-5 py-4">
                     {loading && (
                         <div className="space-y-4 pl-6">
@@ -134,6 +138,7 @@ const SurveyManagement: React.FC = () => {
                 </div>
             </div>
         </div>
+    </div>
     );
 };
 

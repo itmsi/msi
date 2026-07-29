@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { LuSparkles } from "react-icons/lu";
+import { LuCheck, LuCopy, LuLoaderCircle, LuMessageCircle, LuSparkles } from "react-icons/lu";
 import { MarkdownText } from "./markdown-text";
 
 interface AiSummaryPanelProps {
@@ -10,6 +10,10 @@ interface AiSummaryPanelProps {
     onGenerate: (prompt: string) => void;
     onSuggestionClick?: (suggestion: string) => void;
     isGenerating?: boolean;
+    sessionId?: string;
+    setShowChatHistory?: (value: boolean) => void;
+    copied?: boolean;
+    handleCopySummary?: () => void;
 }
 
 export function AiSummaryPanel({
@@ -20,6 +24,10 @@ export function AiSummaryPanel({
     onGenerate,
     onSuggestionClick,
     isGenerating = false,
+    sessionId,
+    setShowChatHistory,
+    copied = false,
+    handleCopySummary
 }: AiSummaryPanelProps) {
     // const [prompt, setPrompt] = useState(textPrompt || '');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -38,10 +46,41 @@ export function AiSummaryPanel({
                 {/* Header AI Summary */}
                 <div className="flex items-center justify-between px-4 pt-3 pb-2">
                     <div className="flex items-center gap-1.5">
-                        <LuSparkles className="text-purple-600" size={15} />
-                        <span className="text-sm font-semibold text-purple-700">AI Summary</span>
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-blue-200/60 rounded-lg shadow-xs">
+                            <LuSparkles className="text-primary" size={15} />
+                            <span className="text-sm font-primary-bold bg-gradient-to-r from-primary via-blue-600 to-cyan-600 bg-clip-text text-transparent">AI Summary</span>
+                        </div>
                         {isGenerating && (
-                            <span className="text-xs text-purple-500">· Membuat ringkasan...</span>
+                            <span className="text-xs text-primary">· Membuat ringkasan...</span>
+                        )}
+                    </div>
+                    
+                    <div className="flex items-center gap-1">
+                        {(sessionId || !isGenerating) && (
+                            <div className="flex items-center gap-2.5">
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-blue-200/60 rounded-lg shadow-xs">
+                                    <button
+                                        onClick={() => setShowChatHistory?.(true)}
+                                        className="text-sm font-primary-bold bg-gradient-to-r from-primary via-blue-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-1.5"
+                                    >
+                                        <LuMessageCircle size={13} className="text-primary" />
+                                        <span className="hidden sm:inline">Chat History</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        {!isGenerating && (
+                            <div className="flex items-center gap-2.5">
+                                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-blue-200/60 rounded-lg shadow-xs">
+                                    <button
+                                        onClick={handleCopySummary}
+                                        className="text-sm font-primary-bold bg-gradient-to-r from-primary via-blue-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-1.5"
+                                        title="Copy"
+                                    >
+                                        {copied ? <LuCheck size={16} className="text-green-500" /> : <LuCopy size={16} className="text-primary" />}
+                                    </button>
+                                </div>
+                            </div>
                         )}
                     </div>
                     {/* <button
@@ -55,8 +94,34 @@ export function AiSummaryPanel({
                 </div>
 
                 {/* Isi ringkasan */}
-                <div className="px-4 pb-3">
-                    <MarkdownText content={summary} />
+                <div className="pt-3">
+                    <div className="bg-white rounded-t-2xl max-h-[55vh] overflow-auto">
+                        
+                        {/* ── Loading State ── */}
+                        {sessionId && isGenerating && (
+                            <div className="px-6 py-8">
+                                <div className="max-w-md mx-auto space-y-5">
+                                    <div className="flex items-center justify-center gap-3">
+                                        <div className="relative">
+                                            <LuLoaderCircle size={22} className="animate-spin text-primary" />
+                                        </div>
+                                        <span className="text-sm text-gray-500 font-medium">Analyzing survey data...</span>
+                                    </div>
+                                    <div className="space-y-2.5">
+                                        {[75, 50, 85].map((w, i) => (
+                                            <div key={i} className={`h-3 rounded-full relative overflow-hidden bg-slate-100 mx-auto`} style={{ width: `${w}%` }}>
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-200/50 to-transparent animate-shimmer" 
+                                                    style={{ animationDelay: `${i * 0.15}s` }} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        <div className="px-4 pt-3">
+                        <MarkdownText content={summary} />
+                        </div>
+                    </div>
                 </div>
 
                 {/* Suggestion chips — pengganti kalimat saran pasif */}
@@ -78,8 +143,8 @@ export function AiSummaryPanel({
                 {/* Prompt input — jadi satu composer, bukan blok terpisah */}
                 <div className="border-t border-purple-100 bg-white/70 backdrop-blur-sm px-3 py-2.5">
                     <div className="flex items-start gap-2">
-                        <div className="flex items-center justify-centerw-6 h-9 ">
-                        <LuSparkles className="text-purple-600" size={15} />
+                        <div className="flex items-center justify-center w-6 h-11.25 ">
+                            <LuSparkles className="text-primary" size={16} />
                         </div>
                         <textarea
                             ref={textareaRef}
@@ -87,13 +152,13 @@ export function AiSummaryPanel({
                             onChange={(e) => setPrompt(e.target.value)}
                             rows={1}
                             placeholder="Tulis instruksi untuk Mosa AI..."
-                            className="flex-1 resize-none text-sm leading-relaxed text-gray-700 placeholder:text-gray-400 border-0 focus:ring-0 focus:outline-none py-1.5 max-h-[120px] overflow-y-auto"
+                            className="flex-1 resize-none text-sm leading-relaxed text-gray-700 placeholder:text-gray-400 focus:ring-0 focus:outline-none px-3.5 py-2.5 max-h-[120px] overflow-y-auto border border-blue-300/60 rounded-xl"
                         />
                         <button
                             type="button"
                             onClick={() => onGenerate(prompt)}
                             disabled={isGenerating || !prompt.trim()}
-                            className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-3.5 py-1.5 rounded-full shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
+                            className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-4 py-2.5 rounded-xl shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
                         >
                             <LuSparkles size={14} className={isGenerating ? "animate-pulse" : ""} />
                             {isGenerating ? "Membuat..." : "Generate"}

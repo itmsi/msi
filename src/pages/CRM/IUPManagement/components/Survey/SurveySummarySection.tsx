@@ -1,11 +1,13 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { LuSparkles, LuCopy, LuCheck, LuLoaderCircle, LuChevronDown, LuMessageCircle } from "react-icons/lu";
-import { TypingText } from "@/components/assistant-ui/typing-text";
+import { LuSparkles } from "react-icons/lu";
+// import { LuSparkles, LuCopy, LuCheck, LuLoaderCircle, LuChevronDown, LuMessageCircle } from "react-icons/lu";
+// import { TypingText } from "@/components/assistant-ui/typing-text";
 import SurveyChatHistory from "./SurveyChatHistory";
 import toast from "react-hot-toast";
 import moment from "moment";
 import { IupSurveyItem } from "../../types/iupmanagement";
 import { IupService } from "../../services/iupManagementService";
+import { AiSummaryPanel } from "@/components/assistant-ui/Aisummarypanel";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -27,7 +29,7 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
     const [summaryAiId, setSummaryAiId] = useState<string | null>(null);
     const [loadingInit, setLoadingInit] = useState(true);
     const abortRef = useRef<AbortController | null>(null);
-    const promptRef = useRef<HTMLTextAreaElement>(null);
+    // const promptRef = useRef<HTMLTextAreaElement>(null);
     const hasEverGenerated = !!summaryResponse;
     const hasData = surveys.length > 0;
 
@@ -79,13 +81,13 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
         return msg;
     }, [surveys]);
 
-    const resizePrompt = useCallback(() => {
-        const el = promptRef.current;
-        if (el) {
-            el.style.height = "auto";
-            el.style.height = el.scrollHeight + "px";
-        }
-    }, []);
+    // const resizePrompt = useCallback(() => {
+    //     const el = promptRef.current;
+    //     if (el) {
+    //         el.style.height = "auto";
+    //         el.style.height = el.scrollHeight + "px";
+    //     }
+    // }, []);
 
     const handleCopySummary = useCallback(() => {
         if (!summaryResponse) return;
@@ -229,7 +231,7 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
     return (
         <div className="overflow-hidden">
             {/* ── Header ── */}
-            <div className="w-full flex items-center justify-between px-5 py-4 bg-white border-b border-slate-200 relative overflow-hidden">
+            {/* <div className="w-full flex items-center justify-between px-5 py-4 bg-white border-b border-slate-200 relative overflow-hidden">
                 <div className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-gradient-to-b from-primary to-blue-600" />
                 
                 <div className="flex items-center gap-3">
@@ -245,36 +247,57 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
                         </p>
                     </div>
                 </div>
-            </div>
-            
+            </div> */}
+            {(hasEverGenerated || summaryResponse || summaryLoading) && (
+            <AiSummaryPanel
+                summary={summaryResponse || ''}
+                prompt={summaryPrompt}
+                setPrompt={setSummaryPrompt}
+                onGenerate={handleGenerateSummary}
+                isGenerating={summaryLoading}
+                copied={copied}
+                handleCopySummary={handleCopySummary}
+                sessionId={sessionId}
+                setShowChatHistory={setShowChatHistory}
+            />
+            )}
             {/* ── Content ── */}
             <div className="animate-fadeIn">
                 {/* ── Empty State / Initial Generate ── */}
                 {!hasEverGenerated && !summaryLoading && (
-                    <div className="relative px-6 py-8 text-center overflow-hidden">
-                        <div className="relative">
-                            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-blue-700 text-white shadow-lg shadow-primary/30 mb-4">
-                                <LuSparkles size={24} />
-                            </div>
-                            <p className="text-sm font-semibold text-gray-800 mb-1.5">
-                                No summary yet
-                            </p>
-                            <p className="text-xs text-gray-400 mb-5 max-w-xs mx-auto leading-relaxed">
-                                Generate a summary for <span className="font-medium text-gray-500">{surveys.length}</span> IUP survey data using AI.
-                            </p>
-                            <button
-                                onClick={handleGenerateSummary}
-                                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-primary via-blue-600 to-blue-700 rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
-                            >
-                                <LuSparkles size={16} />
-                                Generate Summary
-                            </button>
-                        </div>
+                    // <div className="relative px-6 py-8 text-center overflow-hidden">
+                    //     <div className="relative">
+                    //         <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-blue-700 text-white shadow-lg shadow-primary/30 mb-4">
+                    //             <LuSparkles size={24} />
+                    //         </div>
+                    //         <p className="text-sm font-semibold text-gray-800 mb-1.5">
+                    //             No summary yet
+                    //         </p>
+                    //         <p className="text-xs text-gray-400 mb-5 max-w-xs mx-auto leading-relaxed">
+                    //             Generate a summary for <span className="font-medium text-gray-500">{surveys.length}</span> IUP survey data using AI.
+                    //         </p>
+                    //         <button
+                    //             onClick={handleGenerateSummary}
+                    //             className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-primary via-blue-600 to-blue-700 rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+                    //         >
+                    //             <LuSparkles size={16} />
+                    //             Generate Summary
+                    //         </button>
+                    //     </div>
+                    // </div>
+                    <div className="relative text-center overflow-hidden">
+                        <button
+                            onClick={handleGenerateSummary}
+                            className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-4 py-2.5 rounded-xl shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
+                        >
+                            <LuSparkles size={16} />
+                            Generate Summary
+                        </button>
                     </div>
                 )}
 
                 {/* ── Loading State ── */}
-                {summaryLoading && !summaryResponse && (
+                {/* {summaryLoading && !summaryResponse && (
                     <div className="px-6 py-8">
                         <div className="max-w-md mx-auto space-y-5">
                             <div className="flex items-center justify-center gap-3">
@@ -293,10 +316,10 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
                             </div>
                         </div>
                     </div>
-                    )}
+                    )} */}
 
                     {/* ── Prompt Input ── */}
-                    {hasEverGenerated && (
+                    {/* {hasEverGenerated && (
                         <div className="px-5 py-3.5 bg-gradient-to-r from-blue-50/50 to-primary/5 border-b border-primary/10">
                             <div className="flex items-center gap-2.5">
                                     <textarea
@@ -325,20 +348,20 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
                                 </button>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
                     {/* ── Result ── */}
-                    {(summaryResponse || (summaryLoading && summaryResponse !== null)) && (
+                    {/* {(summaryResponse || (summaryLoading && summaryResponse !== null)) && (
                         <div className="px-5 py-4">
                             <div className="relative group">
-                                {/* Glow effect behind card */}
+                                
                                 <div className={`absolute -inset-1 bg-gradient-to-r from-primary/10 via-blue-400/15 to-primary/10 rounded-2xl blur-md transition-opacity duration-500 ${
                                     summaryLoading ? 'opacity-60' : ''
                                 }`} />
                                 
-                                {/* Main card */}
+                                
                                 <div className="relative bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
-                                    {/* Card header */}
+                                    
                                     <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-50/80 via-white to-primary/5 border-b border-slate-100">
                                         <div className="flex items-center gap-2.5">
                                             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-blue-200/60 rounded-lg shadow-xs">
@@ -372,7 +395,7 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
                                         </div>
                                     </div>
 
-                                    {/* Card body */}
+                                    
                                     <div className="px-4 py-4">
                                         {summaryLoading ? (
                                             <div className="space-y-2.5">
@@ -388,7 +411,7 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
                                         )}
                                     </div>
 
-                                    {/* Card footer for AI attribution */}
+                                    
                                     {!summaryLoading && summaryResponse && (
                                         <div className="px-4 py-2 bg-gradient-to-r from-transparent via-blue-50/30 to-transparent border-t border-slate-100/50">
                                             <p className="text-[10px] text-gray-400 text-center">
@@ -399,7 +422,7 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
                                 </div>
                             </div>
                         </div>
-                    )}
+                    )} */}
                 </div>
 
                 {/* ── AI Chat History Panel ── */}
