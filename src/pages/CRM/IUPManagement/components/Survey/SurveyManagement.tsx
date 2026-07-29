@@ -38,7 +38,7 @@ const SurveyManagement: React.FC = () => {
     }, [hasMore, loadingMore, loading, loadMore]);
 
     return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
         <div className="divide-y divide-slate-300">
             <SurveySummarySection
                 surveys={surveys}

@@ -37,7 +37,7 @@ export const useIupManagement = () => {
         iup_zone_id: searchParams.get('iup_zone_id') || '',
         iup_segment_id: searchParams.get('iup_segment_id') || '',
         is_contractor_count: searchParams.get('is_contractor_count') || '',
-        is_selection_iup: searchParams.get('is_selection_iup') || 'false',
+        is_selection_iup: searchParams.get('is_selection_iup') || 'true',
     };
     
     // const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
@@ -143,7 +143,7 @@ export const useIupManagement = () => {
             iup_zone_id: '',
             iup_segment_id: '',
             is_contractor_count: '',
-            is_selection_iup: '',
+            is_selection_iup: 'true',
             status: '',
         }, 1, urlLimit);
     }, [updateUrlParams, urlLimit]);

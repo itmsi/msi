@@ -34,8 +34,8 @@ const filterConfigs = [
         id: 'is_selection_iup',
         label: 'Filter IUP Area',
         options: [
-            { value: 'true', label: 'True' },
-            { value: 'false', label: 'False' }
+            { value: 'true', label: 'Selected' },
+            { value: 'false', label: 'All' }
         ],
         placeholder: 'Filter IUP Area',
         defaultValue: 'false'
@@ -161,7 +161,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         setFilters({
             status: params.get('status') || '',
             is_contractor_count: params.get('is_contractor_count') || '',
-            is_selection_iup: params.get('is_selection_iup') || 'false',
+            is_selection_iup: params.get('is_selection_iup') || 'true',
             sort_by: parseSortBy(params.get('sort_by'))
         });
     }, [location.search]);
@@ -324,7 +324,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         setFilters({
             status: '',
             sort_by: '',
-            is_selection_iup: ''
+            is_selection_iup: 'true'
         });
         
         // Reset territory selections
@@ -463,28 +463,28 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     }
                 </div>
 
-            <div className="flex md:col-span-5 gap-4">
-                {filterConfigs.map((config) => (
-                    <div key={config.id} className='flex-1'>
-                        <CustomSelect
-                            id={config.id}
-                            name={config.id}
-                            value={getCurrentValue(config.id)}
-                            // onChange={(selectedOption) => handleFilterChangeInternal(config.id, selectedOption)}
-                            onChange={(selectedOption) =>
-                                handleFilterChangeInternal({
-                                    [config.id]: selectedOption?.value || ''
-                                })
-                            }
-                            options={config.options}
-                            placeholder={config.placeholder}
-                            isClearable={true}
-                            isSearchable={false}
-                            className="w-full"
-                        />
-                    </div>
-                ))}
-            </div>
+                <div className="flex md:col-span-5 gap-4">
+                    {filterConfigs.map((config) => (
+                        <div key={config.id} className='flex-1'>
+                            <CustomSelect
+                                id={config.id}
+                                name={config.id}
+                                value={getCurrentValue(config.id)}
+                                // onChange={(selectedOption) => handleFilterChangeInternal(config.id, selectedOption)}
+                                onChange={(selectedOption) =>
+                                    handleFilterChangeInternal({
+                                        [config.id]: selectedOption?.value || ''
+                                    })
+                                }
+                                options={config.options}
+                                placeholder={config.placeholder}
+                                isClearable={true}
+                                isSearchable={false}
+                                className="w-full"
+                            />
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* Filter actions */}
