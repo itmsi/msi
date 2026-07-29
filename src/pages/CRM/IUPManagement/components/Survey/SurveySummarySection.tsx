@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { LuSparkles, LuCopy, LuCheck, LuLoaderCircle, LuChevronUp, LuChevronDown, LuMessageCircle } from "react-icons/lu";
+import { LuSparkles, LuCopy, LuCheck, LuLoaderCircle, LuChevronDown, LuMessageCircle } from "react-icons/lu";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import SurveyChatHistory from "./SurveyChatHistory";
 import toast from "react-hot-toast";
@@ -214,7 +214,7 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
             <div className="border-b border-slate-200">
                 <div className="flex items-center justify-between px-5 py-3.5 bg-white">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-sm shadow-purple-200 animate-pulse">
+                        <div className="p-2 rounded-xl bg-gradient-to-br from-primary to-blue-700 text-white shadow-sm shadow-primary/20 animate-pulse">
                             <LuSparkles size={16} />
                         </div>
                         <div>
@@ -228,160 +228,200 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
     }
 
     return (
-        <div>
+        <div className="overflow-hidden">
             {/* ── Header (clickable to toggle) ── */}
             <button
                 onClick={() => setCollapsed(!collapsed)}
-                className="w-full flex items-center justify-between px-5 py-3.5 bg-white border-b border-slate-200 group hover:bg-primary transition-colors cursor-pointer"
+                className={`w-full flex items-center justify-between px-5 py-4 bg-white border-b border-slate-200 group hover:bg-primary transition-all duration-300 cursor-pointer relative overflow-hidden`}
             >
+                {/* Subtle decorative gradient line on left */}
+                <div className={`absolute left-0 top-2 bottom-2 w-1 rounded-full bg-gradient-to-b from-primary to-blue-600 transition-all duration-300 ${
+                    !collapsed ? 'opacity-100 scale-y-100' : 'opacity-0 group-hover:opacity-60 scale-y-0 group-hover:scale-y-100'
+                }`} />
+                
                 <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-sm shadow-purple-200">
-                        <LuSparkles size={16} />
+                    <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${
+                        !collapsed 
+                            ? 'bg-gradient-to-br from-primary to-blue-700 text-white shadow-lg shadow-primary/30'
+                            : 'bg-gradient-to-br from-primary to-blue-700 text-white shadow-sm shadow-primary/20 group-hover:shadow-md group-hover:scale-105'
+                    }`}>
+                        <LuSparkles size={17} className={!collapsed ? 'animate-pulse' : ''} />
+                        {/* Small glow dot */}
                     </div>
                     <div className="text-left">
-                        <h3 className="text-sm font-semibold text-gray-800 group-hover:text-white transition-colors">
+                        <h3 className="text-sm font-semibold text-gray-800 group-hover:text-white transition-colors duration-200">
                             Survey Summary
                         </h3>
-                        <p className="text-[11px] text-gray-400 group-hover:text-white/80 transition-colors">
+                        <p className="text-[11px] text-gray-400 group-hover:text-white/80 transition-colors duration-200">
                             {surveys.length} surveys • AI-powered
                         </p>
                     </div>
                 </div>
-                <span className="text-gray-400 group-hover:text-white transition-colors">
-                    {collapsed ? <LuChevronDown size={18} /> : <LuChevronUp size={18} />}
-                </span>
+                <div className="flex items-center gap-2">
+                    <span className={`text-gray-400 group-hover:text-white transition-all duration-300 ${
+                        !collapsed ? 'rotate-180' : ''
+                    }`}>
+                        <LuChevronDown size={18} className="transition-transform duration-300" />
+                    </span>
+                </div>
             </button>
 
-            {/* ── Empty State / Initial Generate ── */}
-            {!hasEverGenerated && !summaryLoading && (
-                <div className="px-5 py-6 text-center">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 mb-3">
-                        <LuSparkles size={22} className="text-purple-600" />
-                    </div>
-                    <p className="text-sm font-medium text-gray-700 mb-1">
-                        No summary yet
-                    </p>
-                    <p className="text-sm text-gray-400 mb-4 max-w-xs mx-auto leading-relaxed">
-                        Generate a summary for {surveys.length} IUP survey data using AI.
-                    </p>
-                    <button
-                        onClick={handleGenerateSummary}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl shadow-sm shadow-purple-200 hover:shadow-md hover:shadow-purple-300 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
-                    >
-                        <LuSparkles size={15} />
-                        Generate Summary
-                    </button>
-                </div>
-            )}
-
-            {/* ── Loading State ── */}
-            {summaryLoading && !summaryResponse && (
-                <div className="px-5 py-6">
-                    <div className="max-w-xl mx-auto space-y-4">
-                        <div className="flex items-center justify-center gap-3 mb-4">
-                            <LuLoaderCircle size={20} className="animate-spin text-purple-600" />
-                            <span className="text-sm text-gray-500 font-medium">Analyzing survey data...</span>
-                        </div>
-                        <div className="space-y-2.5">
-                            <div className="h-3 rounded-full w-3/4 mx-auto relative overflow-hidden bg-slate-200">
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
-                            </div>
-                            <div className="h-3 rounded-full w-1/2 mx-auto relative overflow-hidden bg-slate-200">
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
-                            </div>
-                            <div className="h-3 rounded-full w-5/6 mx-auto relative overflow-hidden bg-slate-200">
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* ── Prompt Input (above result, always visible when not collapsed) ── */}
-            {!collapsed && hasEverGenerated && (
-                <div className="px-5 py-3 border-b border-slate-100 bg-white">
-                    <div className="flex items-center gap-2">
-                        <textarea
-                            ref={promptRef}
-                            value={summaryPrompt}
-                            onChange={(e) => {
-                                setSummaryPrompt(e.target.value);
-                                requestAnimationFrame(resizePrompt);
-                            }}
-                            onInput={resizePrompt}
-                            rows={1}
-                            placeholder="Set custom instructions for the summary (optional)..."
-                            className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:border-purple-300 focus:ring-2 focus:ring-purple-100 transition-all duration-200 placeholder:text-gray-300 resize-none overflow-hidden"
-                        />
-                        <button
-                            onClick={handleGenerateSummary}
-                            disabled={summaryLoading}
-                            className="shrink-0 px-5 py-3 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-                        >
-                            {summaryLoading ? (
-                                <LuLoaderCircle size={15} className="animate-spin" />
-                            ) : (
-                                <LuSparkles size={15} />
-                            )}
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* ── Result ── */}
-            {(summaryResponse || (summaryLoading && summaryResponse !== null)) && !collapsed && (
-                <div className="px-5 py-4 border-b border-slate-100">
-                    <div className="bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-xs">
-                        {/* Result Header */}
-                        <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-purple-50 to-indigo-50/40 border-b border-slate-100">
-                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-white border border-purple-200 rounded-md shadow-xs">
-                                <LuSparkles size={11} className="text-purple-600" />
-                                <span className="text-[10px] font-semibold text-gray-700">AI</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                                {sessionId && (
-                                    <button
-                                        onClick={() => setShowChatHistory(true)}
-                                        className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-all"
-                                    >
-                                        <LuMessageCircle size={11} />
-                                        Chat History
-                                    </button>
-                                )}
+            {/* ── Expandable Content ── */}
+            {!collapsed && (
+                <div className="animate-fadeIn">
+                    {/* ── Empty State / Initial Generate ── */}
+                    {!hasEverGenerated && !summaryLoading && (
+                        <div className="relative px-6 py-8 text-center overflow-hidden">
+                            <div className="relative">
+                                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-blue-700 text-white shadow-lg shadow-primary/30 mb-4">
+                                    <LuSparkles size={24} />
+                                </div>
+                                <p className="text-sm font-semibold text-gray-800 mb-1.5">
+                                    No summary yet
+                                </p>
+                                <p className="text-xs text-gray-400 mb-5 max-w-xs mx-auto leading-relaxed">
+                                    Generate a summary for <span className="font-medium text-gray-500">{surveys.length}</span> IUP survey data using AI.
+                                </p>
                                 <button
-                                    onClick={handleCopySummary}
-                                    className="p-1.5 rounded-md text-gray-400 hover:text-purple-600 hover:bg-purple-50 active:scale-90 transition-all"
-                                    title="Copy"
+                                    onClick={handleGenerateSummary}
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-primary via-blue-600 to-blue-700 rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                                 >
-                                    {copied ? <LuCheck size={13} className="text-green-500" /> : <LuCopy size={13} />}
+                                    <LuSparkles size={16} />
+                                    Generate Summary
                                 </button>
                             </div>
                         </div>
+                    )}
 
-                        {/* Result Body */}
-                        <div className="px-4 py-3.5">
-                            {summaryLoading ? (
-                                <div className="space-y-2">
-                                    <div className="h-3 rounded w-full relative overflow-hidden bg-slate-200">
-                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
+                    {/* ── Loading State ── */}
+                    {summaryLoading && !summaryResponse && (
+                        <div className="px-6 py-8">
+                            <div className="max-w-md mx-auto space-y-5">
+                                <div className="flex items-center justify-center gap-3">
+                                    <div className="relative">
+                                        <LuLoaderCircle size={22} className="animate-spin text-primary" />
                                     </div>
-                                    <div className="h-3 rounded w-11/12 relative overflow-hidden bg-slate-200">
-                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
-                                    </div>
-                                    <div className="h-3 rounded w-4/5 relative overflow-hidden bg-slate-200">
-                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
-                                    </div>
-                                    <div className="h-3 rounded w-3/4 relative overflow-hidden bg-slate-200">
-                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
-                                    </div>
+                                    <span className="text-sm text-gray-500 font-medium">Analyzing survey data...</span>
                                 </div>
-                            ) : (
-                                <div className="prose prose-sm max-w-none prose-headings:text-slate-800 prose-p:text-slate-600 prose-a:text-purple-600 prose-code:text-purple-600 prose-code:bg-purple-50 prose-code:px-1 prose-code:rounded prose-pre:bg-slate-50 prose-pre:border prose-pre:border-slate-200 leading-relaxed">
-                                    <MarkdownText content={summaryResponse || ''} />
+                                <div className="space-y-2.5">
+                                    {[75, 50, 85].map((w, i) => (
+                                        <div key={i} className={`h-3 rounded-full relative overflow-hidden bg-slate-100 mx-auto`} style={{ width: `${w}%` }}>
+                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-200/50 to-transparent animate-shimmer" 
+                                                style={{ animationDelay: `${i * 0.15}s` }} />
+                                        </div>
+                                    ))}
                                 </div>
-                            )}
+                            </div>
                         </div>
-                    </div>
+                    )}
+
+                    {/* ── Prompt Input ── */}
+                    {hasEverGenerated && (
+                        <div className="px-5 py-3.5 bg-gradient-to-r from-blue-50/50 to-primary/5 border-b border-primary/10">
+                            <div className="flex items-center gap-2.5">
+                                    <textarea
+                                        ref={promptRef}
+                                        value={summaryPrompt}
+                                        onChange={(e) => {
+                                            setSummaryPrompt(e.target.value);
+                                            requestAnimationFrame(resizePrompt);
+                                        }}
+                                        onInput={resizePrompt}
+                                        rows={1}
+                                        placeholder="Set custom instructions for the summary (optional)..."
+                                        className="w-full px-3.5 py-2.5 text-sm border border-blue-200/60 rounded-xl bg-white/80 backdrop-blur-sm focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all duration-200 placeholder:text-gray-300 resize-none overflow-hidden pr-10"
+                                    />
+                                <button
+                                    onClick={handleGenerateSummary}
+                                    disabled={summaryLoading}
+                                    className="shrink-0 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-primary via-blue-600 to-blue-700 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center gap-1.5"
+                                >
+                                    {summaryLoading ? (
+                                        <LuLoaderCircle size={15} className="animate-spin" />
+                                    ) : (
+                                        <LuSparkles size={15} />
+                                    )}
+                                    <span className="hidden sm:inline">Generate</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ── Result ── */}
+                    {(summaryResponse || (summaryLoading && summaryResponse !== null)) && (
+                        <div className="px-5 py-4">
+                            <div className="relative group">
+                                {/* Glow effect behind card */}
+                                <div className={`absolute -inset-1 bg-gradient-to-r from-primary/10 via-blue-400/15 to-primary/10 rounded-2xl blur-md transition-opacity duration-500 ${
+                                    summaryLoading ? 'opacity-60' : ''
+                                }`} />
+                                
+                                {/* Main card */}
+                                <div className="relative bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+                                    {/* Card header */}
+                                    <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-50/80 via-white to-primary/5 border-b border-slate-100">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-blue-200/60 rounded-lg shadow-xs">
+                                                <div className="relative">
+                                                    <LuSparkles size={12} className="text-primary" />
+                                                </div>
+                                                <span className="text-[10px] font-semibold bg-gradient-to-r from-primary via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                                                    AI Generated
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            {sessionId && !summaryLoading && (
+                                                <button
+                                                    onClick={() => setShowChatHistory(true)}
+                                                    className="inline-flex border-1 border-primary items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-gray-500 hover:text-white hover:bg-primary rounded-lg transition-all"
+                                                >
+                                                    <LuMessageCircle size={13} />
+                                                    <span className="hidden sm:inline">Chat History</span>
+                                                </button>
+                                            )}
+                                            {!summaryLoading && (
+                                                <button
+                                                    onClick={handleCopySummary}
+                                                    className="p-1.5 border-1 border-gray-300 rounded-lg text-gray-400 hover:text-white hover:bg-primary active:scale-90 transition-all"
+                                                    title="Copy"
+                                                >
+                                                    {copied ? <LuCheck size={14} className="text-green-500" /> : <LuCopy size={14} />}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Card body */}
+                                    <div className="px-4 py-4">
+                                        {summaryLoading ? (
+                                            <div className="space-y-2.5">
+                                                {[100, 92, 85, 78].map((w, i) => (
+                                                    <div key={i} className={`h-3 rounded relative overflow-hidden bg-slate-100`} style={{ width: `${w}%` }}>
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-200/40 to-transparent animate-shimmer"
+                                                            style={{ animationDelay: `${i * 0.2}s` }} />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="prose prose-sm max-w-none prose-headings:text-slate-800 prose-p:text-slate-600 prose-a:text-primary prose-code:text-primary prose-code:bg-blue-50/80 prose-code:px-1 prose-code:rounded prose-pre:bg-slate-50 prose-pre:border prose-pre:border-slate-200 leading-relaxed">
+                                                <MarkdownText content={summaryResponse || ''} />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Card footer for AI attribution */}
+                                    {!summaryLoading && summaryResponse && (
+                                        <div className="px-4 py-2 bg-gradient-to-r from-transparent via-blue-50/30 to-transparent border-t border-slate-100/50">
+                                            <p className="text-[10px] text-gray-400 text-center">
+                                                Powered by Mosa AI
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
