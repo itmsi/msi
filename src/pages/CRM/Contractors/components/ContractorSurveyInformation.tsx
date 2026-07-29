@@ -9,7 +9,11 @@ const ContractorSurveyInformation: React.FC = () => {
         {
             id: '1',
             judul: 'ROA Revisited',
-            konten: <p>Ini adalah konten ROA Revisited...</p>
+            konten: <p>Ini adalah konten ROA Revisited...</p>,
+            showDeleteButton: true,
+            onDelete: () => {
+                console.log('Delete button clicked for item 1');
+            }
         },
         {
             id: '2',

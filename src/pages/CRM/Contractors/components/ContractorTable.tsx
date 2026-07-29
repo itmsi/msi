@@ -46,22 +46,24 @@ const ContractorTable: React.FC<ContractorTableProps> = ({
                     href={`/crm/contractors/edit/${row.iup_customer_id}${location.search}`}
                     className="absolute inset-0"
                 />
-                <div className=" items-center gap-3 py-2">
-                    <div className="font-medium text-gray-900">
-                        {row?.customer_name || '-'}
+                <div className="items-center gap-3 py-2">
+                    <div className="flex items-center gap-2">
+                        <div className="font-medium text-gray-900 gap-2">
+                            {row?.customer_name || ''}
+                            <span className="text-md font-secondary font-bold px-2 py-0.5 ms-2 min-w-0 rounded bg-slate-200 text-slate-600">
+                                {row.customer_code || '-'}
+                            </span>
+                        </div>
                     </div>
                     <div className="block text-sm text-gray-500">
-                        {row?.customer_code && row?.customer_email 
-                            ? `${row.customer_email} - ${row.customer_code}`
-                            : row?.customer_code || row?.customer_email || '-'
-                        }
+                        {row?.customer_email || '-'}
                     </div>
                     <div className="block text-sm text-gray-500">{`${row?.customer_phone ? formatPhoneNumber(row.customer_phone) : '-'}`}</div>
                 </div>
             </>),
             sortable: false,
             wrap: true,
-            width: '280px',
+            width: '350px',
         },
         {
             name: 'Territory',

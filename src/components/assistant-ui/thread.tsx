@@ -8,7 +8,7 @@ import {
 } from "@assistant-ui/react";
 import { MdSend, MdStop, MdPerson, MdContentCopy } from "react-icons/md";
 import { IconAIAtomOrbit } from "@/icons";
-import { MarkdownText } from "./markdown-text";
+import { TypingText } from "./typing-text";
 import { type FC, useRef, useEffect, useState, useCallback, useMemo, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -87,77 +87,7 @@ const TypingIndicator: FC = () => (
   </div>
 );
 
-// ─── Pulsing cursor (for streaming) ───────────────────────────────────────────
 
-const StreamingCursor: FC = () => (
-  <motion.span
-    className="inline-block w-[3px] h-[14px] bg-[#0253a5] ml-0.5 rounded-full align-middle"
-    animate={{ opacity: [1, 0] }}
-    transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-  />
-);
-
-// ─── Typing Text (progressive reveal) ────────────────────────────────────────
-// Smoothly reveals text character-by-character during streaming.
-// Uses requestAnimationFrame for efficient rendering.
-
-const TypingText: FC<{ content: string; isRunning: boolean }> = ({ content, isRunning }) => {
-  const [visibleLen, setVisibleLen] = useState(0);
-  const contentRef = useRef(content);
-  const lastTimeRef = useRef(0);
-  const SPEED = 18; // ms per character — lower = faster typing
-
-  // Reset when a new message starts (content gets shorter or empty)
-  useEffect(() => {
-    if (content.length < contentRef.current.length) {
-      setVisibleLen(0);
-    }
-    contentRef.current = content;
-  }, [content]);
-
-  // Progressive reveal — runs during streaming
-  useEffect(() => {
-    if (!isRunning) {
-      setVisibleLen(content.length);
-      return;
-    }
-
-    // Don't restart if already fully revealed
-    if (visibleLen >= content.length && content.length > 0) return;
-
-    lastTimeRef.current = 0;
-    let rafId: number;
-    let currentLen = visibleLen;
-
-    const animate = (timestamp: number) => {
-      if (!lastTimeRef.current) lastTimeRef.current = timestamp;
-      const elapsed = timestamp - lastTimeRef.current;
-
-      if (elapsed >= SPEED) {
-        lastTimeRef.current = timestamp;
-        currentLen = Math.min(currentLen + 1, content.length);
-        setVisibleLen(currentLen);
-      }
-
-      if (currentLen < content.length) {
-        rafId = requestAnimationFrame(animate);
-      }
-    };
-
-    rafId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRunning, content]);
-
-  const displayText = content.slice(0, Math.min(visibleLen, content.length));
-
-  return (
-    <>
-      <MarkdownText content={displayText} />
-      {isRunning && <StreamingCursor />}
-    </>
-  );
-};
 
 // ─── Suggested Prompts ───────────────────────────────────────────────────────
 

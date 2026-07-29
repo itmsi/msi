@@ -22,12 +22,12 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
                     className="absolute inset-0"
                 />
                 <div className="flex items-center gap-2">
-                    <div className="font-medium text-gray-900">
+                    <div className="font-medium text-gray-900 gap-2">
                         {row?.customer_name || ''}
+                        <span className="text-md font-secondary font-bold px-2 py-0.5 ms-2 min-w-0 rounded bg-slate-200 text-slate-600">
+                            {row.customer_code || '-'}
+                        </span>
                     </div>
-                    <span className="text-md font-secondary font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-600">
-                        {row.customer_code || '-'}
-                    </span>
                 </div>
             </>),
         },{
