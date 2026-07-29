@@ -23,7 +23,6 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
     const [summaryPrompt, setSummaryPrompt] = useState<string>("");
     const [sessionId, setSessionId] = useState<string>("");
     const [showChatHistory, setShowChatHistory] = useState(false);
-    const [collapsed, setCollapsed] = useState(true);
     const [copied, setCopied] = useState(false);
     const [summaryAiId, setSummaryAiId] = useState<string | null>(null);
     const [loadingInit, setLoadingInit] = useState(true);
@@ -229,90 +228,71 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
 
     return (
         <div className="overflow-hidden">
-            {/* ── Header (clickable to toggle) ── */}
-            <button
-                onClick={() => setCollapsed(!collapsed)}
-                className={`w-full flex items-center justify-between px-5 py-4 bg-white border-b border-slate-200 group hover:bg-primary transition-all duration-300 cursor-pointer relative overflow-hidden`}
-            >
-                {/* Subtle decorative gradient line on left */}
-                <div className={`absolute left-0 top-2 bottom-2 w-1 rounded-full bg-gradient-to-b from-primary to-blue-600 transition-all duration-300 ${
-                    !collapsed ? 'opacity-100 scale-y-100' : 'opacity-0 group-hover:opacity-60 scale-y-0 group-hover:scale-y-100'
-                }`} />
+            {/* ── Header ── */}
+            <div className="w-full flex items-center justify-between px-5 py-4 bg-white border-b border-slate-200 relative overflow-hidden">
+                <div className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-gradient-to-b from-primary to-blue-600" />
                 
                 <div className="flex items-center gap-3">
-                    <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${
-                        !collapsed 
-                            ? 'bg-gradient-to-br from-primary to-blue-700 text-white shadow-lg shadow-primary/30'
-                            : 'bg-gradient-to-br from-primary to-blue-700 text-white shadow-sm shadow-primary/20 group-hover:shadow-md group-hover:scale-105'
-                    }`}>
-                        <LuSparkles size={17} className={!collapsed ? 'animate-pulse' : ''} />
-                        {/* Small glow dot */}
+                    <div className="relative p-2.5 rounded-xl bg-gradient-to-br from-primary to-blue-700 text-white shadow-lg shadow-primary/30">
+                        <LuSparkles size={17} />
                     </div>
                     <div className="text-left">
-                        <h3 className="text-sm font-semibold text-gray-800 group-hover:text-white transition-colors duration-200">
+                        <h3 className="text-sm font-semibold text-gray-800">
                             Survey Summary
                         </h3>
-                        <p className="text-[11px] text-gray-400 group-hover:text-white/80 transition-colors duration-200">
+                        <p className="text-[11px] text-gray-400">
                             {surveys.length} surveys • AI-powered
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className={`text-gray-400 group-hover:text-white transition-all duration-300 ${
-                        !collapsed ? 'rotate-180' : ''
-                    }`}>
-                        <LuChevronDown size={18} className="transition-transform duration-300" />
-                    </span>
-                </div>
-            </button>
-
-            {/* ── Expandable Content ── */}
-            {!collapsed && (
-                <div className="animate-fadeIn">
-                    {/* ── Empty State / Initial Generate ── */}
-                    {!hasEverGenerated && !summaryLoading && (
-                        <div className="relative px-6 py-8 text-center overflow-hidden">
-                            <div className="relative">
-                                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-blue-700 text-white shadow-lg shadow-primary/30 mb-4">
-                                    <LuSparkles size={24} />
-                                </div>
-                                <p className="text-sm font-semibold text-gray-800 mb-1.5">
-                                    No summary yet
-                                </p>
-                                <p className="text-xs text-gray-400 mb-5 max-w-xs mx-auto leading-relaxed">
-                                    Generate a summary for <span className="font-medium text-gray-500">{surveys.length}</span> IUP survey data using AI.
-                                </p>
-                                <button
-                                    onClick={handleGenerateSummary}
-                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-primary via-blue-600 to-blue-700 rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
-                                >
-                                    <LuSparkles size={16} />
-                                    Generate Summary
-                                </button>
+            </div>
+            
+            {/* ── Content ── */}
+            <div className="animate-fadeIn">
+                {/* ── Empty State / Initial Generate ── */}
+                {!hasEverGenerated && !summaryLoading && (
+                    <div className="relative px-6 py-8 text-center overflow-hidden">
+                        <div className="relative">
+                            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-blue-700 text-white shadow-lg shadow-primary/30 mb-4">
+                                <LuSparkles size={24} />
                             </div>
+                            <p className="text-sm font-semibold text-gray-800 mb-1.5">
+                                No summary yet
+                            </p>
+                            <p className="text-xs text-gray-400 mb-5 max-w-xs mx-auto leading-relaxed">
+                                Generate a summary for <span className="font-medium text-gray-500">{surveys.length}</span> IUP survey data using AI.
+                            </p>
+                            <button
+                                onClick={handleGenerateSummary}
+                                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-primary via-blue-600 to-blue-700 rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+                            >
+                                <LuSparkles size={16} />
+                                Generate Summary
+                            </button>
                         </div>
-                    )}
+                    </div>
+                )}
 
-                    {/* ── Loading State ── */}
-                    {summaryLoading && !summaryResponse && (
-                        <div className="px-6 py-8">
-                            <div className="max-w-md mx-auto space-y-5">
-                                <div className="flex items-center justify-center gap-3">
-                                    <div className="relative">
-                                        <LuLoaderCircle size={22} className="animate-spin text-primary" />
+                {/* ── Loading State ── */}
+                {summaryLoading && !summaryResponse && (
+                    <div className="px-6 py-8">
+                        <div className="max-w-md mx-auto space-y-5">
+                            <div className="flex items-center justify-center gap-3">
+                                <div className="relative">
+                                    <LuLoaderCircle size={22} className="animate-spin text-primary" />
+                                </div>
+                                <span className="text-sm text-gray-500 font-medium">Analyzing survey data...</span>
+                            </div>
+                            <div className="space-y-2.5">
+                                {[75, 50, 85].map((w, i) => (
+                                    <div key={i} className={`h-3 rounded-full relative overflow-hidden bg-slate-100 mx-auto`} style={{ width: `${w}%` }}>
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-200/50 to-transparent animate-shimmer" 
+                                            style={{ animationDelay: `${i * 0.15}s` }} />
                                     </div>
-                                    <span className="text-sm text-gray-500 font-medium">Analyzing survey data...</span>
-                                </div>
-                                <div className="space-y-2.5">
-                                    {[75, 50, 85].map((w, i) => (
-                                        <div key={i} className={`h-3 rounded-full relative overflow-hidden bg-slate-100 mx-auto`} style={{ width: `${w}%` }}>
-                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-200/50 to-transparent animate-shimmer" 
-                                                style={{ animationDelay: `${i * 0.15}s` }} />
-                                        </div>
-                                    ))}
-                                </div>
+                                ))}
                             </div>
                         </div>
+                    </div>
                     )}
 
                     {/* ── Prompt Input ── */}
@@ -421,20 +401,19 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
                         </div>
                     )}
                 </div>
-            )}
 
-            {/* ── AI Chat History Panel ── */}
-            {showChatHistory && sessionId && (
-                <SurveyChatHistory
-                    sessionId={sessionId}
-                    surveyId={surveys[0]?.iup_survey_id || ''}
-                    iupId={surveys[0]?.iup_id || ''}
-                    surveyName={surveys[0]?.user_name || 'Survey IUP'}
-                    iupName={surveys[0]?.iup_id?.slice(0, 8) || 'IUP'}
-                    chatDate={surveys[0]?.chat_date || ''}
-                    onClose={() => setShowChatHistory(false)}
-                />
-            )}
+                {/* ── AI Chat History Panel ── */}
+                {showChatHistory && sessionId && (
+                    <SurveyChatHistory
+                        sessionId={sessionId}
+                        surveyId={surveys[0]?.iup_survey_id || ''}
+                        iupId={surveys[0]?.iup_id || ''}
+                        surveyName={surveys[0]?.user_name || 'Survey IUP'}
+                        iupName={surveys[0]?.iup_id?.slice(0, 8) || 'IUP'}
+                        chatDate={surveys[0]?.chat_date || ''}
+                        onClose={() => setShowChatHistory(false)}
+                    />
+                )}
         </div>
     );
 };
