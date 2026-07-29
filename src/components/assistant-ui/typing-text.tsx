@@ -13,9 +13,9 @@ export const StreamingCursor: FC = () => (
 );
 
 export const TypingText: FC<{ content: string; isRunning: boolean }> = ({ content, isRunning }) => {
-  const [visibleLen, setVisibleLen] = useState(0);
+  const [visibleLen, setVisibleLen] = useState(() => isRunning ? 0 : content.length);
   const rafRef = useRef<number>(0);
-  const visibleLenRef = useRef(0);
+  const visibleLenRef = useRef(isRunning ? 0 : content.length);
   const contentRef = useRef(content);
 
   contentRef.current = content;
