@@ -374,7 +374,7 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
                                             {sessionId && !summaryLoading && (
                                                 <button
                                                     onClick={() => setShowChatHistory(true)}
-                                                    className="inline-flex border-1 border-primary items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-gray-500 hover:text-white hover:bg-primary rounded-lg transition-all"
+                                                    className="inline-flex border-1 border-gray-300 items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-gray-500 hover:text-white hover:bg-primary rounded-lg transition-all"
                                                 >
                                                     <LuMessageCircle size={13} />
                                                     <span className="hidden sm:inline">Chat History</span>
