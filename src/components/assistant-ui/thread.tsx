@@ -98,63 +98,60 @@ const StreamingCursor: FC = () => (
 );
 
 // ─── Typing Text (progressive reveal) ────────────────────────────────────────
-// Smoothly reveals text character-by-character during streaming.
-// Uses requestAnimationFrame for efficient rendering.
 
 const TypingText: FC<{ content: string; isRunning: boolean }> = ({ content, isRunning }) => {
   const [visibleLen, setVisibleLen] = useState(0);
+  const rafRef = useRef<number>(0);
+  const visibleLenRef = useRef(0);
   const contentRef = useRef(content);
-  const lastTimeRef = useRef(0);
-  const SPEED = 18; // ms per character — lower = faster typing
 
-  // Reset when a new message starts (content gets shorter or empty)
+  contentRef.current = content;
+
   useEffect(() => {
-    if (content.length < contentRef.current.length) {
-      setVisibleLen(0);
-    }
-    contentRef.current = content;
-  }, [content]);
+    if (visibleLenRef.current >= content.length) return;
+    if (rafRef.current) return;
 
-  // Progressive reveal — runs during streaming
-  useEffect(() => {
-    if (!isRunning) {
-      setVisibleLen(content.length);
-      return;
-    }
-
-    // Don't restart if already fully revealed
-    if (visibleLen >= content.length && content.length > 0) return;
-
-    lastTimeRef.current = 0;
-    let rafId: number;
-    let currentLen = visibleLen;
+    let lastTime = 0;
 
     const animate = (timestamp: number) => {
-      if (!lastTimeRef.current) lastTimeRef.current = timestamp;
-      const elapsed = timestamp - lastTimeRef.current;
+      const target = contentRef.current.length;
+      const current = visibleLenRef.current;
 
-      if (elapsed >= SPEED) {
-        lastTimeRef.current = timestamp;
-        currentLen = Math.min(currentLen + 1, content.length);
-        setVisibleLen(currentLen);
+      if (current >= target) {
+        rafRef.current = 0;
+        return;
       }
 
-      if (currentLen < content.length) {
-        rafId = requestAnimationFrame(animate);
+      if (!lastTime) lastTime = timestamp;
+      const elapsed = timestamp - lastTime;
+
+      const interval = 5
+
+      if (elapsed >= interval) {
+        lastTime = timestamp;
+        visibleLenRef.current = current + 1;
+        setVisibleLen(current + 1);
       }
+
+      rafRef.current = requestAnimationFrame(animate);
     };
 
-    rafId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafId);
+    rafRef.current = requestAnimationFrame(animate);
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRunning, content]);
+  }, [content.length]);
 
-  const displayText = content.slice(0, Math.min(visibleLen, content.length));
+  const displayText = content.slice(0, visibleLen);
+  const isAnimating = visibleLen < content.length;
+  const showCursor = isRunning || isAnimating;
 
   return (
     <>
       <MarkdownText content={displayText} />
-      {isRunning && <StreamingCursor />}
+      {showCursor && <StreamingCursor />}
     </>
   );
 };
