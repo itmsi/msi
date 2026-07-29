@@ -14,6 +14,7 @@ export class IupService {
             status: '',
             is_admin: API_IS_ADMIN,
             is_contractor_count: null,
+            is_selection_iup: 'false',
             ...params
         };
         
