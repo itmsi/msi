@@ -1,5 +1,5 @@
 import React from 'react';
-import { LuPhone, LuMapPin, LuExternalLink, LuMic, LuVideo, LuFile } from 'react-icons/lu';
+import { LuPhone, LuMapPin, LuExternalLink, LuVideo } from 'react-icons/lu';
 import { IupSurveyItem } from '../../types/iupmanagement';
 import { DrivePlayer, DriveImage } from './DriveImage';
 import { classifyEntry, TYPE_CONFIG, formatTime, parseLatLng } from './Surveyutils';
