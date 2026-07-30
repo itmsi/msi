@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LuExternalLink, LuVideo, LuImage } from 'react-icons/lu';
+import { LuExternalLink, LuImage } from 'react-icons/lu';
 import { extractDriveFileId, driveEmbedUrl, driveThumbnailUrl } from './Surveyutils';
 // import { extractDriveFileId, driveEmbedUrl, driveThumbnailUrl } from './surveyUtils';
 
