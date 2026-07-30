@@ -53,7 +53,30 @@ export const formatTime = (iso: string) => moment(iso).format('HH:mm');
 /** Stable per-day grouping key, e.g. "2026-07-28" */
 export const dateGroupKey = (iso: string) => moment(iso).format('YYYY-MM-DD');
 
+// export const parseLatLng = (desc: string) => {
+//     const m = desc.match(/latitude:\s*(-?[\d.]+),\s*longitude:\s*(-?[\d.]+)/i);
+//     return m ? { lat: parseFloat(m[1]), lng: parseFloat(m[2]) } : null;
+// };
 export const parseLatLng = (desc: string) => {
-    const m = desc.match(/latitude:\s*(-?[\d.]+),\s*longitude:\s*(-?[\d.]+)/i);
-    return m ? { lat: parseFloat(m[1]), lng: parseFloat(m[2]) } : null;
+    if (!desc) return null;
+
+    // 1. Format: "latitude: -3.05, longitude: 122.27"
+    const labeled = desc.match(/latitude:\s*(-?[\d.]+),\s*longitude:\s*(-?[\d.]+)/i);
+    if (labeled) {
+        return {
+            lat: parseFloat(labeled[1]),
+            lng: parseFloat(labeled[2]),
+        };
+    }
+
+    // 2. Format: "[-3.0532052,122.276181]"
+    const arrayFormat = desc.match(/\[\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\]/);
+    if (arrayFormat) {
+        return {
+            lat: parseFloat(arrayFormat[1]),
+            lng: parseFloat(arrayFormat[2]),
+        };
+    }
+
+    return null;
 };

@@ -237,7 +237,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         <Input
                             name={`qty_${index}`}
                             type="text"
-                            maxLength={3}
+                            maxLength={4}
                             min='0'
                             value={row.qty && row.qty > 0 ? row.qty.toString() : ''}
                             onKeyPress={handleKeyPress}
