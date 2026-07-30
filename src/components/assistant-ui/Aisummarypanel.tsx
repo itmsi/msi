@@ -48,7 +48,7 @@ export function AiSummaryPanel({
                     <div className="flex items-center gap-1.5">
                         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-blue-200/60 rounded-lg shadow-xs">
                             <LuSparkles className="text-primary" size={15} />
-                            <span className="text-sm font-primary-bold bg-gradient-to-r from-primary via-blue-600 to-cyan-600 bg-clip-text text-transparent">AI Summary</span>
+                            <span className="text-sm font-primary-bold bg-gradient-to-r from-primary via-blue-600 to-cyan-600 bg-clip-text text-transparent">MOSA Ai Summary</span>
                         </div>
                         {isGenerating && (
                             <span className="text-xs text-primary">· Membuat ringkasan...</span>
