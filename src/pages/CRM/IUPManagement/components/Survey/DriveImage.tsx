@@ -90,12 +90,12 @@ export const DriveImage: React.FC<DriveImageProps> = ({ url, alt }) => {
         );
     }
 
-    return (
+    return (<>
         <a
             href={url ?? undefined}
             target="_blank"
             rel="noreferrer"
-            className="mb-2.5 block overflow-hidden rounded-lg border border-slate-300"
+            className="flex justify-center overflow-hidden rounded-lg border border-slate-300"
         >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -105,8 +105,17 @@ export const DriveImage: React.FC<DriveImageProps> = ({ url, alt }) => {
                 onError={() => setFailed(true)}
                 className="block max-h-80 w-full object-cover"
             />
+            
         </a>
-    );
+        <a
+            href={url ?? undefined}
+            target="_blank"
+            rel="noreferrer"
+            className="mb-2.5 inline-flex items-center gap-1 text-[11px] text-slate-500 hover:underline"
+        >
+            Open in Drive <LuExternalLink size={10} />
+        </a>
+    </>);
 };
 
 export const SkeletonCard: React.FC = () => (

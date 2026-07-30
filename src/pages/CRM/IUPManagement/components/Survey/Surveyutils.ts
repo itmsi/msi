@@ -26,7 +26,8 @@ export const TYPE_CONFIG: Record<SurveyEntryType, TypeConfigEntry> = {
 
 export const classifyEntry = (e: IupSurveyItem): SurveyEntryType => {
     if (e.file_name && /\.(mp4|mov|avi|mkv|webm)$/i.test(e.file_name)) return 'video';
-    if (e.file_name && /\.(jpg|jpeg|png|gif|webp|heic)$/i.test(e.file_name)) return 'image';
+    // if (e.file_name && /\.(jpg|jpeg|png|gif|webp|heic)$/i.test(e.file_name)) return 'image';
+    if (e.source_type === 'image') return 'image';
     if (e.source_type === 'Voice') return 'voice';
     if (e.source_type === 'Location') return 'location';
     if (e.description) return 'chat';
@@ -37,7 +38,7 @@ export const classifyEntry = (e: IupSurveyItem): SurveyEntryType => {
 // so they can be embedded directly from the file id in the URL.
 export const extractDriveFileId = (url?: string | null): string | null => {
     if (!url) return null;
-    const m = url.match(/\/d\/([-\w]+)/) || url.match(/[?&]id=([-\w]+)/);
+    const m = url.match(/\/d\/([-\w]+)/) ?? url.match(/[?&]id=([-\w]+)/);
     return m ? m[1] : null;
 };
 export const driveEmbedUrl = (id: string) => `https://drive.google.com/file/d/${id}/preview`;
