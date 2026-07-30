@@ -1,5 +1,5 @@
 import React from 'react';
-import { LuPhone, LuMapPin, LuExternalLink, LuMic, LuVideo } from 'react-icons/lu';
+import { LuPhone, LuMapPin, LuExternalLink, LuMic, LuVideo, LuFile } from 'react-icons/lu';
 import { IupSurveyItem } from '../../types/iupmanagement';
 import { DrivePlayer, DriveImage } from './DriveImage';
 import { classifyEntry, TYPE_CONFIG, formatTime, parseLatLng } from './Surveyutils';
@@ -71,7 +71,7 @@ const SurveyEntryCard: React.FC<SurveyEntryCardProps> = ({ entry }) => {
                     <DrivePlayer
                         url={entry.source_link}
                         height={190}
-                        icon={LuMic}
+                        icon={Icon}
                         label="Play voice note"
                         accentClass="text-amber-600 bg-amber-50"
                     />
@@ -83,6 +83,19 @@ const SurveyEntryCard: React.FC<SurveyEntryCardProps> = ({ entry }) => {
             {type === 'image' && (
                 <div>
                     <DriveImage url={entry.source_link} alt={entry.file_name || `Photo from ${entry.user_name}`} />
+                    {entry.description && <MarkdownText content={entry.description} />}
+                </div>
+            )}
+
+            {type === 'file' && (
+                <div>
+                    <DrivePlayer
+                        url={entry.source_link}
+                        height={420}
+                        icon={Icon}
+                        label={entry.file_name || 'Open document'}
+                        accentClass="text-slate-600 bg-slate-100"
+                    />
                     {entry.description && <MarkdownText content={entry.description} />}
                 </div>
             )}

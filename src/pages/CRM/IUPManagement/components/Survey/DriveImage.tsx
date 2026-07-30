@@ -41,7 +41,7 @@ export const DrivePlayer: React.FC<DrivePlayerProps> = ({ url, height, icon: Ico
                     onClick={() => setLoaded(true)}
                     className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-primary-bold hover:opacity-80 ${accentClass}`}
                 >
-                    <LuVideo size={16} /> {label}
+                    <Icon size={16} /> {label}
                 </button>
             ) : (
                 <div className="overflow-hidden rounded-lg border border-slate-300 bg-black">
