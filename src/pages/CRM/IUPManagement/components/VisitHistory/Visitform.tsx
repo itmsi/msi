@@ -68,15 +68,17 @@ const VisitForm: React.FC<VisitFormProps> = ({
     }, [initializeEmployeeOptions]);
 
     useEffect(() => {
-        if (form.employeeId && form.employeeName) {
+        if (form.employeeId) {
+            const opsiTerpilih = employeeOptions.find((item) => item.value === form.employeeId);
+
             setSelectedEmployee({
                 value: form.employeeId,
-                label: form.employeeName,
+                label: form.employeeName || opsiTerpilih?.label || "",
             });
         } else {
             setSelectedEmployee(null);
         }
-    }, [form.employeeId, form.employeeName]);
+    }, [form.employeeId, form.employeeName, employeeOptions]);
     
     return (
         <div className={`transition-all duration-200 ${!editingId ? ' border border-green-300' : ''}`}>
@@ -142,7 +144,8 @@ const VisitForm: React.FC<VisitFormProps> = ({
                             }}
                             onChange={(option: any) => {
                                 setSelectedEmployee(option);
-                                updateField('employeeId', option?.value || '');
+                                updateField("employeeId", option?.value || "");
+                                updateField("employeeName", option?.label || "");
                             }}
                         />
                         {errors.employeeId && (
