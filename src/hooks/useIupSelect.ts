@@ -37,7 +37,8 @@ export const useIupSelect = () => {
                 search: inputValue,
                 page: page,
                 limit: 20,
-                sort_order: 'desc'
+                sort_order: 'desc',
+                is_selection_iup: 'false'
             });
 
             if (response.success) {

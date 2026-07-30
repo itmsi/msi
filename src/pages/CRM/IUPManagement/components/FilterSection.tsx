@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import Button from '@/components/ui/button/Button';
+import { useLocation } from 'react-router-dom';
 // import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 // import { useSegementationSelect } from '@/hooks/useSegmentSelect';
 // import { SegmentSelectOption } from './IupInformtionsFormFields';
@@ -12,7 +13,7 @@ interface TerritoryFilters {
     status?: string;
     sort_by?: '' | 'updated_at' | 'created_at'
     is_contractor_count?: string;
-    is_selection_iup?: string;
+    is_selection_iup?:  'true' | 'false';
     island_id?: string;
     group_id?: string;
     area_id?: string;
@@ -78,34 +79,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     onClearFilters,
     onApplyFilters
 }) => {
-    // Use reusable segmentation select hook
-    // const {
-    //     segementationOptions,
-    //     inputValue: segmentationInputValue,
-    //     handleInputChange: handleSegmentationInputChange,
-    //     pagination: segmentationPagination,
-    //     handleMenuScrollToBottom: handleSegmentationMenuScrollToBottom,
-    //     initializeOptions: initializeSegementationOptions
-    // } = useSegementationSelect();
-
-    // Segmentation states
-    // const [selectedSegment, setSelectedSegment] = useState<SegmentSelectOption | null>(null);
-    
-    // State for other filter values
+    const location = useLocation();
     const [filters, setFilters] = useState<TerritoryFilters>({});
-    // const [filterValues, setFilterValues] = useState<{[key: string]: string}>({
-    //     status: '',
-    //     sort_by: ''
-    // });
-
-    // Initialize segmentation options
-    // useEffect(() => {
-    //     initializeSegementationOptions();
-    // }, [initializeSegementationOptions]);
-    
     const params = new URLSearchParams(location.search);
 
-    
     // TERRITORY SELECTION LOGIC
     const {
         territories,
@@ -123,6 +100,15 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     useEffect(() => {
         fetchTerritories();
     }, []);
+    useEffect(() => {
+        setFilters({
+            status: params.get('status') || '',
+            is_contractor_count: params.get('is_contractor_count') || '',
+            is_selection_iup: (params.get('is_selection_iup') as TerritoryFilters['is_selection_iup']) || 'true',
+            sort_by: parseSortBy(params.get('sort_by'))
+        });
+    }, [location.search]);
+    
     useEffect(() => {
         if (!territories.length) return;
 
@@ -161,7 +147,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         setFilters({
             status: params.get('status') || '',
             is_contractor_count: params.get('is_contractor_count') || '',
-            is_selection_iup: params.get('is_selection_iup') || 'true',
+            is_selection_iup: params.get('is_selection_iup') as TerritoryFilters['is_selection_iup'] || 'true',
             sort_by: parseSortBy(params.get('sort_by'))
         });
     }, [location.search]);
