@@ -208,7 +208,7 @@ const AppSidebar: React.FC = () => {
                             allowedRoles: ['Area Structure CRM'] 
                         },
                         { 
-                            name: "Area IUP",
+                            name: "Map IUP",
                             path: buildPath("/crm/iup"),
                             allowedRoles: ['IUP Territory CRM'] 
                         },
