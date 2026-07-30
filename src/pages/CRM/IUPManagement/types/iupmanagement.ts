@@ -14,6 +14,7 @@ export interface IupRequest {
     iup_segment_id?: string;
     is_contractor_count?: string | null;
     is_admin?: boolean;
+    is_selection_iup?: string | null;
 }
 export interface IupFilters {
     search: string;

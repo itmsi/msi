@@ -1066,7 +1066,8 @@ p {
     overflow: hidden;
 }
 .ai-border-static {
-    background: #ede9fe; /* purple-100, garis diam saat idle */
+    background: #dbeafe; 
+    border:solid 3px transparent;
 }
 .ai-border-spinning {
     background: transparent;
@@ -1079,12 +1080,12 @@ p {
     height: 200%;
     background: conic-gradient(
         from 0deg,
-        transparent 0deg,
-        #c4b5fd 40deg,
-        #a78bfa 90deg,
-        #ec4899 140deg,
-        transparent 200deg,
-        transparent 360deg
+    transparent 0deg,
+    #93c5fd 40deg,
+    #22d3ee 90deg,
+    #0253a5 140deg,
+    transparent 200deg,
+    transparent 360deg
     );
     animation: aiBorderSpin 1.6s linear infinite;
 }
@@ -1096,16 +1097,16 @@ p {
     z-index: 1;
 }
 .ai-summary-gradient {
-    background: linear-gradient(
-        120deg,
-        rgb(245, 243, 255) 0%,
-        rgb(237, 233, 254) 25%,
-        rgb(243, 232, 255) 50%,
-        rgb(237, 233, 254) 75%,
-        rgb(245, 243, 255) 100%
-    );
-    background-size: 300% 300%;
-    animation: aiGradientShift 8s ease-in-out infinite;
+  background: linear-gradient(
+      120deg,
+      rgb(235, 244, 255) 0%,
+      rgb(199, 224, 248) 25%,
+      rgb(214, 232, 251) 50%,
+      rgb(199, 224, 248) 75%,
+      rgb(235, 244, 255) 100%
+  );
+  background-size: 300% 300%;
+  animation: aiGradientShift 8s ease-in-out infinite;
 }
 @keyframes aiGradientShift {
     0% { background-position: 0% 50%; }
@@ -1119,15 +1120,26 @@ p {
     .ai-generate-btn:hover:not(:disabled) { transform: none; }
 }
 .ai-generate-btn {
-    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 45%, #ec4899 100%);
+    --tw-gradient-position: 135deg;
+    --tw-gradient-from: #0253a5;
+    --tw-gradient-from-position: 0%;
+    --tw-gradient-via: var(--color-blue-600) /* #155dfc */;
+    --tw-gradient-via-position: 45%;
+    --tw-gradient-to: #0891b2;
+    --tw-gradient-to-position: 100%;
+
+    --tw-gradient-via-stops: var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-via-stops);
+
+    background: linear-gradient(var(--tw-gradient-stops));
     background-size: 200% 200%;
     background-position: 0% 0%;
-    box-shadow: 0 1px 2px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 1px 2px rgba(2, 83, 165, 0.3);
     transition: background-position 0.5s ease, box-shadow 0.25s ease, transform 0.2s ease;
 }
 .ai-generate-btn:hover:not(:disabled) {
     background-position: 100% 100%;
-    box-shadow: 0 4px 14px rgba(168, 85, 247, 0.5);
+    box-shadow: 0 4px 14px rgba(21, 93, 252, 0.5);
     transform: translateY(-1px) scale(1.03);
 }
 .ai-generate-btn:active:not(:disabled) {
