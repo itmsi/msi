@@ -28,8 +28,8 @@ export const classifyEntry = (e: IupSurveyItem): SurveyEntryType => {
     if (e.file_name && /\.(mp4|mov|avi|mkv|webm)$/i.test(e.file_name)) return 'video';
     // if (e.file_name && /\.(jpg|jpeg|png|gif|webp|heic)$/i.test(e.file_name)) return 'image';
     if (e.source_type === 'image') return 'image';
-    if (e.source_type === 'Voice') return 'voice';
-    if (e.source_type === 'Location') return 'location';
+    if (e.source_type === 'voice') return 'voice';
+    if (e.source_type === 'location') return 'location';
     if (e.description) return 'chat';
     return 'empty';
 };
