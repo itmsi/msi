@@ -1,8 +1,8 @@
 import moment from 'moment';
-import { LuMapPin, LuMic, LuVideo, LuMessageSquare, LuImage } from 'react-icons/lu';
+import { LuMapPin, LuMic, LuVideo, LuMessageSquare, LuImage, LuFile } from 'react-icons/lu';
 import { IupSurveyItem } from '../../types/iupmanagement';
 
-export type SurveyEntryType = 'video' | 'voice' | 'image' | 'location' | 'chat' | 'empty';
+export type SurveyEntryType = 'video' | 'voice' | 'image' | 'location' | 'chat' | 'file' | 'empty';
 
 interface TypeConfigEntry {
     label: string;
@@ -21,6 +21,7 @@ export const TYPE_CONFIG: Record<SurveyEntryType, TypeConfigEntry> = {
     image: { label: 'Image', icon: LuImage, color: 'text-violet-700', bg: 'bg-violet-100', dot: 'bg-violet-500' },
     location: { label: 'Location', icon: LuMapPin, color: 'text-slate-700', bg: 'bg-slate-200', dot: 'bg-slate-500' },
     chat: { label: 'Text', icon: LuMessageSquare, color: 'text-slate-600', bg: 'bg-slate-100', dot: 'bg-slate-400' },
+    file: { label: 'File', icon: LuFile, color: 'text-slate-600', bg: 'bg-slate-100', dot: 'bg-slate-400' },
     empty: { label: 'Empty', icon: LuMessageSquare, color: 'text-slate-400', bg: 'bg-slate-50', dot: 'bg-slate-300' },
 };
 
@@ -29,6 +30,7 @@ export const classifyEntry = (e: IupSurveyItem): SurveyEntryType => {
     // if (e.file_name && /\.(jpg|jpeg|png|gif|webp|heic)$/i.test(e.file_name)) return 'image';
     if (e.source_type === 'image') return 'image';
     if (e.source_type === 'voice') return 'voice';
+    if (e.source_type === 'file') return 'file';
     if (e.source_type === 'location') return 'location';
     if (e.description) return 'chat';
     return 'empty';
@@ -79,4 +81,9 @@ export const parseLatLng = (desc: string) => {
     }
 
     return null;
+};
+export const getFileExtension = (fileName?: string | null): string | null => {
+    if (!fileName) return null;
+    const match = fileName.match(/\.([a-zA-Z0-9]+)$/);
+    return match ? match[1].toLowerCase() : null;
 };
