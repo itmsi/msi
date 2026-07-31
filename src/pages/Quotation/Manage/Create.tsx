@@ -542,7 +542,9 @@ export default function CreateQuotation() {
                 const newQuotationItem: QuotationItem = {
                     componen_product_id: apiProductData.componen_product_id,
                     componen_product_name: apiProductData.componen_product_name || selectedProduct.label || '',
+                    show_componen_product_name: apiProductData.componen_product_name || selectedProduct.label || '',
                     code_unique: apiProductData.code_unique || '',
+                    cp_code_unique: apiProductData.cp_code_unique || '',
                     msi_model: apiProductData.msi_model || '',
                     msi_product: apiProductData.msi_product || '',
                     segment: apiProductData.segment || '',
@@ -659,7 +661,9 @@ export default function CreateQuotation() {
             [productId]: {
                 componen_product_id: existingItem.componen_product_id,
                 componen_product_name: existingItem.componen_product_name,
+                show_componen_product_name: existingItem.componen_product_name,
                 code_unique: existingItem.code_unique || '',
+                cp_code_unique: existingItem.cp_code_unique || '',
                 msi_model: existingItem.msi_model || '',
                 msi_product: existingItem.msi_product || '',
                 segment: existingItem.segment || '',

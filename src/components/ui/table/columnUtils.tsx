@@ -133,6 +133,7 @@ export const createActionsColumn = (actions: Array<{
     width?: string;
     title?: string;
     disable?: (row: any) => boolean;
+    pinned?: 'left' | 'right';
 }>): TableColumn<any> => ({
     name: actions[0]?.title || 'Actions',
     cell: (row: any) => (
@@ -162,6 +163,7 @@ export const createActionsColumn = (actions: Array<{
     center: true,
     id: `actions-${actions.map(a => a.title).join('-')}`,
     ignoreRowClick: true,
+    ...(actions[0]?.pinned && { pinned: actions[0]?.pinned  }),
 });
 // Badge component for status display
 export const StatusBadge: React.FC<{

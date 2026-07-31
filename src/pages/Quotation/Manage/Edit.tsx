@@ -222,15 +222,17 @@ export default function EditQuotation() {
                 status: (data.status === 'submit' || data.status === 'draft') ? data.status : 'draft',
                 manage_quotation_items: data.manage_quotation_items?.map((item: any) => ({
                     componen_product_id: item.componen_product_id || '',
-                    componen_product_name: item.cp_componen_product_name || '',
-                    code_unique: item.cp_code_unique || '',
-                    segment: item.cp_segment || '',
-                    msi_model: item.cp_msi_model || '',
-                    msi_product: item.cp_msi_product || '',
-                    wheel_no: item.cp_wheel_no || '',
-                    engine: item.cp_engine || '',
-                    volume: item.cp_volume || '',
-                    horse_power: item.cp_horse_power || '',
+                    componen_product_name: item.componen_product_name || '',
+                    show_componen_product_name: item.cp_componen_product_name || '',
+                    code_unique: item.code_unique || '',
+                    cp_code_unique: item.cp_code_unique || '',
+                    segment: item.segment || '',
+                    msi_model: item.msi_model || '',
+                    msi_product: item.msi_product || '',
+                    wheel_no: item.wheel_no || '',
+                    engine: item.engine || '',
+                    volume: item.volume || '',
+                    horse_power: item.horse_power || '',
                     market_price: item.cp_market_price || '',
                     product_type: item.product_type || '',
                     image: item.images || [],
@@ -708,7 +710,9 @@ export default function EditQuotation() {
                 const newQuotationItem: QuotationItem = {
                     componen_product_id: apiProductData.componen_product_id,
                     componen_product_name: apiProductData.componen_product_name || selectedProduct.label || '',
+                    show_componen_product_name: apiProductData.componen_product_name || selectedProduct.label || '',
                     code_unique: apiProductData.code_unique || '',
+                    cp_code_unique: apiProductData.cp_code_unique || '',
                     msi_model: apiProductData.msi_model || '',
                     msi_product: apiProductData.msi_product || '',
                     segment: apiProductData.segment || '',
@@ -824,7 +828,9 @@ export default function EditQuotation() {
                 [productId]: {
                     componen_product_id: existingItem.componen_product_id,
                     componen_product_name: existingItem.componen_product_name,
+                    show_componen_product_name: existingItem.componen_product_name,
                     code_unique: existingItem.code_unique || '',
+                    cp_code_unique: existingItem.cp_code_unique || '',
                     msi_model: existingItem.msi_model || '',
                     msi_product: existingItem.msi_product || '',
                     segment: existingItem.segment || '',
@@ -915,6 +921,7 @@ export default function EditQuotation() {
             items[itemIndex] = {
                 ...currentItem,
                 componen_product_name: updatedProductData.componen_product_name || currentItem.componen_product_name,
+                code_unique: updatedProductData.code_unique || currentItem.code_unique,
                 msi_model: updatedProductData.msi_model || currentItem.msi_model,
                 msi_product: updatedProductData.msi_product || currentItem.msi_product,
                 segment: updatedProductData.segment || currentItem.segment,
@@ -955,16 +962,16 @@ export default function EditQuotation() {
     const productColumns: TableColumn<QuotationItem>[] = [
         {
             name: 'Product Name',
-            selector: (row) => row.componen_product_name,
+            selector: (row) => row.show_componen_product_name,
             cell: (row, index) => (
                 <>
                     <div className="font-medium">
-                        {row.componen_product_name}
+                        {row.show_componen_product_name}
                     </div>
                     <Input
                         type='hidden'
-                        value={row.componen_product_name}
-                        onChange={(e) => updateItemById(index as number, 'componen_product_name', e.target.value)}
+                        value={row.show_componen_product_name}
+                        onChange={(e) => updateItemById(index as number, 'show_componen_product_name', e.target.value)}
                         className="border-0 border-b-1 rounded-none p-1 px-3 w-full w-[480px]"
                         placeholder="Product name"
                         readonly={true}
