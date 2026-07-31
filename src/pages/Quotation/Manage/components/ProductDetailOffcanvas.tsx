@@ -35,7 +35,6 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
 }) => {
     const { langField } = useLanguage(quotationLabels);
     const { langField: langFieldPDF } = useLanguage(quotationLabelPDF);
-
     // Helper function to translate specification labels
     const translateSpecLabel = (label: string): string => {
         const specMap: { [key: string]: string } = {
@@ -407,7 +406,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                         </div>
                         <div className='md:col-span-3 space-y-1'>
                             <p className="text-gray-700 text-sm">
-                                {initialData.code_unique || 'n/a'}
+                                {initialData.cp_code_unique || 'n/a'}
                             </p>
                             <p className="font-bold text-gray-900">
                                 {initialData.msi_model || 'n/a'} {initialData.msi_product ? ' - ' + initialData.msi_product : ''}
@@ -472,11 +471,11 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {langField('productName')}
                                 </label>
-                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.componen_product_name || '-'}
-                                </p>
+                                </p> */}
                                 <Input
-                                    type="hidden"
+                                    // type="hidden"
                                     value={initialData.componen_product_name || ''}
                                     onChange={(e) => handleFieldUpdate('componen_product_name', e.target.value)}
                                     placeholder={langField('enterProductName')}
@@ -487,11 +486,11 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {langField('uniqueCode')}
                                 </label>
-                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.code_unique || '-'}
-                                </p>
+                                </p> */}
                                 <Input
-                                    type="hidden"
+                                    // type="hidden"
                                     value={initialData.code_unique || ''}
                                     onChange={(e) => handleFieldUpdate('code_unique', e.target.value)}
                                     placeholder={langField('enterUniqueCode')}
@@ -502,11 +501,11 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {langField('segment')}
                                 </label>
-                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.segment || '-'}
-                                </p>
+                                </p> */}
                                 <Input
-                                    type="hidden"
+                                    // type="hidden"
                                     value={initialData.segment || ''}
                                     onChange={(e) => handleFieldUpdate('segment', e.target.value)}
                                     placeholder={langField('enterSegment')}
@@ -517,11 +516,11 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {langField('msiModel')}
                                 </label>
-                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.msi_model || '-'}
-                                </p>
+                                </p> */}
                                 <Input
-                                    type="hidden"
+                                    // type="hidden"
                                     value={initialData.msi_model || ''}
                                     onChange={(e) => handleFieldUpdate('msi_model', e.target.value)}
                                     placeholder={langField('enterMsiModel')}
@@ -532,11 +531,11 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {langField('msiProduct')}
                                 </label>
-                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.msi_product || '-'}
-                                </p>
+                                </p> */}
                                 <Input
-                                    type="hidden"
+                                    // type="hidden"
                                     value={initialData.msi_product || ''}
                                     onChange={(e) => handleFieldUpdate('msi_product', e.target.value)}
                                     placeholder={langField('enterMsiProduct')}
@@ -548,11 +547,11 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {langField('wheelNo')}
                                 </label>
-                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.wheel_no || '-'}
-                                </p>
+                                </p> */}
                                 <Input
-                                    type="hidden"
+                                    // type="hidden"
                                     value={initialData.wheel_no || ''}
                                     onChange={(e) => handleFieldUpdate('wheel_no', e.target.value)}
                                     placeholder={langField('enterWheelNo')}
@@ -563,11 +562,11 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 {langField('volume')}
                             </label>
-                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.volume || '-'}
-                                </p>
+                                </p> */}
                                 <Input
-                                    type="hidden"
+                                    // type="hidden"
                                     value={initialData.volume || ''}
                                     onChange={(e) => handleFieldUpdate('volume', e.target.value)}
                                     placeholder={langField('enterVolume')}
@@ -579,11 +578,11 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {langField('horsePower')}
                                 </label>
-                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
                                     {initialData.horse_power || '-'}
-                                </p>
+                                </p> */}
                                 <Input
-                                    type="hidden"
+                                    // type="hidden"
                                     value={initialData.horse_power || ''}
                                     onChange={(e) => handleFieldUpdate('horse_power', e.target.value)}
                                     placeholder={langField('enterHorsePower')}

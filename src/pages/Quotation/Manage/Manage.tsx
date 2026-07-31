@@ -37,7 +37,6 @@ const ManageQuotations: React.FC = () => {
         handleSearchChange,
         handleClearFilters,
         handleFilterChange,
-        handleEdit,
         handleDelete,
         handleDownload,
         handleDuplicate,
@@ -58,6 +57,7 @@ const ManageQuotations: React.FC = () => {
     const columns = useMemo<TableColumn<ManageQuotationItem>[]>(
         () => [
             {
+                id: 'manage_quotation_no',
                 name: langField('quotationNo'),
                 selector: (row) => row.manage_quotation_no,
                 cell: (row) => (
@@ -74,14 +74,16 @@ const ManageQuotations: React.FC = () => {
                     </div>
                 </>
                 ),
-                width: '220px',
+                width: '220px'
             },
             {
+                id: 'customer_name',
                 name: langField('customerName'),
                 selector: (row) => row.customer_name,
                 wrap: true,
             },
             {
+                id: 'quotation_for',
                 name: langField('quotationFor'),
                 selector: (row) => row.quotation_for || 'customer',
                 cell: (row) => (
@@ -93,10 +95,12 @@ const ManageQuotations: React.FC = () => {
                 width: '140px',
             },
             {
+                id: 'island_name',
                 name: langField('island'),
                 selector: (row) => row.island_name,
             },
             {
+                id: 'status',
                 name: langField('status'),
                 selector: (row) => row.status,
                 cell: (row) => {
@@ -110,6 +114,7 @@ const ManageQuotations: React.FC = () => {
                 center: true,
             },
             {
+                id: 'manage_quotation_grand_total',
                 name: langField('grandTotal'),
                 selector: (row) => row.manage_quotation_grand_total,
                 cell: (row) => (
@@ -117,6 +122,7 @@ const ManageQuotations: React.FC = () => {
                 ),
             },
             {
+                id: 'updated_at',
                 name: langField('updatedBy'),
                 selector: row => row.updated_at || '',
                 sortable: false,
@@ -139,6 +145,8 @@ const ManageQuotations: React.FC = () => {
                     className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                     tooltip: langField('download'),
                     permission: 'read',
+                    // pinned: 'right',
+                    width: '150px'
                 },
                 {
                     icon: MdContentCopy,
@@ -156,7 +164,7 @@ const ManageQuotations: React.FC = () => {
                 }
             ]),
         ],
-        [lang, langField, handleEdit, handleDelete, handleDuplicate]
+        [lang, langField, handleDelete, handleDuplicate]
     );
 
     const SearchAndFilters = useMemo(() => (
@@ -290,7 +298,7 @@ const ManageQuotations: React.FC = () => {
                         striped={false}
                         persistTableHead
                         borderRadius="8px"
-                        onRowClicked={handleEdit}
+                        // onRowClicked={handleEdit}
                     />
                 </div>
             </div>

@@ -21,6 +21,7 @@ export interface QuotationItem {
     componen_product_id: string;
     componen_product_name: string;
     code_unique?: string;
+    cp_code_unique?: string;
     segment: string;
     msi_model: string;
     msi_product: string;
@@ -44,6 +45,9 @@ export interface QuotationItem {
     manage_quotation_item_accessories?: QuotationItemAccessory[]; // Nested accessories
     manage_quotation_item_specifications?: QuotationItemSpecification[]; // Nested specifications
     componen_type?: number; // EV type support (4: OFF ROAD EV, 5: ON ROAD EV)
+
+    show_componen_product_name: string,
+
 }
 export interface imageItems {
     image_id: string;
@@ -472,6 +476,7 @@ export interface ManageQuotationItemPDF {
     manage_quotation_lead_time: string | null;
     componen_product_unit_model: string;
     componen_product_name: string;
+    cp_componen_product_name: string;
     product_type: string;
     quantity: number;
     price: string;

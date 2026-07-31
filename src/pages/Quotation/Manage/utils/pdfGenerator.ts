@@ -375,7 +375,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     // TABEL ITEM QUOTATION
     const itemData = data.manage_quotation_items.map((spec, index) => [
         (index + 1).toString() + '.',
-        spec.componen_product_name,
+        spec.cp_componen_product_name,
         spec.componen_product_unit_model || '-',
         formatCurrency(spec.price),
         spec.quantity.toString() || '-',

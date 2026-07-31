@@ -88,7 +88,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
     const handleFilterChange = (filterId: string, selectedOption: FilterOption | null) => {
         if (filterId === 'status' || filterId === 'date_range') {
-            console.log(`${filterId} filter:`, selectedOption?.value);
+            // console.log(`${filterId} filter:`, selectedOption?.value);
             return;
         }
         

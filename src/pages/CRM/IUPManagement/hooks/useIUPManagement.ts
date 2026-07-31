@@ -90,8 +90,8 @@ export const useIupManagement = () => {
             setError(null);
             
             const response = await IupService.getIUPManagement({
-                page: params?.page || pagination.page,
-                limit: params?.limit || pagination.limit,
+                page: urlPage,
+                limit: urlLimit,
                 sort_by: params?.sort_by || "",
                 ...urlFilters,
                 ...params

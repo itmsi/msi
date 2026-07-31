@@ -12,12 +12,16 @@ export interface ItemProductData {
 export interface ItemProduct {
     componen_product_id: string;
     code_unique: string;
+    cp_code_unique: string;
     segment: string;
     msi_model: string;
     msi_product: string;
     wheel_no: string;
     engine: string;
     horse_power: string;
+    
+    show_componen_product_name: string,
+
     market_price: string;
     selling_price_star_1: string;
     selling_price_star_2: string;
