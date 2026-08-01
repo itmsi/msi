@@ -107,8 +107,8 @@ export const useIupRkab = () => {
         setEditingId(visit.iup_rkab_id);
         setForm({
             year: visit.iup_rkab_year,
-            current: Number(visit.iup_rkab_current_production),
-            target: Number(visit.iup_rkab_target_production),
+            current: visit.iup_rkab_current_production,
+            target: visit.iup_rkab_target_production,
         });
         setErrors({});
         setShowForm(true);
@@ -132,8 +132,8 @@ export const useIupRkab = () => {
     const toPayload = (): Omit<CreateIupRkabPayload, "iup_rkab_id"> => ({
         iup_id: id ? id : '',
         iup_rkab_year: form.year,
-        iup_rkab_current_production: Number(form.current),
-        iup_rkab_target_production: Number(form.target)
+        iup_rkab_current_production: form.current,
+        iup_rkab_target_production: form.target
     });
 
     /** Validasi form, lalu kirim create/update ke API. Return true kalau sukses. */

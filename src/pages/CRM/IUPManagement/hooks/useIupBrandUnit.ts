@@ -7,7 +7,7 @@ import { IupService } from '../services/iupManagementService';
 
 export interface BrandUnitFormState {
     name: string;
-    qty: number;
+    qty: number | string;
 }
 
 export interface BrandUnitFormErrors {
@@ -30,7 +30,8 @@ const validateBrandForm = (form: BrandUnitFormState): BrandUnitFormErrors => {
         errors.name = "Judul minimal 3 karakter";
     }
 
-    if (form.qty <= 0) {
+    const qty = Number(form.qty);
+    if (qty <= 0) {
         errors.qty = "Kuantitas wajib diisi dan lebih besar dari 0";
     }
     return errors;
@@ -134,7 +135,7 @@ export const useIupBrandUnit = () => {
     const toPayload = (): Omit<IupBrandUnitPayload, "iup_visit_history_id"> => ({
         iup_id: id ? id : '',
         iup_brand_unit_name: form.name,
-        iup_brand_unit_qty: Number(form.qty)
+        iup_brand_unit_qty: form.qty
     });
 
     /** Validasi form, lalu kirim create/update ke API. Return true kalau sukses. */
