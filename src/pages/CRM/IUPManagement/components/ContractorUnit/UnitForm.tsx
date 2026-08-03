@@ -1,6 +1,7 @@
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import Button from '@/components/ui/button/Button';
+import { handleDecimalInput } from '@/helpers/generalHelper';
 import { LuX, LuCheck, LuLoaderCircle } from 'react-icons/lu';
 
 interface BrandUnitFormValues {
@@ -19,7 +20,8 @@ interface BrandUnitFormProps {
     errors: BrandUnitFormErrors;
     submitting: boolean;
     updateField: (field: keyof BrandUnitFormValues, value: string) => void;
-    handleQtyChange: (value: string) => void;
+    // handleQtyChange: (value: string) => void;
+    handleQtyChange: (field: keyof BrandUnitFormValues, value: string | number) => void;
     closeForm: () => void;
     handleSubmitForm: () => void;
 }
@@ -57,11 +59,24 @@ export default function BrandUnitForm({
                     <Label htmlFor="brand-unit-qty">Qty</Label>
                     <Input
                         id="brand-unit-qty"
-                        type="number"
-                        min="1"
+                        // type="number"
+                        // min="1"
                         value={form.qty}
                         placeholder="0"
-                        onChange={(e) => handleQtyChange(e.target.value)}
+                        // onChange={(e) => handleQtyChange(e.target.value)}
+                        
+                        onChange={(e) => {
+                            const rawValue = e.target.value;
+                            
+                            handleDecimalInput(
+                                rawValue,
+                                (validValue) => handleQtyChange('qty', validValue),
+                                () => handleQtyChange('qty', 0),
+                                true,
+                                9, // maxIntegerDigits
+                                4 // maxDecimalDigits
+                            );
+                        }}
                         className={errors.qty ? 'border-red-500' : ''}
                         hint={errors.qty}
                         error={!!errors.qty}

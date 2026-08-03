@@ -10,6 +10,7 @@ import type { IupBrandUnitItem } from '../../types/iupmanagement';
 import { LuPencil, LuTrash2, LuLoaderCircle, LuCheck, LuX } from 'react-icons/lu';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
+import { handleDecimalInput } from '@/helpers/generalHelper';
 
 const UnitSection: React.FC = () => {
     const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; iup_brand_unit_id?: string }>({ show: false });
@@ -50,15 +51,16 @@ const UnitSection: React.FC = () => {
         }
     };
 
-    const handleQtyChange = (value: string) => {
-        const qty = Number(value);
-        updateField('qty', Number.isNaN(qty) ? 0 : qty);
-    };
+    // const handleQtyChange = (value: string) => {
+    //     // const qty = Number(value);
+    //     // updateField('qty', Number.isNaN(qty) ? 0 : qty);
+    //     updateField('qty', value);
+    // };
 
-    const handleInlineQtyChange = (value: string) => {
-        const qty = Number(value);
-        updateField('qty', Number.isNaN(qty) ? 0 : qty);
-    };
+    // const handleInlineQtyChange = (value: string) => {
+    //     // const qty = (value);
+    //     updateField('qty', value);
+    // };
 
     const columns: TableColumn<IupBrandUnitItem>[] = [
         {
@@ -103,11 +105,22 @@ const UnitSection: React.FC = () => {
                     return (
                         <div className="w-full py-2">
                             <Input
-                                type="number"
-                                min="1"
                                 value={form.qty}
                                 placeholder="0"
-                                onChange={(e) => handleInlineQtyChange(e.target.value)}
+                                // onChange={(e) => handleInlineQtyChange(e.target.value)}
+                                
+                                onChange={(e) => {
+                                    const rawValue = e.target.value;
+                                    
+                                    handleDecimalInput(
+                                        rawValue,
+                                        (validValue) => updateField('qty', validValue),
+                                        () => updateField('qty', 0),
+                                        true,
+                                        9, // maxIntegerDigits
+                                        4 // maxDecimalDigits
+                                    );
+                                }}
                                 className={errors.qty ? 'border-red-500' : ''}
                                 hint={errors.qty}
                                 error={!!errors.qty}
@@ -230,7 +243,8 @@ const UnitSection: React.FC = () => {
                     errors={errors}
                     submitting={submitting}
                     updateField={updateField}
-                    handleQtyChange={handleQtyChange}
+                    // handleQtyChange={handleQtyChange}
+                    handleQtyChange={updateField}
                     closeForm={closeForm}
                     handleSubmitForm={handleSubmitForm}
                 />
