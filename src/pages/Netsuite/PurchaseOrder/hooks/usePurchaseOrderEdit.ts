@@ -360,7 +360,7 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
             id: `${selectedProduct.value}-${Date.now()}`,
             product_id: selectedProduct.value,
             product_name: selectedProduct.data?.displayName || selectedProduct.label,
-            itemId: parseInt(selectedProduct.data?.internalId) || parseInt(selectedProduct.value),
+            itemId: Number(selectedProduct.data?.internalId) || Number(selectedProduct.value),
             qty: 1,
             rate: 0,
             amount: 0,
