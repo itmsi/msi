@@ -20,6 +20,7 @@ export default function Manage() {
 
     const {
         billPayments,
+        syncInfo,
         loading,
         error,
         pagination,
@@ -296,6 +297,11 @@ export default function Manage() {
                     </div>
                 </div>
 
+                {
+                    syncInfo && (<>
+                        <span className='block text-xs text-green-600 pe-6 text-end mb-0'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
+                    </>)
+                }
                 {/* Search & Filter */}
                 <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
                     {SearchAndFilters}

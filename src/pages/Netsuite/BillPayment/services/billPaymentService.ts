@@ -32,7 +32,7 @@ export class BillPaymentService {
     static async syncBillPayments(): Promise<any> {
         const response = await apiPost<any>(
             `${API_BASE_URL}/netsuite/sync/modules`,
-            { module: 'bill_payment' }
+            { module: 'bill_payments' }
         );
 
         return response.data;

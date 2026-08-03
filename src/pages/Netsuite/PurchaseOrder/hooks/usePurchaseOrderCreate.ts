@@ -232,7 +232,7 @@ export const usePurchaseOrderCreate = () => {
             id: `${selectedProduct.value}-${Date.now()}`,
             product_id: selectedProduct.value,
             product_name: selectedProduct.data?.displayName || selectedProduct.label,
-            itemId: Number(selectedProduct.data?.itemId) || Number(selectedProduct.value),
+            itemId: Number(selectedProduct.data?.internalId) || Number(selectedProduct.value),
             qty: 1,
             rate: 0,
             amount: 0,

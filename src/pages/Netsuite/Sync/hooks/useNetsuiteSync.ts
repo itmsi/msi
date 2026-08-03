@@ -114,6 +114,12 @@ const INITIAL_ITEMS: Omit<MasterDataItem, 'status' | 'lastSync' | 'errorMessage'
         description: 'Sync customer return data from NetSuite',
         icon: 'customer_returns',
     },
+    {
+        key: 'quotations',
+        label: 'Quotations',
+        description: 'Sync quotations from NetSuite',
+        icon: 'quotations',
+    },
 ];
 
 // ─── Hook ───────────────────────────────────────────────────────────────────

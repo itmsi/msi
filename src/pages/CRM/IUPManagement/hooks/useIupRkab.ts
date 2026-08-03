@@ -148,19 +148,26 @@ export const useIupRkab = () => {
         const payload = toPayload();
         const isEdit = !!editingId;
         setSubmitting(true);
+        let respon: any;
         try {
             if (editingId) {
-                await IupService.updateIupRkab(editingId, { ...payload, iup_rkab_id: editingId });
+                respon = await IupService.updateIupRkab(editingId, { ...payload, iup_rkab_id: editingId });
             } else {
-                await IupService.createIupRkab(payload);
+                respon = await IupService.createIupRkab(payload);
             }
+            const responseStatus = respon?.status || respon?.response?.status
+            if (responseStatus !== 200 && responseStatus !== 201) {
+                toast.error(respon?.response?.data?.message || "Gagal menyimpan RKAB. Coba lagi.");
+                return false;
+            }
+
             toast.success(isEdit ? "RKAB berhasil diperbarui." : "RKAB berhasil ditambahkan.");
             await fetchRkabData();
             closeForm();
             return true;
         } catch (err) {
             console.error(err);
-            toast.error("Gagal menyimpan unit. Coba lagi.");
+            toast.error("Gagal menyimpan RKAB. Coba lagi.");
             return false;
         } finally {
             setSubmitting(false);
