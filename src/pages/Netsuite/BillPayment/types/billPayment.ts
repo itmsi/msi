@@ -124,10 +124,17 @@ export interface BillPaymentResponse {
     success: boolean;
     message: string;
     data: BillPaymentData;
+    sync_info: SyncInfo;
 }
 
 export interface BillPaymentDetailResponse {
     success: boolean;
     message: string;
     data: BillPayment;
+}
+
+export interface SyncInfo {
+    sync_status: boolean;
+    created_at: string;
+    created_by_name: string;
 }

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { BillPayment, BillPaymentRequest } from '../types/billPayment';
 import { BillPaymentService } from '../services/billPaymentService';
 import toast from 'react-hot-toast';
+import { SyncInfo } from '../../Quotation/types/quotation';
 
 export const useBillPayment = () => {
     const [searchValue, setSearchValue] = useState('');
@@ -15,6 +16,7 @@ export const useBillPayment = () => {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [syncInfo, setSyncInfo] = useState<SyncInfo | null>(null);
     const [billPayments, setBillPayments] = useState<BillPayment[]>([]);
     const [isSyncing, setIsSyncing] = useState(false);
 
@@ -73,6 +75,7 @@ export const useBillPayment = () => {
                 total_records: response.data.pagination.total || 0,
                 total_pages: response.data.pagination.totalPages || 0
             });
+            setSyncInfo(response.sync_info || null);
         } catch (err: any) {
             setError(err?.message || 'Failed to fetch bill payments data');
             console.error('Error fetching bill payments data:', err);
@@ -187,6 +190,7 @@ export const useBillPayment = () => {
 
     return {
         billPayments,
+        syncInfo,
         loading,
         error,
         pagination,
