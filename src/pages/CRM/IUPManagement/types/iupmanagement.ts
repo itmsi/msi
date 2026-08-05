@@ -45,6 +45,10 @@ export interface IupCustomerRkabItem {
     target_production: string | number;
     current_production: string | number;
 }
+export interface SalesPicItem {
+    id: string;
+    name: string;
+}
 export interface IupItemDetails {
     iup_id: string;
     iup_name: string;
@@ -58,6 +62,7 @@ export interface IupItemDetails {
     iup_code: string;
     iup_name_code: string;
     pic: string;
+    sales_pic?: SalesPicItem[] | null;
     mine_location: string;
     area_size_ha: string;
     regency_name: string;
@@ -95,6 +100,7 @@ export interface IupItem {
     contractor_count: string;
     updated_at: string;
     updated_by_name: string;
+    sales_pic?: SalesPicItem[] | null;
 }
 
 export interface Pagination {
@@ -126,6 +132,7 @@ export interface IupManagementFormData {
     segmentation_name_en: string;
     province_name: string;
     pic: string;
+    sales_pic: string[];
     mine_location: string;
     area_size_ha: number | string;
     regency_name: string;

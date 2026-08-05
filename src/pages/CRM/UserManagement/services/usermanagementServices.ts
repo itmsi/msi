@@ -1,5 +1,5 @@
 import { apiDelete, apiGet, apiPost, apiPut } from '@/helpers/apiHelper';
-import { EmployeeCRMRequest, EmployeeCRMResponse, EmployeeTerritoryRequest, EmployeeTerritoryResponse, GetUserAccessByIdResponse } from '../types/usermanagement';
+import { EmployeeCRMRequest, EmployeeCRMResponse, EmployeeTerritoryRequest, EmployeeTerritoryResponse, GetUserAccessByIdResponse, UserAccessData } from '../types/usermanagement';
 import { AuthService } from '@/services/authService';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -73,19 +73,33 @@ export class UsermanagementServices {
         const requestData: EmployeeCRMRequest = {
             employee_id: '',
             search: '',
+            page: 1,
+            limit: 30,
+            is_admin: API_IS_ADMIN,
             ...params
         };
         
-        const response = await apiPost(`${API_BASE_URL}/crm/employee-data-access/get-employee`, requestData as Record<string, any>);
+        const response = await apiPost(`${API_BASE_URL}/crm/employee-data-access/get`, requestData as Record<string, any>);
         const responseData = response.data as EmployeeCRMResponse;
         
         return responseData;
     }
     
-    // Get existing user access by ID
+    // Get employee by ID (menggunakan endpoint get dengan search employee_id)
     static async getUserEmployeeIdCRM(id: string): Promise<GetUserAccessByIdResponse> {
-        const response = await apiGet<GetUserAccessByIdResponse>(`${API_BASE_URL}/crm/employee-data-access/get-employee/${id}`);
-        return response.data;
+        const response = await apiPost<EmployeeCRMResponse>(`${API_BASE_URL}/crm/employee-data-access/get`, {
+            search: id,
+            employee_id: '',
+            page: 1,
+            limit: 1,
+            is_admin: API_IS_ADMIN
+        } as Record<string, any>);
+        const responseData = response.data as EmployeeCRMResponse;
+        const first = Array.isArray(responseData.data) && responseData.data.length > 0 ? responseData.data[0] : null;
+        return {
+            success: responseData.success,
+            data: first as unknown as UserAccessData
+        };
     }
     
 }

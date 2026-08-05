@@ -61,10 +61,15 @@ export interface GetUserAccessByIdResponse {
 export interface EmployeeCRMRequest {
     search: string;
     employee_id: string;
+    page?: number;
+    limit?: number;
+    is_admin?: boolean;
 }
 export interface EmployeeCRMItem {
     employee_id: string;
     employee_name: string;
+    employee_title?: string | null;
+    territories?: unknown[];
 }
 export interface EmployeeCRMResponse {
   success: boolean;

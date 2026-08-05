@@ -33,6 +33,7 @@ export const useIupManagementCreate = () => {
         segmentation_name_en: '',
         province_name: '',
         pic: '',
+        sales_pic: [],
         mine_location: '',
         area_size_ha: '',
         regency_name: '',
@@ -211,6 +212,14 @@ export const useIupManagementCreate = () => {
         }));
     };
 
+    // Sales PIC multi-select handler
+    const handleSalesPicChange = (ids: string[]) => {
+        setFormData(prev => ({
+            ...prev,
+            sales_pic: ids
+        }));
+    };
+
     const handleSubmit = async (e?: React.FormEvent | React.MouseEvent) => {
         e?.preventDefault();
         
@@ -282,6 +291,7 @@ export const useIupManagementCreate = () => {
                 sk_number: formData.sk_number || '',
                 iup_code: formData.iup_code || '',
                 pic: formData.pic || 'pic - kosong',
+                sales_pic: formData.sales_pic || [],
                 regency_name: formData.regency_name || selectedArea.name || '',
                 company_full_name: formData.company_full_name || formData.company_name,
                 segmentation_id: formData.segmentation_id || selectedIupZone.id || '',
@@ -324,6 +334,7 @@ export const useIupManagementCreate = () => {
         handleInputChange,
         handleSelectChange,
         handleDateChange, // Add date change handler
+        handleSalesPicChange,
         handleSubmit
     };
 }

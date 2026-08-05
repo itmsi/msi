@@ -2,26 +2,30 @@ import React from 'react';
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import { handleKeyPress } from '@/helpers/generalHelper';
+import IupSalesPicMultiSelect from './IupSalesPicMultiSelect';
 
 interface IupFormData {
     company_name: string;
     iup_code: string;
+    sales_pic: string[];
 }
 
 interface IupFormFieldsProps {
     formData: IupFormData;
     errors: Record<string, string>;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onSalesPicChange: (ids: string[]) => void;
 }
 
 const IupFormFields: React.FC<IupFormFieldsProps> = ({
     formData,
     errors,
-    onInputChange
+    onInputChange,
+    onSalesPicChange
 }) => {
     // Helper function untuk render input field dengan consistent styling
     const renderInput = (
-        name: keyof IupFormData,
+        name: Exclude<keyof IupFormData, 'sales_pic'>,
         label: string,
         type: string = 'text',
         required: boolean = false
@@ -51,6 +55,13 @@ const IupFormFields: React.FC<IupFormFieldsProps> = ({
             {renderInput('company_name', 'IUP Name', 'text', true)}
             {/* IUP Segmentation Selection */}
             {renderInput('iup_code', 'IUP Code', 'text', false)}
+            {/* Sales PIC - Multi Select (berdampingan dengan IUP Code) */}
+            <IupSalesPicMultiSelect
+                value={formData.sales_pic || []}
+                onChange={onSalesPicChange}
+                label="PIC"
+                placeholder="Select PIC..."
+            />
         </>
     );
 };

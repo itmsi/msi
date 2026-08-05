@@ -48,6 +48,7 @@ const EditIupManagement: React.FC = () => {
         // Form handlers
         handleInputChange,
         handleSelectChange,
+        handleSalesPicChange,
         handleSubmit
     } = useIupManagementEdit();
 
@@ -154,6 +155,7 @@ const EditIupManagement: React.FC = () => {
                         formData={formData}
                         errors={errors}
                         onInputChange={handleInputChange}
+                        onSalesPicChange={handleSalesPicChange}
                         territories={territories}
                         selection={territorySelection}
                         loading={territoriesLoading}

@@ -33,6 +33,7 @@ const CreateIup: React.FC = () => {
         handleInputChange,
         handleSelectChange,
         handleDateChange,
+        handleSalesPicChange,
         handleSubmit
     } = useIupManagementCreate();
     
@@ -75,6 +76,7 @@ const CreateIup: React.FC = () => {
                     formData={formData}
                     errors={errors}
                     onInputChange={handleInputChange}
+                    onSalesPicChange={handleSalesPicChange}
                     territories={territories}
                     selection={territorySelection}
                     loading={territoriesLoading}
