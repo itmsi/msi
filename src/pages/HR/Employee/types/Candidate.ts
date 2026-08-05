@@ -88,3 +88,60 @@ export interface CandidateListResponse {
     data: CandidateListResult;
     timestamp: string;
 }
+
+
+export type CandidateDetail = {
+    candidate_id: string;
+    company_id: string;
+    department_id: string;
+    title_id: string;
+    group_id: string;
+
+    candidate_number: string;
+    candidate_name: string;
+    candidate_email: string;
+    candidate_phone: string;
+
+    candidate_religion: string | null;
+    candidate_gender: string | null;
+    candidate_marital_status: string | null;
+
+    candidate_age: number | null;
+    candidate_date_birth: string | null;
+
+    candidate_nationality: string | null;
+    candidate_city: string | null;
+    candidate_state: string | null;
+    candidate_country: string | null;
+
+    candidate_address: string | null;
+
+    candidate_foto: string | null;
+    candidate_resume: string | null;
+
+    candidate_foto_path: string | null;
+    candidate_resume_path: string | null;
+
+    ptk_date: string | null;
+    offering_letter: string | null;
+
+    remark: string | null;
+    schedule_interview: string | null;
+
+    candidate_status: string;
+    candidate_status_offering_letter: string | null;
+
+    created_at: string;
+    created_by: string;
+    updated_at: string;
+    updated_by: string;
+
+    // join field
+    group_name: string;
+    company_name: string;
+    department_name: string;
+    title_name: string;
+
+    created_by_name: string;
+    updated_by_name: string;
+};
