@@ -8,6 +8,8 @@ import moment from 'moment';
 import Input from '@/components/form/input/InputField';
 import { ZoneFormErrors, ZoneFormState } from '../../hooks/useIupZoneSIte';
 import { PermissionGate } from '@/components/common/PermissionComponents';
+import { getSurveySectionForZoneName } from './data/zoneSurveySchemaMap';
+import SurveySectionTable from './SurveySectionTable';
 
 interface EvidenceFormProps {
     editingId: string | null;
@@ -21,6 +23,7 @@ interface EvidenceFormProps {
     updateFileLink: (idx: number, value: string) => void;
     addFileLinkRow: () => void;
     removeFileLinkRow: (idx: number) => void;
+    updateSurveyField: (key: string, value: string) => void;
     submitForm: () => void;
     closeForm: () => void;
 }
@@ -34,9 +37,11 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({
     updateFileLink,
     addFileLinkRow,
     removeFileLinkRow,
+    updateSurveyField,
     submitForm,
     closeForm,
 }) => {
+    const matchedSection = getSurveySectionForZoneName(form.title);
     return (
         <div className={`transition-all duration-200 ${!editingId ? ' border border-green-300' : ''}`}>
             <div className={`flex justify-between gap-2 px-12 py-3 group-hover:text-white bg-primary hover:bg-primary text-white`}>
@@ -69,6 +74,20 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({
                         hint={errors.title}
                     />
                 </div>
+
+                {matchedSection && (
+                    <div>
+                        <Label className="gap-1">
+                            {matchedSection.title}
+                        </Label>
+                        <SurveySectionTable
+                            section={matchedSection}
+                            values={form.surveyValues}
+                            onChangeField={updateSurveyField}
+                        />
+                    </div>
+                )}
+
                 <div>
                     <Label>
                         Link File

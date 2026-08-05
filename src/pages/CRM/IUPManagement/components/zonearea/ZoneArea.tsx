@@ -34,6 +34,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
         updateFileLink,
         addFileLinkRow,
         removeFileLinkRow,
+        updateSurveyField,
         confirmDelete,
         setConfirmDelete,
 
@@ -78,6 +79,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                                 updateFileLink={updateFileLink}
                                 addFileLinkRow={addFileLinkRow}
                                 removeFileLinkRow={removeFileLinkRow}
+                                updateSurveyField={updateSurveyField}
                                 submitForm={submitForm}
                                 closeForm={closeForm}
                             />
@@ -104,6 +106,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                     updateFileLink={updateFileLink}
                     addFileLinkRow={addFileLinkRow}
                     removeFileLinkRow={removeFileLinkRow}
+                    updateSurveyField={updateSurveyField}
                     submitForm={submitForm}
                     closeForm={closeForm}
                 />

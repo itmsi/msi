@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { IupZonaSiteItem, Pagination, ZonaSitePayload } from '../types/iupmanagement';
 import { IupService } from '../services/iupManagementService';
 import moment from 'moment';
+import { SurveyValues } from '../types/iupSurvey';
 
 
 export interface ZoneFormState {
@@ -14,6 +15,7 @@ export interface ZoneFormState {
     summaryPrompt?: string;
     summaryResponse?: string;
     sessionId?: string;
+    surveyValues: SurveyValues;
 }
 
 export interface ZoneFormErrors {
@@ -28,7 +30,20 @@ const emptyForm = (): ZoneFormState => ({
     date: new Date().toISOString().slice(0, 10),
     description: "",
     fileLink: [""],
+    surveyValues: {},
 });
+const parseSurveyValues = (raw: unknown): SurveyValues => {
+    if (!raw) return {};
+    if (typeof raw === "object") return raw as SurveyValues;
+    if (typeof raw === "string") {
+        try {
+            return JSON.parse(raw) as SurveyValues;
+        } catch {
+            return {};
+        }
+    }
+    return {};
+};
 
 // const isValidUrl = (value: string): boolean => {
 //     try {
@@ -153,6 +168,9 @@ export const useIupZoneSIte = () => {
             summaryPrompt: zone.summary_prompt_ai ?? undefined,
             summaryResponse: zone.summary_response_ai ?? undefined,
             sessionId: zone.session_id ?? undefined,
+            // TODO backend: field ini belum ada di IupZonaSiteItem, cast sementara
+            // sampai `iup_zona_site_survey_data` resmi ditambahkan ke response GET.
+            surveyValues: parseSurveyValues((zone as any).iup_zona_site_survey_data),
         });
         setErrors({});
         setShowForm(true);
@@ -192,8 +210,21 @@ export const useIupZoneSIte = () => {
             return { ...prev, fileLink: links.length ? links : [""] };
         });
     };
+    const updateSurveyField = (key: string, value: string) => {
+        setForm((prev) => ({
+            ...prev,
+            surveyValues: { ...prev.surveyValues, [key]: value },
+        }));
+    };
+
+    // TODO backend: tambahkan `iup_zona_site_survey_data?: SurveyValues` ke
+    // ZonaSitePayload di iupmanagement.ts begitu backend siap. Sementara pakai
+    // extended type lokal ini supaya tetap type-safe tanpa `any`.
+    type ZonaSitePayloadWithSurvey = Omit<ZonaSitePayload, "iup_zona_site_id"> & {
+        iup_zona_site_survey_data?: SurveyValues;
+    };
     
-    const toPayload = (): Omit<ZonaSitePayload, "iup_zona_site_id"> => ({
+    const toPayload = (): ZonaSitePayloadWithSurvey => ({
         iup_id: id ? id : '',
         iup_zona_site_name: form.title.trim(),
         iup_zona_site_date_last_survey: moment(form.date).format("YYYY-MM-DD"),
@@ -205,6 +236,7 @@ export const useIupZoneSIte = () => {
         summary_prompt_ai: form.summaryPrompt,
         summary_response_ai: form.summaryResponse,
         session_id: form.sessionId,
+        iup_zona_site_survey_data: form.surveyValues,
     });
 
     /** Validasi form, lalu kirim create/update ke API. Return true kalau sukses. */
@@ -298,6 +330,7 @@ export const useIupZoneSIte = () => {
         updateFileLink,
         addFileLinkRow,
         removeFileLinkRow,
+        updateSurveyField,
 
         submitForm,
     };
