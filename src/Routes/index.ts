@@ -153,7 +153,8 @@ const NanogridCalculator = lazy(() => import('@/pages/Nanogrid/Manage'));
 
 // ========================================
 // HR MODULE - Candidate/Interview
-const HRCandidateList = lazy(() => import('@/pages/HR/Candidate/index'));
+// const HRCandidateList = lazy(() => import('@/pages/HR/Candidate/index'));
+const HRCandidateList = lazy(() => import('@/pages/HR/Employee/Manage'));
 const HRCandidateCreate = lazy(() => import('@/pages/HR/Candidate/Create'));
 
 // AI Chat
