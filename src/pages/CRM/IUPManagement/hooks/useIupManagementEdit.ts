@@ -39,6 +39,7 @@ export const useIupManagementEdit = () => {
         segmentation_name_en: '',
         province_name: '',
         pic: '',
+        sales_pic: [],
         mine_location: '',
         area_size_ha: '',
         regency_name: '',
@@ -232,6 +233,7 @@ export const useIupManagementEdit = () => {
                     province_name: iup.province_name || '',
                     iup_code: iup.iup_code || '',
                     pic: iup.pic || '',
+                    sales_pic: Array.isArray(iup.sales_pic) ? iup.sales_pic.map((sp) => sp.id) : [],
                     mine_location: iup.mine_location || '',
                     area_size_ha: iup.area_size_ha || '',
                     regency_name: iup.regency_name || '',
@@ -310,6 +312,14 @@ export const useIupManagementEdit = () => {
         setFormData(prev => ({
             ...prev,
             [fieldName]: value
+        }));
+    };
+
+    // Sales PIC multi-select handler
+    const handleSalesPicChange = (ids: string[]) => {
+        setFormData(prev => ({
+            ...prev,
+            sales_pic: ids
         }));
     };
 
@@ -394,6 +404,7 @@ export const useIupManagementEdit = () => {
         handleInputChange,
         handleSelectChange,
         handleDateChange, // Add date change handler
+        handleSalesPicChange,
         handleSubmit,
         loadIupData
     };

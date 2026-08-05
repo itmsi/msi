@@ -21,7 +21,7 @@ export default function ManageIUPManagement() {
     const navigate = useNavigate();
     
     const params = new URLSearchParams(location.search);
-    const filterKeys = ['search', 'sort_order', 'sort_by', 'segmentation_id', 'island_id', 'group_id', 'area_id', 'iup_zone_id', 'iup_segment_id', 'status', 'is_contractor_count'];
+    const filterKeys = ['search', 'sort_order', 'sort_by', 'segmentation_id', 'island_id', 'group_id', 'area_id', 'iup_zone_id', 'iup_segment_id', 'status', 'is_contractor_count', 'is_selection_iup'];
     const hasActiveFilter = filterKeys.some(key => params.has(key) && params.get(key) !== '');
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(hasActiveFilter ? true : false);
     const {
@@ -106,6 +106,26 @@ export default function ManageIUPManagement() {
             name: 'Segmentation',
             selector: row => row.segmentation_name,
             width: '150px',
+            wrap: true,
+        },
+        {
+            name: 'PIC',
+            selector: row => (row.sales_pic || []).map(p => p.name).join(', '),
+            cell: (row) => (
+                <div className="flex flex-wrap gap-1 mt-1">
+                    {(row.sales_pic || []).map((pic, index) => (
+                        <span
+                            key={index}
+                            className="bg-[#eff6ff] py-1 px-2 text-[#1e40af] rounded-md border border-[#bbc7f0] text-sm"
+                        >
+                            {pic.name || pic.id || '-'}
+                        </span>
+                    ))}
+                    {(!row.sales_pic || row.sales_pic.length === 0) && (
+                        <span className="text-gray-400">-</span>
+                    )}
+                </div>
+            ),
             wrap: true,
         },
         {
