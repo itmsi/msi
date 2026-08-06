@@ -73,14 +73,18 @@ export const useEmployeeCRM = () => {
         return loadedOptions;
     }, []);
 
-        // Handle input change
+        // Handle input change (dipakai sebagai `loadOptions` react-select/async - trigger fetch)
     const handleInputChange = useCallback(async (inputValue: string) => {
         setInputValue(inputValue);
         setEmployeeOptions([]); // Clear existing options for new search
         setPagination({ page: 1, hasMore: true, loading: false });
-        
+
         return await loadEmployeeOptions(inputValue, []);
     }, [loadEmployeeOptions]);
+
+    const handleInputTextChange = useCallback((newInputValue: string) => {
+        setInputValue(newInputValue);
+    }, []);
 
     // Handle scroll to bottom - load next page
     const handleMenuScrollToBottom = useCallback(() => {
@@ -117,6 +121,7 @@ export const useEmployeeCRM = () => {
         // setActiveSales,
         // setUserNetsuite,
         handleInputChange,
+        handleInputTextChange,
         handleMenuScrollToBottom,
         initializeOptions,
         loadEmployeeOptions,

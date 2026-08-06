@@ -34,6 +34,7 @@ export default function IupSalesPicMultiSelect({
         pagination,
         inputValue: employeeInputValue,
         handleInputChange: handleEmployeeInputChange,
+        handleInputTextChange: handleEmployeeInputTextChange,
         handleMenuScrollToBottom: handleEmployeeMenuScrollToBottom,
         initializeOptions: initializeEmployeeOptions,
         getEmployeeById,
@@ -73,8 +74,11 @@ export default function IupSalesPicMultiSelect({
 
             // Fetch id yang belum dikenal satu per satu
             for (const id of missingIds) {
+                // sempat kosong ketika search baru dimulai) - skip supaya tidak duplikat
+                if (matched.some((m) => m.value === id)) continue;
+
                 const opt = await getEmployeeById(id);
-                if (aktif && opt) {
+                if (aktif && opt && !matched.some((m) => m.value === id)) {
                     matched.push(opt);
                 }
             }
@@ -115,7 +119,7 @@ export default function IupSalesPicMultiSelect({
                 onMenuScrollToBottom={handleEmployeeMenuScrollToBottom}
                 isLoading={pagination.loading}
                 inputValue={employeeInputValue}
-                onInputChange={handleEmployeeInputChange}
+                onInputChange={handleEmployeeInputTextChange}
                 onChangeMulti={(opts) => handleChange(opts as EmployeeSelectOption[])}
                 noOptionsMessage={() => 'No employee found'}
                 loadingMessage={() => 'Loading employees...'}
