@@ -83,8 +83,16 @@ export const useEmployeeCRM = () => {
     }, [loadEmployeeOptions]);
 
     const handleInputTextChange = useCallback((newInputValue: string) => {
+        if (newInputValue === '') {
+            // `defaultOptions` di-pass sebagai array statis (bukan `true`), jadi
+            // react-select/async TIDAK memanggil `loadOptions('')` lagi saat input
+            // dikosongkan - dia cuma fallback ke `defaultOptions` apa adanya.
+            // Refetch manual di sini supaya employeeOptions balik ke daftar lengkap.
+            handleInputChange('');
+            return;
+        }
         setInputValue(newInputValue);
-    }, []);
+    }, [handleInputChange]);
 
     // Handle scroll to bottom - load next page
     const handleMenuScrollToBottom = useCallback(() => {
