@@ -26,6 +26,7 @@ interface TerritorySelectorProps {
     formData: IupManagementFormData;
     errors: Record<string, string>;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onSalesPicChange: (ids: string[]) => void;
     territories: TerritoryOption[];
     selection: TerritorySelection;
     loading?: boolean;
@@ -44,6 +45,7 @@ const TerritorySelector: React.FC<TerritorySelectorProps> = ({
     formData,
     errors,
     onInputChange,
+    onSalesPicChange,
     territories,
     selection,
     loading = false,
@@ -181,6 +183,7 @@ const TerritorySelector: React.FC<TerritorySelectorProps> = ({
                     formData={formData}
                     errors={errors}
                     onInputChange={onInputChange}
+                    onSalesPicChange={onSalesPicChange}
                 />
 
             </div>

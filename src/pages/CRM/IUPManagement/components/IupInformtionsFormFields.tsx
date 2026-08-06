@@ -61,7 +61,7 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
         });
     };
     const renderInput = (
-        name: keyof IupManagementFormData,
+        name: Exclude<keyof IupManagementFormData, 'sales_pic'>,
         label: string,
         type: string = 'text',
         required: boolean = false
@@ -73,7 +73,7 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
             <Input
                 type={'text'}
                 name={name}
-                value={formData[name]}
+                value={formData[name] as string}
                 onKeyPress={type === 'number' ? allowOnlyNumeric : undefined}
                 onChange={onInputChange}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
