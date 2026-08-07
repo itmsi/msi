@@ -1,40 +1,39 @@
 // ---------------------------------------------------------------------------
-// Types untuk Survey Form — schema-driven, tiap section mewakili satu topik
-// di sheet "SITE VISIT SURVEY REPORT" (Jetty, PIT, ETO, EFO, dst).
+// Types untuk master zone site template — di-fetch dari
+// POST /crm/master_iup_zone_site/get, bukan lagi hardcoded di frontend.
 // ---------------------------------------------------------------------------
 
-export type SurveyFieldType = "text" | "number" | "select" | "textarea";
-
-export interface SurveyFieldOption {
-    label: string;
-    value: string;
-}
-
-export interface SurveyField {
-    /** Key unik secara global (dipakai sebagai key di SurveyValues). */
+export interface MasterZoneSiteField {
     key: string;
     label: string;
-    type: SurveyFieldType;
     unit?: string;
-    options?: SurveyFieldOption[];
     placeholder?: string;
 }
 
-export interface SurveySection {
-    /** Key unik section, dipetakan ke zona (mis. "jetty" ↔ Zone.schemaKey). */
+export interface MasterZoneSiteSection {
+    id: string;
     sectionKey: string;
     title: string;
-    fields: SurveyField[];
+    /** Field set untuk "Insert default data" — disuntikkan ke Remarks/description. */
+    field_data: MasterZoneSiteField[];
+    /** Field set untuk Insert Table di Guide modal — disuntikkan ke field guide. */
+    field_guide: MasterZoneSiteField[];
+    is_default: boolean;
+}
+
+export interface MasterZoneSiteRequest {
+    page: number;
+    limit: number;
+    search?: string;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+    is_default?: boolean;
+}
+
+export interface MasterZoneSiteListResponse {
+    success: boolean;
+    data: MasterZoneSiteSection[];
 }
 
 /** Flat map: field.key -> value yang diisi user. */
 export type SurveyValues = Record<string, string>;
-
-export interface SurveyFormProps {
-    /** Nilai awal (misal hasil load dari server/local storage). */
-    initialValues?: SurveyValues;
-    /** Dipanggil setiap kali ada perubahan nilai. */
-    onChange?: (values: SurveyValues) => void;
-    /** Section mana saja yang ditampilkan. Default: semua section di SURVEY_SCHEMA. */
-    sectionKeys?: string[];
-}

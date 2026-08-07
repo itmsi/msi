@@ -431,7 +431,7 @@ export const useAdministration = () => {
     };
 
     // Filter functions with debouncing
-    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     
     const handleFilterChange = useCallback((filterKey: keyof MenuFilters, value: string) => {
         setFilters(prev => ({
@@ -811,7 +811,7 @@ export const useCompany = () => {
     }, [fetchCompanies, pagination?.per_page]);
 
     // Filter functions with debouncing
-    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     
     const handleFilterChange = useCallback((filterKey: keyof CompanyFilters, value: string) => {
         setFilters(prev => ({
@@ -1138,7 +1138,7 @@ export const useDepartment = () => {
     }, [fetchDepartments]);
 
     // Filter change handler with debouncing
-    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     
     const handleFilterChange = useCallback((field: keyof DepartmentFilters, value: string) => {
         setFilters(prev => ({
@@ -1336,7 +1336,7 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
 
     const pendingRequestRef = useRef<boolean>(false);
     const lastRequestRef = useRef<number>(0);
-    const debouncedFetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const debouncedFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const debouncedFetch = useCallback((params: EmployeeListRequest, appendData: boolean = false) => {
         if (debouncedFetchTimeoutRef.current) {
@@ -1541,7 +1541,7 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
     };
 
     // Debounced filter change for search
-    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     
     const handleFilterChangeDebounced = useCallback((filterKey: keyof EmployeeFilters, value: string) => {
         setFilters(prev => ({
@@ -1733,7 +1733,7 @@ export const useUsersManage = (autoInit: boolean = true, initialFilters: Partial
 
     const pendingRequestRef = useRef<boolean>(false);
     const lastRequestRef = useRef<number>(0);
-    const debouncedFetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const debouncedFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const debouncedFetch = useCallback((params: UserListRequest, appendData: boolean = false) => {
         if (debouncedFetchTimeoutRef.current) {
@@ -1862,7 +1862,7 @@ export const useUsersManage = (autoInit: boolean = true, initialFilters: Partial
     };
 
     // Debounced filter change for search
-    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     
     const handleFilterChangeDebounced = useCallback((filterKey: keyof UsersFilters, value: string | boolean) => {
         setFilters(prev => ({
@@ -2028,7 +2028,7 @@ export const useRole = () => {
 
     const pendingRequestRef = useRef<boolean>(false);
     const lastRequestRef = useRef<number>(0);
-    const debouncedFetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const debouncedFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const debouncedFetch = useCallback((params: RoleListRequest) => {
         if (debouncedFetchTimeoutRef.current) {
@@ -2329,7 +2329,7 @@ export const useRole = () => {
     };
 
     // Debounced filter change for search
-    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     
     const handleFilterChangeDebounced = useCallback((filterKey: keyof RoleFilters, value: string) => {
         setFilters(prev => ({
@@ -2500,7 +2500,7 @@ export const usePosition = () => {
 
     const pendingRequestRef = useRef<boolean>(false);
     const lastRequestRef = useRef<number>(0);
-    const debouncedFetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const debouncedFetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const debouncedFetch = useCallback((params: PositionListRequest) => {
         if (debouncedFetchTimeoutRef.current) {
