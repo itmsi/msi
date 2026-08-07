@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import toast from 'react-hot-toast';
-import { PurchaseOrderService } from '../../PurchaseOrder/services/purchaseOrderService';
-import { Pagination, PurchaseOrderItem, ReceiptItem, ReceiveRequest, SyncInfo } from '../../PurchaseOrder/types/purchaseorder';
+import { ReceiptService } from '../services/receiptService';
+import { Pagination, ReceiptItem, ReceiptRequest, SyncInfo } from '../types/receipt';
 import { NetSuiteSyncService } from '../../Sync/services/netSuiteSyncService';
 
 export const useReceipt = (profileSSO?: number) => {
@@ -9,6 +9,7 @@ export const useReceipt = (profileSSO?: number) => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('desc');
     const [sortModify, setSortModify] = useState< 'created_at' | 'updated_at' | 'last_modified' | 'po_id' | ''>('created_at');
     const [statusFilter, setStatusFilter] = useState('');
+    const [typeFilter, setTypeFilter] = useState('');
     // const [subsidiaryFilter, setSubsidiaryFilter] = useState('');
     // const [locationFilter, setLocationFilter] = useState('');
     // const [approvalStatusFilter, setApprovalStatusFilter] = useState('');
@@ -28,18 +29,19 @@ export const useReceipt = (profileSSO?: number) => {
         paginationRef.current = pagination;
     }, [pagination]);
 
-    const fetchReceipt = useCallback(async (params?: Partial<ReceiveRequest>) => {
+    const fetchReceipt = useCallback(async (params?: Partial<ReceiptRequest>) => {
         try {
             setLoading(true);
             setError(null);
 
-            const response = await PurchaseOrderService.getReceiptById({
+            const response = await ReceiptService.getReceipts({
                 page: params?.page || pagination.page,
                 limit: params?.limit || pagination.limit,
-                sort_by: params?.sort_by || sortModify || 'po_id',
+                sort_by: params?.sort_by || sortModify || 'created_at',
                 sort_order: params?.sort_order || sortOrder || 'desc',
                 search: params?.search !== undefined ? params.search : searchValue,
                 // status: params?.status !== undefined ? params.status : statusFilter,
+                source_type: params?.source_type !== undefined ? params.source_type : (typeFilter || undefined),
                 ...(profileSSO !== undefined ? { classes: profileSSO } : {}),
                 ...params
             });
@@ -53,7 +55,7 @@ export const useReceipt = (profileSSO?: number) => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, sortModify, statusFilter, pagination.page, pagination.limit]);
+    }, [searchValue, sortOrder, sortModify, statusFilter, typeFilter, pagination.page, pagination.limit]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
@@ -73,6 +75,8 @@ export const useReceipt = (profileSSO?: number) => {
     const handleFilterChange = useCallback((filterType: string, value: string) => {
         if (filterType === 'status') {
             setStatusFilter(value);
+        } else if (filterType === 'source_type') {
+            setTypeFilter(value);
         } else if (filterType === 'sort_by') {
             setSortModify(value as 'created_at' | 'updated_at' | 'last_modified' | 'po_id' | '');
         } else if (filterType === 'sort_order') {
@@ -89,6 +93,7 @@ export const useReceipt = (profileSSO?: number) => {
 
         const params: any = { page: 1 };
         if (filterType === 'status') params.status = value;
+        else if (filterType === 'source_type') params.source_type = value || undefined;
         else if (filterType === 'sort_by') params.sort_by = value;
         else if (filterType === 'sort_order') params.sort_order = value;
         else if (filterType === 'subsidiary') params.subsidiary = value;
@@ -120,7 +125,7 @@ export const useReceipt = (profileSSO?: number) => {
 
     const [isSyncing, setIsSyncing] = useState(false);
 
-    const handleSync = useCallback(async (_row?: PurchaseOrderItem) => {
+    const handleSync = useCallback(async (_row?: ReceiptItem) => {
         if (isSyncing) return;
         setIsSyncing(true);
         const toastId = toast.loading('Sinkronisasi data sales order...');
@@ -187,19 +192,23 @@ export const useReceipt = (profileSSO?: number) => {
 
     const handleClearFilters = useCallback(() => {
         setStatusFilter('');
+        setTypeFilter('');
         // setSubsidiaryFilter('');
         // setLocationFilter('');
         // setApprovalStatusFilter('');
         setSortOrder('desc');
         setSortModify('created_at');
-        
+
         setPagination(prev => ({ ...prev, page: 1 }));
-        fetchReceipt({ 
-            page: 1, 
+        fetchReceipt({
+            page: 1,
             sort_order: 'desc',
-            sort_by: 'created_at'
+            sort_by: 'created_at',
+            source_type: undefined
         });
     }, [fetchReceipt]);
+
+    const activeFilterCount = [typeFilter].filter(Boolean).length;
 
     return {
         receipt,
@@ -211,6 +220,8 @@ export const useReceipt = (profileSSO?: number) => {
         sortOrder,
         sortModify,
         statusFilter,
+        typeFilter,
+        activeFilterCount,
         setSearchValue,
         fetchReceipt,
         handlePageChange,
