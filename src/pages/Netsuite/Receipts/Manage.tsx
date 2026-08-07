@@ -1,8 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { TableColumn } from 'react-data-table-component';
-import { Link } from 'react-router-dom';
 // import Badge from '@/components/ui/badge/Badge';
-import { MdClear, MdSearch, MdOutlineSync } from 'react-icons/md';
+import { MdClear, MdSearch, MdOutlineSync, MdFilterListAlt, MdExpandLess, MdExpandMore } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
@@ -10,9 +9,15 @@ import CustomDataTable from '@/components/ui/table';
 import { getProfile, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { useReceipt } from './hooks/useReceipt';
-import { ReceiptItem } from '../PurchaseOrder/types/purchaseorder';
+import { ReceiptItem } from './types/receipt';
 import Button from '@/components/ui/button/Button';
 import PageHeaderManage from '@/components/common/PageHeaderManage';
+
+const SOURCE_TYPE_OPTIONS = [
+    { value: 'purchase_order', label: 'Purchase Order' },
+    { value: 'transfer_order', label: 'Transfer Order' },
+    { value: 'customer_return', label: 'Customer Return' },
+];
 
 export default function Manage() {
     // const navigate = useNavigate();
@@ -28,6 +33,8 @@ export default function Manage() {
         searchValue,
         sortOrder,
         statusFilter,
+        typeFilter,
+        activeFilterCount,
         setSearchValue,
         handlePageChange,
         handleRowsPerPageChange,
@@ -58,7 +65,7 @@ export default function Manage() {
     const columns: TableColumn<ReceiptItem>[] = [
         {
             name: 'Internal id',
-            selector: row => row.receipt_id || '-',
+            selector: row => row.netsuite_id || '-',
             wrap: true,
             width: '140px',
             center: true,
@@ -66,19 +73,23 @@ export default function Manage() {
         {
             name: 'Date',
             selector: row => row.trandate || '-',
-            cell: row => (<>
-                <Link to={`/netsuite/purchase-order/${row.createdfrom}/receive/${row.receipt_id}`} className="absolute inset-0" />
-                
+            cell: row => (
                 <div className="items-center gap-3 py-2">
                     <div className="block text-sm text-gray-500">{formatTanggal(row.trandate)}</div>
                 </div>
-            </>),
+            ),
             wrap: true,
         },
         {
             name: 'Document Number',
             selector: row => row.tranid || '-',
             wrap: true,
+        },
+        {
+            name: 'Type',
+            selector: row => row.source_type_display || '-',
+            wrap: true,
+            center: true,
         },
         {
             name: 'Name',
@@ -128,11 +139,11 @@ export default function Manage() {
                     <CustomSelect
                         id="sort_order"
                         name="sort_order"
-                        value={sortOrder ? { 
-                            value: sortOrder, 
-                            label: sortOrder === 'asc' ? 'Ascending' : 'Descending' 
+                        value={sortOrder ? {
+                            value: sortOrder,
+                            label: sortOrder === 'asc' ? 'Ascending' : 'Descending'
                         } : null}
-                        onChange={(selectedOption) => 
+                        onChange={(selectedOption) =>
                             handleFilterChange('sort_order', selectedOption?.value || '')
                         }
                         options={[
@@ -145,10 +156,58 @@ export default function Manage() {
                         className="w-full"
                     />
                 </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        onClick={handleToggleFilter}
+                        className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
+                        size="sm"
+                    >
+                        <MdFilterListAlt className="w-4 h-4 mr-2" />
+                        Filter
+                        {activeFilterCount > 0 && (
+                            <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-blue-600 text-white">
+                                {activeFilterCount}
+                            </span>
+                        )}
+                        {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                    </Button>
+                </div>
             </div>
-            
+
+            {/* Advanced Filters */}
+            {showAdvancedFilters && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                            <CustomSelect
+                                id="filter_source_type"
+                                name="filter_source_type"
+                                value={typeFilter ? SOURCE_TYPE_OPTIONS.find(o => o.value === typeFilter) || null : null}
+                                onChange={(opt) => handleFilterChange('source_type', opt?.value || '')}
+                                options={SOURCE_TYPE_OPTIONS}
+                                placeholder="All Types"
+                                isClearable={true}
+                                isSearchable={true}
+                            />
+                        </div>
+                    </div>
+                    {activeFilterCount > 0 && (
+                        <div className="mt-3 flex justify-end">
+                            <Button
+                                onClick={handleClearFilters}
+                                size="sm"
+                                className="bg-transparent border border-red-300 text-red-600 hover:bg-red-50"
+                            >
+                                <MdClear className="w-4 h-4 mr-1" />
+                                Clear All
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            )}
         </>);
-    }, [searchValue, sortOrder, statusFilter, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, handleClearFilters]);
+    }, [searchValue, sortOrder, statusFilter, typeFilter, activeFilterCount, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, handleClearFilters]);
 
     return (
         <>
