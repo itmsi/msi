@@ -3,7 +3,7 @@ import { useHasPermission } from '@/hooks/usePermissions';
 import Button from '../ui/button/Button';
 
 interface PermissionGateProps {
-    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | ('create' | 'read' | 'update' | 'delete' | 'duplicate')[];
+    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide' | ('create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide')[];
     routeName?: string;
     fallback?: React.ReactNode;
     children: React.ReactNode;
@@ -22,7 +22,7 @@ export const PermissionGate: React.FC<PermissionGateProps> = ({
 };
 
 interface PermissionButtonProps {
-    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | ('create' | 'read' | 'update' | 'delete' | 'duplicate')[];
+    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide' | ('create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide')[];
     routeName?: string;
     children: React.ReactNode;
     className?: string;
@@ -62,7 +62,7 @@ export const PermissionButton: React.FC<PermissionButtonProps> = ({
 };
 
 interface ConditionalRenderProps {
-    condition: 'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canDuplicate';
+    condition: 'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canDuplicate' | 'canGuide';
     routeName?: string;
     fallback?: React.ReactNode;
     children: React.ReactNode;
@@ -80,6 +80,7 @@ export const ConditionalRender: React.FC<ConditionalRenderProps> = ({
         canUpdate: 'update' as const,
         canDelete: 'delete' as const,
         canDuplicate: 'duplicate' as const,
+        canGuide: 'guide' as const,
     };
     
     const hasPermission = useHasPermission(permissionMap[condition], routeName);

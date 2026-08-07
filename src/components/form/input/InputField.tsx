@@ -51,7 +51,7 @@ const Input: FC<InputProps> = ({
     if (disabled) {
         inputClasses += ` text-gray-500 border-gray-300 opacity-80 bg-gray-100`;
     } else if (error) {
-        inputClasses += `  border-error-500 focus:border-error-300 focus:ring-error-500/20:border-error-800`;
+        inputClasses += `  ring-1 ring-red-300 focus:border-red-300 focus:ring-red-500/20:border-error-800`;
     } else if (success) {
         inputClasses += `  border-success-500 focus:border-success-300 focus:ring-success-500/20:border-success-800`;
     } else if (readonly) {

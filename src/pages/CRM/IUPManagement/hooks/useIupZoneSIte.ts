@@ -4,16 +4,20 @@ import toast from 'react-hot-toast';
 import { IupZonaSiteItem, Pagination, ZonaSitePayload } from '../types/iupmanagement';
 import { IupService } from '../services/iupManagementService';
 import moment from 'moment';
+import { MasterZoneSiteSection, SurveyValues } from '../types/iupSurvey';
+import { parseSurveyTableFromHtml } from '../components/zonearea/data/Parsesurveytablefromhtml';
 
 
 export interface ZoneFormState {
     title: string;
     date: string;
     description: string;
+    guide?: string;
     fileLink: string[];
     summaryPrompt?: string;
     summaryResponse?: string;
     sessionId?: string;
+    surveyValues: SurveyValues;
 }
 
 export interface ZoneFormErrors {
@@ -28,8 +32,8 @@ const emptyForm = (): ZoneFormState => ({
     date: new Date().toISOString().slice(0, 10),
     description: "",
     fileLink: [""],
+    surveyValues: {},
 });
-
 // const isValidUrl = (value: string): boolean => {
 //     try {
 //         new URL(value);
@@ -39,20 +43,27 @@ const emptyForm = (): ZoneFormState => ({
 //     }
 // };
 
-const validateZoneForm = (form: ZoneFormState): ZoneFormErrors => {
+const validateZoneForm = (
+    form: ZoneFormState,
+    zones: IupZonaSiteItem[],
+    excludeId?: string | null
+): ZoneFormErrors => {
     const errors: ZoneFormErrors = {};
 
     const title = form.title.trim();
     if (!title) {
-        errors.title = "Judul wajib diisi";
+        errors.title = "Zone name is required";
     } else if (title.length < 3) {
-        errors.title = "Judul minimal 3 karakter";
+        errors.title = "Title must be at least 3 characters";
+    } else if (zones.some((z) => z.iup_zona_site_id !== excludeId && z.iup_zona_site_name.trim().toLowerCase() === title.toLowerCase())) {
+        errors.title = `${form.title.trim()} Already exists, It must not be exactly the same.
+`;
     }
 
     if (!form.date) {
-        errors.date = "Tanggal wajib diisi";
+        errors.date = "Date is required";
     } else if (Number.isNaN(new Date(form.date).getTime())) {
-        errors.date = "Format tanggal tidak valid";
+        errors.date = "Invalid date format";
     }
 
     // const filledLinks = form.fileLink.map((l) => l.trim()).filter(Boolean);
@@ -86,6 +97,14 @@ export const useIupZoneSIte = () => {
     const [form, setForm] = useState<ZoneFormState>(emptyForm());
     const [errors, setErrors] = useState<ZoneFormErrors>({});
 
+    const [guideZone, setGuideZone] = useState<IupZonaSiteItem | null>(null);
+    const [guideValue, setGuideValue] = useState('');
+    const [guideSubmitting, setGuideSubmitting] = useState(false);
+
+    const [initialShowGuide, setInitialShowGuide] = useState(false);
+
+    const [zoneSiteTemplates, setZoneSiteTemplates] = useState<MasterZoneSiteSection[]>([]);
+
     const fetchZoneSiteData = useCallback(async () => {
         try {
             setLoading(true);
@@ -109,6 +128,20 @@ export const useIupZoneSIte = () => {
     useEffect(() => {
         fetchZoneSiteData();
     }, [fetchZoneSiteData]);
+
+    /** Master zone site templates (field_data/field_guide per sectionKey) — di-load sekali, dicocokkan per nama zona. */
+    const fetchZoneSiteTemplates = useCallback(async () => {
+        try {
+            const response = await IupService.getMasterZoneSite({ search: '', is_default: false });
+            setZoneSiteTemplates(response.data.filter((s) => s.sectionKey !== 'default'));
+        } catch (error) {
+            console.error('Error loading zone site templates:', error);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchZoneSiteTemplates();
+    }, [fetchZoneSiteTemplates]);
 
     const handleConfirmDeleted = async (): Promise<void> => {
         if (!confirmDelete.iup_zona_site_id) {
@@ -140,21 +173,25 @@ export const useIupZoneSIte = () => {
         setEditingId(null);
         setForm(emptyForm());
         setErrors({});
+        setInitialShowGuide(false);
         setShowForm(true);
     };
-    
-    const openEditForm = (zone: IupZonaSiteItem) => {
+
+    const openEditForm = (zone: IupZonaSiteItem, showGuideInitially: boolean = false) => {
         setEditingId(zone.iup_zona_site_id);
         setForm({
             title: zone.iup_zona_site_name ?? "",
             description: zone.iup_zona_site_description ?? "",
-            date: zone.iup_zona_site_date_last_survey ?? new Date().toISOString().slice(0, 10),
-            fileLink: zone.iup_zona_site_file?.length ? zone.iup_zona_site_file.map((i) => i.file_link) : [],
+            date: zone.iup_zona_site_date_last_survey ?? null, //new Date().toISOString().slice(0, 10),
+            fileLink: zone.iup_zona_site_file?.length ? zone.iup_zona_site_file.map((i) => i.file_link) : [""],
             summaryPrompt: zone.summary_prompt_ai ?? undefined,
             summaryResponse: zone.summary_response_ai ?? undefined,
             sessionId: zone.session_id ?? undefined,
+            surveyValues: parseSurveyTableFromHtml(zone.iup_zona_site_description ?? ""),
+            guide: zone.guide ?? "",
         });
         setErrors({});
+        setInitialShowGuide(showGuideInitially);
         setShowForm(true);
     };
 
@@ -192,24 +229,27 @@ export const useIupZoneSIte = () => {
             return { ...prev, fileLink: links.length ? links : [""] };
         });
     };
-    
-    const toPayload = (): Omit<ZonaSitePayload, "iup_zona_site_id"> => ({
-        iup_id: id ? id : '',
-        iup_zona_site_name: form.title.trim(),
-        iup_zona_site_date_last_survey: moment(form.date).format("YYYY-MM-DD"),
-        iup_zona_site_description: form.description,
-        iup_zona_site_file: form.fileLink
-            .map((l) => l.trim())
-            .filter(Boolean)
-            .map((file_link) => ({ file_link })),
-        summary_prompt_ai: form.summaryPrompt,
-        summary_response_ai: form.summaryResponse,
-        session_id: form.sessionId,
-    });
+
+    const toPayload = (): Omit<ZonaSitePayload, "iup_zona_site_id"> => {
+        return {
+            iup_id: id ? id : '',
+            iup_zona_site_name: form.title.trim(),
+            iup_zona_site_date_last_survey: moment(form.date).format("YYYY-MM-DD"),
+            iup_zona_site_description: form.description,
+            iup_zona_site_file: form.fileLink
+                .map((l) => l.trim())
+                .filter(Boolean)
+                .map((file_link) => ({ file_link })),
+            summary_prompt_ai: form.summaryPrompt,
+            summary_response_ai: form.summaryResponse,
+            session_id: form.sessionId,
+            guide: form.guide,
+        };
+    };
 
     /** Validasi form, lalu kirim create/update ke API. Return true kalau sukses. */
     const submitForm = async (): Promise<boolean> => {
-        const validationResult = validateZoneForm(form);
+        const validationResult = validateZoneForm(form, zones, editingId);
         setErrors(validationResult);
         if (hasFormErrors(validationResult)) {
             toast.error("Please check the form, there are invalid fields.");
@@ -242,6 +282,101 @@ export const useIupZoneSIte = () => {
         console.log('handleConfirmDeleted', zone)
         setConfirmDelete({ show: true, iup_zona_site_id: zone.iup_zona_site_id, name: zone.iup_zona_site_name });
     },[confirmDelete]);
+
+    // ---- guide modal helpers ----
+    const openGuideForm = useCallback((zone: IupZonaSiteItem) => {
+        setGuideZone(zone);
+        setGuideValue(zone.guide ?? "");
+    }, []);
+
+    /**
+     * Dipanggil dari tombol "Create Guide" saat form masih dalam mode create
+     * (belum punya iup_zona_site_id). Validasi hanya nama zona — tanggal
+     * dikirim null dulu, biar user bisa langsung nulis guide tanpa harus
+     * ngisi seluruh form Evidence dulu. Setelah zona tersimpan, guide modal
+     * langsung dibuka untuk zona yang baru dibuat itu.
+     */
+    const createZoneAndOpenGuide = async (): Promise<void> => {
+        const titleError = validateZoneForm(form, zones, null).title;
+        if (titleError) {
+            setErrors((prev) => ({ ...prev, title: titleError }));
+            return;
+        }
+
+        type QuickCreatePayload = Omit<ZonaSitePayload, "iup_zona_site_id" | "iup_zona_site_date_last_survey"> & {
+            iup_zona_site_date_last_survey: string | null;
+        };
+        const payload: QuickCreatePayload = {
+            ...toPayload(),
+            iup_zona_site_date_last_survey: null,
+        };
+
+        setSubmitting(true);
+        try {
+            const createRes: any = await IupService.createIupZonaSite(payload as unknown as ZonaSitePayload);
+            toast.success("Zone site has been created.");
+
+            let createdZone: IupZonaSiteItem | undefined = createRes?.data?.iup_zona_site_id
+                ? (createRes.data as IupZonaSiteItem)
+                : undefined;
+
+            if (!createdZone) {
+                // Fallback kalau create endpoint tidak mengembalikan record barunya:
+                // ambil ulang list, urutkan by created_at, dan pakai yang paling baru.
+                const latest = await IupService.getIupZonaSite({
+                    iup_id: id,
+                    sort_by: 'created_at',
+                    sort_order: 'desc',
+                    limit: 1,
+                });
+                createdZone = latest.data?.[0];
+            }
+
+            await fetchZoneSiteData();
+
+            if (createdZone) {
+                // Buka lagi form ini dalam mode edit untuk zona yang baru
+                // dibuat, supaya user bisa lanjut isi field lain (tanggal,
+                // file, remarks) tanpa harus cari & klik Edit manual.
+                openEditForm(createdZone);
+                openGuideForm(createdZone);
+            } else {
+                console.error('[createZoneAndOpenGuide] createIupZonaSite response:', createRes);
+                toast.error("Zone created, but couldn't open the guide editor automatically.");
+                closeForm();
+            }
+        } catch (err) {
+            console.error('[createZoneAndOpenGuide] failed:', err);
+            toast.error("Failed to create zone. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const closeGuideForm = useCallback(() => {
+        setGuideZone(null);
+        setGuideValue("");
+    }, []);
+
+    /** Simpan guide untuk zona yang sedang dibuka di guide modal. Return true kalau sukses. */
+    const submitGuide = async (): Promise<boolean> => {
+        if (!guideZone) return false;
+
+        setGuideSubmitting(true);
+        try {
+            await IupService.updateGuideIupZonaSite(guideZone.iup_zona_site_id, guideValue);
+            toast.success("Guide has been saved.");
+            await fetchZoneSiteData();
+            closeGuideForm();
+            return true;
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to save guide. Please try again.");
+            return false;
+        } finally {
+            setGuideSubmitting(false);
+        }
+    };
 
     // const handleConfirmDeleted = useCallback(async () => {
     //     if (!confirmDelete.iup_zona_site_id) {
@@ -300,5 +435,17 @@ export const useIupZoneSIte = () => {
         removeFileLinkRow,
 
         submitForm,
+
+        guideZone,
+        guideValue,
+        setGuideValue,
+        guideSubmitting,
+        openGuideForm,
+        closeGuideForm,
+        submitGuide,
+        createZoneAndOpenGuide,
+
+        zoneSiteTemplates,
+        initialShowGuide,
     };
 }
