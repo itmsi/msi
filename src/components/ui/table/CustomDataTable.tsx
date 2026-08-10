@@ -37,6 +37,7 @@ interface CustomDataTableProps<T> {
     customStyles?: TableStyles;
     striped?: boolean;
     highlightOnHover?: boolean;
+    pointerOnHover?: boolean;
     responsive?: boolean;
     persistTableHead?: boolean;
     
@@ -101,6 +102,7 @@ const CustomDataTable = <T extends Record<string, any>>({
     customStyles,
     striped = true,
     highlightOnHover = true,
+    pointerOnHover,
     responsive = true,
     persistTableHead = true,
     
@@ -341,6 +343,7 @@ const CustomDataTable = <T extends Record<string, any>>({
                 customStyles={mergedStyles}
                 striped={striped}
                 highlightOnHover={highlightOnHover}
+                pointerOnHover={pointerOnHover ?? !!onRowClicked}
                 responsive={responsive}
                 persistTableHead={persistTableHead}
                 

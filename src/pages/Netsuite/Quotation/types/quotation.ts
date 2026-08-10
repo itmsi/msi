@@ -93,7 +93,7 @@ export interface Quotation {
     updated_at: string;
     created_by: string | null;
     updated_by: string | null;
-    updated_by_name: string | null;
+    update_by_name: string | null;
 }
 
 export interface QuotationPagination {

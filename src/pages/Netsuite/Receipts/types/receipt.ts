@@ -25,6 +25,25 @@ export interface ReceiptRequest {
     classes?: number;
 }
 
+// Item line, cuma ada di response detail (GET by id) - lihat msi_get_item_receipts.js
+export interface ReceiptLineItem {
+    line: number;
+    item: string;
+    item_display: string;
+    description: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+    memo: string;
+    location: string;
+    location_display: string;
+    department: string;
+    department_display: string;
+    class: string;
+    class_display: string;
+    inventorydetail: string;
+}
+
 // GET RECEIPTS RESPONSE ITEMS
 export interface ReceiptItem {
     id: string;
@@ -56,7 +75,7 @@ export interface ReceiptItem {
     created_by_name: string;
     updated_at: string;
     // Cuma ada di response detail (GET by id), gak ada di list - JSON-encoded string, JSON.parse dulu kalau dipakai.
-    lines?: string;
+    lines?: string | ReceiptLineItem[];
 }
 
 export interface ReceiptResponse {
@@ -65,6 +84,13 @@ export interface ReceiptResponse {
         items: ReceiptItem[];
         pagination: Pagination;
     };
+    sync_info?: SyncInfo;
+    message: string;
+}
+
+export interface ReceiptDetailResponse {
+    success: boolean;
+    data: ReceiptItem;
     sync_info?: SyncInfo;
     message: string;
 }
