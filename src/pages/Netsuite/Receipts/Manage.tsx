@@ -1,13 +1,13 @@
 import { useCallback, useMemo, useState } from 'react'
 import { TableColumn } from 'react-data-table-component';
-// import Badge from '@/components/ui/badge/Badge';
-import { MdClear, MdSearch, MdOutlineSync, MdFilterListAlt, MdExpandLess, MdExpandMore } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
+import { MdClear, MdSearch, MdOutlineSync, MdFilterListAlt, MdExpandLess, MdExpandMore, MdVisibility } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
-import CustomDataTable from '@/components/ui/table';
+import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
+import { createByDateColumn } from '@/components/ui/table/columnUtils';
 import { getProfile, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
-import { LoadingOverlay } from '@/components/common/Loading';
 import { useReceipt } from './hooks/useReceipt';
 import { ReceiptItem } from './types/receipt';
 import Button from '@/components/ui/button/Button';
@@ -20,7 +20,7 @@ const SOURCE_TYPE_OPTIONS = [
 ];
 
 export default function Manage() {
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
     
@@ -64,43 +64,83 @@ export default function Manage() {
 
     const columns: TableColumn<ReceiptItem>[] = [
         {
-            name: 'Internal id',
+            id: 'doc_number',
+            name: 'Document Number',
+            selector: row => row.tranid || '-',
+            cell: row => (
+                <div className="items-center gap-3 py-2">
+                    <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
+                    <div className="block text-sm text-gray-500">{formatTanggal(row.trandate)}</div>
+                </div>
+            ),
+            wrap: true,
+            width: '230px',
+            pinned: 'left'
+        },
+        {
+            id: 'internal_id',
+            name: 'Internal ID',
             selector: row => row.netsuite_id || '-',
             wrap: true,
             width: '140px',
             center: true,
         },
         {
-            name: 'Date',
-            selector: row => row.trandate || '-',
-            cell: row => (
-                <div className="items-center gap-3 py-2">
-                    <div className="block text-sm text-gray-500">{formatTanggal(row.trandate)}</div>
-                </div>
-            ),
-            wrap: true,
-        },
-        {
-            name: 'Document Number',
-            selector: row => row.tranid || '-',
-            wrap: true,
-        },
-        {
+            id: 'source_type',
             name: 'Type',
             selector: row => row.source_type_display || '-',
             wrap: true,
+            width: '200px',
             center: true,
         },
         {
+            id: 'vendor_name',
             name: 'Name',
             selector: row => row.vendor_name || '-',
             wrap: true,
+            width: '300px',
         },
         {
+            id: 'location',
+            name: 'Location',
+            selector: row => row.location_display || '-',
+            wrap: true,
+            width: '220px',
+            center: true,
+        },
+        {
+            id: 'memo',
             name: 'Memo',
             selector: row => row.memo || '-',
             wrap: true,
-        }
+            width: '300px',
+        },
+        {
+            id: 'status',
+            name: 'Status',
+            selector: row => row.status_display || '-',
+            cell: row => (
+                <div className="items-center capitalize">
+                    {row.status_display ? (
+                        <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
+                            {row.status_display}
+                        </span>
+                    ) : '-'}
+                </div>
+            ),
+            center: true,
+            width: '200px'
+        },
+        createByDateColumn('Created By', 'created_at', 'created_by_name', '320px'),
+        createActionsColumn([
+            {
+                icon: MdVisibility,
+                onClick: (row: ReceiptItem) => navigate(`/netsuite/receipts/view/${row.id}`),
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                tooltip: 'View Detail',
+                permission: 'read',
+            },
+        ])
     ];
     
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -116,6 +156,7 @@ export default function Manage() {
                         <div className="relative flex-1">
                             <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                             <Input
+                                id='search'
                                 type="text"
                                 placeholder="Search project... (Press Enter)"
                                 value={searchValue}
@@ -159,7 +200,7 @@ export default function Manage() {
                 <div className="flex items-center gap-2">
                     <Button
                         onClick={handleToggleFilter}
-                        className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
+                        className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
                         size="sm"
                     >
                         <MdFilterListAlt className="w-4 h-4 mr-2" />
@@ -212,8 +253,8 @@ export default function Manage() {
     return (
         <>
             <PageMeta
-                title="Purchase Order - Motor Sights International"
-                description="Manage Purchase Orders - Motor Sights International"
+                title="Item Receipts - Motor Sights International"
+                description="Manage Item Receipts - Motor Sights International"
                 image="/motor-sights-international.png"
             />
             
@@ -259,37 +300,28 @@ export default function Manage() {
                                 <p className="text-red-600">{error}</p>
                             </div>
                         )}
-                        
-                        {loading ? (    
-                            <div className="flex justify-center items-center py-12">
-                                <div className="text-center">
-                                    <LoadingOverlay
-                                        message="Loading data purchase order..."
-                                    />
-                                </div>
-                            </div>
-                        ) : (
-                            <CustomDataTable
-                                columns={columns}
-                                data={receipt}
-                                loading={loading}
-                                pagination
-                                paginationServer
-                                paginationTotalRows={pagination?.total || 0}
-                                paginationPerPage={pagination?.limit || 10}
-                                paginationDefaultPage={pagination?.page || 1}
-                                paginationRowsPerPageOptions={[10, 20, 50, 100]}
-                                onChangePage={handlePageChangeAman}
-                                onChangeRowsPerPage={handleRowsPerPageAman}
-                                fixedHeader={true}
-                                fixedHeaderScrollHeight="625px"
-                                responsive
-                                highlightOnHover
-                                striped={false}
-                                persistTableHead
-                                borderRadius="8px"
-                            />
-                        )}
+
+                        <CustomDataTable
+                            columns={columns}
+                            data={receipt}
+                            loading={loading}
+                            pagination
+                            paginationServer
+                            paginationTotalRows={pagination?.total || 0}
+                            paginationPerPage={pagination?.limit || 10}
+                            paginationDefaultPage={pagination?.page || 1}
+                            paginationRowsPerPageOptions={[10, 20, 50, 100]}
+                            onChangePage={handlePageChangeAman}
+                            onChangeRowsPerPage={handleRowsPerPageAman}
+                            fixedHeader={true}
+                            fixedHeaderScrollHeight="625px"
+                            responsive
+                            highlightOnHover
+                            onRowClicked={(row) => navigate(`/netsuite/receipts/view/${row.id}`)}
+                            striped={false}
+                            persistTableHead
+                            borderRadius="8px"
+                        />
                     </div>
                 </div>
             </div>
