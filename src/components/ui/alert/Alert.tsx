@@ -3,7 +3,7 @@ import { Link } from "react-router";
 
 interface AlertProps {
   variant: "success" | "error" | "warning" | "info"; // Alert type
-  title: string; // Title of the alert
+  title?: string; // Title of the alert
   showLink?: boolean; // Whether to show the "Learn More" link
   linkHref?: string; // Link URL
   linkText?: string; // Link text
@@ -117,14 +117,16 @@ const Alert: React.FC<AlertProps> = ({
       className={`rounded-xl border p-4 ${variantClasses[variant].container}`}
     >
       <div className="flex items-start gap-3">
-        <div className={`-mt-0.5 ${variantClasses[variant].icon}`}>
+        <div className={`${title ? '-mt-0.5' : ''} ${variantClasses[variant].icon}`}>
           {icons[variant]}
         </div>
 
-        <div>
-          <h4 className="mb-1 text-sm font-semibold text-gray-800 font-secondary">
-            {title}
-          </h4>
+        <div className="flex-1">
+          {title && (
+            <h4 className="mb-1 text-sm font-semibold text-gray-800 font-secondary">
+              {title}
+            </h4>
+          )}
 
           {children}
 

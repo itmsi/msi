@@ -1,30 +1,40 @@
 import React, { useState, useCallback, useRef } from "react";
-import { LuLink2, LuLoaderCircle, LuChevronDown, LuChevronRight, LuSparkles } from "react-icons/lu";
+import { LuLink2, LuLoaderCircle, LuChevronDown, LuChevronRight, LuSparkles, LuEyeOff, LuBookOpen } from "react-icons/lu";
 import Button from "@/components/ui/button/Button";
 import { MdEdit, MdDeleteOutline } from "react-icons/md";
 import moment from "moment";
-import { IupZonaSiteItem } from "../../types/iupmanagement";
+import { IupZonaSiteItem, ZonaSitePayload } from "../../types/iupmanagement";
+import type { MasterZoneSiteSection } from "../../types/iupSurvey";
 import { IupService } from "../../services/iupManagementService";
 import toast from "react-hot-toast";
 import { PermissionGate } from "@/components/common/PermissionComponents";
+// Survey Data table is currently disabled (see commented block below) — re-enable both together.
+// import { parseSurveyTableFromHtml } from "./data/Parsesurveytablefromhtml";
+// import { getMasterZoneSiteForName } from "./data/zoneSurveySchemaMap";
+import DOMPurify from "dompurify";
+import Tooltip from "@/components/ui/tooltip/Tooltip";
 import { AiSummaryPanel } from "@/components/assistant-ui/Aisummarypanel";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export interface ZonecardProps {
     zone: IupZonaSiteItem;
-    onEdit: (zone: IupZonaSiteItem) => void;
+    onEdit: (zone: IupZonaSiteItem, showGuideInitially?: boolean) => void;
     onDelete: (zone: IupZonaSiteItem) => void;
     isDeleting?: boolean;
+    zoneSiteTemplates: MasterZoneSiteSection[];
 }
 
-const Zonecard: React.FC<ZonecardProps> = ({ 
-    zone, 
-    onEdit, 
-    onDelete, 
-    isDeleting = false
+const Zonecard: React.FC<ZonecardProps> = ({
+    zone,
+    onEdit,
+    onDelete,
+    isDeleting = false,
+    zoneSiteTemplates, // kept for when Survey Data (below) is re-enabled
 }) => {
+    void zoneSiteTemplates;
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+    const [showGuide, setShowGuide] = useState(false);
     const [summaryLoading, setSummaryLoading] = useState(false);
     const [summaryResponse, setSummaryResponse] = useState<string | null>(zone.summary_response_ai ?? null);
     const [summaryPrompt, setSummaryPrompt] = useState<string>(
@@ -46,6 +56,12 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
         setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
     };
     const isOpen = !!expanded[zone.iup_zona_site_id];
+
+    // const matchedSection = getMasterZoneSiteForName(zone.iup_zona_site_name, zoneSiteTemplates);
+    // const surveyValues = parseSurveyTableFromHtml(zone.iup_zona_site_description ?? "");
+    // const filledSurveyFields = matchedSection
+    //     ? matchedSection.field_data.filter((f) => (surveyValues[f.key] ?? "").trim() !== "")
+    //     : [];
 
     const handleGenerateSummary = useCallback(async () => {
         if (!summaryPrompt.trim()) {
@@ -142,20 +158,29 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
             setSessionId(newSessionId);
 
             // Save summary back to API when stream completes
-            try {
-                await IupService.updateIupZonaSite(zone.iup_zona_site_id, {
+            const toPayload = (): Omit<ZonaSitePayload, "iup_zona_site_id"> => {
+                return {
                     iup_id: zone.iup_id,
                     iup_zona_site_name: zone.iup_zona_site_name,
+                    iup_zona_site_date_last_survey: zone?.iup_zona_site_date_last_survey ? moment(zone.iup_zona_site_date_last_survey).format("YYYY-MM-DD") : null,
                     iup_zona_site_description: zone.iup_zona_site_description,
-                    iup_zona_site_date_last_survey: moment(zone.iup_zona_site_date_last_survey).format("YYYY-MM-DD"),
-                    iup_zona_site_file: zone.iup_zona_site_file.map(f => ({ file_link: f.file_link })),
+                    iup_zona_site_file: zone.iup_zona_site_file ? zone.iup_zona_site_file
+                        .map((l) => l.file_link)
+                        .filter(Boolean)
+                        .map((file_link) => ({ file_link })) : [],
                     summary_prompt_ai: summaryPrompt,
                     summary_response_ai: accumulatedText,
                     session_id: newSessionId,
-                });
-            } catch {
-                // Non-critical
+                    guide: zone.guide,
+                };
+            };
+            try {
+                const payload = toPayload();
+                await IupService.updateIupZonaSite(zone.iup_zona_site_id, { ...payload, iup_zona_site_id: zone.iup_zona_site_id });
+            } catch (err) {
+                console.error('[handleGenerateSummary] failed to save summary:', err);
             }
+            
         } catch (error: any) {
             if (error.name !== 'AbortError') {
                 toast.error(error.message || "Gagal membuat summary");
@@ -165,7 +190,6 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
             abortRef.current = null;
         }
     }, [summaryPrompt, sessionId, zone]);
-
     return (
         <div className={`${
             isDeleting ? 'border-red-300 bg-red-50' : ''
@@ -184,13 +208,35 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                         <p className="flex-1 text-sm font-primary-bold">{zone.iup_zona_site_name}</p>
                         <p className="flex-1 text-xs font-secondary">{moment(zone.iup_zona_site_date_last_survey).format("DD MMMM YYYY")}</p>
                     </div>
+
+                    
                 </div>
                 <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                    {zone?.guide && (
+                        <Tooltip content={showGuide ? `Hide the step Instructions for ${zone.iup_zona_site_name}` : `Show the step Instructions for ${zone.iup_zona_site_name}`}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-slate-800 text-slate-500 hover:text-slate-200 ${isOpen ? 'text-white' : 'text-slate-600'}`}
+                                onClick={() => {
+                                    if (!isOpen) {
+                                        toggleZone(zone.iup_zona_site_id);
+                                        setShowGuide(true);
+                                    } else {
+                                        setShowGuide((prev) => !prev);
+                                    }
+                                }}
+                            >
+                                {showGuide ? <LuEyeOff size={15} /> : <LuBookOpen size={15} />}
+                            </Button>
+                        </Tooltip>
+                    )}
                     <PermissionGate permission={["create", "update"]}>
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => onEdit(zone)}
+                            onClick={() => onEdit(zone, showGuide)}
                             className={`bg-transparent p-1 rounded group-hover:text-white hover:bg-slate-800 text-slate-500 hover:text-slate-200 ${isOpen ? 'text-white' : 'text-slate-600'}`}
                         >
                             <MdEdit size={15} />
@@ -210,20 +256,19 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
             {/* Detail — hanya tampil saat accordion terbuka */}
             {isOpen && (
                 <div className="px-10 py-4 space-y-3">
-                    {(hasEverGenerated || summaryResponse || summaryLoading) && (
+                    {(summaryResponse || summaryLoading) && (
                         <AiSummaryPanel
                             summary={summaryResponse || ''}
                             prompt={summaryPrompt}
                             setPrompt={setSummaryPrompt}
                             onGenerate={handleGenerateSummary}
                             isGenerating={summaryLoading || isZoneDataEmpty}
+                            showCopyButton={false}
+                            showChatHistory={false}
                         />
                     )}
-                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-md text-slate-600">
-                        <span className="flex items-center gap-1 text-gray-800 font-primary-bold text-md">
-                            {zone.iup_zona_site_name || '-'}
-                        </span>
-                        {!hasEverGenerated && !summaryResponse && (
+                    {!hasEverGenerated && !summaryResponse && (
+                        <div className="flex justify-end">
                             <Button
                                 size="sm"
                                 onClick={handleGenerateSummary}
@@ -233,10 +278,41 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                                 {summaryLoading ? <LuLoaderCircle size={13} className="animate-spin" /> : <LuSparkles size={13} />}
                                 {summaryLoading ? 'Generating...' : 'Summary by Mosa AI'}
                             </Button>
-                        )}
-                    </div>
-                    <div className="w-full min-h-25 p-4 bg-gray-50 border border-gray-200 rounded-lg prose max-w-none text-gray-700 reset-content">
-                        {zone.iup_zona_site_description && <div dangerouslySetInnerHTML={{ __html: zone.iup_zona_site_description }}></div>}
+                        </div>
+                    )}
+                    <div>
+                        {/* <p className="mb-1.5 text-xs font-primary-bold text-slate-500 uppercase tracking-wide">
+                            Remarks
+                        </p> */}
+                        <div className="w-full min-h-25 border border-gray-300 rounded-lg overflow-hidden">
+                            {zone.guide && showGuide && (
+                                <div className="px-4 py-3 bg-slate-50 border-b border-gray-200 gap-3 flex flex-col">
+                                    <p className="mb-1 flex items-center gap-1 text-sm font-semibold text-gray-800 uppercase font-secondary">
+                                        <LuBookOpen size={12} />
+                                        Guide — reference for filling in the remarks below
+                                    </p>
+                                    <div
+                                        className="reset-content min-h-0 text-sm text-slate-600"
+                                        dangerouslySetInnerHTML={{
+                                            __html: DOMPurify.sanitize(zone.guide, {
+                                                ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
+                                            }),
+                                        }}
+                                    ></div>
+                                </div>
+                            )}
+                            <div className="p-4 prose max-w-none text-gray-700 reset-content">
+                                {zone.iup_zona_site_description && (
+                                    <div
+                                        dangerouslySetInnerHTML={{
+                                            __html: DOMPurify.sanitize(zone.iup_zona_site_description, {
+                                                ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
+                                            }),
+                                        }}
+                                    ></div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                     {zone.iup_zona_site_file?.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
@@ -254,44 +330,6 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                             ))}
                         </div>
                     )}
-
-                    {/* ── Prompt & Summary (hanya jika sudah pernah generate) ── */}
-                    {/* {(hasEverGenerated || summaryResponse || summaryLoading) && (
-                    <div className="border-t border-purple-200 pt-4 mt-4">
-                        {(summaryResponse || summaryLoading) && (
-                            <div className="mt-3 bg-white border border-purple-100 rounded-lg p-4">
-                                <div className="flex items-center gap-1.5 mb-2">
-                                    <LuSparkles size={14} className="text-purple-600" />
-                                    <span className="text-xs font-semibold text-purple-700">AI Summary</span>
-                                </div>
-                                <div className="prose prose-sm max-w-none">
-                                    <MarkdownText content={summaryResponse || ''} />
-                                </div>
-                            </div>
-                        )}
-                        <div className="mb-2">
-                            <label className="text-xs font-medium text-purple-700">Prompt Summary</label>
-                            <TextArea
-                                value={summaryPrompt}
-                                onChange={(e) => setSummaryPrompt(e.target.value)}
-                                rows={2}
-                                placeholder="Masukkan prompt untuk summary..."
-                                className="mt-1 border-purple-200 focus:ring-purple-300"
-                            />
-                        </div>
-                        <div className="flex justify-end">
-                            <Button
-                                size="sm"
-                                onClick={handleGenerateSummary}
-                                disabled={summaryLoading || isZoneDataEmpty}
-                                className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-3.5 py-1.5 rounded-full shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
-                            >
-                                {summaryLoading ? <LuLoaderCircle size={13} className="animate-spin" /> : <LuSparkles size={15} />}
-                                {summaryLoading ? 'Generating...' : 'Summary by Mosa AI'}
-                            </Button>
-                        </div>
-                    </div>
-                    )} */}
                 </div>
             )}
         </div>

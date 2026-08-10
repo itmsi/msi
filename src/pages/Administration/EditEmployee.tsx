@@ -188,7 +188,8 @@ export default function EditEmployee() {
             'update': 3,    // Update alternative
             'delete': 4,    // Delete
             'remove': 4,     // Delete alternative
-            'duplicate': 5   // Duplicate
+            'duplicate': 5,  // Duplicate
+            'guide': 6       // Guide
         };
         
         // First filter to only include CRUD permissions
