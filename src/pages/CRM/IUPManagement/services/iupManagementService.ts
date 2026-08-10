@@ -1,5 +1,6 @@
 import { apiDelete, apiGet, apiPost, apiPut, ApiResponse } from '@/helpers/apiHelper';
 import { IupItemDetails, IupRequest, IupListResponse, IupManagementFormData, IupZonaSiteResponse, ZonaSitePayload, payloadRequest, GetIupRkabResponse, CreateIupRkabPayload, IupRkabUnitResponse, IupRkabUnitForm, VisitHistoryResponse, VisitPayload, GetIupBrandUnitResponse, IupBrandUnitPayload, GetIupSurveyResponse, IupSurveyPayload, IupSummaryAiListResponse, IupSummaryAiCreatePayload, IupSummaryAiRequest } from '../types/iupmanagement';
+import { MasterZoneSiteRequest, MasterZoneSiteListResponse } from '../types/iupSurvey';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_IS_ADMIN = import.meta.env.VITE_PARAM_IS_ADMIN;
@@ -61,8 +62,30 @@ export class IupService {
         return response.data;
     }
     
+    static async updateGuideIupZonaSite(id: string, guide: string): Promise<any> {
+        const response = await apiPut(`${API_BASE_URL}/crm/iup_zona_site/guide/${id}`, { guide });
+        return response.data;
+    }
+    
     static async deleteIupZonaSite(id: string): Promise<any> {
         return await apiDelete(`${API_BASE_URL}/crm/iup_zona_site/${id}`);
+    }
+
+    // search: '' untuk get all, atau sectionKey (mis. "warehouse") untuk filter spesifik.
+    // is_default sengaja tidak di-default ke sini — hanya dikirim kalau caller
+    // eksplisit minta (lihat fetchDefaultZoneTemplate di useIupZoneSIte).
+    static async getMasterZoneSite(params: Partial<MasterZoneSiteRequest> = {}): Promise<MasterZoneSiteListResponse> {
+        const requestData: MasterZoneSiteRequest = {
+            page: 1,
+            limit: 10,
+            search: '',
+            sort_by: 'created_at',
+            sort_order: 'desc',
+            ...params,
+        };
+
+        const response = await apiPost(`${API_BASE_URL}/crm/master_iup_zone_site/get`, requestData as Record<string, any>);
+        return response.data as MasterZoneSiteListResponse;
     }
 
     // IUP RKAB

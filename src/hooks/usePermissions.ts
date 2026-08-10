@@ -8,6 +8,7 @@ export interface PagePermissions {
     canUpdate: boolean;
     canDelete: boolean;
     canDuplicate: boolean;
+    canGuide: boolean;
     permissions: string[];
     routeName: string;
 }
@@ -36,6 +37,7 @@ export const usePermissions = (): PagePermissions => {
         canUpdate: isAdmin || permissions.includes('update'),
         canDelete: isAdmin || permissions.includes('delete'),
         canDuplicate: isAdmin || permissions.includes('duplicate'),
+        canGuide: isAdmin || permissions.includes('guide'),
         permissions,
         routeName
     };
@@ -63,6 +65,7 @@ export const usePermissionsFor = (targetRouteName: string): PagePermissions => {
         canUpdate: isAdmin || permissions.includes('update'),
         canDelete: isAdmin || permissions.includes('delete'),
         canDuplicate: isAdmin || permissions.includes('duplicate'),
+        canGuide: isAdmin || permissions.includes('guide'),
         permissions,
         routeName: targetRouteName
     };
@@ -75,7 +78,7 @@ export const usePermissionsFor = (targetRouteName: string): PagePermissions => {
  * @returns boolean apakah user punya permission tersebut
  */
 export const useHasPermission = (
-    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate',
+    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide',
     targetRouteName?: string
 ): boolean => {
     const location = useLocation();

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuotation } from './hooks/useQuotation';
 import { formatCurrencyDynamic, getStatusBadge, formatDateLocal, formatDateTime } from '@/helpers/generalHelper';
 import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdEdit, MdAdd, MdOutlineSync } from 'react-icons/md';
@@ -8,12 +8,15 @@ import { PermissionGate } from '@/components/common/PermissionComponents';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
+import { createByDateColumn } from '@/components/ui/table/columnUtils';
 import { Quotation } from './types/quotation';
 import Button from '@/components/ui/button/Button';
 import FilterSection from './components/FilterSection';
 
 export default function Manage() {
+    const location = useLocation();
     const navigate = useNavigate();
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
@@ -66,70 +69,50 @@ export default function Manage() {
 
     const columns: TableColumn<Quotation>[] = [
         {
-            name: 'ID',
-            selector: row => row.netsuite_id?.toString() || '-',
-            cell: row => (
-                <div className="items-center py-2">
-                    <div className="block text-sm text-gray-900">{row.netsuite_id || '-'}</div>
-                </div>
-            ),
-            wrap: true,
-            minWidth: '80px',
-        },
-        {
-            name: 'Subsidiary',
-            selector: row => row.subsidiary_name || '-',
-            wrap: true,
-            minWidth: '300px',
-        },
-        {
-            name: 'Doc Number',
+            id: 'doc_number',
+            name: 'Document Number',
             selector: row => row.tranid || '-',
             cell: row => (
-                <div className="items-center py-2">
+                <div className="items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
                     <div className="block text-sm text-gray-500">{row.tran_date ? formatDateLocal(row.tran_date) : '-'}</div>
                 </div>
             ),
             wrap: true,
-            minWidth: '220px',
+            width: '230px',
+            pinned: 'left'
         },
         {
+            id: 'subsidiary_name',
+            name: 'Subsidiary',
+            selector: row => row.subsidiary_name || '-',
+            wrap: true,
+            width: '220px',
+            center: true
+        },
+        {
+            id: 'customer_name',
             name: 'Customer Name',
             selector: row => row.customer_name || '-',
-            cell: row => (
-                <div className="items-center py-2">
-                    <div className="block text-sm text-gray-900">{row.customer_name || '-'}</div>
-                </div>
-            ),
             wrap: true,
-            minWidth: '250px',
+            width: '300px'
         },
         {
+            id: 'memo',
             name: 'Memo',
             selector: row => row.memo || '-',
-            cell: row => (
-                <div className="items-center py-2">
-                    <div className="block text-sm text-gray-900">{row.memo || '-'}</div>
-                </div>
-            ),
             wrap: true,
-            minWidth: '260px',
+            width: '300px'
         },
         {
+            id: 'total_amount',
             name: 'Total Amount',
-            selector: row => row.total_amount,
-            cell: row => (
-                <div className="items-center py-2">
-                    <div className="block text-sm font-medium text-gray-900">
-                        {formatCurrencyDynamic(Math.abs(row.total_amount || 0), row.currency_name || 'IDR')}
-                    </div>
-                </div>
-            ),
+            selector: row => row.total_amount ? formatCurrencyDynamic(Math.abs(row.total_amount), row.currency_name || 'IDR') : '-',
             wrap: true,
-            minWidth: '180px',
+            width: '240px'
         },
         {
+            id: 'approval_status',
             name: 'Approval Status',
             selector: row => row.custbody_me_approval_status_name || '-',
             cell: row => {
@@ -143,20 +126,10 @@ export default function Manage() {
                 );
             },
             center: true,
-            minWidth: '200px',
+            width: '200px'
         },
-        {
-            name: 'Updated By',
-            selector: row => row.updated_by_name || '-',
-            cell: row => (
-                <div className="items-start py-2">
-                    <div className="font-medium text-gray-900">{row.updated_by_name || '-'}</div>
-                    <div className="text-sm text-gray-500">{formatDateTime(row.updated_at)}</div>
-                </div>
-            ),
-            wrap: true,
-            minWidth: '300px',
-        },
+        createByDateColumn('Created By', 'created_at', 'custbody_me_wf_created_by_name', '320px'),
+        createByDateColumn('Updated By', 'updated_at', 'update_by_name', '320px'),
         createActionsColumn([
             {
                 icon: MdOutlineSync,
@@ -166,11 +139,13 @@ export default function Manage() {
             },
             {
                 icon: MdEdit,
-                onClick: (row: Quotation) => navigate(`/netsuite/quotation/edit/${row.netsuite_id || row.id}`),
+                onClick: (row: Quotation) => navigate(`/netsuite/quotation/edit/${row.netsuite_id || row.id}${location.search}`),
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'Edit Quotation',
                 permission: 'update',
-            },
+                width: '120px',
+                title: 'Action',
+            }
         ])
     ];
 
@@ -187,6 +162,7 @@ export default function Manage() {
                             <div className="relative flex-1">
                                 <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                                 <Input
+                                    id='search'
                                     type="text"
                                     placeholder="Search Transaction No... (Press Enter)"
                                     value={searchValue}
@@ -206,7 +182,7 @@ export default function Manage() {
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center">
                         <CustomSelect
                             id="quo_sort_order"
                             name="sort_order"
@@ -224,13 +200,13 @@ export default function Manage() {
                             placeholder="Order by"
                             isClearable={false}
                             isSearchable={false}
-                            className="w-40"
+                            className="w-full"
                         />
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
                             onClick={handleToggleFilter}
-                            className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
+                            className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
                             size="sm"
                         >
                             <MdFilterListAlt className="w-4 h-4 mr-2" />
@@ -270,18 +246,13 @@ export default function Manage() {
 
             <div className="space-y-6">
                 {/* Header */}
-                <div className="bg-white shadow rounded-lg mb-3">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Quotation
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Manage Quotation and related information
-                                </p>
-                            </div>
-                            <div className="flex space-x-3">
+                <PageHeaderManage
+                    title="Quotation"
+                    subtitle="Manage Quotation and related information"
+                    actions={[
+                        {
+                            key: 'sync',
+                            element: (
                                 <PermissionGate permission="read">
                                     <Button
                                         onClick={() => handleSync()}
@@ -293,19 +264,24 @@ export default function Manage() {
                                         <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
                                     </Button>
                                 </PermissionGate>
+                            )
+                        },
+                        {
+                            key: 'create',
+                            element: (
                                 <PermissionGate permission="create">
                                     <Button
-                                        onClick={() => navigate('/netsuite/quotation/create')}
+                                        onClick={() => navigate(`/netsuite/quotation/create${location.search}`)}
                                         className="flex items-center gap-2"
                                     >
                                         <MdAdd size={20} />
                                         <span>Create Quotation</span>
                                     </Button>
                                 </PermissionGate>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            )
+                        }
+                    ]}
+                />
                 {syncInfo && (
                     <span className='block text-xs text-green-600 pe-6 text-end mb-0'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
                 )}
@@ -340,7 +316,7 @@ export default function Manage() {
                             fixedHeaderScrollHeight="625px"
                             responsive
                             highlightOnHover
-                            onRowClicked={(row) => navigate(`/netsuite/quotation/edit/${row.netsuite_id || row.id}`)}
+                            onRowClicked={(row) => navigate(`/netsuite/quotation/edit/${row.netsuite_id || row.id}${location.search}`)}
                             striped={false}
                             persistTableHead
                             borderRadius="8px"

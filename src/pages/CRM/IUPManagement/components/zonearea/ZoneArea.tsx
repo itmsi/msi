@@ -3,6 +3,7 @@ import { LuPlus } from 'react-icons/lu';
 import { EvidenceForm } from './EvidenceForm';
 import { useIupZoneSIte } from '../../hooks/useIupZoneSIte';
 import Zonecard from './Zonecard';
+import GuideModal from './GuideModal';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import LoadingSpinner from '@/components/common/Loading';
 import { PermissionGate } from '@/components/common/PermissionComponents';
@@ -38,6 +39,18 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
         setConfirmDelete,
 
         submitForm,
+
+        guideZone,
+        guideValue,
+        setGuideValue,
+        guideSubmitting,
+        openGuideForm,
+        closeGuideForm,
+        submitGuide,
+        createZoneAndOpenGuide,
+
+        zoneSiteTemplates,
+        initialShowGuide,
     } = useIupZoneSIte();
 
     if (loading) {
@@ -71,6 +84,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                             <EvidenceForm
                                 key={zone.iup_zona_site_id}
                                 editingId={editingId}
+                                zone={zone}
                                 form={form}
                                 errors={errors}
                                 submitting={submitting}
@@ -80,6 +94,10 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                                 removeFileLinkRow={removeFileLinkRow}
                                 submitForm={submitForm}
                                 closeForm={closeForm}
+                                onCreateGuide={openGuideForm}
+                                onCreateGuideForNewZone={createZoneAndOpenGuide}
+                                zoneSiteTemplates={zoneSiteTemplates}
+                                initialShowGuide={initialShowGuide}
                             />
                         ) : (
                             <Zonecard
@@ -88,6 +106,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                                 onEdit={openEditForm}
                                 onDelete={deleteZone}
                                 isDeleting={deletingId === zone.iup_zona_site_id}
+                                zoneSiteTemplates={zoneSiteTemplates}
                             />
                         )
                     )}
@@ -106,6 +125,9 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                     removeFileLinkRow={removeFileLinkRow}
                     submitForm={submitForm}
                     closeForm={closeForm}
+                    onCreateGuide={openGuideForm}
+                    onCreateGuideForNewZone={createZoneAndOpenGuide}
+                    zoneSiteTemplates={zoneSiteTemplates}
                 />
             )}
             {!showForm && !editingId && (
@@ -123,48 +145,6 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
             </div>
             )}
 
-            {/* Tambah zona */}
-            {/* <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl ">
-                {showAddZone ? (
-                <div className="flex items-center gap-2">
-                    <input
-                        autoFocus
-                        value={newZoneName}
-                        onChange={(e) => setNewZoneName(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && addZone()}
-                        placeholder="Nama zona baru..."
-                        className="flex-1 bg-white border border-slate-500 rounded-lg px-3 py-2 text-sm outline-none focus:border-green-500"
-                    />
-                    <Button
-                        variant="outline"
-                        onClick={addZone}
-                        className="p-2 rounded-md text-sm font-medium transition-colors relative text-green-600 hover:text-green-700 hover:bg-red-50"
-                    >
-                        <LuCheck size={16} />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => {
-                            setShowAddZone(false);
-                            setNewZoneName("");
-                        }}
-                        className="p-2 rounded-md text-sm font-medium transition-colors relative text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                        <LuX size={16} />
-                    </Button>
-                </div>
-                ) : (
-                <button
-                    type="button"
-                    onClick={() => setShowAddZone(true)}
-                    className="flex items-center gap-1.5 text-sm font-medium"
-                >
-                    <LuPlus size={16} className="text-primary" />
-                    Tambah Zona
-                </button>
-                )}
-            </div> */}
-
             <ConfirmationModal
                 isOpen={confirmDelete.show}
                 onClose={() => setConfirmDelete({ show: false })}
@@ -176,6 +156,16 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                 loading={submitting}
                 size="md"
                 showIcon={false}
+            />
+
+            <GuideModal
+                zone={guideZone}
+                value={guideValue}
+                onChange={setGuideValue}
+                onClose={closeGuideForm}
+                onSave={submitGuide}
+                submitting={guideSubmitting}
+                zoneSiteTemplates={zoneSiteTemplates}
             />
         </div>
     );
