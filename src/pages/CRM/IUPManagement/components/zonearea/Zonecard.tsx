@@ -8,8 +8,9 @@ import type { MasterZoneSiteSection } from "../../types/iupSurvey";
 import { IupService } from "../../services/iupManagementService";
 import toast from "react-hot-toast";
 import { PermissionGate } from "@/components/common/PermissionComponents";
-import { parseSurveyTableFromHtml } from "./data/Parsesurveytablefromhtml";
-import { getMasterZoneSiteForName } from "./data/zoneSurveySchemaMap";
+// Survey Data table is currently disabled (see commented block below) — re-enable both together.
+// import { parseSurveyTableFromHtml } from "./data/Parsesurveytablefromhtml";
+// import { getMasterZoneSiteForName } from "./data/zoneSurveySchemaMap";
 import DOMPurify from "dompurify";
 import Tooltip from "@/components/ui/tooltip/Tooltip";
 import { AiSummaryPanel } from "@/components/assistant-ui/Aisummarypanel";
@@ -29,8 +30,9 @@ const Zonecard: React.FC<ZonecardProps> = ({
     onEdit,
     onDelete,
     isDeleting = false,
-    zoneSiteTemplates,
+    zoneSiteTemplates, // kept for when Survey Data (below) is re-enabled
 }) => {
+    void zoneSiteTemplates;
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
     const [showGuide, setShowGuide] = useState(false);
     const [summaryLoading, setSummaryLoading] = useState(false);
@@ -55,11 +57,11 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
     };
     const isOpen = !!expanded[zone.iup_zona_site_id];
 
-    const matchedSection = getMasterZoneSiteForName(zone.iup_zona_site_name, zoneSiteTemplates);
-    const surveyValues = parseSurveyTableFromHtml(zone.iup_zona_site_description ?? "");
-    const filledSurveyFields = matchedSection
-        ? matchedSection.field_data.filter((f) => (surveyValues[f.key] ?? "").trim() !== "")
-        : [];
+    // const matchedSection = getMasterZoneSiteForName(zone.iup_zona_site_name, zoneSiteTemplates);
+    // const surveyValues = parseSurveyTableFromHtml(zone.iup_zona_site_description ?? "");
+    // const filledSurveyFields = matchedSection
+    //     ? matchedSection.field_data.filter((f) => (surveyValues[f.key] ?? "").trim() !== "")
+    //     : [];
 
     const handleGenerateSummary = useCallback(async () => {
         if (!summaryPrompt.trim()) {
@@ -254,11 +256,6 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
             {/* Detail — hanya tampil saat accordion terbuka */}
             {isOpen && (
                 <div className="px-10 py-4 space-y-3">
-                    {zone.summary_response_ai && (
-                    <h4 className="text-gray-800 font-primary-bold text-md">
-                        {zone.iup_zona_site_name || '-'}
-                    </h4>
-                    )}
                     {(summaryResponse || summaryLoading) && (
                         <AiSummaryPanel
                             summary={summaryResponse || ''}
@@ -270,30 +267,8 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                             showChatHistory={false}
                         />
                     )}
-                    {zone.guide && showGuide && (
-                        <div className="rounded-xl border p-4 border-blue-light-500 bg-blue-light-50 space-y-3">
-                            <h4 className="text-sm font-semibold text-gray-800 font-secondary gap-2 flex items-center">
-                                <span className="flex rounded-full w-6 h-6 justify-center items-center py-1 ring-blue-light-500 p-0 ring-1 text-blue-light-800"><LuBookOpen size={13} className="pt-[1px]" /></span> 
-                                Guide for {zone.iup_zona_site_name ?? ''}
-                            </h4>
-                            <div
-                                className="reset-content min-h-0"
-                                dangerouslySetInnerHTML={{
-                                    __html: DOMPurify.sanitize(zone.guide, {
-                                        ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
-                                    }),
-                                }}
-                            ></div>
-                        </div>
-                    )}
-                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-md text-slate-600">
-                        
-                        {!zone.summary_response_ai && (
-                            <span className="flex items-center gap-1 text-gray-800 font-primary-bold text-md">
-                                {zone.iup_zona_site_name || '-'}ss
-                            </span>
-                        )}
-                        {!hasEverGenerated && !summaryResponse && (
+                    {!hasEverGenerated && !summaryResponse && (
+                        <div className="flex justify-end">
                             <Button
                                 size="sm"
                                 onClick={handleGenerateSummary}
@@ -303,41 +278,42 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                                 {summaryLoading ? <LuLoaderCircle size={13} className="animate-spin" /> : <LuSparkles size={13} />}
                                 {summaryLoading ? 'Generating...' : 'Summary by Mosa AI'}
                             </Button>
-                        )}
-                    </div>
-                    <div className="w-full min-h-25 p-4 border border-gray-400 rounded-lg prose max-w-none text-gray-700 reset-content">
-                        {zone.iup_zona_site_description && (
-                            <div
-                                dangerouslySetInnerHTML={{
-                                    __html: DOMPurify.sanitize(zone.iup_zona_site_description, {
-                                        ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
-                                    }),
-                                }}
-                            ></div>
-                        )}
-                    </div>
-                    {filledSurveyFields.length > 0 && (
-                        <div className="border border-slate-300 rounded-lg overflow-hidden">
-                            <p className="text-xs font-primary-bold text-slate-700 bg-slate-50 px-3 py-2 border-b border-slate-300">
-                                {matchedSection?.title}
-                            </p>
-                            <table className="w-full text-sm">
-                                <tbody>
-                                    {filledSurveyFields.map((f) => (
-                                        <tr key={f.key} className="border-b border-slate-200 last:border-b-0">
-                                            <td className="px-3 py-1.5 w-2/5 text-xs text-slate-500 align-top">
-                                                {f.label}
-                                                {f.unit && <span className="text-slate-400"> ({f.unit})</span>}
-                                            </td>
-                                            <td className="px-3 py-1.5 text-sm text-slate-800">
-                                                {surveyValues[f.key]}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
                         </div>
                     )}
+                    <div>
+                        {/* <p className="mb-1.5 text-xs font-primary-bold text-slate-500 uppercase tracking-wide">
+                            Remarks
+                        </p> */}
+                        <div className="w-full min-h-25 border border-gray-300 rounded-lg overflow-hidden">
+                            {zone.guide && showGuide && (
+                                <div className="px-4 py-3 bg-slate-50 border-b border-gray-200">
+                                    <p className="mb-1 flex items-center gap-1 text-xs font-primary-bold text-slate-400 uppercase tracking-wide">
+                                        <LuBookOpen size={12} />
+                                        Guide — reference for filling in the remarks below
+                                    </p>
+                                    <div
+                                        className="reset-content min-h-0 text-sm text-slate-600"
+                                        dangerouslySetInnerHTML={{
+                                            __html: DOMPurify.sanitize(zone.guide, {
+                                                ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
+                                            }),
+                                        }}
+                                    ></div>
+                                </div>
+                            )}
+                            <div className="p-4 prose max-w-none text-gray-700 reset-content">
+                                {zone.iup_zona_site_description && (
+                                    <div
+                                        dangerouslySetInnerHTML={{
+                                            __html: DOMPurify.sanitize(zone.iup_zona_site_description, {
+                                                ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
+                                            }),
+                                        }}
+                                    ></div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                     {zone.iup_zona_site_file?.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
                             {zone.iup_zona_site_file.map((img, i) => (
@@ -354,44 +330,6 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                             ))}
                         </div>
                     )}
-
-                    {/* ── Prompt & Summary (hanya jika sudah pernah generate) ── */}
-                    {/* {(hasEverGenerated || summaryResponse || summaryLoading) && (
-                    <div className="border-t border-purple-200 pt-4 mt-4">
-                        {(summaryResponse || summaryLoading) && (
-                            <div className="mt-3 bg-white border border-purple-100 rounded-lg p-4">
-                                <div className="flex items-center gap-1.5 mb-2">
-                                    <LuSparkles size={14} className="text-purple-600" />
-                                    <span className="text-xs font-semibold text-purple-700">AI Summary</span>
-                                </div>
-                                <div className="prose prose-sm max-w-none">
-                                    <MarkdownText content={summaryResponse || ''} />
-                                </div>
-                            </div>
-                        )}
-                        <div className="mb-2">
-                            <label className="text-xs font-medium text-purple-700">Prompt Summary</label>
-                            <TextArea
-                                value={summaryPrompt}
-                                onChange={(e) => setSummaryPrompt(e.target.value)}
-                                rows={2}
-                                placeholder="Masukkan prompt untuk summary..."
-                                className="mt-1 border-purple-200 focus:ring-purple-300"
-                            />
-                        </div>
-                        <div className="flex justify-end">
-                            <Button
-                                size="sm"
-                                onClick={handleGenerateSummary}
-                                disabled={summaryLoading || isZoneDataEmpty}
-                                className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-3.5 py-1.5 rounded-full shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
-                            >
-                                {summaryLoading ? <LuLoaderCircle size={13} className="animate-spin" /> : <LuSparkles size={15} />}
-                                {summaryLoading ? 'Generating...' : 'Summary by Mosa AI'}
-                            </Button>
-                        </div>
-                    </div>
-                    )} */}
                 </div>
             )}
         </div>

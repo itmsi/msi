@@ -12,7 +12,6 @@ export interface ZoneFormState {
     title: string;
     date: string;
     description: string;
-    guide?: string;
     fileLink: string[];
     summaryPrompt?: string;
     summaryResponse?: string;
@@ -188,7 +187,6 @@ export const useIupZoneSIte = () => {
             summaryResponse: zone.summary_response_ai ?? undefined,
             sessionId: zone.session_id ?? undefined,
             surveyValues: parseSurveyTableFromHtml(zone.iup_zona_site_description ?? ""),
-            guide: zone.guide ?? "",
         });
         setErrors({});
         setInitialShowGuide(showGuideInitially);
@@ -243,7 +241,6 @@ export const useIupZoneSIte = () => {
             summary_prompt_ai: form.summaryPrompt,
             summary_response_ai: form.summaryResponse,
             session_id: form.sessionId,
-            guide: form.guide,
         };
     };
 
