@@ -38,10 +38,10 @@ export function AiSummaryPanel({
         el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
     }, [prompt]);
 
-    const borderStateClass = isGenerating ? "ai-border-spinning" : "ai-border-static";
+    const borderStateClass = isGenerating ? "ai-border-spinning" : "";
 
     return (
-        <div className={`ai-border-wrapper ${borderStateClass} rounded-lg`}>
+        <div className={`ai-border-wrapper ai-border-static ${borderStateClass} rounded-lg`} style={{background: '#dbeafe'}}>
             <div className="ai-summary-gradient rounded-[7px] overflow-hidden">
                 {/* Header AI Summary */}
                 <div className="flex items-center justify-between px-4 pt-3 pb-2">
@@ -95,10 +95,10 @@ export function AiSummaryPanel({
 
                 {/* Isi ringkasan */}
                 <div className="pt-3">
-                    <div className="bg-white rounded-t-2xl max-h-[55vh] overflow-auto">
+                    <div className={`bg-white rounded-t-2xl overflow-auto max-h-[55vh] transition-all`}>
                         
                         {/* ── Loading State ── */}
-                        {sessionId && isGenerating && (
+                        {isGenerating && (
                             <div className="px-6 py-8">
                                 <div className="max-w-md mx-auto space-y-5">
                                     <div className="flex items-center justify-center gap-3">
@@ -119,7 +119,7 @@ export function AiSummaryPanel({
                             </div>
                         )}
                         <div className="px-4 pt-3">
-                        <MarkdownText content={summary} />
+                            <MarkdownText content={summary} />
                         </div>
                     </div>
                 </div>
@@ -141,28 +141,32 @@ export function AiSummaryPanel({
                 )}
 
                 {/* Prompt input — jadi satu composer, bukan blok terpisah */}
+                
                 <div className="border-t border-purple-100 bg-white/70 backdrop-blur-sm px-3 py-2.5">
                     <div className="flex items-start gap-2">
-                        <div className="flex items-center justify-center w-6 h-11.25 ">
-                            <LuSparkles className="text-primary" size={16} />
-                        </div>
-                        <textarea
-                            ref={textareaRef}
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            rows={1}
-                            placeholder="Tulis instruksi untuk Mosa AI..."
-                            className="flex-1 resize-none text-sm leading-relaxed text-gray-700 placeholder:text-gray-400 focus:ring-0 focus:outline-none px-3.5 py-2.5 max-h-[120px] overflow-y-auto border border-blue-300/60 rounded-xl"
-                        />
-                        <button
-                            type="button"
-                            onClick={() => onGenerate(prompt)}
-                            disabled={isGenerating || !prompt.trim()}
-                            className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-4 py-2.5 rounded-xl shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
-                        >
-                            <LuSparkles size={14} className={isGenerating ? "animate-pulse" : ""} />
-                            {isGenerating ? "Membuat..." : "Generate"}
-                        </button>
+                            <div className="flex items-center justify-center w-6 h-11.25 ">
+                                <LuSparkles className="text-primary" size={16} />
+                            </div>
+                        
+                            <textarea
+                                ref={textareaRef}
+                                value={prompt}
+                                onChange={(e) => setPrompt(e.target.value)}
+                                rows={1}
+                                placeholder="Tulis instruksi untuk Mosa AI..."
+                                className={"flex-1 resize-none text-sm leading-relaxed text-gray-700 placeholder:text-gray-400 focus:ring-0 focus:outline-none px-3.5 py-2.5 max-h-[120px] overflow-y-auto border border-blue-300/60 rounded-xl bg-white"}
+                                style={{ opacity: isGenerating ? 0 : 1 }}
+                                disabled={isGenerating}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => onGenerate(prompt)}
+                                disabled={isGenerating || !prompt.trim()}
+                                className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-4 py-2.5 rounded-xl shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
+                            >
+                                <LuSparkles size={14} className={isGenerating ? "animate-pulse" : ""} />
+                                {isGenerating ? "Membuat..." : "Generate"}
+                            </button>
                     </div>
                 </div>
             </div>

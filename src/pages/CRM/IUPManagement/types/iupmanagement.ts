@@ -251,7 +251,7 @@ export interface ZonaSitePayload {
     iup_id: string;
     iup_zona_site_name: string;
     iup_zona_site_description: string;
-    iup_zona_site_date_last_survey: string; // format: YYYY-MM-DD
+    iup_zona_site_date_last_survey: string | null; // format: YYYY-MM-DD
     iup_zona_site_file: ZonaSiteFilePayload[];
     guide?: string;
     summary_prompt_ai?: string;

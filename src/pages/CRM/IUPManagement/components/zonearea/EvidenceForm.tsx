@@ -66,7 +66,7 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({
                 </div>
                 <div className="flex items-center gap-1.5">
                     <div className="flex gap-1.5">
-                        {matchedSection && editingId &&
+                        {!zone?.guide && (matchedSection && editingId) &&
                             <PermissionGate permission={["guide"]}>
                                 <Tooltip content={zone?.guide ? 'Edit Step Information' : 'Create Guide step information'}>
                                 <Button

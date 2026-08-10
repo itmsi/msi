@@ -3,7 +3,7 @@ import { LuLink2, LuLoaderCircle, LuChevronDown, LuChevronRight, LuSparkles, LuE
 import Button from "@/components/ui/button/Button";
 import { MdEdit, MdDeleteOutline } from "react-icons/md";
 import moment from "moment";
-import { IupZonaSiteItem } from "../../types/iupmanagement";
+import { IupZonaSiteItem, ZonaSitePayload } from "../../types/iupmanagement";
 import type { MasterZoneSiteSection } from "../../types/iupSurvey";
 import { IupService } from "../../services/iupManagementService";
 import toast from "react-hot-toast";
@@ -12,6 +12,7 @@ import { parseSurveyTableFromHtml } from "./data/Parsesurveytablefromhtml";
 import { getMasterZoneSiteForName } from "./data/zoneSurveySchemaMap";
 import DOMPurify from "dompurify";
 import Tooltip from "@/components/ui/tooltip/Tooltip";
+import { AiSummaryPanel } from "@/components/assistant-ui/Aisummarypanel";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -34,7 +35,7 @@ const Zonecard: React.FC<ZonecardProps> = ({
     const [showGuide, setShowGuide] = useState(false);
     const [summaryLoading, setSummaryLoading] = useState(false);
     const [summaryResponse, setSummaryResponse] = useState<string | null>(zone.summary_response_ai ?? null);
-    const [summaryPrompt] = useState<string>(
+    const [summaryPrompt, setSummaryPrompt] = useState<string>(
         zone.summary_prompt_ai ?? `Buatkan summary dari data zone site berikut:
 
 Nama Zone: ${zone.iup_zona_site_name}
@@ -155,20 +156,29 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
             setSessionId(newSessionId);
 
             // Save summary back to API when stream completes
-            try {
-                await IupService.updateIupZonaSite(zone.iup_zona_site_id, {
+            const toPayload = (): Omit<ZonaSitePayload, "iup_zona_site_id"> => {
+                return {
                     iup_id: zone.iup_id,
                     iup_zona_site_name: zone.iup_zona_site_name,
+                    iup_zona_site_date_last_survey: zone?.iup_zona_site_date_last_survey ? moment(zone.iup_zona_site_date_last_survey).format("YYYY-MM-DD") : null,
                     iup_zona_site_description: zone.iup_zona_site_description,
-                    iup_zona_site_date_last_survey: moment(zone.iup_zona_site_date_last_survey).format("YYYY-MM-DD"),
-                    iup_zona_site_file: zone.iup_zona_site_file.map(f => ({ file_link: f.file_link })),
+                    iup_zona_site_file: zone.iup_zona_site_file ? zone.iup_zona_site_file
+                        .map((l) => l.file_link)
+                        .filter(Boolean)
+                        .map((file_link) => ({ file_link })) : [],
                     summary_prompt_ai: summaryPrompt,
                     summary_response_ai: accumulatedText,
                     session_id: newSessionId,
-                });
-            } catch {
-                // Non-critical
+                    guide: zone.guide,
+                };
+            };
+            try {
+                const payload = toPayload();
+                await IupService.updateIupZonaSite(zone.iup_zona_site_id, { ...payload, iup_zona_site_id: zone.iup_zona_site_id });
+            } catch (err) {
+                console.error('[handleGenerateSummary] failed to save summary:', err);
             }
+            
         } catch (error: any) {
             if (error.name !== 'AbortError') {
                 toast.error(error.message || "Gagal membuat summary");
@@ -178,7 +188,6 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
             abortRef.current = null;
         }
     }, [summaryPrompt, sessionId, zone]);
-
     return (
         <div className={`${
             isDeleting ? 'border-red-300 bg-red-50' : ''
@@ -245,25 +254,43 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
             {/* Detail — hanya tampil saat accordion terbuka */}
             {isOpen && (
                 <div className="px-10 py-4 space-y-3">
+                    {zone.summary_response_ai && (
+                    <h4 className="text-gray-800 font-primary-bold text-md">
+                        {zone.iup_zona_site_name || '-'}
+                    </h4>
+                    )}
+                    {(summaryResponse || summaryLoading) && (
+                        <AiSummaryPanel
+                            summary={summaryResponse || ''}
+                            prompt={summaryPrompt}
+                            setPrompt={setSummaryPrompt}
+                            onGenerate={handleGenerateSummary}
+                            isGenerating={summaryLoading || isZoneDataEmpty}
+                        />
+                    )}
                     {zone.guide && showGuide && (
                         <div className="rounded-xl border p-4 border-blue-light-500 bg-blue-light-50 space-y-3">
-                                <h4 className="text-sm font-semibold text-gray-800 font-secondary">
-                                    Guide for {zone.iup_zona_site_name ?? ''}
-                                </h4>
-                                <div
-                                    className="reset-content min-h-0"
-                                    dangerouslySetInnerHTML={{
-                                        __html: DOMPurify.sanitize(zone.guide, {
-                                            ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
-                                        }),
-                                    }}
-                                ></div>
-                            </div>
+                            <h4 className="text-sm font-semibold text-gray-800 font-secondary gap-2 flex items-center">
+                                <span className="flex rounded-full w-6 h-6 justify-center items-center py-1 ring-blue-light-500 p-0 ring-1 text-blue-light-800"><LuBookOpen size={13} className="pt-[1px]" /></span> 
+                                Guide for {zone.iup_zona_site_name ?? ''}
+                            </h4>
+                            <div
+                                className="reset-content min-h-0"
+                                dangerouslySetInnerHTML={{
+                                    __html: DOMPurify.sanitize(zone.guide, {
+                                        ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
+                                    }),
+                                }}
+                            ></div>
+                        </div>
                     )}
                     <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-md text-slate-600">
-                        <span className="flex items-center gap-1 text-gray-800 font-primary-bold text-md">
-                            {zone.iup_zona_site_name || '-'}
-                        </span>
+                        
+                        {!zone.summary_response_ai && (
+                            <span className="flex items-center gap-1 text-gray-800 font-primary-bold text-md">
+                                {zone.iup_zona_site_name || '-'}ss
+                            </span>
+                        )}
                         {!hasEverGenerated && !summaryResponse && (
                             <Button
                                 size="sm"
@@ -276,7 +303,7 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                             </Button>
                         )}
                     </div>
-                    <div className="w-full min-h-25 p-4 bg-gray-50 border border-gray-200 rounded-lg prose max-w-none text-gray-700 reset-content">
+                    <div className="w-full min-h-25 p-4 border border-gray-400 rounded-lg prose max-w-none text-gray-700 reset-content">
                         {zone.iup_zona_site_description && (
                             <div
                                 dangerouslySetInnerHTML={{
