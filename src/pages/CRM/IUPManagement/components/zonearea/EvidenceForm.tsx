@@ -165,7 +165,8 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({
                 {zone?.guide && showGuide && (
                     <div className="rounded-xl border p-4 border-blue-light-500 bg-blue-light-50 space-y-3" title={`Guide ${zone.iup_zona_site_name ?? ''}`}>
                         <div className="flex items-center justify-between gap-2">
-                            <h4 className="mb-1 text-sm font-semibold text-gray-800 font-secondary">
+                            <h4 className="flex items-center gap-1 mb-1 text-sm font-semibold text-gray-800 font-secondary">
+                                <LuBookOpen size={12} /> 
                                 Guide for {zone.iup_zona_site_name ?? ''}
                             </h4>
                             <PermissionGate permission={["guide"]}>

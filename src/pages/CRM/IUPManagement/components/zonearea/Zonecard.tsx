@@ -286,8 +286,8 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                         </p> */}
                         <div className="w-full min-h-25 border border-gray-300 rounded-lg overflow-hidden">
                             {zone.guide && showGuide && (
-                                <div className="px-4 py-3 bg-slate-50 border-b border-gray-200">
-                                    <p className="mb-1 flex items-center gap-1 text-xs font-primary-bold text-slate-400 uppercase tracking-wide">
+                                <div className="px-4 py-3 bg-slate-50 border-b border-gray-200 gap-3 flex flex-col">
+                                    <p className="mb-1 flex items-center gap-1 text-sm font-semibold text-gray-800 uppercase font-secondary">
                                         <LuBookOpen size={12} />
                                         Guide — reference for filling in the remarks below
                                     </p>
