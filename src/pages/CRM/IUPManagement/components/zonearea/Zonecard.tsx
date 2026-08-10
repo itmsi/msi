@@ -266,6 +266,8 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                             setPrompt={setSummaryPrompt}
                             onGenerate={handleGenerateSummary}
                             isGenerating={summaryLoading || isZoneDataEmpty}
+                            showCopyButton={false}
+                            showChatHistory={false}
                         />
                     )}
                     {zone.guide && showGuide && (

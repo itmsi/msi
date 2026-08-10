@@ -11,7 +11,9 @@ interface AiSummaryPanelProps {
     onSuggestionClick?: (suggestion: string) => void;
     isGenerating?: boolean;
     sessionId?: string;
+    showChatHistory?: boolean;
     setShowChatHistory?: (value: boolean) => void;
+    showCopyButton?: boolean;
     copied?: boolean;
     handleCopySummary?: () => void;
 }
@@ -25,7 +27,9 @@ export function AiSummaryPanel({
     onSuggestionClick,
     isGenerating = false,
     sessionId,
+    showChatHistory = true,
     setShowChatHistory,
+    showCopyButton = true,
     copied = false,
     handleCopySummary
 }: AiSummaryPanelProps) {
@@ -56,7 +60,7 @@ export function AiSummaryPanel({
                     </div>
                     
                     <div className="flex items-center gap-1">
-                        {(sessionId || !isGenerating) && (
+                        {showChatHistory && (sessionId || !isGenerating) && (
                             <div className="flex items-center gap-2.5">
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-blue-200/60 rounded-lg shadow-xs">
                                     <button
@@ -69,7 +73,8 @@ export function AiSummaryPanel({
                                 </div>
                             </div>
                         )}
-                        {!isGenerating && (
+                        
+                        {showCopyButton && !isGenerating && (
                             <div className="flex items-center gap-2.5">
                                 <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-blue-200/60 rounded-lg shadow-xs">
                                     <button
