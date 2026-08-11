@@ -7,7 +7,6 @@ import moment from 'moment';
 import { MasterZoneSiteSection, SurveyValues } from '../types/iupSurvey';
 import { parseSurveyTableFromHtml } from '../components/zonearea/data/Parsesurveytablefromhtml';
 
-
 export interface ZoneFormState {
     title: string;
     date: string;
@@ -33,14 +32,6 @@ const emptyForm = (): ZoneFormState => ({
     fileLink: [""],
     surveyValues: {},
 });
-// const isValidUrl = (value: string): boolean => {
-//     try {
-//         new URL(value);
-//         return true;
-//     } catch {
-//         return false;
-//     }
-// };
 
 const validateZoneForm = (
     form: ZoneFormState,
@@ -65,12 +56,6 @@ const validateZoneForm = (
         errors.date = "Invalid date format";
     }
 
-    // const filledLinks = form.fileLink.map((l) => l.trim()).filter(Boolean);
-    // const invalidLink = filledLinks.find((link) => !isValidUrl(link));
-    // if (invalidLink) {
-    //     errors.fileLink = "Salah satu link file tidak valid, pastikan berupa URL lengkap (https://...)";
-    // }
-
     return errors;
 };
 
@@ -81,14 +66,14 @@ export const useIupZoneSIte = () => {
 
     const [zones, setZones] = useState<IupZonaSiteItem[]>([]);
     const [pagination] = useState<Pagination | null>(null);
-    // const [pagination, setPagination] = useState<Pagination | null>(null);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [confirmDelete, setConfirmDelete] = useState<{ 
-        show: boolean; 
-        iup_zona_site_id?: string; 
-        name?: string }>({ show: false });
+    const [confirmDelete, setConfirmDelete] = useState<{
+        show: boolean;
+        iup_zona_site_id?: string;
+        name?: string
+    }>({ show: false });
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const [showForm, setShowForm] = useState(false);
@@ -128,7 +113,6 @@ export const useIupZoneSIte = () => {
         fetchZoneSiteData();
     }, [fetchZoneSiteData]);
 
-    /** Master zone site templates (field_data/field_guide per sectionKey) — di-load sekali, dicocokkan per nama zona. */
     const fetchZoneSiteTemplates = useCallback(async () => {
         try {
             const response = await IupService.getMasterZoneSite({ search: '', is_default: false });
@@ -156,13 +140,13 @@ export const useIupZoneSIte = () => {
             } else {
                 await fetchZoneSiteData();
             }
-            setConfirmDelete({show: false});
+            setConfirmDelete({ show: false });
         } catch (err) {
             console.error(err);
             toast.error("Failed to delete zone site.");
-            setConfirmDelete({show: false});
+            setConfirmDelete({ show: false });
         } finally {
-            setConfirmDelete({show: false});
+            setConfirmDelete({ show: false });
             setDeletingId(null);
         }
     };
@@ -199,7 +183,7 @@ export const useIupZoneSIte = () => {
         setForm(emptyForm());
         setErrors({});
     };
-    
+
     const updateField = <K extends keyof Omit<ZoneFormState, "fileLink">>(
         field: K,
         value: ZoneFormState[K]
@@ -216,7 +200,7 @@ export const useIupZoneSIte = () => {
         });
         setErrors((prev) => (prev.fileLink ? { ...prev, fileLink: undefined } : prev));
     };
-    
+
     const addFileLinkRow = () => {
         setForm((prev) => ({ ...prev, fileLink: [...prev.fileLink, ""] }));
     };
@@ -278,7 +262,7 @@ export const useIupZoneSIte = () => {
     const deleteZone = useCallback((zone: IupZonaSiteItem) => {
         console.log('handleConfirmDeleted', zone)
         setConfirmDelete({ show: true, iup_zona_site_id: zone.iup_zona_site_id, name: zone.iup_zona_site_name });
-    },[confirmDelete]);
+    }, [confirmDelete]);
 
     // ---- guide modal helpers ----
     const openGuideForm = useCallback((zone: IupZonaSiteItem) => {
@@ -286,13 +270,6 @@ export const useIupZoneSIte = () => {
         setGuideValue(zone.guide ?? "");
     }, []);
 
-    /**
-     * Dipanggil dari tombol "Create Guide" saat form masih dalam mode create
-     * (belum punya iup_zona_site_id). Validasi hanya nama zona — tanggal
-     * dikirim null dulu, biar user bisa langsung nulis guide tanpa harus
-     * ngisi seluruh form Evidence dulu. Setelah zona tersimpan, guide modal
-     * langsung dibuka untuk zona yang baru dibuat itu.
-     */
     const createZoneAndOpenGuide = async (): Promise<void> => {
         const titleError = validateZoneForm(form, zones, null).title;
         if (titleError) {
@@ -355,7 +332,6 @@ export const useIupZoneSIte = () => {
         setGuideValue("");
     }, []);
 
-    /** Simpan guide untuk zona yang sedang dibuka di guide modal. Return true kalau sukses. */
     const submitGuide = async (): Promise<boolean> => {
         if (!guideZone) return false;
 
@@ -374,36 +350,6 @@ export const useIupZoneSIte = () => {
             setGuideSubmitting(false);
         }
     };
-
-    // const handleConfirmDeleted = useCallback(async () => {
-    //     if (!confirmDelete.iup_zona_site_id) {
-    //         toast.error('Zona Area not found');
-    //         return;
-    //     }
-    //     try {
-    //         setIsSubmitting(true);
-
-    //         const response = await IupService.deleteIupZonaSite(confirmDelete.iup_zona_site_id);
-            
-    //         if (response.status === 200) {
-    //             toast.success('Zona berhasil dihapus');
-    //             setConfirmDelete({show: false});
-    //             updateZones(zones.filter((z) => z.id !== confirmDelete.iup_zona_site_id));
-    //             return response;
-    //         } else {
-    //             toast.error(response.message || 'Failed to update quotation');
-    //             throw new Error(response.message || 'Failed to update quotation');
-    //         }
-            
-    //     } catch (error: any) {
-    //         console.error('Error deleting zone:', error);
-    //         toast.error(`Gagal menghapus zona`);
-    //         setConfirmDelete({show: false});
-    //     } finally {
-    //         setConfirmDelete({show: false});
-    //         setIsSubmitting(false);
-    //     }
-    // }, [setIsSubmitting, confirmDelete, zones]);
 
     return {
         zones,

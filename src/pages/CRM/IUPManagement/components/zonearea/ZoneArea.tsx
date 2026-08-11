@@ -105,6 +105,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                                 zone={zone}
                                 onEdit={openEditForm}
                                 onDelete={deleteZone}
+                                onViewGuide={openGuideForm}
                                 isDeleting={deletingId === zone.iup_zona_site_id}
                                 zoneSiteTemplates={zoneSiteTemplates}
                             />

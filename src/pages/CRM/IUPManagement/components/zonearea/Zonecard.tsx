@@ -21,6 +21,7 @@ export interface ZonecardProps {
     zone: IupZonaSiteItem;
     onEdit: (zone: IupZonaSiteItem, showGuideInitially?: boolean) => void;
     onDelete: (zone: IupZonaSiteItem) => void;
+    onViewGuide: (zone: IupZonaSiteItem) => void;
     isDeleting?: boolean;
     zoneSiteTemplates: MasterZoneSiteSection[];
 }
@@ -29,6 +30,7 @@ const Zonecard: React.FC<ZonecardProps> = ({
     zone,
     onEdit,
     onDelete,
+    onViewGuide,
     isDeleting = false,
     zoneSiteTemplates, // kept for when Survey Data (below) is re-enabled
 }) => {
@@ -280,38 +282,46 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                             </Button>
                         </div>
                     )}
-                    <div>
-                        {/* <p className="mb-1.5 text-xs font-primary-bold text-slate-500 uppercase tracking-wide">
-                            Remarks
-                        </p> */}
-                        <div className="w-full min-h-25 border border-gray-300 rounded-lg overflow-hidden">
-                            {zone.guide && showGuide && (
-                                <div className="px-4 py-3 bg-slate-50 border-b border-gray-200 gap-3 flex flex-col">
-                                    <p className="mb-1 flex items-center gap-1 text-sm font-semibold text-gray-800 uppercase font-secondary">
-                                        <LuBookOpen size={12} />
-                                        Guide — reference for filling in the remarks below
-                                    </p>
-                                    <div
-                                        className="reset-content min-h-0 text-sm text-slate-600"
-                                        dangerouslySetInnerHTML={{
-                                            __html: DOMPurify.sanitize(zone.guide, {
-                                                ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
-                                            }),
-                                        }}
-                                    ></div>
-                                </div>
-                            )}
-                            <div className="p-4 prose max-w-none text-gray-700 reset-content">
-                                {zone.iup_zona_site_description && (
-                                    <div
-                                        dangerouslySetInnerHTML={{
-                                            __html: DOMPurify.sanitize(zone.iup_zona_site_description, {
-                                                ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
-                                            }),
-                                        }}
-                                    ></div>
-                                )}
+                    {zone.guide && showGuide && (
+                        <div className="border-l-2 border-blue-light-400 pl-3">
+                            <p className="mb-1 flex items-center gap-1.5 text-xs font-primary-bold text-slate-500 uppercase tracking-wide">
+                                <LuBookOpen size={12} />
+                                Guide — reference for filling in Remarks below
+                            </p>
+                            <div className="relative max-h-20 overflow-hidden">
+                                <div
+                                    className="reset-content text-sm text-slate-600"
+                                    dangerouslySetInnerHTML={{
+                                        __html: DOMPurify.sanitize(zone.guide, {
+                                            ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
+                                        }),
+                                    }}
+                                ></div>
+                                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent"></div>
                             </div>
+                            <button
+                                type="button"
+                                onClick={() => onViewGuide(zone)}
+                                className="mt-1.5 text-xs font-medium text-primary hover:underline"
+                            >
+                                View full guide →
+                            </button>
+                        </div>
+                    )}
+                    <div>
+                        <p className="mb-1.5 text-xs font-primary-bold text-slate-500 uppercase tracking-wide">
+                            Remarks
+                        </p>
+                        <div className="prose max-w-none text-gray-700 reset-content">
+                            {zone.iup_zona_site_description && (
+                                <div
+                                    dangerouslySetInnerHTML={{
+                                        __html: DOMPurify.sanitize(zone.iup_zona_site_description, {
+                                            ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
+                                        }),
+                                    }}
+                                ></div>
+                            )}
                         </div>
                     </div>
                     {zone.iup_zona_site_file?.length > 0 && (

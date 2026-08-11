@@ -14,12 +14,13 @@ import { GiMineTruck } from 'react-icons/gi';
 import TabContractorUnit from './components/TabContractorUnit';
 import TabHistoryVisit from './components/TabHistoryVisit';
 import TabSurvey from './components/TabSurvey';
-import { AiOutlineHistory } from 'react-icons/ai';
+import { AiOutlineDashboard, AiOutlineHistory } from 'react-icons/ai';
+import IupDashboard from './Dashboard';
 
 
 const EditIupManagement: React.FC = () => {
     const goBack = useGoBack();
-    
+
     // Use custom hook for edit functionality
     const {
         isLoading,
@@ -52,7 +53,7 @@ const EditIupManagement: React.FC = () => {
         handleSubmit
     } = useIupManagementEdit();
 
-    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit' | 'survey'>('zone_iup');
+    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit' | 'survey' | 'dashboard'>('zone_iup');
 
     // Show loading spinner while data is loading
     if (isLoading) {
@@ -83,10 +84,10 @@ const EditIupManagement: React.FC = () => {
 
     return (
         <>
-            <PageMeta 
-                title="Edit IUP Management - CRM" 
+            <PageMeta
+                title="Edit IUP Management - CRM"
                 description="Edit IUP management information and view customer details"
-                image="/motor-sights-international.png" 
+                image="/motor-sights-international.png"
             />
             <div className="mx-auto px-0">
                 <PageHeader
@@ -99,53 +100,57 @@ const EditIupManagement: React.FC = () => {
                     <nav className="flex w-[910px] xl:w-full">
                         <button
                             onClick={() => setActiveTab('info_iup')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                activeTab === 'info_iup'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'info_iup'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             <FaIndustry size={'1.2rem'} /> Detail IUP
                         </button>
                         <button
                             onClick={() => setActiveTab('contractor_unit')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                activeTab === 'contractor_unit'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'contractor_unit'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             <GiMineTruck size={'1.2rem'} /> Contractor & Unit
                         </button>
                         <button
                             onClick={() => setActiveTab('zone_iup')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                activeTab === 'zone_iup'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'zone_iup'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             <FaMapMarkedAlt size={'1.2rem'} /> Zone Site
                         </button>
                         <button
                             onClick={() => setActiveTab('history_visit')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                activeTab === 'history_visit'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'history_visit'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             <FaHistory size={'1.2rem'} /> History Visit
                         </button>
                         <button
                             onClick={() => setActiveTab('survey')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                activeTab === 'survey'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'survey'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             <AiOutlineHistory size={'1.2rem'} /> Survey
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('dashboard')}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'dashboard'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                        >
+                            <AiOutlineDashboard size={'1.2rem'} /> Dashboard
                         </button>
                     </nav>
                 </div>
@@ -169,7 +174,7 @@ const EditIupManagement: React.FC = () => {
                         getAvailableIupZones={getAvailableIupZones}
                         getAvailableIupSegmentations={getAvailableIupSegmentations}
                     />
-                    
+
                     <IupInformtionsFormFields
                         formData={formData}
                         errors={errors}
@@ -178,7 +183,7 @@ const EditIupManagement: React.FC = () => {
                     />
 
                     {/* <CustomerInformation customers={customers} /> */}
-                    
+
                     <FormActions
                         submitText={isSubmitting ? 'Updating...' : 'Update IUP'}
                         cancelRoute="/crm/iup-management"
@@ -197,6 +202,9 @@ const EditIupManagement: React.FC = () => {
                 </>)}
                 {activeTab === 'survey' && (<>
                     <TabSurvey />
+                </>)}
+                {activeTab === 'dashboard' && (<>
+                    <IupDashboard />
                 </>)}
             </div>
         </>
