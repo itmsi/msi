@@ -19,7 +19,7 @@ declare module 'jspdf' {
 const formatCurrency = (value: string | number): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(numValue)) return 'Rp 0';
-    
+
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
@@ -34,21 +34,21 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         unit: 'mm',
         format: 'a4'
     });
-    
+
     // Function to get localized text
     const langField = (key: string): string => {
-            const value = roeCalculatorLabelPDF[key];
-            
-            if (value && typeof value === 'object' && value[language as LangCode]) {
-                return value[language as LangCode];
-            }
-            
-            return key; // fallback to key if translation not found
-        };
-    
+        const value = roeCalculatorLabelPDF[key];
+
+        if (value && typeof value === 'object' && value[language as LangCode]) {
+            return value[language as LangCode];
+        }
+
+        return key; // fallback to key if translation not found
+    };
+
     // Load custom Futura fonts
     await loadCustomFonts(doc);
-    
+
     const pageWidth = doc.internal.pageSize.getWidth(); // 297mm for A4 landscape
     const pageHeight = doc.internal.pageSize.getHeight(); // 210mm for A4 landscape
     const margin = 10;
@@ -67,7 +67,7 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         } catch (error) {
             console.warn('IEC logo not found');
         }
-        
+
         try {
             // const msLogo = '/motor-sights-international-logo.png';
             // doc.addImage(msLogo, 'PNG', pageWidth - margin - 20, 3, 24, 15);
@@ -77,11 +77,11 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
             doc.text('ROE & ROA Report', pageWidth - margin, 10, { align: 'right' });
             setFontSafe(doc, 'OpenSans', 'normal');
             doc.setFontSize(10);
-            doc.text(`${data.customer_name} | ${data.commodity}`, pageWidth - margin, 15 , { align: 'right' });
+            doc.text(`${data.customer_name} | ${data.commodity}`, pageWidth - margin, 15, { align: 'right' });
         } catch (error) {
             console.warn('Motor Sights logo not found');
         }
-        
+
         // Line separator
         doc.setDrawColor(200, 200, 200);
         doc.setLineWidth(0.2);
@@ -92,11 +92,11 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         doc.setFillColor(0, 48, 97);
         doc.rect(0, pageHeight - footerHeight, pageWidth, footerHeight, 'F');
         const footerY = pageHeight - footerHeight;
-        
+
         doc.setFontSize(7);
         doc.setTextColor(255, 255, 255);
         setFontSafe(doc, 'Futura', 'bold');
-        
+
         // Address section
         const pinIcon = '/pdf/pin.png';
         doc.addImage(pinIcon, 'PNG', margin, footerY + 4, 7, 7);
@@ -105,16 +105,16 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         const address = 'Jl. Raya Cakung Cilincing, KM 35 Kav 532, RT.009/RW.08, Cakung Barat, Cakung,';
         doc.text(address, margin + 8, footerY + 10);
         doc.text('Jakarta Timur, Daerah Khusus Ibukota Jakarta, 13910', margin + 8, footerY + 14);
-        
+
         // Contact info
-        
+
         const webIcon = '/pdf/web.png';
         doc.addImage(webIcon, 'PNG', pageWidth - margin - 55, footerY + 7.2, 4, 4);
         doc.text('motorsights.com', pageWidth - margin - 50, footerY + 10);
-        
+
         const phoneIcon = '/pdf/phone.png';
         doc.addImage(phoneIcon, 'PNG', pageWidth - margin - 25, footerY + 7.3, 4, 4);
-        doc.text('(+62) 21-4585-9155', pageWidth - margin - 20, footerY + 10);
+        doc.text('(+62) 21-8060-3068', pageWidth - margin - 20, footerY + 10);
     };
 
     const checkNewPage = (spaceNeeded: number = 20) => {
@@ -131,32 +131,32 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
     addHeader();
     addFooter();
 
-    
+
     // Metrik Keuangan
     const keyFinancialData = (varYPos: number): number => {
         const fullTableWidth = (pageWidth - 2 * margin) / 2;
         const colWidth = fullTableWidth / 2;
         const col1X = (margin + colWidth * 0.55);
         const col2X = margin + colWidth * 1.45;
-        
+
         // Create rounded border background
         const borderHeight = 76;
         doc.setDrawColor(228, 231, 236);
         doc.setLineWidth(0.5);
         doc.roundedRect(margin, varYPos - 5, fullTableWidth, borderHeight, 2, 2, 'S');
-        
+
         // Add section title
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
         // setFontSafe(doc, 'Futura', 'bold');
         setFontByLanguage(doc, langField('pdfFinancialMetrics'), 'Futura', 'bold', language);
         doc.text(langField('pdfFinancialMetrics'), margin + 5, varYPos + 3);
-        
+
         // Add border line below title
         doc.setDrawColor(0, 48, 97);
         doc.setLineWidth(0.5);
         doc.line(margin + 5, varYPos + 6, margin + fullTableWidth - 5, varYPos + 6);
-        
+
         varYPos += 15;
 
         // ROE - Add rounded border
@@ -168,17 +168,17 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         doc.setDrawColor(242, 242, 253);
         doc.setLineWidth(0.3);
         doc.roundedRect(roeBoxX - 4, varYPos - 5.5, roeBoxWidth + 4, roeBoxHeight, 1, 1, 'S');
-        
+
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
         setFontByLanguage(doc, langField('returnOnEquity'), 'Futura', 'normal', language);
         doc.text(langField('returnOnEquity'), col1X - 2, varYPos - 1, { align: 'center' });
-        
+
         doc.setFontSize(14);
         doc.setTextColor(99, 106, 232);
         setFontSafe(doc, 'Futura', 'bold');
         doc.text(`${data.pdf_data.key_financial_metrics.roe_percentage}%`, col1X - 2, varYPos + 7, { align: 'center' });
-        
+
         doc.setFontSize(9);
         doc.setTextColor(86, 93, 109);
         setFontByLanguage(doc, langField('pdfNetProfitEquity'), 'Futura', 'normal', language);
@@ -191,24 +191,24 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         doc.setDrawColor(245, 245, 245);
         doc.setLineWidth(0.3);
         doc.roundedRect(roaBoxX, varYPos - 5.5, roaBoxWidth + 4, roaBoxHeight, 1, 1, 'S');
-        
+
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
         setFontByLanguage(doc, langField('returnOnAssets'), 'Futura', 'normal', language);
         doc.text(langField('returnOnAssets'), col2X + 2, varYPos - 1, { align: 'center' });
-        
+
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
         setFontSafe(doc, 'Futura', 'bold');
         doc.text(`${data.pdf_data.key_financial_metrics.roa_percentage}%`, col2X + 2, varYPos + 7, { align: 'center' });
-        
+
         doc.setFontSize(9);
         doc.setTextColor(86, 93, 109);
         setFontByLanguage(doc, langField('pdfNetProfitAssets'), 'Futura', 'normal', language);
         doc.text(langField('pdfNetProfitAssets'), col2X + 2, varYPos + 12, { align: 'center' });
 
         varYPos += 23;
-   
+
         // Revenue per Bulan - Add rounded border
         const revenueBoxWidth = colWidth * 0.85;
         const revenueBoxHeight = 17;
@@ -217,13 +217,13 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         // doc.roundedRect(revenueBoxX, varYPos- 5, revenueBoxWidth, revenueBoxHeight, 1, 1, 'F');
         doc.setDrawColor(245, 245, 245);
         doc.setLineWidth(0.3);
-        doc.roundedRect(revenueBoxX - 4, varYPos- 5, revenueBoxWidth + 4, revenueBoxHeight, 1, 1, 'S');
-        
+        doc.roundedRect(revenueBoxX - 4, varYPos - 5, revenueBoxWidth + 4, revenueBoxHeight, 1, 1, 'S');
+
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
         setFontByLanguage(doc, langField('pdfMonthlyRevenue'), 'Futura', 'normal', language);
         doc.text(langField('pdfMonthlyRevenue'), col1X - 2, varYPos - 1, { align: 'center' });
-        
+
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
         setFontSafe(doc, 'Futura', 'bold');
@@ -237,20 +237,20 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         // doc.roundedRect(expensesBoxX, varYPos- 5, expensesBoxWidth, expensesBoxHeight, 1, 1, 'F');
         doc.setDrawColor(245, 245, 245);
         doc.setLineWidth(0.3);
-        doc.roundedRect(expensesBoxX, varYPos- 6, expensesBoxWidth + 4, expensesBoxHeight, 1, 1, 'S');
-        
+        doc.roundedRect(expensesBoxX, varYPos - 6, expensesBoxWidth + 4, expensesBoxHeight, 1, 1, 'S');
+
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
         setFontByLanguage(doc, langField('pdfMonthlyCosts'), 'Futura', 'normal', language);
         doc.text(langField('pdfMonthlyCosts'), col2X + 2, varYPos - 1, { align: 'center' });
-        
+
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
         setFontSafe(doc, 'Futura', 'bold');
         doc.text(formatCurrency(data.pdf_data.key_financial_metrics.expenses_per_bulan), col2X + 2, varYPos + 7, { align: 'center' });
-        
+
         varYPos += 20;
-        
+
         // Net Profit per Bulan - Add rounded border
         const netProfitBoxWidth = colWidth * 0.85;
         const netProfitBoxHeight = 17;
@@ -258,17 +258,17 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         doc.setDrawColor(245, 245, 245);
         doc.setLineWidth(0.3);
         doc.roundedRect(netProfitBoxX - 4, varYPos - 6, netProfitBoxWidth + 4, netProfitBoxHeight, 1, 1, 'S');
-        
+
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
         setFontByLanguage(doc, langField('pdfMonthlyNetProfit'), 'Futura', 'normal', language);
         doc.text(langField('pdfMonthlyNetProfit'), col1X - 2, varYPos - 1, { align: 'center' });
-        
+
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
         setFontSafe(doc, 'Futura', 'bold');
         doc.text(formatCurrency(data.pdf_data.key_financial_metrics.net_profit_per_bulan), col1X - 2, varYPos + 7, { align: 'center' });
-        
+
         varYPos += 25;
         return varYPos;
 
@@ -278,25 +278,25 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
     const revenueFunction = (varYPos: number): number => {
         const fullTableWidth = (pageWidth - 2 * margin) / 2;
         const colWidth = fullTableWidth / 2;
-        
+
         // Create rounded border background
         const borderHeight = 76;
         let postY = varYPos - borderHeight - 7;
         doc.setDrawColor(228, 231, 236);
         doc.setLineWidth(0.5);
         doc.roundedRect(fullTableWidth + margin + 2, postY - 5, fullTableWidth, borderHeight, 2, 2, 'S');
-        
+
         // Add section title
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
         setFontByLanguage(doc, langField('pdfNetProfitAssets'), 'Futura', 'bold', language);
         doc.text(langField('pdfRevenue'), fullTableWidth + margin + 5, postY + 3);
-        
+
         // Add border line below title
         doc.setDrawColor(0, 48, 97);
         doc.setLineWidth(0.5);
         doc.line(fullTableWidth + margin + 5, postY + 6, fullTableWidth + margin + fullTableWidth - 5, postY + 6);
-        
+
         postY += 10;
 
         // OPERATIONAL Section with border
@@ -304,20 +304,20 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         doc.setTextColor(23, 26, 31);
         setFontByLanguage(doc, langField('pdfOperational'), 'Futura', 'bold', language);
         doc.text(langField('pdfOperational'), fullTableWidth + margin + 5, postY + 2);
-        
+
         // OPERATIONAL border
         doc.setDrawColor(228, 231, 236);
         doc.setLineWidth(0.5);
         doc.roundedRect(fullTableWidth + margin + 5, postY + 5, colWidth - 8, 40, 1, 1, 'S');
-        
+
         const operationalData = [
-            [langField('pdfTonnagePerUnit'), data.pdf_data.revenue.data_operasional.tonnage_per_ritase+' Ton'],
-            [langField('pdfHaulDistance'), data.pdf_data.revenue.data_operasional.haul_distance+' Km'],
+            [langField('pdfTonnagePerUnit'), data.pdf_data.revenue.data_operasional.tonnage_per_ritase + ' Ton'],
+            [langField('pdfHaulDistance'), data.pdf_data.revenue.data_operasional.haul_distance + ' Km'],
             [langField('pdfSellingPricePerTon'), formatCurrency(data.pdf_data.revenue.data_operasional.selling_price_per_ton)],
             [langField('pdfTripsPerShift'), data.pdf_data.revenue.data_operasional.ritase_per_shift],
             [langField('pdfShiftsPerDay'), data.pdf_data.revenue.data_operasional.shift_per_hari],
             [langField('pdfWorkingDaysPerMonth'), data.pdf_data.revenue.data_operasional.hari_kerja_per_bulan],
-            [langField('pdfPhysicalAvailability'), data.pdf_data.revenue.data_operasional.utilization_percent+ '%'],
+            [langField('pdfPhysicalAvailability'), data.pdf_data.revenue.data_operasional.utilization_percent + '%'],
         ];
         // Left table - Operational
         autoTable(doc, {
@@ -360,18 +360,18 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         doc.setDrawColor(0, 48, 97);
         doc.setLineWidth(0.2);
         doc.line(fullTableWidth + margin + colWidth, postY - 2, fullTableWidth + margin + colWidth, postY + 45);
-        
+
         // PRODUKSI Section with border
         doc.setFontSize(10);
         doc.setTextColor(23, 26, 31);
         setFontByLanguage(doc, langField('pdfProduction'), 'Futura', 'bold', language);
         doc.text(langField('pdfProduction'), fullTableWidth + margin + colWidth + 3, postY + 2);
-        
+
         // PRODUKSI border
         doc.setDrawColor(228, 231, 236);
         doc.setLineWidth(0.5);
         doc.roundedRect(fullTableWidth + margin + colWidth + 3, postY + 5, colWidth - 5, 40, 1, 1, 'S');
-        
+
         const produksiData = [
             [langField('pdfTripsPerShift'), data.pdf_data.revenue.hasil_produksi.ritase_per_hari],
             [langField('pdfTripsPerMonth'), data.pdf_data.revenue.hasil_produksi.ritase_per_bulan],
@@ -415,17 +415,17 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
             }
         });
         postY += 5;
-        
+
         // TOTAL REVENUE PER BULAN
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
-        doc.text(langField('pdfTotalMonthlyRevenue'),fullTableWidth * 1.58, (postY + 46), { align: 'center' });
-        
+        doc.text(langField('pdfTotalMonthlyRevenue'), fullTableWidth * 1.58, (postY + 46), { align: 'center' });
+
         doc.setFontSize(14);
         doc.setTextColor(99, 106, 232);
         setFontSafe(doc, 'Futura', 'bold');
-        doc.text(`${formatCurrency(data.pdf_data.revenue.total_revenue_per_bulan)}`,fullTableWidth * 1.58, (postY + 46) + 6, { align: 'center' });
-        
+        doc.text(`${formatCurrency(data.pdf_data.revenue.total_revenue_per_bulan)}`, fullTableWidth * 1.58, (postY + 46) + 6, { align: 'center' });
+
         return varYPos;
 
     }
@@ -433,24 +433,24 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
     // EXPENSES
     const expenseFunction = (varYPos: number): number => {
         const fullTableWidth = (pageWidth - 2 * margin) / 2;
-        
+
         // Create rounded border background
         const borderHeight = 69;
         doc.setDrawColor(228, 231, 236);
         doc.setLineWidth(0.5);
         doc.roundedRect(margin, varYPos - 5, fullTableWidth, borderHeight, 2, 2, 'S');
-        
+
         // Add section title
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
         setFontByLanguage(doc, langField('pdfExpenses'), 'Futura', 'bold', language);
         doc.text(langField('pdfExpenses'), margin + 5, varYPos + 3);
-        
+
         // Add border line below title
         doc.setDrawColor(0, 48, 97);
         doc.setLineWidth(0.5);
         doc.line(margin + 5, varYPos + 6, margin + fullTableWidth - 5, varYPos + 6);
-        
+
         varYPos += 5;
         const operationalData = [
             [langField('costBBM'), `${formatCurrency(data.pdf_data.expenses.detail.bbm.nominal)} (${data.pdf_data.expenses.detail.bbm.persentase}%)`],
@@ -501,12 +501,12 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         doc.setFontSize(11);
         doc.setTextColor(86, 93, 109);
         setFontByLanguage(doc, langField('pdfTotalCosts'), 'Futura', 'bold', language);
-        doc.text(langField('pdfTotalCosts'),margin + 70, (varYPos + 48), { align: 'center' });
-        
+        doc.text(langField('pdfTotalCosts'), margin + 70, (varYPos + 48), { align: 'center' });
+
         doc.setFontSize(14);
         doc.setTextColor(99, 106, 232);
-        doc.text(`${formatCurrency(data.pdf_data.expenses.total_expense)}`,margin + 70, (varYPos + 53), { align: 'center' });
-        
+        doc.text(`${formatCurrency(data.pdf_data.expenses.total_expense)}`, margin + 70, (varYPos + 53), { align: 'center' });
+
         varYPos += 25;
         return varYPos;
 
@@ -516,25 +516,25 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
     const assetliabilityFunction = (varYPos: number): number => {
         const fullTableWidth = (pageWidth - 2 * margin) / 2;
         const colWidth = fullTableWidth / 2;
-        
+
         // Create rounded border background
         const borderHeight = 69;
         let postY = varYPos - borderHeight + 39;
         doc.setDrawColor(228, 231, 236);
         doc.setLineWidth(0.5);
         doc.roundedRect(fullTableWidth + margin + 2, postY - 5, fullTableWidth, borderHeight, 2, 2, 'S');
-        
+
         // Add section title
         doc.setFontSize(14);
         doc.setTextColor(23, 26, 31);
         setFontByLanguage(doc, langField('pdfAssetLiability'), 'Futura', 'bold', language);
         doc.text(langField('pdfAssetLiability'), fullTableWidth + margin + 5, postY + 3);
-        
+
         // Add border line below title
         doc.setDrawColor(0, 48, 97);
         doc.setLineWidth(0.5);
         doc.line(fullTableWidth + margin + 5, postY + 6, fullTableWidth + margin + fullTableWidth - 5, postY + 6);
-        
+
         postY += 10;
 
         // OPERATIONAL Section with border
@@ -542,13 +542,13 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         doc.setTextColor(23, 26, 31);
         setFontByLanguage(doc, langField('pdfFixedAssetUnit'), 'Futura', 'bold', language);
         doc.text(langField('pdfFixedAssetUnit'), fullTableWidth + margin + 5, postY + 2);
-        
+
         const assetData = [
             [langField('pdfPricePerUnit'), formatCurrency(data.pdf_data.asset_liability.unit_purchase.harga_per_unit)],
             [langField('pdfQtyUnit'), data.pdf_data.asset_liability.unit_purchase.qty_unit],
             [langField('pdfDownPayment'), data.pdf_data.asset_liability.unit_purchase.down_payment_percent + '%'],
             [langField('pdfFinancingTenor'), data.pdf_data.asset_liability.unit_purchase.tenor_pembiayaan],
-            [langField('pdfInterestFlat'), data.pdf_data.asset_liability.unit_purchase.interest_rate_flat+ '%'],
+            [langField('pdfInterestFlat'), data.pdf_data.asset_liability.unit_purchase.interest_rate_flat + '%'],
         ];
         const totalAssetData = [
             [langField('pdfTotalAsset'), formatCurrency(data.pdf_data.asset_liability.unit_purchase.total_aset)]
@@ -609,13 +609,13 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         doc.setDrawColor(0, 48, 97);
         doc.setLineWidth(0.2);
         doc.line(fullTableWidth + margin + colWidth, postY - 3, fullTableWidth + margin + colWidth, postY + 53);
-        
+
         // PRODUKSI Section with border
         doc.setFontSize(10);
         doc.setTextColor(23, 26, 31);
         setFontByLanguage(doc, langField('pdfLiabilityInstallment'), 'Futura', 'bold', language);
         doc.text(langField('pdfLiabilityInstallment'), fullTableWidth + margin + colWidth + 3, postY + 2);
-        
+
         const liabilityData = [
             [langField('pdfPrincipalInstallment'), formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.cicilan_pokok)],
             [langField('pdfInterestRp'), formatCurrency(data.pdf_data.asset_liability.cicilan_bulanan.bunga)],
@@ -750,22 +750,22 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
     const iconDisclaimer = '/pdf/alert-hexa.png';
     const titleDisclaimer = langField('attentionTitle');
     const disclaimerText = langField('attentionDisclaimer');
-    
+
     const disclaimerBoxWidth = pageWidth - 2 * margin + 2;
     const disclaimerBoxHeight = 17;
     const disclaimerBoxX = margin;
     const disclaimerBoxY = yPos - 8;
-    
+
     doc.setFillColor(255, 250, 235);
     doc.roundedRect(disclaimerBoxX, disclaimerBoxY, disclaimerBoxWidth, disclaimerBoxHeight, 2, 2, 'F');
-    
+
     doc.addImage(iconDisclaimer, 'PNG', disclaimerBoxX + 5, disclaimerBoxY + 2, 5, 5);
-    
+
     doc.setFontSize(10);
     doc.setTextColor(29, 41, 57);
     setFontByLanguage(doc, titleDisclaimer, 'Futura', 'bold', language);
     doc.text(titleDisclaimer, disclaimerBoxX + 12, disclaimerBoxY + 5.5);
-    
+
     doc.setFontSize(8);
     doc.setTextColor(102, 112, 133);
     setFontByLanguage(doc, disclaimerText, 'OpenSans', 'normal', language);
@@ -781,22 +781,22 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
 
     checkNewPage(30);
     // TABEL COMPARE
-    
+
     doc.setFontSize(14);
     doc.setTextColor(23, 26, 31);
     setFontByLanguage(doc, langField('pdfComparisonTable'), 'Futura', 'bold', language);
     doc.text(langField('pdfComparisonTable'), margin + 2, yPos - 5);
-    
+
     // Add border line below title
     doc.setDrawColor(0, 48, 97);
     doc.setLineWidth(0.5);
     doc.line(margin, yPos - 2, margin + disclaimerBoxWidth, yPos - 2);
-    
+
     const itemData = data.properties_list_compare.list_compare.map((item, index) => [
         (index + 1).toString() + '.',
-        item.brand + 
-        '\n' + langField('tonase') + ': ' + item.tonase + 
-        '\n' + langField('fuelConsumption') + ' ('+ data.fuel_consumption_type  + '): ' + item.fuel_consumption,
+        item.brand +
+        '\n' + langField('tonase') + ': ' + item.tonase +
+        '\n' + langField('fuelConsumption') + ' (' + data.fuel_consumption_type + '): ' + item.fuel_consumption,
         item.qty || '-',
         {
             content: item.roe_percentage + '%',
@@ -828,26 +828,26 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         startY: yPos + 2,
         head: [
             [
-                {content: 'No', styles: { halign: 'center' }},
-                {content: langField('calculatorInfo')},
-                {content: langField('qty'), styles: { halign: 'center' }},
-                {content: langField('roe'), colSpan: 2, styles: { halign: 'center' }},
-                {content: langField('roa'), colSpan: 2, styles: { halign: 'center' }},
-                {content: langField('revenue'), styles: { halign: 'center' }}
+                { content: 'No', styles: { halign: 'center' } },
+                { content: langField('calculatorInfo') },
+                { content: langField('qty'), styles: { halign: 'center' } },
+                { content: langField('roe'), colSpan: 2, styles: { halign: 'center' } },
+                { content: langField('roa'), colSpan: 2, styles: { halign: 'center' } },
+                { content: langField('revenue'), styles: { halign: 'center' } }
             ]
         ],
         body: itemData,
         margin: { left: margin, right: margin },
         styles: {
-            fontSize: 9, 
+            fontSize: 9,
             cellPadding: 2,
             font: 'OpenSans',
             fontStyle: 'normal',
             valign: 'middle',
             textColor: [0, 0, 0]
         },
-        headStyles: { 
-            fillColor: [228, 231, 236], 
+        headStyles: {
+            fillColor: [228, 231, 236],
             textColor: [0, 0, 0],
             font: 'Futura',
             fontStyle: 'bold',
@@ -857,39 +857,39 @@ export const generateROEPDF = async (data: ManageROEDataPDF, language: string) =
         columnStyles: {
             0: { cellWidth: 15, halign: "center", valign: 'top' },
             1: { cellWidth: 70, fontStyle: 'semibold' },
-            2: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold'},
-            3: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold'},
-            4: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold'},
-            5: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold'},
-            6: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold'},
+            2: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold' },
+            3: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold' },
+            4: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold' },
+            5: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold' },
+            6: { cellWidth: 'auto', halign: "center", fontStyle: 'semibold' },
             7: { cellWidth: 'auto', halign: "center" }
         },
-            willDrawCell: (data) => {
-                // Check if cell contains Chinese characters and apply appropriate font
-                const cellText = data.cell.text?.join('') || '';
-                if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
-                    const isFirstColumn = data.column.index === 0;
-                    const isBold = data.cell.styles.fontStyle === 'bold';
-                    try {
-                        if (isFirstColumn) {
-                            doc.setFont('NotoSansSC', 'normal');
-                        } else if (isBold) {
-                            doc.setFont('NotoSansSC', 'bold');
-                        } else {
-                            doc.setFont('NotoSansSC', 'normal');
-                        }
-                    } catch (error) {
-                        doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
+        willDrawCell: (data) => {
+            // Check if cell contains Chinese characters and apply appropriate font
+            const cellText = data.cell.text?.join('') || '';
+            if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
+                const isFirstColumn = data.column.index === 0;
+                const isBold = data.cell.styles.fontStyle === 'bold';
+                try {
+                    if (isFirstColumn) {
+                        doc.setFont('NotoSansSC', 'normal');
+                    } else if (isBold) {
+                        doc.setFont('NotoSansSC', 'bold');
+                    } else {
+                        doc.setFont('NotoSansSC', 'normal');
                     }
+                } catch (error) {
+                    doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
                 }
             }
-        
+        }
+
     });
-    
-    
+
+
     const customerName = (data.customer_name || 'Unknown').replace(/\s+/g, '_');
     const fileName = `ROE_ROA_Calculator_${customerName}_${new Date().getTime()}.pdf`;
     doc.save(fileName);
-    
+
 
 };
