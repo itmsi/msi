@@ -26,7 +26,7 @@ export default function Home() {
                 
                 <div className="text-center space-y-2">
                     <h1 className="text-2xl font-primary-bold text-gray-800">
-                        {langField('welcome_title')} edit test
+                        {langField('welcome_title')}
                     </h1>
                     <p className="text-lg text-gray-600">
                         {langField('dashboard_subtitle')}
