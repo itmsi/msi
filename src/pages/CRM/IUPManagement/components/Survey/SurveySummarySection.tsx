@@ -119,7 +119,7 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
                 const parsed = JSON.parse(authUser);
                 employeeId = parsed.employee_id;
             }
-        } catch {}
+        } catch { }
 
         try {
             const response = await fetch(`${API_BASE_URL}/mosa/ai-assistant/chat/stream`, {
@@ -239,7 +239,7 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
                         <LuSparkles size={17} />
                     </div>
                     <div className="text-left">
-                        <h3 className="text-sm font-semibold text-gray-800">
+                        <h3 className="text-sm font-semibold font-secondary text-gray-800">
                             Survey Summary
                         </h3>
                         <p className="text-[11px] text-gray-400">
@@ -249,22 +249,22 @@ const SurveySummarySection: React.FC<SurveySummarySectionProps> = ({
                 </div>
             </div> */}
             {(hasEverGenerated || summaryResponse || summaryLoading) && (
-            <AiSummaryPanel
-                summary={summaryResponse || ''}
-                prompt={summaryPrompt}
-                setPrompt={setSummaryPrompt}
-                onGenerate={handleGenerateSummary}
-                isGenerating={summaryLoading}
-                copied={copied}
-                handleCopySummary={handleCopySummary}
-                sessionId={sessionId}
-                setShowChatHistory={setShowChatHistory}
-            />
+                <AiSummaryPanel
+                    summary={summaryResponse || ''}
+                    prompt={summaryPrompt}
+                    setPrompt={setSummaryPrompt}
+                    onGenerate={handleGenerateSummary}
+                    isGenerating={summaryLoading}
+                    copied={copied}
+                    handleCopySummary={handleCopySummary}
+                    sessionId={sessionId}
+                    setShowChatHistory={setShowChatHistory}
+                />
             )}
             {/* ── Empty State / Initial Generate ── */}
             {!hasEverGenerated && !summaryLoading && (
-                <div className="relative text-center overflow-hidden" 
-                    style={{ 
+                <div className="relative text-center overflow-hidden"
+                    style={{
                         position: 'absolute',
                         right: '1.3rem',
                         top: '2.6rem',

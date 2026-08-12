@@ -21,7 +21,6 @@ export interface ZonecardProps {
     zone: IupZonaSiteItem;
     onEdit: (zone: IupZonaSiteItem, showGuideInitially?: boolean) => void;
     onDelete: (zone: IupZonaSiteItem) => void;
-    onViewGuide: (zone: IupZonaSiteItem) => void;
     isDeleting?: boolean;
     zoneSiteTemplates: MasterZoneSiteSection[];
 }
@@ -30,7 +29,6 @@ const Zonecard: React.FC<ZonecardProps> = ({
     zone,
     onEdit,
     onDelete,
-    onViewGuide,
     isDeleting = false,
     zoneSiteTemplates, // kept for when Survey Data (below) is re-enabled
 }) => {
@@ -85,7 +83,7 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                 const parsed = JSON.parse(authUser);
                 employeeId = parsed.employee_id;
             }
-        } catch {}
+        } catch { }
 
         // Build message dengan data zone sesungguhnya
         const fileList = zone.iup_zona_site_file?.length
@@ -182,7 +180,7 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
             } catch (err) {
                 console.error('[handleGenerateSummary] failed to save summary:', err);
             }
-            
+
         } catch (error: any) {
             if (error.name !== 'AbortError') {
                 toast.error(error.message || "Gagal membuat summary");
@@ -193,9 +191,8 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
         }
     }, [summaryPrompt, sessionId, zone]);
     return (
-        <div className={`${
-            isDeleting ? 'border-red-300 bg-red-50' : ''
-        }`}>
+        <div className={`${isDeleting ? 'border-red-300 bg-red-50' : ''
+            }`}>
             <div
                 onClick={() => toggleZone(zone.iup_zona_site_id)}
                 className={`pointer flex items-center justify-between gap-2 px-5 py-3 ${isOpen ? 'bg-primary hover:bg-primary text-white ' : ''} group hover:bg-primary transition-colors hover:*:text-white cursor-pointer`}
@@ -204,14 +201,14 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                     {isOpen ? (
                         <LuChevronDown size={20} className={`group-hover:text-white ${isOpen ? 'text-white' : 'text-slate-600'} shrink-0`} />
                     ) : (
-                        <LuChevronRight size={20} className={`group-hover:text-white ${isOpen ? 'text-white' : 'text-slate-600'} shrink-0`}  />
+                        <LuChevronRight size={20} className={`group-hover:text-white ${isOpen ? 'text-white' : 'text-slate-600'} shrink-0`} />
                     )}
                     <div className={`min-w-0 group-hover:text-white ${isOpen ? 'text-white' : 'text-slate-600'}`}>
                         <p className="flex-1 text-sm font-primary-bold">{zone.iup_zona_site_name}</p>
                         <p className="flex-1 text-xs font-secondary">{moment(zone.iup_zona_site_date_last_survey).format("DD MMMM YYYY")}</p>
                     </div>
 
-                    
+
                 </div>
                 <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                     {zone?.guide && (
@@ -288,7 +285,7 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                                 <LuBookOpen size={12} />
                                 Guide — reference for filling in Remarks below
                             </p>
-                            <div className="relative max-h-20 overflow-hidden">
+                            <div className="relative ">
                                 <div
                                     className="reset-content text-sm text-slate-600"
                                     dangerouslySetInnerHTML={{
@@ -297,21 +294,21 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                                         }),
                                     }}
                                 ></div>
-                                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent"></div>
+                                {/* <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent"></div> */}
                             </div>
-                            <button
+                            {/* <button
                                 type="button"
                                 onClick={() => onViewGuide(zone)}
                                 className="mt-1.5 text-xs font-medium text-primary hover:underline"
                             >
                                 View full guide →
-                            </button>
+                            </button> */}
                         </div>
                     )}
-                    <div>
-                        <p className="mb-1.5 text-xs font-primary-bold text-slate-500 uppercase tracking-wide">
+                    <div className="p-5 rounded-lg border border-gray-200 shadow-[1px_2px_5px_0px_#9e9e9e]">
+                        {/* <p className="mb-1.5 text-xs font-primary-bold text-slate-500 uppercase tracking-wide">
                             Remarks
-                        </p>
+                        </p> */}
                         <div className="prose max-w-none text-gray-700 reset-content">
                             {zone.iup_zona_site_description && (
                                 <div

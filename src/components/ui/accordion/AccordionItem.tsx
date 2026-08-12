@@ -35,10 +35,10 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
                     "flex items-center justify-between",
                     "transition-colors duration-200",
                     // Background colors berdasarkan state
-                    isOpen 
-                        ? "bg-[#dfe8f2] border-b border-gray-200" 
-                        : "bg-gray-50 hover:bg-gray-100",
-                    disabled && "hover:bg-gray-50"
+                    isOpen
+                        ? "bg-[#dfe8f2] border-b border-gray-200"
+                        : "bg-gray-100 hover:bg-gray-200",
+                    disabled && "hover:bg-gray-100"
                 )}
             >
                 <button

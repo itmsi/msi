@@ -53,7 +53,7 @@ const EditIupManagement: React.FC = () => {
         handleSubmit
     } = useIupManagementEdit();
 
-    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit' | 'survey' | 'dashboard'>('zone_iup');
+    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit' | 'survey' | 'dashboard'>('dashboard');
 
     // Show loading spinner while data is loading
     if (isLoading) {
@@ -100,7 +100,7 @@ const EditIupManagement: React.FC = () => {
                     <nav className="flex w-[910px] xl:w-full">
                         <button
                             onClick={() => setActiveTab('info_iup')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'info_iup'
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 min-w-[150px] inline-flex items-center gap-2 justify-center ${activeTab === 'info_iup'
                                 ? 'border-blue-500 text-blue-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
@@ -109,7 +109,7 @@ const EditIupManagement: React.FC = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('contractor_unit')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'contractor_unit'
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 min-w-[200px] inline-flex items-center gap-2 justify-center ${activeTab === 'contractor_unit'
                                 ? 'border-blue-500 text-blue-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
@@ -118,7 +118,7 @@ const EditIupManagement: React.FC = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('zone_iup')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'zone_iup'
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 min-w-[150px] inline-flex items-center gap-2 justify-center ${activeTab === 'zone_iup'
                                 ? 'border-blue-500 text-blue-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
@@ -127,7 +127,7 @@ const EditIupManagement: React.FC = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('history_visit')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'history_visit'
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 min-w-[150px] inline-flex items-center gap-2 justify-center ${activeTab === 'history_visit'
                                 ? 'border-blue-500 text-blue-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
@@ -136,7 +136,7 @@ const EditIupManagement: React.FC = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('survey')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'survey'
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 min-w-[150px] inline-flex items-center gap-2 justify-center ${activeTab === 'survey'
                                 ? 'border-blue-500 text-blue-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
@@ -145,12 +145,12 @@ const EditIupManagement: React.FC = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('dashboard')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'dashboard'
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 min-w-[280px] inline-flex items-center gap-2 justify-center ${activeTab === 'dashboard'
                                 ? 'border-blue-500 text-blue-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
-                            <AiOutlineDashboard size={'1.2rem'} /> Dashboard
+                            <AiOutlineDashboard size={'1.2rem'} /> General Site Information
                         </button>
                     </nav>
                 </div>

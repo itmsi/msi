@@ -1,102 +1,109 @@
-import { Card, CardContent } from "@/components/ui/card";
+import {
+    LuActivity,
+    LuBoxes,
+    LuClipboardList,
+    LuLayers,
+    LuRuler,
+    LuTruck,
+    LuUsers,
+} from "react-icons/lu";
+import { StatCard } from "@/pages/CRM/Customer/components/StatCard";
 
-import type { IupDetail } from "../types/iup.types";
-import { daysUntil, formatDate, formatNumber, toNumber } from "../utils/format";
+import type { IupDashboard } from "../../types/iupDashboard";
+import { formatNumber, toNumber } from "./dashboardUtils";
 
 interface OverviewMetricsProps {
-    iup: IupDetail;
+    iup: IupDashboard;
 }
 
-function getLatestRkab(iup: IupDetail) {
+function getLatestRkab(iup: IupDashboard) {
     if (!iup.iup_rkab.length) return null;
     return [...iup.iup_rkab].sort((a, b) => Number(b.iup_rkab_year) - Number(a.iup_rkab_year))[0];
 }
 
-function getTotalFleet(iup: IupDetail): number {
+function getTotalFleet(iup: IupDashboard): number {
     return iup.customers.reduce((sum, c) => sum + toNumber(c.number_of_fleet), 0);
+}
+
+function getBrandUnitSummary(iup: IupDashboard) {
+    const active = iup.iup_brand_unit.filter((b) => !b.is_delete);
+    return {
+        totalQty: active.reduce((sum, b) => sum + toNumber(b.iup_brand_unit_qty), 0),
+        brandCount: active.length,
+    };
 }
 
 export function OverviewMetrics({ iup }: OverviewMetricsProps) {
     const latestRkab = getLatestRkab(iup);
     const totalFleet = getTotalFleet(iup);
-    const skDaysLeft = daysUntil(iup.sk_end_date);
+    const brandUnit = getBrandUnitSummary(iup);
+    // SK Berlaku s.d. card disabled — see commented StatCard below.
+    // const skDaysLeft = daysUntil(iup.sk_end_date);
+    // const skBadge =
+    //     skDaysLeft !== null
+    //         ? skDaysLeft < 0
+    //             ? "Kedaluwarsa"
+    //             : skDaysLeft < 365
+    //                 ? `${skDaysLeft} hari lagi`
+    //                 : undefined
+    //         : undefined;
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Metric label="IUP Area" value={formatNumber(iup.area_size_ha)} unit="Ha" />
-            <Metric label="Customers" value={iup.customer_count} unit="mitra" />
-            <Metric label="Total Fleet" value={formatNumber(totalFleet)} unit="unit" />
-            <Metric
-                label={latestRkab ? `RKAB ${latestRkab.iup_rkab_year}` : "RKAB"}
+            <StatCard
+                title="IUP Area"
+                value={`${formatNumber(iup.area_size_ha)}`}
+                description="Ha"
+                Icon={LuRuler}
+                iconClassName="text-blue-600"
+            />
+            <StatCard
+                title="Customers"
+                value={iup.customer_count}
+                description="mitra terhubung"
+                Icon={LuUsers}
+                iconClassName="text-green-600"
+            />
+            <StatCard
+                title="Total Fleet"
+                value={formatNumber(totalFleet)}
+                description="unit armada"
+                Icon={LuTruck}
+                iconClassName="text-purple-600"
+            />
+            <StatCard
+                title={latestRkab ? `RKAB ${latestRkab.iup_rkab_year}` : "RKAB"}
                 value={latestRkab ? formatNumber(latestRkab.iup_rkab_current_production) : "-"}
-                unit={latestRkab ? `/ target ${formatNumber(latestRkab.iup_rkab_target_production)}` : undefined}
-                highlight
+                description={latestRkab ? `Target: ${formatNumber(latestRkab.iup_rkab_target_production)}` : undefined}
+                Icon={LuClipboardList}
+                iconClassName="text-blue-600"
             />
-            <Metric label="Activity Stage" value={iup.activity_stage} />
-            <Metric label="Segmentation" value={iup.iup_segmentation_name} />
-            <Metric
-                label="SK Berlaku s.d."
+            <StatCard
+                title="Activity Stage"
+                value={iup.activity_stage || "-"}
+                Icon={LuActivity}
+                iconClassName="text-amber-600"
+            />
+            <StatCard
+                title="Segmentation"
+                value={iup.iup_segmentation_name || "-"}
+                Icon={LuLayers}
+                iconClassName="text-teal-600"
+            />
+            {/* <StatCard
+                title="SK Berlaku s.d."
                 value={formatDate(iup.sk_end_date)}
-                badge={
-                    skDaysLeft !== null
-                        ? skDaysLeft < 0
-                            ? "Kedaluwarsa"
-                            : skDaysLeft < 365
-                                ? `${skDaysLeft} hari lagi`
-                                : undefined
-                        : undefined
-                }
-                badgeTone={skDaysLeft !== null && skDaysLeft < 365 ? "warning" : undefined}
+                description={skBadge}
+                Icon={LuCalendarClock}
+                iconClassName={skBadge && skDaysLeft !== null && skDaysLeft < 365 ? "text-warning-600" : "text-gray-500"}
+            /> */}
+            <StatCard
+                title="Brand Unit"
+                value={formatNumber(brandUnit.totalQty)}
+                description={`${brandUnit.brandCount} brand · unit`}
+                Icon={LuBoxes}
+                iconClassName="text-indigo-600"
             />
-            <Metric label="Sales PIC" value={iup.sales_pic.map((p) => p.name).join(", ") || "-"} />
         </div>
-    );
-}
-
-interface MetricProps {
-    label: string;
-    value: string;
-    unit?: string;
-    highlight?: boolean;
-    badge?: string;
-    badgeTone?: "warning";
-}
-
-function Metric({ label, value, unit, highlight, badge, badgeTone }: MetricProps) {
-    return (
-        <Card className={highlight ? "bg-emerald-950 text-white border-emerald-950" : undefined}>
-            <CardContent className="p-4">
-                <div
-                    className={
-                        "text-[11px] uppercase tracking-wide font-semibold mb-1.5 " +
-                        (highlight ? "text-emerald-400" : "text-muted-foreground")
-                    }
-                >
-                    {label}
-                </div>
-                <div className="text-lg font-extrabold leading-tight truncate" title={value}>
-                    {value}
-                    {unit && (
-                        <span
-                            className={
-                                "text-xs font-semibold ml-1 " + (highlight ? "text-emerald-400" : "text-muted-foreground")
-                            }
-                        >
-                            {unit}
-                        </span>
-                    )}
-                </div>
-                {badge && (
-                    <div
-                        className={
-                            "text-[11px] font-semibold mt-1 " +
-                            (badgeTone === "warning" ? "text-amber-600" : "text-muted-foreground")
-                        }
-                    >
-                        {badge}
-                    </div>
-                )}
-            </CardContent>
-        </Card>
     );
 }

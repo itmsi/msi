@@ -1,24 +1,29 @@
-import { useState } from "react";
-import { MessageCircle, Mic, FileText } from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
-
-import type { IupSurveyLog } from "../types/iup.types";
-import { formatDate } from "../utils/format";
+import { useMemo } from "react";
+import { IupSurveyItem } from "../../types/iupmanagement";
+import moment from "moment";
+import { classifyEntry, formatDateHeading, TYPE_CONFIG } from "../Survey/Surveyutils";
+import SurveyEntryCard from "../Survey/Surveyentrycard";
 
 interface SurveyLogListProps {
-    logs: IupSurveyLog[];
+    logs: IupSurveyItem[];
 }
 
-const sourceIcon: Record<string, typeof MessageCircle> = {
-    WhatsApp: MessageCircle,
-    Voice: Mic,
-};
-
 export function SurveyLogList({ logs }: SurveyLogListProps) {
+    const groupedSurveys = useMemo(() => {
+        const map = new Map<string, IupSurveyItem[]>();
+        for (const entry of logs) {
+            const key = moment(entry.chat_date).format('YYYY-MM-DD');
+            if (!map.has(key)) map.set(key, []);
+            map.get(key)!.push(entry);
+        }
+        return Array.from(map.entries()).sort(
+            ([dateA], [dateB]) => moment(dateB).valueOf() - moment(dateA).valueOf()
+        );
+    }, [logs]);
+
     if (logs.length === 0) {
         return (
-            <div className="border border-dashed rounded-lg p-8 text-center text-sm text-muted-foreground">
+            <div className="border border-dashed rounded-lg p-8 text-center text-sm text-gray-500">
                 Belum ada log survei/percakapan sumber lapangan.
             </div>
         );
@@ -26,66 +31,30 @@ export function SurveyLogList({ logs }: SurveyLogListProps) {
 
     return (
         <div className="space-y-3">
-            {logs.map((log) => (
-                <SurveyLogItem key={log.iup_survey_id} log={log} />
-            ))}
-        </div>
-    );
-}
-
-function SurveyLogItem({ log }: { log: IupSurveyLog }) {
-    const [expanded, setExpanded] = useState(false);
-    const Icon = sourceIcon[log.source_type] ?? FileText;
-
-    // Prefer the AI summary when available — raw transcripts (esp. Voice) can be
-    // long and messy; only show the raw description on explicit expand.
-    const hasSummary = Boolean(log.summary_response_ai);
-    const bodyText = hasSummary ? log.summary_response_ai! : log.description ?? "";
-    const isLong = bodyText.length > 280;
-    const displayText = expanded || !isLong ? bodyText : `${bodyText.slice(0, 280)}…`;
-
-    return (
-        <div className="border rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                    <Icon className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-semibold">{log.user_name}</span>
-                    <Badge variant="outline" className="text-[10px]">
-                        {log.source_type}
-                    </Badge>
-                    {hasSummary && (
-                        <Badge className="text-[10px] bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
-                            AI Summary
-                        </Badge>
-                    )}
+            {groupedSurveys.map(([dateKey, dayEntries]) => (
+                <div key={dateKey} className="mb-8">
+                    <div className="sticky top-0 z-10 mb-3 inline-flex items-center gap-2 rounded-full bg-slate-700 px-3 py-1 text-xs font-secondary font-medium text-white">
+                        {formatDateHeading(dayEntries[0].chat_date)}
+                    </div>
+                    <div className="relative pl-6">
+                        <div className="absolute bottom-1 left-[7px] top-1 w-0.5 bg-slate-300" />
+                        <div className="space-y-4">
+                            {dayEntries.map((entry) => {
+                                const cfg = TYPE_CONFIG[classifyEntry(entry)];
+                                return (
+                                    <div key={entry.iup_survey_id} className="relative">
+                                        <div
+                                            className={`absolute left-[-21px] top-4 h-[10px] w-[10px] rounded-full border-2 border-white shadow ring-1 ring-slate-300 ${cfg.dot}`}
+                                        />
+                                        <SurveyEntryCard entry={entry} />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
-                <span className="text-xs text-muted-foreground">{formatDate(log.chat_date)}</span>
-            </div>
-
-            <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">
-                {displayText || <span className="italic">Tidak ada isi tercatat.</span>}
-            </p>
-
-            {isLong && (
-                <button
-                    type="button"
-                    onClick={() => setExpanded((v) => !v)}
-                    className="text-xs font-semibold text-emerald-700 mt-2"
-                >
-                    {expanded ? "Tampilkan lebih sedikit" : "Tampilkan selengkapnya"}
-                </button>
-            )}
-
-            {log.source_link && (
-                <a
-                    href={log.source_link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block text-xs font-semibold text-emerald-700 mt-2"
-                >
-                    Buka sumber asli →
-                </a>
-            )}
+            ))
+            }
         </div>
     );
 }

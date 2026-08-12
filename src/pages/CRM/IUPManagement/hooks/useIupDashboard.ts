@@ -1,34 +1,34 @@
 import { useCallback, useEffect, useState } from "react";
-import { IupDetail } from "../../IUPTerritory/types/iupterritory";
 import { IupService } from "../services/iupManagementService";
+import { useParams } from "react-router-dom";
+import { IupDashboard } from "../types/iupDashboard";
 
 interface UseIupDetailResult {
-    data: IupDetail | null;
+    data: IupDashboard | null;
     isLoading: boolean;
     error: string | null;
     refetch: () => void;
 }
 
-export function useIupDashboard(iupId: string | undefined): UseIupDetailResult {
-    const [data, setData] = useState<IupDetail | null>(null);
+export function useIupDashboard(): UseIupDetailResult {
+    const { id } = useParams<{ id: string }>();
+    const [data, setData] = useState<IupDashboard | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const fetchDetail = useCallback(async () => {
-        if (!iupId) {
+        if (!id) {
             setIsLoading(false);
             setError("ID IUP tidak ditemukan pada URL.");
             return;
         }
-
         setIsLoading(true);
         setError(null);
 
         try {
-            const res = await IupService.getDashboardIup(iupId);
-            console.log(res);
+            const res = await IupService.getDashboardIup(id);
             if (res.data.success) {
-                setData(res?.data);
+                setData(res?.data.data);
             } else {
                 setError(res.data.message || "Gagal memuat data IUP. Silakan coba lagi.");
             }
@@ -41,7 +41,7 @@ export function useIupDashboard(iupId: string | undefined): UseIupDetailResult {
         } finally {
             setIsLoading(false);
         }
-    }, [iupId]);
+    }, [id]);
 
     useEffect(() => {
         fetchDetail();

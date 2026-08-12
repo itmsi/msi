@@ -1,7 +1,12 @@
+import { IupSurveyItem } from "./iupmanagement";
 
 export interface IupSalesPic {
     id: string;
     name: string;
+}
+
+export interface IupFileLink {
+    file_link: string;
 }
 
 export interface IupCustomerRkab {
@@ -50,7 +55,7 @@ export interface IupZonaSite {
     iup_id: string;
     iup_zona_site_name: string;
     iup_zona_site_date_last_survey: string | null;
-    iup_zona_site_file: unknown[] | null;
+    iup_zona_site_file: IupFileLink[] | null;
     iup_zona_site_description: string | null;
     summary_prompt_ai: string | null;
     summary_response_ai: string | null;
@@ -65,7 +70,7 @@ export interface IupVisitHistory {
     iup_visit_history_date: string;
     iup_visit_history_title: string;
     iup_visit_history_phone_number: string | null;
-    iup_visit_history_file: unknown[] | null;
+    iup_visit_history_file: IupFileLink[] | null;
     iup_visit_history_description: string | null;
     iup_visit_history_latitude: string | null;
     iup_visit_history_longitude: string | null;
@@ -87,7 +92,7 @@ export interface IupSurveyLog {
     session_id: string | null;
 }
 
-export interface IupDetail {
+export interface IupDashboard {
     iup_id: string;
     iup_code: string;
     iup_name: string;
@@ -120,10 +125,5 @@ export interface IupDetail {
     iup_rkab: IupRkabYear[];
     iup_zona_site: IupZonaSite[];
     iup_visit_history: IupVisitHistory[];
-    iup_survey: IupSurveyLog[];
-}
-
-export interface GetIupDetailResponse {
-    success: boolean;
-    data: IupDetail;
+    iup_survey: IupSurveyItem[];
 }

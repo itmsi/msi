@@ -105,7 +105,6 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                                 zone={zone}
                                 onEdit={openEditForm}
                                 onDelete={deleteZone}
-                                onViewGuide={openGuideForm}
                                 isDeleting={deletingId === zone.iup_zona_site_id}
                                 zoneSiteTemplates={zoneSiteTemplates}
                             />
@@ -132,18 +131,18 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                 />
             )}
             {!showForm && !editingId && (
-            <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl">
-                <PermissionGate permission="create">
-                    <button
-                        type="button"
-                        onClick={openCreateForm}
-                        className="flex items-center gap-1.5 text-sm font-medium"
-                    >
-                        <LuPlus size={16} className="text-primary" />
-                        Add Zona
-                    </button>
-                </PermissionGate>
-            </div>
+                <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl">
+                    <PermissionGate permission="create">
+                        <button
+                            type="button"
+                            onClick={openCreateForm}
+                            className="flex items-center gap-1.5 text-sm font-medium"
+                        >
+                            <LuPlus size={16} className="text-primary" />
+                            Add Zona
+                        </button>
+                    </PermissionGate>
+                </div>
             )}
 
             <ConfirmationModal

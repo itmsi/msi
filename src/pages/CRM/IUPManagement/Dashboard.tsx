@@ -1,89 +1,92 @@
-import { useParams } from "react-router-dom";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import React from "react";
+import { LuTriangleAlert, LuRefreshCw } from "react-icons/lu";
 
-// NOTE: adjust to the project's actual toast hook location.
-// import { useToast } from "@/hooks/useToast";
-// import { Button } from "@/components/ui/button";
-// import { Skeleton } from "@/components/ui/skeleton";
+import Button from "@/components/ui/button/Button";
+import LoadingSpinner from "@/components/common/Loading";
 
-// import { IupHeader } from "./components/IupHeader";
-// import { OverviewMetrics } from "./components/OverviewMetrics";
-// import { CustomerList } from "./components/CustomerList";
-// import { BrandUnitList } from "./components/BrandUnitList";
-// import { RkabHistory } from "./components/RkabHistory";
-// import { ZonaSiteTabs } from "./components/ZonaSiteTabs";
-// import { VisitHistoryTimeline } from "./components/VisitHistoryTimeline";
-// import { SurveyLogList } from "./components/SurveyLogList";
+import { IupHeader } from "./components/Dashboard/IupHeader";
+import { AreaInformation } from "./components/Dashboard/AreaInformation";
+import { CriteriaInformation } from "./components/Dashboard/CriteriaInformation";
+// import { OverviewMetrics } from "./components/Dashboard/OverviewMetrics";
+// import { CustomerList } from "./components/Dashboard/CustomerList";
+// import { BrandUnitList } from "./components/Dashboard/BrandUnitList";
+// import { RkabHistory } from "./components/Dashboard/RkabHistory";
+import { ZonaSiteList } from "./components/Dashboard/ZonaSiteList";
+// import { VisitHistoryTimeline } from "./components/Dashboard/VisitHistoryTimeline";
+// import { SurveyLogList } from "./components/Dashboard/SurveyLogList";
 import { useIupDashboard } from "./hooks/useIupDashboard";
 
 export default function IupDashboard() {
-    const { iupId } = useParams<{ iupId: string }>();
-    const { data: iup, isLoading, error, refetch } = useIupDashboard(iupId);
-    console.log(iup);
-    // const { toast } = useToast();
+    const { data, isLoading, error, refetch } = useIupDashboard();
 
-    // const handleExport = () => {
-    //     toast({ title: "Menyiapkan export…", description: "File akan diunduh sebentar lagi." });
-    //     // wire to real export endpoint/service
-    // };
+    if (isLoading) {
+        return (
+            <div className="bg-white w-full rounded-2xl border border-slate-300 min-h-60 flex items-center justify-center relative">
+                <LoadingSpinner />
+            </div>
+        );
+    }
 
-    // if (isLoading) {
-    //     return <DetailSkeleton />;
-    // }
+    if (error || !data) {
+        return (
+            <div className="bg-white w-full rounded-2xl border border-slate-300 min-h-60 flex flex-col items-center justify-center text-center px-6">
+                <LuTriangleAlert size={32} className="text-warning-500 mb-3" />
+                <p className="text-sm text-gray-500 mb-4">
+                    {error ?? "Data IUP tidak ditemukan."}
+                </p>
+                <Button type="button" variant="outline" onClick={refetch} startIcon={<LuRefreshCw size={16} />}>
+                    Coba lagi
+                </Button>
+            </div>
+        );
+    }
 
-    // if (error || !iup) {
-    //     return (
-    //         <div className="max-w-md mx-auto mt-24 text-center">
-    //             <AlertTriangle className="h-8 w-8 text-amber-500 mx-auto mb-3" />
-    //             <p className="text-sm text-muted-foreground mb-4">
-    //                 {error ?? "Data IUP tidak ditemukan."}
-    //             </p>
-    //             <Button variant="outline" onClick={refetch}>
-    //                 <RefreshCw className="h-4 w-4 mr-1.5" />
-    //                 Coba lagi
-    //             </Button>
-    //         </div>
-    //     );
-    // }
+    return (<>
+        <div className="space-y-6">
+            <IupHeader iup={data} />
 
-    return (
-        <div className="max-w-[1280px] mx-auto px-6 pb-16">
-            {/* <IupHeader iup={iup} onExport={handleExport} />
-
-            <Section title="Overview">
-                <OverviewMetrics iup={iup} />
+            <Section title="IUP Criteria Information">
+                <CriteriaInformation iup={data} />
             </Section>
 
-            <Section title="RKAB History">
-                <RkabHistory rkabHistory={iup.iup_rkab} />
+            <Section title="IUP Area Information">
+                <AreaInformation iup={data} />
             </Section>
 
-            <Section title="Customers" subtitle={`${iup.customer_count} mitra terhubung`}>
-                <CustomerList customers={iup.customers} />
+
+            {/* <Section title="Overview">
+            <OverviewMetrics iup={data} />
+        </Section> */}
+
+            {/* <Section title="RKAB History">
+            <RkabHistory rkabHistory={data.iup_rkab} />
+        </Section> */}
+
+            {/* <Section title="Customers" subtitle={`${data.customer_count} mitra terhubung`}>
+            <CustomerList customers={data.customers} />
+        </Section> */}
+
+            {/* <Section title="Brand Unit">
+            <BrandUnitList brandUnits={data.iup_brand_unit} />
+        </Section> */}
+
+            <Section title="Zona Site">
+                <ZonaSiteList zonaSites={data.iup_zona_site} />
             </Section>
 
-            <Section title="Brand Unit">
-                <BrandUnitList brandUnits={iup.iup_brand_unit} />
-            </Section>
+            {/* <Section title="Visit History">
+            <VisitHistoryTimeline visits={data.iup_visit_history} />
+        </Section>
 
-            <Section title="Zona Site" subtitle="Detail survei per area operasional">
-                <ZonaSiteTabs zonaSites={iup.iup_zona_site} />
-            </Section>
-
-            <Section title="Visit History">
-                <VisitHistoryTimeline visits={iup.iup_visit_history} />
-            </Section>
-
-            <Section title="Survey / Chat Log" subtitle="Sumber data mentah dari lapangan">
-                <SurveyLogList logs={iup.iup_survey} />
-            </Section> */}
+        <Section title="Survey / Chat Log" subtitle="Sumber data mentah dari lapangan">
+            <SurveyLogList logs={data.iup_survey} />
+        </Section> */}
         </div>
-    );
+    </>);
 }
 
 function Section({
     title,
-    subtitle,
     children,
 }: {
     title: string;
@@ -91,26 +94,20 @@ function Section({
     children: React.ReactNode;
 }) {
     return (
-        <section className="pt-10">
-            <div className="mb-4">
-                <h2 className="text-lg font-bold">{title}</h2>
-                {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+
+        <div className="w-full rounded-2xl border border-slate-300 bg-white overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-300 bg-[#0253a5]">
+                <div className="flex items-center justify-center">
+                    <div className="flex items-center gap-2">
+                        <h2 className="font-primary-bold text-md tracking-wide text-white">{title}</h2>
+                    </div>
+                </div>
             </div>
-            {children}
-        </section>
+
+
+            <div className="font-secondary">
+                {children}
+            </div>
+        </div>
     );
 }
-
-// function DetailSkeleton() {
-//     return (
-//         <div className="max-w-[1280px] mx-auto px-6 pt-6 space-y-6">
-//             <Skeleton className="h-10 w-2/3" />
-//             <div className="grid grid-cols-4 gap-4">
-//                 {Array.from({ length: 8 }).map((_, i) => (
-//                     <Skeleton key={i} className="h-20" />
-//                 ))}
-//             </div>
-//             <Skeleton className="h-64 w-full" />
-//         </div>
-//     );
-// }
