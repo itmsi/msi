@@ -143,7 +143,7 @@ export interface IupManagementFormData {
     sk_effective_date: string;
     company_full_name: string;
     rkab: string;
-    iup_code:string;
+    iup_code: string;
     status: string;
     // Territory selection fields
     island_id?: string;
@@ -394,7 +394,7 @@ export interface ContractorErrors {
 export interface VisitImage {
     file_link: string;
 }
- 
+
 export interface VisitHistoryItem {
     iup_visit_history_id: string;
     iup_id: string;
@@ -408,7 +408,7 @@ export interface VisitHistoryItem {
     latitude: string | null;
     longitude: string | null;
 }
- 
+
 export interface VisitPayload {
     iup_visit_history_id?: string;
     iup_id: string;
@@ -421,7 +421,7 @@ export interface VisitPayload {
     image: VisitImage[];
     description: string;
 }
- 
+
 export interface VisitHistoryResponse {
     success: boolean;
     data: VisitHistoryItem[];
@@ -475,11 +475,11 @@ export type IupSurveyItem = {
     summary_response_ai?: string;
     session_id?: string;
 
-    created_at: string;
-    created_by: string | null;
+    created_at?: string;
+    created_by?: string | null;
 
-    updated_at: string;
-    updated_by: string | null;
+    updated_at?: string;
+    updated_by?: string | null;
 };
 export type GetIupSurveyResponse = {
     success: boolean;

@@ -102,7 +102,7 @@ const SurveyChatHistory: React.FC<SurveyChatHistoryProps> = ({
                 const parsed = JSON.parse(authUser);
                 employeeId = parsed.employee_id;
             }
-        } catch {}
+        } catch { }
 
         try {
             const response = await fetch(`${API_BASE_URL}/mosa/ai-assistant/chat/stream`, {
@@ -196,9 +196,9 @@ const SurveyChatHistory: React.FC<SurveyChatHistoryProps> = ({
                 {/* ── Header ── */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-primary/5">
                     <div className="flex items-center gap-2.5 min-w-0">
-                             <IconAIAtomOrbit size={30} className="text-white" />
+                        <IconAIAtomOrbit size={30} className="text-white" />
                         <div className="min-w-0">
-                            <h3 className="text-sm font-semibold text-gray-800 truncate">
+                            <h3 className="text-sm font-semibold font-secondary text-gray-800 truncate">
                                 Mosa AI Chat History
                             </h3>
                             <p className="text-[11px] text-gray-500 truncate">survey - {iupName}</p>
@@ -247,11 +247,10 @@ const SurveyChatHistory: React.FC<SurveyChatHistoryProps> = ({
                                     className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                                 >
                                     <div
-                                        className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
-                                            msg.role === "user"
+                                        className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${msg.role === "user"
                                                 ? "bg-gradient-to-br from-primary via-blue-600 to-cyan-600 text-white rounded-br-md"
                                                 : "bg-gray-100 text-gray-800 border border-gray-100 rounded-bl-md"
-                                        }`}
+                                            }`}
                                     >
                                         {msg.role === "user" ? (
                                             <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>

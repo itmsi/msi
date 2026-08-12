@@ -155,13 +155,12 @@ export const useIupRkab = () => {
             } else {
                 respon = await IupService.createIupRkab(payload);
             }
-            const responseStatus = respon?.status || respon?.response?.status
-            if (responseStatus !== 200 && responseStatus !== 201) {
+            if (!respon.success && !respon.data) {
                 toast.error(respon?.response?.data?.message || "Gagal menyimpan RKAB. Coba lagi.");
                 return false;
             }
 
-            toast.success(isEdit ? "RKAB berhasil diperbarui." : "RKAB berhasil ditambahkan.");
+            toast.success(isEdit ? respon?.message || "RKAB berhasil diperbarui." : respon?.message || "RKAB berhasil ditambahkan.");
             await fetchRkabData();
             closeForm();
             return true;

@@ -1,6 +1,7 @@
 import { apiDelete, apiGet, apiPost, apiPut, ApiResponse } from '@/helpers/apiHelper';
 import { IupItemDetails, IupRequest, IupListResponse, IupManagementFormData, IupZonaSiteResponse, ZonaSitePayload, payloadRequest, GetIupRkabResponse, CreateIupRkabPayload, IupRkabUnitResponse, IupRkabUnitForm, VisitHistoryResponse, VisitPayload, GetIupBrandUnitResponse, IupBrandUnitPayload, GetIupSurveyResponse, IupSurveyPayload, IupSummaryAiListResponse, IupSummaryAiCreatePayload, IupSummaryAiRequest } from '../types/iupmanagement';
 import { MasterZoneSiteRequest, MasterZoneSiteListResponse } from '../types/iupSurvey';
+import { IupDashboard } from '../types/iupDashboard';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_IS_ADMIN = import.meta.env.VITE_PARAM_IS_ADMIN;
@@ -18,7 +19,7 @@ export class IupService {
             is_selection_iup: 'true',
             ...params
         };
-        
+
         const response = await apiPost(`${API_BASE_URL}/crm/iup_management/get`, requestData as Record<string, any>);
         return response.data as IupListResponse;
     }
@@ -47,7 +48,7 @@ export class IupService {
             sort_order: 'desc',
             ...params
         };
-        
+
         const response = await apiPost(`${API_BASE_URL}/crm/iup_zona_site/get`, requestData as Record<string, any>);
         return response.data as IupZonaSiteResponse;
     }
@@ -61,12 +62,12 @@ export class IupService {
         const response = await apiPut(`${API_BASE_URL}/crm/iup_zona_site/${id}`, data as Record<string, any>);
         return response.data;
     }
-    
+
     static async updateGuideIupZonaSite(id: string, guide: string): Promise<any> {
         const response = await apiPut(`${API_BASE_URL}/crm/iup_zona_site/guide/${id}`, { guide });
         return response.data;
     }
-    
+
     static async deleteIupZonaSite(id: string): Promise<any> {
         return await apiDelete(`${API_BASE_URL}/crm/iup_zona_site/${id}`);
     }
@@ -97,7 +98,7 @@ export class IupService {
             sort_order: 'desc',
             ...params
         };
-        
+
         const response = await apiPost(`${API_BASE_URL}/crm/iup_rkab/get`, requestData as Record<string, any>);
         return response.data as GetIupRkabResponse;
     }
@@ -111,7 +112,7 @@ export class IupService {
         const response = await apiPut(`${API_BASE_URL}/crm/iup_rkab/${id}`, data as Record<string, any>);
         return response.data;
     }
-    
+
     static async deleteIupRkab(id: string): Promise<any> {
         return await apiDelete(`${API_BASE_URL}/crm/iup_rkab/${id}`);
     }
@@ -125,7 +126,7 @@ export class IupService {
             sort_order: 'desc',
             ...params
         };
-        
+
         const response = await apiPost(`${API_BASE_URL}/crm/iup_brand_unit/unit-rkab/get`, requestData as Record<string, any>);
         return response.data as IupRkabUnitResponse;
     }
@@ -135,7 +136,7 @@ export class IupService {
         return response.data;
     }
 
-    
+
     // HISTORY VISIT
     static async getIupVisit(params: Partial<payloadRequest> = {}): Promise<VisitHistoryResponse> {
         const requestData: payloadRequest = {
@@ -145,7 +146,7 @@ export class IupService {
             sort_order: 'desc',
             ...params
         };
-        
+
         const response = await apiPost(`${API_BASE_URL}/crm/iup_visit_history/get`, requestData as Record<string, any>);
         return response.data as VisitHistoryResponse;
     }
@@ -159,11 +160,11 @@ export class IupService {
         const response = await apiPut(`${API_BASE_URL}/crm/iup_visit_history/${id}`, data as Record<string, any>);
         return response.data;
     }
-    
+
     static async deleteIupVisit(id: string): Promise<any> {
         return await apiDelete(`${API_BASE_URL}/crm/iup_visit_history/${id}`);
     }
-    
+
     // Unit
     static async getIupUnit(params: Partial<payloadRequest> = {}): Promise<GetIupBrandUnitResponse> {
         const requestData: payloadRequest = {
@@ -173,7 +174,7 @@ export class IupService {
             sort_order: 'desc',
             ...params
         };
-        
+
         const response = await apiPost(`${API_BASE_URL}/crm/iup_brand_unit/get`, requestData as Record<string, any>);
         return response.data as GetIupBrandUnitResponse;
     }
@@ -187,11 +188,11 @@ export class IupService {
         const response = await apiPut(`${API_BASE_URL}/crm/iup_brand_unit/${id}`, data as Record<string, any>);
         return response.data;
     }
-    
+
     static async deleteIupUnit(id: string): Promise<any> {
         return await apiDelete(`${API_BASE_URL}/crm/iup_brand_unit/${id}`);
     }
-    
+
     // SURVEY
     static async getIupSurvey(params: Partial<payloadRequest> = {}): Promise<GetIupSurveyResponse> {
         const requestData: payloadRequest = {
@@ -201,7 +202,7 @@ export class IupService {
             sort_order: 'desc',
             ...params
         };
-        
+
         const response = await apiPost(`${API_BASE_URL}/crm/iup_survey/get`, requestData as Record<string, any>);
         return response.data as GetIupSurveyResponse;
     }
@@ -215,7 +216,7 @@ export class IupService {
         const response = await apiPut(`${API_BASE_URL}/crm/iup_survey/${id}`, data as Record<string, any>);
         return response.data;
     }
-    
+
     static async deleteIupSurvey(id: string): Promise<any> {
         return await apiDelete(`${API_BASE_URL}/crm/iup_survey/${id}`);
     }
@@ -243,6 +244,11 @@ export class IupService {
 
     static async deleteIupSummaryAi(id: string): Promise<any> {
         return await apiDelete(`${API_BASE_URL}/crm/iup_summary_ai/${id}`);
+    }
+
+    // DASHBOARD
+    static async getDashboardIup(iupId: string): Promise<ApiResponse<{ success: boolean; message: string; data: IupDashboard }>> {
+        return await apiGet<{ success: boolean; message: string; data: IupDashboard }>(`${API_BASE_URL}/crm/iup_management/get-information/${iupId}`);
     }
 
 }
