@@ -61,9 +61,8 @@ const validateZoneForm = (
 
 const hasFormErrors = (errors: ZoneFormErrors): boolean => Object.values(errors).some(Boolean);
 
-export const useIupZoneSIte = () => {
+export const useIupZoneSIte = ({ segmentasion }: { segmentasion: string }) => {
     const { id } = useParams<{ id: string }>();
-
     const [zones, setZones] = useState<IupZonaSiteItem[]>([]);
     const [pagination] = useState<Pagination | null>(null);
     const [page, setPage] = useState(1);
@@ -115,12 +114,12 @@ export const useIupZoneSIte = () => {
 
     const fetchZoneSiteTemplates = useCallback(async () => {
         try {
-            const response = await IupService.getMasterZoneSite({ search: '', is_default: false });
+            const response = await IupService.getMasterZoneSite({ search: '', segmentasion: segmentasion });
             setZoneSiteTemplates(response.data.filter((s) => s.sectionKey !== 'default'));
         } catch (error) {
             console.error('Error loading zone site templates:', error);
         }
-    }, []);
+    }, [segmentasion]);
 
     useEffect(() => {
         fetchZoneSiteTemplates();

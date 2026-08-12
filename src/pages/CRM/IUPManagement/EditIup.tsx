@@ -3,7 +3,6 @@ import PageMeta from '@/components/common/PageMeta';
 import LoadingSpinner from '@/components/common/Loading';
 import { useIupManagementEdit } from './hooks/useIupManagementEdit';
 import TerritorySelector from './components/TerritorySelector';
-// import CustomerInformation from './components/CustomerInformation';
 import FormActions from '@/components/form/FormActions';
 import IupInformtionsFormFields from './components/IupInformtionsFormFields';
 import PageHeader from '@/components/common/PageHeader';
@@ -21,7 +20,6 @@ import IupDashboard from './Dashboard';
 const EditIupManagement: React.FC = () => {
     const goBack = useGoBack();
 
-    // Use custom hook for edit functionality
     const {
         isLoading,
         isSubmitting,
@@ -53,7 +51,7 @@ const EditIupManagement: React.FC = () => {
         handleSubmit
     } = useIupManagementEdit();
 
-    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit' | 'survey' | 'dashboard'>('dashboard');
+    const [activeTab, setActiveTab] = useState<'info_iup' | 'contractor_unit' | 'zone_iup' | 'history_visit' | 'survey' | 'dashboard'>('zone_iup');
 
     // Show loading spinner while data is loading
     if (isLoading) {
@@ -64,14 +62,6 @@ const EditIupManagement: React.FC = () => {
         );
     }
 
-    // Prepare territory info for display component
-    // const territoryInfo = {
-    //     island_name: formData.island_name,
-    //     group_name: formData.group_name,
-    //     area_name: formData.area_name,
-    //     iup_zone_name: formData.iup_zone_name
-    // };
-
     // Territory selection state for passing to components
     const territorySelection = {
         island: selectedIsland,
@@ -80,7 +70,6 @@ const EditIupManagement: React.FC = () => {
         iupZone: selectedIupZone,
         iupSegmentation: selectedIupSegmentation
     };
-
 
     return (
         <>
@@ -195,7 +184,7 @@ const EditIupManagement: React.FC = () => {
                     <TabContractorUnit customers={customers} />
                 </>)}
                 {activeTab === 'zone_iup' && (<>
-                    <TabZoneArea />
+                    <TabZoneArea segmentasion={formData?.iup_segmentation_name || ''} />
                 </>)}
                 {activeTab === 'history_visit' && (<>
                     <TabHistoryVisit />

@@ -82,6 +82,7 @@ export class IupService {
             search: '',
             sort_by: 'created_at',
             sort_order: 'desc',
+            segmentasion: '',
             ...params,
         };
 
