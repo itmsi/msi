@@ -160,6 +160,7 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
                         href={resumeUrl.startsWith('http') ? `${resumeUrl}/download` : resumeUrl}
                         target="_blank"
                         rel="noopener noreferrer"
+                        title="Download Resume"
                         className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium border border-[#E7E9F0] text-[#5B6480] hover:bg-[#F5F6F8]"
                     >
                         <MdOutlineFileDownload size={15} />

@@ -103,7 +103,7 @@ export function NotesTab({ candidateId, remark, isActive }: NotesTabProps) {
                                 <span className="text-sm font-semibold text-[#1F2430]">{n.created_by_name || n.created_by || '-'}</span>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs text-[#9AA2BA]">{formatIndonesianDate(n.created_at)}</span>
-                                    <button onClick={() => setDeleteId(n.note_id)} className="text-[#C4C9DA] hover:text-red-500 transition">
+                                    <button onClick={() => setDeleteId(n.note_id)} title="Delete note" className="text-[#C4C9DA] hover:text-red-500 transition">
                                         <MdDelete size={14} />
                                     </button>
                                 </div>

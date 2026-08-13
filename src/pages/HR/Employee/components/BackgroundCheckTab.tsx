@@ -7,6 +7,7 @@ import Button from '@/components/ui/button/Button';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import TextArea from '@/components/form/input/TextArea';
+import { Tooltip } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface BackgroundCheckTabProps {
@@ -131,9 +132,11 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
                             <FaDownload className="w-3 h-3" /> Download
                           </a>
                         )}
-                        <Button size="sm" variant="transparent" onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }} className="text-rose-500!">
-                          <FaTrash className="w-3.5 h-3.5" />
-                        </Button>
+                        <Tooltip content="Delete" position="top">
+                          <Button size="sm" variant="transparent" onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }} className="text-rose-500!">
+                            <FaTrash className="w-3.5 h-3.5" />
+                          </Button>
+                        </Tooltip>
                       </div>
                     </td>
                   </tr>

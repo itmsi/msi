@@ -108,7 +108,7 @@ const FormScoringCanvas = ({ candidateId, scheduleId, editingFormId }: FormScori
 
   return (
     <div>
-      <div className="relative flex gap-1 border-b border-[#E7E9F0] mb-4 overflow-x-auto">
+      <div className="relative flex gap-1 border-b border-[#E7E9F0] mb-4">
         {tabs.map((tab) => (
           <button
             key={tab.key}
