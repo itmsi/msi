@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import {
     MdMail, MdPhone, MdLocationOn, MdCake, MdPerson, MdFavorite, MdPublic,
-    MdTag, MdBusiness, MdVisibility, MdOutlineFileDownload, MdEditCalendar,
+    MdTag, MdBusiness, MdOutlineFileDownload, MdEditCalendar,
     MdOutlineEditNote, MdGroup,
 } from 'react-icons/md';
 import type { CandidateDetail } from '../types/Candidate';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import { STATUS_STYLE, DEFAULT_STATUS_STYLE, COMPANY_STYLE, DEFAULT_COMPANY_STYLE, initials, hue } from './Candidatecard';
-import { ResumeModal } from './ResumeModal';
 
 interface InfoRowProps {
     icon: React.ElementType;
@@ -46,7 +45,6 @@ interface CandidateProfileSidebarProps {
 
 export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarProps) {
     const [imgError, setImgError] = useState(false);
-    const [resumeOpen, setResumeOpen] = useState(false);
 
     const s = STATUS_STYLE[candidate.candidate_status] || DEFAULT_STATUS_STYLE;
     const cs = candidate.company_name
@@ -61,10 +59,6 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
 
     return (
         <div className="bg-white rounded-2xl border border-[#E7E9F0] shadow-sm p-6 lg:sticky lg:top-6">
-            {resumeOpen && resumeUrl && (
-                <ResumeModal url={resumeUrl} candidateName={candidate.candidate_name} onClose={() => setResumeOpen(false)} />
-            )}
-
             <div className="flex flex-col items-center text-center">
                 {photoSrc && !imgError ? (
                     <img
@@ -149,21 +143,14 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
             </div>
 
             {resumeUrl && (
-                <div className="mt-2 pt-4 border-t border-[#E7E9F0] flex gap-2">
-                    <button
-                        onClick={() => setResumeOpen(true)}
-                        className="flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-white bg-[#1F2430] hover:opacity-90 transition-opacity"
-                    >
-                        <MdVisibility size={15} /> Preview CV
-                    </button>
+                <div className="mt-2 pt-4 border-t border-[#E7E9F0]">
                     <a
                         href={resumeUrl.startsWith('http') ? `${resumeUrl}/download` : resumeUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        title="Download Resume"
-                        className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium border border-[#E7E9F0] text-[#5B6480] hover:bg-[#F5F6F8]"
+                        className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-white bg-[#1F2430] hover:opacity-90 transition-opacity"
                     >
-                        <MdOutlineFileDownload size={15} />
+                        <MdOutlineFileDownload size={15} /> Download CV
                     </a>
                 </div>
             )}

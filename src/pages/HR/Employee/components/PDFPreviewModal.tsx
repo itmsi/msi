@@ -1,14 +1,13 @@
-import { MdClose, MdOutlineFileDownload, MdOutlineDescription } from 'react-icons/md';
+import { MdClose, MdOutlineFileDownload, MdOutlinePictureAsPdf } from 'react-icons/md';
 
-interface ResumeModalProps {
+interface PDFPreviewModalProps {
     url: string;
-    candidateName: string;
+    fileName: string;
+    title: string;
     onClose: () => void;
 }
 
-export function ResumeModal({ url, candidateName, onClose }: ResumeModalProps) {
-    const downloadUrl = url.startsWith('http') ? `${url}/download` : url;
-
+export function PDFPreviewModal({ url, fileName, title, onClose }: PDFPreviewModalProps) {
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
@@ -20,14 +19,12 @@ export function ResumeModal({ url, candidateName, onClose }: ResumeModalProps) {
             >
                 <div className="flex items-center justify-between px-5 py-4 border-b border-[#E7E9F0]">
                     <h3 className="text-sm font-semibold flex items-center gap-2 text-[#1F2430]">
-                        <MdOutlineDescription size={16} /> Resume &mdash; {candidateName}
+                        <MdOutlinePictureAsPdf size={16} /> {title}
                     </h3>
                     <div className="flex items-center gap-2">
                         <a
-                            href={downloadUrl}
-                            download
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            href={url}
+                            download={fileName}
                             className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-[#E7E9F0] text-[#5B6480] hover:bg-[#F5F6F8]"
                         >
                             <MdOutlineFileDownload size={14} /> Download
@@ -37,7 +34,7 @@ export function ResumeModal({ url, candidateName, onClose }: ResumeModalProps) {
                         </button>
                     </div>
                 </div>
-                <iframe title="resume-preview" src={downloadUrl} className="flex-1 w-full border-0" />
+                <iframe title="pdf-preview" src={url} className="flex-1 w-full border-0" />
             </div>
         </div>
     );

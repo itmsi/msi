@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MdArrowBack, MdEdit, MdCalendarMonth, MdVerifiedUser, MdAssignment, MdStickyNote2 } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
@@ -104,10 +105,21 @@ export default function EmployeeCandidateDetail() {
                             </div>
 
                             <div className="p-5 bg-white rounded-2xl border border-[#E7E9F0] shadow-sm overflow-hidden">
-                                {tab === 'interview' && <DateInterviewTab candidateId={candidate.candidate_id} isActive={tab === 'interview'} />}
-                                {tab === 'bgcheck' && <BackgroundCheckTab candidateId={candidate.candidate_id} isActive={tab === 'bgcheck'} />}
-                                {tab === 'documents' && <DocumentTab candidateId={candidate.candidate_id} isActive={tab === 'documents'} />}
-                                {tab === 'notes' && <NotesTab candidateId={candidate.candidate_id} remark={candidate.remark} isActive={tab === 'notes'} />}
+                                <AnimatePresence mode="wait" initial={false}>
+                                    <motion.div
+                                        key={tab}
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.25, ease: 'easeInOut' }}
+                                        className="overflow-hidden"
+                                    >
+                                        {tab === 'interview' && <DateInterviewTab candidateId={candidate.candidate_id} isActive={tab === 'interview'} candidate={candidate} />}
+                                        {tab === 'bgcheck' && <BackgroundCheckTab candidateId={candidate.candidate_id} isActive={tab === 'bgcheck'} />}
+                                        {tab === 'documents' && <DocumentTab candidateId={candidate.candidate_id} isActive={tab === 'documents'} />}
+                                        {tab === 'notes' && <NotesTab candidateId={candidate.candidate_id} remark={candidate.remark} isActive={tab === 'notes'} />}
+                                    </motion.div>
+                                </AnimatePresence>
                             </div>
                         </div>
                     </div>

@@ -16,6 +16,15 @@ const POINT_OPTIONS = [
   { value: '1', label: '1 - Very Poor' },
 ];
 
+const POINT_STYLE: Record<string, { bg: string; fg: string; border: string }> = {
+  '5': { bg: '#ECFDF5', fg: '#047857', border: '#A7F3D0' },
+  '4': { bg: '#ECFDF5', fg: '#047857', border: '#A7F3D0' },
+  '3': { bg: '#FFFBEB', fg: '#B45309', border: '#FDE68A' },
+  '2': { bg: '#FFF7ED', fg: '#C2410C', border: '#FED7AA' },
+  '1': { bg: '#FFF1F2', fg: '#E11D48', border: '#FECDD3' },
+};
+const INACTIVE_POINT_STYLE = { bg: '#FFFFFF', fg: '#5B6480', border: '#E7E9F0' };
+
 const SIAH_ASPECTS = [
   { key: 'sincerity', label: 'Sincerity' },
   { key: 'trustworthy', label: 'Trustworthy' },
@@ -36,23 +45,23 @@ const VALUE_ASPECTS = [
 const CSE_ASPECTS = [
   { key: 'self_esteem', label: 'Self Esteem', defaultQ: 'Does this person believe in their own worth?' },
   { key: 'self_efficacy', label: 'Self Efficacy', defaultQ: 'Does this person believe they have the ability to complete their work?' },
-  { key: 'locus_control', label: 'Locus of Control', defaultQ: 'Does this person believe their success is determined by their own actions or external factors?' },
+  { key: 'locus_control', label: 'Locus of control', defaultQ: 'Does this person believe their success is determined by their own actions or external factors?' },
   { key: 'emotional_stability', label: 'Emotional Stability', defaultQ: 'Can this person control their emotions?' },
 ];
 
 const SDT_ASPECTS = [
-  { key: 'l2', label: 'L2 (External Regulation)', point: 20 },
-  { key: 'l3', label: 'L3 (Self-Involvement)', point: 25 },
-  { key: 'l4', label: 'L4 (Conscious Meaning)', point: 30 },
-  { key: 'l5', label: 'L5 (Self-Integration)', point: 35 },
-  { key: 'l6', label: 'L6 (Intrinsic Motivation)', point: 40 },
+  { key: 'l2', label: 'L2 (External Regulation – Driven by rewards or punishments ( not ideal)', point: 20 },
+  { key: 'l3', label: 'L3 (Self - Involment and focus on self and other evaluation)', point: 25 },
+  { key: 'l4', label: 'L4 (I personally think it is important and consciously give it meaning)', point: 30 },
+  { key: 'l5', label: 'L5 (Consistency self-integration of goals)', point: 35 },
+  { key: 'l6', label: 'L6 (Interest, happiness, self-satisfaction)', point: 40 },
 ];
 
 const EXPERIENCE_ASPECTS = [
   { key: 'role_matching', label: 'Role Matching' },
   { key: 'product_knowledge', label: 'Product Knowledge' },
   { key: 'significant_contribution', label: 'Significant Contribution' },
-  { key: 'goals_align', label: 'Goals align with ROE Company' },
+  { key: 'goals_align_with_roe', label: 'Goals align with ROE Company' },
 ];
 
 type FormType = 'siah' | 'values' | 'cse' | 'sdt' | 'experience';
@@ -161,7 +170,7 @@ interface ScoringFormProps {
 const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewId, defaultQuestions, autoQuestion, interviewId }: ScoringFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState<AspectForm>(() =>
-    aspects.reduce((acc, a) => ({ ...acc, [a.key]: { point: '', question: a.defaultQ || '', remark: '' } }), {})
+    aspects.reduce((acc, a) => ({ ...acc, [a.key]: { point: '', question: a.defaultQ || (autoQuestion ? a.label : ''), remark: '' } }), {})
   );
   const [loadingData, setLoadingData] = useState(false);
 
@@ -228,8 +237,18 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div><h4 className="text-base font-bold text-[#0253a5]">{title}</h4><p className="text-sm text-[#9AA2BA] mb-3">{caption}</p></div>
-      <div className="text-sm text-[#5B6480] mb-2">Total: <span className="font-semibold text-[#1F2430]">{totalScore}</span> / {maxScore}</div>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h4 className="text-base font-bold text-[#0253a5]">{title}</h4>
+          <p className="text-sm text-[#9AA2BA]">{caption}</p>
+        </div>
+        <div className="shrink-0 text-center bg-[#F5F6F8] rounded-xl px-4 py-2">
+          <div className="text-lg font-bold text-[#1F2430] leading-none">
+            {totalScore}<span className="text-xs font-normal text-[#9AA2BA]">/{maxScore}</span>
+          </div>
+          <div className="text-[10px] uppercase tracking-wide text-[#9AA2BA] mt-0.5">Total Score</div>
+        </div>
+      </div>
       <div className="space-y-4">
         <HRAccordion
           allowMultiple
@@ -239,45 +258,58 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
               <>
                 {aspect.label}
                 {companyValue === 'SIAH' && <span className="text-rose-500 ml-1">*</span>}
+                {form[aspect.key]?.point && (
+                  <span
+                    className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                    style={{
+                      background: (POINT_STYLE[form[aspect.key].point] || INACTIVE_POINT_STYLE).bg,
+                      color: (POINT_STYLE[form[aspect.key].point] || INACTIVE_POINT_STYLE).fg,
+                    }}
+                  >
+                    {form[aspect.key].point}
+                  </span>
+                )}
               </>
             ),
             konten: (
               <div className="space-y-3">
-                {/* Point Selector - full width */}
+                {/* Point Selector — chip-based, single source of truth (no dropdown + readonly duplicate) */}
                 <div>
-                  <label className="block text-xs font-medium text-[#9AA2BA] mb-1">
+                  <label className="block text-xs font-medium text-[#9AA2BA] mb-1.5">
                     Specific point {companyValue === 'SIAH' && <span className="text-rose-500">*</span>}
                   </label>
-                  <CustomSelect
-                    value={form[aspect.key]?.point ? { value: form[aspect.key].point, label: POINT_OPTIONS.find(o => o.value === form[aspect.key].point)?.label || form[aspect.key].point } : null}
-                    onChange={(opt) => setForm((prev) => {
-                      const pointVal = opt?.value || '';
-                      const updated = { ...prev, [aspect.key]: { ...prev[aspect.key], point: pointVal } };
-                      if (autoQuestion && pointVal) updated[aspect.key].question = aspect.label;
-                      return updated;
+                  <div className="flex flex-wrap gap-1.5">
+                    {POINT_OPTIONS.filter((o) => o.value).map((opt) => {
+                      const active = form[aspect.key]?.point === opt.value;
+                      const s = active ? (POINT_STYLE[opt.value] || INACTIVE_POINT_STYLE) : INACTIVE_POINT_STYLE;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setForm((prev) => {
+                            const updated = { ...prev, [aspect.key]: { ...prev[aspect.key], point: opt.value } };
+                            if (autoQuestion) updated[aspect.key].question = aspect.label;
+                            return updated;
+                          })}
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
+                          style={{ background: s.bg, color: s.fg, borderColor: s.border }}
+                        >
+                          {opt.value} · {opt.label.split(' - ')[1]}
+                        </button>
+                      );
                     })}
-                    options={POINT_OPTIONS.filter(o => o.value !== '')}
-                    placeholder="Select point"
-                    isSearchable={false}
-                    isClearable
-                  />
-                </div>
-                {/* Row: Point (readonly) | Question | Remark */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-                  <div className="md:col-span-1">
-                    <label className="block text-xs font-medium text-[#9AA2BA] mb-1">Point</label>
-                    <div className="h-16 w-full rounded-lg border border-[#E7E9F0] bg-[#FAFAFB] px-4 py-2.5 text-sm text-[#3A4260]">
-                      {form[aspect.key]?.point || '-'}
-                    </div>
                   </div>
-                  <div className="md:col-span-5">
+                </div>
+                {/* Row: Question | Remark */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
                     <label className="block text-xs font-medium text-[#9AA2BA] mb-1">
                       Question {companyValue === 'SIAH' && <span className="text-rose-500">*</span>}
                     </label>
                     <TextArea value={form[aspect.key]?.question || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], question: e.target.value } }))}
-                      rows={2} placeholder={aspect.defaultQ || 'Question'} readonly={defaultQuestions} />
+                      rows={2} placeholder={aspect.defaultQ || 'Question'} readonly={defaultQuestions || autoQuestion} />
                   </div>
-                  <div className="md:col-span-6">
+                  <div>
                     <label className="block text-xs font-medium text-[#9AA2BA] mb-1">Remark / Answer</label>
                     <TextArea value={form[aspect.key]?.remark || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], remark: e.target.value } }))}
                       rows={2} placeholder="Remark" />
