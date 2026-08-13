@@ -15,15 +15,16 @@ import type { CandidateItem } from '../types/Candidate';
 
 interface CandidateCardProps {
     candidate: CandidateItem;
+    onView: (candidate: CandidateItem) => void;
     onEdit: (candidate: CandidateItem) => void;
     index: number;
 }
 
-const initials = (name: string) => {
+export const initials = (name: string) => {
     return name.trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
 };
 
-const hue = (id: string) => {
+export const hue = (id: string) => {
     const idx = Math.min(5, Math.max(id.length - 1, 0));
     const code = id.charCodeAt(idx) || 0;
     return (code * 37) % 360;
@@ -41,19 +42,23 @@ const normalizeAssignRole = (value: string[] | string | null | undefined): strin
     return Array.isArray(value) ? value : [value];
 };
 
-const STATUS_STYLE: Record<string, { bg: string; fg: string; dot: string }> = {
+export const STATUS_STYLE: Record<string, { bg: string; fg: string; dot: string }> = {
     New: { bg: '#EEF2FF', fg: '#4338CA', dot: '#6366F1' },
+    Screening: { bg: '#FFFBEB', fg: '#B45309', dot: '#F59E0B' },
     Interviewed: { bg: '#FFF7ED', fg: '#C2410C', dot: '#F97316' },
+    Offering: { bg: '#FFFBEB', fg: '#B45309', dot: '#F59E0B' },
+    Hired: { bg: '#ECFDF5', fg: '#047857', dot: '#10B981' },
     Complete: { bg: '#ECFDF5', fg: '#047857', dot: '#10B981' },
+    Rejected: { bg: '#FFF1F2', fg: '#E11D48', dot: '#F43F5E' },
 };
-const DEFAULT_STATUS_STYLE = { bg: '#F5F6F8', fg: '#5B6480', dot: '#9AA2BA' };
+export const DEFAULT_STATUS_STYLE = { bg: '#F5F6F8', fg: '#5B6480', dot: '#9AA2BA' };
 
-const OFFERING_STYLE: Record<string, { bg: string; fg: string; Icon: typeof MdCheckCircle; label: string }> = {
+export const OFFERING_STYLE: Record<string, { bg: string; fg: string; Icon: typeof MdCheckCircle; label: string }> = {
     OK: { bg: '#ECFDF5', fg: '#047857', Icon: MdCheckCircle, label: 'Accepted' },
     'NOT OK': { bg: '#FFF1F2', fg: '#E11D48', Icon: MdCancel, label: 'Declined' },
 };
 
-const COMPANY_STYLE: Record<string, { bg: string; fg: string }> = {
+export const COMPANY_STYLE: Record<string, { bg: string; fg: string }> = {
     IEL: { bg: '#EFF6FF', fg: '#1D4ED8' },
     'IEL-1': { bg: '#ECFEFF', fg: '#0E7490' },
     'IEL-2': { bg: '#F0FDFA', fg: '#0F766E' },
@@ -67,7 +72,7 @@ const COMPANY_STYLE: Record<string, { bg: string; fg: string }> = {
     MSO: { bg: '#FEF2F2', fg: '#B91C1C' },
     MSP: { bg: '#F1F5F9', fg: '#334155' },
 };
-const DEFAULT_COMPANY_STYLE = { bg: '#F5F6F8', fg: '#8891AB' };
+export const DEFAULT_COMPANY_STYLE = { bg: '#F5F6F8', fg: '#8891AB' };
 
 function DetailRow({ label, children }: { label: string; children: ReactNode }) {
     return (
@@ -78,7 +83,7 @@ function DetailRow({ label, children }: { label: string; children: ReactNode }) 
     );
 }
 
-export function CandidateCard({ candidate, onEdit, index }: CandidateCardProps) {
+export function CandidateCard({ candidate, onView, onEdit, index }: CandidateCardProps) {
     const s = STATUS_STYLE[candidate.candidate_status] || DEFAULT_STATUS_STYLE;
     const cs = candidate.company_name
         ? COMPANY_STYLE[candidate.company_name] || DEFAULT_COMPANY_STYLE
@@ -99,11 +104,11 @@ export function CandidateCard({ candidate, onEdit, index }: CandidateCardProps) 
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [menuOpen]);
 
-    const handleCardClick = () => onEdit(candidate);
+    const handleCardClick = () => onView(candidate);
     const handleCardKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            onEdit(candidate);
+            onView(candidate);
         }
     };
 

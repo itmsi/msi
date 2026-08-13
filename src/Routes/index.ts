@@ -157,6 +157,8 @@ const NanogridCalculator = lazy(() => import('@/pages/Nanogrid/Manage'));
 // const HRCandidateList = lazy(() => import('@/pages/HR/Candidate/index'));
 const HRCandidateList = lazy(() => import('@/pages/HR/Employee/Manage'));
 const HRCandidateCreate = lazy(() => import('@/pages/HR/Candidate/Create'));
+const HRCandidateDetail = lazy(() => import('@/pages/HR/Employee/Detail'));
+const HRCandidateEdit = lazy(() => import('@/pages/HR/Employee/Edit'));
 
 // AI Chat
 const AIChatPage = lazy(() => import('@/pages/AIChat'));
@@ -1235,8 +1237,17 @@ export const routes: TAppRoute[] = [
         name: 'Candidate HRM',
         isProtected: true,
         roles: ['Candidate HRM'],
-        requiredPermissions: ['update', 'read'],
-        component: HRCandidateList,
+        requiredPermissions: ['read'],
+        component: HRCandidateDetail,
+        layout: AppLayout,
+    },
+    {
+        path: '/hr/candidate/:id/edit',
+        name: 'Candidate HRM',
+        isProtected: true,
+        roles: ['Candidate HRM'],
+        requiredPermissions: ['update'],
+        component: HRCandidateEdit,
         layout: AppLayout,
     },
     {
