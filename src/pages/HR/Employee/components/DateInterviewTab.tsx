@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import React from 'react';
 import { interviewScheduleService, interviewFormService, type InterviewSchedule, type InterviewFormItem, type ScheduleCreateRequest } from '../../Candidate/services/interviewService';
+import { generateInterviewPDFBlob } from '../utils/PDFInterviewReport';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaTrash, FaPen, FaChartSimple, FaChevronDown, FaChevronUp, FaRegFilePdf, FaRegPenToSquare, FaXmark } from 'react-icons/fa6';
+import { FaPlus, FaTrash, FaPen, FaChartSimple, FaChevronDown, FaChevronUp, FaRegFilePdf, FaRegPenToSquare, FaXmark, FaSpinner } from 'react-icons/fa6';
 import { MdCalendarMonth } from 'react-icons/md';
 import ModalScoreInterview from '../../Candidate/components/ModalScoreInterview';
 import FormScoringCanvas from './FormScoringCanvas';
+import { PDFPreviewModal } from './PDFPreviewModal';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
@@ -13,16 +15,29 @@ import DatePicker from '@/components/form/date-picker';
 import { Tooltip } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 import formatIndonesianDate from '../../Candidate/utils/date';
+import type { CandidateDetail } from '../types/Candidate';
 
 interface DateInterviewTabProps {
   candidateId: string;
   isActive: boolean;
+  candidate?: CandidateDetail | null;
 }
 
 const ROLE_OPTIONS = ['HR', 'GM', 'VP', 'BOD', 'PUB'];
 const DURATION_OPTIONS = ['15m', '30m', '45m', '60m', '90m'];
 
-const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
+const ROLE_STYLE: Record<string, { bg: string; fg: string }> = {
+  HR: { bg: '#EEF2FF', fg: '#4338CA' },
+  GM: { bg: '#ECFDF5', fg: '#047857' },
+  VP: { bg: '#FFFBEB', fg: '#B45309' },
+  BOD: { bg: '#FDF2F8', fg: '#BE185D' },
+  PUB: { bg: '#F0FDFA', fg: '#0F766E' },
+};
+const DEFAULT_ROLE_STYLE = { bg: '#F0F1F5', fg: '#5B6480' };
+// Stored role casing isn't consistent ("hr" vs "HR") — normalize before lookup/display.
+const getRoleStyle = (role: string) => ROLE_STYLE[role.toUpperCase()] || DEFAULT_ROLE_STYLE;
+
+const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTabProps) => {
   const [schedules, setSchedules] = useState<InterviewSchedule[]>([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -40,6 +55,8 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
   const [loadingForms, setLoadingForms] = useState<Record<string, boolean>>({});
   const [showFormScore, setShowFormScore] = useState(false);
   const [formScoreData, setFormScoreData] = useState<{ company_value: string; total_score: number }[]>([]);
+  const [generatingPdfKey, setGeneratingPdfKey] = useState<string | null>(null);
+  const [pdfPreview, setPdfPreview] = useState<{ url: string; fileName: string; title: string } | null>(null);
 
   const [form, setForm] = useState({ date: '', time: '', duration: '', assign_role: [] as string[] });
 
@@ -115,6 +132,51 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
       total_score: form.detail_interviews?.reduce((sum, detail) => sum + (parseInt(detail.score) || 0), 0) || 0,
     }));
 
+  const handleExportPdf = async (schedule: InterviewSchedule, interviewerName: string, forms: InterviewFormItem[]) => {
+    const key = `${schedule.schedule_interview_id}-${interviewerName}`;
+    setGeneratingPdfKey(key);
+    try {
+      const blob = await generateInterviewPDFBlob({
+        data_candidate: {
+          name_candidate: candidate?.candidate_name || 'N/A',
+          gender_candidate: candidate?.candidate_gender || 'N/A',
+          company_candidate: candidate?.company_name || 'N/A',
+          interviewer_candidate: interviewerName,
+          position_candidate: candidate?.title_name || 'N/A',
+          date_interview_candidate: formatIndonesianDate(schedule.schedule_interview_date),
+          age_candidate: candidate?.candidate_age ?? 'N/A',
+          duration_candidate: schedule.schedule_interview_duration || 'N/A',
+        },
+        interview: forms.map((f) => ({
+          company_value: f.company_value,
+          comment: f.comment,
+          detail_interviews: (f.detail_interviews || []).map((d) => ({
+            aspect: d.aspect,
+            question: d.question,
+            answer: d.answer,
+            score: parseInt(d.score) || 0,
+          })),
+        })),
+        data_score: getFormScoreData(forms),
+      });
+      const url = URL.createObjectURL(blob);
+      setPdfPreview({
+        url,
+        fileName: `interview-assessment-${(candidate?.candidate_name || 'candidate').replace(/\s+/g, '-').toLowerCase()}.pdf`,
+        title: `Interview Report — ${interviewerName}`,
+      });
+    } catch {
+      toast.error('Failed to generate PDF');
+    } finally {
+      setGeneratingPdfKey(null);
+    }
+  };
+
+  const closePdfPreview = () => {
+    if (pdfPreview) URL.revokeObjectURL(pdfPreview.url);
+    setPdfPreview(null);
+  };
+
   const handleOpenScoreStats = async (scheduleId: string) => {
     const forms = scheduleForms[scheduleId];
     if (forms) {
@@ -149,7 +211,9 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
     const rawTime = s.schedule_interview_time || '';
     const dateOnly = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate;
     const timeOnly = rawTime.length > 5 ? rawTime.substring(0, 5) : rawTime;
-    setForm({ date: dateOnly, time: timeOnly, duration: s.schedule_interview_duration || '', assign_role: getAssignRoleArr(s) });
+    // Normalize casing so chips match ROLE_OPTIONS regardless of how it was stored
+    // ("hr" vs "HR") — also self-heals the data since it re-saves uppercase.
+    setForm({ date: dateOnly, time: timeOnly, duration: s.schedule_interview_duration || '', assign_role: getAssignRoleArr(s).map(r => r.toUpperCase()) });
     setShowModal(true);
   };
 
@@ -240,9 +304,14 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                   <td className="px-4 py-3">
                     {s.assign_role ? (
                       <div className="flex flex-wrap gap-1">
-                        {getAssignRoleArr(s).map((role, i) => (
-                          <span key={i} className="px-1.5 py-0.5 bg-[#F0F1F5] text-[#5B6480] rounded text-xs">{role}</span>
-                        ))}
+                        {getAssignRoleArr(s).map((role, i) => {
+                          const rs = getRoleStyle(role);
+                          return (
+                            <span key={i} className="px-1.5 py-0.5 rounded text-xs font-medium" style={{ background: rs.bg, color: rs.fg }}>
+                              {role.toUpperCase()}
+                            </span>
+                          );
+                        })}
                       </div>
                     ) : '-'}
                   </td>
@@ -302,15 +371,32 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                                     {Object.entries(grouped).map(([interviewer, forms]) => {
                                       const totalScore = forms.reduce((sum, f) => sum + (f.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0), 0);
                                       return (
-                                        <div key={interviewer} className="bg-white rounded-xl border border-[#E7E9F0] p-3">
-                                          <div className="flex items-center justify-between mb-2">
-                                            <h6 className="text-sm font-semibold text-[#1F2430] mb-0">{interviewer}</h6>
-                                            <span className="text-[10px] text-[#9AA2BA]">Score: {totalScore}</span>
+                                        <div key={interviewer} className="bg-white rounded-2xl border border-[#E7E9F0] p-4 hover:border-[#C4C9DA] hover:shadow-sm transition-all">
+                                          <div className="flex items-start justify-between gap-3 mb-3">
+                                            <div className="min-w-0 flex-1">
+                                              <h6 className="text-sm font-semibold text-[#1F2430] truncate">{interviewer}</h6>
+                                              <div className="flex flex-wrap gap-1 mt-1">
+                                                {getAssignRoleArr(s).length > 0 ? (
+                                                  getAssignRoleArr(s).map((role, i) => {
+                                                    const rs = getRoleStyle(role);
+                                                    return (
+                                                      <span key={i} className="px-1.5 py-0.5 rounded text-[10px] font-medium" style={{ background: rs.bg, color: rs.fg }}>
+                                                        {role.toUpperCase()}
+                                                      </span>
+                                                    );
+                                                  })
+                                                ) : (
+                                                  <span className="text-[11px] text-[#9AA2BA]">No role assigned</span>
+                                                )}
+                                              </div>
+                                            </div>
+                                            <div className="text-right shrink-0">
+                                              <div className="text-base font-bold text-[#1F2430] leading-none">{totalScore}</div>
+                                              <div className="text-[9px] uppercase tracking-wide text-[#9AA2BA] mt-1">Score</div>
+                                            </div>
                                           </div>
-                                          <p className="text-xs text-[#9AA2BA] mb-2">
-                                            Interviewer: <span className="font-medium text-[#5B6480]">{getAssignRoleArr(s).join(', ') || '-'}</span>
-                                          </p>
-                                          <div className="flex flex-wrap gap-1.5 mb-2">
+
+                                          <div className="flex flex-wrap gap-1.5">
                                             {forms.map((form) => {
                                               const score = form.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0;
                                               return (
@@ -322,7 +408,8 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                                               );
                                             })}
                                           </div>
-                                          <div className="flex items-center gap-1 mt-2">
+
+                                          <div className="flex items-center justify-end gap-1 mt-3 pt-2 border-t border-[#F0F1F5]">
                                             <Tooltip content="Edit Score" position="top">
                                               <Button size="sm" variant="transparent" onClick={() => openScoringPanel(s.schedule_interview_id, forms[0]?.interview_id)} className="text-[#0253a5]!">
                                                 <FaRegPenToSquare className="w-3.5 h-3.5" />
@@ -334,8 +421,18 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                                               </Button>
                                             </Tooltip>
                                             <Tooltip content="Export PDF" position="top">
-                                              <Button size="sm" variant="transparent" className="text-rose-500!">
-                                                <FaRegFilePdf className="w-3.5 h-3.5" />
+                                              <Button
+                                                size="sm"
+                                                variant="transparent"
+                                                disabled={generatingPdfKey === `${s.schedule_interview_id}-${interviewer}`}
+                                                onClick={() => handleExportPdf(s, interviewer, forms)}
+                                                className="text-rose-500!"
+                                              >
+                                                {generatingPdfKey === `${s.schedule_interview_id}-${interviewer}` ? (
+                                                  <FaSpinner className="w-3.5 h-3.5 animate-spin" />
+                                                ) : (
+                                                  <FaRegFilePdf className="w-3.5 h-3.5" />
+                                                )}
                                               </Button>
                                             </Tooltip>
                                             <Tooltip content="Delete Form" position="top">
@@ -418,6 +515,15 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
 
       <ModalScoreInterview show={showFormScore} onClose={() => setShowFormScore(false)} scoreData={formScoreData} />
 
+      {pdfPreview && (
+        <PDFPreviewModal
+          url={pdfPreview.url}
+          fileName={pdfPreview.fileName}
+          title={pdfPreview.title}
+          onClose={closePdfPreview}
+        />
+      )}
+
       {/* Add/Edit Schedule Modal (kecil, cukup date/time/duration/role — bukan sidebar) */}
       <AnimatePresence>
         {showModal && (
@@ -437,16 +543,21 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
               onClick={(e) => e.stopPropagation()}
               className="bg-white rounded-2xl border border-[#E7E9F0] shadow-xl w-full max-w-md overflow-hidden"
             >
-              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#E7E9F0]">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#EEF2FF] text-[#4338CA] shrink-0">
-                  <MdCalendarMonth size={20} />
+              <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-[#E7E9F0]">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#EEF2FF] text-[#4338CA] shrink-0">
+                    <MdCalendarMonth size={20} />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-[15px] font-primary-bold text-[#1F2430]">
+                      {editing ? 'Edit Interview Schedule' : 'Add Interview Schedule'}
+                    </h3>
+                    <p className="text-xs text-[#9AA2BA] mt-0.5">Set the date, time, and interview panel.</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-[15px] font-primary-bold text-[#1F2430]">
-                    {editing ? 'Edit Interview Schedule' : 'Add Interview Schedule'}
-                  </h3>
-                  <p className="text-xs text-[#9AA2BA] mt-0.5">Set the date, time, and interview panel.</p>
-                </div>
+                <button onClick={() => setShowModal(false)} title="Close" className="p-2 rounded-full hover:bg-[#F5F6F8] text-[#9AA2BA] shrink-0">
+                  <FaXmark size={16} />
+                </button>
               </div>
 
               <div className="px-6 py-5 space-y-4">
@@ -504,14 +615,14 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                   <label className="block text-[11px] font-medium text-[#9AA2BA] uppercase tracking-wide mb-1.5">Assign Role</label>
                   <div className="flex flex-wrap gap-1.5">
                     {ROLE_OPTIONS.map((role) => {
-                      const active = form.assign_role.includes(role);
+                      const active = form.assign_role.some(r => r.toUpperCase() === role);
                       return (
                         <button
                           key={role}
                           type="button"
                           onClick={() => setForm(f => ({
                             ...f,
-                            assign_role: active ? f.assign_role.filter(r => r !== role) : [...f.assign_role, role],
+                            assign_role: active ? f.assign_role.filter(r => r.toUpperCase() !== role) : [...f.assign_role, role],
                           }))}
                           className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                             active ? 'bg-[#1F2430] text-white border-[#1F2430]' : 'bg-white text-[#5B6480] border-[#E7E9F0] hover:border-[#C4C9DA]'
