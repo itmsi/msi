@@ -1,4 +1,5 @@
 import DOMPurify from "dompurify";
+import { RICH_CONTENT_SANITIZE_CONFIG } from "@/helpers/sanitizeConfig";
 import { LuLink2, LuMapPin } from "react-icons/lu";
 import Avatar from "@/components/common/Avatar";
 
@@ -48,7 +49,7 @@ export function VisitHistoryTimeline({ visits }: VisitHistoryTimelineProps) {
                             {visit.iup_visit_history_description && (
                                 <div
                                     className="reset-content text-sm mt-1.5 prose prose-sm max-w-none"
-                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(visit.iup_visit_history_description) }}
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(visit.iup_visit_history_description, RICH_CONTENT_SANITIZE_CONFIG) }}
                                 />
                             )}
                             {mapsUrl && (

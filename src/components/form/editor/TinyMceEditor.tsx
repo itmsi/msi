@@ -14,6 +14,7 @@ function normalizeImageUrl(url: string): string {
 function fixDriveImages(editor: any) {
     const imgs: HTMLImageElement[] = editor.dom.select('img');
     imgs.forEach((img) => {
+        if (img.hasAttribute('data-mce-object')) return;
         const src = img.getAttribute('src') || '';
         const fixed = normalizeImageUrl(src);
         if (fixed !== src) {
@@ -21,6 +22,25 @@ function fixDriveImages(editor: any) {
         }
     });
 }
+
+function getNodeName(node: unknown): string | undefined {
+    const n = node as { nodeName?: string; name?: string } | null | undefined;
+    return (n?.nodeName ?? n?.name)?.toLowerCase();
+}
+const mediaUrlResolver = (data: { url: string }): Promise<{ html: string }> => {
+    if (!data.url.includes('drive.google.com')) {
+        return Promise.resolve({ html: '' });
+    }
+
+    const fileId = data.url.match(/\/file\/d\/([-\w]+)/)?.[1] ?? data.url.match(/[?&]id=([-\w]+)/)?.[1];
+    // const fileId = extractDriveFileId(data.url);
+    if (fileId) {
+        return Promise.resolve({
+            html: `<iframe src="https://drive.google.com/file/d/${fileId}/preview" width="640" height="360" allow="autoplay" style="border:0;"></iframe>`,
+        });
+    }
+    return Promise.resolve({ html: '' });
+};
 
 interface TinyMceEditorProps {
     value: string;
@@ -42,8 +62,9 @@ const EDITOR_INIT: any = {
     statusbar: true,
     resize: true,
     elementpath: false,
+    sandbox_iframes_exclusions: ['drive.google.com'],
     plugins: [
-        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+        'advlist', 'autolink', 'lists', 'link', 'image', 'media', 'charmap',
         'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
         'fullscreen', 'insertdatetime', 'media', 'table',
         'wordcount', 'nonbreaking'
@@ -53,7 +74,7 @@ const EDITOR_INIT: any = {
         'bold italic underline strikethrough forecolor backcolor | ' +
         'alignleft aligncenter alignright alignjustify | ' +
         'bullist numlist outdent indent | ' +
-        'table link image | ' +
+        'table link image media | ' +
         'removeformat fullscreen code',
     block_formats:
         'Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3; Heading 4=h4; Heading 5=h5; Heading 6=h6; Pre=pre',
@@ -67,9 +88,10 @@ const EDITOR_INIT: any = {
         }
         p { margin: 0 0 8px 0; }
     `,
-    urlconverter_callback: (url: string, _node: unknown, _onSave: boolean, name: string) => {
-        return name === 'src' ? normalizeImageUrl(url) : url;
+    urlconverter_callback: (url: string, node: unknown, _onSave: boolean, name: string) => {
+        return name === 'src' && getNodeName(node) === 'img' ? normalizeImageUrl(url) : url;
     },
+    media_url_resolver: mediaUrlResolver,
     setup: (editor: any) => {
         editor.on('keydown', (e: KeyboardEvent) => {
             if (e.key === 'Tab') {
