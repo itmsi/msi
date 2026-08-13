@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useMemo, useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 import { FaSpinner } from 'react-icons/fa';
 
@@ -46,6 +46,57 @@ function fixDriveIframes(editor: any) {
     });
 }
 
+function isLocalMediaSrc(src: string): boolean {
+    return src.startsWith('data:') || src.startsWith('blob:');
+}
+
+function notifyLocalMediaBlocked(editor: any) {
+    editor.notificationManager.open({
+        type: 'warning',
+        text: 'Gambar atau video dari perangkat/file lokal tidak dapat disisipkan langsung (termasuk hasil copy dari Excel). Unggah ke Google Drive lalu tempel link share-nya.',
+        timeout: 8000,
+    });
+}
+function stripLocalMediaFromHtml(html: string): { html: string; stripped: boolean } {
+    if (!html || (!html.includes('data:') && !html.includes('blob:'))) {
+        return { html, stripped: false };
+    }
+
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    let stripped = false;
+
+    container.querySelectorAll('img[src^="data:"], img[src^="blob:"]').forEach((el) => {
+        el.remove();
+        stripped = true;
+    });
+    container.querySelectorAll('video, source[src^="data:"], source[src^="blob:"]').forEach((el) => {
+        el.remove();
+        stripped = true;
+    });
+
+    return { html: container.innerHTML, stripped };
+}
+
+function fixLocalMedia(editor: any) {
+    let stripped = false;
+    const imgs: HTMLImageElement[] = editor.dom.select('img');
+    imgs.forEach((img) => {
+        if (img.hasAttribute('data-mce-object')) return;
+        const src = img.getAttribute('src') || '';
+        if (isLocalMediaSrc(src)) {
+            editor.dom.remove(img);
+            stripped = true;
+        }
+    });
+    const videos: HTMLElement[] = editor.dom.select('video');
+    videos.forEach((video) => {
+        editor.dom.remove(video);
+        stripped = true;
+    });
+    if (stripped) notifyLocalMediaBlocked(editor);
+}
+
 const mediaUrlResolver = (data: { url: string }): Promise<{ html: string }> => {
     if (!data.url.includes('drive.google.com')) {
         return Promise.resolve({ html: '' });
@@ -82,6 +133,7 @@ const EDITOR_INIT: any = {
     resize: true,
     elementpath: false,
     sandbox_iframes_exclusions: ['drive.google.com'],
+    paste_data_images: false,
     plugins: [
         'advlist', 'autolink', 'lists', 'link', 'image', 'media', 'charmap',
         'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
@@ -121,6 +173,12 @@ const EDITOR_INIT: any = {
         editor.on('SetContent', () => {
             fixDriveImages(editor);
             fixDriveIframes(editor);
+            fixLocalMedia(editor);
+        });
+        editor.on('PastePreProcess', (e: { content: string }) => {
+            const { html, stripped } = stripLocalMediaFromHtml(e.content);
+            e.content = html;
+            if (stripped) notifyLocalMediaBlocked(editor);
         });
     },
 };
@@ -138,6 +196,10 @@ const TinyMceEditor: React.FC<TinyMceEditorProps> = ({
 }) => {
     const editorRef = useRef<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const { html: cleanedValue, stripped: hasLegacyLocalMedia } = useMemo(
+        () => stripLocalMediaFromHtml(value),
+        [value]
+    );
 
     const handleEditorChange = useCallback(
         (content: string) => {
@@ -178,7 +240,7 @@ const TinyMceEditor: React.FC<TinyMceEditorProps> = ({
                 <Editor
                     id={id}
                     tinymceScriptSrc={TINYMCE_CDN}
-                    value={value}
+                    value={cleanedValue}
                     disabled={disabled}
                     onEditorChange={handleEditorChange}
                     onInit={handleInit}
@@ -190,6 +252,12 @@ const TinyMceEditor: React.FC<TinyMceEditorProps> = ({
                     }}
                 />
             </div>
+
+            {hasLegacyLocalMedia && (
+                <p className="mt-1 text-xs text-warning-600">
+                    Gambar/video lokal (termasuk dari Excel) pada konten ini sudah dihapus otomatis karena memperlambat halaman. Unggah ke Google Drive lalu sisipkan link share jika perlu ditampilkan lagi.
+                </p>
+            )}
 
             {error && (
                 <p className="mt-1 text-sm text-red-600">{error}</p>

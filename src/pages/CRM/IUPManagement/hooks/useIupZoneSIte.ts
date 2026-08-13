@@ -61,12 +61,31 @@ const validateZoneForm = (
 
 const hasFormErrors = (errors: ZoneFormErrors): boolean => Object.values(errors).some(Boolean);
 
+// In-memory cache keyed by IUP id, kept at module scope so it survives the
+// component unmounting — the Edit IUP page conditionally renders tabs
+// (activeTab === 'zone_iup' && <TabZoneArea />), which unmounts ZoneArea on
+// every tab switch. Without this, coming back to the Zone Area tab always
+// re-fetched the full zone list (including every description/guide field)
+// from scratch, even though nothing had changed.
+interface ZoneSiteCacheEntry {
+    zones: IupZonaSiteItem[];
+    templates: MasterZoneSiteSection[];
+}
+const zoneSiteCache = new Map<string, ZoneSiteCacheEntry>();
+
+function updateZoneSiteCache(id: string | undefined, patch: Partial<ZoneSiteCacheEntry>) {
+    if (!id) return;
+    const prev = zoneSiteCache.get(id) ?? { zones: [], templates: [] };
+    zoneSiteCache.set(id, { ...prev, ...patch });
+}
+
 export const useIupZoneSIte = ({ segmentasion }: { segmentasion: string }) => {
     const { id } = useParams<{ id: string }>();
-    const [zones, setZones] = useState<IupZonaSiteItem[]>([]);
+    const cached = id ? zoneSiteCache.get(id) : undefined;
+    const [zones, setZones] = useState<IupZonaSiteItem[]>(cached?.zones ?? []);
     const [pagination] = useState<Pagination | null>(null);
     const [page, setPage] = useState(1);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(!cached);
     const [submitting, setSubmitting] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState<{
         show: boolean;
@@ -86,7 +105,7 @@ export const useIupZoneSIte = ({ segmentasion }: { segmentasion: string }) => {
 
     const [initialShowGuide, setInitialShowGuide] = useState(false);
 
-    const [zoneSiteTemplates, setZoneSiteTemplates] = useState<MasterZoneSiteSection[]>([]);
+    const [zoneSiteTemplates, setZoneSiteTemplates] = useState<MasterZoneSiteSection[]>(cached?.templates ?? []);
 
     const fetchZoneSiteData = useCallback(async () => {
         try {
@@ -99,6 +118,7 @@ export const useIupZoneSIte = ({ segmentasion }: { segmentasion: string }) => {
 
             // if (response.success && response.data?.length) {
             setZones(response.data);
+            updateZoneSiteCache(id, { zones: response.data });
             // }
         } catch (error: any) {
             console.error('Error loading zone site:', error);
@@ -109,19 +129,25 @@ export const useIupZoneSIte = ({ segmentasion }: { segmentasion: string }) => {
     }, [id]);
 
     useEffect(() => {
+        // Already have a cached zone list for this IUP (e.g. returning from
+        // another tab) — skip the loading spinner and refetch entirely.
+        if (id && zoneSiteCache.has(id)) return;
         fetchZoneSiteData();
     }, [fetchZoneSiteData]);
 
     const fetchZoneSiteTemplates = useCallback(async () => {
         try {
             const response = await IupService.getMasterZoneSite({ search: '', segmentasion: segmentasion });
-            setZoneSiteTemplates(response.data.filter((s) => s.sectionKey !== 'default'));
+            const filtered = response.data.filter((s) => s.sectionKey !== 'default');
+            setZoneSiteTemplates(filtered);
+            updateZoneSiteCache(id, { templates: filtered });
         } catch (error) {
             console.error('Error loading zone site templates:', error);
         }
-    }, [segmentasion]);
+    }, [segmentasion, id]);
 
     useEffect(() => {
+        if (id && zoneSiteCache.has(id)) return;
         fetchZoneSiteTemplates();
     }, [fetchZoneSiteTemplates]);
 
