@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import React from 'react';
 import { interviewScheduleService, interviewFormService, type InterviewSchedule, type InterviewFormItem, type ScheduleCreateRequest } from '../../Candidate/services/interviewService';
 import { toast } from 'react-hot-toast';
 import { FaPlus, FaTrash, FaPen, FaChartSimple, FaChevronDown, FaChevronUp, FaRegFilePdf, FaRegPenToSquare, FaXmark } from 'react-icons/fa6';
+import { MdCalendarMonth } from 'react-icons/md';
 import ModalScoreInterview from '../../Candidate/components/ModalScoreInterview';
-import FormScoringCanvas from '../../Candidate/components/FormScoringCanvas';
+import FormScoringCanvas from './FormScoringCanvas';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
@@ -18,6 +19,7 @@ interface DateInterviewTabProps {
 }
 
 const ROLE_OPTIONS = ['HR', 'GM', 'VP', 'BOD', 'PUB'];
+const DURATION_OPTIONS = ['15m', '30m', '45m', '60m', '90m'];
 
 const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
   const [schedules, setSchedules] = useState<InterviewSchedule[]>([]);
@@ -39,6 +41,17 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
   const [formScoreData, setFormScoreData] = useState<{ company_value: string; total_score: number }[]>([]);
 
   const [form, setForm] = useState({ date: '', time: '', duration: '', assign_role: [] as string[] });
+
+  const scoringPanelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!scoringPanel) return;
+    // Tunggu satu frame biar motion.div-nya udah ke-mount sebelum discroll.
+    const raf = requestAnimationFrame(() => {
+      scoringPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [scoringPanel]);
 
   const getAssignRoleArr = (s: InterviewSchedule): string[] => {
     if (!s.assign_role) return [];
@@ -333,22 +346,35 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
       )}
 
       {/* Panel scoring interview — full-width di bawah tabel, bukan nested di dalam row,
-          supaya sub-tab & accordion FormScoringCanvas dapet ruang yang cukup lebar. */}
-      <AnimatePresence initial={false}>
+          supaya sub-tab & accordion FormScoringCanvas dapet ruang yang cukup lebar.
+          `key` di-derive dari scheduleId+editingFormId supaya ganti target (mis. dari
+          Edit form A langsung ke Add/create baru) memaksa remount penuh — kalau enggak,
+          React reuse instance yang sama dan state form lama nyangkut. */}
+      <AnimatePresence mode="wait" initial={false}>
         {scoringPanel && (() => {
           const activeSchedule = schedules.find((s) => s.schedule_interview_id === scoringPanel.scheduleId);
+          const panelKey = `${scoringPanel.scheduleId}-${scoringPanel.editingFormId || 'new'}`;
           return (
             <motion.div
+              key={panelKey}
+              ref={scoringPanelRef}
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
               className="overflow-hidden"
             >
-              <div className="bg-white rounded-2xl border border-[#E7E9F0] p-5 mt-4">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, delay: 0.08, ease: 'easeOut' }}
+                className="bg-white rounded-2xl border border-[#E7E9F0] p-5 mt-4"
+              >
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h5 className="text-sm font-semibold text-[#1F2430]">Score Interview</h5>
+                    <h5 className="text-sm font-semibold text-[#1F2430]">
+                      {scoringPanel.editingFormId ? 'Edit Score' : 'New Score'}
+                    </h5>
                     {activeSchedule && (
                       <p className="text-xs text-[#9AA2BA] mt-0.5">
                         {formatIndonesianDate(activeSchedule.schedule_interview_date)} · {activeSchedule.schedule_interview_time}
@@ -365,7 +391,7 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                   editingFormId={scoringPanel.editingFormId}
                   onBack={closeScoringPanel}
                 />
-              </div>
+              </motion.div>
             </motion.div>
           );
         })()}
@@ -374,62 +400,120 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
       <ModalScoreInterview show={showFormScore} onClose={() => setShowFormScore(false)} scoreData={formScoreData} />
 
       {/* Add/Edit Schedule Modal (kecil, cukup date/time/duration/role — bukan sidebar) */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold mb-4">{editing ? 'Edit' : 'Add'} Interview Schedule</h3>
-            <div className="space-y-4">
-              <div>
-                <DatePicker
-                  id="interview-date"
-                  label="Date"
-                  placeholder="Select date"
-                  defaultDate={form.date ? new Date(form.date) : undefined}
-                  isStatic={true}
-                  onChange={(_, dateStr) => setForm(f => ({ ...f, date: dateStr }))}
-                />
-              </div>
-              <div>
-                <DatePicker
-                  id="interview-time"
-                  mode="time"
-                  label="Time"
-                  placeholder="Select time"
-                  defaultDate={form.time ? (() => {
-                      const d = new Date();
-                      const [h, m] = form.time.split(':');
-                      d.setHours(parseInt(h, 10), parseInt(m, 10), 0, 0);
-                      return d;
-                  })() : undefined}
-                  isStatic={true}
-                  onChange={(_, timeStr) => setForm(f => ({ ...f, time: timeStr }))}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
-                <Input type="text" value={form.duration} onChange={(e) => setForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 60" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Assign Role</label>
-                <div className="flex flex-wrap gap-3 mt-1">
-                  {ROLE_OPTIONS.map((role) => (
-                    <label key={role} className="flex items-center gap-1.5 text-sm cursor-pointer">
-                      <input type="checkbox" checked={form.assign_role.includes(role)}
-                        onChange={(e) => setForm(f => ({ ...f, assign_role: e.target.checked ? [...f.assign_role, role] : f.assign_role.filter(r => r !== role) }))}
-                        className="rounded border-gray-300 text-[#0253a5] focus:ring-[#0253a5]" />
-                      {role}
-                    </label>
-                  ))}
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4"
+            onClick={() => setShowModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl border border-[#E7E9F0] shadow-xl w-full max-w-md overflow-hidden"
+            >
+              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#E7E9F0]">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#EEF2FF] text-[#4338CA] shrink-0">
+                  <MdCalendarMonth size={20} />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-[15px] font-primary-bold text-[#1F2430]">
+                    {editing ? 'Edit Interview Schedule' : 'Add Interview Schedule'}
+                  </h3>
+                  <p className="text-xs text-[#9AA2BA] mt-0.5">Set the date, time, and interview panel.</p>
                 </div>
               </div>
-            </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-              <Button onClick={handleSubmit} disabled={submitting}>{submitting ? 'Saving...' : 'Save'}</Button>
-            </div>
-          </div>
-        </div>
-      )}
+
+              <div className="px-6 py-5 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <DatePicker
+                    id="interview-date"
+                    label="Date"
+                    placeholder="Select date"
+                    defaultDate={form.date ? new Date(form.date) : undefined}
+                    isStatic={true}
+                    onChange={(_, dateStr) => setForm(f => ({ ...f, date: dateStr }))}
+                  />
+                  <DatePicker
+                    id="interview-time"
+                    mode="time"
+                    label="Time"
+                    placeholder="Select time"
+                    defaultDate={form.time ? (() => {
+                        const d = new Date();
+                        const [h, m] = form.time.split(':');
+                        d.setHours(parseInt(h, 10), parseInt(m, 10), 0, 0);
+                        return d;
+                    })() : undefined}
+                    isStatic={true}
+                    onChange={(_, timeStr) => setForm(f => ({ ...f, time: timeStr }))}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-medium text-[#9AA2BA] uppercase tracking-wide mb-1.5">Duration</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DURATION_OPTIONS.map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, duration: d }))}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                          form.duration === d ? 'bg-[#1F2430] text-white border-[#1F2430]' : 'bg-white text-[#5B6480] border-[#E7E9F0] hover:border-[#C4C9DA]'
+                        }`}
+                      >
+                        {d}
+                      </button>
+                    ))}
+                  </div>
+                  <Input
+                    type="text"
+                    value={form.duration}
+                    onChange={(e) => setForm(f => ({ ...f, duration: e.target.value }))}
+                    placeholder="Or type a custom duration, e.g. 75m"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-medium text-[#9AA2BA] uppercase tracking-wide mb-1.5">Assign Role</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {ROLE_OPTIONS.map((role) => {
+                      const active = form.assign_role.includes(role);
+                      return (
+                        <button
+                          key={role}
+                          type="button"
+                          onClick={() => setForm(f => ({
+                            ...f,
+                            assign_role: active ? f.assign_role.filter(r => r !== role) : [...f.assign_role, role],
+                          }))}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                            active ? 'bg-[#1F2430] text-white border-[#1F2430]' : 'bg-white text-[#5B6480] border-[#E7E9F0] hover:border-[#C4C9DA]'
+                          }`}
+                        >
+                          {role}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 px-6 py-4 border-t border-[#E7E9F0] bg-[#FAFAFB]">
+                <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
+                <Button onClick={handleSubmit} disabled={submitting}>{submitting ? 'Saving...' : 'Save Schedule'}</Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Delete Confirm */}
       <ConfirmationModal
