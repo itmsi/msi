@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { candidateService, hrCompanyService, hrDepartmentService, hrJobTitleService, hrGroupService } from './services/hrService';
+import { CandidateService, hrCompanyService, hrDepartmentService, hrJobTitleService, hrGroupService } from '../services/Candidateservice';
 import { toast } from 'react-hot-toast';
 import dayjs from 'dayjs';
 import Button from '@/components/ui/button/Button';
@@ -263,10 +263,10 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
             }
 
             if (isEdit) {
-                await candidateService.updateMultipart(initialData!.candidate_id, buildFormData(submitData));
+                await CandidateService.updateCandidateMultipart(initialData!.candidate_id, buildFormData(submitData));
                 toast.success('Candidate updated successfully!');
             } else {
-                await candidateService.createMultipart(buildFormData(submitData));
+                await CandidateService.createCandidateMultipart(buildFormData(submitData));
                 toast.success('Candidate created successfully!');
             }
 

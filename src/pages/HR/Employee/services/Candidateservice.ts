@@ -1,5 +1,5 @@
-import { apiPost, apiGet } from '@/helpers/apiHelper';
-import { CandidateDetail, CandidateListResponse, CandidateListResult, CandidateRequest } from '../types/Candidate';
+import { apiPost, apiGet, apiPostMultipart, apiPutMultipart, ApiResponse } from '@/helpers/apiHelper';
+import { Candidate, CandidateDetail, CandidateListResponse, CandidateListResult, CandidateRequest } from '../types/Candidate';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -25,7 +25,18 @@ export class CandidateService {
         const envelope = response.data as CandidateListResponse;
         return envelope.data;
     }
-    
+
+
+    static async createCandidateMultipart(formData: FormData): Promise<ApiResponse<Candidate>> {
+        const response = await apiPostMultipart<ApiResponse<Candidate>>(`${API_BASE_URL}/hrm/candidates/create`, formData);
+        return response.data;
+    }
+
+    static async updateCandidateMultipart(id: string, formData: FormData): Promise<ApiResponse<Candidate>> {
+        const response = await apiPutMultipart<ApiResponse<Candidate>>(`${API_BASE_URL}/hrm/candidates/${id}`, formData);
+        return response.data;
+    }
+
     static async getCandidateById(id: string): Promise<CandidateDetail> {
         const response = await apiGet<{ success: boolean; message: string; data: CandidateDetail }>(
             `${API_BASE_URL}/hrm/candidates/${id}`
