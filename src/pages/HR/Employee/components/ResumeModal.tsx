@@ -32,7 +32,7 @@ export function ResumeModal({ url, candidateName, onClose }: ResumeModalProps) {
                         >
                             <MdOutlineFileDownload size={14} /> Download
                         </a>
-                        <button onClick={onClose} className="p-2 rounded-full hover:bg-[#F5F6F8] text-[#9AA2BA]">
+                        <button onClick={onClose} title="Close" className="p-2 rounded-full hover:bg-[#F5F6F8] text-[#9AA2BA]">
                             <MdClose size={16} />
                         </button>
                     </div>

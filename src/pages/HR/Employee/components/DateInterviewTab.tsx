@@ -10,6 +10,7 @@ import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
 import DatePicker from '@/components/form/date-picker';
+import { Tooltip } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 import formatIndonesianDate from '../../Candidate/utils/date';
 
@@ -251,13 +252,23 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <Button size="sm" variant="transparent" onClick={() => openScoringPanel(s.schedule_interview_id)} className="text-[#0253a5]!"><FaPlus /></Button>
-                      <Button size="sm" variant="transparent" onClick={() => handleOpenScoreStats(s.schedule_interview_id)} className="text-emerald-600!"><FaChartSimple /></Button>
-                      <Button size="sm" variant="transparent" onClick={() => openEdit(s)} className="text-blue-600!"><FaPen /></Button>
-                      <Button size="sm" variant="transparent" onClick={() => { setDeletingId(s.schedule_interview_id); setShowDeleteConfirm(true); }} className="text-rose-500!"><FaTrash /></Button>
-                      <Button size="sm" variant="transparent" onClick={() => toggleExpand(s.schedule_interview_id)} className="text-[#9AA2BA]!">
-                        {expandedSchedules[s.schedule_interview_id] ? <FaChevronUp /> : <FaChevronDown />}
-                      </Button>
+                      <Tooltip content="Add Score" position="top">
+                        <Button size="sm" variant="transparent" onClick={() => openScoringPanel(s.schedule_interview_id)} className="text-[#0253a5]!"><FaPlus /></Button>
+                      </Tooltip>
+                      <Tooltip content="Score Stats" position="top">
+                        <Button size="sm" variant="transparent" onClick={() => handleOpenScoreStats(s.schedule_interview_id)} className="text-emerald-600!"><FaChartSimple /></Button>
+                      </Tooltip>
+                      <Tooltip content="Edit Schedule" position="top">
+                        <Button size="sm" variant="transparent" onClick={() => openEdit(s)} className="text-blue-600!"><FaPen /></Button>
+                      </Tooltip>
+                      <Tooltip content="Delete Schedule" position="top">
+                        <Button size="sm" variant="transparent" onClick={() => { setDeletingId(s.schedule_interview_id); setShowDeleteConfirm(true); }} className="text-rose-500!"><FaTrash /></Button>
+                      </Tooltip>
+                      <Tooltip content={expandedSchedules[s.schedule_interview_id] ? 'Collapse' : 'Expand'} position="top">
+                        <Button size="sm" variant="transparent" onClick={() => toggleExpand(s.schedule_interview_id)} className="text-[#9AA2BA]!">
+                          {expandedSchedules[s.schedule_interview_id] ? <FaChevronUp /> : <FaChevronDown />}
+                        </Button>
+                      </Tooltip>
                     </div>
                   </td>
                 </tr>
@@ -312,18 +323,26 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                                             })}
                                           </div>
                                           <div className="flex items-center gap-1 mt-2">
-                                            <Button size="sm" variant="transparent" onClick={() => openScoringPanel(s.schedule_interview_id, forms[0]?.interview_id)} className="text-[#0253a5]!">
-                                              <FaRegPenToSquare className="w-3.5 h-3.5" />
-                                            </Button>
-                                            <Button size="sm" variant="transparent" onClick={() => { setFormScoreData(forms.map(f => ({ company_value: f.company_value, total_score: f.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0 }))); setShowFormScore(true); }} className="text-emerald-600!">
-                                              <FaChartSimple className="w-3.5 h-3.5" />
-                                            </Button>
-                                            <Button size="sm" variant="transparent" className="text-rose-500!">
-                                              <FaRegFilePdf className="w-3.5 h-3.5" />
-                                            </Button>
-                                            <Button size="sm" variant="transparent" onClick={() => { setDeletingFormId(forms[0]?.interview_id); setShowDeleteFormConfirm(true); }} className="text-rose-500!">
-                                              <FaTrash className="w-3 h-3" />
-                                            </Button>
+                                            <Tooltip content="Edit Score" position="top">
+                                              <Button size="sm" variant="transparent" onClick={() => openScoringPanel(s.schedule_interview_id, forms[0]?.interview_id)} className="text-[#0253a5]!">
+                                                <FaRegPenToSquare className="w-3.5 h-3.5" />
+                                              </Button>
+                                            </Tooltip>
+                                            <Tooltip content="Score Stats" position="top">
+                                              <Button size="sm" variant="transparent" onClick={() => { setFormScoreData(forms.map(f => ({ company_value: f.company_value, total_score: f.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0 }))); setShowFormScore(true); }} className="text-emerald-600!">
+                                                <FaChartSimple className="w-3.5 h-3.5" />
+                                              </Button>
+                                            </Tooltip>
+                                            <Tooltip content="Export PDF" position="top">
+                                              <Button size="sm" variant="transparent" className="text-rose-500!">
+                                                <FaRegFilePdf className="w-3.5 h-3.5" />
+                                              </Button>
+                                            </Tooltip>
+                                            <Tooltip content="Delete Form" position="top">
+                                              <Button size="sm" variant="transparent" onClick={() => { setDeletingFormId(forms[0]?.interview_id); setShowDeleteFormConfirm(true); }} className="text-rose-500!">
+                                                <FaTrash className="w-3 h-3" />
+                                              </Button>
+                                            </Tooltip>
                                           </div>
                                         </div>
                                       );
@@ -381,7 +400,7 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                       </p>
                     )}
                   </div>
-                  <button onClick={closeScoringPanel} className="p-1.5 rounded-full hover:bg-[#F5F6F8] text-[#9AA2BA]">
+                  <button onClick={closeScoringPanel} title="Close" className="p-1.5 rounded-full hover:bg-[#F5F6F8] text-[#9AA2BA]">
                     <FaXmark size={16} />
                   </button>
                 </div>
