@@ -108,13 +108,13 @@ const FormScoringCanvas = ({ candidateId, scheduleId, editingFormId }: FormScori
 
   return (
     <div>
-      <div className="relative flex gap-1 border-b border-gray-200 mb-4 overflow-x-auto">
+      <div className="relative flex gap-1 border-b border-[#E7E9F0] mb-4 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             type="button"
             onClick={() => setActiveTab(tab.key)}
-            className={`relative whitespace-nowrap px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === tab.key ? 'text-[#0253a5]' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`relative whitespace-nowrap px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === tab.key ? 'text-[#0253a5]' : 'text-[#9AA2BA] hover:text-[#5B6480]'}`}
           >
             {tab.label}
             {activeTab === tab.key && (
@@ -224,12 +224,12 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
     } finally { setIsSubmitting(false); }
   };
 
-  if (loadingData) return <p className="text-sm text-gray-400">Loading form data...</p>;
+  if (loadingData) return <p className="text-sm text-[#9AA2BA]">Loading form data...</p>;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div><h4 className="text-base font-bold text-[#0253a5]">{title}</h4><p className="text-sm text-gray-500 mb-3">{caption}</p></div>
-      <div className="text-sm text-gray-600 mb-2">Total: <span className="font-semibold">{totalScore}</span> / {maxScore}</div>
+      <div><h4 className="text-base font-bold text-[#0253a5]">{title}</h4><p className="text-sm text-[#9AA2BA] mb-3">{caption}</p></div>
+      <div className="text-sm text-[#5B6480] mb-2">Total: <span className="font-semibold text-[#1F2430]">{totalScore}</span> / {maxScore}</div>
       <div className="space-y-4">
         <HRAccordion
           allowMultiple
@@ -238,15 +238,15 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
             judul: (
               <>
                 {aspect.label}
-                {companyValue === 'SIAH' && <span className="text-red-500 ml-1">*</span>}
+                {companyValue === 'SIAH' && <span className="text-rose-500 ml-1">*</span>}
               </>
             ),
             konten: (
               <div className="space-y-3">
                 {/* Point Selector - full width */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
-                    Specific point {companyValue === 'SIAH' && <span className="text-red-500">*</span>}
+                  <label className="block text-xs font-medium text-[#9AA2BA] mb-1">
+                    Specific point {companyValue === 'SIAH' && <span className="text-rose-500">*</span>}
                   </label>
                   <CustomSelect
                     value={form[aspect.key]?.point ? { value: form[aspect.key].point, label: POINT_OPTIONS.find(o => o.value === form[aspect.key].point)?.label || form[aspect.key].point } : null}
@@ -265,20 +265,20 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
                 {/* Row: Point (readonly) | Question | Remark */}
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                   <div className="md:col-span-1">
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Point</label>
-                    <div className="h-16 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-700">
+                    <label className="block text-xs font-medium text-[#9AA2BA] mb-1">Point</label>
+                    <div className="h-16 w-full rounded-lg border border-[#E7E9F0] bg-[#FAFAFB] px-4 py-2.5 text-sm text-[#3A4260]">
                       {form[aspect.key]?.point || '-'}
                     </div>
                   </div>
                   <div className="md:col-span-5">
-                    <label className="block text-xs font-medium text-gray-500 mb-1">
-                      Question {companyValue === 'SIAH' && <span className="text-red-500">*</span>}
+                    <label className="block text-xs font-medium text-[#9AA2BA] mb-1">
+                      Question {companyValue === 'SIAH' && <span className="text-rose-500">*</span>}
                     </label>
                     <TextArea value={form[aspect.key]?.question || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], question: e.target.value } }))}
                       rows={2} placeholder={aspect.defaultQ || 'Question'} readonly={defaultQuestions} />
                   </div>
                   <div className="md:col-span-6">
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Remark / Answer</label>
+                    <label className="block text-xs font-medium text-[#9AA2BA] mb-1">Remark / Answer</label>
                     <TextArea value={form[aspect.key]?.remark || ''} onChange={(e) => setForm((prev) => ({ ...prev, [aspect.key]: { ...prev[aspect.key], remark: e.target.value } }))}
                       rows={2} placeholder="Remark" />
                   </div>
@@ -351,14 +351,14 @@ const SDTForm = ({ scheduleInterviewId, interviewId }: { scheduleInterviewId: st
     finally { setIsSubmitting(false); }
   };
 
-  if (loadingData) return <p className="text-sm text-gray-400">Loading form data...</p>;
+  if (loadingData) return <p className="text-sm text-[#9AA2BA]">Loading form data...</p>;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div><h4 className="text-base font-bold text-[#0253a5]">SDT Assessment</h4><p className="text-sm text-gray-500 mb-3">Assess motivation and self-determination.</p></div>
-      <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
+      <div><h4 className="text-base font-bold text-[#0253a5]">SDT Assessment</h4><p className="text-sm text-[#9AA2BA] mb-3">Assess motivation and self-determination.</p></div>
+      <div className="bg-white rounded-2xl border border-[#E7E9F0] p-4 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Select SDT Aspect</label>
+          <label className="block text-sm font-medium text-[#5B6480] mb-1">Select SDT Aspect</label>
           <CustomSelect
             value={selectedAspect ? { value: selectedAspect, label: SDT_ASPECTS.find(a => a.key === selectedAspect)?.label || '' } : null}
             onChange={(opt) => setSelectedAspect(opt?.value || '')}
@@ -368,8 +368,8 @@ const SDTForm = ({ scheduleInterviewId, interviewId }: { scheduleInterviewId: st
             isClearable
           />
         </div>
-        <div><label className="block text-sm font-medium text-gray-700 mb-1">Auto Point</label><div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-lg font-bold text-gray-700">{pointValue || '-'}</div></div>
-        <div><label className="block text-sm font-medium text-gray-700 mb-1">Remark</label>
+        <div><label className="block text-sm font-medium text-[#5B6480] mb-1">Auto Point</label><div className="px-3 py-2 bg-[#FAFAFB] border border-[#E7E9F0] rounded-lg text-lg font-bold text-[#1F2430]">{pointValue || '-'}</div></div>
+        <div><label className="block text-sm font-medium text-[#5B6480] mb-1">Remark</label>
           <TextArea value={remark} onChange={(e) => setRemark(e.target.value)} rows={3} placeholder="Remark" />
         </div>
       </div>

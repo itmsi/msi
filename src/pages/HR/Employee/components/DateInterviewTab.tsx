@@ -210,7 +210,7 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
     }
   };
 
-  if (loading) return <p className="text-sm text-gray-400">Loading schedules...</p>;
+  if (loading) return <p className="text-sm text-[#9AA2BA]">Loading schedules...</p>;
 
   return (
     <div>
@@ -219,43 +219,43 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
       </div>
 
       {schedules.length === 0 ? (
-        <p className="text-sm text-gray-500">No interview schedules yet.</p>
+        <p className="text-sm text-[#9AA2BA]">No interview schedules yet.</p>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E7E9F0] overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Created by</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Assigned</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Date</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Action</th>
+              <tr className="bg-[#FAFAFB] border-b border-[#E7E9F0]">
+                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Created by</th>
+                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Assigned</th>
+                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Date</th>
+                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-[#F0F1F5]">
               {schedules.map((s) => (
                 <React.Fragment key={s.schedule_interview_id}>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-4 py-3">{s.created_by_name || s.created_by || '-'}</td>
+                <tr className="hover:bg-[#FAFAFB] transition-colors">
+                  <td className="px-4 py-3 text-[#3A4260]">{s.created_by_name || s.created_by || '-'}</td>
                   <td className="px-4 py-3">
                     {s.assign_role ? (
                       <div className="flex flex-wrap gap-1">
                         {getAssignRoleArr(s).map((role, i) => (
-                          <span key={i} className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{role}</span>
+                          <span key={i} className="px-1.5 py-0.5 bg-[#F0F1F5] text-[#5B6480] rounded text-xs">{role}</span>
                         ))}
                       </div>
                     ) : '-'}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="text-gray-900">{formatIndonesianDate(s.schedule_interview_date)}</div>
-                    <div className="text-xs text-gray-500">{s.schedule_interview_time} {s.schedule_interview_duration ? `(${s.schedule_interview_duration})` : ''}</div>
+                    <div className="text-[#1F2430]">{formatIndonesianDate(s.schedule_interview_date)}</div>
+                    <div className="text-xs text-[#9AA2BA]">{s.schedule_interview_time} {s.schedule_interview_duration ? `(${s.schedule_interview_duration})` : ''}</div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
                       <Button size="sm" variant="transparent" onClick={() => openScoringPanel(s.schedule_interview_id)} className="text-[#0253a5]!"><FaPlus /></Button>
-                      <Button size="sm" variant="transparent" onClick={() => handleOpenScoreStats(s.schedule_interview_id)} className="text-green-600!"><FaChartSimple /></Button>
+                      <Button size="sm" variant="transparent" onClick={() => handleOpenScoreStats(s.schedule_interview_id)} className="text-emerald-600!"><FaChartSimple /></Button>
                       <Button size="sm" variant="transparent" onClick={() => openEdit(s)} className="text-blue-600!"><FaPen /></Button>
-                      <Button size="sm" variant="transparent" onClick={() => { setDeletingId(s.schedule_interview_id); setShowDeleteConfirm(true); }} className="text-red-400!"><FaTrash /></Button>
-                      <Button size="sm" variant="transparent" onClick={() => toggleExpand(s.schedule_interview_id)} className="text-gray-400!">
+                      <Button size="sm" variant="transparent" onClick={() => { setDeletingId(s.schedule_interview_id); setShowDeleteConfirm(true); }} className="text-rose-500!"><FaTrash /></Button>
+                      <Button size="sm" variant="transparent" onClick={() => toggleExpand(s.schedule_interview_id)} className="text-[#9AA2BA]!">
                         {expandedSchedules[s.schedule_interview_id] ? <FaChevronUp /> : <FaChevronDown />}
                       </Button>
                     </div>
@@ -272,11 +272,11 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.3, ease: 'easeInOut' }}
                         >
-                          <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 space-y-3">
+                          <div className="px-4 py-3 bg-[#FAFAFB] border-t border-[#E7E9F0] space-y-3">
                             {loadingForms[s.schedule_interview_id] ? (
-                              <p className="text-sm text-gray-400">Loading forms...</p>
+                              <p className="text-sm text-[#9AA2BA]">Loading forms...</p>
                             ) : scheduleForms[s.schedule_interview_id]?.length === 0 ? (
-                              <p className="text-sm text-gray-500">No forms submitted yet.</p>
+                              <p className="text-sm text-[#9AA2BA]">No forms submitted yet.</p>
                             ) : (
                               (() => {
                                 // Group forms by interviewer (created_by_name)
@@ -291,20 +291,20 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                                     {Object.entries(grouped).map(([interviewer, forms]) => {
                                       const totalScore = forms.reduce((sum, f) => sum + (f.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0), 0);
                                       return (
-                                        <div key={interviewer} className="bg-white rounded-lg border border-gray-200 p-3">
+                                        <div key={interviewer} className="bg-white rounded-xl border border-[#E7E9F0] p-3">
                                           <div className="flex items-center justify-between mb-2">
-                                            <h6 className="text-sm font-semibold text-gray-800 mb-0">{interviewer}</h6>
-                                            <span className="text-[10px] text-gray-400">Score: {totalScore}</span>
+                                            <h6 className="text-sm font-semibold text-[#1F2430] mb-0">{interviewer}</h6>
+                                            <span className="text-[10px] text-[#9AA2BA]">Score: {totalScore}</span>
                                           </div>
-                                          <p className="text-xs text-gray-500 mb-2">
-                                            Interviewer: <span className="font-medium text-gray-700">{getAssignRoleArr(s).join(', ') || '-'}</span>
+                                          <p className="text-xs text-[#9AA2BA] mb-2">
+                                            Interviewer: <span className="font-medium text-[#5B6480]">{getAssignRoleArr(s).join(', ') || '-'}</span>
                                           </p>
                                           <div className="flex flex-wrap gap-1.5 mb-2">
                                             {forms.map((form) => {
                                               const score = form.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0;
                                               return (
                                                 <span key={form.interview_id}
-                                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+                                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[#EEF2FF] text-[#4338CA] border border-[#E0E4FA]"
                                                 >
                                                   {form.company_value}: {score}
                                                 </span>
@@ -315,13 +315,13 @@ const DateInterviewTab = ({ candidateId, isActive }: DateInterviewTabProps) => {
                                             <Button size="sm" variant="transparent" onClick={() => openScoringPanel(s.schedule_interview_id, forms[0]?.interview_id)} className="text-[#0253a5]!">
                                               <FaRegPenToSquare className="w-3.5 h-3.5" />
                                             </Button>
-                                            <Button size="sm" variant="transparent" onClick={() => { setFormScoreData(forms.map(f => ({ company_value: f.company_value, total_score: f.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0 }))); setShowFormScore(true); }} className="text-green-600!">
+                                            <Button size="sm" variant="transparent" onClick={() => { setFormScoreData(forms.map(f => ({ company_value: f.company_value, total_score: f.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0 }))); setShowFormScore(true); }} className="text-emerald-600!">
                                               <FaChartSimple className="w-3.5 h-3.5" />
                                             </Button>
-                                            <Button size="sm" variant="transparent" className="text-red-500!">
+                                            <Button size="sm" variant="transparent" className="text-rose-500!">
                                               <FaRegFilePdf className="w-3.5 h-3.5" />
                                             </Button>
-                                            <Button size="sm" variant="transparent" onClick={() => { setDeletingFormId(forms[0]?.interview_id); setShowDeleteFormConfirm(true); }} className="text-red-400!">
+                                            <Button size="sm" variant="transparent" onClick={() => { setDeletingFormId(forms[0]?.interview_id); setShowDeleteFormConfirm(true); }} className="text-rose-500!">
                                               <FaTrash className="w-3 h-3" />
                                             </Button>
                                           </div>
