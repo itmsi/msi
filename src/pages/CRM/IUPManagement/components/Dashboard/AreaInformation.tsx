@@ -47,7 +47,8 @@ export function AreaInformation({ iup }: AreaInformationProps) {
             keyField="label"
             pagination={false}
             hideTableHead={true}
-            striped={false}
+            striped={true}
+            responsive={true}
             headerBackground="transparent"
         />
     );

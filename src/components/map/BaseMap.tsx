@@ -33,8 +33,8 @@ export default function BaseMap({
             zoom={zoom}
             minZoom={4}
             maxBoundsViscosity={1.0}
-            attributionControl={false} 
-            style={{ height, width: '100%', borderRadius: 8 }}
+            attributionControl={false}
+            style={{ height, width: '100%', borderRadius: 8, zIndex: 0 }}
         >
             <MapLayersControl />
             <InvalidateMapSize />

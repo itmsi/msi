@@ -25,6 +25,7 @@ const columns: TableColumn<CriteriaRow>[] = [
         selector: (row) => row.value,
         cell: (row) => <span className="text-gray-800">{row.value}</span>,
         wrap: true,
+        minWidth: "250px",
         grow: 2,
     },
 ];
@@ -60,6 +61,8 @@ export function CriteriaInformation({ iup }: CriteriaInformationProps) {
             pagination={false}
             hideTableHead={true}
             headerBackground="transparent"
+            striped={true}
+            responsive={true}
             customStyles={{
                 tableWrapper: {
                     style: { width: "100%", minWidth: "0" },

@@ -16,7 +16,7 @@ const columns: TableColumn<IupZonaSite>[] = [
         name: "",
         selector: (zone) => zone.iup_zona_site_name,
         cell: (zone) => (
-            <div className={`text-slate-600`}>
+            <div className={`text-slate-600 py-3`}>
                 <p className="flex-1 text-sm font-primary-bold">{zone.iup_zona_site_name}</p>
                 <p className="flex-1 text-xs font-secondary">{moment(zone.iup_zona_site_date_last_survey).format("DD MMMM YYYY")}</p>
             </div>
@@ -28,6 +28,7 @@ const columns: TableColumn<IupZonaSite>[] = [
         selector: (zone) => zone.iup_zona_site_id,
         cell: (zone) => <ZonaSiteDetail zone={zone} />,
         wrap: true,
+        minWidth: "400px",
         grow: 2,
     },
 ];
@@ -49,10 +50,16 @@ export function ZonaSiteList({ zonaSites }: ZonaSiteListProps) {
             pagination={false}
             hideTableHead={true}
             headerBackground="transparent"
-            striped={false}
+            striped={true}
+            responsive={true}
             customStyles={{
                 tableWrapper: {
                     style: { width: "100%", minWidth: "0" },
+                },
+                cells: {
+                    style: {
+                        alignItems: "start",
+                    },
                 },
             }}
         />
