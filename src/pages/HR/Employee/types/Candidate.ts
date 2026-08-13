@@ -1,3 +1,79 @@
+// FORM CANDIDATE
+export interface Candidate {
+    candidate_id: string;
+    company_id: string;
+    department_id: string | null;
+    title_id: string | null;
+    candidate_number: string;
+    candidate_name: string;
+    candidate_email: string;
+    candidate_phone: string;
+    candidate_religion: string;
+    candidate_gender: string;
+    candidate_marital_status: string;
+    candidate_age: number | null;
+    candidate_date_birth: string | null;
+    candidate_nationality: string;
+    candidate_city: string;
+    candidate_state: string;
+    candidate_country: string;
+    candidate_address: string;
+    candidate_foto: string | null;
+    candidate_resume: string | null;
+    candidate_foto_path: string | null;
+    candidate_resume_path: string | null;
+    schedule_interview: ScheduleInterview | null;
+    ptk_date: string | null;
+    offering_letter: string | null;
+    remark: string | null;
+    group_id: string | null;
+    candidate_status: string;
+    candidate_status_offering_letter: string | null;
+    created_at: string;
+    created_by: string;
+    updated_at: string;
+    updated_by: string;
+    deleted_at: string | null;
+    deleted_by: string | null;
+    is_delete: boolean;
+    // Joined fields
+    group_name?: string;
+    company_name?: string;
+    department_name?: string;
+    title_name?: string;
+}
+export interface ScheduleInterview {
+    assign_role?: string;
+    schedule_interview_date?: string;
+    schedule_interview_time?: string;
+    schedule_interview_duration?: string;
+}
+export interface Group {
+    group_id: string;
+    group_name: string;
+}
+
+export interface Company {
+    company_id: string;
+    company_name: string;
+}
+
+export interface Department {
+    department_id: string;
+    department_name: string;
+    company_id: string;
+    company_name?: string;
+}
+
+export interface JobTitle {
+    title_id: string;
+    title_name: string;
+    department_id: string;
+    department_name?: string;
+}
+
+// END FORM CANDIDATE
+// ==============================
 export interface CandidateRequest {
     page: number;
     limit: number;
@@ -71,11 +147,6 @@ export interface CandidateOfferingCount {
     null: number;
 }
 
-// Endpoint hrm/candidates/get membungkus hasil dalam envelope
-// {success, message, data, timestamp} — beda dengan endpoint project yang
-// langsung {status, data, pagination} di level atas. "pagination" dan
-// "candidate_status_offering_count" ada DI DALAM field "data", bukan di
-// level atas envelope.
 export interface CandidateListResult {
     data: CandidateItem[];
     pagination: Pagination;
