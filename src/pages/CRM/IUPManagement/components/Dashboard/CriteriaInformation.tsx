@@ -18,7 +18,7 @@ const columns: TableColumn<CriteriaRow>[] = [
         name: "",
         selector: (row) => row.label,
         cell: (row) => <span className="font-primary-bold text-gray-700">{row.label}</span>,
-        width: "220px",
+        width: "250px",
     },
     {
         name: "",
