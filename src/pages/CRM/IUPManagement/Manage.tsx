@@ -11,15 +11,17 @@ import { BsBuildingCheck } from "react-icons/bs";
 import Badge from '@/components/ui/badge/Badge';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { formatDateTime } from '@/helpers/generalHelper';
 import { useMemo, useState } from 'react';
 import FilterSection from './components/FilterSection';
 
 export default function ManageIUPManagement() {
-    
+
     const navigate = useNavigate();
-    
+
+    const locationpath = useLocation();
+
     const params = new URLSearchParams(location.search);
     const filterKeys = ['search', 'sort_order', 'sort_by', 'segmentation_id', 'island_id', 'group_id', 'area_id', 'iup_zone_id', 'iup_segment_id', 'status', 'is_contractor_count', 'is_selection_iup'];
     const hasActiveFilter = filterKeys.some(key => params.has(key) && params.get(key) !== '');
@@ -52,7 +54,7 @@ export default function ManageIUPManagement() {
         // handleFilterChange('status', '');
         // handleFilterChange('segmentation', '');
         // handleFilterChange('sort_by', '');
-        
+
         // // Reset territory filters dalam satu batch call
         // handleTerritoryFilterChange({
         //     island_id: '',
@@ -72,7 +74,7 @@ export default function ManageIUPManagement() {
             selector: row => row.iup_name,
             cell: (row) => (<>
                 <a
-                    href={`/crm/iup-management/edit/${row.iup_id}`}
+                    href={`/crm/iup-management/edit/${row.iup_id}${locationpath.search}`}
                     className="absolute inset-0"
                 />
                 <div className="flex items-center gap-2">
@@ -85,7 +87,7 @@ export default function ManageIUPManagement() {
                 </div>
             </>),
             wrap: true
-        },{
+        }, {
             name: 'Territory',
             selector: (row) => row?.island_name || '-',
             cell: (row) => (
@@ -145,11 +147,10 @@ export default function ManageIUPManagement() {
             name: 'Status',
             selector: row => row.iup_status,
             cell: (row) => (
-                <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize ${
-                    row.iup_status === 'aktif' 
-                        ? 'bg-green-100 text-green-800' 
+                <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize ${row.iup_status === 'aktif'
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
-                }`}>
+                    }`}>
                     {row.iup_status === 'aktif' ? 'Active' : 'Inactive'}
                 </span>
             ),
@@ -170,90 +171,90 @@ export default function ManageIUPManagement() {
             width: '200px'
         },
     ];
-    
-    const SearchAndFilters = useMemo(() => { 
+
+    const SearchAndFilters = useMemo(() => {
         return (<>
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-            <div className="flex-1">
-                <div className="relative flex">
-                    <div className="relative flex-1">
-                        <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                        <Input
-                            type="text"
-                            placeholder="Search IUP Name... (Press Enter to search)"
-                            value={searchValue}
-                            onChange={(e) => setSearchValue(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            className={`pl-10 py-2 w-full ${searchValue ? 'pr-10' : 'pr-4'}`}
-                        />
-                        {searchValue && (
-                            <button
-                                onClick={handleClearSearch}
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                                type="button"
-                            >
-                                <MdClear className="h-4 w-4" />
-                            </button>
-                        )}
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                <div className="flex-1">
+                    <div className="relative flex">
+                        <div className="relative flex-1">
+                            <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                            <Input
+                                type="text"
+                                placeholder="Search IUP Name... (Press Enter to search)"
+                                value={searchValue}
+                                onChange={(e) => setSearchValue(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                className={`pl-10 py-2 w-full ${searchValue ? 'pr-10' : 'pr-4'}`}
+                            />
+                            {searchValue && (
+                                <button
+                                    onClick={handleClearSearch}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                    type="button"
+                                >
+                                    <MdClear className="h-4 w-4" />
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
+                <div className="flex items-center">
+                    <CustomSelect
+                        id="sort_order"
+                        name="sort_order"
+                        value={filters.sort_order ? {
+                            value: filters.sort_order,
+                            label: filters.sort_order === 'asc' ? 'Ascending' : 'Descending'
+                        } : null}
+                        onChange={(selectedOption) =>
+                            handleFilterChange({ sort_order: (selectedOption?.value as 'asc' | 'desc') || 'desc' })
+                        }
+                        options={[
+                            { value: 'asc', label: 'Ascending' },
+                            { value: 'desc', label: 'Descending' }
+                        ]}
+                        placeholder="Order by"
+                        isClearable={false}
+                        isSearchable={false}
+                        className="w-full"
+                    />
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Button
+                        onClick={handleToggleFilter}
+                        className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
+                        size="sm"
+                    >
+                        <MdFilterListAlt className="w-4 h-4 mr-2" />
+                        Filter
+                        {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                    </Button>
+                </div>
             </div>
-            <div className="flex items-center">
-                <CustomSelect
-                    id="sort_order"
-                    name="sort_order"
-                    value={filters.sort_order ? { 
-                        value: filters.sort_order, 
-                        label: filters.sort_order === 'asc' ? 'Ascending' : 'Descending' 
-                    } : null}
-                    onChange={(selectedOption) => 
-                        handleFilterChange({ sort_order: (selectedOption?.value as 'asc' | 'desc') || 'desc' })
-                    }
-                    options={[
-                        { value: 'asc', label: 'Ascending' },
-                        { value: 'desc', label: 'Descending' }
-                    ]}
-                    placeholder="Order by"
-                    isClearable={false}
-                    isSearchable={false}
-                    className="w-full"
+
+            {showAdvancedFilters && (
+                <FilterSection
+                    // onFilterChange={(field, value) => handleFilterChange({ [field]: value })}
+                    onFilterChange={handleFilterChange}
+                    onClearFilters={handleClearFilters}
                 />
-            </div>
-            
-            <div className="flex items-center gap-2">
-                <Button
-                    onClick={handleToggleFilter}
-                    className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
-                    size="sm"
-                >
-                    <MdFilterListAlt className="w-4 h-4 mr-2" />
-                    Filter
-                    {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
-                </Button>
-            </div>
-        </div>
-        
-        {showAdvancedFilters && (
-            <FilterSection
-                // onFilterChange={(field, value) => handleFilterChange({ [field]: value })}
-                onFilterChange={handleFilterChange}
-                onClearFilters={handleClearFilters}
-            />
-        )}
-    </>);
+            )}
+        </>);
     }, [searchValue, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, filters]);
     // }, [searchValue, statusFilter, segmentationFilter, sortOrder, sortModify, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, handleTerritoryFilterChange, showAdvancedFilters, handleClearFilters]);
-    
+
     return (
         <>
-            <PageMeta 
-                title="Manage IUP Management - Motor Sights International" 
+            <PageMeta
+                title="Manage IUP Management - Motor Sights International"
                 description="Manage IUP Management - Motor Sights International"
                 image="/motor-sights-international.png"
             />
 
             <div className="space-y-3">
-                
+
                 <div className="bg-white shadow rounded-lg">
                     <div className="px-6 py-4 border-b border-gray-200">
                         <div className="flex justify-between items-center">
@@ -310,7 +311,7 @@ export default function ManageIUPManagement() {
                         </div>
                     </div>
 
-                    <div className="bg-white overflow-hidden shadow rounded-lg">                        
+                    <div className="bg-white overflow-hidden shadow rounded-lg">
                         <div className="p-5">
                             <div className="flex items-center">
                                 <div className="p-2 bg-purple-100 rounded-lg">
@@ -324,7 +325,7 @@ export default function ManageIUPManagement() {
                         </div>
                     </div>
 
-                    <div className="bg-white overflow-hidden shadow rounded-lg">                        
+                    <div className="bg-white overflow-hidden shadow rounded-lg">
                         <div className="p-5">
                             <div className="flex items-center">
                                 <div className="p-2 bg-yellow-100 rounded-lg">
@@ -338,7 +339,7 @@ export default function ManageIUPManagement() {
                         </div>
                     </div>
 
-                    <div className="bg-white overflow-hidden shadow rounded-lg">                        
+                    <div className="bg-white overflow-hidden shadow rounded-lg">
                         <div className="p-5">
                             <div className="flex items-center">
                                 <div className="p-2 bg-orange-100 rounded-lg">
@@ -357,7 +358,7 @@ export default function ManageIUPManagement() {
                 <div className="bg-white shadow rounded-lg px-6 py-4">
                     {SearchAndFilters}
                 </div>
-                
+
                 <div className="bg-white shadow rounded-lg">
                     <div className="p-6 font-secondary">
                         {error && (
@@ -384,17 +385,17 @@ export default function ManageIUPManagement() {
                             highlightOnHover
                             striped={false}
                             noDataComponent={
-                            <div className="text-center py-8">
-                                <FaRegBuilding className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                <p className="text-gray-500">No IUP data found</p>
-                                <p className="text-sm text-gray-400">
-                                    {searchValue ? 'Try adjusting your search' : 'Start by adding your first template'}
-                                </p>
-                            </div>
+                                <div className="text-center py-8">
+                                    <FaRegBuilding className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500">No IUP data found</p>
+                                    <p className="text-sm text-gray-400">
+                                        {searchValue ? 'Try adjusting your search' : 'Start by adding your first template'}
+                                    </p>
+                                </div>
                             }
                             persistTableHead
                             borderRadius="8px"
-                            // onRowClicked={(row) => navigate(`/crm/iup-management/edit/${row.iup_id}`)}
+                        // onRowClicked={(row) => navigate(`/crm/iup-management/edit/${row.iup_id}`)}
                         />
                     </div>
                 </div>
