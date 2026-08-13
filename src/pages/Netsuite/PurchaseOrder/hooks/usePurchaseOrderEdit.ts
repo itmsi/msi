@@ -121,6 +121,7 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
     const [validationErrors, setValidationErrors] = useState<PurchaseOrderValidationErrors>({});
     const [masterData, setMasterData] = useState<MasterDataFormFieldItems | null>(null);
     const [loadingMasterData, setLoadingMasterData] = useState(true);
+    const [loadingDownload, setLoadingDownload] = useState(false);
 
     // Detail data dari API (untuk info read-only seperti status, po_number)
     const [poDetail, setPODetail] = useState<PODetailData | null>(null);
@@ -445,6 +446,7 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
     const handleDownloadInvoice = useCallback(async (po_id: any) => {
         if (!po_id) return;
         const toastId = toast.loading(`Mengunduh invoice PO: ${po_id}...`);
+        setLoadingDownload(true);
         try {
             const response = await PurchaseOrderService.downloadInvoice({
                 recId: Number(po_id),
@@ -472,6 +474,8 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
             }
         } catch (err: any) {
             toast.error(err?.message || 'Gagal mengunduh invoice', { id: toastId });
+        } finally {
+            setLoadingDownload(false);
         }
     }, []);
 
@@ -500,6 +504,7 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
         // File handlers
         handleAddFiles,
         handleDownloadInvoice,
+        loadingDownload,
         loadData
     };
 };

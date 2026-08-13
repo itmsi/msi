@@ -27,6 +27,7 @@ export interface MasterZoneSiteRequest {
     search?: string;
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
+    segmentasion?: string;
     is_default?: boolean;
 }
 

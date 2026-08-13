@@ -24,6 +24,7 @@ import HistoryReceiptTab from './components/tabs/HistoryReceiptTab';
 import UserNoteTab from './components/tabs/UserNoteTab';
 import FilesTab from './components/tabs/FilesTab';
 import PageHeader from '@/components/common/PageHeader';
+import { DownloadButton } from '@/components/ui/button/DownloadButton';
 
 export default function Edit() {
     const navigate = useNavigate();
@@ -54,6 +55,7 @@ export default function Edit() {
         isSyncing,
         handleAddFiles,
         handleDownloadInvoice,
+        loadingDownload,
     } = usePurchaseOrderEdit(listRoute);
 
     // Get subsidiary_id dari form data dengan defensive check
@@ -337,15 +339,12 @@ export default function Edit() {
                         subtitle={poDetail?.po_number || '-'}
                         actions={
                             <>
-                                <Button
+                                <DownloadButton
+                                    fileName="Download PDF"
+                                    variant="secondary"
                                     onClick={() => handleDownloadInvoice(poDetail?.po_id)}
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 ring-blue-600 py-2"
-                                >
-                                    <FaRegFilePdf className="w-4 h-4" />
-                                    Download Purchase Order
-                                </Button>
+                                    loading={loadingDownload}
+                                />
                                 {(poDetail?.status_proccess !== 'PROCESSING' && poDetail?.status_proccess !== 'FAILED') && (
                                     <PermissionGate permission="read">
                                         <Button
@@ -733,7 +732,6 @@ export default function Edit() {
                                         </Button>
                                     </PermissionGate>
                                 )}
-                                {/* {poDetail?.approvalstatus === 2 &&  (poDetail?.po_status_label !== 'Pending Receipt' && poDetail?.po_status_label !== 'Pending Bill') || poDetail?.po_status_label === 'Pending Billing/Partially Received' && ( */}
                                 {(poDetail?.approvalstatus === 2 || poDetail?.po_status_label === 'Pending Receipt') && (
                                     <PermissionGate permission={["create", "update"]}>
                                         <Button

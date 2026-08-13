@@ -21,7 +21,7 @@ declare module 'jspdf' {
 const formatCurrency = (value: string | number): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(numValue)) return 'Rp 0';
-    
+
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
@@ -34,31 +34,31 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         unit: 'mm',
         format: [210, 297]
     });
-    
+
     // Language helper function
     const langField = (key: string): string => {
         const value = quotationLabelPDF[key];
-        
+
         if (value && typeof value === 'object' && value[language as LangCode]) {
             return value[language as LangCode];
         }
-        
+
         return key;
     };
-    
+
     let specYPos = 0;
     let specEndPage = 0;
-    
+
     // Helper function to convert HTML to plain text using advanced parsing logic
     const convertHtmlToPlainText = (htmlContent: string): string => {
         if (!htmlContent) return '';
-        
+
         let result = '';
-        
+
         try {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(htmlContent, 'text/html');
-            
+
             const processNodeToText = (node: Node): void => {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const text = node.textContent?.trim();
@@ -67,9 +67,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     }
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node as Element;
-                    
-                    if (element.tagName.toLowerCase() === 'b' || 
-                        element.tagName.toLowerCase() === 'u' || 
+
+                    if (element.tagName.toLowerCase() === 'b' ||
+                        element.tagName.toLowerCase() === 'u' ||
                         element.tagName.toLowerCase() === 'i') {
                         const text = element.textContent?.trim();
                         if (text) {
@@ -98,9 +98,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     }
                 }
             };
-            
+
             Array.from(htmlDoc.body.childNodes).forEach(node => processNodeToText(node));
-            
+
             return result.trim();
         } catch (error) {
             console.error('Error converting HTML to text:', error);
@@ -110,13 +110,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
 
     const processHtmlToTextAdvanced = (htmlContent: string, maxWidth: number, startXpos: number, startYPos: number): void => {
         if (!htmlContent) return;
-        
+
         specYPos = startYPos;
-        
+
         try {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(htmlContent, 'text/html');
-            
+
             const processNodeToTextAdvanced = (node: Node): void => {
                 if (node.nodeType === Node.TEXT_NODE) {
                     const text = node.textContent?.trim();
@@ -129,11 +129,11 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                             specYPos = margin + headerHeight + 5;
                             specEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
                         }
-                        
+
                         doc.setFontSize(8);
                         doc.setTextColor(0, 0, 0);
                         setFontSafe(doc, 'Futura', 'normal');
-                        
+
                         const wrappedText = doc.splitTextToSize(text, maxWidth);
                         wrappedText.forEach((line: string) => {
                             if (specYPos + 5 > pageHeight - footerHeight - margin) {
@@ -149,10 +149,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     }
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node as Element;
-                    
+
                     // Handle different HTML elements (same logic as processNode)
-                    if (element.tagName.toLowerCase() === 'b' || 
-                        element.tagName.toLowerCase() === 'u' || 
+                    if (element.tagName.toLowerCase() === 'b' ||
+                        element.tagName.toLowerCase() === 'u' ||
                         element.tagName.toLowerCase() === 'i') {
                         // Process bold/underline/italic headers
                         const text = element.textContent?.trim();
@@ -165,11 +165,11 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                                 specYPos = margin + headerHeight + 5;
                                 specEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
                             }
-                            
+
                             doc.setFontSize(9);
                             doc.setTextColor(0, 0, 0);
                             setFontSafe(doc, 'Futura', 'bold');
-                            
+
                             const wrappedText = doc.splitTextToSize(text, maxWidth);
                             wrappedText.forEach((line: string) => {
                                 if (specYPos + 5 > pageHeight - footerHeight - margin) {
@@ -189,7 +189,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                         const listItems = element.querySelectorAll('li');
                         listItems.forEach((li, index) => {
                             const text = li.textContent?.trim() || '';
-                            
+
                             // Check if need new page before rendering item
                             if (specYPos + 10 > pageHeight - footerHeight - margin) {
                                 doc.addPage();
@@ -198,23 +198,23 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                                 specYPos = margin + headerHeight + 5;
                                 specEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
                             }
-                            
+
                             doc.setFontSize(8);
                             doc.setTextColor(0, 0, 0);
                             setFontSafe(doc, 'Futura', 'normal');
-                            
+
                             // Numbered list item
                             const numberPrefix = `${index + 1}. `;
                             const indentWidth = doc.getTextWidth(numberPrefix);
-                            
+
                             if (text) {
                                 const wrappedText = doc.splitTextToSize(text, maxWidth - indentWidth);
-                                
+
                                 // First line with number
                                 const firstLine = wrappedText[0] || '';
                                 doc.text(numberPrefix + firstLine, startXpos, specYPos);
                                 specYPos += 4;
-                                
+
                                 // Continuation lines with indentation
                                 for (let i = 1; i < wrappedText.length; i++) {
                                     if (specYPos + 4 > pageHeight - footerHeight - margin) {
@@ -238,7 +238,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                         const listItems = element.querySelectorAll('li');
                         listItems.forEach((li) => {
                             const text = li.textContent?.trim() || '';
-                            
+
                             // Check if need new page before rendering item
                             if (specYPos + 8 > pageHeight - footerHeight - margin) {
                                 doc.addPage();
@@ -247,23 +247,23 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                                 specYPos = margin + headerHeight + 5;
                                 specEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
                             }
-                            
+
                             doc.setFontSize(8);
                             doc.setTextColor(0, 0, 0);
                             setFontSafe(doc, 'Futura', 'normal');
-                            
+
                             // Bullet list item
                             const bulletPrefix = '• ';
                             const indentWidth = doc.getTextWidth(bulletPrefix);
-                            
+
                             if (text) {
                                 const wrappedText = doc.splitTextToSize(text, maxWidth - indentWidth);
-                                
+
                                 // First line with bullet
                                 const firstLine = wrappedText[0] || '';
                                 doc.text(bulletPrefix + firstLine, startXpos, specYPos);
                                 specYPos += 4;
-                                
+
                                 // Continuation lines with indentation
                                 for (let i = 1; i < wrappedText.length; i++) {
                                     if (specYPos + 4 > pageHeight - footerHeight - margin) {
@@ -292,15 +292,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     }
                 }
             };
-            
+
             Array.from(htmlDoc.body.childNodes).forEach(node => processNodeToTextAdvanced(node));
         } catch (error) {
             console.error('Error processing HTML content:', error);
         }
     };
-    
+
     await loadCustomFonts(doc);
-    
+
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 12;
@@ -312,11 +312,11 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         doc.setFillColor(0, 48, 97);
         doc.rect(0, pageHeight - footerHeight, pageWidth, footerHeight, 'F');
         const footerY = pageHeight - footerHeight;
-        
+
         doc.setFontSize(7);
         doc.setTextColor(255, 255, 255);
         setFontSafe(doc, 'Futura', 'bold');
-        
+
         // Address section
         const pinIcon = '/pdf/pin.png';
         doc.addImage(pinIcon, 'PNG', margin, footerY + 4, 7, 7);
@@ -325,16 +325,16 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         const address = 'Jl. Raya Cakung Cilincing, KM 35 Kav 532, RT.009/RW.08, Cakung Barat, Cakung,';
         doc.text(address, margin + 8, footerY + 10);
         doc.text('Jakarta Timur, Daerah Khusus Ibukota Jakarta, 13910', margin + 8, footerY + 14);
-        
+
         // Contact info
-        
+
         const webIcon = '/pdf/web.png';
         doc.addImage(webIcon, 'PNG', pageWidth - margin - 55, footerY + 7.2, 4, 4);
         doc.text('motorsights.com', pageWidth - margin - 50, footerY + 10);
-        
+
         const phoneIcon = '/pdf/phone.png';
         doc.addImage(phoneIcon, 'PNG', pageWidth - margin - 25, footerY + 7.3, 4, 4);
-        doc.text('(+62) 21-4585-9155', pageWidth - margin - 20, footerY + 10);
+        doc.text('(+62) 21-8060-3068', pageWidth - margin - 20, footerY + 10);
     };
 
 
@@ -347,14 +347,14 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         } catch (error) {
             console.warn('IEC logo not found');
         }
-        
+
         try {
             const msLogo = '/motor-sights-international-logo.png';
             doc.addImage(msLogo, 'PNG', pageWidth - margin - 20, 3, 24, 15);
         } catch (error) {
             console.warn('Motor Sights logo not found');
         }
-        
+
         // Line separator
         doc.setDrawColor(200, 200, 200);
         doc.setLineWidth(0.2);
@@ -388,13 +388,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         doc.setTextColor(0, 0, 0);
         setFontByLanguage(doc, label, 'Futura', 'normal', language);
         doc.text(label, margin + boxWidth + 10, yPos);
-        
+
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
         setFontSafe(doc, 'OpenSans', 'semibold');
         doc.text(value, margin + boxWidth + 42, yPos);
     });
-    
+
     const infoData = [
         [langField('quotationNumber'), data.manage_quotation_no],
         [langField('date'), formatDate(data.manage_quotation_date)],
@@ -406,24 +406,24 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         doc.setTextColor(0, 0, 0);
         setFontByLanguage(doc, label, 'Futura', 'normal', language);
         doc.text(label, margin, yPos);
-        
+
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
         setFontSafe(doc, 'OpenSans', 'semibold');
         doc.text(value, margin + 35, yPos);
         yPos += 5;
     });
-    
+
     yPos += 2;
     const boxStartY = yPos - 2;
     const boxRadius = 1;
-    
+
     doc.setFontSize(10);
     doc.setTextColor(0, 48, 97);
     setFontByLanguage(doc, langField('customerDetails'), 'Futura', 'bold', language);
     doc.text(langField('customerDetails'), margin + 5, yPos + 2);
     yPos += 9;
-    
+
     const customersData = [
         [langField('companyName'), data?.customer_name || '-'],
         [langField('contactPerson'), data?.contact_person || '-'],
@@ -432,7 +432,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     ];
 
     const maxValueWidth = boxWidth - 42;
-    
+
     customersData.forEach(([label, value]) => {
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
@@ -442,13 +442,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
         setFontSafe(doc, 'OpenSans', 'semibold');
-        
+
         // Split text if too long
         const splitValue = doc.splitTextToSize(value, maxValueWidth);
         doc.text(splitValue, margin + 37, yPos);
         yPos += splitValue.length * 5.3;
     });
-    
+
     // rounded border for customer
     const boxHeight = yPos - boxStartY;
     doc.setDrawColor(200, 200, 200);
@@ -458,21 +458,21 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     // DETAIL SALES (sebelah kanan customer)
     const salesBoxStartX = margin + boxWidth + 5;
     const salesBoxWidth = boxWidth - 5;
-    let salesYPos = boxStartY + 5; 
+    let salesYPos = boxStartY + 5;
 
     doc.setFontSize(10);
     doc.setTextColor(0, 48, 97);
     setFontByLanguage(doc, langField('salesDetails'), 'Futura', 'bold', language);
     doc.text(langField('salesDetails'), salesBoxStartX + 5, salesYPos);
     salesYPos += 7;
-    
+
     const salesData = [
         [langField('name'), data.employee_name],
         [langField('phone'), data.employee_phone]
     ];
 
     const maxSalesValueWidth = salesBoxWidth - 42;
-    
+
     salesData.forEach(([label, value]) => {
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
@@ -486,7 +486,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         doc.text(splitValue, salesBoxStartX + 37, salesYPos);
         salesYPos += splitValue.length * 5;
     });
-    
+
     // rounded border for sales (same height as customer box)
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
@@ -500,7 +500,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     setFontByLanguage(doc, langField('greetings'), 'Futura', 'normal', language);
     doc.text(langField('greetings'), margin, yPos + 4);
     yPos += 6;
-    
+
     const openingText = langField('openingTextITI');
     const splitText = doc.splitTextToSize(openingText, pageWidth - 2 * margin);
     const lineHeight = 4.2;
@@ -524,15 +524,15 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         body: itemData,
         margin: { left: margin, right: margin },
         styles: {
-            fontSize: 9, 
+            fontSize: 9,
             cellPadding: 2,
             font: language === 'zh' ? 'NotoSansSC' : 'OpenSans',
             fontStyle: 'normal',
             valign: 'middle',
             textColor: [0, 0, 0]
         },
-        headStyles: { 
-            fillColor: [228, 231, 236], 
+        headStyles: {
+            fillColor: [228, 231, 236],
             textColor: [0, 0, 0],
             font: language === 'zh' ? 'NotoSansSC' : 'OpenSans',
             fontStyle: 'bold',
@@ -551,7 +551,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     yPos += 5;
     const tableHeight = yPos - tableStartY - 2.5;
     const tableWidth = pageWidth - 2 * margin;
-    if(data.manage_quotation_items.length < 17) {
+    if (data.manage_quotation_items.length < 17) {
         doc.setDrawColor(228, 231, 236);
         doc.setLineWidth(0.1);
         doc.roundedRect(margin, tableStartY, tableWidth, tableHeight, boxRadius, boxRadius);
@@ -559,20 +559,20 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
 
     // TERM & CONDITION & FINANCIAL SUMMARY (Side by Side)
     checkNewPage(80);
-    
+
     const sectionY = yPos + 3;
     const termWidth = (pageWidth - 2 * margin) * 0.58;
     const financialStartX = margin + termWidth + 5.5;
-    
+
     // Simpan halaman awal untuk Financial Summary
     const startPageNumber = (doc as any).internal.getCurrentPageInfo().pageNumber;
-    
+
     // Left side - Term & Condition (70%)
     let termYPos = sectionY;
     let termEndPage = startPageNumber;
-    
+
     const maxTermWidth = termWidth;
-    
+
     if (data.term_content_payload) {
         doc.setFontSize(12);
         doc.setTextColor(0, 48, 97);
@@ -584,10 +584,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         termYPos = specYPos;
         termEndPage = specEndPage;
     }
-    
+
     // Kembali ke halaman awal untuk render Financial Summary
     doc.setPage(startPageNumber);
-    
+
     // Right side - Financial Summary (30%)
     let financialYPos = sectionY;
     const grandTotalBoxWidth = (pageWidth - 2 * margin) * 0.4;
@@ -615,14 +615,14 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         },
         alternateRowStyles: { fillColor: [255, 255, 255] },
         columnStyles: {
-            0: { 
-                cellWidth: 35, 
+            0: {
+                cellWidth: 35,
                 textColor: [0, 0, 0],
                 font: 'Futura',
                 fontStyle: 'normal',
                 valign: 'top'
             },
-            1: { 
+            1: {
                 cellWidth: 'auto',
                 textColor: [0, 0, 0],
                 fontStyle: 'bold'
@@ -670,14 +670,14 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         },
         alternateRowStyles: { fillColor: [255, 255, 255] },
         columnStyles: {
-            0: { 
-                cellWidth: 35, 
+            0: {
+                cellWidth: 35,
                 textColor: [0, 0, 0],
                 font: 'Futura',
                 fontStyle: 'normal',
                 valign: 'top'
             },
-            1: { 
+            1: {
                 cellWidth: 'auto',
                 textColor: [0, 0, 0],
                 fontStyle: 'bold'
@@ -728,17 +728,17 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     }
 
     checkNewPage(50);
-    
+
     const sectionStartY = yPos - 7;
     const shippingBoxWidth = (pageWidth - 2 * margin) * 0.5 - 2.5;
     const paymentBoxWidth = (pageWidth - 2 * margin) * 0.5 - 2.5;
     // const paymentBoxStartX = margin + shippingBoxWidth + 3;
     const paymentBoxStartX = margin;
     const infoBoxRadius = 1;
-    
+
     const paymentBoxStartY = sectionStartY;
     let paymentYPos = paymentBoxStartY + 5;
-    
+
     doc.setFontSize(12);
     doc.setTextColor(0, 48, 97);
     setFontByLanguage(doc, langField('paymentInformation'), 'Futura', 'bold', language);
@@ -755,12 +755,12 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     setFontSafe(doc, 'Futura', 'normal');
-    
+
     paymentData.forEach(([label, value]) => {
         doc.setTextColor(0, 0, 0);
         setFontByLanguage(doc, label, 'Futura', 'normal', language);
         doc.text(`${label}:`, paymentBoxStartX + 3, paymentYPos);
-        
+
         doc.setTextColor(0, 0, 0);
         setFontSafe(doc, 'OpenSans', 'semibold');
         const maxValueWidth = paymentBoxWidth - 40;
@@ -768,17 +768,17 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         doc.text(splitValue, paymentBoxStartX + 35, paymentYPos);
         paymentYPos += splitValue.length * 5;
     });
-    
+
     // Draw rounded border for payment box
     const paymentBoxHeight = paymentYPos - paymentBoxStartY + 3;
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
     doc.roundedRect(paymentBoxStartX, paymentBoxStartY - 2, paymentBoxWidth, paymentBoxHeight, infoBoxRadius, infoBoxRadius);
-        
+
     // SIGNATURE SECTION - Sejajar dengan shippingData di sebelah kanan
     const signatureStartX = margin + shippingBoxWidth + 32;
     let signatureYPos = sectionStartY + 5;
-    
+
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     setFontByLanguage(doc, langField('respectfully'), 'Futura', 'normal', language);
@@ -787,22 +787,22 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     setFontByLanguage(doc, langField('companySignatureITI'), 'Futura', 'normal', language);
     doc.text(langField('companySignatureITI'), signatureStartX, signatureYPos);
     signatureYPos += 15;
-    
+
     // Signature box
     const signatureBoxWidth = (pageWidth - 2 * margin) * 0.3;
-    
+
     // Signature Box
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     setFontSafe(doc, 'OpenSans', 'semibold');
-    
+
     // Nama dan Jabatan
     signatureYPos += 5;
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     setFontSafe(doc, 'OpenSans', 'semibold');
     doc.text('Reihan Putra Oktavio', signatureStartX + signatureBoxWidth / 2, signatureYPos + 22, { align: 'center' });
-    
+
     signatureYPos += 25;
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.3);
@@ -812,12 +812,12 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     doc.setFontSize(8);
     setFontSafe(doc, 'Futura', 'normal');
     doc.text(langField('jobTitleITI'), signatureStartX + signatureBoxWidth / 2, signatureYPos, { align: 'center' });
-    
+
     // Update yPos berdasarkan yang paling bawah (payment atau signature)
     yPos = Math.max(paymentYPos + 10, signatureYPos + 10);
-    
+
     // checkNewPage(60);
-    
+
     yPos += 15;
 
     const specOrder = [
@@ -852,13 +852,13 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         "Structure Thickness",
         "Remarks"
     ];
-    
-    
+
+
     // Group items by product_type (max 2 items per page per group)
     const itemsWithContent = data.manage_quotation_items
         .map(item => item as any)
-        .filter(item => 
-            ((item.manage_quotation_item_specifications && item.manage_quotation_item_specifications.length > 0) ||
+        .filter(item =>
+        ((item.manage_quotation_item_specifications && item.manage_quotation_item_specifications.length > 0) ||
             (item.manage_quotation_item_accessories && item.manage_quotation_item_accessories.length > 0))
         );
 
@@ -878,21 +878,21 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         addHeaderMSF();
         addFooter();
         yPos = margin + headerHeight + 2;
-        
+
         // Add specifications table header
         doc.setFontSize(14);
         doc.setTextColor(0, 48, 97);
         setFontByLanguage(doc, langField('productSpecificationsITI'), 'Futura', 'bold', language);
         doc.text(langField('productSpecificationsITI'), pageWidth / 2, yPos, { align: 'center' });
         yPos += 7;
-        
+
         // Render specifications dengan multiple tables approach
         Object.entries(groupedItems).forEach(([productType, items]: [string, any], groupIndex) => {
             // Add spacing between groups
             if (groupIndex > 0) {
                 yPos += 5;
             }
-            
+
             // Product Type Header
             doc.setFontSize(12);
             doc.setTextColor(255, 255, 255);
@@ -901,25 +901,25 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             setFontByLanguage(doc, productType.toUpperCase(), 'Futura', 'bold', language);
             doc.text(productType.toUpperCase() || 'OTHER', pageWidth / 2, yPos + 5.5, { align: 'center' });
             yPos += 12;
-            
+
             // Process each item in this product type
             items.forEach((item: any) => {
                 if (item.manage_quotation_item_specifications && item.manage_quotation_item_specifications.length > 0) {
-                    
+
                     // Product name header
                     doc.setFontSize(10);
                     doc.setTextColor(0, 48, 97);
                     setFontSafe(doc, 'OpenSans', 'bold');
                     doc.text(`█ ${item.componen_product_name}`, margin + 3, yPos + 4);
                     yPos += 5;
-                    
+
                     // Prepare specifications data for table
                     const filteredSpecs = item.manage_quotation_item_specifications
                         .map((spec: any) => ({
                             label: spec.manage_quotation_item_specification_label,
                             value: spec.manage_quotation_item_specification_value || '-'
                         }))
-                        .filter((spec: any, index: number, self: any[]) => 
+                        .filter((spec: any, index: number, self: any[]) =>
                             index === self.findIndex((s) => s.label === spec.label && s.value === spec.value)
                         )
                         .sort((a: any, b: any) => {
@@ -929,12 +929,12 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                             const orderB = indexB === -1 ? 999 : indexB;
                             return orderA - orderB;
                         });
-                    
+
                     // Create specifications table data 
                     const specTableData = filteredSpecs.map((spec: any) => [
                         convertHtmlToPlainText(spec.value)
                     ]);
-                    
+
                     // Render specifications table
                     if (specTableData.length > 0) {
                         autoTable(doc, {
@@ -962,7 +962,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                                 }
                             }
                         });
-                        
+
                         yPos = doc.lastAutoTable?.finalY || yPos;
                         yPos += 2;
                     }
@@ -976,7 +976,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         doc.setPage(i);
         addFooter();
     }
-    
+
 
     const fileName = `Quotation_${data.manage_quotation_no.replace(/\//g, '_')}_${new Date().getTime()}.pdf`;
     doc.save(fileName);

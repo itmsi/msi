@@ -1,9 +1,9 @@
 import React from 'react';
 import ZoneArea from '@/pages/CRM/IUPManagement/components/zonearea/ZoneArea';
 
-const TabZoneArea: React.FC = () => {
+const TabZoneArea: React.FC<{ segmentasion: string }> = ({ segmentasion }) => {
     return (<>
-        <ZoneArea />
+        <ZoneArea segmentasion={segmentasion} />
     </>);
 }
 export default TabZoneArea;

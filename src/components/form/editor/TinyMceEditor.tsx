@@ -4,6 +4,24 @@ import { FaSpinner } from 'react-icons/fa';
 
 const TINYMCE_CDN = '/tinymce/tinymce.min.js';
 
+function normalizeImageUrl(url: string): string {
+    if (!url.includes('drive.google.com')) return url;
+    const fileId = url.match(/\/file\/d\/([-\w]+)/)?.[1] ?? url.match(/[?&]id=([-\w]+)/)?.[1];
+    if (!fileId) return url;
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w500`;
+}
+
+function fixDriveImages(editor: any) {
+    const imgs: HTMLImageElement[] = editor.dom.select('img');
+    imgs.forEach((img) => {
+        const src = img.getAttribute('src') || '';
+        const fixed = normalizeImageUrl(src);
+        if (fixed !== src) {
+            editor.dom.setAttrib(img, 'src', fixed);
+        }
+    });
+}
+
 interface TinyMceEditorProps {
     value: string;
     onChange: (value: string) => void;
@@ -49,6 +67,9 @@ const EDITOR_INIT: any = {
         }
         p { margin: 0 0 8px 0; }
     `,
+    urlconverter_callback: (url: string, _node: unknown, _onSave: boolean, name: string) => {
+        return name === 'src' ? normalizeImageUrl(url) : url;
+    },
     setup: (editor: any) => {
         editor.on('keydown', (e: KeyboardEvent) => {
             if (e.key === 'Tab') {
@@ -56,6 +77,7 @@ const EDITOR_INIT: any = {
                 editor.insertContent('&emsp;');
             }
         });
+        editor.on('SetContent', () => fixDriveImages(editor));
     },
 };
 
@@ -97,9 +119,8 @@ const TinyMceEditor: React.FC<TinyMceEditorProps> = ({
             )}
 
             <div
-                className={`w-full border rounded-lg overflow-hidden relative ${
-                    error ? 'border-red-500' : 'border-gray-300'
-                } ${disabled ? 'opacity-60 pointer-events-none' : ''}`}
+                className={`w-full border rounded-lg overflow-hidden relative ${error ? 'border-red-500' : 'border-gray-300'
+                    } ${disabled ? 'opacity-60 pointer-events-none' : ''}`}
                 style={{ minHeight: parseInt(minHeight) }}
             >
                 {isLoading && (
