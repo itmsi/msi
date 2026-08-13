@@ -88,8 +88,11 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
 
   return (
     <div>
-      <div className="flex w-full mb-4">
-        <Button onClick={() => setShowAddModal(true)} startIcon={<FaPlus />} className="w-full justify-center!">Add Background Check</Button>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm text-[#5B6480]">
+          {items.length} {items.length === 1 ? 'check' : 'checks'}
+        </p>
+        <Button size="sm" onClick={() => setShowAddModal(true)} startIcon={<FaPlus />}>Add Check</Button>
       </div>
 
       {items.length === 0 ? (

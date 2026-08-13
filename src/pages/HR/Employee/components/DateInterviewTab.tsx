@@ -279,8 +279,11 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
 
   return (
     <div>
-      <div className="flex w-full mb-4">
-        <Button onClick={openAdd} startIcon={<FaPlus />} className="w-full justify-center">Add Date of Interview</Button>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm text-[#5B6480]">
+          {schedules.length} {schedules.length === 1 ? 'schedule' : 'schedules'}
+        </p>
+        <Button size="sm" onClick={openAdd} startIcon={<FaPlus />}>Add Schedule</Button>
       </div>
 
       {schedules.length === 0 ? (

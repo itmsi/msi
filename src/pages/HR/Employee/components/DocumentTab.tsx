@@ -91,8 +91,11 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
 
   return (
     <div>
-      <div className="flex w-full mb-4">
-        <Button onClick={() => setShowAddModal(true)} startIcon={<FaPlus />} className="w-full justify-center!">Upload Document</Button>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm text-[#5B6480]">
+          {docs.length} {docs.length === 1 ? 'document' : 'documents'}
+        </p>
+        <Button size="sm" onClick={() => setShowAddModal(true)} startIcon={<FaPlus />}>Upload Document</Button>
       </div>
 
       {docs.length === 0 ? (
