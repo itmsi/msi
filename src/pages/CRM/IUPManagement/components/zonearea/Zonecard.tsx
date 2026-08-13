@@ -13,6 +13,7 @@ import { PermissionGate } from "@/components/common/PermissionComponents";
 // import { getMasterZoneSiteForName } from "./data/zoneSurveySchemaMap";
 import DOMPurify from "dompurify";
 import { RICH_CONTENT_SANITIZE_CONFIG } from "@/helpers/sanitizeConfig";
+import { LazyHtmlContent } from "@/components/common/LazyHtmlContent";
 import Tooltip from "@/components/ui/tooltip/Tooltip";
 import { AiSummaryPanel } from "@/components/assistant-ui/Aisummarypanel";
 
@@ -293,11 +294,10 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                     <div className="p-5 rounded-lg border border-gray-200 shadow-[1px_2px_5px_0px_#9e9e9e]">
                         <div className="prose max-w-none text-gray-700 reset-content">
                             {zone.iup_zona_site_description && (
-                                <div
-                                    dangerouslySetInnerHTML={{
-                                        __html: DOMPurify.sanitize(zone.iup_zona_site_description, RICH_CONTENT_SANITIZE_CONFIG),
-                                    }}
-                                ></div>
+                                <LazyHtmlContent
+                                    html={zone.iup_zona_site_description}
+                                    sanitizeConfig={RICH_CONTENT_SANITIZE_CONFIG}
+                                />
                             )}
                         </div>
                     </div>

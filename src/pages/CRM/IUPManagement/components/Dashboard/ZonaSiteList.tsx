@@ -1,10 +1,10 @@
-import DOMPurify from "dompurify";
 import { RICH_CONTENT_SANITIZE_CONFIG } from "@/helpers/sanitizeConfig";
 import moment from "moment";
 import type { TableColumn } from "react-data-table-component";
 import { LuLink2, LuSparkles } from "react-icons/lu";
 import CustomDataTable from "@/components/ui/table/CustomDataTable";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
+import { LazyHtmlContent } from "@/components/common/LazyHtmlContent";
 
 import type { IupZonaSite } from "../../types/iupDashboard";
 
@@ -85,9 +85,10 @@ function ZonaSiteDetail({ zone }: { zone: IupZonaSite }) {
 
             {zone.iup_zona_site_description ? (
                 <div className="max-w-full overflow-x-auto">
-                    <div
+                    <LazyHtmlContent
+                        html={zone.iup_zona_site_description}
+                        sanitizeConfig={RICH_CONTENT_SANITIZE_CONFIG}
                         className="reset-content prose prose-sm max-w-none [&_table]:border [&_td]:border [&_td]:p-2 [&_td]:text-xs [&_img]:max-w-full [&_img]:h-auto"
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(zone.iup_zona_site_description, RICH_CONTENT_SANITIZE_CONFIG) }}
                     />
                 </div>
             ) : (
