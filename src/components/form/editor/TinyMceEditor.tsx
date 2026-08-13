@@ -27,6 +27,25 @@ function getNodeName(node: unknown): string | undefined {
     const n = node as { nodeName?: string; name?: string } | null | undefined;
     return (n?.nodeName ?? n?.name)?.toLowerCase();
 }
+
+function normalizeVideoUrl(url: string): string {
+    if (!url.includes('drive.google.com') || url.includes('/preview')) return url;
+    const fileId = url.match(/\/file\/d\/([-\w]+)/)?.[1] ?? url.match(/[?&]id=([-\w]+)/)?.[1];
+    if (!fileId) return url;
+    return `https://drive.google.com/file/d/${fileId}/preview`;
+}
+
+function fixDriveIframes(editor: any) {
+    const iframes: HTMLIFrameElement[] = editor.dom.select('iframe');
+    iframes.forEach((iframe) => {
+        const src = iframe.getAttribute('src') || '';
+        const fixed = normalizeVideoUrl(src);
+        if (fixed !== src) {
+            editor.dom.setAttrib(iframe, 'src', fixed);
+        }
+    });
+}
+
 const mediaUrlResolver = (data: { url: string }): Promise<{ html: string }> => {
     if (!data.url.includes('drive.google.com')) {
         return Promise.resolve({ html: '' });
@@ -99,7 +118,10 @@ const EDITOR_INIT: any = {
                 editor.insertContent('&emsp;');
             }
         });
-        editor.on('SetContent', () => fixDriveImages(editor));
+        editor.on('SetContent', () => {
+            fixDriveImages(editor);
+            fixDriveIframes(editor);
+        });
     },
 };
 

@@ -15,10 +15,13 @@ import TabHistoryVisit from './components/TabHistoryVisit';
 import TabSurvey from './components/TabSurvey';
 import { AiOutlineDashboard, AiOutlineHistory } from 'react-icons/ai';
 import IupDashboard from './Dashboard';
+import { useLocation } from 'react-router-dom';
 
 
 const EditIupManagement: React.FC = () => {
     const goBack = useGoBack();
+    const location = useLocation();
+    const listRoute = `/crm/iup-management${location.search}`;
 
     const {
         isLoading,
@@ -81,7 +84,7 @@ const EditIupManagement: React.FC = () => {
             <div className="mx-auto px-0">
                 <PageHeader
                     title={`Edit IUP ${formData.company_name ? `- ${formData.company_name}` : ''}`}
-                    backPath={() => goBack('/crm/iup-management')}
+                    backPath={() => goBack(listRoute)}
                 />
 
                 {/* Tab Navigation */}
