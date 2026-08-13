@@ -30,7 +30,7 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
                     </div>
                 </div>
             </>),
-        },{
+        }, {
             name: 'RKAB',
             selector: (row: CustomerInfo) => row.rkab?.year || '-',
             width: '200px',
@@ -84,11 +84,10 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
             center: true,
             cell: (row: CustomerInfo) => (
                 <div className="py-2">
-                    <span className={`capitalize inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        row.status === 'active' 
-                            ? 'bg-green-100 text-green-800' 
+                    <span className={`capitalize inline-flex px-2 py-1 text-xs font-semibold font-secondary rounded-full ${row.status === 'active'
+                            ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
-                    }`}>
+                        }`}>
                         {row.status || 'Unknown'}
                     </span>
                 </div>
@@ -122,8 +121,8 @@ const CustomerInformation: React.FC<CustomerInformationProps> = ({ customers }) 
                     </div>
                 </div>
             </div>
-            
-            
+
+
             <div className="p-6 font-secondary">
                 <CustomDataTable
                     columns={customerColumns}

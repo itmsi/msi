@@ -5,7 +5,7 @@ interface CustomDataTableProps<T> {
     columns: TableColumn<T>[];
     data: T[];
     loading?: boolean;
-    
+
     // Pagination props
     pagination?: boolean;
     paginationServer?: boolean;
@@ -15,23 +15,23 @@ interface CustomDataTableProps<T> {
     paginationRowsPerPageOptions?: number[];
     onChangePage?: (page: number) => void;
     onChangeRowsPerPage?: (currentRowsPerPage: number, currentPage: number) => void;
-    
+
     // Selection props
     selectableRows?: boolean;
     selectableRowSelected?: (row: T) => boolean;
     onSelectedRowsChange?: (state: { allSelected: boolean; selectedCount: number; selectedRows: T[] }) => void;
     clearSelectedRows?: boolean;
-    
+
     // Row events
     onRowClicked?: (row: T, event: React.MouseEvent<Element>) => void;
     onRowDoubleClicked?: (row: T, event: React.MouseEvent<Element>) => void;
     onRowMouseEnter?: (row: T, event: React.MouseEvent<Element>) => void;
     onRowMouseLeave?: (row: T, event: React.MouseEvent<Element>) => void;
-    
+
     // Search props
     subHeader?: boolean;
     subHeaderComponent?: React.ReactNode;
-    
+
     // Styling props
     theme?: 'light' | 'dark' | 'auto';
     customStyles?: TableStyles;
@@ -40,29 +40,30 @@ interface CustomDataTableProps<T> {
     pointerOnHover?: boolean;
     responsive?: boolean;
     persistTableHead?: boolean;
-    
+    hideTableHead?: boolean;
+
     // Additional props
     noDataComponent?: React.ReactNode;
     progressComponent?: React.ReactNode;
     expandableRows?: boolean;
     expandableRowsComponent?: React.ComponentType<{ data: T }>;
     conditionalRowStyles?: ConditionalStyles<T>[];
-    
+
     // Custom styling options
     headerBackground?: string;
     hoverBackground?: string;
     borderRadius?: string;
-    
+
     // Density options
     dense?: boolean;
-    
+
     // Fixed header options
     fixedHeader?: boolean;
     fixedHeaderScrollHeight?: string;
 
     // Row identity
     keyField?: string;
-    
+
     className?: string;
 }
 
@@ -70,7 +71,7 @@ const CustomDataTable = <T extends Record<string, any>>({
     columns,
     data,
     loading = false,
-    
+
     // Pagination
     pagination = true,
     paginationServer = false,
@@ -80,23 +81,23 @@ const CustomDataTable = <T extends Record<string, any>>({
     paginationRowsPerPageOptions,
     onChangePage,
     onChangeRowsPerPage,
-    
+
     // Selection
     selectableRows = false,
     selectableRowSelected,
     onSelectedRowsChange,
     clearSelectedRows = false,
-    
+
     // Row events
     onRowClicked,
     onRowDoubleClicked,
     onRowMouseEnter,
     onRowMouseLeave,
-    
+
     // Search
     subHeader = false,
     subHeaderComponent,
-    
+
     // Styling
     theme = 'light',
     customStyles,
@@ -105,34 +106,35 @@ const CustomDataTable = <T extends Record<string, any>>({
     pointerOnHover,
     responsive = true,
     persistTableHead = true,
-    
+    hideTableHead = false,
+
     // Additional
     noDataComponent,
     progressComponent,
     expandableRows = false,
     expandableRowsComponent,
     conditionalRowStyles,
-    
+
     // Custom styling
     headerBackground = '#dfe8f2',
     hoverBackground = 'rgba(223, 232, 242, 0.3)',
     borderRadius = '8px',
-    
+
     // Density
     dense = false,
-    
+
     // Fixed header
     fixedHeader = false,
     fixedHeaderScrollHeight = '400px',
 
     // Row identity
     keyField = 'id',
-    
+
     className = '',
-    ...props 
+    ...props
 }: CustomDataTableProps<T>) => {
     const wrapperClassName = ['msi-rdt', className].filter(Boolean).join(' ');
-    
+
     // Default custom styles with customization options
     const defaultCustomStyles: TableStyles = {
         tableWrapper: {
@@ -169,7 +171,7 @@ const CustomDataTable = <T extends Record<string, any>>({
                 minHeight: dense ? '40px' : '52px',
                 fontSize: '14px',
                 color: '#374151',
-                borderBottom: '1px solid #ededed !important',  
+                borderBottom: '1px solid #ededed !important',
                 position: 'relative',
                 // '&:last-of-type': {
                 //     borderBottomWidth: '0px',
@@ -242,7 +244,7 @@ const CustomDataTable = <T extends Record<string, any>>({
     };
 
     // Merge custom styles with defaults
-    const mergedStyles = customStyles 
+    const mergedStyles = customStyles
         ? {
             ...defaultCustomStyles,
             ...customStyles,
@@ -268,17 +270,17 @@ const CustomDataTable = <T extends Record<string, any>>({
     // Default no data component
     const defaultNoDataComponent = (
         <div className="flex flex-col items-center justify-center py-12">
-            <svg 
-                className="w-12 h-12 text-gray-400 mb-4" 
-                fill="none" 
-                stroke="currentColor" 
+            <svg
+                className="w-12 h-12 text-gray-400 mb-4"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
             >
-                <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={1.5} 
-                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1H6a1 1 0 00-1 1v1m8 0V4" 
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1H6a1 1 0 00-1 1v1m8 0V4"
                 />
             </svg>
             <p className="text-gray-500 text-lg font-medium">No data available</p>
@@ -296,7 +298,7 @@ const CustomDataTable = <T extends Record<string, any>>({
 
     return (
         <div className={`bg-white ${wrapperClassName} relative`}>
-            <div style={{ 
+            <div style={{
                 position: 'absolute',
                 left: 0,
                 right: 0,
@@ -305,13 +307,13 @@ const CustomDataTable = <T extends Record<string, any>>({
                 height: mergedStyles.headRow?.style?.minHeight ?? (dense ? '40px' : '48px'),
                 zIndex: 2,
                 borderRadius: borderRadius,
-             }} />
+            }} />
             <DataTable
                 {...props}
                 columns={columns}
                 data={data}
                 progressPending={loading}
-                
+
                 // Pagination
                 pagination={pagination}
                 paginationServer={paginationServer}
@@ -321,23 +323,23 @@ const CustomDataTable = <T extends Record<string, any>>({
                 onChangePage={onChangePage}
                 onChangeRowsPerPage={onChangeRowsPerPage}
                 paginationRowsPerPageOptions={paginationRowsPerPageOptions || [10, 25, 50, 100]}
-                
+
                 // Selection
                 selectableRows={selectableRows}
                 selectableRowSelected={selectableRowSelected}
                 onSelectedRowsChange={onSelectedRowsChange}
                 clearSelectedRows={clearSelectedRows}
-                
+
                 // Row events
                 onRowClicked={onRowClicked}
                 onRowDoubleClicked={onRowDoubleClicked}
                 onRowMouseEnter={onRowMouseEnter}
                 onRowMouseLeave={onRowMouseLeave}
-                
+
                 // Search
                 subHeader={subHeader}
                 // subHeaderComponent={subHeaderComponent}
-                
+
                 // Styling
                 theme={theme}
                 customStyles={mergedStyles}
@@ -346,17 +348,17 @@ const CustomDataTable = <T extends Record<string, any>>({
                 pointerOnHover={pointerOnHover ?? !!onRowClicked}
                 responsive={responsive}
                 persistTableHead={persistTableHead}
-                
+
                 // Additional
                 noDataComponent={noDataComponent || defaultNoDataComponent}
                 progressComponent={progressComponent || defaultProgressComponent}
                 expandableRows={expandableRows}
                 expandableRowsComponent={expandableRowsComponent}
                 conditionalRowStyles={conditionalRowStyles}
-                
+
                 // Density
                 dense={dense}
-                
+
                 // Fixed header
                 fixedHeader={fixedHeader}
                 fixedHeaderScrollHeight={fixedHeaderScrollHeight}
@@ -365,6 +367,7 @@ const CustomDataTable = <T extends Record<string, any>>({
                 keyField={keyField}
                 headerSeparator={false}
                 columnSeparator={false}
+                noTableHead={hideTableHead}
             />
         </div>
     );

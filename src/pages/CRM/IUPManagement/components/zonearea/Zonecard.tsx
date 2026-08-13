@@ -83,7 +83,7 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                 const parsed = JSON.parse(authUser);
                 employeeId = parsed.employee_id;
             }
-        } catch {}
+        } catch { }
 
         // Build message dengan data zone sesungguhnya
         const fileList = zone.iup_zona_site_file?.length
@@ -180,7 +180,7 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
             } catch (err) {
                 console.error('[handleGenerateSummary] failed to save summary:', err);
             }
-            
+
         } catch (error: any) {
             if (error.name !== 'AbortError') {
                 toast.error(error.message || "Gagal membuat summary");
@@ -191,9 +191,8 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
         }
     }, [summaryPrompt, sessionId, zone]);
     return (
-        <div className={`${
-            isDeleting ? 'border-red-300 bg-red-50' : ''
-        }`}>
+        <div className={`${isDeleting ? 'border-red-300 bg-red-50' : ''
+            }`}>
             <div
                 onClick={() => toggleZone(zone.iup_zona_site_id)}
                 className={`pointer flex items-center justify-between gap-2 px-5 py-3 ${isOpen ? 'bg-primary hover:bg-primary text-white ' : ''} group hover:bg-primary transition-colors hover:*:text-white cursor-pointer`}
@@ -202,14 +201,14 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                     {isOpen ? (
                         <LuChevronDown size={20} className={`group-hover:text-white ${isOpen ? 'text-white' : 'text-slate-600'} shrink-0`} />
                     ) : (
-                        <LuChevronRight size={20} className={`group-hover:text-white ${isOpen ? 'text-white' : 'text-slate-600'} shrink-0`}  />
+                        <LuChevronRight size={20} className={`group-hover:text-white ${isOpen ? 'text-white' : 'text-slate-600'} shrink-0`} />
                     )}
                     <div className={`min-w-0 group-hover:text-white ${isOpen ? 'text-white' : 'text-slate-600'}`}>
                         <p className="flex-1 text-sm font-primary-bold">{zone.iup_zona_site_name}</p>
                         <p className="flex-1 text-xs font-secondary">{moment(zone.iup_zona_site_date_last_survey).format("DD MMMM YYYY")}</p>
                     </div>
 
-                    
+
                 </div>
                 <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                     {zone?.guide && (
@@ -280,38 +279,46 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                             </Button>
                         </div>
                     )}
-                    <div>
+                    {zone.guide && showGuide && (
+                        <div className="border-l-2 border-blue-light-400 pl-3">
+                            <p className="mb-1 flex items-center gap-1.5 text-xs font-primary-bold text-slate-500 uppercase tracking-wide">
+                                <LuBookOpen size={12} />
+                                Guide — reference for filling in Remarks below
+                            </p>
+                            <div className="relative ">
+                                <div
+                                    className="reset-content text-sm text-slate-600"
+                                    dangerouslySetInnerHTML={{
+                                        __html: DOMPurify.sanitize(zone.guide, {
+                                            ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
+                                        }),
+                                    }}
+                                ></div>
+                                {/* <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent"></div> */}
+                            </div>
+                            {/* <button
+                                type="button"
+                                onClick={() => onViewGuide(zone)}
+                                className="mt-1.5 text-xs font-medium text-primary hover:underline"
+                            >
+                                View full guide →
+                            </button> */}
+                        </div>
+                    )}
+                    <div className="p-5 rounded-lg border border-gray-200 shadow-[1px_2px_5px_0px_#9e9e9e]">
                         {/* <p className="mb-1.5 text-xs font-primary-bold text-slate-500 uppercase tracking-wide">
                             Remarks
                         </p> */}
-                        <div className="w-full min-h-25 border border-gray-300 rounded-lg overflow-hidden">
-                            {zone.guide && showGuide && (
-                                <div className="px-4 py-3 bg-slate-50 border-b border-gray-200 gap-3 flex flex-col">
-                                    <p className="mb-1 flex items-center gap-1 text-sm font-semibold text-gray-800 uppercase font-secondary">
-                                        <LuBookOpen size={12} />
-                                        Guide — reference for filling in the remarks below
-                                    </p>
-                                    <div
-                                        className="reset-content min-h-0 text-sm text-slate-600"
-                                        dangerouslySetInnerHTML={{
-                                            __html: DOMPurify.sanitize(zone.guide, {
-                                                ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
-                                            }),
-                                        }}
-                                    ></div>
-                                </div>
+                        <div className="prose max-w-none text-gray-700 reset-content">
+                            {zone.iup_zona_site_description && (
+                                <div
+                                    dangerouslySetInnerHTML={{
+                                        __html: DOMPurify.sanitize(zone.iup_zona_site_description, {
+                                            ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
+                                        }),
+                                    }}
+                                ></div>
                             )}
-                            <div className="p-4 prose max-w-none text-gray-700 reset-content">
-                                {zone.iup_zona_site_description && (
-                                    <div
-                                        dangerouslySetInnerHTML={{
-                                            __html: DOMPurify.sanitize(zone.iup_zona_site_description, {
-                                                ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
-                                            }),
-                                        }}
-                                    ></div>
-                                )}
-                            </div>
                         </div>
                     </div>
                     {zone.iup_zona_site_file?.length > 0 && (

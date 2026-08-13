@@ -50,7 +50,7 @@ const AppSidebar: React.FC = () => {
     const { menu: authMenu } = useAuth();
     const { lang, langField, buildPath } = useLanguage(menuTranslations);
     const [hrGroups, setHrGroups] = useState<SidebarGroup[]>([]);
-    
+
     const allowedMenuNames = useMemo(
         () => authMenu?.map(menu => menu.name) || [],
         [authMenu]
@@ -74,7 +74,7 @@ const AppSidebar: React.FC = () => {
         return () => {
             mounted = false;
         };
-    }, []);
+    }, [location.pathname]);
 
     const candidateGroupSubItems = useMemo(() => [
         { name: 'All Candidates', path: buildPath('/hr/candidate'), allowedRoles: ['Candidate HRM'] },
@@ -90,7 +90,7 @@ const AppSidebar: React.FC = () => {
             name: "Mosa AI Assistant",
             icon: <IconAIAtomOrbit size={24} />,
             allowedRoles: ['Chat AI'],
-            path: buildPath("/chat-ai"),             
+            path: buildPath("/chat-ai"),
         },
         {
             icon: <GridIcon />,
@@ -120,19 +120,19 @@ const AppSidebar: React.FC = () => {
                 {
                     name: "Administration",
                     subItems: [
-                        { 
-                            name: "Customers", 
-                            path: buildPath("/quotations/administration/customers"), 
+                        {
+                            name: "Customers",
+                            path: buildPath("/quotations/administration/customers"),
                             allowedRoles: ['Customer Quotation']
                         },
-                        { 
-                            name: "Bank Accounts", 
-                            path: buildPath("/quotations/administration/bank-accounts"), 
+                        {
+                            name: "Bank Accounts",
+                            path: buildPath("/quotations/administration/bank-accounts"),
                             allowedRoles: ['Bank Quotation']
                         },
-                        { 
-                            name: "Regions", 
-                            path: buildPath("/quotations/administration/islands"), 
+                        {
+                            name: "Regions",
+                            path: buildPath("/quotations/administration/islands"),
                             allowedRoles: ['Island']
                         }
                     ],
@@ -151,26 +151,26 @@ const AppSidebar: React.FC = () => {
                 {
                     name: "Administration",
                     subItems: [
-                        { 
-                            name: "Customers", 
-                            path: buildPath("/quotations-iti/administration/customers"), 
+                        {
+                            name: "Customers",
+                            path: buildPath("/quotations-iti/administration/customers"),
                             allowedRoles: ['Customer ITI Quotation']
                         },
-                        { 
-                            name: "Bank Accounts", 
-                            path: buildPath("/quotations-iti/administration/bank-accounts"), 
+                        {
+                            name: "Bank Accounts",
+                            path: buildPath("/quotations-iti/administration/bank-accounts"),
                             allowedRoles: ['Bank ITI Quotation']
                         },
-                        { 
-                            name: "Regions", 
-                            path: buildPath("/quotations-iti/administration/islands"), 
+                        {
+                            name: "Regions",
+                            path: buildPath("/quotations-iti/administration/islands"),
                             allowedRoles: ['Island']
                         }
                     ],
                 },
             ],
         },
-        
+
         {
             name: "Calculator Tools",
             icon: <MdCalculate />,
@@ -185,8 +185,8 @@ const AppSidebar: React.FC = () => {
             name: "CRM",
             icon: <TbTopologyStar3 />,
             allowedRoles: [
-                'Area Structure CRM', 
-                'IUP Management CRM', 
+                'Area Structure CRM',
+                'IUP Management CRM',
                 'Contractors CRM',
                 'Activities CRM',
                 'Daily Task Activity CRM',
@@ -202,72 +202,72 @@ const AppSidebar: React.FC = () => {
                 {
                     name: "IUP Management",
                     subItems: [
-                        { 
+                        {
                             name: "Area Structure",
                             path: buildPath("/crm/area-structure"),
-                            allowedRoles: ['Area Structure CRM'] 
+                            allowedRoles: ['Area Structure CRM']
                         },
-                        { 
+                        {
                             name: "Map IUP",
                             path: buildPath("/crm/iup"),
-                            allowedRoles: ['IUP Territory CRM'] 
+                            allowedRoles: ['IUP Territory CRM']
                         },
-                        { 
+                        {
                             name: "IUP",
                             path: buildPath("/crm/iup-management"),
-                            allowedRoles: ['IUP Management CRM'] 
+                            allowedRoles: ['IUP Management CRM']
                         },
-                        { 
+                        {
                             name: "Contractors",
                             path: buildPath("/crm/contractors"),
-                            allowedRoles: ['Contractors CRM'] 
+                            allowedRoles: ['Contractors CRM']
                         },
                     ]
-                }, 
+                },
                 {
                     name: "Project Management",
                     subItems: [
-                        { 
+                        {
                             name: "Projects",
                             path: buildPath("/crm/project"),
-                            allowedRoles: ['Project CRM'] 
+                            allowedRoles: ['Project CRM']
                         },
-                        { 
+                        {
                             name: "Activities",
                             path: buildPath("/crm/activity"),
-                            allowedRoles: ['Activities CRM'] 
+                            allowedRoles: ['Activities CRM']
                         },
-                        { 
+                        {
                             name: "Division",
                             path: buildPath("/crm/manage-division"),
-                            allowedRoles: ['Division CRM'] 
+                            allowedRoles: ['Division CRM']
                         },
-                        { 
+                        {
                             name: "Daily Task Activity",
                             path: buildPath("/crm/daily-task-activity"),
-                            allowedRoles: ['Daily Task Activity CRM'] 
+                            allowedRoles: ['Daily Task Activity CRM']
                         }
                     ]
                 },
-                { 
+                {
                     name: "Customer 360°",
                     path: buildPath("/crm/customer"),
-                    allowedRoles: ['Customer CRM'] 
+                    allowedRoles: ['Customer CRM']
                 },
-                { 
+                {
                     name: "User Management",
                     path: buildPath("/crm/user-management"),
-                    allowedRoles: ['User Management CRM'] 
+                    allowedRoles: ['User Management CRM']
                 },
-                { 
+                {
                     name: "Sales Activity",
                     path: buildPath("/crm/project-sales-activity"),
-                    allowedRoles: ['Project Sales Activity CRM'] 
+                    allowedRoles: ['Project Sales Activity CRM']
                 },
-                { 
+                {
                     name: "Sales Stage",
                     path: buildPath("/crm/sales-stage"),
-                    allowedRoles: ['Sales Stage CRM'] 
+                    allowedRoles: ['Sales Stage CRM']
                 }
             ],
         },
@@ -275,7 +275,7 @@ const AppSidebar: React.FC = () => {
             name: "NetSuite",
             icon: <TbReport />,
             allowedRoles: [
-                'Purchase Orders Netsuite', 
+                'Purchase Orders Netsuite',
                 'Sales Invoice Netsuite',
                 'Admin Sync Netsuite',
                 'Sales Order Netsuite',
@@ -351,15 +351,15 @@ const AppSidebar: React.FC = () => {
                     path: buildPath("/roles"),
                     allowedRoles: ['Roles'],
                 },
-                { 
-                    name: "Menu", 
-                    path: buildPath("/menu"), 
-                    allowedRoles: ['Menu'], 
+                {
+                    name: "Menu",
+                    path: buildPath("/menu"),
+                    allowedRoles: ['Menu'],
                 },
-                { 
-                    name: "Sign Up", 
-                    path: buildPath("/signup"), 
-                    allowedRoles: ['Sign Up'], 
+                {
+                    name: "Sign Up",
+                    path: buildPath("/signup"),
+                    allowedRoles: ['Sign Up'],
                 },
             ],
         },
@@ -414,14 +414,14 @@ const AppSidebar: React.FC = () => {
     const isActive = useCallback(
         (path: string) => {
             const pathOnly = extractPathname(path);
-            
+
             if (pathOnly === location.pathname) {
                 return true;
             }
-            
+
             const normalizedPath = pathOnly.endsWith('/') ? pathOnly : pathOnly + '/';
             const normalizedCurrentPath = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/';
-            
+
             return normalizedCurrentPath.startsWith(normalizedPath);
         },
         [location.pathname, extractPathname]
@@ -429,13 +429,13 @@ const AppSidebar: React.FC = () => {
 
     const isSubActive = useCallback((subPath: string) => {
         const pathOnly = extractPathname(subPath);
-        
+
         if (pathOnly === location.pathname) {
             return true;
         }
         const normalizedSubPath = pathOnly.endsWith('/') ? pathOnly : pathOnly + '/';
         const normalizedCurrentPath = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/';
-        
+
         return normalizedCurrentPath.startsWith(normalizedSubPath);
     }, [location.pathname, extractPathname]);
 
@@ -480,8 +480,8 @@ const AppSidebar: React.FC = () => {
 
         setOpenSubmenu(bestMatch);
         setOpenNestedSubmenu(bestNestedKey);
-    }, [location.pathname, mainFiltered, othersFiltered]);
-    
+    }, [location.pathname, mainFiltered, othersFiltered,]);
+
     const handleSubmenuToggle = (menuType: 'main' | 'others', nav: NavItem) => {
         const key = buildNavKey(menuType, nav);
         setOpenSubmenu((prev) => (prev && prev.key === key ? null : { type: menuType, key }));
@@ -493,63 +493,58 @@ const AppSidebar: React.FC = () => {
 
     const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => {
         return (
-        <ul className="flex flex-col gap-4">
-            {items.map((nav, index) => {
+            <ul className="flex flex-col gap-4">
+                {items.map((nav, index) => {
 
-                const navKey = buildNavKey(menuType, nav);
-                const filteredSubItems = nav.subItems?.filter(
-                    (sub) => {
-                        if (!authMenu || authMenu.length === 0) {
-                            return !sub.allowedRoles || sub.allowedRoles.length === 0;
+                    const navKey = buildNavKey(menuType, nav);
+                    const filteredSubItems = nav.subItems?.filter(
+                        (sub) => {
+                            if (!authMenu || authMenu.length === 0) {
+                                return !sub.allowedRoles || sub.allowedRoles.length === 0;
+                            }
+                            return !sub.allowedRoles || sub.allowedRoles.some(name => allowedMenuNames.includes(name));
                         }
-                        return !sub.allowedRoles || sub.allowedRoles.some(name => allowedMenuNames.includes(name));
-                    }
-                );
-                const isOpen = openSubmenu?.type === menuType && openSubmenu?.key === navKey;
-                return (
-                    <li key={index}>
-                        {filteredSubItems?.length ? (
-                            <button
-                                onClick={() => handleSubmenuToggle(menuType, nav)}
-                                className={`menu-item group ${
-                                    isOpen
-                                    ? "menu-item-active"
-                                    : "menu-item-inactive"
-                                } cursor-pointer ${
-                                    !isExpanded && !isHovered
-                                    ? "lg:justify-center color-[#606060]"
-                                    : "lg:justify-start"
-                                }`}
-                            >
-                                <span className={`menu-item-icon-size ${!isExpanded && !isHovered ? '' : 'color-[#606060]'}`}>
-                                    {nav.icon}
-                                </span>
-                                {(isExpanded || isHovered || isMobileOpen) && (
-                                    <span className="menu-item-text">{langField(nav.name)}</span>
-                                )}
-                                {(isExpanded || isHovered || isMobileOpen) && (
-                                    <ChevronDownIcon
-                                        className={`ml-auto w-5 h-5 transition-transform duration-200 ${
-                                            isOpen
-                                            ? "rotate-180"
-                                            : ""
+                    );
+                    const isOpen = openSubmenu?.type === menuType && openSubmenu?.key === navKey;
+                    return (
+                        <li key={index}>
+                            {filteredSubItems?.length ? (
+                                <button
+                                    onClick={() => handleSubmenuToggle(menuType, nav)}
+                                    className={`menu-item group ${isOpen
+                                        ? "menu-item-active"
+                                        : "menu-item-inactive"
+                                        } cursor-pointer ${!isExpanded && !isHovered
+                                            ? "lg:justify-center color-[#606060]"
+                                            : "lg:justify-start"
                                         }`}
-                                    />
-                                )}
-                            </button>
-                        ) : nav.path ? (
+                                >
+                                    <span className={`menu-item-icon-size ${!isExpanded && !isHovered ? '' : 'color-[#606060]'}`}>
+                                        {nav.icon}
+                                    </span>
+                                    {(isExpanded || isHovered || isMobileOpen) && (
+                                        <span className="menu-item-text">{langField(nav.name)}</span>
+                                    )}
+                                    {(isExpanded || isHovered || isMobileOpen) && (
+                                        <ChevronDownIcon
+                                            className={`ml-auto w-5 h-5 transition-transform duration-200 ${isOpen
+                                                ? "rotate-180"
+                                                : ""
+                                                }`}
+                                        />
+                                    )}
+                                </button>
+                            ) : nav.path ? (
                                 <Link
                                     to={nav.path}
-                                    className={`menu-item group ${
-                                        isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                                    } ${!isHovered ? '' : 'color-[#606060]'}`}
+                                    className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                                        } ${!isHovered ? '' : 'color-[#606060]'}`}
                                 >
                                     <span
-                                        className={`menu-item-icon-size ${
-                                            isActive(nav.path)
+                                        className={`menu-item-icon-size ${isActive(nav.path)
                                             ? "menu-item-icon-active"
                                             : "menu-item-icon-inactive"
-                                        }`}
+                                            }`}
                                     >
                                         {nav.icon}
                                     </span>
@@ -557,114 +552,112 @@ const AppSidebar: React.FC = () => {
                                         <span className={`menu-item-text`}>{langField(nav.name)}</span>
                                     )}
                                 </Link>
-                        ) : null }
-                        {filteredSubItems?.length ? (
-                            <div
-                                ref={(el) => {
-                                    subMenuRefs.current[navKey] = el;
-                                }}
-                                className="overflow-hidden transition-all duration-300"
-                                style={{
-                                    height: isOpen ? "auto" : "0px",
-                                }}
-                            >
-                                <ul className={`mt-2 space-y-1 ml-9 ${(isExpanded || isHovered || isMobileOpen) ? "" : "hidden"}`}>
-                                    {filteredSubItems.map((subItem, subIndex) => {
-                                        const subItemKey = `${navKey}:${subItem.path || subItem.name}:${subIndex}`;
-                                        const hasNestedSubItems = subItem.subItems && subItem.subItems.length > 0;
-                                        
-                                        // Filter nested items untuk mengecek apakah ada yang diizinkan
-                                        const allowedNestedItems = hasNestedSubItems ? subItem.subItems?.filter((nestedItem) => {
-                                            if (!authMenu || authMenu.length === 0) {
-                                                return !nestedItem.allowedRoles || nestedItem.allowedRoles.length === 0;
+                            ) : null}
+                            {filteredSubItems?.length ? (
+                                <div
+                                    ref={(el) => {
+                                        subMenuRefs.current[navKey] = el;
+                                    }}
+                                    className="overflow-hidden transition-all duration-300"
+                                    style={{
+                                        height: isOpen ? "auto" : "0px",
+                                    }}
+                                >
+                                    <ul className={`mt-2 space-y-1 ml-9 ${(isExpanded || isHovered || isMobileOpen) ? "" : "hidden"}`}>
+                                        {filteredSubItems.map((subItem, subIndex) => {
+                                            const subItemKey = `${navKey}:${subItem.path || subItem.name}:${subIndex}`;
+                                            const hasNestedSubItems = subItem.subItems && subItem.subItems.length > 0;
+
+                                            // Filter nested items untuk mengecek apakah ada yang diizinkan
+                                            const allowedNestedItems = hasNestedSubItems ? subItem.subItems?.filter((nestedItem) => {
+                                                if (!authMenu || authMenu.length === 0) {
+                                                    return !nestedItem.allowedRoles || nestedItem.allowedRoles.length === 0;
+                                                }
+                                                if (!nestedItem.allowedRoles || nestedItem.allowedRoles.length === 0) {
+                                                    return true;
+                                                }
+                                                return nestedItem.allowedRoles.some(name => allowedMenuNames.includes(name));
+                                            }) : [];
+
+                                            // Jika ada nested items tapi semua tidak diizinkan, skip item ini
+                                            if (hasNestedSubItems && (!allowedNestedItems || allowedNestedItems.length === 0)) {
+                                                return null;
                                             }
-                                            if (!nestedItem.allowedRoles || nestedItem.allowedRoles.length === 0) {
-                                                return true;
-                                            }
-                                            return nestedItem.allowedRoles.some(name => allowedMenuNames.includes(name));
-                                        }) : [];
-                                        
-                                        // Jika ada nested items tapi semua tidak diizinkan, skip item ini
-                                        if (hasNestedSubItems && (!allowedNestedItems || allowedNestedItems.length === 0)) {
-                                            return null;
-                                        }
-                                        
-                                        const isNestedOpen = openNestedSubmenu === subItemKey;
-                                        
-                                        return (
-                                    <li key={subItemKey}>
-                                        {hasNestedSubItems ? (
-                                            <>
-                                                <button
-                                                    onClick={() => handleNestedSubmenuToggle(subItemKey)}
-                                                    className={`menu-dropdown-item w-full text-left flex items-center justify-between ${
-                                                        isNestedOpen ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"
-                                                    }`}
-                                                >
-                                                    <span>{langField(subItem.name)}</span>
-                                                    <ChevronDownIcon
-                                                        className={`w-4 h-4 transition-transform duration-200 ${
-                                                            isNestedOpen ? "rotate-180" : ""
-                                                        }`}
-                                                    />
-                                                </button>
-                                                {isNestedOpen && (
-                                                    <ul className="mt-1 space-y-1 ml-4">
-                                                        {allowedNestedItems?.map((nestedItem, nestedIndex) => {
-                                                            if (!nestedItem.path) return null;
-                                                            const isNestedItemActive = nestedItem.name === 'All Candidates'
-                                                                ? location.pathname === '/hr/candidate' || location.pathname === '/hr/candidate/'
-                                                                : isSubActive(nestedItem.path);
-                                                            return (
-                                                            <li key={`${subItemKey}:nested:${nestedIndex}`}>
-                                                                <Link
-                                                                    to={nestedItem.path}
-                                                                    className={`menu-dropdown-item text-sm ${
-                                                                        isNestedItemActive
-                                                                        ? "menu-dropdown-item-active"
-                                                                        : "menu-dropdown-item-inactive"
+
+                                            const isNestedOpen = openNestedSubmenu === subItemKey;
+
+                                            return (
+                                                <li key={subItemKey}>
+                                                    {hasNestedSubItems ? (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleNestedSubmenuToggle(subItemKey)}
+                                                                className={`menu-dropdown-item w-full text-left flex items-center justify-between ${isNestedOpen ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"
                                                                     }`}
-                                                                >
-                                                                    {langField(nestedItem.name)}
-                                                                </Link>
-                                                            </li>
-                                                        )})}
-                                                    </ul>
-                                                )}
-                                            </>
-                                        ) : subItem.path ? (
-                                            <Link
-                                                to={subItem.path}
-                                                className={`menu-dropdown-item ${
-                                                    isSubActive(subItem.path)
-                                                    ? "menu-dropdown-item-active"
-                                                    : "menu-dropdown-item-inactive"
-                                                }`}
-                                            >
-                                                {langField(subItem.name)}
-                                            </Link>
-                                        ) : null}
-                                    </li>
-                                    );})}
-                                </ul>
-                            </div>
-                        ) : null}
-                    </li>
-                )
-            })}
-        </ul>
-    )};
+                                                            >
+                                                                <span>{langField(subItem.name)}</span>
+                                                                <ChevronDownIcon
+                                                                    className={`w-4 h-4 transition-transform duration-200 ${isNestedOpen ? "rotate-180" : ""
+                                                                        }`}
+                                                                />
+                                                            </button>
+                                                            {isNestedOpen && (
+                                                                <ul className="mt-1 space-y-1 ml-4">
+                                                                    {allowedNestedItems?.map((nestedItem, nestedIndex) => {
+                                                                        if (!nestedItem.path) return null;
+                                                                        const isNestedItemActive = nestedItem.name === 'All Candidates'
+                                                                            ? location.pathname === '/hr/candidate' || location.pathname === '/hr/candidate/'
+                                                                            : isSubActive(nestedItem.path);
+                                                                        return (
+                                                                            <li key={`${subItemKey}:nested:${nestedIndex}`}>
+                                                                                <Link
+                                                                                    to={nestedItem.path}
+                                                                                    className={`menu-dropdown-item text-sm ${isNestedItemActive
+                                                                                        ? "menu-dropdown-item-active"
+                                                                                        : "menu-dropdown-item-inactive"
+                                                                                        }`}
+                                                                                >
+                                                                                    {langField(nestedItem.name)}
+                                                                                </Link>
+                                                                            </li>
+                                                                        )
+                                                                    })}
+                                                                </ul>
+                                                            )}
+                                                        </>
+                                                    ) : subItem.path ? (
+                                                        <Link
+                                                            to={subItem.path}
+                                                            className={`menu-dropdown-item ${isSubActive(subItem.path)
+                                                                ? "menu-dropdown-item-active"
+                                                                : "menu-dropdown-item-inactive"
+                                                                }`}
+                                                        >
+                                                            {langField(subItem.name)}
+                                                        </Link>
+                                                    ) : null}
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            ) : null}
+                        </li>
+                    )
+                })}
+            </ul>
+        )
+    };
 
     return (
         <aside
             className={`bg-aside fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 shadow-[0 0px 15px -8px #0055b5] 
-            ${
-                isExpanded || isMobileOpen
+            ${isExpanded || isMobileOpen
                     ? "w-[290px]"
                     : isHovered
-                    ? "w-[290px]"
-                    : "w-[90px]"
-            }
+                        ? "w-[290px]"
+                        : "w-[90px]"
+                }
             ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
             lg:translate-x-0`}
             onMouseEnter={() => !isExpanded && setIsHovered(true)}
@@ -672,9 +665,8 @@ const AppSidebar: React.FC = () => {
         >
             <GridShape />
             <div
-                className={`py-8 flex ${
-                    !isExpanded && !isHovered ? "lg:justify-center" : "justify-center"
-                }`}
+                className={`py-8 flex ${!isExpanded && !isHovered ? "justify-center" : "justify-center"
+                    }`}
             >
                 <Link to="/">
                     {isExpanded || isHovered || isMobileOpen ? (
@@ -701,22 +693,21 @@ const AppSidebar: React.FC = () => {
                     <div className="flex flex-col gap-4">
                         {renderMenuItems(mainFiltered, "main")}
                         {othersFiltered.length === 0 ? null : (
-                        <div>
-                            <h2
-                                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                                !isExpanded && !isHovered
-                                    ? "lg:justify-center"
-                                    : "justify-start"
-                                }`}
-                            >
-                                {isExpanded || isHovered || isMobileOpen ? (
-                                    ""
-                                ) : (
-                                    <HorizontaLDots />
-                                )}
-                            </h2>
-                            {renderMenuItems(othersFiltered, "others")}
-                        </div>
+                            <div>
+                                <h2
+                                    className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${!isExpanded && !isHovered
+                                        ? "lg:justify-center"
+                                        : "justify-start"
+                                        }`}
+                                >
+                                    {isExpanded || isHovered || isMobileOpen ? (
+                                        ""
+                                    ) : (
+                                        <HorizontaLDots />
+                                    )}
+                                </h2>
+                                {renderMenuItems(othersFiltered, "others")}
+                            </div>
                         )}
                     </div>
                 </nav>

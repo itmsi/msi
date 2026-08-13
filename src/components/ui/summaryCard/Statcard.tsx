@@ -118,6 +118,13 @@ export interface StatCardProps {
     label: string;
     value: string | number;
     color: StatCardColor;
+    // Opsional: teks satuan kecil setelah value, mis. "Ha", "unit"
+    unit?: string;
+    // Opsional: teks kecil di bawah value, mis. "45 hari lagi"
+    badge?: string;
+    badgeTone?: "warning";
+    // Opsional: varian solid/gelap untuk menonjolkan satu card di antara yang lain
+    highlight?: boolean;
     // Override untuk wrapper terluar (mis. tambah col-span, margin, dst)
     className?: string;
     // Override lebih detail per-bagian, semua opsional
@@ -134,6 +141,10 @@ export default function StatCard({
     label,
     value,
     color,
+    unit,
+    badge,
+    badgeTone,
+    highlight,
     className,
     classNames,
 }: StatCardProps) {
@@ -141,20 +152,20 @@ export default function StatCard({
 
     return (
         <div
-            className={`bg-white overflow-hidden shadow rounded-lg${
-                className ? ` ${className}` : ""
-            }`}
+            className={`overflow-hidden shadow rounded-lg ${
+                highlight ? "bg-primary" : "bg-white"
+            }${className ? ` ${className}` : ""}`}
         >
             <div className="p-5">
                 <div className="flex items-center">
                     {Icon && (
                         <div
-                            className={`p-2 rounded-lg ${classes.iconBg}${
+                            className={`p-2 rounded-lg ${highlight ? "bg-white/10" : classes.iconBg}${
                                 classNames?.iconWrapper ? ` ${classNames.iconWrapper}` : ""
                             }`}
                         >
                             <Icon
-                                className={`w-5 h-5 ${classes.iconText}${
+                                className={`w-5 h-5 ${highlight ? "text-white" : classes.iconText}${
                                     classNames?.icon ? ` ${classNames.icon}` : ""
                                 }`}
                             />
@@ -162,19 +173,41 @@ export default function StatCard({
                     )}
                     <div className={Icon ? "ml-3" : ""}>
                         <p
-                            className={`text-sm font-medium ${classes.labelText}${
+                            className={`text-sm font-medium ${highlight ? "text-blue-light-200" : classes.labelText}${
                                 classNames?.label ? ` ${classNames.label}` : ""
                             }`}
                         >
                             {label}
                         </p>
                         <p
-                            className={`text-2xl font-bold ${classes.valueText}${
+                            className={`text-2xl font-bold ${highlight ? "text-white" : classes.valueText}${
                                 classNames?.value ? ` ${classNames.value}` : ""
                             }`}
                         >
                             {value.toLocaleString()}
+                            {unit && (
+                                <span
+                                    className={`text-xs font-semibold ml-1 ${
+                                        highlight ? "text-blue-light-200" : "text-gray-500"
+                                    }`}
+                                >
+                                    {unit}
+                                </span>
+                            )}
                         </p>
+                        {badge && (
+                            <p
+                                className={`text-[11px] font-semibold mt-1 ${
+                                    badgeTone === "warning"
+                                        ? "text-warning-600"
+                                        : highlight
+                                            ? "text-blue-light-200"
+                                            : "text-gray-500"
+                                }`}
+                            >
+                                {badge}
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

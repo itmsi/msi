@@ -9,9 +9,10 @@ import LoadingSpinner from '@/components/common/Loading';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 
 interface ZoneAreaProps {
+    segmentasion: string;
 }
 
-const ZoneArea: React.FC<ZoneAreaProps> = () => {
+const ZoneArea: React.FC<ZoneAreaProps> = ({ segmentasion }) => {
     const {
         zones,
         // pagination,
@@ -51,7 +52,7 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
 
         zoneSiteTemplates,
         initialShowGuide,
-    } = useIupZoneSIte();
+    } = useIupZoneSIte({ segmentasion });
 
     if (loading) {
         return <div className="bg-white w-full rounded-2xl border border-slate-300 min-h-60 flex items-center justify-center relative">
@@ -131,18 +132,18 @@ const ZoneArea: React.FC<ZoneAreaProps> = () => {
                 />
             )}
             {!showForm && !editingId && (
-            <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl">
-                <PermissionGate permission="create">
-                    <button
-                        type="button"
-                        onClick={openCreateForm}
-                        className="flex items-center gap-1.5 text-sm font-medium"
-                    >
-                        <LuPlus size={16} className="text-primary" />
-                        Add Zona
-                    </button>
-                </PermissionGate>
-            </div>
+                <div className="px-5 py-4 border-t bg-green-100 rounded-b-2xl">
+                    <PermissionGate permission="create">
+                        <button
+                            type="button"
+                            onClick={openCreateForm}
+                            className="flex items-center gap-1.5 text-sm font-medium"
+                        >
+                            <LuPlus size={16} className="text-primary" />
+                            Add Zona
+                        </button>
+                    </PermissionGate>
+                </div>
             )}
 
             <ConfirmationModal

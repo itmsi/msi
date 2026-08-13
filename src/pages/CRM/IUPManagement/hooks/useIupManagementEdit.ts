@@ -8,27 +8,27 @@ import { IupService } from '../services/iupManagementService';
 export const useIupManagementEdit = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    
+
     // Territory hook
     const {
         territories,
         loading: territoriesLoading,
         fetchTerritories
     } = useTerritory();
-    
+
     // State management
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [customers, setCustomers] = useState<CustomerInfo[]>([]);
-    
+
     // Territory selection states
     const [selectedIsland, setSelectedIsland] = useState<Island | null>(null);
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
     const [selectedArea, setSelectedArea] = useState<Area | null>(null);
     const [selectedIupZone, setSelectedIupZone] = useState<IUPZone | null>(null);
     const [selectedIupSegmentation, setSelectedIupSegmentation] = useState<IUPSegmentation | null>(null);
-    
+
     // Form data state
     const [formData, setFormData] = useState<IupManagementFormData>({
         company_name: '',
@@ -76,22 +76,22 @@ export const useIupManagementEdit = () => {
             const island = territories.find(t => t.id === formData.island_id);
             if (island) {
                 setSelectedIsland(island);
-                
+
                 if (formData.group_id) {
                     const group = island.children?.find(g => g.id === formData.group_id);
                     if (group) {
                         setSelectedGroup(group);
-                        
+
                         if (formData.area_id) {
                             const area = group.children?.find(a => a.id === formData.area_id);
                             if (area) {
                                 setSelectedArea(area);
-                                
+
                                 if (formData.iup_zone_id) {
                                     const iupZone = area.children?.find(z => z.id === formData.iup_zone_id);
                                     if (iupZone) {
                                         setSelectedIupZone(iupZone);
-                                        
+
                                         if (formData.iup_segment_id) {
                                             const iupSegmentation = iupZone.children?.find(s => s.id === formData.iup_segment_id);
                                             if (iupSegmentation) {
@@ -140,7 +140,7 @@ export const useIupManagementEdit = () => {
         setSelectedArea(null);
         setSelectedIupZone(null);
         setSelectedIupSegmentation(null);
-        
+
         setFormData(prev => ({
             ...prev,
             island_id: island?.id || '',
@@ -161,7 +161,7 @@ export const useIupManagementEdit = () => {
         setSelectedArea(null);
         setSelectedIupZone(null);
         setSelectedIupSegmentation(null);
-        
+
         setFormData(prev => ({
             ...prev,
             group_id: group?.id || '',
@@ -179,7 +179,7 @@ export const useIupManagementEdit = () => {
         setSelectedArea(area);
         setSelectedIupZone(null);
         setSelectedIupSegmentation(null);
-        
+
         setFormData(prev => ({
             ...prev,
             area_id: area?.id || '',
@@ -194,7 +194,7 @@ export const useIupManagementEdit = () => {
         const iupZone = getAvailableIupZones().find(z => z.id === option?.value) || null;
         setSelectedIupZone(iupZone);
         setSelectedIupSegmentation(null);
-        
+
         setFormData(prev => ({
             ...prev,
             iup_zone_id: iupZone?.id || '',
@@ -206,7 +206,7 @@ export const useIupManagementEdit = () => {
     const handleIupSegmentationChange = (option: { value: string; label: string; } | null) => {
         const iupSegmentation = getAvailableIupSegmentations().find(s => s.id === option?.value) || null;
         setSelectedIupSegmentation(iupSegmentation);
-        
+
         setFormData(prev => ({
             ...prev,
             iup_segment_id: iupSegmentation?.id || '',
@@ -222,7 +222,7 @@ export const useIupManagementEdit = () => {
             if (response.data.success && response.data.data) {
                 const iup = response.data.data;
                 setCustomers(iup.customers || []);
-                
+
                 setFormData({
                     company_name: iup.iup_name || '',
                     iup_zone_id: iup.iup_zone_id || '',
@@ -254,8 +254,9 @@ export const useIupManagementEdit = () => {
                     iup_zone_name: iup.iup_zone_name || '',
                     iup_segment_id: iup.iup_segment_id || '',
                     iup_id: iup.iup_id || id,
+                    iup_segmentation_name: iup.iup_segmentation_name || '',
                 });
-                
+
             } else {
                 toast.error('IUP not found');
                 navigate('/crm/iup-management');
@@ -272,14 +273,14 @@ export const useIupManagementEdit = () => {
     // Form input change handler
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        
+
         if (errors[name]) {
             setErrors(prev => {
                 const { [name]: _, ...rest } = prev;
                 return rest;
             });
         }
-        
+
         setFormData(prev => ({
             ...prev,
             [name]: name === 'area_size_ha' ? value : value
@@ -294,7 +295,7 @@ export const useIupManagementEdit = () => {
                 return rest;
             });
         }
-        
+
         setFormData(prev => ({
             ...prev,
             [field]: value
@@ -308,7 +309,7 @@ export const useIupManagementEdit = () => {
                 return rest;
             });
         }
-        
+
         setFormData(prev => ({
             ...prev,
             [fieldName]: value
@@ -328,7 +329,7 @@ export const useIupManagementEdit = () => {
         if (e) {
             e.preventDefault();
         }
-        
+
         if (!id) {
             toast.error('IUP ID not found');
             return;
@@ -336,11 +337,11 @@ export const useIupManagementEdit = () => {
 
         // Basic validation
         const newErrors: Record<string, string> = {};
-        
+
         if (!formData.company_name.trim()) {
             newErrors.company_name = 'IUP Name is required';
         }
-        
+
         if (!formData.rkab.trim()) {
             newErrors.rkab = 'RKAB is required';
         }
@@ -354,13 +355,13 @@ export const useIupManagementEdit = () => {
         try {
             setIsSubmitting(true);
             setErrors({}); // Clear previous errors
-            
+
             const updateData = {
                 ...formData
             };
 
             const response = await IupService.updateIup(id, updateData);
-            
+
             if (response.success) {
                 toast.success('IUP updated successfully');
                 navigate('/crm/iup-management');
