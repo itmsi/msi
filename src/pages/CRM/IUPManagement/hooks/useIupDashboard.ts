@@ -9,11 +9,13 @@ interface UseIupDetailResult {
     error: string | null;
     refetch: () => void;
 }
+const dashboardCache = new Map<string, IupDashboard>();
 
 export function useIupDashboard(): UseIupDetailResult {
     const { id } = useParams<{ id: string }>();
-    const [data, setData] = useState<IupDashboard | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const cached = id ? dashboardCache.get(id) : undefined;
+    const [data, setData] = useState<IupDashboard | null>(cached ?? null);
+    const [isLoading, setIsLoading] = useState(!cached);
     const [error, setError] = useState<string | null>(null);
 
     const fetchDetail = useCallback(async () => {
@@ -29,6 +31,7 @@ export function useIupDashboard(): UseIupDetailResult {
             const res = await IupService.getDashboardIup(id);
             if (res.data.success) {
                 setData(res?.data.data);
+                dashboardCache.set(id, res.data.data);
             } else {
                 setError(res.data.message || "Gagal memuat data IUP. Silakan coba lagi.");
             }
@@ -44,6 +47,7 @@ export function useIupDashboard(): UseIupDetailResult {
     }, [id]);
 
     useEffect(() => {
+        if (id && dashboardCache.has(id)) return;
         fetchDetail();
     }, [fetchDetail]);
 
