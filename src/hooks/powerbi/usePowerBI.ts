@@ -162,7 +162,7 @@ export const useDashboard = (autoInit: boolean = true) => {
     }, [fetchDashboards]);
 
     // Filter change handler with debouncing
-    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     
     const handleFilterChange = useCallback((field: keyof PowerBIFilters, value: string) => {
         setFilters(prev => {
@@ -591,7 +591,7 @@ export const useDashboardView = () => {
     }, [fetchDashboards]);
 
     // Filter change handler with debouncing
-    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     
     const handleFilterChange = useCallback((field: 'search' | 'category_id', value: string) => {
         setFilters(prev => {
