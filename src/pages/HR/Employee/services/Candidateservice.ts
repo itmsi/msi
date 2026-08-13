@@ -1,4 +1,4 @@
-import { apiPost, apiGet, ApiResponse } from '@/helpers/apiHelper';
+import { apiPost, apiGet } from '@/helpers/apiHelper';
 import { CandidateDetail, CandidateListResponse, CandidateListResult, CandidateRequest } from '../types/Candidate';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -26,9 +26,10 @@ export class CandidateService {
         return envelope.data;
     }
     
-    static async getProjectById(id: string): Promise<ApiResponse<{ success: boolean; message: string; data: CandidateDetail }>> {
-        return await apiGet<{ success: boolean; message: string; data: CandidateDetail }>(
+    static async getCandidateById(id: string): Promise<CandidateDetail> {
+        const response = await apiGet<{ success: boolean; message: string; data: CandidateDetail }>(
             `${API_BASE_URL}/hrm/candidates/${id}`
         );
+        return response.data.data;
     }
 }

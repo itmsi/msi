@@ -37,8 +37,12 @@ export default function ManageCandidate() {
         handleClearSearch,
     } = useCandidateManagement();
 
+    const handleView = (row: CandidateItem) => {
+        navigate(`/hr/candidate/${row.candidate_id}`);
+    };
+
     const handleEdit = (row: CandidateItem) => {
-        navigate(`/employee/candidate/edit/${row.candidate_id}`);
+        navigate(`/hr/candidate/${row.candidate_id}/edit`);
     };
 
     // Sentinel di bawah grid — begitu terlihat di viewport, ambil halaman berikutnya
@@ -81,7 +85,7 @@ export default function ManageCandidate() {
                         element: (
                             <PermissionGate permission="create">
                                 <Button
-                                onClick={() => navigate(`/employee/candidate/create${location.search}`)}
+                                onClick={() => navigate(`/hr/candidate/create${location.search}`)}
                                     className="flex items-center gap-2"
                                 >
                                     <MdAdd className="mr-2" size={20} />
@@ -121,7 +125,7 @@ export default function ManageCandidate() {
                         transition={{ duration: 0.2 }}
                     >
                         {candidates.map((c, index) => (
-                            <CandidateCard key={c.candidate_id} candidate={c} onEdit={handleEdit} index={index} />
+                            <CandidateCard key={c.candidate_id} candidate={c} onView={handleView} onEdit={handleEdit} index={index} />
                         ))}
                         {loadingMore &&
                             Array.from({ length: 3 }).map((_, i) => <CandidateCardSkeleton key={`more-${i}`} />)}
