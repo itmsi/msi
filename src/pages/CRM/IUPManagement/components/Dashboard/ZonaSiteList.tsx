@@ -1,4 +1,5 @@
 import DOMPurify from "dompurify";
+import { RICH_CONTENT_SANITIZE_CONFIG } from "@/helpers/sanitizeConfig";
 import moment from "moment";
 import type { TableColumn } from "react-data-table-component";
 import { LuLink2, LuSparkles } from "react-icons/lu";
@@ -86,7 +87,7 @@ function ZonaSiteDetail({ zone }: { zone: IupZonaSite }) {
                 <div className="max-w-full overflow-x-auto">
                     <div
                         className="reset-content prose prose-sm max-w-none [&_table]:border [&_td]:border [&_td]:p-2 [&_td]:text-xs [&_img]:max-w-full [&_img]:h-auto"
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(zone.iup_zona_site_description) }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(zone.iup_zona_site_description, RICH_CONTENT_SANITIZE_CONFIG) }}
                     />
                 </div>
             ) : (

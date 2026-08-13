@@ -12,6 +12,7 @@ import { PermissionGate } from "@/components/common/PermissionComponents";
 // import { parseSurveyTableFromHtml } from "./data/Parsesurveytablefromhtml";
 // import { getMasterZoneSiteForName } from "./data/zoneSurveySchemaMap";
 import DOMPurify from "dompurify";
+import { RICH_CONTENT_SANITIZE_CONFIG } from "@/helpers/sanitizeConfig";
 import Tooltip from "@/components/ui/tooltip/Tooltip";
 import { AiSummaryPanel } from "@/components/assistant-ui/Aisummarypanel";
 
@@ -56,12 +57,6 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
         setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
     };
     const isOpen = !!expanded[zone.iup_zona_site_id];
-
-    // const matchedSection = getMasterZoneSiteForName(zone.iup_zona_site_name, zoneSiteTemplates);
-    // const surveyValues = parseSurveyTableFromHtml(zone.iup_zona_site_description ?? "");
-    // const filledSurveyFields = matchedSection
-    //     ? matchedSection.field_data.filter((f) => (surveyValues[f.key] ?? "").trim() !== "")
-    //     : [];
 
     const handleGenerateSummary = useCallback(async () => {
         if (!summaryPrompt.trim()) {
@@ -289,33 +284,18 @@ Buatlah ringkasan yang informatif tentang zone ini saja.`
                                 <div
                                     className="reset-content text-sm text-slate-600"
                                     dangerouslySetInnerHTML={{
-                                        __html: DOMPurify.sanitize(zone.guide, {
-                                            ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
-                                        }),
+                                        __html: DOMPurify.sanitize(zone.guide, RICH_CONTENT_SANITIZE_CONFIG),
                                     }}
                                 ></div>
-                                {/* <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent"></div> */}
                             </div>
-                            {/* <button
-                                type="button"
-                                onClick={() => onViewGuide(zone)}
-                                className="mt-1.5 text-xs font-medium text-primary hover:underline"
-                            >
-                                View full guide →
-                            </button> */}
                         </div>
                     )}
                     <div className="p-5 rounded-lg border border-gray-200 shadow-[1px_2px_5px_0px_#9e9e9e]">
-                        {/* <p className="mb-1.5 text-xs font-primary-bold text-slate-500 uppercase tracking-wide">
-                            Remarks
-                        </p> */}
                         <div className="prose max-w-none text-gray-700 reset-content">
                             {zone.iup_zona_site_description && (
                                 <div
                                     dangerouslySetInnerHTML={{
-                                        __html: DOMPurify.sanitize(zone.iup_zona_site_description, {
-                                            ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
-                                        }),
+                                        __html: DOMPurify.sanitize(zone.iup_zona_site_description, RICH_CONTENT_SANITIZE_CONFIG),
                                     }}
                                 ></div>
                             )}

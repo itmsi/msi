@@ -12,6 +12,7 @@ import { ZoneFormErrors, ZoneFormState } from '../../hooks/useIupZoneSIte';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import { sectionToHtmlTable } from './data/Sectiontohtmltable';
 import DOMPurify from "dompurify";
+import { RICH_CONTENT_SANITIZE_CONFIG } from "@/helpers/sanitizeConfig";
 import { Tooltip } from '@/components/ui/tooltip';
 import { getMasterZoneSiteForName } from './data/zoneSurveySchemaMap';
 
@@ -189,9 +190,7 @@ export const EvidenceForm: React.FC<EvidenceFormProps> = ({
                         <div
                             className="reset-content min-h-0"
                             dangerouslySetInnerHTML={{
-                                __html: DOMPurify.sanitize(zone.guide, {
-                                    ADD_ATTR: ["style", "data-field-key", "data-survey-section", "contenteditable"],
-                                }),
+                                __html: DOMPurify.sanitize(zone.guide, RICH_CONTENT_SANITIZE_CONFIG),
                             }}
                         ></div>
                     </div>
