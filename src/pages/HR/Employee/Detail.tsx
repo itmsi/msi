@@ -8,8 +8,8 @@ import { useCandidateDetail } from './hooks/UsecandidateDetail';
 import { CandidateProfileSidebar } from './components/CandidateProfileSidebar';
 import { NotesTab } from './components/NotesTab';
 import DateInterviewTab from './components/DateInterviewTab';
-import BackgroundCheckTab from '../Candidate/components/BackgroundCheckTab';
-import DocumentTab from '../Candidate/components/DocumentTab';
+import BackgroundCheckTab from './components/BackgroundCheckTab';
+import DocumentTab from './components/DocumentTab';
 
 type TabKey = 'interview' | 'bgcheck' | 'documents' | 'notes';
 
@@ -35,25 +35,38 @@ export default function EmployeeCandidateDetail() {
             />
 
             <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <button
-                        onClick={() => navigate('/hr/candidate')}
-                        className="flex items-center gap-1.5 text-sm text-[#5B6480] hover:text-[#1F2430] transition-colors"
-                    >
-                        <MdArrowBack size={16} /> Back to Candidates
-                    </button>
-
-                    {candidate && (
-                        <PermissionGate permission="update">
-                            <Button
-                                size="sm"
-                                startIcon={<MdEdit size={14} />}
-                                onClick={() => navigate(`/hr/candidate/${candidate.candidate_id}/edit`)}
+                <div className="bg-white rounded-2xl border border-[#E7E9F0] shadow-sm">
+                    <div className="px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => navigate('/hr/candidate')}
+                                className="p-2 hover:bg-[#F5F6F8] rounded-full transition-colors text-[#5B6480]"
+                                title="Back to Candidates"
                             >
-                                Edit
-                            </Button>
-                        </PermissionGate>
-                    )}
+                                <MdArrowBack size={22} />
+                            </button>
+                            <div>
+                                <h3 className="text-lg font-primary-bold text-[#1F2430]">
+                                    {candidate ? candidate.candidate_name : 'Candidate Detail'}
+                                </h3>
+                                {candidate && (
+                                    <p className="text-xs text-[#9AA2BA] mt-0.5">{candidate.candidate_number}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {candidate && (
+                            <PermissionGate permission="update">
+                                <Button
+                                    size="sm"
+                                    startIcon={<MdEdit size={14} />}
+                                    onClick={() => navigate(`/hr/candidate/${candidate.candidate_id}/edit`)}
+                                >
+                                    Edit
+                                </Button>
+                            </PermissionGate>
+                        )}
+                    </div>
                 </div>
 
                 {loading && !candidate ? (
@@ -71,21 +84,26 @@ export default function EmployeeCandidateDetail() {
                         <CandidateProfileSidebar candidate={candidate} />
 
                         <div>
-                            <div className="flex gap-1 border-b border-[#E7E9F0] overflow-x-auto">
-                                {TABS.map((t) => (
-                                    <button
-                                        key={t.key}
-                                        onClick={() => setTab(t.key)}
-                                        className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors ${
-                                            tab === t.key ? 'border-[#1F2430] text-[#1F2430]' : 'border-transparent text-[#9AA2BA] hover:text-[#5B6480]'
-                                        }`}
-                                    >
-                                        <t.icon size={15} /> {t.label}
-                                    </button>
-                                ))}
+                            <div className="flex gap-1 px-3 pt-2">
+                                {TABS.map((t) => {
+                                    const isActive = tab === t.key;
+                                    return (
+                                        <button
+                                            key={t.key}
+                                            onClick={() => setTab(t.key)}
+                                            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium whitespace-nowrap rounded-t-xl border border-b-0 transition-colors ${
+                                                isActive
+                                                    ? 'bg-white text-[#1F2430]  border-t-2xl shadow-[0_-8px_3px_-8px_rgba(15,23,42,0.16),-4px_0_10px_-6px_rgba(15,23,42,0.08),4px_0_10px_-6px_rgba(15,23,42,0.08)] border-[#E7E9F0] -mb-px'
+                                                    : 'bg-transparent text-[#9AA2BA] hover:text-[#5B6480] border-transparent'
+                                            }`}
+                                        >
+                                            <t.icon size={15} /> {t.label}
+                                        </button>
+                                    );
+                                })}
                             </div>
 
-                            <div className="py-5">
+                            <div className="p-5 bg-white rounded-2xl border border-[#E7E9F0] shadow-sm overflow-hidden">
                                 {tab === 'interview' && <DateInterviewTab candidateId={candidate.candidate_id} isActive={tab === 'interview'} />}
                                 {tab === 'bgcheck' && <BackgroundCheckTab candidateId={candidate.candidate_id} isActive={tab === 'bgcheck'} />}
                                 {tab === 'documents' && <DocumentTab candidateId={candidate.candidate_id} isActive={tab === 'documents'} />}
