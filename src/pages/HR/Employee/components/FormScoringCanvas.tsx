@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { interviewFormService } from '../../Candidate/services/interviewService';
+import { AuthService } from '@/services/authService';
 import { toast } from 'react-hot-toast';
 import Button from '@/components/ui/button/Button';
 import TextArea from '@/components/form/input/TextArea';
@@ -67,6 +68,18 @@ const EXPERIENCE_ASPECTS = [
 type FormType = 'siah' | 'values' | 'cse' | 'sdt' | 'experience';
 type AspectForm = Record<string, { point: string; question: string; remark: string }>;
 
+// Same window as the "Round N" grouping in DateInterviewTab — submissions from the same
+// interviewer within this window count as the same sitting.
+const SESSION_GAP_MS = 60 * 60 * 1000;
+
+const TAB_COMPANY_VALUES: { key: FormType; companyValue: string }[] = [
+  { key: 'siah', companyValue: 'SIAH' },
+  { key: 'values', companyValue: '7 Values' },
+  { key: 'cse', companyValue: 'CSE' },
+  { key: 'sdt', companyValue: 'SDT' },
+  { key: 'experience', companyValue: 'EXPERIENCE' },
+];
+
 interface FormScoringCanvasProps {
   candidateId: string;
   scheduleId?: string | null;
@@ -74,34 +87,60 @@ interface FormScoringCanvasProps {
   onBack: () => void;
 }
 
-const FormScoringCanvas = ({ candidateId, scheduleId, editingFormId }: FormScoringCanvasProps) => {
+const FormScoringCanvas = ({ candidateId, scheduleId, editingFormId, onBack }: FormScoringCanvasProps) => {
   const scheduleInterviewId = scheduleId || candidateId;
   const [formIdMap, setFormIdMap] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<FormType>('siah');
 
-  // Tanpa editingFormId artinya ini submission baru (tombol "Add Score") —
-  // jangan load form yang udah ada punya interviewer lain, biar mulai kosong.
   useEffect(() => {
-    if (!scheduleInterviewId || !editingFormId) {
+    if (!scheduleInterviewId) {
       setFormIdMap({});
       return;
     }
     interviewFormService.getList({ schedule_interview_id: scheduleInterviewId })
       .then((res) => {
+        const all = res.data || [];
+        let relevant = all;
+
+        if (editingFormId) {
+          // Editing an existing round — only pull company_value -> interviewId from that
+          // same interviewer's same sitting, so an aspect tab doesn't accidentally pick up
+          // someone else's (or an older round's) form.
+          const match = all.find((f) => f.interview_id === editingFormId);
+          if (match) {
+            const anchor = new Date(match.created_at).getTime();
+            relevant = all.filter((f) =>
+              f.created_by_name === match.created_by_name &&
+              Math.abs(new Date(f.created_at).getTime() - anchor) <= SESSION_GAP_MS
+            );
+            const key = match.company_value === '7 Values' ? 'values'
+              : match.company_value === 'SIAH' ? 'siah'
+                : match.company_value === 'CSE' ? 'cse'
+                  : match.company_value === 'SDT' ? 'sdt'
+                    : match.company_value === 'EXPERIENCE' ? 'experience'
+                      : 'siah';
+            setActiveTab(key);
+          } else {
+            relevant = [];
+          }
+        } else {
+          const me = AuthService.getCurrentUser();
+          const myName = me?.employee_name || me?.user_name;
+          const now = Date.now();
+          relevant = myName
+            ? all.filter((f) => f.created_by_name === myName && (now - new Date(f.created_at).getTime()) <= SESSION_GAP_MS)
+            : [];
+        }
+
         const map: Record<string, string> = {};
-        (res.data || []).forEach((f) => {
-          map[f.company_value] = f.interview_id;
-        });
+        relevant.forEach((f) => { map[f.company_value] = f.interview_id; });
         setFormIdMap(map);
-        const match = (res.data || []).find((f) => f.interview_id === editingFormId);
-        if (match) {
-          const key = match.company_value === '7 Values' ? 'values'
-            : match.company_value === 'SIAH' ? 'siah'
-              : match.company_value === 'CSE' ? 'cse'
-                : match.company_value === 'SDT' ? 'sdt'
-                  : match.company_value === 'EXPERIENCE' ? 'experience'
-                    : 'siah';
-          setActiveTab(key);
+
+        if (!editingFormId) {
+          // Land on the first aspect that's still blank this round, so "+" reads as
+          // adding something new instead of always reopening the SIAH tab in edit mode.
+          const firstEmpty = TAB_COMPANY_VALUES.find((t) => !map[t.companyValue]);
+          setActiveTab(firstEmpty?.key || 'siah');
         }
       })
       .catch(() => { });
@@ -145,11 +184,11 @@ const FormScoringCanvas = ({ candidateId, scheduleId, editingFormId }: FormScori
           exit={{ opacity: 0, x: -14 }}
           transition={{ duration: 0.18, ease: 'easeOut' }}
         >
-          {activeTab === 'siah' && <ScoringForm title="SIAH Assessment" caption="Assess sincerity, trustworthiness, altruism, and humility." companyValue="SIAH" aspects={SIAH_ASPECTS} scheduleInterviewId={scheduleInterviewId} interviewId={formIdMap['SIAH']} />}
-          {activeTab === 'values' && <ScoringForm title="7 Values Assessment" caption="Evaluate alignment with company's core values." companyValue="7 Values" aspects={VALUE_ASPECTS} scheduleInterviewId={scheduleInterviewId} interviewId={formIdMap['7 Values']} />}
-          {activeTab === 'cse' && <ScoringForm title="CSE Assessment" caption="Assess core self-evaluation traits." companyValue="CSE" aspects={CSE_ASPECTS} scheduleInterviewId={scheduleInterviewId} defaultQuestions interviewId={formIdMap['CSE']} />}
-          {activeTab === 'sdt' && <SDTForm scheduleInterviewId={scheduleInterviewId} interviewId={formIdMap['SDT']} />}
-          {activeTab === 'experience' && <ScoringForm title="Experience Assessment" caption="Evaluate role fit and contributions." companyValue="EXPERIENCE" aspects={EXPERIENCE_ASPECTS} scheduleInterviewId={scheduleInterviewId} autoQuestion interviewId={formIdMap['EXPERIENCE']} />}
+          {activeTab === 'siah' && <ScoringForm title="SIAH Assessment" caption="Assess sincerity, trustworthiness, altruism, and humility." companyValue="SIAH" aspects={SIAH_ASPECTS} scheduleInterviewId={scheduleInterviewId} interviewId={formIdMap['SIAH']} onSuccess={onBack} />}
+          {activeTab === 'values' && <ScoringForm title="7 Values Assessment" caption="Evaluate alignment with company's core values." companyValue="7 Values" aspects={VALUE_ASPECTS} scheduleInterviewId={scheduleInterviewId} interviewId={formIdMap['7 Values']} onSuccess={onBack} />}
+          {activeTab === 'cse' && <ScoringForm title="CSE Assessment" caption="Assess core self-evaluation traits." companyValue="CSE" aspects={CSE_ASPECTS} scheduleInterviewId={scheduleInterviewId} defaultQuestions interviewId={formIdMap['CSE']} onSuccess={onBack} />}
+          {activeTab === 'sdt' && <SDTForm scheduleInterviewId={scheduleInterviewId} interviewId={formIdMap['SDT']} onSuccess={onBack} />}
+          {activeTab === 'experience' && <ScoringForm title="Experience Assessment" caption="Evaluate role fit and contributions." companyValue="EXPERIENCE" aspects={EXPERIENCE_ASPECTS} scheduleInterviewId={scheduleInterviewId} autoQuestion interviewId={formIdMap['EXPERIENCE']} onSuccess={onBack} />}
         </motion.div>
       </AnimatePresence>
     </div>
@@ -165,9 +204,10 @@ interface ScoringFormProps {
   defaultQuestions?: boolean;
   autoQuestion?: boolean;
   interviewId?: string;
+  onSuccess?: () => void;
 }
 
-const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewId, defaultQuestions, autoQuestion, interviewId }: ScoringFormProps) => {
+const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewId, defaultQuestions, autoQuestion, interviewId, onSuccess }: ScoringFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState<AspectForm>(() =>
     aspects.reduce((acc, a) => ({ ...acc, [a.key]: { point: '', question: a.defaultQ || (autoQuestion ? a.label : ''), remark: '' } }), {})
@@ -228,6 +268,7 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
         await interviewFormService.create({ schedule_interview_id: scheduleInterviewId, company_value: companyValue, comment: 'tidak ada komentar', detail_interviews: detailInterviews });
         toast.success(`${title} submitted!`);
       }
+      onSuccess?.();
     } catch (err: unknown) {
       toast.error(`Failed: ${err instanceof Error ? err.message : 'Error'}`);
     } finally { setIsSubmitting(false); }
@@ -329,7 +370,7 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
   );
 };
 
-const SDTForm = ({ scheduleInterviewId, interviewId }: { scheduleInterviewId: string; interviewId?: string }) => {
+const SDTForm = ({ scheduleInterviewId, interviewId, onSuccess }: { scheduleInterviewId: string; interviewId?: string; onSuccess?: () => void }) => {
   const [selectedAspect, setSelectedAspect] = useState('');
   const [remark, setRemark] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -379,6 +420,7 @@ const SDTForm = ({ scheduleInterviewId, interviewId }: { scheduleInterviewId: st
         await interviewFormService.create(payload);
         toast.success('SDT form submitted!');
       }
+      onSuccess?.();
     } catch (err: unknown) { toast.error(`Failed: ${err instanceof Error ? err.message : 'Error'}`); }
     finally { setIsSubmitting(false); }
   };

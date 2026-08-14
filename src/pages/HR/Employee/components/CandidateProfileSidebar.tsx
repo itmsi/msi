@@ -12,15 +12,16 @@ interface InfoRowProps {
     icon: React.ElementType;
     label: string;
     children: React.ReactNode;
+    fullWidth?: boolean;
 }
 
-function InfoRow({ icon: Icon, label, children }: InfoRowProps) {
+function InfoRow({ icon: Icon, label, children, fullWidth }: InfoRowProps) {
     return (
-        <div className="flex items-start gap-2.5 py-2">
+        <div className={`flex items-start gap-2.5 py-2 ${fullWidth ? 'col-span-2' : ''}`}>
             <Icon size={15} className="text-[#AAB1C6] mt-0.5 shrink-0" />
             <div className="min-w-0">
                 <p className="text-[10.5px] text-[#9AA2BA] uppercase tracking-wide">{label}</p>
-                <p className="text-[13px] text-[#3A4260] font-secondary font-medium truncate">{children}</p>
+                <p className={`text-[13px] text-[#3A4260] font-secondary font-medium ${fullWidth ? '' : 'truncate'}`}>{children}</p>
             </div>
         </div>
     );
@@ -110,14 +111,14 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
             </div>
 
             <div className="mt-2 pt-4 border-t border-[#E7E9F0] grid grid-cols-2 gap-x-2">
-                <InfoRow icon={MdCake} label="Age">
+                <InfoRow icon={MdPerson} label="Gender">{candidate.candidate_gender || '-'}</InfoRow>
+                <InfoRow icon={MdFavorite} label="Marital Status">{candidate.candidate_marital_status || '-'}</InfoRow>
+                <InfoRow icon={MdPublic} label="Nationality">{candidate.candidate_nationality || '-'}</InfoRow>
+                <InfoRow icon={MdCake} label="Age" fullWidth>
                     {candidate.candidate_date_birth
                         ? `${candidate.candidate_age ?? '-'} th (${formatIndonesianDate(candidate.candidate_date_birth)})`
                         : (candidate.candidate_age ? `${candidate.candidate_age} th` : '-')}
                 </InfoRow>
-                <InfoRow icon={MdPerson} label="Gender">{candidate.candidate_gender || '-'}</InfoRow>
-                <InfoRow icon={MdFavorite} label="Marital Status">{candidate.candidate_marital_status || '-'}</InfoRow>
-                <InfoRow icon={MdPublic} label="Nationality">{candidate.candidate_nationality || '-'}</InfoRow>
             </div>
 
             <div className="mt-2 pt-4 border-t border-[#E7E9F0] space-y-0.5">
