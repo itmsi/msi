@@ -25,15 +25,19 @@ interface DateInterviewTabProps {
 
 const ROLE_OPTIONS = ['HR', 'GM', 'VP', 'BOD', 'PUB'];
 const DURATION_OPTIONS = ['15m', '30m', '45m', '60m', '90m'];
+// Cap chips shown per row so rows with many assigned roles don't grow taller than others.
+const MAX_VISIBLE_ROLES = 5;
 
-const ROLE_STYLE: Record<string, { bg: string; fg: string }> = {
-  HR: { bg: '#EEF2FF', fg: '#4338CA' },
-  GM: { bg: '#ECFDF5', fg: '#047857' },
-  VP: { bg: '#FFFBEB', fg: '#B45309' },
-  BOD: { bg: '#FDF2F8', fg: '#BE185D' },
-  PUB: { bg: '#F0FDFA', fg: '#0F766E' },
+// Same badge language as the rest of the app (e.g. /netsuite/sales-orders StatusTypeBadge):
+// bg-X-100 / text-X-800 / border-X-200, rounded-full, bordered — no custom hex or shadows.
+const ROLE_STYLE: Record<string, string> = {
+  HR: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  GM: 'bg-green-100 text-green-800 border-green-200',
+  VP: 'bg-amber-100 text-amber-800 border-amber-200',
+  BOD: 'bg-pink-100 text-pink-800 border-pink-200',
+  PUB: 'bg-teal-100 text-teal-800 border-teal-200',
 };
-const DEFAULT_ROLE_STYLE = { bg: '#F0F1F5', fg: '#5B6480' };
+const DEFAULT_ROLE_STYLE = 'bg-gray-100 text-gray-800 border-gray-200';
 // Stored role casing isn't consistent ("hr" vs "HR") — normalize before lookup/display.
 const getRoleStyle = (role: string) => ROLE_STYLE[role.toUpperCase()] || DEFAULT_ROLE_STYLE;
 
@@ -132,9 +136,8 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
       total_score: form.detail_interviews?.reduce((sum, detail) => sum + (parseInt(detail.score) || 0), 0) || 0,
     }));
 
-  const handleExportPdf = async (schedule: InterviewSchedule, interviewerName: string, forms: InterviewFormItem[]) => {
-    const key = `${schedule.schedule_interview_id}-${interviewerName}`;
-    setGeneratingPdfKey(key);
+  const handleExportPdf = async (schedule: InterviewSchedule, interviewerName: string, forms: InterviewFormItem[], sessionKey: string) => {
+    setGeneratingPdfKey(sessionKey);
     try {
       const blob = await generateInterviewPDFBlob({
         data_candidate: {
@@ -275,7 +278,35 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
     }
   };
 
-  if (loading) return <p className="text-sm text-[#9AA2BA]">Loading schedules...</p>;
+  if (loading) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-4 w-20 bg-[#F0F1F5] rounded animate-pulse" />
+          <div className="h-9 w-32 bg-[#F0F1F5] rounded-lg animate-pulse" />
+        </div>
+        <div className="bg-white rounded-2xl border border-[#E7E9F0] overflow-hidden">
+          <div className="bg-[#FAFAFB] border-b border-[#E7E9F0] px-4 py-3 h-[38px]" />
+          <div className="divide-y divide-[#F0F1F5]">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="px-4 py-4 flex items-center gap-6">
+                <div className="h-4 w-24 bg-[#F0F1F5] rounded animate-pulse" />
+                <div className="flex gap-1">
+                  <div className="h-5 w-9 bg-[#F0F1F5] rounded animate-pulse" />
+                  <div className="h-5 w-9 bg-[#F0F1F5] rounded animate-pulse" />
+                </div>
+                <div className="ml-auto space-y-1.5">
+                  <div className="h-3.5 w-28 bg-[#F0F1F5] rounded animate-pulse" />
+                  <div className="h-3 w-16 bg-[#F0F1F5] rounded animate-pulse" />
+                </div>
+                <div className="h-7 w-28 bg-[#F0F1F5] rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -289,7 +320,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
       {schedules.length === 0 ? (
         <p className="text-sm text-[#9AA2BA]">No interview schedules yet.</p>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E7E9F0] overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E7E9F0] overflow-hidden shadow-[0_1px_2px_rgba(16,24,40,0.06),0_1px_3px_rgba(16,24,40,0.04)]">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-[#FAFAFB] border-b border-[#E7E9F0]">
@@ -302,21 +333,36 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
             <tbody className="divide-y divide-[#F0F1F5]">
               {schedules.map((s) => (
                 <React.Fragment key={s.schedule_interview_id}>
-                <tr className="hover:bg-[#FAFAFB] transition-colors">
+                <tr
+                  className={`transition-colors ${
+                    expandedSchedules[s.schedule_interview_id] || scoringPanel?.scheduleId === s.schedule_interview_id
+                      ? 'bg-[#F5F7FF] shadow-[inset_3px_0_0_0_#4338CA]'
+                      : 'hover:bg-[#FAFAFB]'
+                  }`}
+                >
                   <td className="px-4 py-3 text-[#3A4260]">{s.created_by_name || s.created_by || '-'}</td>
                   <td className="px-4 py-3">
-                    {s.assign_role ? (
-                      <div className="flex flex-wrap gap-1">
-                        {getAssignRoleArr(s).map((role, i) => {
-                          const rs = getRoleStyle(role);
-                          return (
-                            <span key={i} className="px-1.5 py-0.5 rounded text-xs font-medium" style={{ background: rs.bg, color: rs.fg }}>
+                    {s.assign_role ? (() => {
+                      const roles = getAssignRoleArr(s);
+                      const visibleRoles = roles.slice(0, MAX_VISIBLE_ROLES);
+                      const extraRoles = roles.slice(MAX_VISIBLE_ROLES);
+                      return (
+                        <div className="flex flex-nowrap gap-1">
+                          {visibleRoles.map((role, i) => (
+                            <span key={i} className={`shrink-0 inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-medium ${getRoleStyle(role)}`}>
                               {role.toUpperCase()}
                             </span>
-                          );
-                        })}
-                      </div>
-                    ) : '-'}
+                          ))}
+                          {extraRoles.length > 0 && (
+                            <Tooltip content={extraRoles.map(r => r.toUpperCase()).join(', ')} position="top">
+                              <span className={`shrink-0 inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-medium ${DEFAULT_ROLE_STYLE}`}>
+                                +{extraRoles.length}
+                              </span>
+                            </Tooltip>
+                          )}
+                        </div>
+                      );
+                    })() : '-'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="text-[#1F2430]">{formatIndonesianDate(s.schedule_interview_date)}</div>
@@ -362,39 +408,67 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                               <p className="text-sm text-[#9AA2BA]">No forms submitted yet.</p>
                             ) : (
                               (() => {
-                                // Group forms by interviewer (created_by_name)
-                                const grouped: Record<string, typeof scheduleForms[string]> = {};
-                                for (const form of scheduleForms[s.schedule_interview_id] || []) {
-                                  const key = form.created_by_name || 'Unknown';
-                                  if (!grouped[key]) grouped[key] = [];
-                                  grouped[key].push(form);
+                                // Group forms into scoring sessions per interviewer: consecutive submissions
+                                // within SESSION_GAP_MS stay in the same card (one sitting across SIAH/7 Values/
+                                // CSE/etc. tabs); a bigger gap means the interviewer came back for a new round,
+                                // so it gets its own card instead of silently merging into the old one.
+                                const SESSION_GAP_MS = 60 * 60 * 1000;
+                                const sorted = [...(scheduleForms[s.schedule_interview_id] || [])].sort(
+                                  (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                                );
+                                type FormItem = typeof sorted[number];
+                                const sessions: { key: string; interviewer: string; forms: FormItem[] }[] = [];
+                                for (const form of sorted) {
+                                  const interviewer = form.created_by_name || 'Unknown';
+                                  const last = sessions[sessions.length - 1];
+                                  const prevForm = last?.forms[last.forms.length - 1];
+                                  const gap = prevForm ? new Date(form.created_at).getTime() - new Date(prevForm.created_at).getTime() : Infinity;
+                                  if (last && last.interviewer === interviewer && gap <= SESSION_GAP_MS) {
+                                    last.forms.push(form);
+                                  } else {
+                                    sessions.push({ key: form.interview_id, interviewer, forms: [form] });
+                                  }
                                 }
+                                const sessionsPerInterviewer: Record<string, number> = {};
+                                sessions.forEach((sess) => {
+                                  sessionsPerInterviewer[sess.interviewer] = (sessionsPerInterviewer[sess.interviewer] || 0) + 1;
+                                });
+                                const roundCounter: Record<string, number> = {};
                                 return (
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {Object.entries(grouped).map(([interviewer, forms]) => {
+                                    {sessions.map((session) => {
+                                      roundCounter[session.interviewer] = (roundCounter[session.interviewer] || 0) + 1;
+                                      const round = roundCounter[session.interviewer];
+                                      const interviewer = session.interviewer;
+                                      const forms = session.forms;
                                       const totalScore = forms.reduce((sum, f) => sum + (f.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0), 0);
                                       return (
-                                        <div key={interviewer} className="bg-white rounded-2xl border border-[#E7E9F0] p-4 hover:border-[#C4C9DA] hover:shadow-sm transition-all">
+                                        <div key={session.key} className="bg-white rounded-2xl border border-[#E7E9F0] p-4 shadow-[0_1px_2px_rgba(16,24,40,0.05)] hover:border-[#C4C9DA] hover:shadow-[0_4px_12px_rgba(16,24,40,0.08)] hover:-translate-y-0.5 transition-all">
                                           <div className="flex items-start justify-between gap-3 mb-3">
                                             <div className="min-w-0 flex-1">
-                                              <h6 className="text-sm font-semibold text-[#1F2430] truncate">{interviewer}</h6>
+                                              <h6 className="text-sm font-semibold text-[#1F2430] truncate">
+                                                {interviewer}
+                                                {sessionsPerInterviewer[interviewer] > 1 && (
+                                                  <span className="ml-1.5 text-[10px] font-medium text-[#9AA2BA]">· Round {round}</span>
+                                                )}
+                                              </h6>
+                                              <p className="text-[10px] text-[#C4C9DA] mt-0.5">{formatIndonesianDate(forms[0]?.created_at)}</p>
                                               <div className="flex flex-wrap gap-1 mt-1">
                                                 {getAssignRoleArr(s).length > 0 ? (
-                                                  getAssignRoleArr(s).map((role, i) => {
-                                                    const rs = getRoleStyle(role);
-                                                    return (
-                                                      <span key={i} className="px-1.5 py-0.5 rounded text-[10px] font-medium" style={{ background: rs.bg, color: rs.fg }}>
-                                                        {role.toUpperCase()}
-                                                      </span>
-                                                    );
-                                                  })
+                                                  getAssignRoleArr(s).map((role, i) => (
+                                                    <span key={i} className={`inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] border rounded-full font-medium ${getRoleStyle(role)}`}>
+                                                      {role.toUpperCase()}
+                                                    </span>
+                                                  ))
                                                 ) : (
                                                   <span className="text-[11px] text-[#9AA2BA]">No role assigned</span>
                                                 )}
                                               </div>
                                             </div>
                                             <div className="text-right shrink-0">
-                                              <div className="text-base font-bold text-[#1F2430] leading-none">{totalScore}</div>
+                                              <div className="inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-sm font-bold">
+                                                {totalScore}
+                                              </div>
                                               <div className="text-[9px] uppercase tracking-wide text-[#9AA2BA] mt-1">Score</div>
                                             </div>
                                           </div>
@@ -404,7 +478,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                               const score = form.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0;
                                               return (
                                                 <span key={form.interview_id}
-                                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[#EEF2FF] text-[#4338CA] border border-[#E0E4FA]"
+                                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200"
                                                 >
                                                   {form.company_value}: {score}
                                                 </span>
@@ -427,11 +501,11 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                               <Button
                                                 size="sm"
                                                 variant="transparent"
-                                                disabled={generatingPdfKey === `${s.schedule_interview_id}-${interviewer}`}
-                                                onClick={() => handleExportPdf(s, interviewer, forms)}
+                                                disabled={generatingPdfKey === session.key}
+                                                onClick={() => handleExportPdf(s, interviewer, forms, session.key)}
                                                 className="text-rose-500!"
                                               >
-                                                {generatingPdfKey === `${s.schedule_interview_id}-${interviewer}` ? (
+                                                {generatingPdfKey === session.key ? (
                                                   <FaSpinner className="w-3.5 h-3.5 animate-spin" />
                                                 ) : (
                                                   <FaRegFilePdf className="w-3.5 h-3.5" />
@@ -487,7 +561,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25, delay: 0.08, ease: 'easeOut' }}
-                className="bg-white rounded-2xl border border-[#E7E9F0] p-5 mt-4"
+                className="bg-white rounded-2xl border border-[#E7E9F0] p-5 mt-4 shadow-[0_8px_24px_rgba(16,24,40,0.10)]"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div>
