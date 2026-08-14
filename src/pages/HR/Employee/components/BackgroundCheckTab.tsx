@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { BackgroundCheckItem } from '../../Candidate/types/hr';
 import { backgroundCheckService } from '../../Candidate/services/hrService';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaTrash, FaDownload, FaShieldHalved } from 'react-icons/fa6';
+import { FaPlus, FaTrash, FaDownload, FaShieldHalved, FaXmark } from 'react-icons/fa6';
 import Button from '@/components/ui/button/Button';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
@@ -15,12 +15,14 @@ interface BackgroundCheckTabProps {
   isActive: boolean;
 }
 
-const STATUS_STYLE: Record<string, { bg: string; fg: string }> = {
-  Hired: { bg: '#ECFDF5', fg: '#047857' },
-  Rejected: { bg: '#FFF1F2', fg: '#E11D48' },
-  'On Hold': { bg: '#FFFBEB', fg: '#B45309' },
+// Same badge language as the rest of the app (e.g. /netsuite/sales-orders StatusTypeBadge):
+// bg-X-100 / text-X-800 / border-X-200, rounded-full, bordered.
+const STATUS_STYLE: Record<string, string> = {
+  Hired: 'bg-green-100 text-green-800 border-green-200',
+  Rejected: 'bg-red-100 text-red-800 border-red-200',
+  'On Hold': 'bg-amber-100 text-amber-800 border-amber-200',
 };
-const DEFAULT_STATUS_STYLE = { bg: '#F5F6F8', fg: '#5B6480' };
+const DEFAULT_STATUS_STYLE = 'bg-gray-100 text-gray-800 border-gray-200';
 
 const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) => {
   const [items, setItems] = useState<BackgroundCheckItem[]>([]);
@@ -111,7 +113,6 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
             </thead>
             <tbody className="divide-y divide-[#F0F1F5]">
               {items.map((item) => {
-                const s = STATUS_STYLE[item.background_check_status] || DEFAULT_STATUS_STYLE;
                 return (
                   <tr key={item.background_check_id} className="hover:bg-[#FAFAFB] transition-colors">
                     <td className="px-4 py-3">
@@ -120,7 +121,7 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
                     <td className="px-4 py-3 text-[#5B6480]">{item.created_by_name || '-'}</td>
                     <td className="px-4 py-3 text-[#5B6480]">{formatIndonesianDate(item.created_at)}</td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: s.bg, color: s.fg }}>
+                      <span className={`inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-medium ${STATUS_STYLE[item.background_check_status] || DEFAULT_STATUS_STYLE}`}>
                         {item.background_check_status}
                       </span>
                     </td>
@@ -169,14 +170,19 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
               onClick={(e) => e.stopPropagation()}
               className="bg-white rounded-2xl border border-[#E7E9F0] shadow-xl w-full max-w-md overflow-hidden"
             >
-              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#E7E9F0]">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#ECFDF5] text-[#047857] shrink-0">
-                  <FaShieldHalved size={16} />
+              <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-[#E7E9F0]">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#ECFDF5] text-[#047857] shrink-0">
+                    <FaShieldHalved size={16} />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-[15px] font-primary-bold text-[#1F2430]">Add Background Check</h3>
+                    <p className="text-xs text-[#9AA2BA] mt-0.5">Record the result of a background verification.</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-[15px] font-primary-bold text-[#1F2430]">Add Background Check</h3>
-                  <p className="text-xs text-[#9AA2BA] mt-0.5">Record the result of a background verification.</p>
-                </div>
+                <button onClick={() => setShowAddModal(false)} title="Close" className="p-2 rounded-full hover:bg-[#F5F6F8] text-[#9AA2BA] shrink-0">
+                  <FaXmark size={16} />
+                </button>
               </div>
 
               <div className="px-6 py-5 space-y-4">
