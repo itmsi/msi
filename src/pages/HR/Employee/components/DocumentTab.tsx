@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { OnBoardDocument } from '../../Candidate/types/hr';
 import { documentService } from '../../Candidate/services/hrService';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaTrash, FaDownload, FaFileLines, FaFolderOpen } from 'react-icons/fa6';
+import { FaPlus, FaTrash, FaDownload, FaFileLines, FaFolderOpen, FaXmark } from 'react-icons/fa6';
 import { BsFiletypePdf, BsFiletypeDoc, BsFiletypeXls } from 'react-icons/bs';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
@@ -165,14 +165,19 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
               onClick={(e) => e.stopPropagation()}
               className="bg-white rounded-2xl border border-[#E7E9F0] shadow-xl w-full max-w-md overflow-hidden"
             >
-              <div className="flex items-center gap-3 px-6 py-5 border-b border-[#E7E9F0]">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#EEF2FF] text-[#4338CA] shrink-0">
-                  <FaFolderOpen size={16} />
+              <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-[#E7E9F0]">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#EEF2FF] text-[#4338CA] shrink-0">
+                    <FaFolderOpen size={16} />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-[15px] font-primary-bold text-[#1F2430]">Upload Document</h3>
+                    <p className="text-xs text-[#9AA2BA] mt-0.5">Add an onboarding document for this candidate.</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-[15px] font-primary-bold text-[#1F2430]">Upload Document</h3>
-                  <p className="text-xs text-[#9AA2BA] mt-0.5">Add an onboarding document for this candidate.</p>
-                </div>
+                <button onClick={() => setShowAddModal(false)} title="Close" className="p-2 rounded-full hover:bg-[#F5F6F8] text-[#9AA2BA] shrink-0">
+                  <FaXmark size={16} />
+                </button>
               </div>
 
               <div className="px-6 py-5 space-y-4">
