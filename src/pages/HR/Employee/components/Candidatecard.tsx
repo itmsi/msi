@@ -20,7 +20,8 @@ interface CandidateCardProps {
     index: number;
 }
 
-export const initials = (name: string) => {
+export const initials = (name: string | null | undefined) => {
+    if (!name?.trim()) return '?';
     return name.trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
 };
 
