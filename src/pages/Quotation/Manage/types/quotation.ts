@@ -41,6 +41,8 @@ export interface QuotationItem {
     selling_price_star_5?: string;
     total: string;
     description: string;
+    cp_notes?: string;
+    notes?: string;
     image: imageItems[];
     manage_quotation_item_accessories?: QuotationItemAccessory[]; // Nested accessories
     manage_quotation_item_specifications?: QuotationItemSpecification[]; // Nested specifications
@@ -361,6 +363,7 @@ export interface ManageQuotationItem {
     manage_quotation_id: string;
     componen_product_id: string;
     code_unique: string;
+    notes: string;
     segment: string;
     msi_model: string;
     wheel_no: string;
@@ -382,6 +385,7 @@ export interface ManageQuotationItem {
     is_delete: boolean;
 
     cp_code_unique: string;
+    cp_notes?: string;
     cp_segment: string;
     cp_msi_model: string;
     cp_wheel_no: string;
