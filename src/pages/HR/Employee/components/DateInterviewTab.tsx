@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import React from 'react';
 import { interviewScheduleService, interviewFormService, type InterviewSchedule, type InterviewFormItem, type ScheduleCreateRequest } from '../../Candidate/services/interviewService';
 import { generateInterviewPDFBlob } from '../utils/PDFInterviewReport';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaTrash, FaPen, FaChartSimple, FaChevronDown, FaChevronUp, FaRegFilePdf, FaRegPenToSquare, FaXmark, FaSpinner } from 'react-icons/fa6';
+import { FaPlus, FaTrash, FaChartSimple, FaChevronDown, FaChevronUp, FaRegFilePdf, FaClipboardCheck, FaRegPenToSquare, FaXmark, FaSpinner } from 'react-icons/fa6';
 import { MdCalendarMonth } from 'react-icons/md';
 import ModalScoreInterview from '../../Candidate/components/ModalScoreInterview';
 import FormScoringCanvas from './FormScoringCanvas';
@@ -64,17 +64,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
 
   const [form, setForm] = useState({ date: '', time: '', duration: '', assign_role: [] as string[] });
 
-  const scoringPanelRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!scoringPanel) return;
-    // Tunggu satu frame biar motion.div-nya udah ke-mount sebelum discroll.
-    const raf = requestAnimationFrame(() => {
-      scoringPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [scoringPanel]);
-
   const getAssignRoleArr = (s: InterviewSchedule): string[] => {
     if (!s.assign_role) return [];
     if (typeof s.assign_role === 'string') return s.assign_role.split(',').map(r => r.trim());
@@ -86,7 +75,11 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
     setLoading(true);
     try {
       const result = await interviewScheduleService.getList(candidateId);
-      setSchedules(result.data || []);
+      const list = result.data || [];
+      setSchedules(list);
+      // Prefetch forms per schedule so the row action can tell Add vs Edit apart
+      // right away, instead of only after the user expands/opens it once.
+      list.forEach((s) => { fetchScheduleForms(s.schedule_interview_id); });
     } catch {
       toast.error('Failed to load schedules');
     } finally {
@@ -326,6 +319,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
               <tr className="bg-[#FAFAFB] border-b border-[#E7E9F0]">
                 <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Created by</th>
                 <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Assigned</th>
+                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Score</th>
                 <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Date</th>
                 <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Action</th>
               </tr>
@@ -365,19 +359,35 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                     })() : '-'}
                   </td>
                   <td className="px-4 py-3">
+                    {(() => {
+                      const forms = scheduleForms[s.schedule_interview_id] || [];
+                      if (!forms.length) return <span className="text-xs text-[#9AA2BA]">Not scored</span>;
+                      const totalScore = forms.reduce((sum, f) => sum + (f.detail_interviews?.reduce((s2, d) => s2 + (parseInt(d.score) || 0), 0) || 0), 0);
+                      return (
+                        <div className="flex items-center gap-1.5">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-bold bg-indigo-100 text-indigo-800 border-indigo-200">
+                            {totalScore}
+                          </span>
+                        </div>
+                      );
+                    })()}
+                  </td>
+                  <td className="px-4 py-3">
                     <div className="text-[#1F2430]">{formatIndonesianDate(s.schedule_interview_date)}</div>
                     <div className="text-xs text-[#9AA2BA]">{s.schedule_interview_time} {s.schedule_interview_duration ? `(${s.schedule_interview_duration})` : ''}</div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <Tooltip content="Add Score" position="top">
-                        <Button size="sm" variant="transparent" onClick={() => openScoringPanel(s.schedule_interview_id)} className="text-[#0253a5]!"><FaPlus /></Button>
+                      <Tooltip content={scheduleForms[s.schedule_interview_id]?.length ? 'Edit Score' : 'Add Score'} position="top">
+                        <Button size="sm" variant="transparent" onClick={() => openScoringPanel(s.schedule_interview_id)} className="text-[#0253a5]!">
+                          {scheduleForms[s.schedule_interview_id]?.length ? <FaClipboardCheck /> : <FaPlus />}
+                        </Button>
                       </Tooltip>
                       <Tooltip content="Score Stats" position="top">
                         <Button size="sm" variant="transparent" onClick={() => handleOpenScoreStats(s.schedule_interview_id)} className="text-emerald-600!"><FaChartSimple /></Button>
                       </Tooltip>
                       <Tooltip content="Edit Schedule" position="top">
-                        <Button size="sm" variant="transparent" onClick={() => openEdit(s)} className="text-blue-600!"><FaPen /></Button>
+                        <Button size="sm" variant="transparent" onClick={() => openEdit(s)} className="text-blue-600!"><FaRegPenToSquare /></Button>
                       </Tooltip>
                       <Tooltip content="Delete Schedule" position="top">
                         <Button size="sm" variant="transparent" onClick={() => { setDeletingId(s.schedule_interview_id); setShowDeleteConfirm(true); }} className="text-rose-500!"><FaTrash /></Button>
@@ -392,7 +402,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                 </tr>
                 {/* Collapsible: submitted interview forms + inline scoring panel */}
                 <tr>
-                  <td colSpan={4} className="p-0">
+                  <td colSpan={5} className="p-0">
                     <AnimatePresence initial={false}>
                       {expandedSchedules[s.schedule_interview_id] && (
                         <motion.div
@@ -489,7 +499,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                           <div className="flex items-center justify-end gap-1 mt-3 pt-2 border-t border-[#F0F1F5]">
                                             <Tooltip content="Edit Score" position="top">
                                               <Button size="sm" variant="transparent" onClick={() => openScoringPanel(s.schedule_interview_id, forms[0]?.interview_id)} className="text-[#0253a5]!">
-                                                <FaRegPenToSquare className="w-3.5 h-3.5" />
+                                                <FaClipboardCheck className="w-3.5 h-3.5" />
                                               </Button>
                                             </Tooltip>
                                             <Tooltip content="Score Stats" position="top">
@@ -538,8 +548,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
         </div>
       )}
 
-      {/* Panel scoring interview — full-width di bawah tabel, bukan nested di dalam row,
-          supaya sub-tab & accordion FormScoringCanvas dapet ruang yang cukup lebar.
+      {/* Add/Edit Score Modal — popup kayak Add Schedule, bukan panel inline lagi.
           `key` di-derive dari scheduleId+editingFormId supaya ganti target (mis. dari
           Edit form A langsung ke Add/create baru) memaksa remount penuh — kalau enggak,
           React reuse instance yang sama dan state form lama nyangkut. */}
@@ -550,40 +559,49 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
           return (
             <motion.div
               key={panelKey}
-              ref={scoringPanelRef}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-              className="overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4"
+              onClick={closeScoringPanel}
             >
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25, delay: 0.08, ease: 'easeOut' }}
-                className="bg-white rounded-2xl border border-[#E7E9F0] p-5 mt-4 shadow-[0_8px_24px_rgba(16,24,40,0.10)]"
+                initial={{ opacity: 0, scale: 0.96, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-2xl border border-[#E7E9F0] shadow-xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h5 className="text-sm font-semibold text-[#1F2430]">
-                      {scoringPanel.editingFormId ? 'Edit Score' : 'New Score'}
-                    </h5>
-                    {activeSchedule && (
-                      <p className="text-xs text-[#9AA2BA] mt-0.5">
-                        {formatIndonesianDate(activeSchedule.schedule_interview_date)} · {activeSchedule.schedule_interview_time}
-                      </p>
-                    )}
+                <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-[#E7E9F0] shrink-0">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#EEF2FF] text-[#4338CA] shrink-0">
+                      <FaClipboardCheck size={16} />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-[15px] font-primary-bold text-[#1F2430]">
+                        Edit Score
+                      </h3>
+                      {activeSchedule && (
+                        <p className="text-xs text-[#9AA2BA] mt-0.5">
+                          {formatIndonesianDate(activeSchedule.schedule_interview_date)} · {activeSchedule.schedule_interview_time}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <button onClick={closeScoringPanel} title="Close" className="p-1.5 rounded-full hover:bg-[#F5F6F8] text-[#9AA2BA]">
+                  <button onClick={closeScoringPanel} title="Close" className="p-2 rounded-full hover:bg-[#F5F6F8] text-[#9AA2BA] shrink-0">
                     <FaXmark size={16} />
                   </button>
                 </div>
-                <FormScoringCanvas
-                  candidateId={candidateId}
-                  scheduleId={scoringPanel.scheduleId}
-                  editingFormId={scoringPanel.editingFormId}
-                  onBack={closeScoringPanel}
-                />
+                <div className="px-6 py-5 overflow-y-auto">
+                  <FormScoringCanvas
+                    candidateId={candidateId}
+                    scheduleId={scoringPanel.scheduleId}
+                    editingFormId={scoringPanel.editingFormId}
+                    onBack={closeScoringPanel}
+                  />
+                </div>
               </motion.div>
             </motion.div>
           );
@@ -644,7 +662,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                     label="Date"
                     placeholder="Select date"
                     defaultDate={form.date ? new Date(form.date) : undefined}
-                    isStatic={true}
                     onChange={(_, dateStr) => setForm(f => ({ ...f, date: dateStr }))}
                   />
                   <DatePicker
@@ -658,7 +675,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                         d.setHours(parseInt(h, 10), parseInt(m, 10), 0, 0);
                         return d;
                     })() : undefined}
-                    isStatic={true}
                     onChange={(_, timeStr) => setForm(f => ({ ...f, time: timeStr }))}
                   />
                 </div>
