@@ -537,7 +537,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     };
 
     return (<>
-        <div className="grid grid-cols-1 md:grid-cols-3 mb-0">
+        <div className="grid grid-cols-1 md:grid-cols-3 mb-0 gap-6">
             <div className={`space-y-6 gap-2 ${(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? 'md:col-span-2' : 'md:col-span-3'}`}>
                 <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
                     <h3 className="text-md font-primary-bold font-medium text-gray-900">Primary Information</h3>
@@ -607,7 +607,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
             {modeEdit && (
                 (formData.approvalstatus === 2 || formData.approvalstatus === 3 || (formData.approvalstatus === 1 && formData.nextapprover !== null)) &&
                 formData.items && formData.items.length > 0 && (
-                    <div className="sticky top-0 self-start lg:px-4">
+                    <div className="sticky top-0 self-start">
                         <div className='bg-white rounded-2xl shadow-sm p-6'>
                             <InvoiceSummary 
                                 items={formData.items} 

@@ -49,6 +49,7 @@ const TextArea: React.FC<TextareaProps> = ({
                 value={value}
                 onChange={onChange}
                 disabled={disabled}
+                readOnly={readonly}
                 className={clsx(
                     twMerge(
                         textareaClasses,
