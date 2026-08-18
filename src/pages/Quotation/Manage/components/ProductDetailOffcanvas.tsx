@@ -14,6 +14,7 @@ import { getDefaultSpecs } from '../../Product/hooks/useProductCreate';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from '../language/quotationLabels';
 import { quotationLabelPDF } from '../language/quotationLabelPDF';
+import TextArea from '@/components/form/input/TextArea';
 
 interface ProductDetailOffcanvasProps {
     productId: string | null;
@@ -66,7 +67,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
             'Structure Thickness': langFieldPDF('spec_structureThickness'),
             'Cargo Box Size': langFieldPDF('spec_cargoBoxSize')
         };
-        
+
         return specMap[label] || label;
     };
     const [error, setError] = useState<string | null>(null);
@@ -112,7 +113,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
             setError('Product data not available');
         } else {
             setError(null);
-            
+
             // Initialize accessories from initialData
             const accessoriesSource = initialData.manage_quotation_item_accessories || initialData.accessories || [];
             const initializedAccessories = accessoriesSource.map((acc: any, index: number) => ({
@@ -124,42 +125,42 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 quantity: acc.quantity || 1,
                 description: acc.description || ''
             }));
-            
+
             setAccessories(initializedAccessories);
         }
     }, [productId, isOpen, initialData]);
 
     const handleFieldUpdate = useCallback((field: keyof ItemProduct, value: string) => {
         if (!initialData || !onChange) return;
-        
+
         const updatedData = {
             ...initialData,
             [field]: value
         };
-        
+
         onChange(updatedData);
     }, [initialData, onChange]);
 
     const handleSpecificationUpdate = useCallback((index: number, value: string) => {
         if (!initialData || !onChange) return;
-        
+
         const updatedData = { ...initialData };
         const existingSpecs = updatedData.componen_product_specifications || [];
         const updatedSpecs = [];
-        
+
         for (let i = 0; i < defaultSpecifications.length; i++) {
             const defaultSpec = defaultSpecifications[i];
-            
-            const existingSpec = existingSpecs.find(spec => 
+
+            const existingSpec = existingSpecs.find(spec =>
                 spec.componen_product_specification_label === defaultSpec.label ||
                 spec.specification_label_name === defaultSpec.label
             );
-            
-            const newValue = i === index ? value : 
-                (existingSpec?.componen_product_specification_value || 
-                 existingSpec?.specification_value_name || 
-                 defaultSpec.value || '');
-            
+
+            const newValue = i === index ? value :
+                (existingSpec?.componen_product_specification_value ||
+                    existingSpec?.specification_value_name ||
+                    defaultSpec.value || '');
+
             updatedSpecs.push({
                 componen_product_specification_label: defaultSpec.label,
                 componen_product_specification_value: newValue,
@@ -168,7 +169,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 specification_value_name: newValue
             });
         }
-        
+
         updatedData.componen_product_specifications = updatedSpecs;
         onChange(updatedData);
     }, [initialData, defaultSpecifications, onChange]);
@@ -182,13 +183,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         // Map by matching label names, not by index
         for (let i = 0; i < defaultSpecifications.length; i++) {
             const defaultSpec = defaultSpecifications[i];
-            
+
             // Find matching specification by label name
-            const existingSpec = existingSpecs.find(spec => 
+            const existingSpec = existingSpecs.find(spec =>
                 spec.componen_product_specification_label === defaultSpec.label ||
                 spec.specification_label_name === defaultSpec.label
             );
-            
+
             editableSpecs.push({
                 componen_product_specification_label: defaultSpec.label,
                 componen_product_specification_value: existingSpec?.componen_product_specification_value || existingSpec?.specification_value_name || defaultSpec.value || '',
@@ -197,7 +198,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 specification_value_name: existingSpec?.componen_product_specification_value || existingSpec?.specification_value_name || defaultSpec.value || ''
             });
         }
-        
+
         return editableSpecs;
     }, [initialData?.componen_product_specifications, defaultSpecifications]);
 
@@ -209,7 +210,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
             return;
         }
 
-        const isDuplicate = accessories.some(item => 
+        const isDuplicate = accessories.some(item =>
             item.accessory_id === selectedAccessory.value
         );
 
@@ -232,7 +233,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
 
         const updatedAccessories = [...accessories, newAccessory];
         setAccessories(updatedAccessories);
-        
+
         if (initialData && onChange) {
             onChange({
                 ...initialData,
@@ -240,7 +241,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 accessories: updatedAccessories
             });
         }
-        
+
         setSelectedAccessory(null);
         setAccessorySelectError('');
         toast.success(langField('accessoryAddedSuccess'));
@@ -249,7 +250,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
     const removeAccessoryItem = useCallback((index: number) => {
         const updatedAccessories = accessories.filter((_, i) => i !== index);
         setAccessories(updatedAccessories);
-        
+
         if (initialData && onChange) {
             onChange({
                 ...initialData,
@@ -257,7 +258,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 accessories: updatedAccessories
             });
         }
-        
+
         toast.success(langField('accessoryRemovedSuccess'));
     }, [accessories, initialData, onChange]);
 
@@ -344,16 +345,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 </div>
             );
         }
-        
+
         return (
             <div className="p-6 space-y-6">
-
-                {/* Product Image */}
                 <div className="border-b border-gray-200 pb-6">
                     <div className='md:grid md:grid-cols-5 md:gap-4'>
                         <div className="flex md:col-span-2 justify-center">
                             {(() => {
-                                // Flatten nested array structure
                                 const flatImages = initialData.images ? initialData.images.flat() : [];
                                 return flatImages?.length ? (
                                     flatImages.map((img: any, idx: number) => (
@@ -381,7 +379,6 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                                     </div>
                                                 </div>
                                             )}
-                                            {/* Hidden placeholder for error handling */}
                                             <div className="image-placeholder hidden flex items-center justify-center w-50 h-50 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
                                                 <div className="text-center">
                                                     <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,12 +418,9 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     {initialData.segment || ''}
                                 </p>
                             )}
-                            {/* <p className="text-gray-700 text-sm">
-                                {initialData.product_type || 'n/a'}
-                            </p> */}
                         </div>
                     </div>
-                    
+
                 </div>
 
                 {/* Tab Navigation */}
@@ -434,21 +428,19 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                     <nav className="flex space-x-8">
                         <button
                             onClick={() => setActiveTab('specifications')}
-                            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                                activeTab === 'specifications'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'specifications'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             {langField('specifications')}
                         </button>
                         <button
                             onClick={() => setActiveTab('accessories')}
-                            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                                activeTab === 'accessories'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'accessories'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             {langField('accessories')}
                             {accessories.length > 0 && (
@@ -460,296 +452,273 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                     </nav>
                 </div>
 
-                {/* Tab Content */}
                 {activeTab === 'specifications' && (
                     <div className='product-spesification-information'>
-                    {/* Product Basic Info */}
-                    <div className="border-b border-gray-200 pb-6">
-                        <h4 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('basicInformation')}</h4>
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className='md:col-span-3'>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {langField('productName')}
-                                </label>
-                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                    {initialData.componen_product_name || '-'}
-                                </p> */}
-                                <Input
-                                    // type="hidden"
-                                    value={initialData.componen_product_name || ''}
-                                    onChange={(e) => handleFieldUpdate('componen_product_name', e.target.value)}
-                                    placeholder={langField('enterProductName')}
-                                    className="w-full"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {langField('uniqueCode')}
-                                </label>
-                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                    {initialData.code_unique || '-'}
-                                </p> */}
-                                <Input
-                                    // type="hidden"
-                                    value={initialData.code_unique || ''}
-                                    onChange={(e) => handleFieldUpdate('code_unique', e.target.value)}
-                                    placeholder={langField('enterUniqueCode')}
-                                    className="w-full"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {langField('segment')}
-                                </label>
-                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                    {initialData.segment || '-'}
-                                </p> */}
-                                <Input
-                                    // type="hidden"
-                                    value={initialData.segment || ''}
-                                    onChange={(e) => handleFieldUpdate('segment', e.target.value)}
-                                    placeholder={langField('enterSegment')}
-                                    className="w-full"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {langField('msiModel')}
-                                </label>
-                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                    {initialData.msi_model || '-'}
-                                </p> */}
-                                <Input
-                                    // type="hidden"
-                                    value={initialData.msi_model || ''}
-                                    onChange={(e) => handleFieldUpdate('msi_model', e.target.value)}
-                                    placeholder={langField('enterMsiModel')}
-                                    className="w-full"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {langField('msiProduct')}
-                                </label>
-                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                    {initialData.msi_product || '-'}
-                                </p> */}
-                                <Input
-                                    // type="hidden"
-                                    value={initialData.msi_product || ''}
-                                    onChange={(e) => handleFieldUpdate('msi_product', e.target.value)}
-                                    placeholder={langField('enterMsiProduct')}
-                                    className="w-full"
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {langField('wheelNo')}
-                                </label>
-                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                    {initialData.wheel_no || '-'}
-                                </p> */}
-                                <Input
-                                    // type="hidden"
-                                    value={initialData.wheel_no || ''}
-                                    onChange={(e) => handleFieldUpdate('wheel_no', e.target.value)}
-                                    placeholder={langField('enterWheelNo')}
-                                    className="w-full"
-                                />
-                            </div>
-                            <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                {langField('volume')}
-                            </label>
-                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                    {initialData.volume || '-'}
-                                </p> */}
-                                <Input
-                                    // type="hidden"
-                                    value={initialData.volume || ''}
-                                    onChange={(e) => handleFieldUpdate('volume', e.target.value)}
-                                    placeholder={langField('enterVolume')}
-                                    className="w-full"
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {langField('horsePower')}
-                                </label>
-                                {/* <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                    {initialData.horse_power || '-'}
-                                </p> */}
-                                <Input
-                                    // type="hidden"
-                                    value={initialData.horse_power || ''}
-                                    onChange={(e) => handleFieldUpdate('horse_power', e.target.value)}
-                                    placeholder={langField('enterHorsePower')}
-                                    className="w-full"
-                                />
+                        <div className="border-b border-gray-200 pb-6">
+                            <h4 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('basicInformation')}</h4>
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className='md:col-span-3'>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {langField('productName')}
+                                    </label>
+                                    <Input
+                                        value={initialData.componen_product_name || ''}
+                                        onChange={(e) => handleFieldUpdate('componen_product_name', e.target.value)}
+                                        placeholder={langField('enterProductName')}
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {langField('uniqueCode')}
+                                    </label>
+                                    <Input
+                                        value={initialData.code_unique || ''}
+                                        onChange={(e) => handleFieldUpdate('code_unique', e.target.value)}
+                                        placeholder={langField('enterUniqueCode')}
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {langField('segment')}
+                                    </label>
+                                    <Input
+                                        value={initialData.segment || ''}
+                                        onChange={(e) => handleFieldUpdate('segment', e.target.value)}
+                                        placeholder={langField('enterSegment')}
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {langField('msiModel')}
+                                    </label>
+                                    <Input
+                                        value={initialData.msi_model || ''}
+                                        onChange={(e) => handleFieldUpdate('msi_model', e.target.value)}
+                                        placeholder={langField('enterMsiModel')}
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {langField('msiProduct')}
+                                    </label>
+                                    <Input
+                                        value={initialData.msi_product || ''}
+                                        onChange={(e) => handleFieldUpdate('msi_product', e.target.value)}
+                                        placeholder={langField('enterMsiProduct')}
+                                        className="w-full"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {langField('wheelNo')}
+                                    </label>
+                                    <Input
+                                        value={initialData.wheel_no || ''}
+                                        onChange={(e) => handleFieldUpdate('wheel_no', e.target.value)}
+                                        placeholder={langField('enterWheelNo')}
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {langField('volume')}
+                                    </label>
+                                    <Input
+                                        value={initialData.volume || ''}
+                                        onChange={(e) => handleFieldUpdate('volume', e.target.value)}
+                                        placeholder={langField('enterVolume')}
+                                        className="w-full"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {langField('horsePower')}
+                                    </label>
+                                    <Input
+                                        value={initialData.horse_power || ''}
+                                        onChange={(e) => handleFieldUpdate('horse_power', e.target.value)}
+                                        placeholder={langField('enterHorsePower')}
+                                        className="w-full"
+                                    />
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Product Specifications */}
-                    <div className="border-b border-gray-200 pb-6">
-                        <h4 className="text-lg font-semibold text-gray-900 my-4">{langField('specifications')}</h4>
-                        <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4">
-                            {editableSpecifications.map((spec, index) => {
-                                return (
-                                <div key={index} className="flex justify-between items-start">
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900 mb-2">
-                                            {translateSpecLabel(spec.componen_product_specification_label ?? '')}
+                        {/* Product Specifications */}
+                        <div className="border-b border-gray-200 pb-6">
+                            <h4 className="text-lg font-semibold text-gray-900 my-4">{langField('specifications')}</h4>
+                            <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4">
+                                {editableSpecifications.map((spec, index) => {
+                                    return (
+                                        <div key={index} className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-gray-900 mb-2">
+                                                    {translateSpecLabel(spec.componen_product_specification_label ?? '')}
+                                                </p>
+                                                <Input
+                                                    type="text"
+                                                    value={spec.componen_product_specification_value || ''}
+                                                    onChange={(e) => handleSpecificationUpdate(index, e.target.value)}
+                                                    placeholder={`${langField('enter')} ${translateSpecLabel(spec.componen_product_specification_label ?? '').toLowerCase()}`}
+                                                    className="w-full text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                    )
+                                }
+                                )}
+
+                                <div className='col-span-2'>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="notes">
+                                        Notes
+                                    </label>
+                                    <TextArea
+                                        name="notes"
+                                        rows={3}
+                                        value={initialData.notes || ''}
+                                        onChange={(e) => handleFieldUpdate('notes', e.target.value)}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-vertical"
+                                        placeholder="Tambahkan catatan..."
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Product Pricing Info */}
+                        <div className="border-b border-gray-200 pb-6 hidden">
+                            <h4 className="text-lg font-semibold text-gray-900 my-4">{langField('priceInformation')}</h4>
+                            <div className="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {langField('marketPrice')}
+                                    </label>
+                                    <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                        {initialData.market_price ?
+                                            new Intl.NumberFormat('id-ID', {
+                                                style: 'currency',
+                                                currency: 'IDR'
+                                            }).format(Number(initialData.market_price)) : '-'}
+                                    </p>
+                                    <Input
+                                        type="hidden"
+                                        value={initialData.market_price || ''}
+                                        onChange={(e) => handleFieldUpdate('market_price', e.target.value)}
+                                        placeholder={langField('enterMarketPrice')}
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {langField('priceStar1')}
+                                        </label>
+                                        <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                            {initialData.selling_price_star_1 ?
+                                                new Intl.NumberFormat('id-ID', {
+                                                    style: 'currency',
+                                                    currency: 'IDR'
+                                                }).format(Number(initialData.selling_price_star_1)) : '-'}
                                         </p>
                                         <Input
-                                            type="text"
-                                            value={spec.componen_product_specification_value || ''}
-                                            onChange={(e) => handleSpecificationUpdate(index, e.target.value)}
-                                            placeholder={`${langField('enter')} ${translateSpecLabel(spec.componen_product_specification_label ?? '').toLowerCase()}`}
-                                            className="w-full text-sm"
+                                            type="hidden"
+                                            value={initialData.selling_price_star_1 || ''}
+                                            onChange={(e) => handleFieldUpdate('selling_price_star_1', e.target.value)}
+                                            placeholder={langField('pricePlaceholderStar1')}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {langField('priceStar2')}
+                                        </label>
+                                        <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                            {initialData.selling_price_star_2 ?
+                                                new Intl.NumberFormat('id-ID', {
+                                                    style: 'currency',
+                                                    currency: 'IDR'
+                                                }).format(Number(initialData.selling_price_star_2)) : '-'}
+                                        </p>
+                                        <Input
+                                            type="hidden"
+                                            value={initialData.selling_price_star_2 || ''}
+                                            onChange={(e) => handleFieldUpdate('selling_price_star_2', e.target.value)}
+                                            placeholder={langField('pricePlaceholderStar2')}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {langField('priceStar3')}
+                                        </label>
+                                        <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                            {initialData.selling_price_star_3 ?
+                                                new Intl.NumberFormat('id-ID', {
+                                                    style: 'currency',
+                                                    currency: 'IDR'
+                                                }).format(Number(initialData.selling_price_star_3)) : '-'}
+                                        </p>
+                                        <Input
+                                            type="hidden"
+                                            value={initialData.selling_price_star_3 || ''}
+                                            onChange={(e) => handleFieldUpdate('selling_price_star_3', e.target.value)}
+                                            placeholder={langField('pricePlaceholderStar3')}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {langField('priceStar4')}
+                                        </label>
+                                        <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                            {initialData.selling_price_star_4 ?
+                                                new Intl.NumberFormat('id-ID', {
+                                                    style: 'currency',
+                                                    currency: 'IDR'
+                                                }).format(Number(initialData.selling_price_star_4)) : '-'}
+                                        </p>
+                                        <Input
+                                            type="hidden"
+                                            value={initialData.selling_price_star_4 || ''}
+                                            onChange={(e) => handleFieldUpdate('selling_price_star_4', e.target.value)}
+                                            placeholder={langField('pricePlaceholderStar4')}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {langField('priceStar5')}
+                                        </label>
+                                        <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
+                                            {initialData.selling_price_star_5 ?
+                                                new Intl.NumberFormat('id-ID', {
+                                                    style: 'currency',
+                                                    currency: 'IDR'
+                                                }).format(Number(initialData.selling_price_star_5)) : '-'}
+                                        </p>
+                                        <Input
+                                            type="hidden"
+                                            value={initialData.selling_price_star_5 || ''}
+                                            onChange={(e) => handleFieldUpdate('selling_price_star_5', e.target.value)}
+                                            placeholder={langField('pricePlaceholderStar5')}
+                                            className="w-full"
                                         />
                                     </div>
                                 </div>
-                            )}
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Product Pricing Info */}
-                    <div className="border-b border-gray-200 pb-6 hidden">
-                        <h4 className="text-lg font-semibold text-gray-900 my-4">{langField('priceInformation')}</h4>
-                        <div className="grid grid-cols-1 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {langField('marketPrice')}
-                                </label>
-                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                    {initialData.market_price ? 
-                                        new Intl.NumberFormat('id-ID', {
-                                            style: 'currency',
-                                            currency: 'IDR'
-                                        }).format(Number(initialData.market_price)) : '-'}
-                                </p>
-                                <Input
-                                    type="hidden"
-                                    value={initialData.market_price || ''}
-                                    onChange={(e) => handleFieldUpdate('market_price', e.target.value)}
-                                    placeholder={langField('enterMarketPrice')}
-                                    className="w-full"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        {langField('priceStar1')}
-                                    </label>
-                                    <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                        {initialData.selling_price_star_1 ? 
-                                            new Intl.NumberFormat('id-ID', {
-                                                style: 'currency',
-                                                currency: 'IDR'
-                                            }).format(Number(initialData.selling_price_star_1)) : '-'}
-                                    </p>
-                                    <Input
-                                        type="hidden"
-                                        value={initialData.selling_price_star_1 || ''}
-                                        onChange={(e) => handleFieldUpdate('selling_price_star_1', e.target.value)}
-                                        placeholder={langField('pricePlaceholderStar1')}
-                                        className="w-full"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        {langField('priceStar2')}
-                                    </label>
-                                    <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                        {initialData.selling_price_star_2 ? 
-                                            new Intl.NumberFormat('id-ID', {
-                                                style: 'currency',
-                                                currency: 'IDR'
-                                            }).format(Number(initialData.selling_price_star_2)) : '-'}
-                                    </p>
-                                    <Input
-                                        type="hidden"
-                                        value={initialData.selling_price_star_2 || ''}
-                                        onChange={(e) => handleFieldUpdate('selling_price_star_2', e.target.value)}
-                                        placeholder={langField('pricePlaceholderStar2')}
-                                        className="w-full"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        {langField('priceStar3')}
-                                    </label>
-                                    <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                        {initialData.selling_price_star_3 ? 
-                                            new Intl.NumberFormat('id-ID', {
-                                                style: 'currency',
-                                                currency: 'IDR'
-                                            }).format(Number(initialData.selling_price_star_3)) : '-'}
-                                    </p>
-                                    <Input
-                                        type="hidden"
-                                        value={initialData.selling_price_star_3 || ''}
-                                        onChange={(e) => handleFieldUpdate('selling_price_star_3', e.target.value)}
-                                        placeholder={langField('pricePlaceholderStar3')}
-                                        className="w-full"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        {langField('priceStar4')}
-                                    </label>
-                                    <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                        {initialData.selling_price_star_4 ? 
-                                            new Intl.NumberFormat('id-ID', {
-                                                style: 'currency',
-                                                currency: 'IDR'
-                                            }).format(Number(initialData.selling_price_star_4)) : '-'}
-                                    </p>
-                                    <Input
-                                        type="hidden"
-                                        value={initialData.selling_price_star_4 || ''}
-                                        onChange={(e) => handleFieldUpdate('selling_price_star_4', e.target.value)}
-                                        placeholder={langField('pricePlaceholderStar4')}
-                                        className="w-full"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        {langField('priceStar5')}
-                                    </label>
-                                    <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                                        {initialData.selling_price_star_5 ? 
-                                            new Intl.NumberFormat('id-ID', {
-                                                style: 'currency',
-                                                currency: 'IDR'
-                                            }).format(Number(initialData.selling_price_star_5)) : '-'}
-                                    </p>
-                                    <Input
-                                        type="hidden"
-                                        value={initialData.selling_price_star_5 || ''}
-                                        onChange={(e) => handleFieldUpdate('selling_price_star_5', e.target.value)}
-                                        placeholder={langField('pricePlaceholderStar5')}
-                                        className="w-full"
-                                    />
-                                </div>
                             </div>
                         </div>
-                    </div>
                     </div>
                 )}
 
                 {/* Accessories Tab */}
                 {activeTab === 'accessories' && (
                     <div className='product-accessories-information'>
-                        {/* Accessories Section */}
-                        
                         <h4 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('accessories')}</h4>
-                        
-                        {/* Add Accessory */}
                         <div className="flex gap-4 mb-6">
                             <div className="flex-1">
                                 <CustomAsyncSelect
@@ -784,9 +753,9 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                     <span className="text-sm text-red-500 mt-1 block">{accessorySelectError}</span>
                                 )}
                             </div>
-                            <Button 
-                                type="button" 
-                                onClick={addAccessoryItem} 
+                            <Button
+                                type="button"
+                                onClick={addAccessoryItem}
                                 className="flex items-center gap-2"
                                 disabled={!selectedAccessory}
                             >
@@ -823,39 +792,39 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
     return (
         <>
             {renderProductInfo()}
-            
+
             {/* Image Modal */}
             {showImageModal && initialData?.images && (() => {
                 const flatImages = initialData.images.flat();
                 return flatImages.length > 0 && flatImages[selectedImageIndex]?.image_url;
             })() && (
-                <div 
-                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black-900 backdrop-blur-sm"
-                    onClick={() => setShowImageModal(false)}
-                >
-                    <div className="relative max-w-4xl max-h-[90vh] p-4 overflow-hidden">
-                        <img
-                            src={initialData.images.flat()[selectedImageIndex]?.image_url}
-                            alt={initialData.componen_product_name || 'Product Image'}
-                            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
-                            onClick={(e) => e.stopPropagation()}
-                        />
-                        <button
-                            onClick={() => setShowImageModal(false)}
-                            className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70 transition-colors"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <div className="absolute bottom-4 left-4 right-4 text-center">
-                            <p className="text-white text-sm bg-black bg-opacity-50 rounded px-3 py-1 inline-block">
-                                {initialData.componen_product_name}
-                            </p>
+                    <div
+                        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black-900 backdrop-blur-sm"
+                        onClick={() => setShowImageModal(false)}
+                    >
+                        <div className="relative max-w-4xl max-h-[90vh] p-4 overflow-hidden">
+                            <img
+                                src={initialData.images.flat()[selectedImageIndex]?.image_url}
+                                alt={initialData.componen_product_name || 'Product Image'}
+                                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                            <button
+                                onClick={() => setShowImageModal(false)}
+                                className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70 transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <div className="absolute bottom-4 left-4 right-4 text-center">
+                                <p className="text-white text-sm bg-black bg-opacity-50 rounded px-3 py-1 inline-block">
+                                    {initialData.componen_product_name}
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
         </>
     );
 };

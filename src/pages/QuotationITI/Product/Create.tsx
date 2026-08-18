@@ -26,15 +26,15 @@ export default function CreateProduct() {
 
     return (
         <>
-            <PageMeta 
-                title="Tambah Produk | MSI" 
+            <PageMeta
+                title="Tambah Produk | MSI"
                 description="Tambah data produk baru dalam sistem MSI"
                 image=""
             />
 
             <div className="bg-gray-50 overflow-auto">
                 <div className="mx-auto px-4 sm:px-3">
-                    
+
                     {/* HEADER */}
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
@@ -60,7 +60,7 @@ export default function CreateProduct() {
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
                                 Informasi Dasar
                             </h2>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <Label htmlFor="code_unique">
@@ -81,7 +81,7 @@ export default function CreateProduct() {
                                         </p>
                                     )}
                                 </div>
-                                
+
                                 <div>
                                     <Label htmlFor="product_type">Product Type</Label>
                                     <CustomSelect
@@ -111,7 +111,22 @@ export default function CreateProduct() {
                                         placeholder="Masukkan deskripsi produk..."
                                     />
                                 </div>
-                                
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="notes">Notes</Label>
+                                    <textarea
+                                        id="notes"
+                                        name="notes"
+                                        rows={3}
+                                        value={formData.notes || ''}
+                                        onChange={(e) => handleInputChange('notes', e.target.value)}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-vertical"
+                                        placeholder="Tambahkan catatan..."
+                                    />
+                                    {validationErrors.notes && (
+                                        <p className="mt-1 text-sm text-red-600">{validationErrors.notes}</p>
+                                    )}
+                                </div>
+
                                 {formData.componen_product_specifications.map((spec, index) => (
                                     <div key={`${spec.specification_label_name}-${index}`} className="md:col-span-2">
                                         <WysiwygEditor

@@ -394,7 +394,7 @@ export default function EditQuotation() {
                         bank_account_bank_name: data.bank_account_bank_name
                     }));
                 }
-                
+
                 // Set flag to prevent future resets
                 setBankInitialized(true);
             }
@@ -931,6 +931,7 @@ export default function EditQuotation() {
                 selling_price_star_4: updatedProductData.selling_price_star_4 || currentItem.selling_price_star_4,
                 selling_price_star_5: updatedProductData.selling_price_star_5 || currentItem.selling_price_star_5,
                 description: updatedProductData.componen_product_description || currentItem.description,
+                notes: updatedProductData.notes || (currentItem as any).notes || '',
                 manage_quotation_item_specifications: updatedProductData.componen_product_specifications?.map((spec: any) => ({
                     manage_quotation_item_specification_label: spec.componen_product_specification_label || '',
                     manage_quotation_item_specification_value: spec.componen_product_specification_value || ''
@@ -1046,18 +1047,18 @@ export default function EditQuotation() {
             name: 'Detail',
             cell: (row) => (
                 <>
-                {row.product_type !== 'non_unit' &&
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleShowProductDetail(row.componen_product_id)}
-                        className=""
-                        disabled={showProductDetail && selectedProductId === row.componen_product_id}
-                    >
-                        {showProductDetail && selectedProductId === row.componen_product_id ? <FaEye /> : <FaEye />}
-                    </Button>
-                }
+                    {row.product_type !== 'non_unit' &&
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleShowProductDetail(row.componen_product_id)}
+                            className=""
+                            disabled={showProductDetail && selectedProductId === row.componen_product_id}
+                        >
+                            {showProductDetail && selectedProductId === row.componen_product_id ? <FaEye /> : <FaEye />}
+                        </Button>
+                    }
                 </>
             ),
             width: '100px',
@@ -1961,7 +1962,7 @@ export default function EditQuotation() {
                                                         type="text"
                                                         onKeyPress={(e) => {
                                                             // Custom key press handler to allow comma
-                                                            if (!/[0-9,]/.test(e.key) && 
+                                                            if (!/[0-9,]/.test(e.key) &&
                                                                 !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'].includes(e.key) &&
                                                                 !(e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase()))
                                                             ) {

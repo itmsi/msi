@@ -61,12 +61,6 @@ const validateZoneForm = (
 
 const hasFormErrors = (errors: ZoneFormErrors): boolean => Object.values(errors).some(Boolean);
 
-// In-memory cache keyed by IUP id, kept at module scope so it survives the
-// component unmounting — the Edit IUP page conditionally renders tabs
-// (activeTab === 'zone_iup' && <TabZoneArea />), which unmounts ZoneArea on
-// every tab switch. Without this, coming back to the Zone Area tab always
-// re-fetched the full zone list (including every description/guide field)
-// from scratch, even though nothing had changed.
 interface ZoneSiteCacheEntry {
     zones: IupZonaSiteItem[];
     templates: MasterZoneSiteSection[];
@@ -129,8 +123,6 @@ export const useIupZoneSIte = ({ segmentasion }: { segmentasion: string }) => {
     }, [id]);
 
     useEffect(() => {
-        // Already have a cached zone list for this IUP (e.g. returning from
-        // another tab) — skip the loading spinner and refetch entirely.
         if (id && zoneSiteCache.has(id)) return;
         fetchZoneSiteData();
     }, [fetchZoneSiteData]);
@@ -320,8 +312,6 @@ export const useIupZoneSIte = ({ segmentasion }: { segmentasion: string }) => {
                 : undefined;
 
             if (!createdZone) {
-                // Fallback kalau create endpoint tidak mengembalikan record barunya:
-                // ambil ulang list, urutkan by created_at, dan pakai yang paling baru.
                 const latest = await IupService.getIupZonaSite({
                     iup_id: id,
                     sort_by: 'created_at',
@@ -334,9 +324,6 @@ export const useIupZoneSIte = ({ segmentasion }: { segmentasion: string }) => {
             await fetchZoneSiteData();
 
             if (createdZone) {
-                // Buka lagi form ini dalam mode edit untuk zona yang baru
-                // dibuat, supaya user bisa lanjut isi field lain (tanggal,
-                // file, remarks) tanpa harus cari & klik Edit manual.
                 openEditForm(createdZone);
                 openGuideForm(createdZone);
             } else {

@@ -927,6 +927,267 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         "Cargo Box Size"
     ];
 
+    const renderItemImageAndName = (item: any, startX: number, startYPos: number, width: number): number => {
+        let itemYPos = startYPos;
+
+        setFontSafe(doc, 'Futura', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(52, 64, 84);
+
+        // Add product image if available
+        if (item.images && item.images.length > 0) {
+            const imageUrl = getImageUrl(item.images[0]);
+            const imageUrl2 = getImageUrl(item.images[1]);
+            const panjang = item.images.length > 1 && item.images.length < 3;
+
+            if (imageUrl) {
+                try {
+                    let imageFormat = 'JPEG';
+                    const imageSrc = imageUrl.toLowerCase();
+                    if (imageSrc.includes('.png') || imageSrc.includes('image/png')) {
+                        imageFormat = 'PNG';
+                    } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
+                        imageFormat = 'JPEG';
+                    }
+
+                    let imageFormat2 = 'JPEG';
+                    if (imageUrl2) {
+                        const imageSrc2 = imageUrl2.toLowerCase();
+                        if (imageSrc2.includes('.png') || imageSrc2.includes('image/png')) {
+                            imageFormat2 = 'PNG';
+                        } else if (imageSrc2.includes('.jpg') || imageSrc2.includes('.jpeg') || imageSrc2.includes('image/jpeg')) {
+                            imageFormat2 = 'JPEG';
+                        }
+                    }
+
+                    if (panjang) {
+                        doc.addImage(imageUrl, imageFormat, startX + (width / 2) - 38, itemYPos - 10, 37, 50);
+                        if (imageUrl2) {
+                            doc.addImage(imageUrl2, imageFormat2, startX + (width / 2) + 2, itemYPos - 10, 37, 50);
+                        }
+                    } else {
+                        doc.addImage(imageUrl, imageFormat, startX + (width / 2) - 21, itemYPos - 10, 37, 50);
+                    }
+
+                    itemYPos += 50;
+                } catch (error) {
+                    console.warn('Failed to load product image for item:', error);
+                }
+            }
+        }
+
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0);
+        setFontSafe(doc, 'Futura', 'normal');
+        const productName = doc.splitTextToSize(item.componen_product_name, width - 10);
+        const limitedProductName = productName.slice(0, 2);
+        for (let i = 0; i < 2; i++) {
+            const line = limitedProductName[i] || '';
+            doc.text(line, startX + width / 2, itemYPos, { align: 'center' });
+            itemYPos += 4;
+        }
+        itemYPos += 3;
+
+        return itemYPos;
+    };
+
+    const renderItemSpecifications = (
+        item: any,
+        startX: number,
+        startYPos: number,
+        itemWidth: number,
+        tableRightMargin: number
+    ): { finalY: number; boxHeight: number } => {
+        let itemYPos = startYPos;
+
+        if (!(item.manage_quotation_item_specifications && item.manage_quotation_item_specifications.length > 0)) {
+            return { finalY: itemYPos, boxHeight: 0 };
+        }
+
+        setFontByLanguage(doc, langField('specifications'), 'Futura', 'bold', language);
+        doc.setFontSize(10);
+        doc.setTextColor(23, 26, 31);
+        doc.text(langField('specifications'), startX + margin + 2, itemYPos, { align: 'center' });
+        itemYPos += 5;
+
+        const specData = item.manage_quotation_item_specifications
+            .map((spec: any) => ({
+                label: spec.manage_quotation_item_specification_label,
+                value: spec.manage_quotation_item_specification_value || '-'
+            }))
+            .filter((spec: any, index: number, self: any[]) =>
+                index === self.findIndex((s) => s.label === spec.label && s.value === spec.value)
+            )
+            .sort((a: any, b: any) => {
+                const indexA = specOrder.indexOf(a.label);
+                const indexB = specOrder.indexOf(b.label);
+                const orderA = indexA === -1 ? 999 : indexA;
+                const orderB = indexB === -1 ? 999 : indexB;
+                return orderA - orderB;
+            })
+            .map((spec: any) => [translateSpecLabel(spec.label), spec.value]);
+
+        const specTableStartY = itemYPos;
+        autoTable(doc, {
+            startY: itemYPos,
+            body: specData,
+            margin: { left: startX, right: tableRightMargin },
+            tableWidth: itemWidth,
+            styles: {
+                fontSize: 8,
+                cellPadding: [1, 2],
+                font: 'Futura',
+                fontStyle: 'normal'
+            },
+            headStyles: {
+                fillColor: [52, 152, 219],
+                textColor: 255,
+                font: 'Futura',
+                fontStyle: 'bold'
+            },
+            alternateRowStyles: { fillColor: [255, 255, 255] },
+            columnStyles: {
+                0: { cellWidth: itemWidth * 0.4, fontStyle: 'bold' },
+                1: { cellWidth: itemWidth * 0.6 }
+            },
+            didParseCell: (data) => {
+                // Set minimum height for Gearbox Transmission rows
+                if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
+                    data.cell.styles.minCellHeight = 8;
+                }
+            },
+            willDrawCell: (data) => {
+                // Check if cell contains Chinese characters and apply appropriate font
+                const cellText = data.cell.text?.join('') || '';
+                if (language === 'zh' || cellText.match(/[一-鿿]/)) {
+                    const isFirstColumn = data.column.index === 0;
+                    const isBold = data.cell.styles.fontStyle === 'bold';
+                    try {
+                        if (isFirstColumn) {
+                            doc.setFont('NotoSansSC', isBold ? 'bold' : 'normal');
+                        } else if (isBold) {
+                            doc.setFont('NotoSansSC', 'bold');
+                        } else {
+                            doc.setFont('NotoSansSC', 'normal');
+                        }
+                    } catch (error) {
+                        doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
+                    }
+                }
+            },
+            didDrawPage: () => {
+                // Safety net: if this table is long enough that autoTable breaks it onto a new
+                // page on its own, that page still needs the header/footer drawn on it
+                addHeader();
+                addFooter();
+            }
+        });
+
+        itemYPos = doc.lastAutoTable?.finalY || itemYPos;
+
+        // Add rounded border for specifications table
+        const specTableHeight = itemYPos - specTableStartY + 10;
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.1);
+        doc.roundedRect(startX, specTableStartY - 10, itemWidth, specTableHeight, 2, 2);
+
+        itemYPos += 7;
+
+        return { finalY: itemYPos, boxHeight: specTableHeight };
+    };
+
+    const renderItemAccessories = (
+        item: any,
+        startX: number,
+        startYPos: number,
+        itemWidth: number,
+        tableRightMargin: number,
+        tableLeftOffset: number = 0
+    ): number => {
+        let itemYPos = startYPos;
+
+        if (!(item.manage_quotation_item_accessories && item.manage_quotation_item_accessories.length > 0)) {
+            return itemYPos;
+        }
+
+        setFontByLanguage(doc, langField('accessories'), 'Futura', 'bold', language);
+        doc.setFontSize(10);
+        doc.setTextColor(23, 26, 31);
+        doc.text(langField('accessories'), startX + margin, itemYPos, { align: 'center' });
+        itemYPos += 5;
+
+        const accData = item.manage_quotation_item_accessories.map((acc: any, index: number) => [
+            (index + 1).toString() + '.',
+            acc.accessory_part_name || '-',
+        ]);
+
+        const accTableStartY = itemYPos - 1;
+        autoTable(doc, {
+            startY: itemYPos,
+            body: accData,
+            margin: { left: startX + tableLeftOffset, right: tableRightMargin },
+            tableWidth: itemWidth,
+            styles: {
+                fontSize: 8,
+                cellPadding: [.5, 0],
+                valign: 'middle',
+                font: 'Futura',
+                fontStyle: 'normal'
+            },
+            alternateRowStyles: { fillColor: [255, 255, 255] },
+            columnStyles: {
+                0: { cellWidth: 5, halign: "center", valign: 'top' },
+            },
+            didDrawPage: () => {
+                addHeader();
+                addFooter();
+            }
+        });
+
+        itemYPos = doc.lastAutoTable?.finalY || itemYPos;
+
+        // Add rounded border for accessories table
+        const accTableHeight = itemYPos - accTableStartY + 10;
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.1);
+        doc.roundedRect(startX, accTableStartY - 10, itemWidth, accTableHeight, 2, 2);
+
+        return itemYPos;
+    };
+
+    const renderItemNotes = (item: any, startX: number, startYPos: number, width: number, minBoxHeight: number = 0): number => {
+        let itemYPos = startYPos;
+
+        if (!(item.notes && String(item.notes).trim().length > 0)) {
+            return itemYPos;
+        }
+
+        setFontByLanguage(doc, langField('notes_label'), 'Futura', 'bold', language);
+        doc.setFontSize(10);
+        doc.setTextColor(23, 26, 31);
+        doc.text(langField('notes_label'), startX + 8, itemYPos, { align: 'center' });
+        itemYPos += 5;
+
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0);
+        setFontSafe(doc, 'Futura', 'normal');
+        const notesBoxStartY = itemYPos;
+        const wrappedNotes = doc.splitTextToSize(String(item.notes), width - 6);
+        wrappedNotes.forEach((line: string) => {
+            doc.text(line, startX + 3, itemYPos + 2);
+            itemYPos += 4.5;
+        });
+        itemYPos += 4;
+
+        // Rounded border for notes block, matching specifications/accessories styling.
+        // Kept at least as tall as the specifications box beside it so both columns line up.
+        const notesBoxHeight = Math.max(itemYPos - notesBoxStartY + 6, minBoxHeight);
+        // doc.setDrawColor(200, 200, 200);
+        // doc.setLineWidth(0.1);
+        // doc.roundedRect(startX, notesBoxStartY - 10, width, notesBoxHeight, 2, 2);
+
+        return Math.max(itemYPos, notesBoxStartY - 10 + notesBoxHeight);
+    };
 
     // Group items into pages (max 2 items per page)
     const itemsWithContent = data.manage_quotation_items
@@ -937,413 +1198,79 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 (item.manage_quotation_item_accessories && item.manage_quotation_item_accessories.length > 0))
         );
 
+    const hasNotes = (item: any): boolean => !!(item.notes && String(item.notes).trim().length > 0);
+
     if (itemsWithContent.length > 0) {
-        for (let i = 0; i < itemsWithContent.length; i += 2) {
-            const item1 = itemsWithContent[i];
-            const item2 = itemsWithContent[i + 1] || null;
-            const hasOnlyOne = !item2;
+        let itemIndex = 0;
+
+        while (itemIndex < itemsWithContent.length) {
+            const current = itemsWithContent[itemIndex];
+            const currentHasNotes = hasNotes(current);
+            // An item with notes always gets its own page, so it's never offered as a pairing partner
+            const next = currentHasNotes ? null : (itemsWithContent[itemIndex + 1] || null);
+            const canPairWithNext = !!next && !hasNotes(next);
 
             doc.addPage();
             addHeader();
             addFooter();
             yPos = margin + headerHeight + 5;
 
-            // Calculate widths based on number of items
-            const itemWidth = hasOnlyOne ? (pageWidth - 2 * margin) * 0.6 : (pageWidth - 2 * margin) * 0.5 - 2.5;
-            const item1StartX = hasOnlyOne ? margin + (pageWidth - 2 * margin) * 0.2 : margin;
-            const item2StartX = margin + itemWidth + 5;
+            if (currentHasNotes) {
+                const fullWidth = pageWidth - 2 * margin;
+                const headerYPos = renderItemImageAndName(current, margin, yPos, fullWidth);
 
-            // Render first item
-            let item1YPos = yPos;
+                const itemWidth = (pageWidth - 2 * margin) * 0.5 - 2.5;
+                const leftStartX = margin;
+                const notesStartX = margin + itemWidth + 5;
 
-            // Specifications for item 1
-            if (item1.manage_quotation_item_specifications && item1.manage_quotation_item_specifications.length > 0) {
-                setFontSafe(doc, 'Futura', 'bold');
-                doc.setFontSize(10);
-                doc.setTextColor(52, 64, 84);
+                const leftSpecResult = renderItemSpecifications(current, leftStartX, headerYPos, itemWidth, notesStartX - 5);
+                renderItemAccessories(current, leftStartX, leftSpecResult.finalY, itemWidth, notesStartX - 5, 1);
 
-                // Add product image if available
-                if (item1.images && item1.images.length > 0) {
-                    const imageUrl = getImageUrl(item1.images[0]);
-                    const imageUrl2 = getImageUrl(item1.images[1]);
-                    let panjang = item1.images.length > 1 && item1.images.length < 3 ? true : false;
-                    if (imageUrl) {
-                        try {
-                            let imageFormat = 'JPEG';
-                            const imageSrc = imageUrl.toLowerCase();
-                            if (imageSrc.includes('.png') || imageSrc.includes('image/png')) {
-                                imageFormat = 'PNG';
-                            } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
-                                imageFormat = 'JPEG';
-                            }
+                renderItemNotes(current, notesStartX, headerYPos, itemWidth, leftSpecResult.boxHeight);
 
-                            let imageFormat2 = 'JPEG';
-                            if (imageUrl2) {
-                                const imageSrc2 = imageUrl2.toLowerCase();
-                                if (imageSrc2.includes('.png') || imageSrc2.includes('image/png')) {
-                                    imageFormat2 = 'PNG';
-                                } else if (imageSrc2.includes('.jpg') || imageSrc2.includes('.jpeg') || imageSrc2.includes('image/jpeg')) {
-                                    imageFormat2 = 'JPEG';
-                                }
-                            }
+                itemIndex += 1;
+            } else if (canPairWithNext && next) {
+                // Two items side by side, neither has notes
+                const itemWidth = (pageWidth - 2 * margin) * 0.5 - 2.5;
+                const item1StartX = margin;
+                const item2StartX = margin + itemWidth + 5;
+                const item1RightMargin = item2StartX - 5;
 
-                            if (panjang) {
-                                doc.addImage(imageUrl, imageFormat, item1StartX + (itemWidth / 2) - 38, item1YPos - 10, 37, 50);
-                                if (imageUrl2) {
-                                    doc.addImage(imageUrl2, imageFormat2, item1StartX + (itemWidth / 2) + 2, item1YPos - 10, 37, 50);
-                                }
-                            } else {
-                                doc.addImage(imageUrl, imageFormat, item1StartX + (itemWidth / 2) - 21, item1YPos - 10, 37, 50);
-                            }
+                const pairPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
 
-                            item1YPos += 50;
-                        } catch (error) {
-                            console.warn('Failed to load product image for item 1:', error);
-                        }
-                    }
+                let item1YPos = renderItemImageAndName(current, item1StartX, yPos, itemWidth);
+                item1YPos = renderItemSpecifications(current, item1StartX, item1YPos, itemWidth, item1RightMargin).finalY;
+
+                let item2YPos = renderItemImageAndName(next, item2StartX, yPos, itemWidth);
+                item2YPos = renderItemSpecifications(next, item2StartX, item2YPos, itemWidth, margin).finalY;
+
+                // Render item1's accessories directly and let autoTable's own (accurate) pagination
+                // decide if it needs to break to a new page - no more guessing at its height up front.
+                item1YPos = renderItemAccessories(current, item1StartX, item1YPos, itemWidth, item1RightMargin, 1);
+                const pageAfterItem1Accessories = (doc as any).internal.getCurrentPageInfo().pageNumber;
+
+                if (pageAfterItem1Accessories > pairPage) {
+                    // item1's accessories genuinely didn't fit and moved to a new page - keep item2's
+                    // accessories together with it there, instead of splitting them across two pages
+                    renderItemAccessories(next, item2StartX, margin + headerHeight + 5, itemWidth, margin);
+                } else {
+                    item2YPos = renderItemAccessories(next, item2StartX, item2YPos, itemWidth, margin);
                 }
 
-                doc.setFontSize(9);
-                doc.setTextColor(0, 0, 0);
-                setFontSafe(doc, 'Futura', 'normal');
-                const productName1 = doc.splitTextToSize(item1.componen_product_name, itemWidth - 10);
-                const limitedProductName1 = productName1.slice(0, 2);
-                for (let i = 0; i < 2; i++) {
-                    const line = limitedProductName1[i] || '';
-                    doc.text(line, item1StartX + itemWidth / 2, item1YPos, { align: 'center' });
-                    item1YPos += 4;
-                }
-                item1YPos += 3;
+                itemIndex += 2;
+            } else {
+                // Single item alone on the page (last odd item, or the next item has notes and
+                // needs its own page). No sibling column to coordinate with, so just draw in place
+                // and let autoTable's own (more accurate) pagination handle genuine overflow.
+                const itemWidth = (pageWidth - 2 * margin) * 0.6;
+                const startX = margin + (pageWidth - 2 * margin) * 0.2;
 
+                let itemYPos = renderItemImageAndName(current, startX, yPos, itemWidth);
+                itemYPos = renderItemSpecifications(current, startX, itemYPos, itemWidth, startX).finalY;
+                renderItemAccessories(current, startX, itemYPos, itemWidth, startX, 1);
 
-                setFontByLanguage(doc, langField('specifications'), 'Futura', 'bold', language);
-                doc.setFontSize(10);
-                doc.setTextColor(23, 26, 31);
-                doc.text(langField('specifications'), item1StartX + margin + 2, item1YPos, { align: 'center' });
-                item1YPos += 5;
-
-                const specData1 = item1.manage_quotation_item_specifications
-                    .map((spec: any) => ({
-                        label: spec.manage_quotation_item_specification_label,
-                        value: spec.manage_quotation_item_specification_value || '-'
-                    }))
-                    .filter((spec: any, index: number, self: any[]) =>
-                        index === self.findIndex((s) => s.label === spec.label && s.value === spec.value)
-                    )
-                    .sort((a: any, b: any) => {
-                        const indexA = specOrder.indexOf(a.label);
-                        const indexB = specOrder.indexOf(b.label);
-                        const orderA = indexA === -1 ? 999 : indexA;
-                        const orderB = indexB === -1 ? 999 : indexB;
-                        return orderA - orderB;
-                    })
-                    .map((spec: any) => [translateSpecLabel(spec.label), spec.value]);
-
-                const specTableStartY = item1YPos;
-                autoTable(doc, {
-                    startY: item1YPos,
-                    body: specData1,
-                    margin: { left: item1StartX, right: hasOnlyOne ? margin + (pageWidth - 2 * margin) * 0.2 : item2StartX - 5 },
-                    tableWidth: itemWidth,
-                    styles: {
-                        fontSize: 8,
-                        cellPadding: [1, 2],
-                        font: 'Futura',
-                        fontStyle: 'normal'
-                    },
-                    headStyles: {
-                        fillColor: [52, 152, 219],
-                        textColor: 255,
-                        font: 'Futura',
-                        fontStyle: 'bold'
-                    },
-                    alternateRowStyles: { fillColor: [255, 255, 255] },
-                    columnStyles: {
-                        0: { cellWidth: itemWidth * 0.4, fontStyle: 'bold' },
-                        1: { cellWidth: itemWidth * 0.6 }
-                    },
-                    didParseCell: (data) => {
-                        // Set minimum height for Gearbox Transmission rows
-                        if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
-                            data.cell.styles.minCellHeight = 8;
-                        }
-                    },
-                    willDrawCell: (data) => {
-                        // Check if cell contains Chinese characters and apply appropriate font
-                        const cellText = data.cell.text?.join('') || '';
-                        if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
-                            const isFirstColumn = data.column.index === 0;
-                            const isBold = data.cell.styles.fontStyle === 'bold';
-                            try {
-                                if (isFirstColumn) {
-                                    doc.setFont('NotoSansSC', isBold ? 'bold' : 'normal');
-                                } else if (isBold) {
-                                    doc.setFont('NotoSansSC', 'bold');
-                                } else {
-                                    doc.setFont('NotoSansSC', 'normal');
-                                }
-                            } catch (error) {
-                                doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
-                            }
-                        }
-                    }
-                });
-
-                item1YPos = doc.lastAutoTable?.finalY || item1YPos;
-
-                // Add rounded border for specifications table
-                const specTableHeight = item1YPos - specTableStartY + 10;
-                doc.setDrawColor(200, 200, 200);
-                doc.setLineWidth(0.1);
-                doc.roundedRect(item1StartX, specTableStartY - 10, itemWidth, specTableHeight, 2, 2);
-
-                item1YPos += 7;
+                itemIndex += 1;
             }
-
-            // Accessories for item 1
-            if (item1.manage_quotation_item_accessories && item1.manage_quotation_item_accessories.length > 0) {
-                setFontByLanguage(doc, langField('accessories'), 'Futura', 'bold', language);
-                doc.setFontSize(10);
-                doc.setTextColor(23, 26, 31);
-                doc.text(langField('accessories'), item1StartX + margin, item1YPos, { align: 'center' });
-                item1YPos += 5;
-
-                const accData1 = item1.manage_quotation_item_accessories.map((acc: any, index: number) => [
-                    (index + 1).toString() + '.',
-                    acc.accessory_part_name,
-                ]);
-
-                const accTableStartY = item1YPos;
-                autoTable(doc, {
-                    startY: item1YPos,
-                    body: accData1,
-                    margin: { left: item1StartX + 1, right: hasOnlyOne ? margin + (pageWidth - 2 * margin) * 0.2 : item2StartX - 5 },
-                    tableWidth: itemWidth,
-                    styles: {
-                        fontSize: 8,
-                        cellPadding: [.5, 0],
-                        valign: 'middle',
-                        font: 'Futura',
-                        fontStyle: 'normal'
-                    },
-                    alternateRowStyles: { fillColor: [255, 255, 255] },
-                    columnStyles: {
-                        0: { cellWidth: 5, halign: "center", valign: 'top' },
-                    }
-                });
-
-                item1YPos = doc.lastAutoTable?.finalY || item1YPos;
-
-                // Add rounded border for accessories table
-                const accTableHeight = item1YPos - accTableStartY + 10;
-                doc.setDrawColor(200, 200, 200);
-                doc.setLineWidth(0.1);
-                doc.roundedRect(item1StartX, accTableStartY - 10, itemWidth, accTableHeight, 2, 2);
-            }
-
-            // Render second item (if exists)
-            if (!hasOnlyOne && item2) {
-                let item2YPos = yPos;
-
-                // Specifications for item 2
-                if (item2.manage_quotation_item_specifications && item2.manage_quotation_item_specifications.length > 0) {
-                    setFontSafe(doc, 'Futura', 'bold');
-                    doc.setFontSize(10);
-                    doc.setTextColor(52, 64, 84);
-
-                    // Add product image if available
-                    if (item2.images && item2.images.length > 0) {
-                        const imageUrl = getImageUrl(item2.images[0]);
-                        const imageUrl2 = getImageUrl(item2.images[1]);
-                        let panjang = item2.images.length > 1 && item2.images.length < 3 ? true : false;
-
-                        if (imageUrl) {
-                            try {
-                                let imageFormat = 'JPEG';
-                                const imageSrc = imageUrl.toLowerCase();
-                                if (imageSrc.includes('.png') || imageSrc.includes('image/png')) {
-                                    imageFormat = 'PNG';
-                                } else if (imageSrc.includes('.jpg') || imageSrc.includes('.jpeg') || imageSrc.includes('image/jpeg')) {
-                                    imageFormat = 'JPEG';
-                                }
-
-                                let imageFormat2 = 'JPEG';
-                                if (imageUrl2) {
-                                    const imageSrc2 = imageUrl2.toLowerCase();
-                                    if (imageSrc2.includes('.png') || imageSrc2.includes('image/png')) {
-                                        imageFormat2 = 'PNG';
-                                    } else if (imageSrc2.includes('.jpg') || imageSrc2.includes('.jpeg') || imageSrc2.includes('image/jpeg')) {
-                                        imageFormat2 = 'JPEG';
-                                    }
-                                }
-
-                                if (panjang) {
-                                    doc.addImage(imageUrl, imageFormat, item2StartX + (itemWidth / 2) - 38, item2YPos - 10, 37, 50);
-                                    if (imageUrl2) {
-                                        doc.addImage(imageUrl2, imageFormat2, item2StartX + (itemWidth / 2) + 2, item2YPos - 10, 37, 50);
-                                    }
-                                } else {
-                                    doc.addImage(imageUrl, imageFormat, item2StartX + (itemWidth / 2) - 21, item2YPos - 10, 37, 50);
-                                }
-
-                                // doc.addImage(imageUrl, imageFormat, item2StartX + (itemWidth / 2) - 21, item2YPos - 10, 37, 50);
-                                item2YPos += 50;
-                            } catch (error) {
-                                console.warn('Failed to load product image for item 2:', error);
-                            }
-                        }
-                    }
-
-                    doc.setFontSize(9);
-                    doc.setTextColor(0, 0, 0);
-                    setFontSafe(doc, 'Futura', 'normal');
-                    const productName2 = doc.splitTextToSize(item2.componen_product_name, itemWidth - 10);
-                    // Limit to maximum 2 lines
-                    const limitedProductName2 = productName2.slice(0, 2);
-                    // Always render exactly 2 lines for consistent height
-                    for (let i = 0; i < 2; i++) {
-                        const line = limitedProductName2[i] || '';
-                        doc.text(line, item2StartX + itemWidth / 2, item2YPos, { align: 'center' });
-                        item2YPos += 4;
-                    }
-                    item2YPos += 3;
-
-
-                    setFontByLanguage(doc, langField('specifications'), 'Futura', 'bold', language);
-                    doc.setFontSize(10);
-                    doc.setTextColor(23, 26, 31);
-                    doc.text(langField('specifications'), item2StartX + margin + 2, item2YPos, { align: 'center' });
-                    item2YPos += 5;
-
-                    const specData2 = item2.manage_quotation_item_specifications
-                        .map((spec: any) => ({
-                            label: spec.manage_quotation_item_specification_label,
-                            value: spec.manage_quotation_item_specification_value || '-'
-                        }))
-                        // Remove duplicate rows based on label+value combination
-                        .filter((spec: any, index: number, self: any[]) =>
-                            index === self.findIndex((s) => s.label === spec.label && s.value === spec.value)
-                        )
-                        .sort((a: any, b: any) => {
-                            const indexA = specOrder.indexOf(a.label);
-                            const indexB = specOrder.indexOf(b.label);
-                            // If not in order list, put at the end
-                            const orderA = indexA === -1 ? 999 : indexA;
-                            const orderB = indexB === -1 ? 999 : indexB;
-                            return orderA - orderB;
-                        })
-                        .map((spec: any) => [translateSpecLabel(spec.label), spec.value]);
-
-                    const specTableStartY2 = item2YPos;
-                    autoTable(doc, {
-                        startY: item2YPos,
-                        body: specData2,
-                        margin: { left: item2StartX, right: margin },
-                        tableWidth: itemWidth,
-                        styles: {
-                            fontSize: 8,
-                            cellPadding: [1, 2],
-                            font: 'Futura',
-                            fontStyle: 'normal'
-                        },
-                        headStyles: {
-                            fillColor: [52, 152, 219],
-                            textColor: 255,
-                            font: 'Futura',
-                            fontStyle: 'bold'
-                        },
-                        alternateRowStyles: { fillColor: [255, 255, 255] },
-                        columnStyles: {
-                            0: { cellWidth: itemWidth * 0.4, fontStyle: 'bold' },
-                            1: { cellWidth: itemWidth * 0.6 }
-                        },
-                        didParseCell: (data) => {
-                            // Set minimum height for Gearbox Transmission rows
-                            if (data.cell.text && data.cell.text[0] === 'Gearbox Transmission') {
-                                data.cell.styles.minCellHeight = 8;
-                            }
-                        },
-                        willDrawCell: (data) => {
-                            // Check if cell contains Chinese characters and apply appropriate font
-                            const cellText = data.cell.text?.join('') || '';
-                            if (language === 'zh' || cellText.match(/[\u4e00-\u9fff]/)) {
-                                const isFirstColumn = data.column.index === 0;
-                                const isBold = data.cell.styles.fontStyle === 'bold';
-                                try {
-                                    if (isFirstColumn) {
-                                        doc.setFont('NotoSansSC', isBold ? 'bold' : 'normal');
-                                    } else if (isBold) {
-                                        doc.setFont('NotoSansSC', 'bold');
-                                    } else {
-                                        doc.setFont('NotoSansSC', 'normal');
-                                    }
-                                } catch (error) {
-                                    doc.setFont('helvetica', data.cell.styles.fontStyle || 'normal');
-                                }
-                            }
-                        }
-                    });
-
-                    item2YPos = doc.lastAutoTable?.finalY || item2YPos;
-
-                    // Add rounded border for specifications table
-                    const specTableHeight2 = item2YPos - specTableStartY2 + 10;
-                    doc.setDrawColor(200, 200, 200);
-                    doc.setLineWidth(0.1);
-                    doc.roundedRect(item2StartX, specTableStartY2 - 10, itemWidth, specTableHeight2, 2, 2);
-
-                    item2YPos += 7;
-                }
-
-                // Accessories for item 2
-                if (item2.manage_quotation_item_accessories && item2.manage_quotation_item_accessories.length > 0) {
-                    // Draw separator line
-                    // if (item2.manage_quotation_item_specifications && item2.manage_quotation_item_specifications.length > 0) {
-                    //     doc.setDrawColor(200, 200, 200);
-                    //     doc.setLineWidth(0.3);
-                    //     doc.line(item2StartX, item2YPos - 3, item2StartX + itemWidth, item2YPos - 3);
-                    //     item2YPos += 2;
-                    // }
-                    setFontByLanguage(doc, langField('accessories'), 'Futura', 'bold', language);
-                    doc.setFontSize(10);
-                    doc.setTextColor(23, 26, 31);
-                    doc.text(langField('accessories'), item2StartX + margin, item2YPos, { align: 'center' });
-                    item2YPos += 5;
-
-                    const accData2 = item2.manage_quotation_item_accessories.map((acc: any, index: number) => [
-                        (index + 1).toString() + '.',
-                        acc.accessory_part_name || '-',
-                    ]);
-
-                    const accTableStartY2 = item2YPos;
-                    autoTable(doc, {
-                        startY: item2YPos,
-                        body: accData2,
-                        margin: { left: item2StartX, right: margin },
-                        tableWidth: itemWidth,
-                        styles: {
-                            fontSize: 8,
-                            cellPadding: [.5, 0],
-                            valign: 'middle',
-                            font: 'Futura',
-                            fontStyle: 'normal'
-                        },
-                        alternateRowStyles: { fillColor: [255, 255, 255] },
-                        columnStyles: {
-                            0: { cellWidth: 5, halign: "center", valign: 'top' },
-                        }
-                    });
-
-                    item2YPos = doc.lastAutoTable?.finalY || item2YPos;
-
-                    // Add rounded border for accessories table
-                    const accTableHeight2 = item2YPos - accTableStartY2 + 10;
-                    doc.setDrawColor(200, 200, 200);
-                    doc.setLineWidth(0.1);
-                    doc.roundedRect(item2StartX, accTableStartY2 - 10, itemWidth, accTableHeight2, 2, 2);
-                }
-            }
-
         }
     }
 

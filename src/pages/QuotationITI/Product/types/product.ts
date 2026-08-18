@@ -40,6 +40,7 @@ export interface ItemProduct {
     specifications?: any[];
     accessories?: any[];
     manage_quotation_item_accessories?: any[];
+    notes?: string | null;
 }
 
 export interface ProductSpecification {
@@ -94,6 +95,7 @@ export interface ItemProductFormData {
     image?: File | string | null;
     componen_type: number;
     product_dimensi_id: string;
+    notes?: string | null;
 }
 export interface ItemProductValidationErrors {
     code_unique?: string;
@@ -114,6 +116,7 @@ export interface ItemProductValidationErrors {
     componen_type?: string;
     product_dimensi_id?: string;
     company_name?: string;
+    notes?: string;
 }
 
 export interface EditProductFormData {
@@ -133,4 +136,5 @@ export interface EditProductFormData {
     componen_type: number;
     volume: string;
     componen_product_unit_model: string;
+    notes?: string;
 }

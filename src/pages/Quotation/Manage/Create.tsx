@@ -545,6 +545,8 @@ export default function CreateQuotation() {
                     show_componen_product_name: apiProductData.componen_product_name || selectedProduct.label || '',
                     code_unique: apiProductData.code_unique || '',
                     cp_code_unique: apiProductData.cp_code_unique || '',
+                    cp_notes: apiProductData.cp_notes || '',
+                    notes: apiProductData.notes || '',
                     msi_model: apiProductData.msi_model || '',
                     msi_product: apiProductData.msi_product || '',
                     segment: apiProductData.segment || '',
@@ -664,6 +666,8 @@ export default function CreateQuotation() {
                 show_componen_product_name: existingItem.componen_product_name,
                 code_unique: existingItem.code_unique || '',
                 cp_code_unique: existingItem.cp_code_unique || '',
+                cp_notes: existingItem.cp_notes || '',
+                notes: existingItem.notes || '',
                 msi_model: existingItem.msi_model || '',
                 msi_product: existingItem.msi_product || '',
                 segment: existingItem.segment || '',
@@ -767,6 +771,7 @@ export default function CreateQuotation() {
                 selling_price_star_4: updatedProductData.selling_price_star_4 || currentItem.selling_price_star_4,
                 selling_price_star_5: updatedProductData.selling_price_star_5 || currentItem.selling_price_star_5,
                 description: updatedProductData.componen_product_description || currentItem.description,
+                notes: updatedProductData.notes || (currentItem as any).notes || '',
                 manage_quotation_item_specifications: updatedProductData.componen_product_specifications?.map((spec: any) => ({
                     manage_quotation_item_specification_label: spec.componen_product_specification_label || '',
                     manage_quotation_item_specification_value: spec.componen_product_specification_value || ''
@@ -876,18 +881,18 @@ export default function CreateQuotation() {
             name: 'Detail',
             cell: (row) => (
                 <>
-                {row.product_type !== 'non_unit' &&
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleShowProductDetail(row.componen_product_id)}
-                    className=""
-                    disabled={showProductDetail && selectedProductId === row.componen_product_id}
-                >
-                    {showProductDetail && selectedProductId === row.componen_product_id ? <FaEye /> : <FaEye />}
-                </Button>
-                }
+                    {row.product_type !== 'non_unit' &&
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleShowProductDetail(row.componen_product_id)}
+                            className=""
+                            disabled={showProductDetail && selectedProductId === row.componen_product_id}
+                        >
+                            {showProductDetail && selectedProductId === row.componen_product_id ? <FaEye /> : <FaEye />}
+                        </Button>
+                    }
                 </>
             ),
             width: '100px',
@@ -1758,7 +1763,7 @@ export default function CreateQuotation() {
                                                     type="text"
                                                     onKeyPress={(e) => {
                                                         // Custom key press handler to allow comma
-                                                        if (!/[0-9,]/.test(e.key) && 
+                                                        if (!/[0-9,]/.test(e.key) &&
                                                             !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'].includes(e.key) &&
                                                             !(e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase()))
                                                         ) {

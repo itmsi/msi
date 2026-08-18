@@ -36,22 +36,23 @@ interface EditProductFormData {
     componen_product_unit_model: string;
     msi_product: string;
     componen_product_specifications: ProductSpecification[];
+    notes?: string;
 }
 
 export default function EditProduct() {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    
-    const { 
+
+    const {
         isLoading,
         isUpdating,
         productData,
-        validationErrors, 
+        validationErrors,
         loadProduct,
         clearFieldError,
-        updateProduct 
+        updateProduct
     } = useProductEdit();
-    
+
     const [formData, setFormData] = useState<EditProductFormData>({
         code_unique: '',
         segment: '',
@@ -72,8 +73,9 @@ export default function EditProduct() {
         componen_product_unit_model: '',
         msi_product: '',
         componen_product_specifications: getDefaultSpecs(1),
+        notes: '',
     });
-    
+
     const [specifications, setSpecifications] = useState<any[]>([]);
     const [productImage, setProductImage] = useState<File[]>([]);
     const [existingImageUrl, setExistingImageUrl] = useState<any[] | null>(null);
@@ -85,17 +87,17 @@ export default function EditProduct() {
         if (id) {
             loadProductData(id);
         }
-    }, [id]); 
+    }, [id]);
 
     const loadProductData = async (productId: string) => {
         try {
             const product = await loadProduct(productId);
-            
+
             if (product) {
                 const defaultSpecifications = getDefaultSpecs(product.componen_type || 1);
 
                 const specificationsData = defaultSpecifications.map(defaultSpec => {
-                    const apiSpec = product.componen_product_specifications?.find(spec => 
+                    const apiSpec = product.componen_product_specifications?.find(spec =>
                         spec.specification_label_name === defaultSpec.specification_label_name ||
                         spec.componen_product_specification_label === defaultSpec.componen_product_specification_label
                     );
@@ -126,10 +128,11 @@ export default function EditProduct() {
                     componen_product_unit_model: product.componen_product_unit_model || '',
                     msi_product: product.msi_product || '',
                     componen_product_specifications: specificationsData,
+                    notes: product.notes || '',
                 });
-                
+
                 setSpecifications(specificationsData);
-                
+
                 if (product.images && product.images.length > 0 && !allImagesRemoved) {
                     const imageUrls = product.images.map((img: any) => img.image_url);
                     setExistingImageUrl(imageUrls);
@@ -167,11 +170,11 @@ export default function EditProduct() {
             setProductImage([]);
             return;
         }
-        
+
         // Handle both single file and multiple files
         const fileArray = Array.isArray(files) ? files : [files];
         setProductImage(fileArray);
-        
+
     };
 
     const handleRemoveExistingImage = (index?: number) => {
@@ -179,10 +182,10 @@ export default function EditProduct() {
             if (originalImages[index] && originalImages[index].image_id) {
                 setDeletedImageIds(prev => [...prev, originalImages[index].image_id]);
             }
-            
+
             const newExistingImages = existingImageUrl.filter((_, i) => i !== index);
             const newOriginalImages = originalImages.filter((_, i) => i !== index);
-            
+
             if (newExistingImages.length === 0) {
                 setExistingImageUrl(null);
                 setOriginalImages([]);
@@ -196,11 +199,11 @@ export default function EditProduct() {
                 const allImageIds = originalImages.map(img => img.image_id).filter(Boolean);
                 setDeletedImageIds(prev => [...prev, ...allImageIds]);
             }
-            
+
             setExistingImageUrl(null);
             setOriginalImages([]);
             setAllImagesRemoved(true);
-            
+
             setTimeout(() => {
                 setExistingImageUrl(null);
             }, 0);
@@ -227,14 +230,14 @@ export default function EditProduct() {
 
     const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault();
-        
+
         if (!validateForm() || !id) {
             return;
         }
 
         try {
             const formDataToSend = new FormData();
-            
+
             let specificationsData = specifications.length > 0 ? specifications : formData.componen_product_specifications;;
             let segmentValue = formData.segment;
             let msiModelValue = formData.msi_model;
@@ -265,7 +268,8 @@ export default function EditProduct() {
             formDataToSend.append('selling_price_star_4', formData.selling_price_star_4.replace(/\./g, ''));
             formDataToSend.append('selling_price_star_5', formData.selling_price_star_5.replace(/\./g, ''));
             formDataToSend.append('componen_product_specifications', JSON.stringify(specificationsData));
-            
+            formDataToSend.append('notes', formData.notes || '');
+
             if (deletedImageIds.length > 0) {
                 const deletedImagesData = deletedImageIds.map(imageId => {
                     const originalImage = originalImages.find(img => img.image_id === imageId);
@@ -288,9 +292,9 @@ export default function EditProduct() {
                     formDataToSend.append('image_count', productImage.length.toString());
                 }
             }
-            
+
             const success = await updateProduct(id, formDataToSend);
-            
+
             if (success) {
                 toast.success('Produk berhasil diperbarui');
                 navigate('/quotations-iti/products');
@@ -320,8 +324,8 @@ export default function EditProduct() {
             <div className="flex justify-center items-center min-h-[400px]">
                 <div className="text-center">
                     <p className="text-gray-600">Data produk tidak ditemukan</p>
-                    <Button 
-                        variant="outline" 
+                    <Button
+                        variant="outline"
                         onClick={handleBack}
                         className="mt-4"
                     >
@@ -340,15 +344,15 @@ export default function EditProduct() {
 
     return (
         <>
-            <PageMeta 
-                title="Edit Produk | MSI" 
+            <PageMeta
+                title="Edit Produk | MSI"
                 description="Edit data produk dalam sistem MSI"
                 image=""
             />
 
             <div className="bg-gray-50 overflow-auto">
                 <div className="mx-auto px-4 sm:px-3">
-                    
+
                     <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
                         <div className="flex items-center gap-1">
                             <Button
@@ -371,7 +375,7 @@ export default function EditProduct() {
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
                                 Informasi Dasar
                             </h2>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <Label htmlFor="code_unique">
@@ -392,7 +396,7 @@ export default function EditProduct() {
                                         </p>
                                     )}
                                 </div>
-                            
+
                                 <div>
                                     <Label htmlFor="product_type">Product Type</Label>
                                     <CustomSelect
@@ -422,7 +426,22 @@ export default function EditProduct() {
                                         placeholder="Masukkan deskripsi produk..."
                                     />
                                 </div>
-                                
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="notes">Notes</Label>
+                                    <textarea
+                                        id="notes"
+                                        name="notes"
+                                        rows={3}
+                                        value={formData.notes || ''}
+                                        onChange={(e) => handleInputChange('notes', e.target.value)}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-vertical"
+                                        placeholder="Tambahkan catatan..."
+                                    />
+                                    {validationErrors.notes && (
+                                        <p className="mt-1 text-sm text-red-600">{validationErrors.notes}</p>
+                                    )}
+                                </div>
+
                                 {specifications.map((spec, index) => (
                                     <div key={`${spec.specification_label_name}-${index}`} className="md:col-span-2">
                                         <WysiwygEditor
@@ -454,7 +473,7 @@ export default function EditProduct() {
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
                                 Informasi Harga
                             </h2>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <Label htmlFor="market_price">
@@ -581,13 +600,13 @@ export default function EditProduct() {
                             >
                                 Batal
                             </Button>
-                            
+
                             <PermissionGate permission={["create", "update"]}>
                                 <Button
                                     disabled={isUpdating}
                                     type="submit"
                                     onClick={() => {
-                                        const tipu = { preventDefault: () => {} } as React.FormEvent;
+                                        const tipu = { preventDefault: () => { } } as React.FormEvent;
                                         handleSubmit(tipu);
                                     }}
                                     className="px-6 flex items-center gap-2 rounded-full"

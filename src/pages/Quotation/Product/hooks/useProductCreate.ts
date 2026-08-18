@@ -54,15 +54,16 @@ interface CreateProductFormData {
     componen_product_unit_model: string;
     company_name: string;
     componen_product_specifications: ProductSpecification[];
+    notes: string | null;
 }
 
 export const useCreateProduct = () => {
     const navigate = useNavigate();
-    
+
     const [isCreating, setIsCreating] = useState(false);
     const [validationErrors, setValidationErrors] = useState<ItemProductValidationErrors>({});
     const [productImage, setProductImage] = useState<File[]>([]);
-    
+
     const [formData, setFormData] = useState<CreateProductFormData>({
         code_unique: '',
         segment: '',
@@ -84,8 +85,9 @@ export const useCreateProduct = () => {
         componen_product_unit_model: '',
         company_name: getCompanyName(),
         componen_product_specifications: REGULAR_SPECS.map(s => ({ ...s })),
+        notes: '',
     });
-    
+
 
     // Handle input changes
     const handleInputChange = (field: keyof CreateProductFormData, value: string) => {
@@ -113,21 +115,21 @@ export const useCreateProduct = () => {
             setProductImage([]);
             return;
         }
-        
+
         const fileArray = Array.isArray(files) ? files : [files];
-        
+
         const uniqueFiles = fileArray.filter((file, index, self) => {
-            const isDuplicate = self.slice(0, index).some(existingFile => 
+            const isDuplicate = self.slice(0, index).some(existingFile =>
                 existingFile === file || // Same reference
-                (existingFile.name === file.name && 
-                 existingFile.size === file.size && 
-                 existingFile.lastModified === file.lastModified &&
-                 existingFile.type === file.type)
+                (existingFile.name === file.name &&
+                    existingFile.size === file.size &&
+                    existingFile.lastModified === file.lastModified &&
+                    existingFile.type === file.type)
             );
-            
+
             return !isDuplicate;
         });
-        
+
         setProductImage(uniqueFiles);
     };
 
@@ -154,7 +156,7 @@ export const useCreateProduct = () => {
     // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!validateForm()) {
             return;
         }
@@ -163,7 +165,7 @@ export const useCreateProduct = () => {
 
         try {
             const formDataToSend = new FormData();
-            
+
             let specificationsData = formData.componen_product_specifications;
             let segmentValue = formData.segment;
             let msiModelValue = formData.msi_model;
@@ -192,7 +194,7 @@ export const useCreateProduct = () => {
                     specification_value_name: ''
                 }));
             }
-            
+
             // Append all form fields
             formDataToSend.append('code_unique', formData.code_unique);
             formDataToSend.append('product_type', formData.product_type);
@@ -214,13 +216,14 @@ export const useCreateProduct = () => {
             formDataToSend.append('selling_price_star_5', formData.selling_price_star_5.replace(/\./g, ''));
             formDataToSend.append('company_name', formData.company_name);
             formDataToSend.append('componen_product_specifications', JSON.stringify(specificationsData));
+            formDataToSend.append('notes', formData.notes || '');
 
             // Append image files if uploaded
             if (productImage && productImage.length > 0) {
                 productImage.forEach((file, index) => {
                     formDataToSend.append(`images[${index}]`, file);
                 });
-                
+
                 formDataToSend.append('images_count', productImage.length.toString());
             }
 

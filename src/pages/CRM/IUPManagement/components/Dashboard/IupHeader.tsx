@@ -31,17 +31,21 @@ export function IupHeader({ iup }: IupHeaderProps) {
             <div className="p-6">
                 <div className="flex items-start justify-between gap-6 flex-wrap">
                     <div>
-                        {iup.sales_pic.length > 0 && (
-                            <div className="flex items-center flex-wrap gap-1.5 mt-2">
-                                <span className="text-xs text-gray-500 flex items-center gap-1">
-                                    <LuUser size={12} />
-                                    Sales PIC:
-                                </span>
-                                {iup.sales_pic.map((pic) => (
+                        <div className="flex items-center flex-wrap gap-1.5">
+                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                                <LuUser size={12} />
+                                Sales PIC:
+                            </span>
+
+                            {iup.sales_pic.length > 0 ? (
+                                iup.sales_pic.map((pic) => (
                                     <Badge key={pic.id} variant="light" color="light" size="sm">{pic.name}</Badge>
-                                ))}
-                            </div>
-                        )}
+                                ))
+
+                            ) : (
+                                <span className="text-xs text-gray-500">-</span>
+                            )}
+                        </div>
                     </div>
                 </div>
 
