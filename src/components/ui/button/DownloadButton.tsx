@@ -1,4 +1,3 @@
-import { FaCloudDownloadAlt } from "react-icons/fa";
 import { LuArrowDown } from "react-icons/lu";
 import Button from "./Button";
 
@@ -14,33 +13,6 @@ interface DownloadButtonProps {
     onClick?: () => void;
 }
 
-const fileConfig = {
-    pdf: {
-        label: "PDF",
-        icon: LuArrowDown,
-        color: "text-gray-600",
-    },
-    excel: {
-        label: "Excel",
-        icon: LuArrowDown,
-        color: "text-green-600",
-    },
-    csv: {
-        label: "CSV",
-        icon: LuArrowDown,
-        color: "text-green-500",
-    },
-    image: {
-        label: "Image",
-        icon: LuArrowDown,
-        color: "text-purple-600",
-    },
-    doc: {
-        label: "DOC",
-        icon: LuArrowDown,
-        color: "text-blue-600",
-    },
-};
 const Spinner = () => (
     <svg
         className="animate-spin h-4 w-4"
