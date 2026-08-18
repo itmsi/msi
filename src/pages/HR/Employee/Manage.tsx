@@ -11,12 +11,6 @@ import { CandidateCardSkeleton } from './components/Candidatecardskeleton';
 import { CandidateCard } from './components/Candidatecard';
 import PageHeaderManage from '@/components/common/PageHeaderManage';
 
-const STATUS_CHIPS = [
-    { value: '', label: 'All' },
-    { value: 'New', label: 'New' },
-    { value: 'Complete', label: 'Complete' },
-];
-
 export default function ManageCandidate() {
     const navigate = useNavigate();
 
@@ -25,16 +19,8 @@ export default function ManageCandidate() {
         loading,
         loadingMore,
         hasMore,
-        error,
         pagination,
-        offeringCount,
-        filters,
-        searchValue,
-        setSearchValue,
         loadMore,
-        handleFilterChange,
-        handleKeyPress,
-        handleClearSearch,
     } = useCandidateManagement();
 
     const handleView = (row: CandidateItem) => {

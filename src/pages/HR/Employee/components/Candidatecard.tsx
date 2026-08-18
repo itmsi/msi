@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
     MdGroup,
     MdCheckCircle,
     MdCancel,
     MdHelpOutline,
-    MdCheck,
     MdEdit,
     MdMoreVert,
     MdSchedule,
@@ -90,7 +89,6 @@ export function CandidateCard({ candidate, onView, onEdit, index }: CandidateCar
         ? COMPANY_STYLE[candidate.company_name] || DEFAULT_COMPANY_STYLE
         : DEFAULT_COMPANY_STYLE;
     const h = hue(candidate.candidate_id);
-    const [copied, setCopied] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement | null>(null);
 

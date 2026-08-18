@@ -10,7 +10,7 @@ import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOVendorSelect } from '@/hooks/usePOVendorSelect';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { PermissionGate } from '@/components/common/PermissionComponents';
-import { FaReceipt, FaRegFilePdf, FaSave } from 'react-icons/fa';
+import { FaReceipt, FaSave } from 'react-icons/fa';
 import ModalApproval from './components/ModalApproval';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
