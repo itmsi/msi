@@ -77,26 +77,25 @@ export default function EmployeeCandidateDetail() {
                     </div>
                 ) : error || !candidate ? (
                     <div className="bg-white rounded-2xl border border-[#E7E9F0] py-16 text-center">
-                        <div className="text-[#3A4260] font-medium mb-1">Candidate not found</div>
+                        <div className="text-[#3A4260] font-primary-bold mb-1">Candidate not found</div>
                         <div className="text-[13px] text-[#9AA2BA]">{error || 'This candidate may have been removed.'}</div>
                     </div>
                 ) : (
                     <div className="grid lg:grid-cols-[340px_1fr] gap-5 items-start">
                         <CandidateProfileSidebar candidate={candidate} />
 
-                        <div>
-                            <div className="flex gap-1 px-3 pt-2">
+                        <div className='overflow-auto'>
+                            <div className="flex gap-1 px-3 pt-2 overflow-x-auto overflow-y-hidden">
                                 {TABS.map((t) => {
                                     const isActive = tab === t.key;
                                     return (
                                         <button
                                             key={t.key}
                                             onClick={() => setTab(t.key)}
-                                            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium whitespace-nowrap rounded-t-xl border border-b-0 transition-colors ${
-                                                isActive
-                                                    ? 'bg-white text-[#1F2430]  border-t-2xl shadow-[0_-8px_3px_-8px_rgba(15,23,42,0.16),-4px_0_10px_-6px_rgba(15,23,42,0.08),4px_0_10px_-6px_rgba(15,23,42,0.08)] border-[#E7E9F0] -mb-px'
-                                                    : 'bg-transparent text-[#9AA2BA] hover:text-[#5B6480] border-transparent'
-                                            }`}
+                                            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm whitespace-nowrap rounded-t-xl border border-b-0 transition-colors ${isActive
+                                                ? 'bg-white font-primary-bold text-[#1F2430]  border-t-2xl shadow-[0_-8px_3px_-8px_rgba(15,23,42,0.16),-4px_0_10px_-6px_rgba(15,23,42,0.08),4px_0_10px_-6px_rgba(15,23,42,0.08)] border-[#E7E9F0] -mb-px'
+                                                : 'bg-transparent text-[#9AA2BA] hover:text-[#5B6480] border-transparent'
+                                                }`}
                                         >
                                             <t.icon size={15} /> {t.label}
                                         </button>

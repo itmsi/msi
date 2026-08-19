@@ -3,10 +3,15 @@ import { CandidateItem, CandidateRequest, Pagination, CandidateOfferingCount } f
 import { CandidateService } from '../services/Candidateservice';
 import { useLocation, useSearchParams } from 'react-router-dom';
 
-type FilterState = {
+export type FilterState = {
     search: string;
     candidate_status: string;
     sort_order: 'asc' | 'desc' | '';
+    group_id: string;
+    company_id: string;
+    department_id: string;
+    title_id: string;
+    assign_role: string;
 };
 
 export const useCandidateManagement = () => {
@@ -19,6 +24,11 @@ export const useCandidateManagement = () => {
         search: searchParams.get('search') ?? '',
         candidate_status: searchParams.get('candidate_status') ?? '',
         sort_order: (searchParams.get('sort_order') as FilterState['sort_order']) || 'desc',
+        group_id: searchParams.get('group_id') ?? '',
+        company_id: searchParams.get('company_id') ?? '',
+        department_id: searchParams.get('department_id') ?? '',
+        title_id: searchParams.get('title_id') ?? '',
+        assign_role: searchParams.get('assign_role') ?? '',
     };
 
     const [searchValue, setSearchValue] = useState(urlFilters.search);
@@ -105,6 +115,18 @@ export const useCandidateManagement = () => {
         handleFilterChange({ search: '' });
     }, [handleFilterChange]);
 
+    const handleClearFilters = useCallback(() => {
+        handleFilterChange({
+            search: '',
+            candidate_status: '',
+            group_id: '',
+            company_id: '',
+            department_id: '',
+            title_id: '',
+            assign_role: '',
+        });
+    }, [handleFilterChange]);
+
     return {
         candidates,
         filters: urlFilters,
@@ -122,5 +144,6 @@ export const useCandidateManagement = () => {
         executeSearch,
         handleKeyPress,
         handleClearSearch,
+        handleClearFilters,
     };
 };

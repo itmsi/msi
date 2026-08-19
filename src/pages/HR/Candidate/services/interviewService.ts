@@ -125,7 +125,7 @@ export class interviewFormService {
     sort_by?: string;
     sort_order?: string;
   }): Promise<ApiListResponse<InterviewFormItem>> {
-    return unwrapList<InterviewFormItem>(`${HRM}/interviews/get`, {
+    const result = await unwrapList<InterviewFormItem | { data_interviews?: InterviewFormItem[] }>(`${HRM}/interviews/get`, {
       page: params.page || 1,
       limit: params.limit || 100,
       search: params.search || '',
@@ -133,6 +133,17 @@ export class interviewFormService {
       sort_order: params.sort_order || 'desc',
       schedule_interview_id: params.schedule_interview_id,
     });
+
+    // The API sometimes wraps interview forms inside a schedule object's
+    // `data_interviews` array instead of returning them as a flat list — flatten
+    // either shape to InterviewFormItem[] so callers don't need to know which one it is.
+    const flattened = result.data.flatMap((item) =>
+      Array.isArray((item as { data_interviews?: InterviewFormItem[] }).data_interviews)
+        ? (item as { data_interviews: InterviewFormItem[] }).data_interviews
+        : [item as InterviewFormItem]
+    );
+
+    return { data: flattened, pagination: result.pagination };
   }
 
   static async create(data: InterviewCreateRequest): Promise<ApiDetailResponse<InterviewFormItem>> {

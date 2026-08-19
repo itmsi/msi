@@ -16,7 +16,7 @@ export function CandidateStatusBadge({ status }: CandidateStatusBadgeProps) {
 
     return (
         <span
-            className={`inline-flex items-center justify-center rounded-md font-medium px-2 py-0.5 text-xs border ${style}`}
+            className={`inline-flex items-center justify-center rounded-md font-primary px-2 py-0.5 text-xs border ${style}`}
         >
             {status || '-'}
         </span>
