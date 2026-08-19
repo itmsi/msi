@@ -3,8 +3,8 @@ import React from 'react';
 import { interviewScheduleService, interviewFormService, type InterviewSchedule, type InterviewFormItem, type ScheduleCreateRequest } from '../../Candidate/services/interviewService';
 import { generateInterviewPDFBlob } from '../utils/PDFInterviewReport';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaTrash, FaChartSimple, FaChevronDown, FaChevronUp, FaRegFilePdf, FaClipboardCheck, FaRegPenToSquare, FaXmark, FaSpinner } from 'react-icons/fa6';
-import { MdAdd, MdCalendarMonth } from 'react-icons/md';
+import { FaPlus, FaTrash, FaChartSimple, FaChevronDown, FaChevronUp, FaRegFilePdf, FaClipboardCheck, FaRegPenToSquare, FaSpinner } from 'react-icons/fa6';
+import { MdAdd } from 'react-icons/md';
 import ModalScoreInterview from '../../Candidate/components/ModalScoreInterview';
 import FormScoringCanvas from './FormScoringCanvas';
 import { PDFPreviewModal } from './PDFPreviewModal';
@@ -28,7 +28,7 @@ interface DateInterviewTabProps {
 }
 
 const ROLE_OPTIONS = ['HR', 'GM', 'VP', 'BOD', 'PUB'];
-const DURATION_OPTIONS = ['15m', '30m', '45m', '60m', '90m'];
+// const DURATION_OPTIONS = ['15m', '30m', '45m', '60m', '90m'];
 // Cap chips shown per row so rows with many assigned roles don't grow taller than others.
 const MAX_VISIBLE_ROLES = 5;
 
@@ -335,7 +335,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
             {schedules.length === 0 ? (
                 <p className="text-sm text-[#9AA2BA]">No interview schedules yet.</p>
             ) : (
-                <div className="bg-white rounded-xl border border-[#E7E9F0] overflow-hidden shadow-[0_1px_2px_rgba(16,24,40,0.06),0_1px_3px_rgba(16,24,40,0.04)]">
+                <div className="bg-white rounded-xl overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[1090px] text-sm">
                             <thead>

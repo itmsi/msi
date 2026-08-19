@@ -2,13 +2,16 @@ import { useState, useEffect } from 'react';
 import type { BackgroundCheckItem } from '../../Candidate/types/hr';
 import { backgroundCheckService } from '../../Candidate/services/hrService';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaTrash, FaDownload, FaShieldHalved, FaXmark } from 'react-icons/fa6';
+import { FaTrash, FaShieldHalved, FaXmark } from 'react-icons/fa6';
 import Button from '@/components/ui/button/Button';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import TextArea from '@/components/form/input/TextArea';
 import { Tooltip } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MdAdd } from 'react-icons/md';
+import { FaRegFilePdf } from 'react-icons/fa';
+import { PermissionButton } from '@/components/common/PermissionComponents';
 
 interface BackgroundCheckTabProps {
     candidateId: string;
@@ -90,64 +93,86 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-4">
-                <p className="text-sm text-[#5B6480]">
-                    {items.length} {items.length === 1 ? 'check' : 'checks'}
-                </p>
-                <Button size="sm" onClick={() => setShowAddModal(true)} startIcon={<FaPlus />}>Add Check</Button>
+            <div className="flex items-center justify-end mb-4">
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowAddModal(true)}
+                    className="rounded-md w-full md:w-40 flex items-center justify-center gap-2"
+                    size="sm"
+                >
+                    <MdAdd className="w-4 h-4" />
+                    Add Check
+                </Button>
             </div>
 
             {items.length === 0 ? (
                 <p className="text-sm text-[#9AA2BA]">No background checks yet.</p>
             ) : (
-                <div className="bg-white rounded-2xl border border-[#E7E9F0] overflow-hidden">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="bg-[#FAFAFB] border-b border-[#E7E9F0]">
-                                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Notes</th>
-                                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Created By</th>
-                                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Date</th>
-                                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Status</th>
-                                <th className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9AA2BA]">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[#F0F1F5]">
-                            {items.map((item) => {
-                                return (
-                                    <tr key={item.background_check_id} className="hover:bg-[#FAFAFB] transition-colors">
-                                        <td className="px-4 py-3">
-                                            <span className="text-[#3A4260]">{item.background_check_note || '-'}</span>
-                                        </td>
-                                        <td className="px-4 py-3 text-[#5B6480]">{item.created_by_name || '-'}</td>
-                                        <td className="px-4 py-3 text-[#5B6480]">{formatIndonesianDate(item.created_at)}</td>
-                                        <td className="px-4 py-3">
-                                            <span className={`inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-primary-bold ${STATUS_STYLE[item.background_check_status] || DEFAULT_STATUS_STYLE}`}>
-                                                {item.background_check_status}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-1">
-                                                {item.file_attachment && (
-                                                    <a
-                                                        href={item.file_attachment?.startsWith('http') ? item.file_attachment + '/download' : item.file_attachment}
-                                                        target="_blank" rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs text-[#0253a5] border border-[#E7E9F0] rounded-lg hover:bg-[#FAFAFB]"
-                                                    >
-                                                        <FaDownload className="w-3 h-3" /> Download
-                                                    </a>
-                                                )}
-                                                <Tooltip content="Delete" position="top">
-                                                    <Button size="sm" variant="transparent" onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }} className="text-rose-500!">
-                                                        <FaTrash className="w-3.5 h-3.5" />
-                                                    </Button>
-                                                </Tooltip>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                <div className="bg-white rounded-xl overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[1090px] text-sm">
+                            <thead>
+                                <tr className="bg-[#dfe8f2] border-b border-[#E7E9F0]">
+                                    <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Notes</th>
+                                    <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Created By</th>
+                                    <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Date</th>
+                                    <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Status</th>
+                                    <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151] w-32">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#F0F1F5]">
+                                {items.map((item) => {
+                                    return (
+                                        <tr key={item.background_check_id} className="hover:bg-[#FAFAFB] transition-colors">
+                                            <td className="px-4 py-3">
+                                                <span className="text-[#3A4260]">{item.background_check_note || '-'}</span>
+                                            </td>
+                                            <td className="px-4 py-3 text-[#5B6480]">{item.created_by_name || '-'}</td>
+                                            <td className="px-4 py-3 text-[#5B6480]">{formatIndonesianDate(item.created_at)}</td>
+                                            <td className="px-4 py-3">
+                                                <span className={`inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-primary-bold ${STATUS_STYLE[item.background_check_status] || DEFAULT_STATUS_STYLE}`}>
+                                                    {item.background_check_status}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-1">
+                                                    {item.file_attachment && (
+                                                        <PermissionButton
+                                                            permission={'read'}
+                                                            onClick={() => {
+                                                                if (!item.file_attachment) return;
+                                                                const downloadUrl = item.file_attachment.startsWith('http')
+                                                                    ? `${item.file_attachment}/download`
+                                                                    : item.file_attachment;
+                                                                window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+                                                            }}
+                                                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                                            }`}
+                                                        >
+                                                            <FaRegFilePdf className="w-4 h-4" />
+                                                        </PermissionButton>
+                                                        // <a
+                                                        //     href={item.file_attachment?.startsWith('http') ? item.file_attachment + '/download' : item.file_attachment}
+                                                        //     target="_blank" rel="noopener noreferrer"
+                                                        //     className="inline-flex items-center gap-1 px-2 py-1 text-xs text-[#0253a5] border border-[#E7E9F0] rounded-lg hover:bg-[#FAFAFB]"
+                                                        // >
+                                                        //     <FaRegFilePdf className="w-3 h-3" /> Download
+                                                        // </a>
+                                                    )}
+                                                    <Tooltip content="Delete" position="top">
+                                                        <Button size="sm" variant="transparent" onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }} className="text-rose-500!">
+                                                            <FaTrash className="w-3.5 h-3.5" />
+                                                        </Button>
+                                                    </Tooltip>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 

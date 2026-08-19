@@ -11,6 +11,7 @@ import { NotesTab } from './components/NotesTab';
 import DateInterviewTab from './components/DateInterviewTab';
 import BackgroundCheckTab from './components/BackgroundCheckTab';
 import DocumentTab from './components/DocumentTab';
+import PageHeader from '@/components/common/PageHeader';
 
 type TabKey = 'interview' | 'bgcheck' | 'documents' | 'notes';
 
@@ -36,39 +37,27 @@ export default function EmployeeCandidateDetail() {
             />
 
             <div className="space-y-4">
-                <div className="bg-white rounded-2xl border border-[#E7E9F0] shadow-sm">
-                    <div className="px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => navigate('/hr/candidate')}
-                                className="p-2 hover:bg-[#F5F6F8] rounded-full transition-colors text-[#5B6480]"
-                                title="Back to Candidates"
-                            >
-                                <MdArrowBack size={22} />
-                            </button>
-                            <div>
-                                <h3 className="text-lg font-primary-bold text-[#1F2430]">
-                                    {candidate ? candidate.candidate_name : 'Candidate Detail'}
-                                </h3>
-                                {candidate && (
-                                    <p className="text-xs text-[#9AA2BA] mt-0.5">{candidate.candidate_number}</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {candidate && (
-                            <PermissionGate permission="update">
-                                <Button
-                                    size="sm"
-                                    startIcon={<MdEdit size={14} />}
-                                    onClick={() => navigate(`/hr/candidate/${candidate.candidate_id}/edit`)}
-                                >
-                                    Edit
-                                </Button>
-                            </PermissionGate>
-                        )}
-                    </div>
-                </div>
+                <PageHeader
+                    title="Edit Purchase Order"
+                    backPath={() => navigate('/hr/candidate')}
+                    subtitle={candidate?.candidate_number || '-'}
+                    actions={
+                        <>
+                            {candidate && (
+                                <PermissionGate permission="update">
+                                    <Button
+                                        size="sm"
+                                        startIcon={<MdEdit size={14} />}
+                                        onClick={() => navigate(`/hr/candidate/${candidate.candidate_id}/edit`)}
+                                        className="flex items-center gap-2 py-2"
+                                    >
+                                        Edit
+                                    </Button>
+                                </PermissionGate>
+                            )}
+                        </>
+                    }
+                />
 
                 {loading && !candidate ? (
                     <div className="grid lg:grid-cols-[340px_1fr] gap-5 items-start">
@@ -84,7 +73,7 @@ export default function EmployeeCandidateDetail() {
                     <div className="grid lg:grid-cols-[340px_1fr] gap-5 items-start">
                         <CandidateProfileSidebar candidate={candidate} />
 
-                        <div className='overflow-auto'>
+                        <div className='overflow-auto pb-3'>
                             <div className="flex gap-1 px-3 pt-2 overflow-x-auto overflow-y-hidden">
                                 {TABS.map((t) => {
                                     const isActive = tab === t.key;
@@ -103,7 +92,7 @@ export default function EmployeeCandidateDetail() {
                                 })}
                             </div>
 
-                            <div className="p-5 bg-white rounded-2xl border border-[#E7E9F0] shadow-sm overflow-hidden">
+                            <div className="p-5 bg-white rounded-2xl shadow-sm overflow-hidden">
                                 <AnimatePresence mode="wait" initial={false}>
                                     <motion.div
                                         key={tab}
