@@ -92,7 +92,6 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete, index }: Ca
         ? COMPANY_STYLE[candidate.company_name] || DEFAULT_COMPANY_STYLE
         : DEFAULT_COMPANY_STYLE;
     const h = hue(candidate.candidate_id);
-    const [copied, setCopied] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -251,7 +250,6 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete, index }: Ca
                     <DetailRow label="Assigned">
                         {assignedRoles.length > 0 ? (() => {
                             const visibleRoles = assignedRoles.slice(0, MAX_VISIBLE_ROLES);
-                            const extraRoles = assignedRoles.slice(MAX_VISIBLE_ROLES);
                             return (
                                 <div className="flex flex-wrap gap-1">
                                     {visibleRoles.map((role, i) => (

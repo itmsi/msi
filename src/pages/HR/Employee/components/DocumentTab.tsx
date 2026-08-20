@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import type { OnBoardDocument } from '../../Candidate/types/hr';
 import { documentService } from '../../Candidate/services/hrService';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaTrash, FaDownload, FaFileLines, FaFolderOpen, FaXmark } from 'react-icons/fa6';
+import { FaDownload, FaFileLines, FaFolderOpen, FaXmark } from 'react-icons/fa6';
 import { BsFiletypePdf, BsFiletypeDoc, BsFiletypeXls } from 'react-icons/bs';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
-import { Tooltip } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdAdd } from 'react-icons/md';
 
