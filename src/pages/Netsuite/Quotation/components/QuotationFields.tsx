@@ -8,15 +8,16 @@ import { convertDateToTanggal, formatDate, formatTanggal, parseTanggalToDate } f
 import { Calendar } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
-import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
+import Checkbox from '@/components/form/input/Checkbox';
 import { QuotationInvoiceSummary } from './QuotationItemFields';
-import { getPrimaryInfoFields, getAdditionalInfoFields, getClassificationInfoFields } from './FieldForm';
+import { getPrimaryInfoFields, getSalesInfoFields, getClassificationInfoFields, getAdditionalInfoFields } from './FieldForm';
 
 interface QuotationFormFieldsProps {
     formData: QuotationFormData;
     errors: Record<string, string>;
     masterData: MasterDataFormFieldItems | null;
     loadingMasterData: boolean;
+    tranid?: string;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
     onSelectChange: (field: string, value: any) => void;
     onDateChange: (field: string, value: string) => void;
@@ -85,6 +86,7 @@ export default function QuotationFields({
     errors,
     masterData,
     loadingMasterData,
+    tranid,
     onInputChange,
     onSelectChange,
     onDateChange,
@@ -302,6 +304,24 @@ export default function QuotationFields({
 
     const renderField = (field: any) => {
         switch (field.type) {
+            case 'display': {
+                const val = field.staticValue !== undefined
+                    ? field.staticValue
+                    : (formData[field.name as keyof QuotationFormData] as any);
+                return (
+                    <div>
+                        <Label htmlFor={`quo-${field.name}`}>{field.label}</Label>
+                        <Input
+                            id={`quo-${field.name}`}
+                            name={field.name}
+                            value={val || '-'}
+                            disabled
+                            onChange={() => {}}
+                        />
+                    </div>
+                );
+            }
+
             case 'text':
             case 'number':
                 return renderInput(field);
@@ -507,11 +527,33 @@ export default function QuotationFields({
         }
     };
 
-    const primaryFields = getPrimaryInfoFields(masterData);
-    const additionalFields = getAdditionalInfoFields(masterData);
+    const primaryFields = getPrimaryInfoFields(masterData, tranid);
+    const primaryCol1 = primaryFields.filter((f) => f.column === 1);
+    const primaryCol2 = primaryFields.filter((f) => f.column === 2);
+
+    const salesFields = getSalesInfoFields();
+    const salesCol1 = salesFields.filter((f) => f.column === 1);
+    const salesCol2 = salesFields.filter((f) => f.column === 2);
+    const salesCol3 = salesFields.filter((f) => f.column === 3);
+
     const classificationFields = getClassificationInfoFields(
         masterData,
         formData.subsidiary ? Number(formData.subsidiary) : undefined
+    );
+    const classCol1 = classificationFields.filter((f) => f.column === 1);
+    const classCol2 = classificationFields.filter((f) => f.column === 2);
+    const classCol3 = classificationFields.filter((f) => f.column === 3);
+
+    const additionalFields = getAdditionalInfoFields(masterData);
+
+    const renderColumn = (fields: any[]) => (
+        <div className="space-y-4">
+            {fields.map((field) => (
+                <div key={field.name}>
+                    {renderField(field)}
+                </div>
+            ))}
+        </div>
     );
 
     return (
@@ -522,18 +564,95 @@ export default function QuotationFields({
                 <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
                     <h3 className="text-md font-primary-bold font-medium text-gray-900">Primary Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {primaryFields.map((field) => (
-                            <div key={field.name}>
-                                {renderField(field)}
-                            </div>
-                        ))}
+                        {renderColumn(primaryCol1)}
+                        {renderColumn(primaryCol2)}
                     </div>
                 </div>
 
-                {/* Additional Information */}
+                {/* Approval Information */}
+                <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                    <h3 className="text-md font-primary-bold font-medium text-gray-900">Approval Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-4">
+                            <div>
+                                <Label htmlFor="quo-approval-status">Approval Status</Label>
+                                <Input
+                                    id="quo-approval-status"
+                                    name="approval_status_display"
+                                    value={formData.custbody_me_approval_status_name || '-'}
+                                    disabled
+                                    onChange={() => {}}
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="quo-created-by">Created By</Label>
+                                <Input
+                                    id="quo-created-by"
+                                    name="created_by_display"
+                                    value={formData.custbody_me_wf_created_by_name || '-'}
+                                    disabled
+                                    onChange={() => {}}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <Label htmlFor="quo-delegate-approver">Delegate Approver</Label>
+                                <Input
+                                    id="quo-delegate-approver"
+                                    name="delegate_approver_display"
+                                    value="-"
+                                    disabled
+                                    onChange={() => {}}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <Label htmlFor="quo-next-approver">Next Approver</Label>
+                                <Input
+                                    id="quo-next-approver"
+                                    name="nextapprover_display"
+                                    value={formData.nextapprover || '-'}
+                                    disabled
+                                    onChange={() => {}}
+                                />
+                            </div>
+                            <div>
+                                <Label>In Delegation</Label>
+                                <div className="mt-1 min-h-[42px] flex items-center">
+                                    <Checkbox checked={false} disabled onChange={() => {}} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sales Information */}
+                <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                    <h3 className="text-md font-primary-bold font-medium text-gray-900">Sales Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {renderColumn(salesCol1)}
+                        {renderColumn(salesCol2)}
+                        {renderColumn(salesCol3)}
+                    </div>
+                </div>
+
+                {/* Classification */}
+                <div className="bg-white rounded-2xl shadow-sm space-y-6 p-6">
+                    <h3 className="text-md font-primary-bold font-medium text-gray-900">Classification</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {renderColumn(classCol1)}
+                        {renderColumn(classCol2)}
+                        {renderColumn(classCol3)}
+                    </div>
+                </div>
+
+                {/* Additional Information — not part of NetSuite's visible Estimate sections,
+                    kept here since these fields are still required for create/update */}
                 <div className="bg-white rounded-2xl shadow-sm space-y-6 p-6">
                     <h3 className="text-md font-primary-bold font-medium text-gray-900">Additional Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {additionalFields.map((field) => (
                             <div key={field.name}>
                                 {renderField(field)}
@@ -541,42 +660,8 @@ export default function QuotationFields({
                         ))}
                     </div>
                 </div>
-
-                {/* Classification */}
-                <div className="bg-white rounded-2xl shadow-sm space-y-6 p-6">
-                    <h3 className="text-md font-primary-bold font-medium text-gray-900">Classification</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                        {classificationFields.map((field) => (
-                            <div key={field.name}>
-                                {renderField(field)}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {(formData.custbody_me_approval_status === 2 || formData.custbody_me_approval_status === 3) && (
-                    <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
-                        <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Approval</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <p className='mb-1.5 block text-sm text-gray-700'>Approval Status</p>
-                                <StatusTypeBadge
-                                    type={Number(formData.custbody_me_approval_status) as 1 | 2 | 3}
-                                />
-                            </div>
-                            <div>
-                                <p className='mb-1.5 block text-sm text-gray-700'>Next Approver</p>
-                                <p>{formData.nextapprover || '-'}</p>
-                            </div>
-                            <div>
-                                <p className='mb-1.5 block text-sm text-gray-700'>Created By</p>
-                                <p className='break-words'>{formData.custbody_msi_createdby_api || '-'}</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
-            {(formData.custbody_me_approval_status === 2 || formData.custbody_me_approval_status === 3) && (
+            {isApprovedReadOnly && formData.items && formData.items.length > 0 && (
                 <div className="sticky top-0 self-start lg:px-4 mb-6">
                     <div className='bg-white rounded-2xl shadow-sm p-6'>
                         <QuotationInvoiceSummary items={formData.items} currency={formData.currency_name || ''} />

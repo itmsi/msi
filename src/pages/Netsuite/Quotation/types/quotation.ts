@@ -217,6 +217,8 @@ export interface QuotationFormData {
     custbody_me_approval_status?: number | null;
     custbody_me_approval_status_name?: string;
     custbody_msi_createdby_api: string;
+    custbody_me_wf_created_by?: string;
+    custbody_me_wf_created_by_name?: string;
     items: QuotationFormItem[];
     total_amount: number;
     nextapprover?: string | null;
@@ -243,10 +245,13 @@ export interface QuotationFormItem {
     taxcode_name?: string;
     pricelevel?: number | null;
     pricelevel_name?: string;
+    item_displayname?: string;
     unit?: string | null;
     tax_rate?: string;
     gross_amount?: number;
     tax_amount?: number;
+    quantityonhand?: string | null;
+    quantityavailable?: string | null;
 }
 
 export interface FormFieldItemsResponse {

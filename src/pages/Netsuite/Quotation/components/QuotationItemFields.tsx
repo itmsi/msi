@@ -4,7 +4,7 @@ import Label from '@/components/form/Label';
 import InputField from '@/components/form/input/InputField';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import { QuotationFormData, QuotationFormItem } from '../types/quotation';
-import { formatCurrencyDynamic, formatCurrencyTyping, formatNumberPriceKoma, handleCurrencyKeyPress, handleKeyPress, parseCurrencyIDR } from '@/helpers/generalHelper';
+import { formatCurrencyDynamic, formatCurrencyTyping, formatNumberInput, formatNumberPriceKoma, handleCurrencyKeyPress, handleKeyPress, parseCurrencyIDR } from '@/helpers/generalHelper';
 import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
 import Button from '@/components/ui/button/Button';
 import { TableColumn } from 'react-data-table-component';
@@ -160,15 +160,39 @@ export default function QuotationItemFields({
     const itemColumns: TableColumn<QuotationFormItem>[] = [
         {
             name: 'Item',
-            selector: (row: QuotationFormItem) => row.item_name || 'N/A',
+            selector: (row: QuotationFormItem) => row.item_displayname || 'N/A',
             cell: row => (
                 <div className="items-center gap-3 py-2">
-                    <div className="font-medium text-gray-900">{row.item_name || 'N/A'}</div>
-                    <div className="block text-sm text-gray-500">{row.itemId || '-'}</div>
+                    <div className="font-medium text-gray-900">{row.item_displayname || 'N/A'}</div>
+                    <div className="block text-sm text-gray-500">{row.item_name || '-'}</div>
                 </div>
             ),
             grow: 2,
             width: '260px',
+        },
+        {
+            name: 'Available',
+            selector: (row: QuotationFormItem) => Number(row.quantityavailable) || 0,
+            cell: row => (
+                <div className="text-sm text-gray-700 text-center">
+                    {row.quantityavailable != null ? formatNumberInput(row.quantityavailable) || '0' : '-'}
+                </div>
+            ),
+            center: true,
+            width: '110px',
+            sortable: false,
+        },
+        {
+            name: 'On Hand',
+            selector: (row: QuotationFormItem) => Number(row.quantityonhand) || 0,
+            cell: row => (
+                <div className="text-sm text-gray-700 text-center">
+                    {row.quantityonhand != null ? formatNumberInput(row.quantityonhand) || '0' : '-'}
+                </div>
+            ),
+            center: true,
+            width: '110px',
+            sortable: false,
         },
         {
             name: 'Description',
@@ -613,9 +637,9 @@ export default function QuotationItemFields({
                     </div>
                 )}
                 {/* Invoice Summary */}
-                {(formData.custbody_me_approval_status !== 1) && (
+                {(
                     formData.items && formData.items.length > 0 && (<>
-                        <QuotationInvoiceSummary 
+                        <QuotationInvoiceSummary
                             items={formData.items} 
                             currency={formData?.currency_name || ''} 
                             serverTotal={Number(formData.total_amount)}

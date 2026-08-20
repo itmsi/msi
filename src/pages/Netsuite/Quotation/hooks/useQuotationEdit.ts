@@ -158,11 +158,14 @@ export const useQuotationEdit = (id: string | undefined) => {
                     custbody_msi_quotation_no_iec: quo.custbody_msi_quotation_no_iec || '',
                     total_amount: quo.total_amount || 0,
                     custbody_msi_createdby_api: quo.custbody_msi_createdby_api || '',
+                    custbody_me_wf_created_by: quo.custbody_me_wf_created_by || '',
+                    custbody_me_wf_created_by_name: quo.custbody_me_wf_created_by_name || '',
                     nextapprover: quo.nextapprover || null,
                     items: (quo.items || []).map((item: any, idx: number) => ({
                         id: `${item.item_id || 'item'}-${idx}-${Date.now()}`,
                         itemId: safeNumber(item.item_id) || 0,
                         item_name: item.item_name || '',
+                        item_displayname: item.item_displayname || item.item_name || '',
                         ...calcLineAmounts(item),
                         qty: calcLineAmounts(item).quantity || 0,
                         description: item.description || '',
@@ -177,6 +180,8 @@ export const useQuotationEdit = (id: string | undefined) => {
                         pricelevel: safeNumber(item.pricelevel),
                         pricelevel_name: item.pricelevel_name || '',
                         unit: item.unit || null,
+                        quantityonhand: item.quantityonhand ?? null,
+                        quantityavailable: item.quantityavailable ?? null,
                     })),
                 }));
             } else {
@@ -260,7 +265,8 @@ export const useQuotationEdit = (id: string | undefined) => {
         const newItem: QuotationFormItem = {
             id: `${selectedItem.value}-${Date.now()}`,
             itemId: Number(selectedItem.value),
-            item_name: selectedItem.label,
+            item_name: selectedItem.data?.itemId || selectedItem.label,
+            item_displayname: selectedItem.data?.displayName || selectedItem.label,
             qty: 1,
             rate: 0,
             amount: 0,
