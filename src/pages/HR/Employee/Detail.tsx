@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MdArrowBack, MdEdit, MdCalendarMonth, MdVerifiedUser, MdAssignment, MdStickyNote2 } from 'react-icons/md';
+import { MdEdit, MdCalendarMonth, MdVerifiedUser, MdAssignment, MdStickyNote2 } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
@@ -11,6 +11,7 @@ import { NotesTab } from './components/NotesTab';
 import DateInterviewTab from './components/DateInterviewTab';
 import BackgroundCheckTab from './components/BackgroundCheckTab';
 import DocumentTab from './components/DocumentTab';
+import PageHeader from '@/components/common/PageHeader';
 
 type TabKey = 'interview' | 'bgcheck' | 'documents' | 'notes';
 
@@ -36,39 +37,27 @@ export default function EmployeeCandidateDetail() {
             />
 
             <div className="space-y-4">
-                <div className="bg-white rounded-2xl border border-[#E7E9F0] shadow-sm">
-                    <div className="px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => navigate('/hr/candidate')}
-                                className="p-2 hover:bg-[#F5F6F8] rounded-full transition-colors text-[#5B6480]"
-                                title="Back to Candidates"
-                            >
-                                <MdArrowBack size={22} />
-                            </button>
-                            <div>
-                                <h3 className="text-lg font-primary-bold text-[#1F2430]">
-                                    {candidate ? candidate.candidate_name : 'Candidate Detail'}
-                                </h3>
-                                {candidate && (
-                                    <p className="text-xs text-[#9AA2BA] mt-0.5">{candidate.candidate_number}</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {candidate && (
-                            <PermissionGate permission="update">
-                                <Button
-                                    size="sm"
-                                    startIcon={<MdEdit size={14} />}
-                                    onClick={() => navigate(`/hr/candidate/${candidate.candidate_id}/edit`)}
-                                >
-                                    Edit
-                                </Button>
-                            </PermissionGate>
-                        )}
-                    </div>
-                </div>
+                <PageHeader
+                    title="Edit Purchase Order"
+                    backPath={() => navigate('/hr/candidate')}
+                    subtitle={candidate?.candidate_number || '-'}
+                    actions={
+                        <>
+                            {candidate && (
+                                <PermissionGate permission="update">
+                                    <Button
+                                        size="sm"
+                                        startIcon={<MdEdit size={14} />}
+                                        onClick={() => navigate(`/hr/candidate/${candidate.candidate_id}/edit`)}
+                                        className="flex items-center gap-2 py-2"
+                                    >
+                                        Edit
+                                    </Button>
+                                </PermissionGate>
+                            )}
+                        </>
+                    }
+                />
 
                 {loading && !candidate ? (
                     <div className="grid lg:grid-cols-[340px_1fr] gap-5 items-start">
@@ -77,26 +66,25 @@ export default function EmployeeCandidateDetail() {
                     </div>
                 ) : error || !candidate ? (
                     <div className="bg-white rounded-2xl border border-[#E7E9F0] py-16 text-center">
-                        <div className="text-[#3A4260] font-medium mb-1">Candidate not found</div>
+                        <div className="text-[#3A4260] font-primary-bold mb-1">Candidate not found</div>
                         <div className="text-[13px] text-[#9AA2BA]">{error || 'This candidate may have been removed.'}</div>
                     </div>
                 ) : (
                     <div className="grid lg:grid-cols-[340px_1fr] gap-5 items-start">
                         <CandidateProfileSidebar candidate={candidate} />
 
-                        <div>
-                            <div className="flex gap-1 px-3 pt-2">
+                        <div className='overflow-auto pb-3'>
+                            <div className="flex gap-1 px-3 pt-2 overflow-x-auto overflow-y-hidden">
                                 {TABS.map((t) => {
                                     const isActive = tab === t.key;
                                     return (
                                         <button
                                             key={t.key}
                                             onClick={() => setTab(t.key)}
-                                            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium whitespace-nowrap rounded-t-xl border border-b-0 transition-colors ${
-                                                isActive
-                                                    ? 'bg-white text-[#1F2430]  border-t-2xl shadow-[0_-8px_3px_-8px_rgba(15,23,42,0.16),-4px_0_10px_-6px_rgba(15,23,42,0.08),4px_0_10px_-6px_rgba(15,23,42,0.08)] border-[#E7E9F0] -mb-px'
-                                                    : 'bg-transparent text-[#9AA2BA] hover:text-[#5B6480] border-transparent'
-                                            }`}
+                                            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm whitespace-nowrap rounded-t-xl border border-b-0 transition-colors ${isActive
+                                                ? 'bg-white font-primary-bold text-[#1F2430]  border-t-2xl shadow-[0_-8px_3px_-8px_rgba(15,23,42,0.16),-4px_0_10px_-6px_rgba(15,23,42,0.08),4px_0_10px_-6px_rgba(15,23,42,0.08)] border-[#E7E9F0] -mb-px'
+                                                : 'bg-transparent text-[#9AA2BA] hover:text-[#5B6480] border-transparent'
+                                                }`}
                                         >
                                             <t.icon size={15} /> {t.label}
                                         </button>
@@ -104,7 +92,7 @@ export default function EmployeeCandidateDetail() {
                                 })}
                             </div>
 
-                            <div className="p-5 bg-white rounded-2xl border border-[#E7E9F0] shadow-sm overflow-hidden">
+                            <div className="p-5 bg-white rounded-2xl shadow-sm overflow-hidden">
                                 <AnimatePresence mode="wait" initial={false}>
                                     <motion.div
                                         key={tab}

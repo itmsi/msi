@@ -10,10 +10,10 @@ interface StatCardProps {
     iconClassName?: string;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ 
-    title, 
-    value, 
-    description, 
+export const StatCard: React.FC<StatCardProps> = ({
+    title,
+    value,
+    description,
     Icon,
     className = '',
     iconClassName = ""
@@ -26,12 +26,12 @@ export const StatCard: React.FC<StatCardProps> = ({
                     {value}
                 </p>
             </div>
-            
+
             {/* Bagian bawah hanya akan dirender jika ada description atau Icon */}
             {(description || Icon) && (
-                <div className="px-6 [&:last-child]:pb-6">
+                <div className="px-6 last:pb-6">
                     <div className="flex items-center justify-end gap-2 text-sm text-slate-500">
-                        {Icon && <Icon className={`h-4 w-4 absolute top-0 bottom-0 m-auto left-5 opacity-20 ${iconClassName}`} style={{transform: 'scale(10)'}} />}
+                        {Icon && <Icon className={`h-4 w-4 absolute top-0 bottom-0 m-auto left-5 opacity-20 ${iconClassName}`} style={{ transform: 'scale(10)' }} />}
                         <span>{description}</span>
                     </div>
                 </div>

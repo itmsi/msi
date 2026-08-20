@@ -801,7 +801,7 @@ export default function CreateQuotation() {
                 <Input
                     value={row.componen_product_name}
                     onChange={(e) => updateItemById(index as number, 'componen_product_name', e.target.value)}
-                    className="border-0 border-b-1 rounded-none p-1 px-3 w-full w-[480px]"
+                    className="border-0 border-b rounded-none p-1 px-3 w-full"
                     placeholder="Product name"
                     readonly
                 />
@@ -829,7 +829,7 @@ export default function CreateQuotation() {
                             updateItemById(index as number, 'quantity', 1);
                         }
                     }}
-                    className="border-0 border-b-1 rounded-none p-1 px-3 w-[80px] text-center"
+                    className="border-0 border-b rounded-none p-1 px-3 w-20 text-center"
                 />
             ),
             wrap: true,
@@ -844,7 +844,7 @@ export default function CreateQuotation() {
                     value={row.price}
                     onChange={(e) => updateItemById(index as number, 'price', e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="border-0 border-b-1 rounded-none p-1 px-3 w-[150px] text-center"
+                    className="border-0 border-b rounded-none p-1 px-3 w-37.5 text-center"
                     placeholder='input price'
                 />
             ),
@@ -1614,7 +1614,7 @@ export default function CreateQuotation() {
                         </div>
 
                         {/* Totals Summary */}
-                        <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
+                        <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-2">
                             <div className="space-y-3">
                                 <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
                                     <Label htmlFor="manage_quotation_items" className='text-end'>{langField('subtotal')}</Label>
@@ -1849,7 +1849,7 @@ export default function CreateQuotation() {
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
+                        <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-2">
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('additionalPages')}</h2>
                             <div className="space-y-4">
                                 <div className="flex items-center gap-3">

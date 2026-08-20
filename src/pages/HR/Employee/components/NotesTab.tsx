@@ -5,6 +5,7 @@ import { notesService } from '../../Candidate/services/hrService';
 import type { NoteItem } from '../../Candidate/types/hr';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import { PermissionButton } from '@/components/common/PermissionComponents';
 
 interface NotesTabProps {
     candidateId: string;
@@ -65,18 +66,18 @@ export function NotesTab({ candidateId, remark, isActive }: NotesTabProps) {
 
     return (
         <div className="space-y-3">
-            <div className="bg-white rounded-2xl border border-[#E7E9F0] p-4 flex gap-2">
+            <div className="bg-white rounded-2xl flex gap-2">
                 <input
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
                     placeholder="Write a note about this candidate..."
-                    className="flex-1 text-[13px] px-3 py-2 rounded-lg border border-[#E7E9F0] focus:outline-none focus:ring-2 focus:ring-[#8B93B8]/30"
+                    className="flex-1 px-3 py-2 font-secondary h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3:text-white/30"
                 />
                 <button
                     onClick={handleAdd}
                     disabled={submitting || !text.trim()}
-                    className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white bg-[#1F2430] hover:opacity-90 disabled:opacity-40 transition-opacity shrink-0"
+                    className="flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-primary-bold text-white bg-[#0253a5] hover:opacity-90 disabled:opacity-40 transition-opacity shrink-0"
                 >
                     <MdSend size={13} /> Send
                 </button>
@@ -84,7 +85,7 @@ export function NotesTab({ candidateId, remark, isActive }: NotesTabProps) {
 
             {remark && (
                 <div className="bg-[#FFFBEB] rounded-2xl border border-[#F4E3C4] p-4">
-                    <span className="text-[11px] font-semibold uppercase tracking-wide flex items-center gap-1.5 text-[#8A5D1E]">
+                    <span className="text-[11px] font-primary-bold uppercase tracking-wide flex items-center gap-1.5 text-[#8A5D1E]">
                         <MdStickyNote2 size={13} /> Remark
                     </span>
                     <p className="text-sm text-[#3A4260] mt-1.5 leading-relaxed">{remark}</p>
@@ -100,12 +101,17 @@ export function NotesTab({ candidateId, remark, isActive }: NotesTabProps) {
                     {notes.map((n) => (
                         <div key={n.note_id} className="bg-white rounded-2xl border border-[#E7E9F0] p-4">
                             <div className="flex items-center justify-between">
-                                <span className="text-sm font-semibold text-[#1F2430]">{n.created_by_name || n.created_by || '-'}</span>
+                                <span className="text-sm font-primary-bold text-[#1F2430]">{n.created_by_name || n.created_by || '-'}</span>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs text-[#9AA2BA]">{formatIndonesianDate(n.created_at)}</span>
-                                    <button onClick={() => setDeleteId(n.note_id)} title="Delete note" className="text-[#C4C9DA] hover:text-red-500 transition">
-                                        <MdDelete size={14} />
-                                    </button>
+
+                                    <PermissionButton
+                                        permission={'delete'}
+                                        onClick={() => setDeleteId(n.note_id)}
+                                        className={`text-[#C4C9DA] hover:text-red-500 transition border-none ring-0 p-0`}
+                                    >
+                                        <MdDelete size={20} />
+                                    </PermissionButton>
                                 </div>
                             </div>
                             <p className="text-sm text-[#5B6480] mt-1.5 leading-relaxed whitespace-pre-wrap">{n.notes}</p>

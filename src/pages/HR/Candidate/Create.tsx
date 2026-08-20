@@ -1,4 +1,4 @@
-import CreateCandidateForm from './CreateCandidateForm';
+import CreateCandidateForm from '../Employee/CreateCandidateForm';
 import { useNavigate } from 'react-router';
 import PageMeta from '@/components/common/PageMeta';
 
@@ -15,7 +15,7 @@ const CreatePage = () => {
 
         <CreateCandidateForm
             onSave={() => navigate('/hr/candidate')}
-            onCancel={() => navigate('/hr/candidate')}
+            onCancel={() => goBack('/hr/candidate')}
         />
     </>);
 };

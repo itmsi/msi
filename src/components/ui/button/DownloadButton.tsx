@@ -32,7 +32,7 @@ const Spinner = () => (
             fill="currentColor"
             d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
         />
-  </svg>
+    </svg>
 );
 const DownloadIcon = ({ variant }: { variant: string }) => {
     const base =
@@ -63,7 +63,7 @@ export const DownloadButton = ({
     disabled = false,
     showIcon = true,
     showLabel = true,
-  onClick,
+    onClick,
 }: DownloadButtonProps) => {
     return (
         <Button
@@ -71,26 +71,25 @@ export const DownloadButton = ({
             variant="outline"
             size="sm"
             disabled={loading || disabled}
-            className={`px-1.5 py-1 rounded-full transition hover:shadow-md h-9 ring-0 bg-gradient-to-br from-gray-100 to-blue-200 ${
-                loading || disabled ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`px-1.5 py-1 rounded-full transition hover:shadow-md h-9 ring-0 bg-gradient-to-br from-gray-100 to-blue-200 ${loading || disabled ? "opacity-50 cursor-not-allowed" : ""
+                }`}
         >
-        {loading ? (
-            <>
-                <Spinner />
-                <span>Preparing file...</span>
-            </>
+            {loading ? (
+                <>
+                    <Spinner />
+                    <span>Preparing file...</span>
+                </>
             ) : (
-            <>
-                {showIcon && <DownloadIcon variant={variant} />}
+                <>
+                    {showIcon && <DownloadIcon variant={variant} />}
 
-                {showLabel && (
-                    <span className="mr-2">
-                        {fileName}
-                        {fileSize && ` (${fileSize})`}
-                    </span>
-                )}
-            </>
+                    {showLabel && (
+                        <span className="mr-2">
+                            {fileName}
+                            {fileSize && ` (${fileSize})`}
+                        </span>
+                    )}
+                </>
             )}
         </Button>
     );

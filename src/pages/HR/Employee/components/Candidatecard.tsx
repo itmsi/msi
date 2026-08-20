@@ -9,13 +9,16 @@ import {
     MdEdit,
     MdMoreVert,
     MdSchedule,
+    MdDeleteOutline,
 } from 'react-icons/md';
 import type { CandidateItem } from '../types/Candidate';
+import { getRoleStyle } from '../utils/roleStyle';
 
 interface CandidateCardProps {
     candidate: CandidateItem;
     onView: (candidate: CandidateItem) => void;
     onEdit: (candidate: CandidateItem) => void;
+    onDelete: (candidate: CandidateItem) => void;
     index: number;
 }
 
@@ -83,7 +86,7 @@ function DetailRow({ label, children }: { label: string; children: ReactNode }) 
     );
 }
 
-export function CandidateCard({ candidate, onView, onEdit, index }: CandidateCardProps) {
+export function CandidateCard({ candidate, onView, onEdit, onDelete, index }: CandidateCardProps) {
     const s = STATUS_STYLE[candidate.candidate_status] || DEFAULT_STATUS_STYLE;
     const cs = candidate.company_name
         ? COMPANY_STYLE[candidate.company_name] || DEFAULT_COMPANY_STYLE
@@ -120,9 +123,10 @@ export function CandidateCard({ candidate, onView, onEdit, index }: CandidateCar
         : null;
     const interviewTime = candidate.schedule_interview?.schedule_interview_time || null;
     const assignedRoles = normalizeAssignRole(candidate.schedule_interview?.assign_role);
+    const MAX_VISIBLE_ROLES = 5;
 
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * .1, duration: 0.2 }}
@@ -160,12 +164,24 @@ export function CandidateCard({ candidate, onView, onEdit, index }: CandidateCar
                         >
                             <MdEdit size={14} /> Edit candidate
                         </button>
+                        <button
+                            type="button"
+                            role="menuitem"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setMenuOpen(false);
+                                onDelete(candidate);
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-[13px] text-[#E11D48] hover:bg-[#FFF1F2] transition"
+                        >
+                            <MdDeleteOutline size={14} /> Delete candidate
+                        </button>
                         {/* TODO: tambahkan aksi lain di sini kalau endpoint-nya sudah ada,
                             mis. "Update status", "Send offering letter", "Delete candidate" */}
                     </div>
                 )}
             </div>
-            <div 
+            <div
                 role="button"
                 tabIndex={0}
                 onClick={handleCardClick}
@@ -189,7 +205,7 @@ export function CandidateCard({ candidate, onView, onEdit, index }: CandidateCar
                                     {candidate.candidate_number}
                                 </span>
                                 <span
-                                    className="inline-flex items-center gap-1 text-[10.5px] font-medium px-2 py-0.5 rounded-full"
+                                    className="inline-flex items-center gap-1 text-[10.5px] font-primary-bold px-2 py-0.5 rounded-full"
                                     style={{ background: s.bg, color: s.fg }}
                                 >
                                     <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.dot }} />
@@ -206,7 +222,7 @@ export function CandidateCard({ candidate, onView, onEdit, index }: CandidateCar
                             <span
                                 className="inline-flex items-center text-[11.5px] font-secondary font-semibold px-2 py-0.5 rounded-md"
                                 style={{ background: cs.bg, color: cs.fg }}
-                                // style={{ background: `linear-gradient(90deg, ${cs.fg}, ${s.fg + '50'})` }}
+                            // style={{ background: `linear-gradient(90deg, ${cs.fg}, ${s.fg + '50'})` }}
                             >
                                 {candidate.company_name}
                             </span>
@@ -232,18 +248,21 @@ export function CandidateCard({ candidate, onView, onEdit, index }: CandidateCar
                         )}
                     </DetailRow>
                     <DetailRow label="Assigned">
-                        {assignedRoles.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                                {assignedRoles.map((role) => (
-                                    <span
-                                        key={role}
-                                        className="inline-flex items-center text-[10px] font-secondary font-semibold px-1.5 py-0.5 rounded bg-[#F0F1F5] "
-                                    >
-                                        {role}
-                                    </span>
-                                ))}
-                            </div>
-                        ) : (
+                        {assignedRoles.length > 0 ? (() => {
+                            const visibleRoles = assignedRoles.slice(0, MAX_VISIBLE_ROLES);
+                            return (
+                                <div className="flex flex-wrap gap-1">
+                                    {visibleRoles.map((role, i) => (
+                                        <span
+                                            key={i}
+                                            className={`shrink-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-secondary font-semibold border rounded-full ${getRoleStyle(role)}`}
+                                        >
+                                            {role.toUpperCase()}
+                                        </span>
+                                    ))}
+                                </div>
+                            );
+                        })() : (
                             <span className="font-normal text-[#C4C9DA] italic">Unassigned</span>
                         )}
                     </DetailRow>
@@ -256,7 +275,7 @@ export function CandidateCard({ candidate, onView, onEdit, index }: CandidateCar
                                 <offering.Icon size={12} /> {offering.label}
                             </span>
                         ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-[#F5F6F8] text-[#9AA2BA]">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-primary-bold px-2 py-0.5 rounded-md bg-[#F5F6F8] text-[#9AA2BA]">
                                 <MdHelpOutline size={12} /> Awaiting
                             </span>
                         )}
@@ -266,7 +285,7 @@ export function CandidateCard({ candidate, onView, onEdit, index }: CandidateCar
                 {candidate.group_name && (
                     <div className="mb-4 mt-2">
                         <span
-                            className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md"
+                            className="inline-flex items-center gap-1 text-[11px] font-primary-bold px-2 py-0.5 rounded-md"
                             style={{ background: `hsl(${h} 60% 96%)`, color: `hsl(${h} 55% 38%)` }}
                         >
                             <MdGroup size={12} /> {candidate.group_name}
@@ -297,10 +316,10 @@ export const animationVariants = {
             x: 0,
             transition: { duration: 0.3, ease: 'easeOut' }
         },
-        exit: { 
-            opacity: 0, 
+        exit: {
+            opacity: 0,
             x: -10,
-            transition: { 
+            transition: {
                 duration: 0.2,
                 ease: "easeIn"
             }
@@ -311,16 +330,16 @@ export const animationVariants = {
         visible: (index: any) => ({
             opacity: 1,
             x: 0,
-            transition: { 
+            transition: {
                 duration: 0.2,
                 delay: index * 0.07,
                 ease: "easeOut"
             }
         }),
-        exit: { 
-            opacity: 0, 
+        exit: {
+            opacity: 0,
             x: -10,
-            transition: { 
+            transition: {
                 duration: 0.1,
                 ease: "easeIn"
             }

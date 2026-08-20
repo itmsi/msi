@@ -83,7 +83,7 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
                 </span>
 
                 <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold mt-3"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-secondary font-semibold mt-3"
                     style={{ background: s.bg, color: s.fg }}
                 >
                     <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.dot }} />
@@ -92,7 +92,7 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
 
                 {candidate.group_name && (
                     <span
-                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium mt-2"
+                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-secondary font-medium mt-2"
                         style={{ background: `hsl(${h} 60% 96%)`, color: `hsl(${h} 55% 38%)` }}
                     >
                         <MdGroup size={12} /> {candidate.group_name}
@@ -149,7 +149,7 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
                         href={resumeUrl.startsWith('http') ? `${resumeUrl}/download` : resumeUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-white bg-[#1F2430] hover:opacity-90 transition-opacity"
+                        className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-secondary font-semibold text-white bg-[#1F2430] hover:opacity-90 transition-opacity"
                     >
                         <MdOutlineFileDownload size={15} /> Download CV
                     </a>

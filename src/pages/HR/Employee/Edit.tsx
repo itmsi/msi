@@ -2,8 +2,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MdArrowBack } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
 import { useCandidateDetail } from './hooks/UsecandidateDetail';
-import CreateCandidateForm from '../Candidate/CreateCandidateForm';
-import type { Candidate } from '../Candidate/types/hr';
+import CreateCandidateForm from './CreateCandidateForm';
+import type { Candidate } from './types/hr';
 
 export default function EmployeeCandidateEdit() {
     const { id } = useParams<{ id: string }>();
@@ -37,7 +37,7 @@ export default function EmployeeCandidateEdit() {
                             <div className="h-64 animate-pulse rounded-lg bg-[#F5F6F8]" />
                         ) : error || !candidate ? (
                             <div className="text-center py-10">
-                                <p className="text-[#3A4260] font-medium mb-1">Candidate not found</p>
+                                <p className="text-[#3A4260] font-primary-bold mb-1">Candidate not found</p>
                                 <p className="text-[13px] text-[#9AA2BA]">{error || 'This candidate may have been removed.'}</p>
                             </div>
                         ) : (

@@ -379,7 +379,8 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                                     </div>
                                                 </div>
                                             )}
-                                            <div className="image-placeholder hidden flex items-center justify-center w-50 h-50 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
+                                            {/* Hidden placeholder for error handling */}
+                                            <div className="image-placeholder hidden items-center justify-center w-50 h-50 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
                                                 <div className="text-center">
                                                     <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -454,6 +455,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
 
                 {activeTab === 'specifications' && (
                     <div className='product-spesification-information'>
+                        {/* Product Basic Info */}
                         <div className="border-b border-gray-200 pb-6">
                             <h4 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('basicInformation')}</h4>
                             <div className="grid grid-cols-3 gap-4">
@@ -718,7 +720,11 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 {/* Accessories Tab */}
                 {activeTab === 'accessories' && (
                     <div className='product-accessories-information'>
+                        {/* Accessories Section */}
+
                         <h4 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">{langField('accessories')}</h4>
+
+                        {/* Add Accessory */}
                         <div className="flex gap-4 mb-6">
                             <div className="flex-1">
                                 <CustomAsyncSelect
@@ -799,7 +805,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 return flatImages.length > 0 && flatImages[selectedImageIndex]?.image_url;
             })() && (
                     <div
-                        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black-900 backdrop-blur-sm"
+                        className="fixed inset-0 z-9999 flex items-center justify-center bg-black-900 backdrop-blur-sm"
                         onClick={() => setShowImageModal(false)}
                     >
                         <div className="relative max-w-4xl max-h-[90vh] p-4 overflow-hidden">

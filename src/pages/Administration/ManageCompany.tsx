@@ -35,7 +35,7 @@ export default function ManageCompany() {
         handleCloseModal,
         handlePageChange,
         fetchCompanies,
-        
+
         // Filter actions
         handleFilterChange,
         handleSearchChange,
@@ -75,8 +75,8 @@ export default function ManageCompany() {
             selector: row => row.company_address || '-',
         },
         createDateColumn(
-            'Created', 
-            'created_at', 
+            'Created',
+            'created_at',
             tableDateFormat
         ),
         createActionsColumn([
@@ -147,11 +147,11 @@ export default function ManageCompany() {
                             <CustomSelect
                                 id="sort_by"
                                 name="sort_by"
-                                value={filters.sort_by ? { 
-                                    value: filters.sort_by, 
-                                    label: filters.sort_by === 'company_name' ? 'Company Name' : 'Created Date' 
+                                value={filters.sort_by ? {
+                                    value: filters.sort_by,
+                                    label: filters.sort_by === 'company_name' ? 'Company Name' : 'Created Date'
                                 } : null}
-                                onChange={(selectedOption) => 
+                                onChange={(selectedOption) =>
                                     handleFilterChange('sort_by', selectedOption?.value || '')
                                 }
                                 options={[
@@ -170,11 +170,11 @@ export default function ManageCompany() {
                             <CustomSelect
                                 id="sort_order"
                                 name="sort_order"
-                                value={filters.sort_order ? { 
-                                    value: filters.sort_order, 
-                                    label: filters.sort_order === 'asc' ? 'Ascending' : 'Descending' 
+                                value={filters.sort_order ? {
+                                    value: filters.sort_order,
+                                    label: filters.sort_order === 'asc' ? 'Ascending' : 'Descending'
                                 } : null}
-                                onChange={(selectedOption) => 
+                                onChange={(selectedOption) =>
                                     handleFilterChange('sort_order', selectedOption?.value || '')
                                 }
                                 options={[
@@ -332,11 +332,10 @@ export default function ManageCompany() {
                             </Button>
                             <Button
                                 disabled={loading}
-                                className={`rounded-[50px] ${
-                                    Object.keys(validationErrors).length > 0 
-                                            ? 'bg-red-600 hover:bg-red-700' 
-                                            : 'bg-blue-600 hover:bg-blue-700'
-                                } text-white`}
+                                className={`rounded-[50px] ${Object.keys(validationErrors).length > 0
+                                        ? 'bg-red-600 hover:bg-red-700'
+                                        : 'bg-blue-600 hover:bg-blue-700'
+                                    } text-white`}
                             >
                                 {loading ? 'Saving...' : (editingCompany ? 'Update Company' : 'Create Company')}
                             </Button>

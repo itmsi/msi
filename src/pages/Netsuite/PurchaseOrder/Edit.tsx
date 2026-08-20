@@ -32,7 +32,7 @@ export default function Edit() {
     const listRoute = `/netsuite/purchase-order/manage${location.search}`;
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
-    
+
     const {
         isSubmitting,
         setIsSubmitting,
@@ -72,7 +72,7 @@ export default function Edit() {
         initialized: locationInitialized,
         isLoading: locationLoading
     } = usePOLocationSelect(30, false, subsidiaryId);
-    
+
     const [selectedLocation, setSelectedLocation] = useState<any>(null);
     const [locationSelectError, setLocationSelectError] = useState<string>('');
     const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
@@ -89,7 +89,7 @@ export default function Edit() {
             }
         }
     }, [locationInitialized, locationLoading, hasAttemptedInitialization]);
-    
+
     // Class select untuk items
     const {
         POClassOptions,
@@ -101,10 +101,10 @@ export default function Edit() {
         initialized: classInitialized,
         isLoading: classLoading
     } = usePOClassSelect(30, subsidiaryId, profileSSOId);
-    
+
     const [selectedClass, setSelectedClass] = useState<any>(null);
     const [classSelectError, setClassSelectError] = useState<string>('');
-    
+
     // Department select untuk items
     const {
         PODepartmentOptions,
@@ -116,7 +116,7 @@ export default function Edit() {
         initialized: departmentInitialized,
         isLoading: departmentLoading
     } = usePODepartmentSelect(30, subsidiaryId);
-    
+
     const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
     const [departmentSelectError, setDepartmentSelectError] = useState<string>('');
 
@@ -129,7 +129,7 @@ export default function Edit() {
             }
         }
     }, [classInitialized, classLoading, initializeItemClassOptions]);
-    
+
     useEffect(() => {
         if (initializeItemDepartmentOptions && !departmentInitialized && !departmentLoading) {
             try {
@@ -145,7 +145,7 @@ export default function Edit() {
         if (isInitialLoadComplete && subsidiaryId && formData?.subsidiary && poDetail) {
             const currentSubsidiary = Number(formData.subsidiary);
             const initialSubsidiary = Number(poDetail.subsidiary);
-            
+
             if (currentSubsidiary !== initialSubsidiary) {
                 try {
                     setSelectedLocation(null);
@@ -157,38 +157,38 @@ export default function Edit() {
             }
         }
     }, [subsidiaryId, isInitialLoadComplete, formData?.subsidiary, poDetail]);
-    
+
     const {
         POVendorOptions,
-        pagination : vendorPagination,
-        inputValue : vendorInputValue,
+        pagination: vendorPagination,
+        inputValue: vendorInputValue,
         handleInputChange: handleVendorInputChange,
         handleMenuScrollToBottom: handleVendorMenuScrollToBottom,
         initializeOptions: initializeVendorOptions,
     } = usePOVendorSelect();
-    
+
     const [selectedVendor, setSelectedVendor] = useState<any>(null);
     const [VendorSelectError, setVendorSelectError] = useState<string>('');
-    
+
     useEffect(() => {
         if (initializeVendorOptions) {
             initializeVendorOptions();
         }
     }, [initializeVendorOptions]); // Add function dependency back
-    
+
     // Term select
     const {
         POTermOptions,
-        pagination : termPagination,
-        inputValue : termInputValue,
+        pagination: termPagination,
+        inputValue: termInputValue,
         handleInputChange: handleTermInputChange,
         handleMenuScrollToBottom: handleTermMenuScrollToBottom,
         initializeOptions: initializeTermOptions,
     } = usePOTermSelect();
-    
+
     const [selectedTerm, setSelectedTerm] = useState<any>(null);
     const [TermSelectError, setTermSelectError] = useState<string>('');
-    
+
     useEffect(() => {
         if (initializeTermOptions) {
             initializeTermOptions();
@@ -226,7 +226,7 @@ export default function Edit() {
                         };
                         setSelectedLocation(locationValue);
                     }
-                    
+
                     // Set class with defensive checks
                     if (poDetail.class && poDetail.class_display) {
                         const classValue = {
@@ -235,7 +235,7 @@ export default function Edit() {
                         };
                         setSelectedClass(classValue);
                     }
-                    
+
                     // Set department with defensive checks
                     if (poDetail.department && poDetail.department_display) {
                         const departmentValue = {
@@ -244,10 +244,10 @@ export default function Edit() {
                         };
                         setSelectedDepartment(departmentValue);
                     }
-                    
+
                     // Mark initial load as complete
                     setIsInitialLoadComplete(true);
-                    
+
                 } catch (error) {
                     console.error('Failed to set initial PO data:', error);
                     setIsInitialLoadComplete(true);
@@ -283,10 +283,10 @@ export default function Edit() {
         setSelectedPoIdRejected(poId || null);
         setIsOpenRejected(true);
     };
-    
+
     const [editReceive] = useState<boolean>(false);
     // const handleSubmitReceive = (poId: string) => {}
-    
+
     const [activeTab, setActiveTab] = useState<'items' | 'files' | 'usernotes' | 'receipt' | 'historyreceipt'>('items');
 
     const {
@@ -317,7 +317,7 @@ export default function Edit() {
             </Button>
         </PermissionGate>
     );
-    
+
     return (
         <>
             <PageMeta
@@ -325,13 +325,13 @@ export default function Edit() {
                 description="Edit Netsuite purchase order"
                 image="/motor-sights-international.png"
             />
-            
+
             <div className="mx-auto px-0">
                 {(isLoading || loadingMasterData) ? (
                     <LoadingOverlay
                         message="Loading data..."
                     />
-                ) : ( <>
+                ) : (<>
                     {/* Header */}
                     <PageHeader
                         title="Edit Purchase Order"
@@ -373,10 +373,10 @@ export default function Edit() {
                                 <div className="space-y-4">
                                     <p className="text-sm text-gray-500">
                                         {
-                                            poDetail?.status_proccess_message ? (poDetail.status_proccess_message) : 
-                                            <>Your purchase order is currently being generated. Please allow some time for the process to complete. <br />
-                                            Click the refresh button below to check whether the data is already available.</>
-                                        } 
+                                            poDetail?.status_proccess_message ? (poDetail.status_proccess_message) :
+                                                <>Your purchase order is currently being generated. Please allow some time for the process to complete. <br />
+                                                    Click the refresh button below to check whether the data is already available.</>
+                                        }
                                     </p>
                                     <ElemRefresh />
                                 </div>
@@ -388,15 +388,15 @@ export default function Edit() {
                                 <div className="space-y-4">
                                     <p className="text-sm text-gray-500">
                                         {
-                                            poDetail?.status_proccess_message ? (poDetail.status_proccess_message) : 
-                                            'We were unable to generate your purchase order at this time. Please try again by clicking the refresh button below. If the issue persists, contact support for further assistance.'
-                                        } 
-                                        
+                                            poDetail?.status_proccess_message ? (poDetail.status_proccess_message) :
+                                                'We were unable to generate your purchase order at this time. Please try again by clicking the refresh button below. If the issue persists, contact support for further assistance.'
+                                        }
+
                                     </p>
                                 </div>
                             </Alert>
                         )}
-                        
+
                         {/* Purchase Order Fields */}
                         <PurchaseOrderFields
                             formData={formData}
@@ -451,7 +451,7 @@ export default function Edit() {
                                 }
                             }}
                             termError={errors.termid || TermSelectError}
-                            
+
                             // Location props  
                             locationOptions={POLocationOptions}
                             locationPagination={locationPagination}
@@ -471,7 +471,7 @@ export default function Edit() {
                                 }
                             }}
                             locationError={errors.location || locationSelectError}
-                            
+
                             // Class props  
                             classOptions={POClassOptions}
                             classPagination={itemClassPagination}
@@ -491,7 +491,7 @@ export default function Edit() {
                                 }
                             }}
                             classError={errors.class || classSelectError}
-                            
+
                             // Department props  
                             departmentOptions={PODepartmentOptions}
                             departmentPagination={itemDepartmentPagination}
@@ -519,51 +519,46 @@ export default function Edit() {
                                 <nav className="flex space-x-2 overflow-auto">
                                     <button
                                         onClick={() => setActiveTab('items')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                            activeTab === 'items'
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'items'
                                                 ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                        }`}
+                                            }`}
                                     >
                                         <MdInventory2 /> Items
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('files')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                            activeTab === 'files'
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'files'
                                                 ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                        }`}
+                                            }`}
                                     >
                                         <MdOutlineAttachFile /> Files
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('usernotes')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                            activeTab === 'usernotes'
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'usernotes'
                                                 ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                        }`}
+                                            }`}
                                     >
                                         <MdOutlineComment /> User Notes
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('receipt')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                            activeTab === 'receipt'
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'receipt'
                                                 ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                        }`}
+                                            }`}
                                     >
                                         <MdReceiptLong /> Receipt & Bill
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('historyreceipt')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                            activeTab === 'historyreceipt'
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'historyreceipt'
                                                 ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                        }`}
+                                            }`}
                                     >
                                         <MdHistory /> History Receipt
                                     </button>
@@ -584,7 +579,7 @@ export default function Edit() {
                                         onProductDelete={handleProductDelete}
                                         onProductCopy={handleProductCopy}
                                         onUpdateProductItem={handleUpdateProductItem}
-                                        
+
                                         // EDIT RECIVE STATUS
                                         editReceive={editReceive}
 
@@ -627,7 +622,7 @@ export default function Edit() {
                                             }
                                         }}
                                         classError={errors.class || classSelectError}
-                                        
+
                                         // Department props  
                                         departmentOptions={PODepartmentOptions}
                                         departmentPagination={itemDepartmentPagination}
@@ -650,7 +645,7 @@ export default function Edit() {
                                         serverTotal={poDetail?.foreigntotal}
                                     />
                                 )}
-                                
+
                                 {activeTab === 'files' && (
                                     <FilesTab
                                         key={`files-${poDetail?.po_id}-${poDetail?.last_modified}`}
@@ -660,13 +655,13 @@ export default function Edit() {
                                         pendingFiles={(formData.files || []).filter(
                                             file => !(poDetail?.files || []).some(
                                                 pf => (pf.fileUrl || '') === (file.fileUrl || '') &&
-                                                        (pf.fileName || '') === (file.fileName || '')
+                                                    (pf.fileName || '') === (file.fileName || '')
                                             )
                                         )}
                                         deletedFileUrls={(poDetail?.files || [])
                                             .filter(pf => !(formData.files || []).some(
                                                 file => (file.fileUrl || '') === (pf.fileUrl || '') &&
-                                                        (file.fileName || '') === (pf.fileName || '')
+                                                    (file.fileName || '') === (pf.fileName || '')
                                             ))
                                             .map(pf => pf.fileUrl)
                                         }
@@ -719,7 +714,7 @@ export default function Edit() {
                                 Cancel
                             </Button>
                             {(poDetail?.status_proccess !== 'PROCESSING') && (<>
-                                {((poDetail?.approvalstatus === 1 && poDetail.nextapprover === "") && poDetail?.status_proccess !== 'FAILED' ) && (
+                                {((poDetail?.approvalstatus === 1 && poDetail.nextapprover === "") && poDetail?.status_proccess !== 'FAILED') && (
                                     <PermissionGate permission={["create", "update"]}>
                                         <Button
                                             type="button"
@@ -777,7 +772,7 @@ export default function Edit() {
                                         </Button>
                                     </PermissionGate>
                                 )}
-                                
+
                                 {((poDetail?.po_status_label === 'Pending Receipt' || poDetail?.po_status_label === 'Pending Billing/Partially Received') && poDetail?.po_id !== null && !editReceive) && (
                                     <PermissionGate permission={["create", "update"]}>
                                         <Button
@@ -797,7 +792,7 @@ export default function Edit() {
                             )}
 
                         </div>
-                    </div> 
+                    </div>
                 </>)}
 
                 {/* // MODAL REOPEN SAAT STATUS APPROVAL = APPROVED */}
