@@ -6,7 +6,7 @@ import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { useEffect, useRef, useState } from 'react';
 import { useCandidateManagement } from './hooks/Usecandidatemanagement';
 import { CandidateCardSkeleton } from './components/Candidatecardskeleton';
@@ -20,6 +20,7 @@ import { toast } from 'react-hot-toast';
 
 export default function ManageCandidate() {
     const navigate = useNavigate();
+    const { id, groupId } = useParams<{ id?: string; groupId?: string }>();
 
     const {
         candidates,
@@ -80,6 +81,17 @@ export default function ManageCandidate() {
             setDeleteLoading(false);
         }
     };
+    useEffect(() => {
+        if ((groupId || '') !== filters.group_id) {
+            handleFilterChange({ group_id: groupId || '' });
+        }
+    }, [groupId]);
+
+    useEffect(() => {
+        if (id) {
+            navigate(groupId ? `/hr/candidate/${id}?groupId=${groupId}` : `/hr/candidate/${id}`, { replace: true });
+        }
+    }, [id, groupId]);
 
     // Sentinel di bawah grid — begitu terlihat di viewport, ambil halaman berikutnya
     const sentinelRef = useRef<HTMLDivElement | null>(null);

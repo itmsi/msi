@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdEdit, MdCalendarMonth, MdVerifiedUser, MdAssignment, MdStickyNote2 } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
@@ -25,6 +25,9 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
 export default function EmployeeCandidateDetail() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const groupId = searchParams.get('groupId');
+    const backPath = groupId ? `/hr/candidate/group/${groupId}` : '/hr/candidate';
     const { candidate, loading, error } = useCandidateDetail(id);
     const [tab, setTab] = useState<TabKey>('interview');
 
@@ -39,7 +42,7 @@ export default function EmployeeCandidateDetail() {
             <div className="space-y-4">
                 <PageHeader
                     title="Edit Purchase Order"
-                    backPath={() => navigate('/hr/candidate')}
+                    backPath={() => navigate(backPath)}
                     subtitle={candidate?.candidate_number || '-'}
                     actions={
                         <>
