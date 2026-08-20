@@ -409,6 +409,11 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
                                         ? `${form.candidate_foto}/download`
                                         : null
                                 }
+                                existingFiles={
+                                    initialData?.candidate_foto_path
+                                        ? [{ file_id: 'candidate_foto', file_url: initialData.candidate_foto_path, file_name: initialData.candidate_foto_path.split('/').pop() }]
+                                        : undefined
+                                }
                                 onFileChange={handlePhotoChange}
                                 hasDownloadButton
                                 description="Format: JPG, JPEG, PNG - Max 2MB"
@@ -428,6 +433,11 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
                                     typeof form.candidate_resume === 'string' && form.candidate_resume.startsWith('http')
                                         ? `${form.candidate_resume}/download`
                                         : null
+                                }
+                                existingFiles={
+                                    initialData?.candidate_resume_path
+                                        ? [{ file_id: 'candidate_resume', file_url: initialData.candidate_resume_path, file_name: initialData.candidate_resume_path.split('/').pop() }]
+                                        : undefined
                                 }
                                 onFileChange={handleResumeChange}
                                 hasDownloadButton

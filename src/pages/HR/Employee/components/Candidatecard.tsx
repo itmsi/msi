@@ -80,7 +80,7 @@ export const DEFAULT_COMPANY_STYLE = { bg: '#F5F6F8', fg: '#8891AB' };
 function DetailRow({ label, children }: { label: string; children: ReactNode }) {
     return (
         <div className="flex items-start gap-3">
-            <div className="w-[112px] shrink-0 text-[13px]">{label}</div>
+            <div className="w-28 shrink-0 text-[13px]">{label}</div>
             <div className="text-[13px] font-secondary font-semibold text-[#1F2430] min-w-0">{children}</div>
         </div>
     );
@@ -130,7 +130,7 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete, index }: Ca
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * .1, duration: 0.2 }}
-            className={`relative bg-white rounded-b-2xl border hover:border-[#C4C9DA] shadow-lg/10 hover:shadow-black/[0.04] transition-all duration-200`} style={{ borderColor: cs.fg + '50' }}>
+            className={`relative bg-white rounded-b-2xl border hover:border-[#C4C9DA] shadow-lg/10 hover:shadow-black/4 transition-all duration-200`} style={{ borderColor: cs.fg + '50' }}>
             <div className="h-0.5 rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${cs.fg}, ${s.dot})` }} />
             <div ref={menuRef} className="absolute top-4 right-4 z-10">
                 <button

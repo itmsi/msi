@@ -4,7 +4,7 @@ import { interviewScheduleService, interviewFormService, type InterviewSchedule,
 import { generateInterviewPDFBlob } from '../utils/PDFInterviewReport';
 import { toast } from 'react-hot-toast';
 import { FaPlus, FaTrash, FaChartSimple, FaChevronDown, FaChevronUp, FaRegFilePdf, FaClipboardCheck, FaRegPenToSquare, FaSpinner } from 'react-icons/fa6';
-import { MdAdd } from 'react-icons/md';
+import { MdAdd, MdDeleteOutline } from 'react-icons/md';
 import ModalScoreInterview from '../../Candidate/components/ModalScoreInterview';
 import FormScoringCanvas from './FormScoringCanvas';
 import { PDFPreviewModal } from './PDFPreviewModal';
@@ -524,11 +524,13 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                                                                         )}
                                                                                                     </Button>
                                                                                                 </Tooltip>
-                                                                                                <Tooltip content="Delete Form" position="top">
-                                                                                                    <Button size="sm" variant="transparent" onClick={() => { setDeletingFormId(forms[0]?.interview_id); setShowDeleteFormConfirm(true); }} className="text-rose-500!">
-                                                                                                        <FaTrash className="w-3 h-3" />
-                                                                                                    </Button>
-                                                                                                </Tooltip>
+                                                                                                <PermissionGate permission={["create", "update"]}>
+                                                                                                    <Tooltip content="Delete Form" position="top">
+                                                                                                        <Button size="sm" variant="transparent" onClick={() => { setDeletingFormId(forms[0]?.interview_id); setShowDeleteFormConfirm(true); }} className="text-rose-500!">
+                                                                                                            <MdDeleteOutline className="w-3 h-3" />
+                                                                                                        </Button>
+                                                                                                    </Tooltip>
+                                                                                                </PermissionGate>
                                                                                             </div>
                                                                                         </div>
                                                                                     );

@@ -2,14 +2,16 @@ import { useState, useEffect } from 'react';
 import type { OnBoardDocument } from '../../Candidate/types/hr';
 import { documentService } from '../../Candidate/services/hrService';
 import { toast } from 'react-hot-toast';
-import { FaDownload, FaFileLines, FaFolderOpen, FaXmark } from 'react-icons/fa6';
+import { FaDownload, FaFileLines } from 'react-icons/fa6';
 import { BsFiletypePdf, BsFiletypeDoc, BsFiletypeXls } from 'react-icons/bs';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import { Modal } from '@/components/ui/modal';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
-import { motion, AnimatePresence } from 'framer-motion';
 import { MdAdd } from 'react-icons/md';
+import { PermissionGate } from '@/components/common/PermissionComponents';
+import Label from '@/components/form/Label';
 
 interface DocumentTabProps {
     candidateId: string;
@@ -155,63 +157,47 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
             )}
 
             {/* Upload Modal */}
-            <AnimatePresence>
-                {showAddModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4"
-                        onClick={() => setShowAddModal(false)}
-                    >
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.96, y: 8 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.96, y: 8 }}
-                            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-white rounded-2xl border border-[#E7E9F0] shadow-xl w-full max-w-md overflow-hidden"
+            <Modal
+                isOpen={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                className="max-w-xl"
+                title="Upload Document"
+                description="Add an onboarding document for this candidate."
+            >
+                <div className="px-6 py-5 space-y-4">
+                    <div>
+                        <Label>Title</Label>
+                        <Input type="text" value={form.on_board_documents_name}
+                            onChange={(e) => setForm(f => ({ ...f, on_board_documents_name: e.target.value }))} />
+                    </div>
+                    <div>
+                        <Label>File</Label>
+                        <input type="file"
+                            onChange={(e) => setForm(f => ({ ...f, file: e.target.files?.[0] || null }))}
+                            className="w-full text-sm text-[#5B6480] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#EEF2FF] file:text-[#4338CA]" />
+                    </div>
+                    <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowAddModal(false)}
+                            disabled={loading}
+                            className="rounded-[50px]"
                         >
-                            <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-[#E7E9F0]">
-                                <div className="flex items-center gap-3 min-w-0">
-                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#EEF2FF] text-[#4338CA] shrink-0">
-                                        <FaFolderOpen size={16} />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <h3 className="text-[15px] font-primary-bold text-[#1F2430]">Upload Document</h3>
-                                        <p className="text-xs text-[#9AA2BA] mt-0.5">Add an onboarding document for this candidate.</p>
-                                    </div>
-                                </div>
-                                <button onClick={() => setShowAddModal(false)} title="Close" className="p-2 rounded-full hover:bg-[#F5F6F8] text-[#9AA2BA] shrink-0">
-                                    <FaXmark size={16} />
-                                </button>
-                            </div>
+                            Cancel
+                        </Button>
+                        <PermissionGate permission={["create", "update"]}>
+                            <Button
+                                onClick={handleUpload}
+                                className='rounded-[50px]'
+                                disabled={uploading}
+                            >
+                                {uploading ? 'Saving...' : 'Save'}
+                            </Button>
+                        </PermissionGate>
+                    </div>
+                </div>
 
-                            <div className="px-6 py-5 space-y-4">
-                                <div>
-                                    <label className="block text-[11px] font-medium text-[#9AA2BA] uppercase tracking-wide mb-1.5">Title</label>
-                                    <Input type="text" value={form.on_board_documents_name}
-                                        onChange={(e) => setForm(f => ({ ...f, on_board_documents_name: e.target.value }))} />
-                                </div>
-                                <div>
-                                    <label className="block text-[11px] font-medium text-[#9AA2BA] uppercase tracking-wide mb-1.5">File</label>
-                                    <input type="file"
-                                        onChange={(e) => setForm(f => ({ ...f, file: e.target.files?.[0] || null }))}
-                                        className="w-full text-sm text-[#5B6480] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#EEF2FF] file:text-[#4338CA]" />
-                                </div>
-                            </div>
-
-                            <div className="flex justify-end gap-3 px-6 py-4 border-t border-[#E7E9F0] bg-[#FAFAFB]">
-                                <Button variant="outline" onClick={() => setShowAddModal(false)}>Cancel</Button>
-                                <Button onClick={handleUpload} disabled={uploading}>
-                                    {uploading ? 'Uploading...' : 'Upload'}
-                                </Button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            </Modal>
 
             {/* Delete Modal */}
             <ConfirmationModal

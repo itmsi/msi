@@ -29,6 +29,7 @@ interface CandidateFormValues {
     candidate_country: string;
     candidate_foto: File | string | null;
     candidate_resume: File | string | null;
+    candidate_resume_path: File | string | null;
     ptk_date: Date | null;
     offering_letter: Date | null;
     remark: string;
@@ -54,6 +55,7 @@ const INITIAL_FORM: CandidateFormValues = {
     candidate_country: '',
     candidate_foto: null,
     candidate_resume: null,
+    candidate_resume_path: null,
     ptk_date: null,
     offering_letter: null,
     remark: '',

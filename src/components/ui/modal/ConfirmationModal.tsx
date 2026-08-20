@@ -95,7 +95,7 @@ export default function ConfirmationModal({
     return (
         <Modal
             isOpen={isOpen}
-            onClose={loading ? () => {} : onClose} // Prevent closing when loading
+            onClose={loading ? () => { } : onClose} // Prevent closing when loading
             showCloseButton={!loading}
             className={`${sizeClass} ${className}`}
             title={title}
@@ -106,31 +106,30 @@ export default function ConfirmationModal({
                 <div className="sm:flex items-center">
                     {/* Icon */}
                     {showIcon && (
-                        <div className={`mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full ${colors.background} sm:mx-0 sm:h-10 sm:w-10`}>
+                        <div className={`mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${colors.background} sm:mx-0 sm:h-10 sm:w-10`}>
                             <Icon className={`h-6 w-6 ${colors.icon}`} />
                         </div>
                     )}
 
                     {/* Text Content */}
                     <div className={`text-center sm:mt-0 sm:text-left ${showIcon ? 'sm:ml-4' : 'sm:ml-0'}`}>
-                            {typeof message === 'string' ? (
-                                <p className="text-sm text-gray-500">
-                                    {message}
-                                </p>
-                            ) : (
-                                message
-                            )}
+                        {typeof message === 'string' ? (
+                            <p className="text-sm text-gray-500">
+                                {message}
+                            </p>
+                        ) : (
+                            message
+                        )}
                     </div>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="mt-5 gap-3 sm:mt-6 sm:flex sm:flex-row-reverse">
                     <Button
-                        className={`rounded-[50px] ${
-                            loading 
-                                ? colors.confirmButtonDisabled 
+                        className={`rounded-[50px] ${loading
+                                ? colors.confirmButtonDisabled
                                 : `${colors.confirmButton} focus:ring-2 focus:ring-offset-2`
-                        }`}
+                            }`}
                         onClick={handleConfirm}
                         disabled={loading}
                     >

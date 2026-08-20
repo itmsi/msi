@@ -979,7 +979,7 @@ export default function EditQuotation() {
                         type='hidden'
                         value={row.show_componen_product_name}
                         onChange={(e) => updateItemById(index as number, 'show_componen_product_name', e.target.value)}
-                        className="border-0 border-b-1 rounded-none p-1 px-3 w-full w-[480px]"
+                        className="border-0 border-b rounded-none p-1 px-3 w-full"
                         placeholder="Product name"
                         readonly={true}
                     />
@@ -1023,7 +1023,7 @@ export default function EditQuotation() {
                     value={row.price}
                     onChange={(e) => updateItemById(index as number, 'price', e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="border-0 border-b-1 rounded-none p-1 px-3 w-[150px] text-center"
+                    className="border-0 border-b rounded-none p-1 px-3 w-37.5 text-center"
                     placeholder='input price'
                 />
             ),
@@ -1226,7 +1226,7 @@ export default function EditQuotation() {
     if (loading && !formData.customer_id) {
         return (
             <>
-                <div className="flex items-center justify-center min-h-[400px]">
+                <div className="flex items-center justify-center min-h-100">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
                         <p className="text-gray-600">{langField('loadingQuotationData')}</p>
@@ -1813,7 +1813,7 @@ export default function EditQuotation() {
                         </div>
 
                         {/* Totals Summary */}
-                        <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
+                        <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-2">
                             <div className="space-y-3">
                                 <div className='grid grid-cols-1 md:grid-cols-2 gap-6 items-center'>
                                     <Label htmlFor="manage_quotation_items" className='text-end'>{langField('subtotal')}</Label>
@@ -2049,7 +2049,7 @@ export default function EditQuotation() {
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-white rounded-2xl md:col-span-2 shadow-sm p-6 md:col-span-2">
+                        <div className="bg-white rounded-2xl shadow-sm p-6 md:col-span-2">
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-5">{langField('additionalPages')}</h2>
                             <div className="space-y-4">
                                 <div className="flex items-center gap-3">
