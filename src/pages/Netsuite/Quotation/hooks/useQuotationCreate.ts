@@ -1,51 +1,58 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { getProfile } from '@/helpers/generalHelper';
+import { getProfile, convertDateToTanggal } from '@/helpers/generalHelper';
 import { QuotationFormData, QuotationFormItem } from '../types/quotation';
 import { QuotationService } from '../services/quotationService';
 import { MasterDataFormFieldItems } from '../types/quotation';
 
-const DEFAULT_FORM: QuotationFormData = {
-    customform: 114,
-    title: '',
-    subsidiary: null,
-    subsidiary_name: '',
-    entity: null,
-    entity_name: '',
-    trandate: '',
-    duedate: null,
-    expectedclosedate: null,
-    orderstatus: 'A',
-    otherrefnum: '',
-    memo: '',
-    currency: 1,
-    currency_name: '',
-    terms: null,
-    terms_name: '',
-    department: null,
-    department_name: '',
-    class: null,
-    class_name: '',
-    location: null,
-    location_name: '',
-    probability: null,
-    forecasttype: 0,
-    salesrep: '',
-    salesrep_name: '',
-    opportunity: '',
-    opportunity_name: '',
-    partner: '',
-    partner_name: '',
-    custbody_msi_bank_payment_so: null,
-    custbody_msi_bank_payment_so_name: [],
-    custbody_cseg_cn_cfi: null,
-    custbody_me_approval_status: 1,
-    custbody_msi_createdby_api: 'T',
-    custbody_msi_quotation_no_iec: '',
-    total_amount: 0,
-    items: [],
-    nextapprover: null,
+// Computed at each call (not module scope) so the dates don't go stale in a long-lived session.
+const buildDefaultForm = (): QuotationFormData => {
+    const today = new Date();
+    const expires = new Date();
+    expires.setDate(today.getDate() + 30);
+
+    return {
+        customform: 114,
+        title: '',
+        subsidiary: null,
+        subsidiary_name: '',
+        entity: null,
+        entity_name: '',
+        trandate: convertDateToTanggal(today),
+        duedate: convertDateToTanggal(expires),
+        expectedclosedate: convertDateToTanggal(today),
+        orderstatus: '10', // Proposal
+        otherrefnum: '',
+        memo: '',
+        currency: 1,
+        currency_name: '',
+        terms: null,
+        terms_name: '',
+        department: null,
+        department_name: '',
+        class: null,
+        class_name: '',
+        location: null,
+        location_name: '',
+        probability: 50,
+        forecasttype: 0,
+        salesrep: '',
+        salesrep_name: '',
+        opportunity: '',
+        opportunity_name: '',
+        partner: '',
+        partner_name: '',
+        custbody_msi_bank_payment_so: null,
+        custbody_msi_bank_payment_so_name: [],
+        custbody_cseg_cn_cfi: null,
+        custbody_me_approval_status: 1,
+        custbody_msi_createdby_api: 'T',
+        custbody_msi_quotation_no_iec: '',
+        total_amount: 0,
+        items: [],
+        nextapprover: null,
+    };
 };
 
 export const useQuotationCreate = () => {
@@ -61,14 +68,14 @@ export const useQuotationCreate = () => {
         if (location.state?.formData) {
             return {
                 ...location.state.formData,
-                orderstatus: 'A', // Reset to default status
+                orderstatus: '10', // Reset to default status (Proposal)
                 custbody_me_approval_status: 1,
                 nextapprover: null,
                 custbody_msi_createdby_api: profileSSO?.email || 'T',
             };
         }
         return {
-            ...DEFAULT_FORM,
+            ...buildDefaultForm(),
             custbody_msi_createdby_api: profileSSO?.email || 'T',
         };
     });
@@ -126,7 +133,8 @@ export const useQuotationCreate = () => {
         const newItem: QuotationFormItem = {
             id: `${selectedItem.value}-${Date.now()}`,
             itemId: Number(selectedItem.value),
-            item_name: selectedItem.label,
+            item_name: selectedItem.data?.itemId || selectedItem.label,
+            item_displayname: selectedItem.data?.displayName || selectedItem.label,
             qty: 1,
             rate: 0,
             amount: 0,
