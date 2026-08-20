@@ -90,18 +90,21 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
                     {candidate.candidate_status || '-'}
                 </span>
 
-                {candidate.group_name && (
-                    <span
-                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-secondary font-medium mt-2"
-                        style={{ background: `hsl(${h} 60% 96%)`, color: `hsl(${h} 55% 38%)` }}
-                    >
-                        <MdGroup size={12} /> {candidate.group_name}
-                    </span>
-                )}
+
             </div>
 
             <div className="mt-5 pt-5 border-t border-[#E7E9F0] space-y-0.5">
-                <InfoRow icon={MdBusiness} label="Applied Role">{candidate.title_name || '-'}</InfoRow>
+                <InfoRow icon={MdBusiness} label="Applied Role">
+                    {candidate.title_name || '-'}
+                    {candidate.group_name && (
+                        <span
+                            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-secondary font-medium mt-2"
+                            style={{ background: `hsl(${h} 60% 96%)`, color: `hsl(${h} 55% 38%)` }}
+                        >
+                            <MdGroup size={12} /> {candidate.group_name}
+                        </span>
+                    )}
+                </InfoRow>
                 <InfoRow icon={MdBusiness} label="Department / Company">
                     {candidate.department_name || '-'}{candidate.company_name ? ` · ${candidate.company_name}` : ''}
                 </InfoRow>

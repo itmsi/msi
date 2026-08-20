@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { OnBoardDocument } from '../../Candidate/types/hr';
 import { documentService } from '../../Candidate/services/hrService';
 import { toast } from 'react-hot-toast';
-import { FaDownload, FaFileLines } from 'react-icons/fa6';
+import { FaFileArrowDown, FaFileLines } from 'react-icons/fa6';
 import { BsFiletypePdf, BsFiletypeDoc, BsFiletypeXls } from 'react-icons/bs';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
@@ -10,8 +10,9 @@ import { Modal } from '@/components/ui/modal';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
 import { MdAdd } from 'react-icons/md';
-import { PermissionGate } from '@/components/common/PermissionComponents';
+import { PermissionButton, PermissionGate } from '@/components/common/PermissionComponents';
 import Label from '@/components/form/Label';
+import { Tooltip } from '@/components/ui/tooltip';
 
 interface DocumentTabProps {
     candidateId: string;
@@ -111,10 +112,10 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
             ) : (
                 <div className="bg-white rounded-xl overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-[1090px] text-sm">
+                        <table className="w-full min-w-272.5 text-sm">
                             <thead>
                                 <tr className="bg-[#dfe8f2] border-b border-[#E7E9F0]">
-                                    <th className="w-20 px-4 py-3"></th>
+                                    <th className="w-10 px-2 py-3"></th>
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Document</th>
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Uploaded By</th>
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Date</th>
@@ -124,7 +125,7 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
                             <tbody className="divide-y divide-[#F0F1F5]">
                                 {docs.map((doc) => (
                                     <tr key={doc.on_board_documents_id} className="hover:bg-[#FAFAFB] transition-colors">
-                                        <td className="px-4 py-3 text-center">{getFileIcon(doc)}</td>
+                                        <td className="px-0 py-3 text-center justify-items-end" valign='middle'>{getFileIcon(doc)}</td>
                                         <td className="px-4 py-3">
                                             <span className="font-medium text-[#1F2430]">{doc.on_board_documents_name}</span>
                                         </td>
@@ -133,19 +134,25 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
                                             {formatIndonesianDate(doc.created_at)}
                                         </td>
                                         <td className="px-4 py-3">
-                                            <div className="flex items-center justify-center gap-2">
+                                            <div className="flex items-center justify-center">
                                                 {doc.on_board_documents_file && (
-                                                    <a href={doc.on_board_documents_file?.startsWith('http') ? doc.on_board_documents_file + '/download' : doc.on_board_documents_file}
-                                                        target="_blank" rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs text-[#0253a5] border border-[#E7E9F0] rounded-lg hover:bg-[#FAFAFB]">
-                                                        <FaDownload className="w-3 h-3" /> Download
-                                                    </a>
+                                                    <Tooltip content={'Download Document'} position="top">
+                                                        <PermissionButton
+                                                            permission={['read']}
+                                                            onClick={() => {
+                                                                if (!doc.on_board_documents_file) return;
+                                                                const downloadUrl = doc.on_board_documents_file.startsWith('http')
+                                                                    ? `${doc.on_board_documents_file}/download`
+                                                                    : doc.on_board_documents_file;
+                                                                window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+                                                            }}
+                                                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-blue-600 hover:text-blue-700 hover:bg-blue-50`}
+                                                        >
+                                                            <FaFileArrowDown className="w-4 h-4" />
+                                                        </PermissionButton>
+                                                    </Tooltip>
                                                 )}
-                                                {/* <Tooltip content="Delete" position="top">
-                                                    <Button size="sm" variant="transparent" onClick={() => { setDeletingId(doc.on_board_documents_id); setShowDeleteModal(true); }} className="text-rose-500!">
-                                                        <FaTrash className="w-3.5 h-3.5" />
-                                                    </Button>
-                                                </Tooltip> */}
+
                                             </div>
                                         </td>
                                     </tr>

@@ -13,6 +13,7 @@ import CascadeFieldGroup from './components/CascadeFieldGroup';
 import FieldError from './components/FieldError';
 import { useCandidateForm } from './hooks/UsecandidateForm';
 import { PermissionGate } from '@/components/common/PermissionComponents';
+import { LuLoaderCircle, LuSparkles } from 'react-icons/lu';
 
 interface CreateCandidateFormProps {
     initialData?: Candidate | null;
@@ -80,7 +81,7 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
 
                 <div className="space-y-10 p-6 bg-white rounded-xl border border-gray-200">
                     {/* Informasi Pribadi */}
-                    <FormSection title="Informasi Pribadi">
+                    <FormSection title="Personal Information">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Name */}
                             <div>
@@ -223,7 +224,7 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
                     </FormSection>
 
                     {/* Informasi Pekerjaan */}
-                    <FormSection title="Informasi Pekerjaan">
+                    <FormSection title="Employment Information">
                         <CascadeFieldGroup>
                             {/* Group */}
                             <div>
@@ -334,7 +335,7 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
                     </FormSection>
 
                     {/* Alamat */}
-                    <FormSection title="Alamat">
+                    <FormSection title="Address">
                         <div>
                             <label className="block text-sm font-primary text-gray-700 mb-1">Address</label>
                             <TextArea
@@ -381,7 +382,7 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
                     </FormSection>
 
                     {/* Catatan & Dokumen */}
-                    <FormSection title="Catatan & Dokumen">
+                    <FormSection title="Notes & Documents">
                         <div>
                             <label className="block text-sm font-primary text-gray-700 mb-1">Remark</label>
                             <TextArea
@@ -460,12 +461,21 @@ const CreateCandidateForm = ({ initialData, onSave, onCancel }: CreateCandidateF
 
                     <PermissionGate permission={["create", "update"]}>
                         <Button
+                            size="sm"
+                            type="submit"
+                            disabled={submitting}
+                            className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-3.5 py-1.5 rounded-full shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
+                        >
+                            {submitting ? <LuLoaderCircle size={13} className="animate-spin" /> : <LuSparkles size={13} />}
+                            {submitting ? 'Saving...' : isEdit ? 'Update Candidate' : 'Create Candidate & analyze by Mosa AI'}
+                        </Button>
+                        {/* <Button
                             type="submit"
                             disabled={submitting}
                             className="px-6 flex items-center gap-2 rounded-full"
                         >
-                            {submitting ? 'Saving...' : isEdit ? 'Update Candidate' : 'Create Candidate'}
-                        </Button>
+                            {submitting ? 'Saving...' : isEdit ? 'Update Candidate' : 'Create Candidate & analyze by Mosa AI'}
+                        </Button> */}
                     </PermissionGate>
                 </div>
 

@@ -254,7 +254,7 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
                     <h4 className="text-base font-primary-bold text-[#0253a5]">{title}</h4>
                     <p className="text-sm text-gray-500">{caption}</p>
                 </div>
-                <div className="inline-flex flex-col items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-5 py-2 px-4 py-2">
+                <div className="inline-flex flex-col items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-4 py-2">
                     <div className="text-lg font-primary-bold text-[#1F2430] leading-none">
                         {totalScore}<span className="text-xs font-normal text-gray-500">/{maxScore}</span>
                     </div>
@@ -304,7 +304,7 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
                                                         if (autoQuestion) updated[aspect.key].question = aspect.label;
                                                         return updated;
                                                     })}
-                                                    className="px-3 py-1.5 rounded-lg text-sm font-secondary border-1 transition-colors"
+                                                    className="px-3 py-1.5 rounded-lg text-sm font-secondary border transition-colors"
                                                     style={{ background: s.bg, color: s.fg, borderColor: s.border }}
                                                 >
                                                     {opt.value} · {opt.label.split(' - ')[1]}

@@ -12,20 +12,12 @@ import { MdAdd, MdDeleteOutline } from 'react-icons/md';
 import { FaRegFilePdf } from 'react-icons/fa';
 import { PermissionButton, PermissionGate } from '@/components/common/PermissionComponents';
 import Label from '@/components/form/Label';
+import { StatusTypeBadgeCandidate } from '@/components/ui/badge/StatusBadge';
 
 interface BackgroundCheckTabProps {
     candidateId: string;
     isActive: boolean;
 }
-
-// Same badge language as the rest of the app (e.g. /netsuite/sales-orders StatusTypeBadge):
-// bg-X-100 / text-X-800 / border-X-200, rounded-full, bordered.
-const STATUS_STYLE: Record<string, string> = {
-    Hired: 'bg-green-100 text-green-800 border-green-200',
-    Rejected: 'bg-red-100 text-red-800 border-red-200',
-    'On Hold': 'bg-amber-100 text-amber-800 border-amber-200',
-};
-const DEFAULT_STATUS_STYLE = 'bg-gray-100 text-gray-800 border-gray-200';
 
 const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) => {
     const [items, setItems] = useState<BackgroundCheckItem[]>([]);
@@ -117,7 +109,7 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Notes</th>
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Created By</th>
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Date</th>
-                                    <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Status</th>
+                                    <th className="text-center px-4 py-3 font-secondary font-semibold text-[#374151]">Status</th>
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151] w-32">Actions</th>
                                 </tr>
                             </thead>
@@ -131,15 +123,20 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
                                             <td className="px-4 py-3 text-[#5B6480]">{item.created_by_name || '-'}</td>
                                             <td className="px-4 py-3 text-[#5B6480]">{formatIndonesianDate(item.created_at)}</td>
                                             <td className="px-4 py-3">
-                                                <span className={`inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-primary-bold ${STATUS_STYLE[item.background_check_status] || DEFAULT_STATUS_STYLE}`}>
-                                                    {item.background_check_status}
-                                                </span>
+                                                <div className="items-center flex justify-center capitalize">
+                                                    {item.background_check_status ? (
+                                                        <StatusTypeBadgeCandidate
+                                                            type={item.background_check_status as 'Hired' | 'Rejected' | 'On Hold'}
+                                                            label={item.background_check_status || undefined}
+                                                        />
+                                                    ) : '-'}
+                                                </div>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <div className="flex items-center gap-1">
-                                                    {item.file_attachment && (
+                                                <div className="flex items-center gap-3">
+                                                    <Tooltip content={item.file_attachment ? 'Download' : 'File Not Found'} position="top">
                                                         <PermissionButton
-                                                            permission={'read'}
+                                                            permission={['read']}
                                                             onClick={() => {
                                                                 if (!item.file_attachment) return;
                                                                 const downloadUrl = item.file_attachment.startsWith('http')
@@ -147,27 +144,21 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
                                                                     : item.file_attachment;
                                                                 window.open(downloadUrl, '_blank', 'noopener,noreferrer');
                                                             }}
-                                                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                                                            }`}
+                                                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-blue-600 hover:text-blue-700 hover:bg-blue-50`}
+                                                            disabled={!item.file_attachment}
                                                         >
                                                             <FaRegFilePdf className="w-4 h-4" />
                                                         </PermissionButton>
-                                                        // <a
-                                                        //     href={item.file_attachment?.startsWith('http') ? item.file_attachment + '/download' : item.file_attachment}
-                                                        //     target="_blank" rel="noopener noreferrer"
-                                                        //     className="inline-flex items-center gap-1 px-2 py-1 text-xs text-[#0253a5] border border-[#E7E9F0] rounded-lg hover:bg-[#FAFAFB]"
-                                                        // >
-                                                        //     <FaRegFilePdf className="w-3 h-3" /> Download
-                                                        // </a>
-                                                    )}
-
-                                                    <PermissionGate permission={["create", "update"]}>
-                                                        <Tooltip content="Delete" position="top">
-                                                            <Button size="sm" variant="transparent" onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }} className="text-rose-500!">
-                                                                <MdDeleteOutline className="w-3.5 h-3.5" />
-                                                            </Button>
-                                                        </Tooltip>
-                                                    </PermissionGate>
+                                                    </Tooltip>
+                                                    <Tooltip content={'Delete'} position="top">
+                                                        <PermissionButton
+                                                            permission={["create", "update"]}
+                                                            onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }}
+                                                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-red-600 hover:text-red-700 hover:bg-red-50`}
+                                                        >
+                                                            <MdDeleteOutline className="w-4 h-4" />
+                                                        </PermissionButton>
+                                                    </Tooltip>
                                                 </div>
                                             </td>
                                         </tr>

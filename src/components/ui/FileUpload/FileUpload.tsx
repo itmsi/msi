@@ -527,12 +527,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                         const files = getCurrentFiles();
                         const imageFiles = files.filter(isImageFile);
                         const documentFiles = files.filter(file => !isImageFile(file));
-                        // Use preserved existing images if current existingImageUrl is null/empty
                         const currentExistingImages = existingImageUrl || preservedExistingImages;
-                        // const existingImagesCount = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
-                        // const totalImages = imageFiles.length + existingImagesCount;
-                        // const getImageLength = totalImages > 3 ? 3 : (totalImages > 0 ? totalImages : 1);
-
                         if (multiple) {
                             return (
                                 <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(${colLength}, 1fr)` }}>
@@ -598,7 +593,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                                     />
                                                                 </div>
                                                             ) : (
-                                                                <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center">
+                                                                <div className="flex flex-col items-center justify-center h-full min-h-30 text-center">
                                                                     <div className="text-4xl mb-2">
                                                                         {getDocumentIcon(fileName)}
                                                                     </div>
@@ -640,7 +635,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                                 />
                                                             </div>
                                                         </>) : (
-                                                            <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center">
+                                                            <div className="flex flex-col items-center justify-center h-full min-h-30 text-center">
                                                                 <div className="text-4xl mb-2">
                                                                     {getDocumentIcon(fileName)}
                                                                 </div>
@@ -745,7 +740,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                             <div key={`new-doc-${file.name}-${file.size}-${file.lastModified}-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square`}>
                                                 {/* Document Preview */}
                                                 <div className="relative">
-                                                    <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center">
+                                                    <div className="flex flex-col items-center justify-center h-full min-h-30 text-center">
                                                         <div className="text-4xl mb-2">
                                                             {getDocumentIcon(file.name)}
                                                         </div>
@@ -812,7 +807,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                     />
                                                 </div>
                                             </>) : (
-                                                <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center p-5">
+                                                <div className="flex flex-col items-center justify-center h-full min-h-30 text-center p-5">
                                                     <div className="text-4xl mb-2">
                                                         {getDocumentIcon(file.name)}
                                                     </div>
@@ -883,7 +878,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center p-5">
+                                                <div className="flex flex-col items-center justify-center h-full min-h-30 text-center p-5">
                                                     <div className="text-4xl mb-2">
                                                         {getDocumentIcon(fileName)}
                                                     </div>

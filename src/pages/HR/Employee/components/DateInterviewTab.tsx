@@ -127,6 +127,14 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
         setScoringPanel(null);
     };
 
+    const CATEGORY_ORDER = ['SIAH', '7 Values', 'CSE', 'SDT', 'EXPERIENCE'];
+    const sortByCategoryOrder = (forms: InterviewFormItem[]): InterviewFormItem[] =>
+        [...forms].sort((a, b) => {
+            const ai = CATEGORY_ORDER.indexOf(a.company_value);
+            const bi = CATEGORY_ORDER.indexOf(b.company_value);
+            return (ai === -1 ? CATEGORY_ORDER.length : ai) - (bi === -1 ? CATEGORY_ORDER.length : bi);
+        });
+
     // A category can have more than one submission (interviewer redid that tab) —
     // only the latest one should count, never both stacked.
     const dedupeFormsByCategory = (forms: InterviewFormItem[]): InterviewFormItem[] => {
@@ -296,7 +304,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                     <div className="h-9 w-32 bg-[#F0F1F5] rounded-lg animate-pulse" />
                 </div>
                 <div className="bg-white rounded-2xl border border-[#E7E9F0] overflow-hidden">
-                    <div className="bg-[#FAFAFB] border-b border-[#E7E9F0] px-4 py-3 h-[38px]" />
+                    <div className="bg-[#FAFAFB] border-b border-[#E7E9F0] px-4 py-3 h-9.5" />
                     <div className="divide-y divide-[#F0F1F5]">
                         {[0, 1, 2].map((i) => (
                             <div key={i} className="px-4 py-4 flex items-center gap-6">
@@ -337,7 +345,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
             ) : (
                 <div className="bg-white rounded-xl overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-[1090px] text-sm">
+                        <table className="w-full min-w-272.5 text-sm">
                             <thead>
                                 <tr className="bg-[#dfe8f2] border-b border-[#E7E9F0]">
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Created by</th>
@@ -461,7 +469,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                                                         <div key={groupKey} className="bg-white rounded-2xl border border-[#E7E9F0] p-4 shadow-[0_1px_2px_rgba(16,24,40,0.05)] hover:border-[#C4C9DA] hover:shadow-[0_4px_12px_rgba(16,24,40,0.08)] hover:-translate-y-0.5 transition-all">
                                                                                             <div className="flex items-start justify-between gap-3 mb-3">
                                                                                                 <div className="min-w-0 flex-1">
-                                                                                                    <h6 className="text-sm font-semibold text-[#1F2430] truncate">
+                                                                                                    <h6 className="text-sm font-primary-bold text-[#1F2430]">
                                                                                                         {interviewer}
                                                                                                     </h6>
                                                                                                     <p className="text-[10px] text-[#C4C9DA] mt-0.5">{formatIndonesianDate(forms[0]?.created_at)}</p>
@@ -478,7 +486,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                                                                     </div>
                                                                                                 </div>
                                                                                                 <div className="text-right shrink-0">
-                                                                                                    <div className="inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-sm font-bold">
+                                                                                                    <div className="inline-flex items-center justify-center min-w-8 h-8 px-2 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-sm font-bold">
                                                                                                         {totalScore}
                                                                                                     </div>
                                                                                                     <div className="text-[9px] uppercase tracking-wide text-[#9AA2BA] mt-1">Score</div>
@@ -486,13 +494,13 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                                                             </div>
 
                                                                                             <div className="flex flex-wrap gap-1.5">
-                                                                                                {forms.map((form) => {
+                                                                                                {sortByCategoryOrder(forms).map((form) => {
                                                                                                     const score = form.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0;
                                                                                                     return (
                                                                                                         <span key={form.interview_id}
-                                                                                                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200"
+                                                                                                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-md font-medium bg-indigo-100 text-indigo-800 border border-indigo-200"
                                                                                                         >
-                                                                                                            {form.company_value}: {score}
+                                                                                                            {form.company_value}: <span className='font-secondary font-semibold'>{score}</span>
                                                                                                         </span>
                                                                                                     );
                                                                                                 })}

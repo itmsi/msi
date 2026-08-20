@@ -41,9 +41,9 @@ export default function EmployeeCandidateDetail() {
 
             <div className="space-y-4">
                 <PageHeader
-                    title="Edit Purchase Order"
+                    title="Detail Candidate"
                     backPath={() => navigate(backPath)}
-                    subtitle={candidate?.candidate_number || '-'}
+                    subtitle={candidate?.candidate_name + ' - ' + candidate?.candidate_number || '-'}
                     actions={
                         <>
                             {candidate && (
