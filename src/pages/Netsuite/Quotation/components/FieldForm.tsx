@@ -40,7 +40,28 @@ export const STATIC_FORECAST_OPTIONS = [
     { value: 3, label: 'Upside' },
 ];
 
-export const getPrimaryInfoFields = (masterData?: MasterDataFormFieldItems | null) => [
+// NetSuite "Customer Status" list (entitystatus). Order kept as grouped by
+// Stage (Lead -> Prospect -> Customer), matching NetSuite's own list order.
+export const STATIC_STATUS_OPTIONS = [
+    { value: 7, label: 'Memenuhi Syarat' },
+    { value: 6, label: 'Tidak Memenuhi Syarat' },
+    { value: 14, label: 'Kekalahan Tertutup' },
+    { value: 12, label: 'Pembelian' },
+    { value: 9, label: 'Pengambil Keputusan yang Teridentifikasi' },
+    { value: 10, label: 'Proposal' },
+    { value: 8, label: 'Sedang Didiskusikan' },
+    { value: 11, label: 'Sedang Dinegosiasikan' },
+    { value: 15, label: 'Diperbarui' },
+    { value: 13, label: 'Kemenangan Tertutup' },
+    { value: 16, label: 'Pelanggan Hilang' },
+];
+
+// Field grouping mirrors the NetSuite Estimate form exactly: Primary Information,
+// Approval Information (rendered directly in QuotationFields.tsx), Sales Information,
+// Classification. Each field carries a `column` (1-3) so the layout can be rendered as
+// independent stacked columns instead of a row-major grid, matching NetSuite's column order.
+export const getPrimaryInfoFields = (masterData?: MasterDataFormFieldItems | null, tranid?: string) => [
+    // Column 1
     {
         name: "customform",
         label: "Custom Form",
@@ -48,6 +69,21 @@ export const getPrimaryInfoFields = (masterData?: MasterDataFormFieldItems | nul
         options: masterData ? formatMasterDataOptions(masterData.customforms) : [],
         disabled: true,
         readonlyDisplay: "Quotation",
+        column: 1,
+    },
+    {
+        name: "tranid",
+        label: "Estimate #",
+        type: "display",
+        staticValue: tranid || "To Be Generated",
+        column: 1,
+    },
+    {
+        name: "entity",
+        label: "Customer",
+        type: "select-customer",
+        required: true,
+        column: 1,
     },
     {
         name: "title",
@@ -55,37 +91,162 @@ export const getPrimaryInfoFields = (masterData?: MasterDataFormFieldItems | nul
         type: "text",
         placeholder: "Judul Quotation",
         forceEditable: true,
+        column: 1,
     },
     {
-        name: "expectedclosedate",
-        label: "Expected Close Date",
+        name: "duedate",
+        label: "Expires",
         type: "date",
+        column: 1,
     },
     {
-        name: "entity",
-        label: "Customer",
-        type: "select-customer",
+        name: "trandate",
+        label: "Date",
+        type: "date",
         required: true,
+        column: 1,
     },
+    {
+        name: "orderstatus",
+        label: "Status",
+        type: "select",
+        options: STATIC_STATUS_OPTIONS,
+        forceEditable: true,
+        showFieldError: false,
+        column: 1,
+    },
+    // Column 2
     {
         name: "probability",
-        label: "Probability (%)",
+        label: "Probability",
         type: "number",
         placeholder: "e.g., 50",
         min: 0,
         max: 100,
+        column: 2,
     },
     {
-        name: "trandate",
-        label: "Transaction Date",
+        name: "expectedclosedate",
+        label: "Exp. Close",
         type: "date",
+        column: 2,
+    },
+    {
+        name: "memo",
+        label: "Memo",
+        type: "text",
+        placeholder: "Catatan untuk Quotation ini",
+        column: 2,
+    },
+    {
+        name: "custbody_msi_bank_payment_so",
+        label: "MSI - Bank Payment",
+        type: "select-bank",
+        column: 2,
+    },
+    // {
+    //     name: "custbody_msi_price_level",
+    //     label: "MSI - Price Level",
+    //     type: "display",
+    //     staticValue: "-",
+    //     column: 2,
+    // },
+];
+
+export const getSalesInfoFields = () => [
+    {
+        name: "salesrep",
+        label: "Sales Rep",
+        type: "text",
+        placeholder: "Sales Representative",
+        forceEditable: true,
+        column: 1,
+    },
+    {
+        name: "opportunity",
+        label: "Opportunity",
+        type: "text",
+        placeholder: "Opportunity",
+        forceEditable: true,
+        column: 1,
+    },
+    {
+        name: "forecasttype",
+        label: "Forecast Type",
+        type: "select",
+        options: STATIC_FORECAST_OPTIONS,
+        forceEditable: true,
+        column: 2,
+    },
+    {
+        name: "partner",
+        label: "Partner",
+        type: "text",
+        placeholder: "Partner",
+        forceEditable: true,
+        column: 3,
+    },
+];
+
+export const getClassificationInfoFields = (masterData?: MasterDataFormFieldItems | null, subsidiaryId?: number) => [
+    // Column 1
+    {
+        name: "subsidiary",
+        label: "Subsidiary",
+        type: "select",
+        options: masterData ? formatMasterDataOptions(masterData.subsidiarys) : [],
         required: true,
+        dependsOn: "entity",
+        dependsOnLabel: "Customer",
+        cascadeClear: ["location", "department", "class"],
+        showFieldError: true,
+        column: 1,
     },
     {
-        name: "duedate",
-        label: "Due Date",
-        type: "date",
+        name: "department",
+        label: "Department",
+        type: "select-department",
+        required: true,
+        dependsOn: "subsidiary",
+        dependsOnLabel: "Subsidiary",
+        subsidiaryId: subsidiaryId,
+        column: 1,
     },
+    // Column 2
+    {
+        name: "class",
+        label: "Class",
+        type: "select-class",
+        dependsOn: "subsidiary",
+        dependsOnLabel: "Subsidiary",
+        subsidiaryId: subsidiaryId,
+        column: 2,
+    },
+    {
+        name: "location",
+        label: "Location",
+        type: "select-location",
+        required: true,
+        dependsOn: "subsidiary",
+        dependsOnLabel: "Subsidiary",
+        subsidiaryId: subsidiaryId,
+        column: 2,
+    },
+    // Column 3
+    {
+        name: "custbody_cseg_cn_cfi",
+        label: "China Cash Flow Item",
+        type: "select",
+        options: STATIC_CFI_OPTIONS,
+        forceEditable: true,
+        column: 3,
+    },
+];
+
+// Fields that exist in the app but aren't part of NetSuite's visible Estimate sections
+// (Primary / Approval / Sales / Classification) — kept functional in their own section
+// rather than dropped, since they're still required for create/update.
+export const getAdditionalInfoFields = (_masterData?: MasterDataFormFieldItems | null) => [
     {
         name: "terms",
         label: "Terms",
@@ -98,98 +259,9 @@ export const getPrimaryInfoFields = (masterData?: MasterDataFormFieldItems | nul
         placeholder: "Enter reference number",
     },
     {
-        name: "memo",
-        label: "Memo / Notes",
-        type: "text",
-        placeholder: "Catatan untuk Quotation ini",
-    },
-];
-
-export const getAdditionalInfoFields = (_masterData?: MasterDataFormFieldItems | null) => [
-    {
-        name: "custbody_msi_bank_payment_so",
-        label: "Bank Payment",
-        type: "select-bank",
-    },
-    {
         name: "custbody_msi_quotation_no_iec",
         label: "Quotation No (IEC)",
         type: "text",
         placeholder: "Nomor Quotation",
-    },
-    {
-        name: "forecasttype",
-        label: "Forecast Type",
-        type: "select",
-        options: STATIC_FORECAST_OPTIONS,
-        forceEditable: true,
-    },
-    {
-        name: "salesrep",
-        label: "Sales Rep",
-        type: "text",
-        placeholder: "Sales Representative",
-        forceEditable: true,
-    },
-    {
-        name: "opportunity",
-        label: "Opportunity",
-        type: "text",
-        placeholder: "Opportunity",
-        forceEditable: true,
-    },
-    {
-        name: "partner",
-        label: "Partner",
-        type: "text",
-        placeholder: "Partner",
-        forceEditable: true,
-    },
-    {
-        name: "custbody_cseg_cn_cfi",
-        label: "China Cash Flow Item",
-        type: "select",
-        options: STATIC_CFI_OPTIONS,
-        forceEditable: true,
-    },
-];
-
-export const getClassificationInfoFields = (masterData?: MasterDataFormFieldItems | null, subsidiaryId?: number) => [
-    {
-        name: "subsidiary",
-        label: "Subsidiary",
-        type: "select",
-        options: masterData ? formatMasterDataOptions(masterData.subsidiarys) : [],
-        required: true,
-        dependsOn: "entity",
-        dependsOnLabel: "Customer",
-        cascadeClear: ["location", "department", "class"],
-        showFieldError: true,
-    },
-    {
-        name: "location",
-        label: "Location",
-        type: "select-location",
-        required: true,
-        dependsOn: "subsidiary",
-        dependsOnLabel: "Subsidiary",
-        subsidiaryId: subsidiaryId,
-    },
-    {
-        name: "department",
-        label: "Department",
-        type: "select-department",
-        required: true,
-        dependsOn: "subsidiary",
-        dependsOnLabel: "Subsidiary",
-        subsidiaryId: subsidiaryId,
-    },
-    {
-        name: "class",
-        label: "Class",
-        type: "select-class",
-        dependsOn: "subsidiary",
-        dependsOnLabel: "Subsidiary",
-        subsidiaryId: subsidiaryId,
     },
 ];

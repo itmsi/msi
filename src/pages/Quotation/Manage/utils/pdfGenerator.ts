@@ -1118,8 +1118,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
 
         const accData = item.manage_quotation_item_accessories.map((acc: any, index: number) => [
             (index + 1).toString() + '.',
-            acc.accessory_part_name || '-',
+            acc.accessory_part_name + ' (qyt: ' + acc.quantity + ')',
         ]);
+        console.log({ accData })
 
         const accTableStartY = itemYPos - 1;
         autoTable(doc, {
@@ -1249,6 +1250,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 item1YPos = renderItemAccessories(current, item1StartX, item1YPos, itemWidth, item1RightMargin, 1);
                 const pageAfterItem1Accessories = (doc as any).internal.getCurrentPageInfo().pageNumber;
 
+                console.log({ current, next })
                 if (pageAfterItem1Accessories > pairPage) {
                     // item1's accessories genuinely didn't fit and moved to a new page - keep item2's
                     // accessories together with it there, instead of splitting them across two pages
@@ -1268,6 +1270,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 let itemYPos = renderItemImageAndName(current, startX, yPos, itemWidth);
                 itemYPos = renderItemSpecifications(current, startX, itemYPos, itemWidth, startX).finalY;
                 renderItemAccessories(current, startX, itemYPos, itemWidth, startX, 1);
+                console.log(current)
 
                 itemIndex += 1;
             }

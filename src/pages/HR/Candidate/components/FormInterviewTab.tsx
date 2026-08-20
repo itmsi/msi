@@ -48,23 +48,23 @@ const VALUE_ASPECTS = [
 const CSE_ASPECTS = [
   { key: 'self_esteem', label: 'Self Esteem', defaultQ: 'Does this person believe in their own worth?' },
   { key: 'self_efficacy', label: 'Self Efficacy', defaultQ: 'Does this person believe they have the ability to complete their work?' },
-  { key: 'locus_control', label: 'Locus of Control', defaultQ: 'Is their success determined by own actions or external factors?' },
+  { key: 'locus_control', label: 'Locus of control', defaultQ: 'Does this person believe their success is determined by their own actions or external factors?' },
   { key: 'emotional_stability', label: 'Emotional Stability', defaultQ: 'Can this person control their emotions?' },
 ];
 
 const SDT_ASPECTS = [
-  { key: 'l2', label: 'L2 (External Regulation)', point: 20 },
-  { key: 'l3', label: 'L3 (Self-Involvement)', point: 25 },
-  { key: 'l4', label: 'L4 (Conscious Meaning)', point: 30 },
-  { key: 'l5', label: 'L5 (Self-Integration)', point: 35 },
-  { key: 'l6', label: 'L6 (Intrinsic Motivation)', point: 40 },
+  { key: 'l2', label: 'L2 (External Regulation – Driven by rewards or punishments ( not ideal)', point: 20 },
+  { key: 'l3', label: 'L3 (Self - Involment and focus on self and other evaluation)', point: 25 },
+  { key: 'l4', label: 'L4 (I personally think it is important and consciously give it meaning)', point: 30 },
+  { key: 'l5', label: 'L5 (Consistency self-integration of goals)', point: 35 },
+  { key: 'l6', label: 'L6 (Interest, happiness, self-satisfaction)', point: 40 },
 ];
 
 const EXPERIENCE_ASPECTS = [
   { key: 'role_matching', label: 'Role Matching' },
   { key: 'product_knowledge', label: 'Product Knowledge' },
   { key: 'significant_contribution', label: 'Significant Contribution' },
-  { key: 'goals_align', label: 'Goals align with ROE' },
+  { key: 'goals_align_with_roe', label: 'Goals align with ROE Company' },
 ];
 
 type FormType = 'siah' | 'values' | 'cse' | 'sdt' | 'experience';
@@ -318,11 +318,14 @@ const ScoringForm = ({
 }: ScoringFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // `autoQuestion` aspects (Experience) have no defaultQ of their own — the
+  // question IS the aspect label, so pre-fill from that instead and lock it
+  // the same way `defaultQuestions` aspects (CSE) already are.
   const [form, setForm] = useState<AspectForm>(() =>
     aspects.reduce(
       (acc, a) => ({
         ...acc,
-        [a.key]: { point: '', question: a.defaultQ || '', remark: '' },
+        [a.key]: { point: '', question: a.defaultQ || (autoQuestion ? a.label : ''), remark: '' },
       }),
       {}
     )
@@ -435,7 +438,7 @@ const ScoringForm = ({
                       }
                       rows={2}
                       placeholder={aspect.defaultQ || 'Question'}
-                      readonly={defaultQuestions}
+                      readonly={defaultQuestions || autoQuestion}
                     />
                   </div>
                   <div className="md:col-span-6">

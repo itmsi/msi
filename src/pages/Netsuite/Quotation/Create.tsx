@@ -1,4 +1,4 @@
-import { MdKeyboardArrowLeft } from 'react-icons/md';
+import { MdKeyboardArrowLeft, MdInventory2, MdOutlineAttachFile } from 'react-icons/md';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import PageMeta from '@/components/common/PageMeta';
@@ -333,29 +333,29 @@ export default function Create() {
 
                     <div>
                         {/* Tab Navigation */}
-                        <div className="border-b border-gray-200 px-6 overflow-auto">
-                            <nav className="flex space-x-8 overflow-auto">
+                        <div className="border-b border-gray-200 overflow-auto">
+                            <nav className="flex space-x-2 overflow-auto">
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab('items')}
-                                    className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                    className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
                                         activeTab === 'items'
-                                            ? 'border-blue-500 text-blue-600'
+                                            ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}
                                 >
-                                    Items
+                                    <MdInventory2 /> Items
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab('files')}
-                                    className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                    className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
                                         activeTab === 'files'
-                                            ? 'border-blue-500 text-blue-600'
+                                            ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}
                                 >
-                                    Files
+                                    <MdOutlineAttachFile /> Files
                                 </button>
                             </nav>
                         </div>

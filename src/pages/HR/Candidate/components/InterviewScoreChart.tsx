@@ -71,11 +71,19 @@ const InterviewScoreChart = ({ metrics = [] }: InterviewScoreChartProps) => {
     );
   }
 
-  const sortedMetrics = [...validMetrics].sort((a, b) => {
-    const iA = DESIRED_ORDER.indexOf(a.company_value);
-    const iB = DESIRED_ORDER.indexOf(b.company_value);
-    return (iA === -1 ? 999 : iA) - (iB === -1 ? 999 : iB);
-  });
+  // One entry per category. Callers are expected to already dedupe re-submitted
+  // categories (keeping the latest one) before this point — this just guards against
+  // a caller that doesn't, so two entries for the same category never render as two axes.
+  const metricByCategory = new Map<string, ScoreMetric>();
+  validMetrics.forEach((m) => metricByCategory.set(m.company_value, m));
+
+  // Always show all 5 standard categories as axes — a category with no submission
+  // yet (e.g. CSE not scored) still appears, at 0, instead of silently disappearing.
+  const orderedMetrics = DESIRED_ORDER.map(
+    (cv) => metricByCategory.get(cv) || { company_value: cv, total_score: 0 }
+  );
+  const extraMetrics = validMetrics.filter((m) => !DESIRED_ORDER.includes(m.company_value));
+  const sortedMetrics = [...orderedMetrics, ...extraMetrics];
 
   const companyValues = sortedMetrics.map((m) => m.company_value);
   const actualScores = sortedMetrics.map((m) =>

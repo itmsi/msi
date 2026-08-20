@@ -14,6 +14,7 @@ type PropsType = {
   label?: string;
   placeholder?: string;
   isStatic?: boolean;
+  dateFormat?: string;
 };
 
 export default function DatePicker({
@@ -24,12 +25,13 @@ export default function DatePicker({
   defaultDate,
   placeholder,
   isStatic = false,
+  dateFormat = "Y-m-d",
 }: PropsType) {
   useEffect(() => {
     const config: any = {
       mode: mode || "single",
       static: isStatic,
-      dateFormat: "Y-m-d",
+      dateFormat,
       defaultDate,
       onChange,
     };
@@ -56,7 +58,7 @@ export default function DatePicker({
         }
       }, 100);
     };
-  }, [mode, id]);
+  }, [mode, id, dateFormat]);
 
   return (
     <div>

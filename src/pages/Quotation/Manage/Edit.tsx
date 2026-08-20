@@ -994,8 +994,8 @@ export default function EditQuotation() {
             cell: (row, index) => (
                 <Input
                     type="text"
-                    maxLength={3}
-                    min='1'
+                    maxLength={6}
+                    min='0'
                     value={row.quantity}
                     onKeyPress={handleKeyPress}
                     onChange={(e) => {
@@ -1008,7 +1008,7 @@ export default function EditQuotation() {
                             updateItemById(index as number, 'quantity', 1);
                         }
                     }}
-                    className="border-0 border-b-1 rounded-none p-1 px-3 w-[80px] text-center"
+                    className="border-0 border-b rounded-none p-1 px-3 w-20 text-center"
                 />
             ),
             wrap: true,
