@@ -1118,7 +1118,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
 
         const accData = item.manage_quotation_item_accessories.map((acc: any, index: number) => [
             (index + 1).toString() + '.',
-            acc.accessory_part_name + ' (qyt: ' + acc.quantity + ')',
+            acc.accessory_part_name + ' (qty: ' + acc.quantity + ')',
         ]);
         console.log({ accData })
 
