@@ -1,9 +1,11 @@
 import CreateCandidateForm from '../Employee/CreateCandidateForm';
 import { useNavigate } from 'react-router';
 import PageMeta from '@/components/common/PageMeta';
+import useGoBack from '@/hooks/useGoBack';
 
 const CreatePage = () => {
     const navigate = useNavigate();
+    const goBack = useGoBack();
 
     return (<>
 

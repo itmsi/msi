@@ -15,6 +15,44 @@ import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from '../language/quotationLabels';
 import { quotationLabelPDF } from '../language/quotationLabelPDF';
 import TextArea from '@/components/form/input/TextArea';
+import { handleKeyPress } from '@/helpers/generalHelper';
+
+interface QuantityCellProps {
+    value: number;
+    onCommit: (value: number) => void;
+}
+
+// Local draft state so the field can be cleared/retyped freely while focused —
+// value is only parsed/clamped to the real state on blur or Enter, not per keystroke.
+const QuantityCell: React.FC<QuantityCellProps> = ({ value, onCommit }) => {
+    const [draft, setDraft] = useState(String(value));
+
+    useEffect(() => {
+        setDraft(String(value));
+    }, [value]);
+
+    const commit = () => {
+        const parsed = parseInt(draft, 10);
+        const next = Number.isNaN(parsed) || parsed < 1 ? 1 : parsed;
+        setDraft(String(next));
+        if (next !== value) onCommit(next);
+    };
+
+    return (
+        <Input
+            type="text"
+            maxLength={6}
+            value={draft}
+            onKeyPress={(e) => {
+                handleKeyPress(e);
+                if (e.key === 'Enter') e.currentTarget.blur();
+            }}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commit}
+            className="border-0 border-b rounded-none p-1 px-3 w-20 text-center"
+        />
+    );
+};
 
 interface ProductDetailOffcanvasProps {
     productId: string | null;
@@ -262,6 +300,19 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         toast.success(langField('accessoryRemovedSuccess'));
     }, [accessories, initialData, onChange]);
 
+    const updateAccessoryQuantity = useCallback((index: number, quantity: number) => {
+        const updatedAccessories = accessories.map((acc, i) => (i === index ? { ...acc, quantity } : acc));
+        setAccessories(updatedAccessories);
+
+        if (initialData && onChange) {
+            onChange({
+                ...initialData,
+                manage_quotation_item_accessories: updatedAccessories,
+                accessories: updatedAccessories
+            });
+        }
+    }, [accessories, initialData, onChange]);
+
     const accessoryColumns: TableColumn<QuotationAccessory>[] = React.useMemo(() => [
         {
             name: langField('accessoryName'),
@@ -279,7 +330,13 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         },
         {
             name: langField('quantity'),
-            selector: (row: QuotationAccessory) => row.quantity,
+            // selector: (row: QuotationAccessory) => row.quantity,
+            cell: (row, index) => (
+                <QuantityCell
+                    value={row.quantity}
+                    onCommit={(val) => updateAccessoryQuantity(index, val)}
+                />
+            ),
             width: '100px',
             center: true,
         },
@@ -297,7 +354,7 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                 permission: 'delete'
             }
         ]),
-    ], [accessories, removeAccessoryItem]);
+    ], [accessories, removeAccessoryItem, updateAccessoryQuantity]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
