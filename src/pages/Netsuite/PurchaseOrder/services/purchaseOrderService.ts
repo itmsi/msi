@@ -1,5 +1,5 @@
 import { apiPost, apiGet, ApiResponse, apiPut, apiPostMultipart, apiDelete, apiPutMultipart } from '@/helpers/apiHelper';
-import { ComponentsDataResponse, GetPurchaseOrderListResponse, HistoryLogResponse, ItemReceiptPayload, ItemTypeResponse, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, POAttachment, POAttachmentDelete, POAttachmentResponse, POAttachmentUpdate, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, POItemsSelectRequest, PostReceiptResponse, PurchaseOrderDashboardRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, ResponseAttachUpdateItem, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
+import { ComponentsDataResponse, GetPurchaseOrderListResponse, HistoryLogResponse, ItemReceiptPayload, ItemTypeResponse, LocationDataResponse, MasterDataFormFieldItems, POApprovalRequest, POApprovalResponse, POAttachment, POAttachmentDelete, POAttachmentResponse, POAttachmentUpdate, PODetailResponse, PODownloadRequest, PODownloadResponse, POItemResponse, POItemsRequest, POItemsSelectRequest, PostReceiptResponse, ProjectSegmentationDataResponse, PurchaseOrderDashboardRequest, PurchaseOrderFormUpdate, PurchaseOrderRequest, PurchaseOrderResponse, ReceiptResponse, ReceiveRequest, ResponseAttachUpdateItem, TermsDataResponse, VendorResponse } from '../types/purchaseorder';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -97,6 +97,20 @@ export class PurchaseOrderService {
 
         const response = await apiPost(`${API_BASE_URL}/netsuite/departments/get-list`, requestData as Record<string, any>);
         return response.data as ComponentsDataResponse;
+    }
+
+    static async getPOProjectSegmentation(params: Partial<POItemsRequest> = {}): Promise<ProjectSegmentationDataResponse> {
+        const requestData: POItemsRequest = {
+            page: 1,
+            limit: 10,
+            sort_by: 'created_at',
+            sort_order: 'desc',
+            search: '',
+            ...params
+        };
+
+        const response = await apiPost(`${API_BASE_URL}/netsuite/project-segmentations/get-list`, requestData as Record<string, any>);
+        return response.data as ProjectSegmentationDataResponse;
     }
 
     static async getPOVendor(params: Partial<POItemsRequest> = {}): Promise<VendorResponse> {

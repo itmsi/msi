@@ -15,6 +15,7 @@ import { usePOItemsSelect } from '@/hooks/usePOItemsSelect';
 import { POLocationPaginationState, POLocationSelectOption } from '@/hooks/usePOLocationSelect';
 import { POClassPaginationState, POClassSelectOption } from '@/hooks/usePOClassSelect';
 import { PODepartmentPaginationState, PODepartmentSelectOption } from '@/hooks/usePODepartmentSelect';
+import { POProjectSegmentationPaginationState, POProjectSegmentationSelectOption } from '@/hooks/usePOProjectSegmentationSelect';
 import TextArea from '@/components/form/input/TextArea';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { LoadingOverlay } from '@/components/common/Loading';
@@ -64,6 +65,14 @@ interface POItemsFieldsProps {
     selectedDepartment?: PODepartmentSelectOption | null;
     onDepartmentChange?: (option: PODepartmentSelectOption | null) => void;
     departmentError?: string;
+
+    // Project Segmentation Select Props
+    projectSegmentationOptions?: POProjectSegmentationSelectOption[];
+    projectSegmentationPagination?: POProjectSegmentationPaginationState;
+    projectSegmentationInputValue?: string;
+    onProjectSegmentationInputChange?: (inputValue: string) => Promise<POProjectSegmentationSelectOption[]>;
+    onProjectSegmentationMenuScrollToBottom?: () => void;
+
     // Grand total dari server (foreigntotal) — override kalkulasi lokal di Edit page
     serverTotal?: number;
 }
@@ -101,6 +110,13 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
     departmentInputValue = '',
     onDepartmentInputChange,
     onDepartmentMenuScrollToBottom,
+
+    // Project Segmentation props
+    projectSegmentationOptions = [],
+    projectSegmentationPagination = { page: 1, hasMore: true, loading: false },
+    projectSegmentationInputValue = '',
+    onProjectSegmentationInputChange,
+    onProjectSegmentationMenuScrollToBottom,
     serverTotal,
 }) => {
     // Use POItemsSelect hook for product management
@@ -663,6 +679,52 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             <span className="text-xs text-red-500 mt-1 block">Location wajib dipilih</span>
                         )}
                         </>
+                    )}
+                </div>
+            ),
+            width: '300px',
+            sortable: false
+        },
+        {
+            name: 'Project Segmentation',
+            selector: (row: TablePOItem) => row.cseg_msi_pro_segmen_display || 'N/A',
+            cell: (row, index) => (
+                <div className="w-[285px]">
+                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                        <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                            row.cseg_msi_pro_segmen_display || '-'
+                        }</p>
+                    ) : (
+                        <CustomAsyncSelect
+                            name={`cseg_msi_pro_segmen_${index}`}
+                            placeholder="Select project segmentation..."
+                            value={row.cseg_msi_pro_segmen ? {
+                                label: row.cseg_msi_pro_segmen_display || '',
+                                value: row.cseg_msi_pro_segmen.toString()
+                            } : null}
+                            defaultOptions={projectSegmentationOptions}
+                            loadOptions={onProjectSegmentationInputChange}
+                            onMenuScrollToBottom={onProjectSegmentationMenuScrollToBottom}
+                            isLoading={projectSegmentationPagination.loading}
+                            noOptionsMessage={() => "No project segmentation found"}
+                            loadingMessage={() => "Loading project segmentation..."}
+                            isSearchable={true}
+                            isClearable={true}
+                            inputValue={projectSegmentationInputValue}
+                            onInputChange={onProjectSegmentationInputChange}
+                            onChange={(option) => {
+                                if (option) {
+                                    updateItemById(index as number, 'cseg_msi_pro_segmen', parseInt(String(option.value)));
+                                    updateItemById(index as number, 'cseg_msi_pro_segmen_display', option.label);
+                                } else {
+                                    updateItemById(index as number, 'cseg_msi_pro_segmen', null);
+                                    updateItemById(index as number, 'cseg_msi_pro_segmen_display', '');
+                                }
+                            }}
+                            className="text-xs"
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                        />
                     )}
                 </div>
             ),

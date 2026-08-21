@@ -241,6 +241,8 @@ export interface TablePOItem {
     custcol_msi_fob?: number;
     custcol_me_landed_cost?: number;
     description?: string;
+    cseg_msi_pro_segmen?: number | string | null;
+    cseg_msi_pro_segmen_display?: string | null;
 }
 
 
@@ -410,6 +412,8 @@ export interface PODetailLine {
     custcol_me_landed_cost?: number | null;
     custcol_msi_fob?: number | null;
     description?: string | null;
+    cseg_msi_pro_segmen?: number | string | null;
+    cseg_msi_pro_segmen_display?: string | null;
 }
 
 export interface PODetailResponse {
@@ -434,6 +438,26 @@ export interface ComponentsDataResponse {
     success: boolean;
     data: {
         items: ComponentsItem[];
+        pagination: Pagination;
+    };
+    message: string;
+}
+
+// PROJECT SEGMENTATION SELECT
+export interface ProjectSegmentationItem {
+    id: string;
+    name: string;
+    full_name: string;
+    is_inactive: boolean;
+    parent_id: string | null;
+    parent_name: string | null;
+    last_modified: string;
+}
+
+export interface ProjectSegmentationDataResponse {
+    success: boolean;
+    data: {
+        items: ProjectSegmentationItem[];
         pagination: Pagination;
     };
     message: string;
@@ -480,6 +504,7 @@ export interface PurchaseOrderUpdateItem {
     tax_amount?: number;
     gross_amount?: number;
     description?: string;
+    cseg_msi_pro_segmen?: number | null;
 }
 // ITEM TYPE
  export interface ItemTypeRequest {
