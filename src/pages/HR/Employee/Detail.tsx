@@ -34,7 +34,7 @@ export default function EmployeeCandidateDetail() {
     return (
         <>
             <PageMeta
-                title={candidate ? `${candidate.candidate_name} - Motor Sights International` : 'Candidate Detail - Motor Sights International'}
+                title={'Candidate Detail - Motor Sights International'}
                 description="Candidate detail profile - Motor Sights International"
                 image="/motor-sights-international.png"
             />

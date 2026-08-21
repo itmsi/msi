@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import type { OnBoardDocument } from '../../Candidate/types/hr';
 import { documentService } from '../../Candidate/services/hrService';
 import { toast } from 'react-hot-toast';
-import { FaFileArrowDown, FaFileLines } from 'react-icons/fa6';
-import { BsFiletypePdf, BsFiletypeDoc, BsFiletypeXls } from 'react-icons/bs';
+import { FaFileArrowDown, FaFileLines, FaRegFileExcel, FaRegFileImage, FaRegFilePdf } from 'react-icons/fa6';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import { Modal } from '@/components/ui/modal';
@@ -13,6 +12,7 @@ import { MdAdd } from 'react-icons/md';
 import { PermissionButton, PermissionGate } from '@/components/common/PermissionComponents';
 import Label from '@/components/form/Label';
 import { Tooltip } from '@/components/ui/tooltip';
+import { FaRegFileWord } from 'react-icons/fa';
 
 interface DocumentTabProps {
     candidateId: string;
@@ -83,10 +83,10 @@ const DocumentTab = ({ candidateId, isActive }: DocumentTabProps) => {
 
     const getFileIcon = (doc: OnBoardDocument) => {
         const name = doc.on_board_documents_file_path?.toLowerCase() || doc.on_board_documents_file?.toLowerCase() || '';
-        if (name.endsWith('.pdf')) return <BsFiletypePdf className="w-5 h-5 text-rose-500" />;
-        if (name.endsWith('.doc') || name.endsWith('.docx')) return <BsFiletypeDoc className="w-5 h-5 text-[#0253a5]" />;
-        if (name.endsWith('.xls') || name.endsWith('.xlsx')) return <BsFiletypeXls className="w-5 h-5 text-emerald-600" />;
-        if (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.gif')) return <FaFileLines className="w-5 h-5 text-[#8B5CF6]" />;
+        if (name.endsWith('.pdf')) return <FaRegFilePdf className="w-5 h-5 text-rose-500" />;
+        if (name.endsWith('.doc') || name.endsWith('.docx')) return <FaRegFileWord className="w-5 h-5 text-[#0253a5]" />;
+        if (name.endsWith('.xls') || name.endsWith('.xlsx')) return <FaRegFileExcel className="w-5 h-5 text-emerald-600" />;
+        if (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.gif')) return <FaRegFileImage className="w-5 h-5 text-[#8B5CF6]" />;
         return <FaFileLines className="w-5 h-5 text-[#9AA2BA]" />;
     };
 
