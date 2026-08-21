@@ -45,7 +45,10 @@ export const useCandidateManagement = () => {
         totalPages: 0,
     });
 
-    const isFetchingRef = useRef(false);
+    // Tracks the most recent fetch — lets an in-flight request for a filter/group
+    // that's no longer current be ignored when it resolves, instead of clobbering
+    // the newer request's results (e.g. switching groups while loadMore is still in flight).
+    const requestIdRef = useRef(0);
 
     const updateUrlParams = useCallback((currentFilters: FilterState) => {
         const params = new URLSearchParams();
@@ -59,8 +62,7 @@ export const useCandidateManagement = () => {
     }, [setSearchParams]);
 
     const fetchCandidates = useCallback(async (page: number, replace: boolean, activeFilters: FilterState) => {
-        if (isFetchingRef.current) return;
-        isFetchingRef.current = true;
+        const requestId = ++requestIdRef.current;
 
         replace ? setLoading(true) : setLoadingMore(true);
         setError(null);
@@ -72,16 +74,20 @@ export const useCandidateManagement = () => {
                 ...activeFilters,
             } as Partial<CandidateRequest>);
 
+            if (requestId !== requestIdRef.current) return; // superseded by a newer request
+
             setCandidates((prev) => (replace ? response.data || [] : [...prev, ...(response.data || [])]));
             setPagination(response.pagination);
             setOfferingCount(response.candidate_status_offering_count ?? null);
         } catch (err: any) {
+            if (requestId !== requestIdRef.current) return;
             setError(err?.message || 'Failed to fetch candidate data');
             console.error('Error fetching candidate data:', err);
         } finally {
-            setLoading(false);
-            setLoadingMore(false);
-            isFetchingRef.current = false;
+            if (requestId === requestIdRef.current) {
+                setLoading(false);
+                setLoadingMore(false);
+            }
         }
     }, []);
     useEffect(() => {

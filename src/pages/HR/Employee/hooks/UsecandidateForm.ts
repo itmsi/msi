@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import dayjs from 'dayjs';
+import moment from 'moment';
 import {
     candidateService,
     hrCompanyService,
@@ -350,13 +350,13 @@ export function useCandidateForm({ initialData, onSave }: UseCandidateFormArgs) 
         try {
             const submitData = { ...form };
             if (submitData.candidate_date_birth) {
-                submitData.candidate_date_birth = dayjs(submitData.candidate_date_birth).format('YYYY-MM-DD') as unknown as Date;
+                submitData.candidate_date_birth = moment(submitData.candidate_date_birth).format('YYYY-MM-DD') as unknown as Date;
             }
             if (submitData.ptk_date) {
-                submitData.ptk_date = dayjs(submitData.ptk_date).format('YYYY-MM-DD') as unknown as Date;
+                submitData.ptk_date = moment(submitData.ptk_date).format('YYYY-MM-DD') as unknown as Date;
             }
             if (submitData.offering_letter) {
-                submitData.offering_letter = dayjs(submitData.offering_letter).format('YYYY-MM-DD') as unknown as Date;
+                submitData.offering_letter = moment(submitData.offering_letter).format('YYYY-MM-DD') as unknown as Date;
             }
 
             if (isEdit) {

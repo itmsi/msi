@@ -9,7 +9,7 @@ import { Modal } from '@/components/ui/modal';
 import TextArea from '@/components/form/input/TextArea';
 import { Tooltip } from '@/components/ui/tooltip';
 import { MdAdd, MdDeleteOutline } from 'react-icons/md';
-import { FaRegFilePdf } from 'react-icons/fa';
+import { FaRegFilePdf } from 'react-icons/fa6';
 import { PermissionButton, PermissionGate } from '@/components/common/PermissionComponents';
 import Label from '@/components/form/Label';
 import { StatusTypeBadgeCandidate } from '@/components/ui/badge/StatusBadge';
@@ -152,7 +152,7 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
                                                     </Tooltip>
                                                     <Tooltip content={'Delete'} position="top">
                                                         <PermissionButton
-                                                            permission={["create", "update"]}
+                                                            permission={["delete"]}
                                                             onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }}
                                                             className={`p-2 rounded-md text-sm font-medium transition-colors relative text-red-600 hover:text-red-700 hover:bg-red-50`}
                                                         >

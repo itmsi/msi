@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { ENUM_MONTH } from './constants';
 import { AuthService } from '@/services/authService';
 
@@ -32,12 +33,12 @@ export function formatFloatingValue(value: number | string | null | undefined, d
 
 export const allowOnlyNumeric = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'];
-    
+
     // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
     if (e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) {
         return;
     }
-    
+
     if (
         !/[0-9.,]/.test(e.key) &&
         !allowedKeys.includes(e.key)
@@ -58,7 +59,7 @@ export const parseNumberInput = (value: string | undefined | null, isZero?: bool
 
 export const parseDecimalInput = (value: string | number | undefined | null, defaultVal: number = 0): number => {
     if (!value && value !== 0) return defaultVal;
-    
+
     if (typeof value === 'number') {
         return isNaN(value) ? defaultVal : value;
     }
@@ -70,7 +71,7 @@ export const parseDecimalInput = (value: string | number | undefined | null, def
     if (!cleaned) return defaultVal;
 
     let normalized = cleaned.replace(',', '.');
-    
+
     const dots = (normalized.match(/\./g) || []).length;
     if (dots > 1) {
         const lastDotIdx = normalized.lastIndexOf('.');
@@ -78,7 +79,7 @@ export const parseDecimalInput = (value: string | number | undefined | null, def
         const afterLastDot = normalized.substring(lastDotIdx);
         normalized = beforeLastDot + afterLastDot;
     }
-    
+
     const result = parseFloat(normalized);
     return isNaN(result) ? defaultVal : result;
 };
@@ -92,13 +93,13 @@ export const formatTanggal = (dateString?: string): string => {
     if (parts.length !== 3) return dateString; // return original jika format tidak valid
 
     const [hari, bulanNum, tahun] = parts;
-    
+
     // Cari nama bulan dari ENUM_MONTH
     const namaBulan = ENUM_MONTH.find(m => m.value === bulanNum.padStart(2, '0'));
-    
+
     // Jika bulan tidak ditemukan, return original
     if (!namaBulan) return dateString;
-    
+
     return `${hari} ${namaBulan.label} ${tahun}`;
 };
 
@@ -111,7 +112,7 @@ export const parseTanggalToDate = (dateString?: string): Date | null => {
     if (parts.length !== 3) return null;
 
     const [hari, bulan, tahun] = parts;
-    
+
     // Validasi apakah semua parts adalah angka
     if (isNaN(Number(hari)) || isNaN(Number(bulan)) || isNaN(Number(tahun))) {
         return null;
@@ -120,21 +121,21 @@ export const parseTanggalToDate = (dateString?: string): Date | null => {
     // JavaScript Date constructor menggunakan format (year, monthIndex, day)
     // monthIndex dimulai dari 0 (Januari = 0)
     const dateObj = new Date(Number(tahun), Number(bulan) - 1, Number(hari));
-    
+
     // Validasi apakah date yang dibuat valid
     if (isNaN(dateObj.getTime())) return null;
-    
+
     return dateObj;
 };
 
 // Konversi Date object ke format DD/M/YYYY
 export const convertDateToTanggal = (date: Date): string => {
     if (!date || isNaN(date.getTime())) return '';
-    
+
     const hari = date.getDate();
     const bulan = date.getMonth() + 1; // getMonth() returns 0-based month
     const tahun = date.getFullYear();
-    
+
     return `${hari}/${bulan}/${tahun}`;
 };
 
@@ -152,13 +153,13 @@ export const formatNumberInputFadlan = (value: string | number | undefined | nul
 
     const stringValue = value.toString();
     const [integerPart, decimalPart] = stringValue.replace(/[^\d.]/g, '').split('.');
-    
+
     const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart || '0', 10));
-    
+
     if (decimalPart !== undefined) {
         return `${formattedInteger},${decimalPart}`;
     }
-    
+
     return formattedInteger;
 };
 
@@ -167,22 +168,22 @@ export const formatNumberPriceKoma = (value: string | number | undefined | null)
 
     const stringValue = value.toString();
     const [integerPart, decimalPart] = stringValue.replace(/[^\d.]/g, '').split('.');
-    
+
     const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart || '0', 10));
-    
+
     if (decimalPart !== undefined) {
         return `${formattedInteger},${decimalPart}`;
     }
-    
+
     return formattedInteger;
 };
 
 // New helper for currency formatting with proper decimal support
 export const formatCurrencyIDR = (value: string | number | undefined | null, maxDecimals: number = 2): string => {
     if (!value && value !== 0) return '';
-    
+
     let stringValue = value.toString();
-    
+
     // Handle case where value might already be formatted (contains dots and commas)
     if (typeof value === 'string' && (value.includes('.') || value.includes(','))) {
         // If it's already a formatted string, parse it first
@@ -196,74 +197,74 @@ export const formatCurrencyIDR = (value: string | number | undefined | null, max
         if (isNaN(numericValue)) return '';
         stringValue = numericValue.toString();
     }
-    
+
     // Split into integer and decimal parts
     const [integerPart, decimalPart] = stringValue.split('.');
-    
+
     // Format integer part with thousand separators (dots)
     const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart || '0', 10));
-    
+
     // Handle decimal part
     if (decimalPart !== undefined && decimalPart.length > 0) {
         // Limit decimal places
         const limitedDecimals = decimalPart.slice(0, maxDecimals);
         return `${formattedInteger},${limitedDecimals}`;
     }
-    
+
     return formattedInteger;
 };
 
 // Helper to format during typing (more lenient)
 export const formatCurrencyTyping = (value: string, maxDecimals: number = 2): string => {
     if (!value) return '';
-    
+
     // Jika value adalah JS number string (titik sebagai desimal, tanpa koma), konversi ke format koma
     if (value.includes('.') && !value.includes(',')) {
         value = value.replace('.', ',');
     }
-    
+
     // Remove all non-digit characters except comma
     const cleaned = value.replace(/[^\d,]/g, '');
-    
+
     // Split by comma
     const parts = cleaned.split(',');
-    
+
     if (parts.length > 2) {
         // If more than one comma, keep only the first part and first decimal
         return formatCurrencyTyping(`${parts[0]},${parts[1]}`, maxDecimals);
     }
-    
+
     const integerPart = parts[0] || '';
     const decimalPart = parts[1];
-    
+
     if (!integerPart) return '';
-    
+
     // Format integer part
     const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart, 10));
-    
+
     // Return with or without decimal part
     if (decimalPart !== undefined) {
         const limitedDecimal = decimalPart.slice(0, maxDecimals);
         return `${formattedInteger},${limitedDecimal}`;
     }
-    
+
     // Check if original value ended with comma (user is starting to type decimal)
     if (value.endsWith(',')) {
         return `${formattedInteger},`;
     }
-    
+
     return formattedInteger;
 };
 
 // Helper to parse currency back to number
 export const parseCurrencyIDR = (value: string): number => {
     if (!value) return 0;
-    
+
     // Remove thousand separators (dots) and replace decimal separator (comma) with dot
     const cleanValue = value
         .replace(/\./g, '')  // Remove thousand separators
         .replace(',', '.');  // Replace decimal separator
-    
+
     const numericValue = parseFloat(cleanValue);
     return isNaN(numericValue) ? 0 : numericValue;
 };
@@ -271,25 +272,25 @@ export const parseCurrencyIDR = (value: string): number => {
 // Key press handler for currency input (supports decimal)
 export const handleCurrencyKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End', 'Enter'];
-    
+
     // Allow control keys
     if (e.ctrlKey && ['a', 'c', 'v', 'x', 'z', 'y'].includes(e.key.toLowerCase())) {
         return;
     }
-    
+
     // Allow navigation keys
     if (allowedKeys.includes(e.key)) {
         return;
     }
-    
+
     const input = e.currentTarget;
     const currentValue = input.value;
-    
+
     // Allow digits
     if (/[0-9]/.test(e.key)) {
         return;
     }
-    
+
     // Allow comma for decimal separator (only one comma allowed)
     if (e.key === ',') {
         // Don't allow comma if one already exists
@@ -300,22 +301,22 @@ export const handleCurrencyKeyPress = (e: React.KeyboardEvent<HTMLInputElement>)
         // Allow comma
         return;
     }
-    
+
     // Prevent all other characters
     e.preventDefault();
 };
 export const formatCurrencyForBackend = (value: string | number | null | undefined): string => {
     if (!value && value !== 0) return '';
-    
+
     let numericValue: number;
-    
+
     if (typeof value === 'string') {
         if (value.includes(',')) {
             numericValue = parseCurrencyIDR(value);
         } else if (value.includes('.')) {
             const lastDotIndex = value.lastIndexOf('.');
             const afterDot = value.substring(lastDotIndex + 1);
-            
+
             if (afterDot.length <= 3 && /^\d+$/.test(afterDot)) {
                 numericValue = parseFloat(value);
             } else {
@@ -327,16 +328,16 @@ export const formatCurrencyForBackend = (value: string | number | null | undefin
     } else {
         numericValue = value;
     }
-    
+
     return (numericValue % 1 !== 0) ? numericValue.toFixed(2) : numericValue.toString();
 };
 export const formatNumberInputwithComma = (value: string | number | undefined | null): string => {
     if (!value && value !== 0) return '';
 
     const stringValue = value.toString();
-    
+
     let integerPart: string, decimalPart: string | undefined;
-    
+
     if (stringValue.includes(',')) {
         [integerPart, decimalPart] = stringValue.replace(/[^\d,]/g, '').split(',');
     } else if (stringValue.includes('.')) {
@@ -345,13 +346,13 @@ export const formatNumberInputwithComma = (value: string | number | undefined | 
         integerPart = stringValue.replace(/[^\d]/g, '');
         decimalPart = undefined;
     }
-    
+
     const formattedInteger = new Intl.NumberFormat('id-ID').format(parseInt(integerPart || '0', 10));
-    
+
     if (decimalPart !== undefined) {
         return `${formattedInteger},${decimalPart}`;
     }
-    
+
     return formattedInteger;
 };
 
@@ -361,23 +362,23 @@ export const parseFormatNumber = (formatValue: string): string => {
 };
 
 export const resetFormatNumbers = (
-    formData: any, 
+    formData: any,
     numericFields: string[] = []
 ): any => {
     const resetData = { ...formData };
-    const fieldsToReset = numericFields.length > 0 
-        ? numericFields 
+    const fieldsToReset = numericFields.length > 0
+        ? numericFields
         : Object.keys(resetData).filter(key => {
             const value = resetData[key];
             return typeof value === 'string' && /^\d{1,3}(\.\d{3})*$/.test(value);
         });
-    
+
     fieldsToReset.forEach(field => {
         if (resetData[field]) {
             resetData[field] = parseFormatNumber(resetData[field].toString());
         }
     });
-    
+
     return resetData;
 };
 export const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -396,8 +397,8 @@ export const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     }
 };
 export const handlePercentageInput = (
-    inputValue: string, 
-    min: number = 0, 
+    inputValue: string,
+    min: number = 0,
     max: number = 100
 ): string => {
     const numericValue = inputValue.replace(/[^\d]/g, '');
@@ -407,22 +408,22 @@ export const handlePercentageInput = (
 };
 
 export const handlePercentageInputComma = (
-    inputValue: string, 
-    min: number = 0, 
+    inputValue: string,
+    min: number = 0,
     max: number = 100
 ): string => {
     if (!inputValue) return '';
 
     const cleanedValue = inputValue.replace(/[^\d,]/g, '');
-    
+
     if (cleanedValue === ',') return '0,';
     if (cleanedValue.startsWith(',')) return '0' + cleanedValue;
 
     const parts = cleanedValue.split(',');
     if (parts.length > 2) return parts[0] + ',' + parts.slice(1).join('');
-    
+
     const dotValue = cleanedValue.replace(',', '.');
-    
+
     const numericValue = parseFloat(dotValue);
 
     if (isNaN(numericValue)) return cleanedValue;
@@ -445,7 +446,7 @@ export const hasChanged = <T extends object>(oldData: T, newData: Partial<T>, ke
 export const formatCurrency = (value: number | string): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(numValue)) return 'Rp 0';
-    
+
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
@@ -456,7 +457,7 @@ export const formatCurrency = (value: number | string): string => {
 export const formatCurrencyID = (value: number | string): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(numValue)) return 'Rp 0';
-    
+
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
@@ -489,7 +490,7 @@ export const formatCurrencyDynamic = (value: number | string, currencySymbol: st
 export const formatCurrencyZH = (value: number | string): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(numValue)) return '￥0';
-    
+
     return new Intl.NumberFormat('zh-CN', {
         style: 'currency',
         currency: 'CNY',
@@ -511,10 +512,15 @@ export const tableDateFormatTime = {
     minute: '2-digit' as const,
     second: '2-digit' as const
 }
+export const formatDateMoment = (value: string | Date | null | undefined) => {
+    if (!value) return '-';
+    const date = moment(value).locale('id');
+    return date.isValid() ? date.format('D MMMM YYYY') : '-';
+}
 
 export const formatDate = (dateString: string, includeTime: boolean = false) => {
     const date = new Date(dateString);
-    
+
     if (includeTime) {
         return date.toLocaleDateString('id-ID', {
             year: 'numeric',
@@ -525,7 +531,7 @@ export const formatDate = (dateString: string, includeTime: boolean = false) => 
             second: '2-digit'
         });
     }
-    
+
     return date.toLocaleDateString('id-ID', {
         year: 'numeric',
         month: 'short',
@@ -577,9 +583,9 @@ export const parseNetsuiteDate = (dateStr: string | null | undefined): string =>
     // DD/M/YYYY or D/M/YYYY
     const m = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
     if (m) {
-        const day   = m[1].padStart(2, '0');
+        const day = m[1].padStart(2, '0');
         const month = m[2].padStart(2, '0');
-        const year  = m[3];
+        const year = m[3];
         return `${year}-${month}-${day}T00:00:00`;
     }
     return dateStr;
@@ -627,8 +633,8 @@ export const fourdigitcomma = (value: string | number): string => {
 
 // Handle numeric input with support for decimal values starting with 0 (e.g., 0.12)
 export const handleDecimalInput = (
-    rawValue: string, 
-    onValidInput: (value: string) => void, 
+    rawValue: string,
+    onValidInput: (value: string) => void,
     onInvalidInput: () => void,
     formatWithComma: boolean = true,
     maxIntegerDigits?: number,
@@ -638,33 +644,33 @@ export const handleDecimalInput = (
         onInvalidInput();
         return;
     }
-    
+
     const cleanValue = rawValue.replace(/[^\d.]/g, '');
     const [integerPart, decimalPart] = cleanValue.split('.');
-    
+
     // Check max integer digits
     if (maxIntegerDigits && integerPart && integerPart.length > maxIntegerDigits) {
         return;
     }
-    
+
     // Check max decimal digits
     if (decimalPart && decimalPart.length > maxDecimalDigits) {
         return;
     }
-    
+
     let processedValue = cleanValue;
     if (integerPart && integerPart.length > 1 && integerPart.startsWith('0') && !cleanValue.startsWith('0.')) {
         const trimmedInteger = integerPart.replace(/^0+/, '') || '0';
         processedValue = decimalPart !== undefined ? `${trimmedInteger}.${decimalPart}` : trimmedInteger;
     }
-    
+
     if (processedValue === '0' || processedValue.startsWith('0.')) {
         onValidInput(processedValue);
         return;
     }
-    
+
     const numericValue = parseFloat(processedValue) || 0;
-    
+
     if (numericValue <= 0) {
         onInvalidInput();
     } else {
@@ -674,8 +680,8 @@ export const handleDecimalInput = (
 };
 // Handle numeric input with support for decimal values starting with 0 (e.g., 0.12)
 export const handleDecimalInputComma = (
-    rawValue: string, 
-    onValidInput: (value: string) => void, 
+    rawValue: string,
+    onValidInput: (value: string) => void,
     onInvalidInput: () => void,
     formatWithComma: boolean = true,
     maxIntegerDigits?: number,
@@ -685,25 +691,25 @@ export const handleDecimalInputComma = (
         onInvalidInput();
         return;
     }
-    
+
     const cleanValue = rawValue.replace(/[^\d,]/g, '');
     const [integerPart, decimalPart] = cleanValue.split(',');
-    
+
     if (maxIntegerDigits && integerPart && integerPart.length > maxIntegerDigits) {
         return;
     }
-    
+
     if (decimalPart && decimalPart.length > maxDecimalDigits) {
-        return; 
+        return;
     }
-    
+
     if (cleanValue === '0' || cleanValue.startsWith('0,')) {
         onValidInput(cleanValue);
         return;
     }
-    
+
     const numericValue = parseFloat(cleanValue) || 0;
-    
+
     if (numericValue <= 0) {
         onInvalidInput();
     } else {
@@ -720,7 +726,7 @@ export const formatPhoneNumber = (phone: string): string => {
     } else if (cleaned.startsWith('08')) {
         return `${cleaned.substring(0, 4)}-${cleaned.substring(4, 8)}-${cleaned.substring(8)}`;
     }
-    
+
     return phone;
 }
 

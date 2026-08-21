@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import moment from 'moment';
 import {
     MdGroup,
     MdCheckCircle,
     MdCancel,
-    MdHelpOutline,
     MdEdit,
     MdMoreVert,
     MdSchedule,
@@ -35,9 +35,8 @@ export const hue = (id: string) => {
 
 const formatDate = (value: string | null) => {
     if (!value) return null;
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const date = moment(value);
+    return date.isValid() ? date.format('DD MMM YYYY') : value;
 };
 
 const normalizeAssignRole = (value: string[] | string | null | undefined): string[] => {
@@ -113,10 +112,6 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete, index }: Ca
             onView(candidate);
         }
     };
-
-    const offering = candidate.candidate_status_offering_letter
-        ? OFFERING_STYLE[candidate.candidate_status_offering_letter]
-        : null;
 
     const interviewDate = candidate.schedule_interview?.schedule_interview_date
         ? formatDate(candidate.schedule_interview.schedule_interview_date)
@@ -266,19 +261,8 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete, index }: Ca
                             <span className="font-normal text-[#C4C9DA] italic">Unassigned</span>
                         )}
                     </DetailRow>
-                    <DetailRow label="Offering Letter">
-                        {offering ? (
-                            <span
-                                className="inline-flex items-center gap-1 text-[11px] font-secondary font-semibold px-2 py-0.5 rounded-md"
-                                style={{ background: offering.bg, color: offering.fg }}
-                            >
-                                <offering.Icon size={12} /> {offering.label}
-                            </span>
-                        ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-primary-bold px-2 py-0.5 rounded-md bg-[#F5F6F8] text-[#9AA2BA]">
-                                <MdHelpOutline size={12} /> Awaiting
-                            </span>
-                        )}
+                    <DetailRow label="Offering Date">
+                        {formatDate(candidate.offering_letter) || <span className="font-normal text-[#C4C9DA] italic">Not set</span>}
                     </DetailRow>
                 </div>
 
