@@ -14,6 +14,7 @@ import { FaReceipt, FaSave } from 'react-icons/fa';
 import ModalApproval from './components/ModalApproval';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
+import { usePOProjectSegmentationSelect } from '@/hooks/usePOProjectSegmentationSelect';
 import { getProfile } from '@/helpers/generalHelper';
 import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 import { useReceiptTab } from './hooks/useReceiptTab';
@@ -119,6 +120,28 @@ export default function Edit() {
 
     const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
     const [departmentSelectError, setDepartmentSelectError] = useState<string>('');
+
+    // Project Segmentation select untuk items (line-level only)
+    const {
+        POProjectSegmentationOptions,
+        pagination: itemProjectSegmentationPagination,
+        inputValue: itemProjectSegmentationInputValue,
+        handleInputChange: handleItemProjectSegmentationInputChange,
+        handleMenuScrollToBottom: handleItemProjectSegmentationScrollToBottom,
+        initializeOptions: initializeItemProjectSegmentationOptions,
+        initialized: projectSegmentationInitialized,
+        isLoading: projectSegmentationLoading
+    } = usePOProjectSegmentationSelect(30);
+
+    useEffect(() => {
+        if (initializeItemProjectSegmentationOptions && !projectSegmentationInitialized && !projectSegmentationLoading) {
+            try {
+                initializeItemProjectSegmentationOptions();
+            } catch (error) {
+                console.error('Failed to initialize project segmentation options:', error);
+            }
+        }
+    }, [projectSegmentationInitialized, projectSegmentationLoading, initializeItemProjectSegmentationOptions]);
 
     useEffect(() => {
         if (initializeItemClassOptions && !classInitialized && !classLoading) {
@@ -642,6 +665,13 @@ export default function Edit() {
                                             }
                                         }}
                                         departmentError={errors.department || departmentSelectError}
+
+                                        // Project Segmentation props
+                                        projectSegmentationOptions={POProjectSegmentationOptions}
+                                        projectSegmentationPagination={itemProjectSegmentationPagination}
+                                        projectSegmentationInputValue={itemProjectSegmentationInputValue}
+                                        onProjectSegmentationInputChange={handleItemProjectSegmentationInputChange}
+                                        onProjectSegmentationMenuScrollToBottom={handleItemProjectSegmentationScrollToBottom}
                                         serverTotal={poDetail?.foreigntotal}
                                     />
                                 )}

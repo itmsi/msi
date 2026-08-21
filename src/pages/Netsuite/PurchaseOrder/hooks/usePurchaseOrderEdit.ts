@@ -73,6 +73,8 @@ const mapPODetailToForm = (detail: PODetailData): PurchaseOrderForm => {
         custcol_me_landed_cost: line.custcol_me_landed_cost != null ? Number(line.custcol_me_landed_cost) : 0,
         custcol_msi_fob: line.custcol_msi_fob != null ? Number(line.custcol_msi_fob) : 0,
         description: line.description || '',
+        cseg_msi_pro_segmen: line.cseg_msi_pro_segmen || null,
+        cseg_msi_pro_segmen_display: line.cseg_msi_pro_segmen_display || '',
     }));
 
     return {
@@ -329,7 +331,8 @@ export const usePurchaseOrderEdit = (backRoute: string = '/netsuite/purchase-ord
                     total: Number(item.total || 0),
                     tax_amount: Number(item.tax_amount || 0),
                     gross_amount: Number(item.gross_amount || 0),
-                    description: item.description || ''
+                    description: item.description || '',
+                    cseg_msi_pro_segmen: item.cseg_msi_pro_segmen ? Number(item.cseg_msi_pro_segmen) : null,
                 })),
                 files: sortById(formData.files || [], false),
             };
