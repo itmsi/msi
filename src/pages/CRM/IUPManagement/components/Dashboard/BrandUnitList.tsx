@@ -1,14 +1,14 @@
 import { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
-import * as echarts from "echarts/core";
-import { PieChart } from "echarts/charts";
+import { use } from 'echarts/core';
+import { PieChart } from 'echarts/charts';
 import { CanvasRenderer } from "echarts/renderers";
 import { LegendComponent, TooltipComponent } from "echarts/components";
 
 import type { IupBrandUnit } from "../../types/iupDashboard";
 import { formatNumber, toNumber } from "./dashboardUtils";
 
-echarts.use([TooltipComponent, LegendComponent, PieChart, CanvasRenderer]);
+use([TooltipComponent, LegendComponent, PieChart, CanvasRenderer]);
 
 const CHART_COLORS = ["#0253a5", "#465fff", "#0ba5ec", "#12b76a", "#f79009", "#7a5af8"];
 

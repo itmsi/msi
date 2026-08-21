@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import ReactECharts from "echarts-for-react";
-import * as echarts from "echarts/core";
+import { use } from 'echarts/core';
+import ReactECharts from 'echarts-for-react';
 import { BarChart } from "echarts/charts";
 import { CanvasRenderer } from "echarts/renderers";
 import { GridComponent, LegendComponent, TooltipComponent } from "echarts/components";
@@ -8,7 +8,7 @@ import { GridComponent, LegendComponent, TooltipComponent } from "echarts/compon
 import type { IupRkabYear } from "../../types/iupDashboard";
 import { formatNumber, toNumber } from "./dashboardUtils";
 
-echarts.use([TooltipComponent, LegendComponent, GridComponent, BarChart, CanvasRenderer]);
+use([TooltipComponent, LegendComponent, GridComponent, BarChart, CanvasRenderer]);
 
 interface RkabHistoryProps {
     rkabHistory: IupRkabYear[];

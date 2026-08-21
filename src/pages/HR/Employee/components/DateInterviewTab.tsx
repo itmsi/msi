@@ -10,7 +10,7 @@ import { getMultipliedScore } from '../../Candidate/components/InterviewScoreCha
 import FormScoringCanvas from './FormScoringCanvas';
 import { PDFPreviewModal } from './PDFPreviewModal';
 import InterviewerScoreCard from './InterviewerScoreCard';
-import { dedupeFormsByCategory } from '../utils/interviewFormHelpers';
+import { dedupeFormsByCategory, getLatestInterviewerForms } from '../utils/interviewFormHelpers';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import { Modal } from '@/components/ui/modal';
 import Button from '@/components/ui/button/Button';
@@ -127,7 +127,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
     };
 
     const closeScoringPanel = () => {
-        // if (scoringPanel) fetchScheduleForms(scoringPanel.scheduleId);
+        if (scoringPanel) fetchScheduleForms(scoringPanel.scheduleId);
         setScoringPanel(null);
     };
 
@@ -378,7 +378,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                     }
                                                     const forms = scheduleForms[s.schedule_interview_id] || [];
                                                     if (!forms.length) return <span className="text-xs text-[#9AA2BA]">Not scored</span>;
-                                                    const totalScore = forms.reduce((sum, f) => {
+                                                    const totalScore = getLatestInterviewerForms(forms).reduce((sum, f) => {
                                                         const categoryScore = f.detail_interviews?.reduce((s2, d) => s2 + (parseInt(d.score) || 0), 0) || 0;
                                                         return sum + getMultipliedScore(f.company_value, categoryScore);
                                                     }, 0);
