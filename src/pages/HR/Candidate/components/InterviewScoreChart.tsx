@@ -64,8 +64,8 @@ const InterviewScoreChart = ({ metrics = [] }: InterviewScoreChartProps) => {
 
     if (!isValid) {
         return (
-            <div className="p-4 border rounded bg-white shadow-sm m-2 text-center">
-                <h5 className="mb-3 font-semibold">Interview Scoring</h5>
+            <div className="p-4 border rounded bg-white text-center">
+                <h5 className="mb-3 font-primary-bold">Interview Scoring</h5>
                 <p className="text-gray-500">No scoring data available or insufficient data to display chart</p>
             </div>
         );
@@ -206,7 +206,7 @@ const InterviewScoreChart = ({ metrics = [] }: InterviewScoreChartProps) => {
     };
 
     return (
-        <div className="p-4 border rounded bg-white shadow-sm m-2">
+        <div className="p-4 bg-white">
             <div className="flex flex-col lg:flex-row items-center gap-6">
                 {/* Chart */}
                 <div className="w-full lg:w-2/3" style={{ height: '400px' }}>
@@ -221,7 +221,7 @@ const InterviewScoreChart = ({ metrics = [] }: InterviewScoreChartProps) => {
                     </div>
                     <div className="mb-4">
                         <span className="text-gray-400 text-sm">Recommendation</span>
-                        <h5 className="text-base font-semibold text-gray-800">{recommendation}</h5>
+                        <h5 className="text-base font-primary-bold text-gray-800">{recommendation}</h5>
                     </div>
                 </div>
             </div>

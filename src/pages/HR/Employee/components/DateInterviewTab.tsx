@@ -3,10 +3,9 @@ import React from 'react';
 import { interviewScheduleService, interviewFormService, type InterviewSchedule, type InterviewFormItem, type ScheduleCreateRequest } from '../../Candidate/services/interviewService';
 import { generateInterviewPDFBlob } from '../utils/PDFInterviewReport';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaChartSimple, FaChevronDown, FaChevronUp, FaClipboardCheck, FaRegPenToSquare, FaSpinner } from 'react-icons/fa6';
+import { FaPlus, FaChevronDown, FaChevronUp, FaClipboardCheck, FaRegPenToSquare, FaSpinner } from 'react-icons/fa6';
 import { MdAdd, MdDeleteOutline } from 'react-icons/md';
-import ModalScoreInterview from '../../Candidate/components/ModalScoreInterview';
-import { getMultipliedScore } from '../../Candidate/components/InterviewScoreChart';
+import InterviewScoreChart, { getMultipliedScore } from '../../Candidate/components/InterviewScoreChart';
 import FormScoringCanvas from './FormScoringCanvas';
 import { PDFPreviewModal } from './PDFPreviewModal';
 import InterviewerScoreCard from './InterviewerScoreCard';
@@ -181,27 +180,27 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
         setPdfPreview(null);
     };
 
-    const handleOpenScoreStats = async (scheduleId: string) => {
-        const forms = scheduleForms[scheduleId];
-        if (forms) {
-            setFormScoreData(getFormScoreData(forms));
-            setShowFormScore(true);
-            return;
-        }
+    // const handleOpenScoreStats = async (scheduleId: string) => {
+    //     const forms = scheduleForms[scheduleId];
+    //     if (forms) {
+    //         setFormScoreData(getFormScoreData(forms));
+    //         setShowFormScore(true);
+    //         return;
+    //     }
 
-        setLoadingForms(prev => ({ ...prev, [scheduleId]: true }));
-        try {
-            const result = await interviewFormService.getList({ schedule_interview_id: scheduleId });
-            const loadedForms = result.data || [];
-            setScheduleForms(prev => ({ ...prev, [scheduleId]: loadedForms }));
-            setFormScoreData(getFormScoreData(loadedForms));
-            setShowFormScore(true);
-        } catch {
-            toast.error('Failed to load interview forms');
-        } finally {
-            setLoadingForms(prev => ({ ...prev, [scheduleId]: false }));
-        }
-    };
+    //     setLoadingForms(prev => ({ ...prev, [scheduleId]: true }));
+    //     try {
+    //         const result = await interviewFormService.getList({ schedule_interview_id: scheduleId });
+    //         const loadedForms = result.data || [];
+    //         setScheduleForms(prev => ({ ...prev, [scheduleId]: loadedForms }));
+    //         setFormScoreData(getFormScoreData(loadedForms));
+    //         setShowFormScore(true);
+    //     } catch {
+    //         toast.error('Failed to load interview forms');
+    //     } finally {
+    //         setLoadingForms(prev => ({ ...prev, [scheduleId]: false }));
+    //     }
+    // };
 
     const openAdd = () => {
         setEditing(null);
@@ -410,7 +409,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                             </PermissionButton>
                                                         </Tooltip>
                                                     }
-                                                    <Tooltip content="Score Stats" position="top">
+                                                    {/* <Tooltip content="Score Stats" position="top">
                                                         <PermissionButton
                                                             permission={['read']}
                                                             onClick={() => handleOpenScoreStats(s.schedule_interview_id)}
@@ -418,7 +417,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                         >
                                                             <FaChartSimple className="w-4 h-4" />
                                                         </PermissionButton>
-                                                    </Tooltip>
+                                                    </Tooltip> */}
                                                     <Tooltip content="Edit Schedule" position="top">
                                                         <PermissionButton
                                                             permission={['read']}
@@ -556,7 +555,15 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                 })()}
             </Modal>
 
-            <ModalScoreInterview show={showFormScore} onClose={() => setShowFormScore(false)} scoreData={formScoreData} />
+            <Modal
+                isOpen={showFormScore}
+                onClose={() => setShowFormScore(false)}
+                className="max-w-4xl! rounded-2xl! max-h-[85vh]! overflow-y-auto!"
+            >
+                <div className="px-0 py-5">
+                    <InterviewScoreChart metrics={formScoreData} />
+                </div>
+            </Modal>
 
             {pdfPreview && (
                 <PDFPreviewModal
