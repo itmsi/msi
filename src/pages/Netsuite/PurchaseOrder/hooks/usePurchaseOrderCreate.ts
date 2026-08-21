@@ -193,6 +193,7 @@ export const usePurchaseOrderCreate = () => {
                     custcol_msi_fob: Number(item.custcol_msi_fob) || null,
                     description: item.description || '',
                     grossamt: Number(item.amount) || null,
+                    cseg_msi_pro_segmen: item.cseg_msi_pro_segmen ? Number(item.cseg_msi_pro_segmen) : null,
                 })),
                 files: formData.files || []
             };
