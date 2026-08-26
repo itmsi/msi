@@ -136,6 +136,9 @@ const CreateQuotationNetsuite = lazy(() => import('@/pages/Netsuite/Quotation/Cr
 const EditQuotationNetsuite = lazy(() => import('@/pages/Netsuite/Quotation/Edit'));
 const CreateSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Create'));
 const EditSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Edit'));
+const ManageTransferOrder = lazy(() => import('@/pages/Netsuite/TransferOrder/Manage'));
+const CreateTransferOrder = lazy(() => import('@/pages/Netsuite/TransferOrder/Create'));
+const EditTransferOrder = lazy(() => import('@/pages/Netsuite/TransferOrder/Edit'));
 // ========================================
 
 // DIVISION
@@ -1155,6 +1158,33 @@ export const routes: TAppRoute[] = [
         roles: ['Sales Order Netsuite'],
         requiredPermissions: ['update', 'read'],
         component: EditSalesOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/transfer-orders',
+        name: 'Transfer Order Netsuite',
+        isProtected: true,
+        roles: ['Transfer Order Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: ManageTransferOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/transfer-orders/create',
+        name: 'Transfer Order Netsuite',
+        isProtected: true,
+        roles: ['Transfer Order Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: CreateTransferOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/transfer-orders/edit/:id',
+        name: 'Transfer Order Netsuite',
+        isProtected: true,
+        roles: ['Transfer Order Netsuite'],
+        requiredPermissions: ['update', 'read'],
+        component: EditTransferOrder,
         layout: AppLayout,
     },
     {
