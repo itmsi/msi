@@ -55,8 +55,8 @@ export interface PurchaseOrderItem {
     created_at: string;
     updated_at: string;
     custbody_msi_createdby_api?: string;
-    last_modified?: string ;
-    created_by_name?: string ;
+    last_modified?: string;
+    created_by_name?: string;
 }
 
 export interface POLine {
@@ -115,7 +115,7 @@ export interface PurchaseOrderForm {
 
 export interface POLineItem {
     id?: string;
-    product_id?: string; 
+    product_id?: string;
     product_name?: string;
     itemId?: string | number;
     qty?: number;
@@ -171,7 +171,7 @@ export interface FormFieldItemsResponse {
     data: MasterDataFormFieldItems;
 }
 
-export  interface MasterDataFormFieldItems {
+export interface MasterDataFormFieldItems {
     customforms: BaseOption[];
     subsidiarys: BaseOption[];
     currencys: BaseOption[];
@@ -323,6 +323,7 @@ export interface PODetailData {
     location_display: string;
     subsidiary: number;
     subsidiary_display: string;
+    trandate?: string;
     memo: string;
     vendor_id: number;
     vendor_name: string;
@@ -364,14 +365,14 @@ export interface PODetailData {
 }
 
 export interface MessageError {
-  response: ErrorResponsePayload;
+    response: ErrorResponsePayload;
 }
 
 export interface ErrorResponsePayload {
-  errors: any;
-  message: string;
-  success: boolean;
-  timestamp: string;
+    errors: any;
+    message: string;
+    success: boolean;
+    timestamp: string;
 }
 
 export interface PODetailLine {
@@ -507,40 +508,40 @@ export interface PurchaseOrderUpdateItem {
     cseg_msi_pro_segmen?: number | null;
 }
 // ITEM TYPE
- export interface ItemTypeRequest {
-     page: number;
-     limit: number;
-     sort_by: string;
-     sort_order: string;
-     search: string;
- }
- 
- export interface ItemTypeResponse {
-     success: boolean;
-     data: ItemTypeDataResponse;
-     message: string;
- }
- 
- export interface ItemTypeDataResponse {
-     items: ItemTypeItem[];
-     pagination: Pagination;
- }
- 
- export interface ItemTypeItem {
-     id: string;
-     netsuite_id: string | null;
-     code: string;
-     name: string;
-     created_at: string | null;
-     created_by: string | null;
-     updated_at: string | null;
-     updated_by: string | null;
-     deleted_at: string | null;
-     deleted_by: string | null;
-     is_deleted: boolean;
- }
- 
- // TERM SELECT
+export interface ItemTypeRequest {
+    page: number;
+    limit: number;
+    sort_by: string;
+    sort_order: string;
+    search: string;
+}
+
+export interface ItemTypeResponse {
+    success: boolean;
+    data: ItemTypeDataResponse;
+    message: string;
+}
+
+export interface ItemTypeDataResponse {
+    items: ItemTypeItem[];
+    pagination: Pagination;
+}
+
+export interface ItemTypeItem {
+    id: string;
+    netsuite_id: string | null;
+    code: string;
+    name: string;
+    created_at: string | null;
+    created_by: string | null;
+    updated_at: string | null;
+    updated_by: string | null;
+    deleted_at: string | null;
+    deleted_by: string | null;
+    is_deleted: boolean;
+}
+
+// TERM SELECT
 export interface TermsItem {
     id: string;
     name: string;
@@ -614,7 +615,7 @@ export interface ItemReceiptPayload {
 }
 
 export interface RequestFilters {
-   createdfrom?: number;
+    createdfrom?: number;
 }
 // RECEIVE REQUEST PARAMS
 export interface ReceiveRequest {
@@ -710,17 +711,17 @@ export interface PostReceiptResponse {
 
 // HISTORY RECEIPT LOGS
 export interface HistoryLogItem {
-  id: string;
-  trandate?: string;
-  msg_error?: string;
-  created_at?: string;
-  created_by_name?: string;
+    id: string;
+    trandate?: string;
+    msg_error?: string;
+    created_at?: string;
+    created_by_name?: string;
 }
 
 export interface HistoryLogResponse {
-  success: boolean;
-  data?: HistoryLogItem[];
-  message?: string;
+    success: boolean;
+    data?: HistoryLogItem[];
+    message?: string;
 }
 
 // USER NOTES
@@ -756,7 +757,7 @@ export interface POAttachment {
 }
 
 export interface POAttachmentUpdate {
-    file?: File ;
+    file?: File;
     id?: string;
     type: string;
     file_name: string;
