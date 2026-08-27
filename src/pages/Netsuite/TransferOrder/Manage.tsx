@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useTransferOrder } from './hooks/useTransferOrder';
-import { formatDateTime } from '@/helpers/generalHelper';
+import { formatDateTime, getProfile } from '@/helpers/generalHelper';
 import {
     MdClear,
     MdSearch,
@@ -46,6 +46,8 @@ const formatDateID = (dateString: string) => {
 export default function Manage() {
     const navigate = useNavigate();
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const profileSSO = getProfile() as any;
+    const profileSSOId = profileSSO?.classes_id_netsuite || null;
 
     const {
         transferOrders,
@@ -69,7 +71,7 @@ export default function Manage() {
         isSyncing,
         handleSync,
         handleSyncById,
-    } = useTransferOrder();
+    } = useTransferOrder(profileSSOId);
 
     // Location filter select
     const {

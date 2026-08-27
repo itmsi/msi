@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { TransferOrderService } from '../services/transferOrderService';
 import { NetSuiteSyncService } from '../../Sync/services/netSuiteSyncService';
 
-export const useTransferOrder = () => {
+export const useTransferOrder = (profileSSO?: number) => {
     const [searchValue, setSearchValue] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
@@ -47,6 +47,7 @@ export const useTransferOrder = () => {
                 ...(overrides?.status_name !== undefined
                     ? (overrides.status_name ? { status_name: overrides.status_name } : {})
                     : (filterStatus ? { status_name: filterStatus } : {})),
+                ...(profileSSO !== undefined ? { classes: profileSSO } : {}),
             };
 
             const response = await TransferOrderService.getTransferOrders(requestBody);
@@ -67,7 +68,7 @@ export const useTransferOrder = () => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, filterLocation, filterTransferLocation, filterStatus, pagination.page, pagination.page_size]);
+    }, [searchValue, sortOrder, filterLocation, filterTransferLocation, filterStatus, pagination.page, pagination.page_size, profileSSO]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
