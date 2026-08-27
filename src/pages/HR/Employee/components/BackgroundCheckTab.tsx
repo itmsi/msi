@@ -2,30 +2,22 @@ import { useState, useEffect } from 'react';
 import type { BackgroundCheckItem } from '../../Candidate/types/hr';
 import { backgroundCheckService } from '../../Candidate/services/hrService';
 import { toast } from 'react-hot-toast';
-import { FaTrash, FaShieldHalved, FaXmark } from 'react-icons/fa6';
 import Button from '@/components/ui/button/Button';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
+import { Modal } from '@/components/ui/modal';
 import TextArea from '@/components/form/input/TextArea';
 import { Tooltip } from '@/components/ui/tooltip';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MdAdd } from 'react-icons/md';
-import { FaRegFilePdf } from 'react-icons/fa';
-import { PermissionButton } from '@/components/common/PermissionComponents';
+import { MdAdd, MdDeleteOutline } from 'react-icons/md';
+import { FaRegFilePdf } from 'react-icons/fa6';
+import { PermissionButton, PermissionGate } from '@/components/common/PermissionComponents';
+import Label from '@/components/form/Label';
+import { StatusTypeBadgeCandidate } from '@/components/ui/badge/StatusBadge';
 
 interface BackgroundCheckTabProps {
     candidateId: string;
     isActive: boolean;
 }
-
-// Same badge language as the rest of the app (e.g. /netsuite/sales-orders StatusTypeBadge):
-// bg-X-100 / text-X-800 / border-X-200, rounded-full, bordered.
-const STATUS_STYLE: Record<string, string> = {
-    Hired: 'bg-green-100 text-green-800 border-green-200',
-    Rejected: 'bg-red-100 text-red-800 border-red-200',
-    'On Hold': 'bg-amber-100 text-amber-800 border-amber-200',
-};
-const DEFAULT_STATUS_STYLE = 'bg-gray-100 text-gray-800 border-gray-200';
 
 const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) => {
     const [items, setItems] = useState<BackgroundCheckItem[]>([]);
@@ -111,13 +103,13 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
             ) : (
                 <div className="bg-white rounded-xl overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-[1090px] text-sm">
+                        <table className="w-full min-w-272 text-sm">
                             <thead>
                                 <tr className="bg-[#dfe8f2] border-b border-[#E7E9F0]">
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Notes</th>
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Created By</th>
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Date</th>
-                                    <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Status</th>
+                                    <th className="text-center px-4 py-3 font-secondary font-semibold text-[#374151]">Status</th>
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151] w-32">Actions</th>
                                 </tr>
                             </thead>
@@ -131,15 +123,20 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
                                             <td className="px-4 py-3 text-[#5B6480]">{item.created_by_name || '-'}</td>
                                             <td className="px-4 py-3 text-[#5B6480]">{formatIndonesianDate(item.created_at)}</td>
                                             <td className="px-4 py-3">
-                                                <span className={`inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-primary-bold ${STATUS_STYLE[item.background_check_status] || DEFAULT_STATUS_STYLE}`}>
-                                                    {item.background_check_status}
-                                                </span>
+                                                <div className="items-center flex justify-center capitalize">
+                                                    {item.background_check_status ? (
+                                                        <StatusTypeBadgeCandidate
+                                                            type={item.background_check_status as 'Hired' | 'Rejected' | 'On Hold'}
+                                                            label={item.background_check_status || undefined}
+                                                        />
+                                                    ) : '-'}
+                                                </div>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <div className="flex items-center gap-1">
-                                                    {item.file_attachment && (
+                                                <div className="flex items-center gap-3">
+                                                    <Tooltip content={item.file_attachment ? 'Download' : 'File Not Found'} position="top">
                                                         <PermissionButton
-                                                            permission={'read'}
+                                                            permission={['read']}
                                                             onClick={() => {
                                                                 if (!item.file_attachment) return;
                                                                 const downloadUrl = item.file_attachment.startsWith('http')
@@ -147,23 +144,20 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
                                                                     : item.file_attachment;
                                                                 window.open(downloadUrl, '_blank', 'noopener,noreferrer');
                                                             }}
-                                                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                                                            }`}
+                                                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-blue-600 hover:text-blue-700 hover:bg-blue-50`}
+                                                            disabled={!item.file_attachment}
                                                         >
                                                             <FaRegFilePdf className="w-4 h-4" />
                                                         </PermissionButton>
-                                                        // <a
-                                                        //     href={item.file_attachment?.startsWith('http') ? item.file_attachment + '/download' : item.file_attachment}
-                                                        //     target="_blank" rel="noopener noreferrer"
-                                                        //     className="inline-flex items-center gap-1 px-2 py-1 text-xs text-[#0253a5] border border-[#E7E9F0] rounded-lg hover:bg-[#FAFAFB]"
-                                                        // >
-                                                        //     <FaRegFilePdf className="w-3 h-3" /> Download
-                                                        // </a>
-                                                    )}
-                                                    <Tooltip content="Delete" position="top">
-                                                        <Button size="sm" variant="transparent" onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }} className="text-rose-500!">
-                                                            <FaTrash className="w-3.5 h-3.5" />
-                                                        </Button>
+                                                    </Tooltip>
+                                                    <Tooltip content={'Delete'} position="top">
+                                                        <PermissionButton
+                                                            permission={["delete"]}
+                                                            onClick={() => { setDeletingId(item.background_check_id); setShowDeleteModal(true); }}
+                                                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-red-600 hover:text-red-700 hover:bg-red-50`}
+                                                        >
+                                                            <MdDeleteOutline className="w-4 h-4" />
+                                                        </PermissionButton>
                                                     </Tooltip>
                                                 </div>
                                             </td>
@@ -177,87 +171,70 @@ const BackgroundCheckTab = ({ candidateId, isActive }: BackgroundCheckTabProps) 
             )}
 
             {/* Add Modal */}
-            <AnimatePresence>
-                {showAddModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4"
-                        onClick={() => setShowAddModal(false)}
-                    >
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.96, y: 8 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.96, y: 8 }}
-                            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-white rounded-2xl border border-[#E7E9F0] shadow-xl w-full max-w-md overflow-hidden"
-                        >
-                            <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-[#E7E9F0]">
-                                <div className="flex items-center gap-3 min-w-0">
-                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#ECFDF5] text-[#047857] shrink-0">
-                                        <FaShieldHalved size={16} />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <h3 className="text-[15px] font-primary-bold text-[#1F2430]">Add Background Check</h3>
-                                        <p className="text-xs text-[#9AA2BA] mt-0.5">Record the result of a background verification.</p>
-                                    </div>
-                                </div>
-                                <button onClick={() => setShowAddModal(false)} title="Close" className="p-2 rounded-full hover:bg-[#F5F6F8] text-[#9AA2BA] shrink-0">
-                                    <FaXmark size={16} />
+            <Modal
+                isOpen={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                className="max-w-xl"
+                title={`Add Background Check`}
+                description={`Record the result of a background verification.`}
+            >
+                <div className="px-6 py-5 space-y-4">
+                    <div>
+                        <Label>Result</Label>
+                        <div className="flex flex-wrap gap-1.5">
+                            {['Hired', 'Rejected', 'On Hold'].map((s) => (
+                                <button
+                                    key={s}
+                                    type="button"
+                                    onClick={() => setForm(f => ({ ...f, background_check_status: s }))}
+                                    className={`px-3 py-1.5 rounded-full text-xs font-primary-bold border transition-colors ${form.background_check_status === s ? 'bg-[#0253a5] text-white border-[#0253a5]' : 'bg-white text-[#5B6480] border-[#E7E9F0] hover:border-[#C4C9DA]'
+                                        }`}
+                                >
+                                    {s}
                                 </button>
-                            </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div>
+                        <Label>Notes</Label>
+                        <TextArea value={form.background_check_note} onChange={(e) => setForm(f => ({ ...f, background_check_note: e.target.value }))} rows={3} />
+                    </div>
+                    <div>
+                        <Label>Attachment (PDF)</Label>
+                        <input type="file" accept=".pdf,application/pdf"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file && file.size > 10 * 1024 * 1024) {
+                                    toast.error('File size must be less than 10MB');
+                                    e.target.value = '';
+                                    return;
+                                }
+                                setForm(f => ({ ...f, file: file || null }));
+                            }}
+                            className="w-full text-sm text-[#5B6480] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-primary-bold file:bg-[#EEF2FF] file:text-[#4338CA]" />
+                        <p className="text-xs text-[#9AA2BA] mt-1">Upload background check documents (PDF only, max 10MB)</p>
+                    </div>
+                    <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowAddModal(false)}
+                            className="rounded-[50px]"
+                        >
+                            Cancel
+                        </Button>
+                        <PermissionGate permission={["create", "update"]}>
+                            <Button
+                                onClick={handleSubmit}
+                                className='rounded-[50px]'
+                                disabled={submitting}
+                            >
+                                {submitting ? 'Saving...' : 'Save'}
+                            </Button>
+                        </PermissionGate>
+                    </div>
+                </div>
 
-                            <div className="px-6 py-5 space-y-4">
-                                <div>
-                                    <label className="block text-[11px] font-primary-bold text-[#9AA2BA] uppercase tracking-wide mb-1.5">Result</label>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {['Hired', 'Rejected', 'On Hold'].map((s) => (
-                                            <button
-                                                key={s}
-                                                type="button"
-                                                onClick={() => setForm(f => ({ ...f, background_check_status: s }))}
-                                                className={`px-3 py-1.5 rounded-full text-xs font-primary-bold border transition-colors ${form.background_check_status === s ? 'bg-[#1F2430] text-white border-[#1F2430]' : 'bg-white text-[#5B6480] border-[#E7E9F0] hover:border-[#C4C9DA]'
-                                                    }`}
-                                            >
-                                                {s}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-[11px] font-primary-bold text-[#9AA2BA] uppercase tracking-wide mb-1.5">Notes</label>
-                                    <TextArea value={form.background_check_note} onChange={(e) => setForm(f => ({ ...f, background_check_note: e.target.value }))} rows={3} />
-                                </div>
-                                <div>
-                                    <label className="block text-[11px] font-primary-bold text-[#9AA2BA] uppercase tracking-wide mb-1.5">Attachment (PDF)</label>
-                                    <input type="file" accept=".pdf,application/pdf"
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file && file.size > 10 * 1024 * 1024) {
-                                                toast.error('File size must be less than 10MB');
-                                                e.target.value = '';
-                                                return;
-                                            }
-                                            setForm(f => ({ ...f, file: file || null }));
-                                        }}
-                                        className="w-full text-sm text-[#5B6480] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-primary-bold file:bg-[#EEF2FF] file:text-[#4338CA]" />
-                                    <p className="text-xs text-[#9AA2BA] mt-1">Upload background check documents (PDF only, max 10MB)</p>
-                                </div>
-                            </div>
-
-                            <div className="flex justify-end gap-3 px-6 py-4 border-t border-[#E7E9F0] bg-[#FAFAFB]">
-                                <Button variant="outline" onClick={() => setShowAddModal(false)}>Cancel</Button>
-                                <Button onClick={handleSubmit} disabled={submitting}>
-                                    {submitting ? 'Saving...' : 'Save'}
-                                </Button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            </Modal>
 
             {/* Delete Modal */}
             <ConfirmationModal

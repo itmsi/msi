@@ -15,12 +15,12 @@ interface Step1Props {
     langField: (key: string) => string;
 }
 
-export default function Step1BasicInfo({ 
-    formData, 
-    validationErrors, 
+export default function Step1BasicInfo({
+    formData,
+    validationErrors,
     loading,
     handleInputChange,
-    langField 
+    langField
 }: Step1Props) {
 
     const { getIupById } = useIupSelect();
@@ -85,7 +85,7 @@ export default function Step1BasicInfo({
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center min-h-100">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
                     <p className="text-gray-600">{langField('loadingCalculatorData')}</p>
@@ -166,7 +166,7 @@ export default function Step1BasicInfo({
                         value={formData.tonase_per_ritase}
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            
+
                             handleDecimalInput(
                                 rawValue,
                                 (validValue) => handleInputChange('tonase_per_ritase', validValue),
@@ -191,7 +191,7 @@ export default function Step1BasicInfo({
                         value={formData.jarak_haul}
                         onChange={(e) => {
                             const rawValue = e.target.value;
-                            
+
                             handleDecimalInput(
                                 rawValue,
                                 (validValue) => handleInputChange('jarak_haul', validValue),

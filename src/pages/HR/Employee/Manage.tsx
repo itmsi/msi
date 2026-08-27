@@ -6,12 +6,12 @@ import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { useEffect, useRef, useState } from 'react';
 import { useCandidateManagement } from './hooks/Usecandidatemanagement';
 import { CandidateCardSkeleton } from './components/Candidatecardskeleton';
 import { CandidateCard } from './components/Candidatecard';
-import { OfferingSummaryCards } from './components/OfferingSummaryCards';
+// import { OfferingSummaryCards } from './components/OfferingSummaryCards';
 import FilterSection from './components/FilterSection';
 import PageHeaderManage from '@/components/common/PageHeaderManage';
 import { candidateService } from './services/hrService';
@@ -20,6 +20,7 @@ import { toast } from 'react-hot-toast';
 
 export default function ManageCandidate() {
     const navigate = useNavigate();
+    const { id, groupId } = useParams<{ id?: string; groupId?: string }>();
 
     const {
         candidates,
@@ -27,7 +28,7 @@ export default function ManageCandidate() {
         loadingMore,
         hasMore,
         pagination,
-        offeringCount,
+        // offeringCount,
         filters,
         searchValue,
         setSearchValue,
@@ -80,6 +81,17 @@ export default function ManageCandidate() {
             setDeleteLoading(false);
         }
     };
+    useEffect(() => {
+        if ((groupId || '') !== filters.group_id) {
+            handleFilterChange({ group_id: groupId || '' });
+        }
+    }, [groupId]);
+
+    useEffect(() => {
+        if (id) {
+            navigate(groupId ? `/hr/candidate/${id}?groupId=${groupId}` : `/hr/candidate/${id}`, { replace: true });
+        }
+    }, [id, groupId]);
 
     // Sentinel di bawah grid — begitu terlihat di viewport, ambil halaman berikutnya
     const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -206,7 +218,7 @@ export default function ManageCandidate() {
                 />
 
                 {/* Offering status summary */}
-                <OfferingSummaryCards counts={offeringCount} total={pagination?.total ?? candidates.length} />
+                {/* <OfferingSummaryCards counts={offeringCount} total={pagination?.total ?? candidates.length} /> */}
 
 
                 <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">

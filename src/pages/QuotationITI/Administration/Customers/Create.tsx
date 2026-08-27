@@ -146,8 +146,9 @@ export default function CreateCustomer() {
         }
     
         
-        if (!formData.customer_phone.trim()) {
-            errors.customer_phone = 'Customer phone is required';
+        const customerPhone = formData.customer_phone.replace(/\s|-/g, '');
+        if (customerPhone && customerPhone.length < 7) {
+            errors.customer_phone = 'Phone number must be at least 7 characters';
         }
         
         if (!formData.customer_address.trim()) {

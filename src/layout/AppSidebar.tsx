@@ -279,6 +279,7 @@ const AppSidebar: React.FC = () => {
                 'Sales Invoice Netsuite',
                 'Admin Sync Netsuite',
                 'Sales Order Netsuite',
+                'Transfer Order Netsuite',
                 'Manage Receipts Netsuite',
                 'Bill Payment Netsuite',
                 'Quotation Netsuite'
@@ -287,6 +288,7 @@ const AppSidebar: React.FC = () => {
                 { name: "Purchase Orders", path: "/netsuite/purchase-order", allowedRoles: ['Purchase Orders Netsuite'] },
                 { name: "Sales Invoice", path: "/netsuite/invoice-sales-order", allowedRoles: ['Sales Invoice Netsuite'] },
                 { name: "Sales Orders", path: "/netsuite/sales-orders", allowedRoles: ['Sales Order Netsuite'] },
+                { name: "Transfer Orders", path: "/netsuite/transfer-orders", allowedRoles: ['Transfer Order Netsuite'] },
                 { name: "Receipts", path: "/netsuite/receipts", allowedRoles: ['Manage Receipts Netsuite'] },
                 { name: "Bill Payment", path: "/netsuite/bill-payment", allowedRoles: ['Bill Payment Netsuite'] },
                 { name: "Quotation", path: "/netsuite/quotation", allowedRoles: ['Quotation Netsuite'] },
@@ -653,10 +655,10 @@ const AppSidebar: React.FC = () => {
         <aside
             className={`bg-aside fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 shadow-[0 0px 15px -8px #0055b5] 
             ${isExpanded || isMobileOpen
-                    ? "w-[290px]"
+                    ? "w-72.5"
                     : isHovered
-                        ? "w-[290px]"
-                        : "w-[90px]"
+                        ? "w-72.5"
+                        : "w-22.5"
                 }
             ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
             lg:translate-x-0`}
@@ -695,7 +697,7 @@ const AppSidebar: React.FC = () => {
                         {othersFiltered.length === 0 ? null : (
                             <div>
                                 <h2
-                                    className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${!isExpanded && !isHovered
+                                    className={`mb-4 text-xs uppercase flex leading-5 text-gray-400 ${!isExpanded && !isHovered
                                         ? "lg:justify-center"
                                         : "justify-start"
                                         }`}

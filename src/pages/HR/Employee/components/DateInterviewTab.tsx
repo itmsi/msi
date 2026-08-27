@@ -3,11 +3,13 @@ import React from 'react';
 import { interviewScheduleService, interviewFormService, type InterviewSchedule, type InterviewFormItem, type ScheduleCreateRequest } from '../../Candidate/services/interviewService';
 import { generateInterviewPDFBlob } from '../utils/PDFInterviewReport';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaTrash, FaChartSimple, FaChevronDown, FaChevronUp, FaRegFilePdf, FaClipboardCheck, FaRegPenToSquare, FaSpinner } from 'react-icons/fa6';
-import { MdAdd } from 'react-icons/md';
-import ModalScoreInterview from '../../Candidate/components/ModalScoreInterview';
+import { FaPlus, FaChevronDown, FaChevronUp, FaClipboardCheck, FaRegPenToSquare, FaSpinner } from 'react-icons/fa6';
+import { MdAdd, MdDeleteOutline } from 'react-icons/md';
+import InterviewScoreChart, { getMultipliedScore } from '../../Candidate/components/InterviewScoreChart';
 import FormScoringCanvas from './FormScoringCanvas';
 import { PDFPreviewModal } from './PDFPreviewModal';
+import InterviewerScoreCard from './InterviewerScoreCard';
+import { dedupeFormsByCategory, getLatestInterviewerForms } from '../utils/interviewFormHelpers';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import { Modal } from '@/components/ui/modal';
 import Button from '@/components/ui/button/Button';
@@ -17,7 +19,7 @@ import { Tooltip } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import type { CandidateDetail } from '../types/Candidate';
-import { PermissionGate } from '@/components/common/PermissionComponents';
+import { PermissionButton, PermissionGate } from '@/components/common/PermissionComponents';
 import Label from '@/components/form/Label';
 import { handleKeyPress } from '@/helpers/generalHelper';
 
@@ -44,10 +46,16 @@ const ROLE_STYLE: Record<string, string> = {
 const DEFAULT_ROLE_STYLE = 'bg-gray-100 text-gray-800 border-gray-200';
 // Stored role casing isn't consistent ("hr" vs "HR") — normalize before lookup/display.
 const getRoleStyle = (role: string) => ROLE_STYLE[role.toUpperCase()] || DEFAULT_ROLE_STYLE;
+// Display-only rename — "PUB" is still the stored/submitted value everywhere
+// (existing records, API payloads) so nothing but the on-screen label changes.
+const ROLE_LABEL_OVERRIDES: Record<string, string> = {
+    PUB: 'USER',
+};
+const getRoleLabel = (role: string) => ROLE_LABEL_OVERRIDES[role.toUpperCase()] || role.toUpperCase();
 
 const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTabProps) => {
     const [schedules, setSchedules] = useState<InterviewSchedule[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState<InterviewSchedule | null>(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -81,9 +89,10 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
             const result = await interviewScheduleService.getList(candidateId);
             const list = result.data || [];
             setSchedules(list);
-            // Prefetch forms per schedule so the row action can tell Add vs Edit apart
-            // right away, instead of only after the user expands/opens it once.
-            // list.forEach((s) => { fetchScheduleForms(s.schedule_interview_id); });
+            // Prefetch forms per schedule — the row's score badge and the
+            // expanded-view "no submissions yet" state both read scheduleForms
+            // directly without fetching on their own, so this can't be lazy.
+            list.forEach((s) => { fetchScheduleForms(s.schedule_interview_id); });
         } catch {
             toast.error('Failed to load schedules');
         } finally {
@@ -123,21 +132,8 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
     };
 
     const closeScoringPanel = () => {
-        // if (scoringPanel) fetchScheduleForms(scoringPanel.scheduleId);
+        if (scoringPanel) fetchScheduleForms(scoringPanel.scheduleId);
         setScoringPanel(null);
-    };
-
-    // A category can have more than one submission (interviewer redid that tab) —
-    // only the latest one should count, never both stacked.
-    const dedupeFormsByCategory = (forms: InterviewFormItem[]): InterviewFormItem[] => {
-        const latestByCategory = new Map<string, InterviewFormItem>();
-        forms.forEach((form) => {
-            const existing = latestByCategory.get(form.company_value);
-            if (!existing || new Date(form.created_at).getTime() > new Date(existing.created_at).getTime()) {
-                latestByCategory.set(form.company_value, form);
-            }
-        });
-        return Array.from(latestByCategory.values());
     };
 
     const getFormScoreData = (forms: InterviewFormItem[]) =>
@@ -190,27 +186,27 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
         setPdfPreview(null);
     };
 
-    const handleOpenScoreStats = async (scheduleId: string) => {
-        const forms = scheduleForms[scheduleId];
-        if (forms) {
-            setFormScoreData(getFormScoreData(forms));
-            setShowFormScore(true);
-            return;
-        }
+    // const handleOpenScoreStats = async (scheduleId: string) => {
+    //     const forms = scheduleForms[scheduleId];
+    //     if (forms) {
+    //         setFormScoreData(getFormScoreData(forms));
+    //         setShowFormScore(true);
+    //         return;
+    //     }
 
-        setLoadingForms(prev => ({ ...prev, [scheduleId]: true }));
-        try {
-            const result = await interviewFormService.getList({ schedule_interview_id: scheduleId });
-            const loadedForms = result.data || [];
-            setScheduleForms(prev => ({ ...prev, [scheduleId]: loadedForms }));
-            setFormScoreData(getFormScoreData(loadedForms));
-            setShowFormScore(true);
-        } catch {
-            toast.error('Failed to load interview forms');
-        } finally {
-            setLoadingForms(prev => ({ ...prev, [scheduleId]: false }));
-        }
-    };
+    //     setLoadingForms(prev => ({ ...prev, [scheduleId]: true }));
+    //     try {
+    //         const result = await interviewFormService.getList({ schedule_interview_id: scheduleId });
+    //         const loadedForms = result.data || [];
+    //         setScheduleForms(prev => ({ ...prev, [scheduleId]: loadedForms }));
+    //         setFormScoreData(getFormScoreData(loadedForms));
+    //         setShowFormScore(true);
+    //     } catch {
+    //         toast.error('Failed to load interview forms');
+    //     } finally {
+    //         setLoadingForms(prev => ({ ...prev, [scheduleId]: false }));
+    //     }
+    // };
 
     const openAdd = () => {
         setEditing(null);
@@ -296,7 +292,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                     <div className="h-9 w-32 bg-[#F0F1F5] rounded-lg animate-pulse" />
                 </div>
                 <div className="bg-white rounded-2xl border border-[#E7E9F0] overflow-hidden">
-                    <div className="bg-[#FAFAFB] border-b border-[#E7E9F0] px-4 py-3 h-[38px]" />
+                    <div className="bg-[#FAFAFB] border-b border-[#E7E9F0] px-4 py-3 h-9.5" />
                     <div className="divide-y divide-[#F0F1F5]">
                         {[0, 1, 2].map((i) => (
                             <div key={i} className="px-4 py-4 flex items-center gap-6">
@@ -337,7 +333,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
             ) : (
                 <div className="bg-white rounded-xl overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-[1090px] text-sm">
+                        <table className="w-full min-w-272.5 text-sm">
                             <thead>
                                 <tr className="bg-[#dfe8f2] border-b border-[#E7E9F0]">
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Created by</th>
@@ -366,11 +362,11 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                         <div className="flex flex-nowrap gap-1">
                                                             {visibleRoles.map((role, i) => (
                                                                 <span key={i} className={`shrink-0 inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-primary ${getRoleStyle(role)}`}>
-                                                                    {role.toUpperCase()}
+                                                                    {getRoleLabel(role)}
                                                                 </span>
                                                             ))}
                                                             {extraRoles.length > 0 && (
-                                                                <Tooltip content={extraRoles.map(r => r.toUpperCase()).join(', ')} position="top">
+                                                                <Tooltip content={extraRoles.map(r => getRoleLabel(r)).join(', ')} position="top">
                                                                     <span className={`shrink-0 inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-primary ${DEFAULT_ROLE_STYLE}`}>
                                                                         +{extraRoles.length}
                                                                     </span>
@@ -382,9 +378,15 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                             </td>
                                             <td className="px-4 py-3">
                                                 {(() => {
+                                                    if (loadingForms[s.schedule_interview_id]) {
+                                                        return <FaSpinner className="w-3.5 h-3.5 animate-spin text-[#9AA2BA]" />;
+                                                    }
                                                     const forms = scheduleForms[s.schedule_interview_id] || [];
                                                     if (!forms.length) return <span className="text-xs text-[#9AA2BA]">Not scored</span>;
-                                                    const totalScore = forms.reduce((sum, f) => sum + (f.detail_interviews?.reduce((s2, d) => s2 + (parseInt(d.score) || 0), 0) || 0), 0);
+                                                    const totalScore = getLatestInterviewerForms(forms).reduce((sum, f) => {
+                                                        const categoryScore = f.detail_interviews?.reduce((s2, d) => s2 + (parseInt(d.score) || 0), 0) || 0;
+                                                        return sum + getMultipliedScore(f.company_value, categoryScore);
+                                                    }, 0);
                                                     return (
                                                         <div className="flex items-center gap-1.5">
                                                             <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-bold bg-indigo-100 text-indigo-800 border-indigo-200">
@@ -399,26 +401,55 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                 <div className="text-xs text-[#9AA2BA]">{s.schedule_interview_time} {s.schedule_interview_duration ? `(${s.schedule_interview_duration})` : ''}</div>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <div className="flex items-center gap-1">
-                                                    {/* <Tooltip content={scheduleForms[s.schedule_interview_id]?.length ? 'Edit Score' : 'Add Score'} position="top"> */}
-                                                    <Tooltip content={'Add Score'} position="top">
-                                                        <Button size="sm" variant="transparent" onClick={() => openScoringPanel(s.schedule_interview_id)} className="text-[#0253a5]!">
-                                                            {/* {scheduleForms[s.schedule_interview_id]?.length ? <FaClipboardCheck /> : <FaPlus />} */}
-                                                            <FaPlus />
-                                                        </Button>
-                                                    </Tooltip>
-                                                    <Tooltip content="Score Stats" position="top">
-                                                        <Button size="sm" variant="transparent" onClick={() => handleOpenScoreStats(s.schedule_interview_id)} className="text-emerald-600!"><FaChartSimple /></Button>
-                                                    </Tooltip>
+                                                <div className="flex items-center gap-3">
+                                                    {loadingForms[s.schedule_interview_id] ?
+                                                        <FaSpinner className="w-3.5 h-3.5 animate-spin text-[#9AA2BA]" />
+                                                        :
+                                                        <Tooltip content={scheduleForms[s.schedule_interview_id]?.length ? 'Edit Score' : 'Add Score'} position="top">
+                                                            <PermissionButton
+                                                                permission={['create', 'update']}
+                                                                onClick={() => openScoringPanel(s.schedule_interview_id)}
+                                                                className={`p-2 rounded-md text-sm font-medium transition-colors relative text-gray-600 hover:text-gray-700 hover:bg-gray-50 ring-0`}
+                                                            >
+                                                                {scheduleForms[s.schedule_interview_id]?.length ? <FaClipboardCheck className="w-4 h-4" /> : <FaPlus className="w-4 h-4" />}
+                                                            </PermissionButton>
+                                                        </Tooltip>
+                                                    }
+                                                    {/* <Tooltip content="Score Stats" position="top">
+                                                        <PermissionButton
+                                                            permission={['read']}
+                                                            onClick={() => handleOpenScoreStats(s.schedule_interview_id)}
+                                                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 ring-0`}
+                                                        >
+                                                            <FaChartSimple className="w-4 h-4" />
+                                                        </PermissionButton>
+                                                    </Tooltip> */}
                                                     <Tooltip content="Edit Schedule" position="top">
-                                                        <Button size="sm" variant="transparent" onClick={() => openEdit(s)} className="text-blue-600!"><FaRegPenToSquare /></Button>
+                                                        <PermissionButton
+                                                            permission={['read']}
+                                                            onClick={() => openEdit(s)}
+                                                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-blue-600 hover:text-blue-700 hover:bg-blue-50 ring-0`}
+                                                        >
+                                                            <FaRegPenToSquare className="w-4 h-4" />
+                                                        </PermissionButton>
                                                     </Tooltip>
                                                     <Tooltip content="Delete Schedule" position="top">
-                                                        <Button size="sm" variant="transparent" onClick={() => { setDeletingId(s.schedule_interview_id); setShowDeleteConfirm(true); }} className="text-rose-500!"><FaTrash /></Button>
+                                                        <PermissionButton
+                                                            permission={['delete']}
+                                                            onClick={() => { setDeletingId(s.schedule_interview_id); setShowDeleteConfirm(true); }}
+                                                            className={`p-2 rounded-md text-sm font-medium transition-colors relative text-rose-600 hover:text-rose-700 hover:bg-rose-50 ring-0`}
+                                                        >
+                                                            <MdDeleteOutline className="w-4 h-4" />
+                                                        </PermissionButton>
                                                     </Tooltip>
                                                     <Tooltip content={expandedSchedules[s.schedule_interview_id] ? 'Collapse' : 'Expand'} position="top">
-                                                        <Button size="sm" variant="transparent" onClick={() => toggleExpand(s.schedule_interview_id)} className="text-[#9AA2BA]!">
-                                                            {expandedSchedules[s.schedule_interview_id] ? <FaChevronUp /> : <FaChevronDown />}
+                                                        <Button
+                                                            size="sm"
+                                                            variant="transparent"
+                                                            onClick={() => toggleExpand(s.schedule_interview_id)}
+                                                            className="text-[#9AA2BA]!"
+                                                        >
+                                                            {expandedSchedules[s.schedule_interview_id] ? <FaChevronUp className="w-4 h-4" /> : <FaChevronDown className="w-4 h-4" />}
                                                         </Button>
                                                     </Tooltip>
                                                 </div>
@@ -442,8 +473,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                                     <p className="text-sm text-[#9AA2BA]">No forms submitted yet.</p>
                                                                 ) : (
                                                                     (() => {
-                                                                        // One card per interviewer — every submission they made for this schedule
-                                                                        // is grouped together regardless of how much time passed between them.
                                                                         const byInterviewer = new Map<string, InterviewFormItem[]>();
                                                                         (scheduleForms[s.schedule_interview_id] || []).forEach((form) => {
                                                                             const interviewer = form.created_by_name || 'Unknown';
@@ -456,81 +485,18 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                                                 {Array.from(byInterviewer.entries()).map(([interviewer, rawForms]) => {
                                                                                     const forms = dedupeFormsByCategory(rawForms);
                                                                                     const groupKey = forms[0]?.interview_id || interviewer;
-                                                                                    const totalScore = forms.reduce((sum, f) => sum + (f.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0), 0);
                                                                                     return (
-                                                                                        <div key={groupKey} className="bg-white rounded-2xl border border-[#E7E9F0] p-4 shadow-[0_1px_2px_rgba(16,24,40,0.05)] hover:border-[#C4C9DA] hover:shadow-[0_4px_12px_rgba(16,24,40,0.08)] hover:-translate-y-0.5 transition-all">
-                                                                                            <div className="flex items-start justify-between gap-3 mb-3">
-                                                                                                <div className="min-w-0 flex-1">
-                                                                                                    <h6 className="text-sm font-semibold text-[#1F2430] truncate">
-                                                                                                        {interviewer}
-                                                                                                    </h6>
-                                                                                                    <p className="text-[10px] text-[#C4C9DA] mt-0.5">{formatIndonesianDate(forms[0]?.created_at)}</p>
-                                                                                                    <div className="flex flex-wrap gap-1 mt-1">
-                                                                                                        {getAssignRoleArr(s).length > 0 ? (
-                                                                                                            getAssignRoleArr(s).map((role, i) => (
-                                                                                                                <span key={i} className={`inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] border rounded-full font-medium ${getRoleStyle(role)}`}>
-                                                                                                                    {role.toUpperCase()}
-                                                                                                                </span>
-                                                                                                            ))
-                                                                                                        ) : (
-                                                                                                            <span className="text-[11px] text-[#9AA2BA]">No role assigned</span>
-                                                                                                        )}
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                                <div className="text-right shrink-0">
-                                                                                                    <div className="inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-sm font-bold">
-                                                                                                        {totalScore}
-                                                                                                    </div>
-                                                                                                    <div className="text-[9px] uppercase tracking-wide text-[#9AA2BA] mt-1">Score</div>
-                                                                                                </div>
-                                                                                            </div>
-
-                                                                                            <div className="flex flex-wrap gap-1.5">
-                                                                                                {forms.map((form) => {
-                                                                                                    const score = form.detail_interviews?.reduce((s, d) => s + (parseInt(d.score) || 0), 0) || 0;
-                                                                                                    return (
-                                                                                                        <span key={form.interview_id}
-                                                                                                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200"
-                                                                                                        >
-                                                                                                            {form.company_value}: {score}
-                                                                                                        </span>
-                                                                                                    );
-                                                                                                })}
-                                                                                            </div>
-
-                                                                                            <div className="flex items-center justify-end gap-1 mt-3 pt-2 border-t border-[#F0F1F5]">
-                                                                                                <Tooltip content="Edit Score" position="top">
-                                                                                                    <Button size="sm" variant="transparent" onClick={() => openScoringPanel(s.schedule_interview_id, forms[0]?.interview_id)} className="text-[#0253a5]!">
-                                                                                                        <FaClipboardCheck className="w-3.5 h-3.5" />
-                                                                                                    </Button>
-                                                                                                </Tooltip>
-                                                                                                <Tooltip content="Score Stats" position="top">
-                                                                                                    <Button size="sm" variant="transparent" onClick={() => { setFormScoreData(getFormScoreData(forms)); setShowFormScore(true); }} className="text-emerald-600!">
-                                                                                                        <FaChartSimple className="w-3.5 h-3.5" />
-                                                                                                    </Button>
-                                                                                                </Tooltip>
-                                                                                                <Tooltip content="Export PDF" position="top">
-                                                                                                    <Button
-                                                                                                        size="sm"
-                                                                                                        variant="transparent"
-                                                                                                        disabled={generatingPdfKey === groupKey}
-                                                                                                        onClick={() => handleExportPdf(s, interviewer, forms, groupKey)}
-                                                                                                        className="text-rose-500!"
-                                                                                                    >
-                                                                                                        {generatingPdfKey === groupKey ? (
-                                                                                                            <FaSpinner className="w-3.5 h-3.5 animate-spin" />
-                                                                                                        ) : (
-                                                                                                            <FaRegFilePdf className="w-3.5 h-3.5" />
-                                                                                                        )}
-                                                                                                    </Button>
-                                                                                                </Tooltip>
-                                                                                                <Tooltip content="Delete Form" position="top">
-                                                                                                    <Button size="sm" variant="transparent" onClick={() => { setDeletingFormId(forms[0]?.interview_id); setShowDeleteFormConfirm(true); }} className="text-rose-500!">
-                                                                                                        <FaTrash className="w-3 h-3" />
-                                                                                                    </Button>
-                                                                                                </Tooltip>
-                                                                                            </div>
-                                                                                        </div>
+                                                                                        <InterviewerScoreCard
+                                                                                            key={groupKey}
+                                                                                            interviewer={interviewer}
+                                                                                            forms={forms}
+                                                                                            assignRoles={getAssignRoleArr(s)}
+                                                                                            isGeneratingPdf={generatingPdfKey === groupKey}
+                                                                                            onEditScore={() => openScoringPanel(s.schedule_interview_id, forms[0]?.interview_id)}
+                                                                                            onShowStats={() => { setFormScoreData(getFormScoreData(forms)); setShowFormScore(true); }}
+                                                                                            onExportPdf={() => handleExportPdf(s, interviewer, forms, groupKey)}
+                                                                                            onDeleteForm={() => { setDeletingFormId(forms[0]?.interview_id); setShowDeleteFormConfirm(true); }}
+                                                                                        />
                                                                                     );
                                                                                 })}
                                                                             </div>
@@ -595,7 +561,15 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                 })()}
             </Modal>
 
-            <ModalScoreInterview show={showFormScore} onClose={() => setShowFormScore(false)} scoreData={formScoreData} />
+            <Modal
+                isOpen={showFormScore}
+                onClose={() => setShowFormScore(false)}
+                className="max-w-4xl! rounded-2xl! max-h-[85vh]! overflow-y-auto!"
+            >
+                <div className="px-0 py-5">
+                    <InterviewScoreChart metrics={formScoreData} />
+                </div>
+            </Modal>
 
             {pdfPreview && (
                 <PDFPreviewModal
@@ -680,7 +654,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                         className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${active ? 'bg-[#0253a5] text-white border-[#0253a5]' : 'bg-white text-[#5B6480] border-[#E7E9F0] hover:border-[#C4C9DA]'
                                             }`}
                                     >
-                                        {role}
+                                        {getRoleLabel(role)}
                                     </button>
                                 );
                             })}

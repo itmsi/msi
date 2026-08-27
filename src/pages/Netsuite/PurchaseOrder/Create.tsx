@@ -10,6 +10,7 @@ import { usePOVendorSelect } from '@/hooks/usePOVendorSelect';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
+import { usePOProjectSegmentationSelect } from '@/hooks/usePOProjectSegmentationSelect';
 import { getProfile } from '@/helpers/generalHelper';
 import { usePOTermSelect } from '@/hooks/usePOTermSelect';
 import FilesTab from './components/tabs/FilesTab';
@@ -107,7 +108,21 @@ export default function Create() {
     useEffect(() => {
         initializeItemDepartmentOptions();
     }, [initializeItemDepartmentOptions]);
-    
+
+    // Project Segmentation select untuk items (line-level only)
+    const {
+        POProjectSegmentationOptions,
+        pagination: itemProjectSegmentationPagination,
+        inputValue: itemProjectSegmentationInputValue,
+        handleInputChange: handleItemProjectSegmentationInputChange,
+        handleMenuScrollToBottom: handleItemProjectSegmentationScrollToBottom,
+        initializeOptions: initializeItemProjectSegmentationOptions,
+    } = usePOProjectSegmentationSelect(30);
+
+    useEffect(() => {
+        initializeItemProjectSegmentationOptions();
+    }, [initializeItemProjectSegmentationOptions]);
+
     // Reset location options ketika subsidiary berubah
     useEffect(() => {
         if (subsidiaryId) {
@@ -394,9 +409,16 @@ export default function Create() {
                                             }
                                         }}
                                         departmentError={errors.department || departmentSelectError}
+
+                                        // Project Segmentation props
+                                        projectSegmentationOptions={POProjectSegmentationOptions}
+                                        projectSegmentationPagination={itemProjectSegmentationPagination}
+                                        projectSegmentationInputValue={itemProjectSegmentationInputValue}
+                                        onProjectSegmentationInputChange={handleItemProjectSegmentationInputChange}
+                                        onProjectSegmentationMenuScrollToBottom={handleItemProjectSegmentationScrollToBottom}
                                     />
                                 )}
-                                    
+
                                 {activeTab === 'files' && (
                                     <FilesTab
                                         formData={formData}

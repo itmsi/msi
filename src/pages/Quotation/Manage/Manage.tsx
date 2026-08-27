@@ -61,18 +61,18 @@ const ManageQuotations: React.FC = () => {
                 name: langField('quotationNo'),
                 selector: (row) => row.manage_quotation_no,
                 cell: (row) => (
-                <>
-                    <a
-                        href={buildPath(`/quotations/manage/edit/${row.manage_quotation_id}`)}
-                        className="absolute inset-0"
-                    />
-                    <div className=" items-center gap-3 py-2">
-                        <div className="font-medium text-[#0253a5]">
-                            {row.manage_quotation_no}
+                    <>
+                        <a
+                            href={buildPath(`/quotations/manage/edit/${row.manage_quotation_id}`)}
+                            className="absolute inset-0"
+                        />
+                        <div className=" items-center gap-3 py-2">
+                            <div className="font-medium text-[#0253a5]">
+                                {row.manage_quotation_no}
+                            </div>
+                            <div className="block text-sm text-gray-500">{formatDate(row.manage_quotation_date)} - {formatDate(row.manage_quotation_valid_date)}</div>
                         </div>
-                        <div className="block text-sm text-gray-500">{formatDate(row.manage_quotation_date)} - {formatDate(row.manage_quotation_valid_date)}</div>
-                    </div>
-                </>
+                    </>
                 ),
                 width: '220px'
             },
@@ -169,74 +169,74 @@ const ManageQuotations: React.FC = () => {
 
     const SearchAndFilters = useMemo(() => (
         <>
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-            <div className="flex-1">
-                <div className="relative flex">
-                    <div className="relative flex-1">
-                        <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                        <Input
-                            type="text"
-                            placeholder={langField('searchPlaceholder')}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            className={`pl-10 py-2 w-full ${searchTerm ? 'pr-10' : 'pr-4'}`}
-                        />
-                        {searchTerm && (
-                            <button
-                                onClick={handleClearFilters}
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                                type="button"
-                            >
-                                <MdClear className="h-4 w-4" />
-                            </button>
-                        )}
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                <div className="flex-1">
+                    <div className="relative flex">
+                        <div className="relative flex-1">
+                            <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                            <Input
+                                type="text"
+                                placeholder={langField('searchPlaceholder')}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                className={`pl-10 py-2 w-full ${searchTerm ? 'pr-10' : 'pr-4'}`}
+                            />
+                            {searchTerm && (
+                                <button
+                                    onClick={handleClearFilters}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                    type="button"
+                                >
+                                    <MdClear className="h-4 w-4" />
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
+                {/* Sort Order */}
+                <div className="flex items-center gap-2">
+                    <CustomSelect
+                        id="sort_order"
+                        name="sort_order"
+                        value={sortOrder ? {
+                            value: sortOrder,
+                            label: sortOrder === 'asc' ? langField('ascending') : langField('descending')
+                        } : null}
+                        onChange={(selectedOption) =>
+                            handleFilterChange('sort_order', selectedOption?.value || '')
+                        }
+                        options={[
+                            { value: 'asc', label: langField('ascending') },
+                            { value: 'desc', label: langField('descending') }
+                        ]}
+                        placeholder={langField('orderBy')}
+                        isClearable={false}
+                        isSearchable={false}
+                        className="w-40"
+                    />
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        onClick={handleToggleFilter}
+                        className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
+                        size="sm"
+                    >
+                        <MdFilterListAlt className="w-4 h-4 mr-2" />
+                        {langField('filter')}
+                        {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                    </Button>
+                </div>
             </div>
-            {/* Sort Order */}
-            <div className="flex items-center gap-2">
-                <CustomSelect
-                    id="sort_order"
-                    name="sort_order"
-                    value={sortOrder ? {
-                        value: sortOrder,
-                        label: sortOrder === 'asc' ? langField('ascending') : langField('descending')
-                    } : null}
-                    onChange={(selectedOption) =>
-                        handleFilterChange('sort_order', selectedOption?.value || '')
-                    }
-                    options={[
-                        { value: 'asc', label: langField('ascending') },
-                        { value: 'desc', label: langField('descending') }
-                    ]}
-                    placeholder={langField('orderBy')}
-                    isClearable={false}
-                    isSearchable={false}
-                    className="w-40"
+
+            {/* Advanced Filters Collapse */}
+            {showAdvancedFilters && (
+                <FilterSection
+                    quotationFor={quotationFor}
+                    onFilterChange={handleFilterChange}
+                    onClearFilters={handleClearFilters}
                 />
-            </div>
-            <div className="flex items-center gap-2">
-                <Button
-                    onClick={handleToggleFilter}
-                    className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
-                    size="sm"
-                >
-                    <MdFilterListAlt className="w-4 h-4 mr-2" />
-                    {langField('filter')}
-                    {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
-                </Button>
-            </div>
-        </div>
-        
-        {/* Advanced Filters Collapse */}
-        {showAdvancedFilters && (
-            <FilterSection
-                quotationFor={quotationFor}
-                onFilterChange={handleFilterChange}
-                onClearFilters={handleClearFilters}
-            />
-        )}
+            )}
         </>
     ), [lang, langField, searchTerm, sortOrder, quotationFor, loading, quotations.length, showAdvancedFilters, handleSearchChange, handleClearFilters, handleFilterChange, handleToggleFilter]);
 
@@ -298,7 +298,7 @@ const ManageQuotations: React.FC = () => {
                         striped={false}
                         persistTableHead
                         borderRadius="8px"
-                        // onRowClicked={handleEdit}
+                    // onRowClicked={handleEdit}
                     />
                 </div>
             </div>

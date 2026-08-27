@@ -13,16 +13,18 @@ import { PermissionGate } from "@/components/common/PermissionComponents";
 import CustomerPersonsSection from "./components/CustomerPersonsSection";
 import { CustomerUtilityService } from "./services/customerUtilityService";
 import CustomSelect from "@/components/form/select/CustomSelect";
+import { handleKeyPress } from "@/helpers/generalHelper";
 
 export default function EditCustomer() {
     const navigate = useNavigate();
     const location = useLocation();
     const listRoute = `/quotations/administration/customers${location.search}`;
     const { id } = useParams<{ id: string }>();
-    
+
     const [isLoading, setIsLoading] = useState(true);
-    const [contactErrors, setContactErrors] = useState<Record<string,string>>({});
-    const [taxBuyerTypes, setTaxBuyerTypes] = useState<{value: string, label: string}[]>([]);
+    const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
+    const [taxBuyerTypes, setTaxBuyerTypes] = useState<{ value: string, label: string }[]>([]);
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
         const fetchTaxTypes = async () => {
@@ -35,15 +37,15 @@ export default function EditCustomer() {
         };
         fetchTaxTypes();
     }, []);
-    
+
     // Hook for updating customer
-    const { 
-        isUpdating, 
-        validationErrors, 
+    const {
+        isUpdating,
+        validationErrors,
         clearFieldError,
-        updateCustomer 
+        updateCustomer
     } = useCustomerEdit();
-    
+
     // State for form data
     const [formData, setFormData] = useState<CustomerFormData>({
         customer_code: '',
@@ -74,7 +76,7 @@ export default function EditCustomer() {
         try {
             setIsLoading(true);
             const response = await CustomerService.getCustomerById(customerId);
-            
+
             if (response.data.success && response.data.data) {
                 const customer = response.data.data;
                 setFormData({
@@ -119,7 +121,7 @@ export default function EditCustomer() {
             clearFieldError(field as keyof CustomerValidationErrors);
         }
     };
-    
+
     // Contact person handlers
     const handleAddContact = () => {
         setFormData(prev => ({
@@ -138,11 +140,11 @@ export default function EditCustomer() {
     const handleContactChange = (index: number, field: keyof ContactPerson, value: string | number) => {
         setFormData(prev => ({
             ...prev,
-            contact_persons: (prev.contact_persons || []).map((contact, i) => 
+            contact_persons: (prev.contact_persons || []).map((contact, i) =>
                 i === index ? { ...contact, [field]: value } : contact
             )
         }));
-        
+
         // Clear error for this specific field when user types
         const errorKey = `contact_${index}_${field}`;
         if (contactErrors[errorKey]) {
@@ -157,7 +159,7 @@ export default function EditCustomer() {
     // Validate contact persons
     const validateContacts = (): boolean => {
         const errors: Record<string, string> = {};
-        
+
         (formData.contact_persons || []).forEach((contact, index) => {
             // Validate email format if provided
             if (contact.contact_person_email && contact.contact_person_email.trim()) {
@@ -165,7 +167,7 @@ export default function EditCustomer() {
                     errors[`contact_${index}_contact_person_email`] = 'Invalid email format';
                 }
             }
-            
+
             // Validate phone format if provided
             if (contact.contact_person_phone && contact.contact_person_phone.trim()) {
                 if (!CustomerUtilityService.validatePhone(contact.contact_person_phone)) {
@@ -173,50 +175,67 @@ export default function EditCustomer() {
                 }
             }
         });
-        
+
         setContactErrors(errors);
         return Object.keys(errors).length === 0;
     };
 
     // Form validation (client side)
     const validateForm = (): boolean => {
-        let hasErrors = false;
-        
-        if (!formData.customer_name.trim()) {
-            toast.error('Customer name is required');
-            hasErrors = true;
-        }
-        
-        // if (!formData.customer_email.trim()) {
-        //     toast.error('Customer email is required');
-        //     hasErrors = true;
-        // } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customer_email)) {
-        //     toast.error('Please enter a valid email address');
-        //     hasErrors = true;
-        // }
-        
-        if (!formData.customer_phone.trim()) {
-            toast.error('Customer phone is required');
-            hasErrors = true;
-        }
-        
-        if (!formData.customer_address.trim()) {
-            toast.error('Customer address is required');
-            hasErrors = true;
+
+
+        const next: Record<string, string> = {};
+
+        if (!formData.customer_name.trim()) next.customer_name = 'Customer name is required';
+        if (!formData.customer_address.trim()) next.customer_address = 'Customer address is required';
+        if (!formData.contact_person?.trim()) next.contact_person = 'Contact person is required';
+
+        const customerPhone = formData.customer_phone.replace(/\s|-/g, '');
+        if (customerPhone && customerPhone.length < 7) {
+            next.customer_phone = 'Phone number must be at least 7 characters';
         }
 
-        return !hasErrors;
+        setErrors(next);
+        return Object.keys(next).length === 0;
+
+        // let hasErrors = false;
+
+        // if (!formData.customer_name.trim()) {
+        //     toast.error('Customer name is required');
+        //     hasErrors = true;
+        // }
+
+        // // if (!formData.customer_email.trim()) {
+        // //     toast.error('Customer email is required');
+        // //     hasErrors = true;
+        // // } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customer_email)) {
+        // //     toast.error('Please enter a valid email address');
+        // //     hasErrors = true;
+        // // }
+
+        // const customerPhone = formData.customer_phone.replace(/\s|-/g, '');
+        // if (customerPhone && customerPhone.length < 7) {
+        //     toast.error('Phone number must be at least 7 characters');
+        //     hasErrors = true;
+        // }
+
+        // if (!formData.customer_address.trim()) {
+        //     toast.error('Customer address is required');
+        //     hasErrors = true;
+        // }
+
+        // return !hasErrors;
     };
 
     // Form submission
     const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault();
-        
+
         if (!validateForm()) {
             toast.error('Please fix the validation errors');
             return;
         }
-        
+
         // Validate contact persons
         if (!validateContacts()) {
             toast.error('Please fix contact person errors');
@@ -230,7 +249,7 @@ export default function EditCustomer() {
 
         try {
             const response = await updateCustomer(id, formData);
-            
+
             if (response) {
                 toast.success('Customer updated successfully');
                 navigate('/quotations/administration/customers');
@@ -285,10 +304,10 @@ export default function EditCustomer() {
                         <div className="md:col-span-3 p-8 relative">
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-4">Basic Information</h2>
-                                
+
                                 {/* Customer Name */}
                                 <div className="md:col-span-4">
-                                    <Label htmlFor="customer_name">Customer Name *</Label>
+                                    <Label htmlFor="customer_name">Customer Name <span className="text-error-500">*</span></Label>
                                     <Input
                                         id="customer_name"
                                         type="text"
@@ -298,13 +317,14 @@ export default function EditCustomer() {
                                             handleInputChange('customer_name', replaceDot.toUpperCase());
                                         }}
                                         placeholder="Enter customer name"
-                                        error={!!validationErrors.customer_name}
+                                        error={!!errors.customer_name || !!validationErrors.customer_name}
+                                        hint={errors.customer_name || validationErrors.customer_name}
                                     />
                                     {validationErrors.customer_name && (
                                         <span className="text-sm text-red-500">{validationErrors.customer_name}</span>
                                     )}
                                 </div>
-                                
+
                                 {/* Customer Code */}
                                 <div className="md:col-span-2">
                                     <Label htmlFor="customer_code">Customer Code</Label>
@@ -322,32 +342,29 @@ export default function EditCustomer() {
                                 </div>
 
                                 <div className="md:col-span-2">
-                                    <Label htmlFor="contact_person">Contact Person *</Label>
+                                    <Label htmlFor="contact_person">Contact Person <span className="text-error-500">*</span></Label>
                                     <Input
                                         id="contact_person"
                                         type="text"
                                         value={formData.contact_person}
                                         onChange={(e) => handleInputChange('contact_person', e.target.value)}
                                         placeholder="Enter contact person"
-                                        error={!!validationErrors.contact_person}
+                                        error={!!errors.contact_person || !!validationErrors.contact_person}
+                                        hint={errors.contact_person || validationErrors.contact_person}
                                     />
                                     {validationErrors.contact_person && (
                                         <span className="text-sm text-red-500">{validationErrors.contact_person}</span>
                                     )}
                                 </div>
                                 <div className="md:col-span-2">
-                                    <Label htmlFor="job_title">Job Title *</Label>
+                                    <Label htmlFor="job_title">Job Title</Label>
                                     <Input
                                         id="job_title"
                                         type="text"
                                         value={formData.job_title}
                                         onChange={(e) => handleInputChange('job_title', e.target.value)}
                                         placeholder="Enter job title"
-                                        error={!!validationErrors.job_title}
                                     />
-                                    {validationErrors.job_title && (
-                                        <span className="text-sm text-red-500">{validationErrors.job_title}</span>
-                                    )}
                                 </div>
 
                                 {/* Customer Email */}
@@ -359,39 +376,35 @@ export default function EditCustomer() {
                                         value={formData.customer_email}
                                         onChange={(e) => handleInputChange('customer_email', e.target.value)}
                                         placeholder="Enter customer email"
-                                        error={!!validationErrors.customer_email}
                                     />
-                                    {validationErrors.customer_email && (
-                                        <span className="text-sm text-red-500">{validationErrors.customer_email}</span>
-                                    )}
                                 </div>
 
                                 {/* Customer Phone */}
                                 <div className="md:col-span-2">
-                                    <Label htmlFor="customer_phone">Phone *</Label>
+                                    <Label htmlFor="customer_phone">Phone</Label>
                                     <Input
                                         id="customer_phone"
-                                        type="tel"
+                                        type="text"
                                         value={formData.customer_phone}
                                         onChange={(e) => handleInputChange('customer_phone', e.target.value)}
                                         placeholder="Enter customer phone"
-                                        error={!!validationErrors.customer_phone}
+                                        onKeyPress={handleKeyPress}
+                                        error={!!errors.customer_phone || !!validationErrors.customer_phone}
+                                        hint={errors.customer_phone || validationErrors.customer_phone}
                                     />
-                                    {validationErrors.customer_phone && (
-                                        <span className="text-sm text-red-500">{validationErrors.customer_phone}</span>
-                                    )}
                                 </div>
 
                                 {/* Customer Address */}
                                 <div className="md:col-span-4">
-                                    <Label htmlFor="customer_address">Address *</Label>
+                                    <Label htmlFor="customer_address">Address <span className="text-error-500">*</span></Label>
                                     <Input
                                         id="customer_address"
                                         type="text"
                                         value={formData.customer_address}
                                         onChange={(e) => handleInputChange('customer_address', e.target.value)}
                                         placeholder="Enter customer address"
-                                        error={!!validationErrors.customer_address}
+                                        error={!!errors.customer_address || !!validationErrors.customer_address}
+                                        hint={errors.customer_address || validationErrors.customer_address}
                                     />
                                     {validationErrors.customer_address && (
                                         <span className="text-sm text-red-500">{validationErrors.customer_address}</span>
@@ -463,7 +476,7 @@ export default function EditCustomer() {
                     <div className="bg-white rounded-2xl shadow-sm mb-8 p-8">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-4">Coretax</h2>
-                            
+
                             <div className="md:col-span-2">
                                 <Label htmlFor="type_tax_buyer">Type</Label>
                                 <CustomSelect
@@ -500,7 +513,7 @@ export default function EditCustomer() {
 
                         </div>
                     </div>
-                            
+
                     {/* Form Actions */}
                     <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
                         <div className="flex justify-end gap-4">
@@ -516,7 +529,7 @@ export default function EditCustomer() {
                             <PermissionGate permission={["update"]}>
                                 <Button
                                     onClick={() => {
-                                        const tipu = { preventDefault: () => {} } as React.FormEvent;
+                                        const tipu = { preventDefault: () => { } } as React.FormEvent;
                                         handleSubmit(tipu);
                                     }}
                                     disabled={isUpdating}

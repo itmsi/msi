@@ -5,7 +5,9 @@ import {
     MdOutlineEditNote, MdGroup,
 } from 'react-icons/md';
 import type { CandidateDetail } from '../types/Candidate';
-import formatIndonesianDate from '../../Candidate/utils/date';
+import moment from 'moment';
+// @ts-expect-error moment ships this locale file without a type declaration for the submodule path
+import 'moment/locale/id';
 import { STATUS_STYLE, DEFAULT_STATUS_STYLE, COMPANY_STYLE, DEFAULT_COMPANY_STYLE, initials, hue } from './Candidatecard';
 
 interface InfoRowProps {
@@ -25,6 +27,12 @@ function InfoRow({ icon: Icon, label, children, fullWidth }: InfoRowProps) {
             </div>
         </div>
     );
+}
+
+function formatDate(value: string | Date | null | undefined) {
+    if (!value) return '-';
+    const date = moment(value).locale('id');
+    return date.isValid() ? date.format('D MMMM YYYY') : '-';
 }
 
 function formatAddress(c: CandidateDetail) {
@@ -90,18 +98,21 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
                     {candidate.candidate_status || '-'}
                 </span>
 
-                {candidate.group_name && (
-                    <span
-                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-secondary font-medium mt-2"
-                        style={{ background: `hsl(${h} 60% 96%)`, color: `hsl(${h} 55% 38%)` }}
-                    >
-                        <MdGroup size={12} /> {candidate.group_name}
-                    </span>
-                )}
+
             </div>
 
             <div className="mt-5 pt-5 border-t border-[#E7E9F0] space-y-0.5">
-                <InfoRow icon={MdBusiness} label="Applied Role">{candidate.title_name || '-'}</InfoRow>
+                <InfoRow icon={MdBusiness} label="Applied Role">
+                    {candidate.title_name || '-'}
+                    {candidate.group_name && (
+                        <span
+                            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-secondary font-medium mt-2"
+                            style={{ background: `hsl(${h} 60% 96%)`, color: `hsl(${h} 55% 38%)` }}
+                        >
+                            <MdGroup size={12} /> {candidate.group_name}
+                        </span>
+                    )}
+                </InfoRow>
                 <InfoRow icon={MdBusiness} label="Department / Company">
                     {candidate.department_name || '-'}{candidate.company_name ? ` · ${candidate.company_name}` : ''}
                 </InfoRow>
@@ -116,29 +127,18 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
                 <InfoRow icon={MdPublic} label="Nationality">{candidate.candidate_nationality || '-'}</InfoRow>
                 <InfoRow icon={MdCake} label="Age" fullWidth>
                     {candidate.candidate_date_birth
-                        ? `${candidate.candidate_age ?? '-'} th (${formatIndonesianDate(candidate.candidate_date_birth)})`
+                        ? `${candidate.candidate_age ?? '-'} th (${formatDate(candidate.candidate_date_birth)})`
                         : (candidate.candidate_age ? `${candidate.candidate_age} th` : '-')}
                 </InfoRow>
             </div>
 
             <div className="mt-2 pt-4 border-t border-[#E7E9F0] space-y-0.5">
                 <InfoRow icon={MdEditCalendar} label="PTK Date">
-                    {candidate.ptk_date ? formatIndonesianDate(candidate.ptk_date) : '-'}
+                    {candidate.ptk_date ? formatDate(candidate.ptk_date) : '-'}
                 </InfoRow>
-                <InfoRow icon={MdOutlineEditNote} label="Offering Letter">
+                <InfoRow icon={MdOutlineEditNote} label="Offering Date">
                     <span className="inline-flex items-center gap-2">
-                        {candidate.offering_letter ? formatIndonesianDate(candidate.offering_letter) : '-'}
-                        {candidate.candidate_status_offering_letter && (
-                            <span
-                                className="text-[10px] font-semibold rounded-full px-2 py-0.5"
-                                style={{
-                                    background: candidate.candidate_status_offering_letter === 'OK' ? '#ECFDF5' : '#FFF1F2',
-                                    color: candidate.candidate_status_offering_letter === 'OK' ? '#047857' : '#E11D48',
-                                }}
-                            >
-                                {candidate.candidate_status_offering_letter}
-                            </span>
-                        )}
+                        {candidate.offering_letter ? formatDate(candidate.offering_letter) : '-'}
                     </span>
                 </InfoRow>
             </div>

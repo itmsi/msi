@@ -16,7 +16,7 @@ interface FileUploadProps {
     multiple?: boolean;
     currentFile?: File | null;
     currentFiles?: File[];
-    existingImageUrl?: any[] | string |null;
+    existingImageUrl?: any[] | string | null;
     onFileChange: (files: File | File[] | null) => void;
     onRemoveExistingImage?: (index?: number) => void;
     validationError?: string;
@@ -28,7 +28,7 @@ interface FileUploadProps {
     previewSize?: 'sm' | 'md' | 'lg';
     viewMode?: boolean;
     colLength?: number;
-    existingFiles?: Array<{file_id: string; file_url: string; file_name?: string}>;
+    existingFiles?: Array<{ file_id: string; file_url: string; file_name?: string }>;
     hasDownloadButton?: boolean;
 }
 
@@ -72,9 +72,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
     existingFiles,
     hasDownloadButton = false,
 }) => {
-    
+
     const [dragState, setDragState] = useState<DragState>({ isDragging: false });
-    const [previewState, setPreviewState] = useState<PreviewState>({ 
+    const [previewState, setPreviewState] = useState<PreviewState>({
         url: null
     });
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -113,7 +113,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         });
 
         const files = getCurrentFiles();
-        
+
         if (multiple) {
             // Handle multiple files
             const imageFiles = files.filter(isImageFile);
@@ -127,10 +127,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
                     index
                 };
             });
-            
+
             setPreviewUrls(urls.map(item => item.url));
             setPreviewState({ url: null });
-            
+
             return () => {
                 urls.forEach(item => URL.revokeObjectURL(item.url));
             };
@@ -141,7 +141,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 const url = URL.createObjectURL(file);
                 setPreviewState({ url });
                 setPreviewUrls([]);
-                
+
                 return () => {
                     URL.revokeObjectURL(url);
                 };
@@ -156,14 +156,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
         if (!file || typeof file !== 'object' || !file.name || typeof file.type !== 'string') {
             return false;
         }
-        
+
         if (file.type.startsWith('image/')) {
             return true;
         }
-        
+
         const fileName = file.name.toLowerCase();
         const imageExtensions = ['.svg', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'];
-        
+
         return imageExtensions.some(ext => fileName.endsWith(ext));
     };
 
@@ -242,7 +242,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 URL.revokeObjectURL(url);
             }
         });
-        
+
         if (multiple && typeof indexToRemove === 'number') {
             // Remove specific file from multiple files
             const files = getCurrentFiles();
@@ -263,7 +263,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         if (onRemoveExistingImage) {
             onRemoveExistingImage(indexToRemove);
         }
-    };    
+    };
     const getIcon = () => {
         const iconProps = { className: "mx-auto h-12 w-12 text-gray-400" };
         switch (icon) {
@@ -284,10 +284,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }
 
         const fileExtension = file.name.toLowerCase().split('.').pop();
-        const mimeTypeValid = acceptedFormats.some(format => 
+        const mimeTypeValid = acceptedFormats.some(format =>
             file.type.includes(format) || file.name.toLowerCase().endsWith(format)
         );
-        const extensionValid = acceptedFormats.some(format => 
+        const extensionValid = acceptedFormats.some(format =>
             format.includes(fileExtension || '')
         );
 
@@ -303,38 +303,38 @@ const FileUpload: React.FC<FileUploadProps> = ({
     // Handle file selection
     const handleFileChange = (newFiles: File[]) => {
         const validFiles: File[] = [];
-        
+
         for (const file of newFiles) {
             if (validasiFile(file)) {
                 validFiles.push(file);
             }
         }
-        
+
         if (validFiles.length === 0) {
             return;
         }
-        
+
         if (multiple) {
             const currentFiles = getCurrentFiles();
             const currentExistingImages = existingImageUrl || preservedExistingImages;
-            
+
             const cekFiles = validFiles.filter(newFile => {
-                return !currentFiles.some(existingFile => 
-                    existingFile.name === newFile.name && 
-                    existingFile.size === newFile.size && 
+                return !currentFiles.some(existingFile =>
+                    existingFile.name === newFile.name &&
+                    existingFile.size === newFile.size &&
                     existingFile.lastModified === newFile.lastModified
                 );
             });
-            
+
             if (cekFiles.length === 0) {
                 toast.error('All selected files are already added');
                 return;
             }
-            
+
             const allFiles = [...currentFiles, ...cekFiles];
             const totalExisting = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
             const totalFiles = allFiles.length + totalExisting;
-            
+
             onFileChange(allFiles);
             toast.success(`${cekFiles.length} file(s) added successfully! Total: ${totalFiles} files`);
         } else {
@@ -349,7 +349,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         if (files && files.length > 0) {
             const fileArray = Array.from(files);
             handleFileChange(fileArray);
-            
+
             // Reset input untuk mencegah masalah caching
             e.target.value = '';
         }
@@ -403,8 +403,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 <div
                     className={`
                         relative flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-all duration-200
-                        ${disabled 
-                            ? 'bg-gray-100 border-gray-200 cursor-not-allowed opacity-60' 
+                        ${disabled
+                            ? 'bg-gray-100 border-gray-200 cursor-not-allowed opacity-60'
                             : dragState.isDragging
                                 ? 'border-blue-400 bg-blue-50 shadow-sm'
                                 : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
@@ -427,15 +427,15 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                 htmlFor={id}
                                 className={`
                                     relative font-medium rounded-md focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500
-                                    ${disabled 
-                                        ? 'text-gray-400 cursor-not-allowed' 
+                                    ${disabled
+                                        ? 'text-gray-400 cursor-not-allowed'
                                         : 'cursor-pointer text-blue-600 hover:text-blue-500'
                                     }
                                 `}
                             >
                                 <span>
-                                    {(getCurrentFiles().length > 0 || existingImageUrl) 
-                                        ? (multiple ? 'Add more files' : 'Change file') 
+                                    {(getCurrentFiles().length > 0 || existingImageUrl)
+                                        ? (multiple ? 'Add more files' : 'Change file')
                                         : `Upload ${getAcceptedFormatsText()} ${multiple ? 'files' : 'file'}`
                                     }
                                 </span>
@@ -460,7 +460,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                             <p className="text-xs text-gray-500">
                                 {description || `${getAcceptedFormatsText()} files only, max ${maxSize}MB`}
                             </p>
-                            
+
                             {/* Current File Display */}
                             {getCurrentFiles().length > 0 && (
                                 <div className="space-y-2">
@@ -510,6 +510,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                         </h4>
                         {!viewMode && (
                             <button
+                                type="button"
                                 onClick={() => handleRemoveFile()}
                                 className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
                                 disabled={disabled}
@@ -526,12 +527,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                         const files = getCurrentFiles();
                         const imageFiles = files.filter(isImageFile);
                         const documentFiles = files.filter(file => !isImageFile(file));
-                        // Use preserved existing images if current existingImageUrl is null/empty
                         const currentExistingImages = existingImageUrl || preservedExistingImages;
-                        // const existingImagesCount = Array.isArray(currentExistingImages) ? currentExistingImages.length : (currentExistingImages ? 1 : 0);
-                        // const totalImages = imageFiles.length + existingImagesCount;
-                        // const getImageLength = totalImages > 3 ? 3 : (totalImages > 0 ? totalImages : 1);
-                        
                         if (multiple) {
                             return (
                                 <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(${colLength}, 1fr)` }}>
@@ -540,19 +536,20 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                         Array.isArray(currentExistingImages) ? (
                                             currentExistingImages.map((imageUrl, index) => {
                                                 // Get file name from URL or use default
-                                                const fileName = existingFiles?.[index]?.file_name || 
-                                                               imageUrl.split('/').pop() || 
-                                                               `attachment-${index + 1}`;
+                                                const fileName = existingFiles?.[index]?.file_name ||
+                                                    imageUrl.split('/').pop() ||
+                                                    `attachment-${index + 1}`;
                                                 const isImage = !isDocumentFile(fileName);
-                                                
+
                                                 return (
-                                                    <div key={`existing-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square hover:brightness-90` }>
+                                                    <div key={`existing-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square hover:brightness-90`}>
                                                         {/* Action buttons */}
                                                         <div className="absolute top-2 right-2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
 
                                                             {/* Download button */}
                                                             {hasDownloadButton && (
                                                                 <Button
+                                                                    type="button"
                                                                     onClick={() => handleDownload(imageUrl, fileName)}
                                                                     className='rounded-full p-1'
                                                                     size='sm'
@@ -560,10 +557,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                                     <MdDownload className="w-4 h-4" />
                                                                 </Button>
                                                             )}
-                                                            
+
                                                             {/* Remove button */}
                                                             {!viewMode && (
                                                                 <Button
+                                                                    type="button"
                                                                     onClick={() => handleRemoveExistingImage(index)}
                                                                     className="bg-red-500 text-white rounded-full p-1"
                                                                     size='sm'
@@ -572,14 +570,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                                 </Button>
                                                             )}
                                                         </div>
-                                                        
+
                                                         {isImage && (
                                                             <div
                                                                 className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
                                                                 onClick={() => handleImageClick(imageUrl, fileName)}
                                                             >
-                                                                <MdZoomIn 
-                                                                    className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg" 
+                                                                <MdZoomIn
+                                                                    className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg"
                                                                     size={40}
                                                                 />
                                                             </div>
@@ -595,7 +593,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                                     />
                                                                 </div>
                                                             ) : (
-                                                                <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center">
+                                                                <div className="flex flex-col items-center justify-center h-full min-h-30 text-center">
                                                                     <div className="text-4xl mb-2">
                                                                         {getDocumentIcon(fileName)}
                                                                     </div>
@@ -604,7 +602,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                                     </p>
                                                                 </div>
                                                             )}
-                                                            
+
                                                         </div>
                                                     </div>
                                                 );
@@ -613,18 +611,18 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                             <div className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center hover:brightness-90 aspect-square`}>
                                                 <div className="relative">
                                                     {(() => {
-                                                        const fileName = existingFiles?.[0]?.file_name || 
-                                                                        currentExistingImages.split('/').pop() || 
-                                                                        'attachment';
+                                                        const fileName = existingFiles?.[0]?.file_name ||
+                                                            currentExistingImages.split('/').pop() ||
+                                                            'attachment';
                                                         const isImage = !isDocumentFile(fileName);
-                                                        
+
                                                         return isImage ? (<>
                                                             <div
                                                                 className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
                                                                 onClick={() => handleImageClick(currentExistingImages, fileName)}
                                                             >
-                                                                <MdZoomIn 
-                                                                    className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg" 
+                                                                <MdZoomIn
+                                                                    className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg"
                                                                     size={40}
                                                                 />
                                                             </div>
@@ -637,7 +635,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                                 />
                                                             </div>
                                                         </>) : (
-                                                            <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center">
+                                                            <div className="flex flex-col items-center justify-center h-full min-h-30 text-center">
                                                                 <div className="text-4xl mb-2">
                                                                     {getDocumentIcon(fileName)}
                                                                 </div>
@@ -647,15 +645,16 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                             </div>
                                                         );
                                                     })()}
-                                                    
+
                                                     {/* Action buttons */}
                                                     <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         {/* Download button */}
                                                         <button
+                                                            type="button"
                                                             onClick={() => {
-                                                                const fileName = existingFiles?.[0]?.file_name || 
-                                                                               currentExistingImages.split('/').pop() || 
-                                                                               'attachment';
+                                                                const fileName = existingFiles?.[0]?.file_name ||
+                                                                    currentExistingImages.split('/').pop() ||
+                                                                    'attachment';
                                                                 handleDownload(currentExistingImages, fileName);
                                                             }}
                                                             className="bg-blue-500 text-white rounded-full p-1 hover:bg-blue-600 transition-colors"
@@ -663,10 +662,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                         >
                                                             <MdDownload className="w-3 h-3" />
                                                         </button>
-                                                        
+
                                                         {/* Remove button */}
                                                         {!viewMode && (
                                                             <button
+                                                                type="button"
                                                                 onClick={() => handleRemoveExistingImage(0)}
                                                                 className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
                                                                 title="Remove"
@@ -679,25 +679,25 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                             </div>
                                         )
                                     )}
-                                    
+
                                     {/* Then show new image files */}
                                     {imageFiles.map((file, index) => {
                                         const url = previewUrls[index];
-                                        
+
                                         if (!url) {
                                             return null;
                                         }
-                                        
+
                                         return (
                                             <div key={`new-image-${file.name}-${file.size}-${file.lastModified}-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square hover:brightness-90`}>
-                                                
+
                                                 {/* Zoom icon overlay */}
                                                 <div
                                                     className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
                                                     onClick={() => handleImageClick(url, file.name)}
                                                 >
-                                                    <MdZoomIn 
-                                                        className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg" 
+                                                    <MdZoomIn
+                                                        className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg"
                                                         size={40}
                                                     />
                                                 </div>
@@ -712,6 +712,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                     />
                                                     {!viewMode && (
                                                         <button
+                                                            type="button"
                                                             onClick={() => handleRemoveFile(imageFiles.length > 1 ? index : undefined)}
                                                             className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                                                         >
@@ -719,7 +720,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                         </button>
                                                     )}
                                                 </div>
-                                                
+
                                                 {/* File Info */}
                                                 <div className="space-y-1">
                                                     <p className="text-xs font-medium text-gray-900 truncate" title={file.name}>
@@ -739,7 +740,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                             <div key={`new-doc-${file.name}-${file.size}-${file.lastModified}-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square`}>
                                                 {/* Document Preview */}
                                                 <div className="relative">
-                                                    <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center">
+                                                    <div className="flex flex-col items-center justify-center h-full min-h-30 text-center">
                                                         <div className="text-4xl mb-2">
                                                             {getDocumentIcon(file.name)}
                                                         </div>
@@ -752,6 +753,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                     </div>
                                                     {!viewMode && (
                                                         <button
+                                                            type="button"
                                                             onClick={() => handleRemoveFile(files.indexOf(file))}
                                                             className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                                                         >
@@ -791,8 +793,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                     className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
                                                     onClick={() => handleImageClick(imageUrl || '', file.name)}
                                                 >
-                                                    <MdZoomIn 
-                                                        className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg" 
+                                                    <MdZoomIn
+                                                        className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg"
                                                         size={40}
                                                     />
                                                 </div>
@@ -805,7 +807,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                     />
                                                 </div>
                                             </>) : (
-                                                <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-center p-5">
+                                                <div className="flex flex-col items-center justify-center h-full min-h-30 text-center p-5">
                                                     <div className="text-4xl mb-2">
                                                         {getDocumentIcon(file.name)}
                                                     </div>
@@ -827,7 +829,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                         {file.type || 'Unknown type'}
                                                     </p>
                                                 </div>
-                                                
+
                                                 <div className="text-xs text-gray-500 space-y-1">
                                                     <p>Size: {(file.size / 1024 / 1024).toFixed(2)} MB</p>
                                                 </div>
@@ -836,28 +838,55 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                     </div>
                                 );
                             } else if (imageUrl) {
+                                const fileName = existingFiles?.[0]?.file_name || imageUrl.split('/').pop() || 'attachment';
+                                const isImage = !isDocumentFile(fileName);
                                 return (
                                     <div className="space-y-2">
-                                        {/* Image Preview */}
+                                        {/* Preview */}
                                         <div className={`${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group`}>
-                                            <div className="relative group">
-                                                <img
-                                                    src={imageUrl}
-                                                    alt="Preview"
-                                                    className="w-full h-full object-contain transition-all"
-                                                    title="Click untuk preview"
-                                                />
-                                                {/* Zoom icon overlay */}
-                                                <div 
-                                                    className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
-                                                    onClick={() => handleImageClick(imageUrl, 'Existing Image')}
-                                                >
-                                                    <MdZoomIn 
-                                                        className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg" 
-                                                        size={40}
-                                                    />
+                                            {/* Download button */}
+                                            {hasDownloadButton && (
+                                                <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button
+                                                        type="button"
+                                                        onClick={() => handleDownload(imageUrl, fileName)}
+                                                        className="rounded-full p-1"
+                                                        size="sm"
+                                                    >
+                                                        <MdDownload className="w-4 h-4" />
+                                                    </Button>
                                                 </div>
-                                            </div>
+                                            )}
+
+                                            {isImage ? (
+                                                <div className="relative group">
+                                                    <img
+                                                        src={imageUrl}
+                                                        alt="Preview"
+                                                        className="w-full h-full object-contain transition-all"
+                                                        title="Click untuk preview"
+                                                    />
+                                                    {/* Zoom icon overlay */}
+                                                    <div
+                                                        className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
+                                                        onClick={() => handleImageClick(imageUrl, fileName)}
+                                                    >
+                                                        <MdZoomIn
+                                                            className="text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-gray-700 rounded-lg"
+                                                            size={40}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center h-full min-h-30 text-center p-5">
+                                                    <div className="text-4xl mb-2">
+                                                        {getDocumentIcon(fileName)}
+                                                    </div>
+                                                    <p className="text-xs font-medium text-gray-900 truncate max-w-full" title={fileName}>
+                                                        {fileName}
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* File Info */}
@@ -865,7 +894,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                             <div className="space-y-2">
                                                 <div>
                                                     <p className="text-sm font-medium text-gray-900 truncate">
-                                                        Existing Image
+                                                        {isImage ? 'Existing Image' : fileName}
                                                     </p>
                                                 </div>
                                             </div>
@@ -886,20 +915,21 @@ const FileUpload: React.FC<FileUploadProps> = ({
                     <div className="relative max-w-4xl max-h-full p-4" onClick={e => e.stopPropagation()}>
                         {/* Tombol Close */}
                         <button
+                            type="button"
                             onClick={handleModalClose}
                             className="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75 transition-all z-10"
                             title="Tutup preview"
                         >
                             <MdClose className="w-6 h-6" />
                         </button>
-                        
+
                         {/* Image */}
                         <img
                             src={modalState.imageUrl}
                             alt={modalState.imageName}
                             className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
                         />
-                        
+
                         {/* Image Name */}
                         <div className="absolute bottom-4 left-4 right-4 text-center">
                             <p className="text-white bg-black/50 rounded-b-lg px-3 py-2 text-sm font-medium">
