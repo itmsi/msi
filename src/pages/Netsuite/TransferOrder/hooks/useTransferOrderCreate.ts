@@ -8,7 +8,7 @@ import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/pu
 import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
 
 const DEFAULT_FORM: TransferOrderFormData = {
-    customform: null,
+    customform: 135,
     subsidiary: null,
     subsidiary_name: '',
     location: null,
