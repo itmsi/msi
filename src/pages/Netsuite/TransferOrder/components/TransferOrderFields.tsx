@@ -249,6 +249,7 @@ export default function TransferOrderFields({
                                     isClearable={false}
                                     isSearchable={true}
                                     isLoading={loadingMasterData}
+                                    disabled
                                 />
                             </div>
 
