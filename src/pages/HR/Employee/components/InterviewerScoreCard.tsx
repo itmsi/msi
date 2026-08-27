@@ -5,7 +5,7 @@ import { PermissionButton } from '@/components/common/PermissionComponents';
 import formatIndonesianDate from '../../Candidate/utils/date';
 import { getMultipliedScore } from '../../Candidate/components/InterviewScoreChart';
 import type { InterviewFormItem } from '../../Candidate/services/interviewService';
-import { getRoleStyle } from '../utils/roleStyle';
+import { getRoleStyle, getRoleLabel } from '../utils/roleStyle';
 import { sortByCategoryOrder } from '../utils/interviewFormHelpers';
 
 interface InterviewerScoreCardProps {
@@ -46,7 +46,7 @@ const InterviewerScoreCard = ({
                         {assignRoles.length > 0 ? (
                             assignRoles.map((role, i) => (
                                 <span key={i} className={`inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] border rounded-full font-medium ${getRoleStyle(role)}`}>
-                                    {role.toUpperCase()}
+                                    {getRoleLabel(role)}
                                 </span>
                             ))
                         ) : (

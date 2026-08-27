@@ -12,7 +12,7 @@ import {
     MdDeleteOutline,
 } from 'react-icons/md';
 import type { CandidateItem } from '../types/Candidate';
-import { getRoleStyle } from '../utils/roleStyle';
+import { getRoleStyle, getRoleLabel } from '../utils/roleStyle';
 
 interface CandidateCardProps {
     candidate: CandidateItem;
@@ -252,7 +252,7 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete, index }: Ca
                                             key={i}
                                             className={`shrink-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-secondary font-semibold border rounded-full ${getRoleStyle(role)}`}
                                         >
-                                            {role.toUpperCase()}
+                                            {getRoleLabel(role)}
                                         </span>
                                     ))}
                                 </div>

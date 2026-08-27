@@ -46,6 +46,12 @@ const ROLE_STYLE: Record<string, string> = {
 const DEFAULT_ROLE_STYLE = 'bg-gray-100 text-gray-800 border-gray-200';
 // Stored role casing isn't consistent ("hr" vs "HR") — normalize before lookup/display.
 const getRoleStyle = (role: string) => ROLE_STYLE[role.toUpperCase()] || DEFAULT_ROLE_STYLE;
+// Display-only rename — "PUB" is still the stored/submitted value everywhere
+// (existing records, API payloads) so nothing but the on-screen label changes.
+const ROLE_LABEL_OVERRIDES: Record<string, string> = {
+    PUB: 'USER',
+};
+const getRoleLabel = (role: string) => ROLE_LABEL_OVERRIDES[role.toUpperCase()] || role.toUpperCase();
 
 const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTabProps) => {
     const [schedules, setSchedules] = useState<InterviewSchedule[]>([]);
@@ -356,11 +362,11 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                         <div className="flex flex-nowrap gap-1">
                                                             {visibleRoles.map((role, i) => (
                                                                 <span key={i} className={`shrink-0 inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-primary ${getRoleStyle(role)}`}>
-                                                                    {role.toUpperCase()}
+                                                                    {getRoleLabel(role)}
                                                                 </span>
                                                             ))}
                                                             {extraRoles.length > 0 && (
-                                                                <Tooltip content={extraRoles.map(r => r.toUpperCase()).join(', ')} position="top">
+                                                                <Tooltip content={extraRoles.map(r => getRoleLabel(r)).join(', ')} position="top">
                                                                     <span className={`shrink-0 inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-primary ${DEFAULT_ROLE_STYLE}`}>
                                                                         +{extraRoles.length}
                                                                     </span>
@@ -648,7 +654,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                         className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${active ? 'bg-[#0253a5] text-white border-[#0253a5]' : 'bg-white text-[#5B6480] border-[#E7E9F0] hover:border-[#C4C9DA]'
                                             }`}
                                     >
-                                        {role}
+                                        {getRoleLabel(role)}
                                     </button>
                                 );
                             })}

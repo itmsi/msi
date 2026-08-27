@@ -261,7 +261,7 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
                     <div className="text-[10px] uppercase tracking-wide text-gray-500 mt-0.5">Total Score</div>
                 </div>
             </div>
-            <div className="overflow-y-auto mb-0 max-h-[65dvh] md:pb-25 pb-55">
+            <div className="overflow-y-auto mb-0 max-h-[60dvh] md:pb-25 pb-55">
                 <HRAccordion
                     allowMultiple
                     defaultOpenFirst

@@ -173,8 +173,9 @@ export default function EditCustomer() {
         //     hasErrors = true;
         // }
         
-        if (!formData.customer_phone.trim()) {
-            toast.error('Customer phone is required');
+        const customerPhone = formData.customer_phone.replace(/\s|-/g, '');
+        if (customerPhone && customerPhone.length < 7) {
+            toast.error('Phone number must be at least 7 characters');
             hasErrors = true;
         }
         

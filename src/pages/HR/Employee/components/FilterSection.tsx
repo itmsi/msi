@@ -15,7 +15,7 @@ const INTERVIEWER_OPTIONS = [
     { value: 'GM', label: 'GM' },
     { value: 'VP', label: 'VP' },
     { value: 'BOD', label: 'BOD' },
-    { value: 'PUB', label: 'PUB' },
+    { value: 'PUB', label: 'USER' },
 ];
 
 interface FilterSectionProps {

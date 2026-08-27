@@ -16,9 +16,7 @@ export class CustomerUtilityService {
             errors.push('Please enter a valid email address');
         }
 
-        if (!customerData.customer_phone || customerData.customer_phone.trim().length === 0) {
-            errors.push('Customer phone is required');
-        } else if (!this.isValidPhone(customerData.customer_phone)) {
+        if (customerData.customer_phone && !this.isValidPhone(customerData.customer_phone)) {
             errors.push('Please enter a valid phone number');
         }
 
@@ -94,7 +92,7 @@ export class CustomerUtilityService {
     }
 
     private static isValidPhone(phone: string): boolean {
-        const phoneRegex = /^(\+62|62|0)[0-9]{9,13}$/;
+        const phoneRegex = /^(\+62|62|0)[0-9]{6,13}$/;
         return phoneRegex.test(phone.replace(/\s|-/g, ''));
     }
 
