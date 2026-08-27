@@ -22,6 +22,7 @@ export interface TransferOrderRequest {
     transferlocation?: number | string;
     status_name?: string;
     status_code?: string;
+    classes?: number;
 }
 
 export interface TransferOrderListItem {
