@@ -1,0 +1,418 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { TableColumn } from 'react-data-table-component';
+import { useNavigate } from 'react-router-dom';
+import { useTransferOrder } from './hooks/useTransferOrder';
+import { formatDateTime, getProfile } from '@/helpers/generalHelper';
+import {
+    MdClear,
+    MdSearch,
+    MdFilterListAlt,
+    MdExpandLess,
+    MdExpandMore,
+    MdOutlineSync,
+    MdAdd,
+} from 'react-icons/md';
+import Input from '@/components/form/input/InputField';
+import PageMeta from '@/components/common/PageMeta';
+import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
+import { TransferOrderListItem } from './types/transferOrder';
+import Button from '@/components/ui/button/Button';
+import { PermissionGate } from '@/components/common/PermissionComponents';
+import { createByDateColumn } from '@/components/ui/table/columnUtils';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
+import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
+import CustomSelect from '@/components/form/select/CustomSelect';
+import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
+
+const formatDateID = (dateString: string) => {
+    if (!dateString || dateString === '-') return '-';
+    const isoMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) {
+        const [, , m, d] = isoMatch;
+        const year = isoMatch[1];
+        const monthNum = parseInt(m, 10);
+        const dayNum = parseInt(d, 10);
+        const monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        return `${String(dayNum).padStart(2, '0')} ${monthNames[monthNum - 1]} ${year}`;
+    }
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleString('id-ID', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
+};
+
+export default function Manage() {
+    const navigate = useNavigate();
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const profileSSO = getProfile() as any;
+    const profileSSOId = profileSSO?.classes_id_netsuite || null;
+
+    const {
+        transferOrders,
+        loading,
+        error,
+        pagination,
+        searchValue,
+        sortOrder,
+        filterLocation,
+        filterTransferLocation,
+        filterStatus,
+        activeFilterCount,
+        setSearchValue,
+        handlePageChange,
+        handleRowsPerPageChange,
+        handleFilterChange,
+        handleKeyPress,
+        handleClearSearch,
+        handleClearAllFilters,
+        syncInfo,
+        isSyncing,
+        handleSync,
+        handleSyncById,
+    } = useTransferOrder(profileSSOId);
+
+    // Location filter select
+    const {
+        POLocationOptions: locationOptions,
+        pagination: locationPagination,
+        inputValue: locationInputValue,
+        handleInputChange: handleLocationInputChange,
+        handleMenuScrollToBottom: handleLocationMenuScrollToBottom,
+        initializeOptions: initializeLocationOptions,
+    } = usePOLocationSelect(30, false);
+
+    const {
+        POLocationOptions: transferLocationOptions,
+        pagination: transferLocationPagination,
+        inputValue: transferLocationInputValue,
+        handleInputChange: handleTransferLocationInputChange,
+        handleMenuScrollToBottom: handleTransferLocationMenuScrollToBottom,
+        initializeOptions: initializeTransferLocationOptions,
+    } = usePOLocationSelect(30, false);
+
+    useEffect(() => {
+        initializeLocationOptions();
+        initializeTransferLocationOptions();
+    }, [initializeLocationOptions, initializeTransferLocationOptions]);
+
+    const [selectedLocationFilter, setSelectedLocationFilter] = useState<any>(null);
+    const [selectedTransferLocationFilter, setSelectedTransferLocationFilter] = useState<any>(null);
+
+    const handlePageChangeSafe = useCallback((newPage: number) => {
+        const currentPage = pagination?.page || 1;
+        if (newPage === currentPage) return;
+        handlePageChange(newPage);
+    }, [pagination?.page, handlePageChange]);
+
+    const handleRowsPerPageSafe = useCallback((newLimit: number, newPage: number) => {
+        const currentPage = pagination?.page || 1;
+        const currentLimit = pagination?.page_size || 10;
+        if (newLimit === currentLimit && newPage === currentPage) return;
+        handleRowsPerPageChange(newLimit, newPage);
+    }, [pagination?.page, pagination?.page_size, handleRowsPerPageChange]);
+
+    const columns: TableColumn<TransferOrderListItem>[] = [
+        {
+            name: 'Document Number',
+            selector: row => row.tranid || '-',
+            cell: row => (<>
+                <a
+                    href={`/netsuite/transfer-orders/edit/${row.netsuite_id || row.id}`}
+                    className="absolute inset-0"
+                />
+                <div className="items-center py-2">
+                    <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
+                    <div className="block text-sm text-gray-500">{formatDateID(row.tran_date || '-')}</div>
+                </div>
+            </>),
+            wrap: true,
+            width: '230px',
+            pinned: 'left',
+        },
+        {
+            name: 'From Location',
+            selector: row => row.from_location_name || '-',
+            wrap: true,
+            width: '260px',
+        },
+        {
+            name: 'To Location',
+            selector: row => row.to_location_name || '-',
+            wrap: true,
+            width: '260px',
+        },
+        {
+            name: 'Status',
+            selector: row => row.status_name || row.status_code || '-',
+            cell: row => (
+                <div className="items-center capitalize">
+                    {row.status_name ? (
+                        <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
+                            {row.status_name}
+                        </span>
+                    ) : '-'}
+                </div>
+            ),
+            center: true,
+            width: '260px'
+        },
+        {
+            name: 'Memo',
+            selector: row => row.memo || '-',
+            cell: row => (
+                <div className="text-sm text-gray-600 line-clamp-2 max-w-xs" title={row.memo || ''}>
+                    {row.memo || '-'}
+                </div>
+            ),
+            wrap: true,
+            minWidth: '180px',
+        },
+        createByDateColumn('Created By', 'created_at', 'created_by_name', '320px'),
+        createByDateColumn('Updated By', 'updated_at', 'updated_by_name', '320px'),
+        createActionsColumn([
+            {
+                icon: MdOutlineSync,
+                onClick: handleSyncById,
+                className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                tooltip: 'Sync this TO',
+                permission: 'read',
+            }
+        ]),
+    ];
+
+    const SearchAndFilters = useMemo(() => (
+        <>
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                <div className="flex-1">
+                    <div className="relative flex">
+                        <div className="relative flex-1">
+                            <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                            <Input
+                                type="text"
+                                placeholder="Search TO Number / Memo... (Press Enter)"
+                                value={searchValue}
+                                onChange={(e) => setSearchValue(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                className={`pl-10 py-2 w-full ${searchValue ? 'pr-10' : 'pr-4'}`}
+                            />
+                            {searchValue && (
+                                <button
+                                    onClick={handleClearSearch}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                    type="button"
+                                >
+                                    <MdClear className="h-4 w-4" />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <CustomSelect
+                        id="sort_order"
+                        name="sort_order"
+                        value={sortOrder ? {
+                            value: sortOrder,
+                            label: sortOrder === 'asc' ? 'Ascending' : 'Descending'
+                        } : null}
+                        onChange={(selectedOption) =>
+                            handleFilterChange('sort_order', selectedOption?.value || '')
+                        }
+                        options={[
+                            { value: 'asc', label: 'Ascending' },
+                            { value: 'desc', label: 'Descending' },
+                        ]}
+                        placeholder="Order by"
+                        isClearable={false}
+                        isSearchable={false}
+                        className="w-40"
+                    />
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        onClick={() => setShowAdvancedFilters(prev => !prev)}
+                        className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
+                        size="sm"
+                    >
+                        <MdFilterListAlt className="w-4 h-4 mr-2" />
+                        Filter
+                        {activeFilterCount > 0 && (
+                            <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-blue-600 text-white">
+                                {activeFilterCount}
+                            </span>
+                        )}
+                        {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                    </Button>
+                </div>
+            </div>
+
+            {/* Advanced Filters */}
+            {showAdvancedFilters && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">From Location</label>
+                            <CustomAsyncSelect
+                                name="filter_location"
+                                value={selectedLocationFilter}
+                                onChange={(opt) => {
+                                    setSelectedLocationFilter(opt);
+                                    handleFilterChange('location', opt?.value || '');
+                                }}
+                                defaultOptions={locationOptions}
+                                loadOptions={handleLocationInputChange}
+                                onMenuScrollToBottom={handleLocationMenuScrollToBottom}
+                                isLoading={locationPagination.loading}
+                                inputValue={locationInputValue}
+                                onInputChange={handleLocationInputChange}
+                                placeholder="All Locations"
+                                isClearable={true}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">To Location</label>
+                            <CustomAsyncSelect
+                                name="filter_transferlocation"
+                                value={selectedTransferLocationFilter}
+                                onChange={(opt) => {
+                                    setSelectedTransferLocationFilter(opt);
+                                    handleFilterChange('transferlocation', opt?.value || '');
+                                }}
+                                defaultOptions={transferLocationOptions}
+                                loadOptions={handleTransferLocationInputChange}
+                                onMenuScrollToBottom={handleTransferLocationMenuScrollToBottom}
+                                isLoading={transferLocationPagination.loading}
+                                inputValue={transferLocationInputValue}
+                                onInputChange={handleTransferLocationInputChange}
+                                placeholder="All Locations"
+                                isClearable={true}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <Input
+                                type="text"
+                                value={filterStatus}
+                                onChange={(e) => handleFilterChange('status_name', e.target.value)}
+                                placeholder="e.g. Pending Approval"
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
+                    {activeFilterCount > 0 && (
+                        <div className="mt-3 flex justify-end">
+                            <Button
+                                onClick={() => {
+                                    setSelectedLocationFilter(null);
+                                    setSelectedTransferLocationFilter(null);
+                                    handleClearAllFilters();
+                                }}
+                                size="sm"
+                                className="bg-transparent border border-red-300 text-red-600 hover:bg-red-50"
+                            >
+                                <MdClear className="w-4 h-4 mr-1" />
+                                Clear All
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            )}
+        </>
+    ), [searchValue, sortOrder, filterLocation, filterTransferLocation, filterStatus, activeFilterCount, showAdvancedFilters, locationOptions, transferLocationOptions, selectedLocationFilter, selectedTransferLocationFilter]);
+
+    return (
+        <>
+            <PageMeta
+                title="Transfer Orders - Motor Sights International"
+                description="Manage Transfer Orders from NetSuite - Motor Sights International"
+                image="/motor-sights-international.png"
+            />
+
+            <div className="space-y-6">
+                {/* Header */}
+                <PageHeaderManage
+                    title="Transfer Orders"
+                    subtitle="Manage Transfer Orders"
+                    actions={[
+                        {
+                            key: 'sync',
+                            element: (
+                                <Button
+                                    onClick={() => handleSync()}
+                                    disabled={isSyncing}
+                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                    variant='outline'
+                                >
+                                    <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                    <div>
+                                        <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                    </div>
+                                </Button>
+                            )
+                        },
+                        {
+                            key: 'create',
+                            element: (
+                                <PermissionGate permission="create">
+                                    <Button
+                                        onClick={() => navigate('/netsuite/transfer-orders/create')}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <MdAdd className="mr-2" size={20} />
+                                        Create Transfer Order
+                                    </Button>
+                                </PermissionGate>
+                            )
+                        }
+                    ]}
+                />
+
+                {
+                    syncInfo && (<>
+                        <span className='block text-xs text-green-600 pe-6 text-end mb-0'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
+                    </>)
+                }
+
+                {/* Search & Filter */}
+                <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
+                    {SearchAndFilters}
+                </div>
+
+                {/* Table */}
+                <div className="bg-white shadow rounded-lg">
+                    <div className="p-6 font-secondary">
+                        {error && (
+                            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                                <p className="text-red-600">{error}</p>
+                            </div>
+                        )}
+
+                        <CustomDataTable
+                            columns={columns}
+                            data={transferOrders}
+                            loading={loading}
+                            pagination
+                            paginationServer
+                            paginationTotalRows={pagination?.total_records || 0}
+                            paginationPerPage={pagination?.page_size || 10}
+                            paginationDefaultPage={pagination?.page || 1}
+                            paginationRowsPerPageOptions={[10, 20, 50, 100]}
+                            onChangePage={handlePageChangeSafe}
+                            onChangeRowsPerPage={handleRowsPerPageSafe}
+                            fixedHeader={true}
+                            fixedHeaderScrollHeight="625px"
+                            responsive
+                            highlightOnHover
+                            onRowClicked={(row) => navigate(`/netsuite/transfer-orders/edit/${row.netsuite_id || row.id}`)}
+                            striped={false}
+                            persistTableHead
+                            borderRadius="8px"
+                        />
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}
