@@ -55,7 +55,7 @@ const InterviewerScoreCard = ({
                     </div>
                 </div>
                 <div className="text-right shrink-0">
-                    <div className="inline-flex items-center justify-center min-w-8 h-8 px-2 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-sm font-bold">
+                    <div className="inline-flex items-center justify-center min-w-8 h-8 px-2 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-sm font-primary-bold">
                         {totalScore}
                     </div>
                     <div className="text-[9px] uppercase tracking-wide text-[#9AA2BA] mt-1">Score</div>

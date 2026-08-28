@@ -13,6 +13,7 @@ import {
 } from 'react-icons/md';
 import type { CandidateItem } from '../types/Candidate';
 import { getRoleStyle, getRoleLabel } from '../utils/roleStyle';
+import { getAssignRoleArr } from '../utils/interviewFormHelpers';
 
 interface CandidateCardProps {
     candidate: CandidateItem;
@@ -37,11 +38,6 @@ const formatDate = (value: string | null) => {
     if (!value) return null;
     const date = moment(value);
     return date.isValid() ? date.format('DD MMM YYYY') : value;
-};
-
-const normalizeAssignRole = (value: string[] | string | null | undefined): string[] => {
-    if (!value) return [];
-    return Array.isArray(value) ? value : [value];
 };
 
 export const STATUS_STYLE: Record<string, { bg: string; fg: string; dot: string }> = {
@@ -85,7 +81,7 @@ function DetailRow({ label, children }: { label: string; children: ReactNode }) 
     );
 }
 
-export function CandidateCard({ candidate, onView, onEdit, onDelete, index }: CandidateCardProps) {
+export function CandidateCard({ candidate, onView, onEdit, onDelete }: CandidateCardProps) {
     const s = STATUS_STYLE[candidate.candidate_status] || DEFAULT_STATUS_STYLE;
     const cs = candidate.company_name
         ? COMPANY_STYLE[candidate.company_name] || DEFAULT_COMPANY_STYLE
@@ -117,14 +113,14 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete, index }: Ca
         ? formatDate(candidate.schedule_interview.schedule_interview_date)
         : null;
     const interviewTime = candidate.schedule_interview?.schedule_interview_time || null;
-    const assignedRoles = normalizeAssignRole(candidate.schedule_interview?.assign_role);
+    const assignedRoles = getAssignRoleArr(candidate.schedule_interview);
     const MAX_VISIBLE_ROLES = 5;
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * .1, duration: 0.2 }}
+            transition={{ duration: 0.2 }}
             className={`relative bg-white rounded-b-2xl border hover:border-[#C4C9DA] shadow-lg/10 hover:shadow-black/4 transition-all duration-200`} style={{ borderColor: cs.fg + '50' }}>
             <div className="h-0.5 rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${cs.fg}, ${s.dot})` }} />
             <div ref={menuRef} className="absolute top-4 right-4 z-10">
@@ -171,8 +167,6 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete, index }: Ca
                         >
                             <MdDeleteOutline size={14} /> Delete candidate
                         </button>
-                        {/* TODO: tambahkan aksi lain di sini kalau endpoint-nya sudah ada,
-                            mis. "Update status", "Send offering letter", "Delete candidate" */}
                     </div>
                 )}
             </div>
@@ -217,7 +211,6 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete, index }: Ca
                             <span
                                 className="inline-flex items-center text-[11.5px] font-secondary font-semibold px-2 py-0.5 rounded-md"
                                 style={{ background: cs.bg, color: cs.fg }}
-                            // style={{ background: `linear-gradient(90deg, ${cs.fg}, ${s.fg + '50'})` }}
                             >
                                 {candidate.company_name}
                             </span>

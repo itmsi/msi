@@ -1,4 +1,4 @@
-import type { InterviewFormItem } from '../../Candidate/services/interviewService';
+import type { InterviewFormItem, InterviewSchedule } from '../../Candidate/services/interviewService';
 
 export const CATEGORY_ORDER = ['SIAH', '7 Values', 'CSE', 'SDT', 'EXPERIENCE'];
 
@@ -38,4 +38,25 @@ export const getLatestInterviewerForms = (forms: InterviewFormItem[]): Interview
     });
 
     return dedupeFormsByCategory(latestForms);
+};
+
+// Accepts every shape assign_role shows up in across the app: a comma-joined
+// string ("HR, BOD"), an array of those, or the schedule API's { role } wrapper.
+type AssignRoleSource = { assign_role?: string[] | string | { role?: string } | null };
+
+export const getAssignRoleArr = (s: AssignRoleSource | InterviewSchedule | null | undefined): string[] => {
+    if (!s || !s.assign_role) return [];
+    const value = s.assign_role;
+    const parts = Array.isArray(value)
+        ? value
+        : typeof value === 'string'
+            ? [value]
+            : [value.role || ''];
+    return parts.flatMap((part) => part.split(',').map((r) => r.trim())).filter(Boolean);
+};
+
+export const formatDecimal = (value: number | string | null | undefined): number => {
+    if (value === null || value === undefined || value === '') return 0;
+
+    return Number(Number(value).toFixed(1));
 };
