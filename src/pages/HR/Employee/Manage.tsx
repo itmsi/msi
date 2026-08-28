@@ -259,7 +259,7 @@ export default function ManageCandidate() {
                             <CandidateCard key={c.candidate_id} candidate={c} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} index={index} />
                         ))}
                         {loadingMore &&
-                            Array.from({ length: 3 }).map((_, i) => <CandidateCardSkeleton key={`more-${i}`} />)}
+                            Array.from({ length: 8 }).map((_, i) => <CandidateCardSkeleton key={`more-${i}`} />)}
                     </motion.div>
                     // </AnimatePresence>
                 )}

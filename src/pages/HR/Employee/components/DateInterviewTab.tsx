@@ -9,7 +9,7 @@ import InterviewScoreChart, { getMultipliedScore } from '../../Candidate/compone
 import FormScoringCanvas from './FormScoringCanvas';
 import { PDFPreviewModal } from './PDFPreviewModal';
 import InterviewerScoreCard from './InterviewerScoreCard';
-import { dedupeFormsByCategory, getLatestInterviewerForms } from '../utils/interviewFormHelpers';
+import { dedupeFormsByCategory, getAssignRoleArr, getLatestInterviewerForms } from '../utils/interviewFormHelpers';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import { Modal } from '@/components/ui/modal';
 import Button from '@/components/ui/button/Button';
@@ -30,12 +30,7 @@ interface DateInterviewTabProps {
 }
 
 const ROLE_OPTIONS = ['HR', 'GM', 'VP', 'BOD', 'PUB'];
-// const DURATION_OPTIONS = ['15m', '30m', '45m', '60m', '90m'];
-// Cap chips shown per row so rows with many assigned roles don't grow taller than others.
 const MAX_VISIBLE_ROLES = 5;
-
-// Same badge language as the rest of the app (e.g. /netsuite/sales-orders StatusTypeBadge):
-// bg-X-100 / text-X-800 / border-X-200, rounded-full, bordered — no custom hex or shadows.
 const ROLE_STYLE: Record<string, string> = {
     HR: 'bg-indigo-100 text-indigo-800 border-indigo-200',
     GM: 'bg-green-100 text-green-800 border-green-200',
@@ -44,10 +39,7 @@ const ROLE_STYLE: Record<string, string> = {
     PUB: 'bg-teal-100 text-teal-800 border-teal-200',
 };
 const DEFAULT_ROLE_STYLE = 'bg-gray-100 text-gray-800 border-gray-200';
-// Stored role casing isn't consistent ("hr" vs "HR") — normalize before lookup/display.
 const getRoleStyle = (role: string) => ROLE_STYLE[role.toUpperCase()] || DEFAULT_ROLE_STYLE;
-// Display-only rename — "PUB" is still the stored/submitted value everywhere
-// (existing records, API payloads) so nothing but the on-screen label changes.
 const ROLE_LABEL_OVERRIDES: Record<string, string> = {
     PUB: 'USER',
 };
@@ -63,8 +55,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
     const [showDeleteFormConfirm, setShowDeleteFormConfirm] = useState(false);
     const [deletingFormId, setDeletingFormId] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
-    // Panel penilaian interview kini dirender inline di bawah baris jadwalnya,
-    // bukan lagi offcanvas — hanya satu panel yang aktif dalam satu waktu.
     const [scoringPanel, setScoringPanel] = useState<{ scheduleId: string; editingFormId?: string } | null>(null);
     const [expandedSchedules, setExpandedSchedules] = useState<Record<string, boolean>>({});
     const [scheduleForms, setScheduleForms] = useState<Record<string, InterviewFormItem[]>>({});
@@ -76,12 +66,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
 
     const [form, setForm] = useState({ date: '', time: '', duration: '', assign_role: [] as string[] });
 
-    const getAssignRoleArr = (s: InterviewSchedule): string[] => {
-        if (!s.assign_role) return [];
-        if (typeof s.assign_role === 'string') return s.assign_role.split(',').map(r => r.trim());
-        return (s.assign_role?.role || '').split(',').map(r => r.trim()).filter(Boolean);
-    };
-
     const fetchData = async () => {
         if (!candidateId) return;
         setLoading(true);
@@ -89,9 +73,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
             const result = await interviewScheduleService.getList(candidateId);
             const list = result.data || [];
             setSchedules(list);
-            // Prefetch forms per schedule — the row's score badge and the
-            // expanded-view "no submissions yet" state both read scheduleForms
-            // directly without fetching on their own, so this can't be lazy.
             list.forEach((s) => { fetchScheduleForms(s.schedule_interview_id); });
         } catch {
             toast.error('Failed to load schedules');
@@ -186,28 +167,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
         setPdfPreview(null);
     };
 
-    // const handleOpenScoreStats = async (scheduleId: string) => {
-    //     const forms = scheduleForms[scheduleId];
-    //     if (forms) {
-    //         setFormScoreData(getFormScoreData(forms));
-    //         setShowFormScore(true);
-    //         return;
-    //     }
-
-    //     setLoadingForms(prev => ({ ...prev, [scheduleId]: true }));
-    //     try {
-    //         const result = await interviewFormService.getList({ schedule_interview_id: scheduleId });
-    //         const loadedForms = result.data || [];
-    //         setScheduleForms(prev => ({ ...prev, [scheduleId]: loadedForms }));
-    //         setFormScoreData(getFormScoreData(loadedForms));
-    //         setShowFormScore(true);
-    //     } catch {
-    //         toast.error('Failed to load interview forms');
-    //     } finally {
-    //         setLoadingForms(prev => ({ ...prev, [scheduleId]: false }));
-    //     }
-    // };
-
     const openAdd = () => {
         setEditing(null);
         setForm({ date: '', time: '', duration: '', assign_role: [] });
@@ -220,8 +179,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
         const rawTime = s.schedule_interview_time || '';
         const dateOnly = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate;
         const timeOnly = rawTime.length > 5 ? rawTime.substring(0, 5) : rawTime;
-        // Normalize casing so chips match ROLE_OPTIONS regardless of how it was stored
-        // ("hr" vs "HR") — also self-heals the data since it re-saves uppercase.
         setForm({ date: dateOnly, time: timeOnly, duration: s.schedule_interview_duration || '', assign_role: getAssignRoleArr(s).map(r => r.toUpperCase()) });
         setShowModal(true);
     };
@@ -389,7 +346,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                     }, 0);
                                                     return (
                                                         <div className="flex items-center gap-1.5">
-                                                            <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-bold bg-indigo-100 text-indigo-800 border-indigo-200">
+                                                            <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-primary-bold bg-indigo-100 text-indigo-800 border-indigo-200">
                                                                 {totalScore}
                                                             </span>
                                                         </div>
@@ -520,8 +477,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
             <Modal
                 isOpen={!!scoringPanel}
                 onClose={closeScoringPanel}
-                // showCloseButton={true}
-                // title={`${scoringPanel?.editingFormId ? 'Edit' : 'New'} Score`}
                 className="w-5xl! max-w-full min-h-[90vh] rounded-2xl! border! border-[#E7E9F0]! shadow-xl! max-h-[85vh]! overflow-hidden! flex! flex-col!"
             >
                 {scoringPanel && (() => {
