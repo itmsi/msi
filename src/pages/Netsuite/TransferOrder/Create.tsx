@@ -370,20 +370,6 @@ export default function Create() {
                             itemInput={itemInputValue}
                             onItemInputChange={handleItemInputChange}
                             onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
-
-                            // Class Props
-                            classOptions={classOptions}
-                            classPagination={classPagination}
-                            classInput={classInputValue}
-                            onClassInputChange={handleClassInputChange}
-                            onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
-
-                            // Dept Props
-                            deptOptions={deptOptions}
-                            deptPagination={deptPagination}
-                            deptInput={deptInputValue}
-                            onDeptInputChange={handleDeptInputChange}
-                            onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
                         />
                     </div>
 

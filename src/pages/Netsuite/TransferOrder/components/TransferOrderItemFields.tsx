@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { MdAdd, MdDeleteOutline } from 'react-icons/md';
 import Label from '@/components/form/Label';
 import InputField from '@/components/form/input/InputField';
@@ -29,31 +30,23 @@ interface TOItemFieldsProps {
     onItemInputChange: (val: string) => Promise<any[]>;
     onItemMenuScrollToBottom: () => void;
 
-    // Item Class Props
-    classOptions: any[];
-    classPagination: any;
-    classInput: string;
-    onClassInputChange: (val: string) => Promise<any[]>;
-    onClassMenuScrollToBottom: () => void;
-
-    // Item Department Props
-    deptOptions: any[];
-    deptPagination: any;
-    deptInput: string;
-    onDeptInputChange: (val: string) => Promise<any[]>;
-    onDeptMenuScrollToBottom: () => void;
-
     isEditing?: boolean;
 }
 
 const InlineDatePicker: React.FC<{ value: string | null; onChange: (val: string) => void }> = ({ value, onChange }) => {
     const [show, setShow] = useState(false);
-    const ref = useRef<HTMLDivElement>(null);
+    const [position, setPosition] = useState({ top: 0, left: 0 });
+    const triggerRef = useRef<HTMLDivElement>(null);
+    const popupRef = useRef<HTMLDivElement>(null);
     const currentDate = value ? parseTanggalToDate(value) : null;
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (ref.current && !ref.current.contains(event.target as Node)) {
+            const target = event.target as Node;
+            if (
+                triggerRef.current && !triggerRef.current.contains(target) &&
+                popupRef.current && !popupRef.current.contains(target)
+            ) {
                 setShow(false);
             }
         };
@@ -61,18 +54,40 @@ const InlineDatePicker: React.FC<{ value: string | null; onChange: (val: string)
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Popup dipindah ke document.body lewat portal supaya tidak ke-clip oleh
+    // overflow-y-auto pada wrapper tabel item, lalu diposisikan fixed mengikuti trigger.
+    useEffect(() => {
+        if (!show) return;
+        const handleScroll = () => setShow(false);
+        window.addEventListener('scroll', handleScroll, true);
+        return () => window.removeEventListener('scroll', handleScroll, true);
+    }, [show]);
+
+    const handleToggle = () => {
+        if (!show && triggerRef.current) {
+            const rect = triggerRef.current.getBoundingClientRect();
+            setPosition({ top: rect.bottom + 4, left: rect.left });
+        }
+        setShow(prev => !prev);
+    };
+
     return (
-        <div className="relative" ref={ref}>
+        <div className="relative">
             <div
+                ref={triggerRef}
                 className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer bg-white hover:border-gray-400 text-sm min-w-[140px]"
-                onClick={() => setShow(!show)}
+                onClick={handleToggle}
             >
                 <span className={currentDate ? "text-gray-700" : "text-gray-400"}>
                     {currentDate ? formatTanggal(value || '') : 'Pilih tanggal'}
                 </span>
             </div>
-            {show && (
-                <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+            {show && createPortal(
+                <div
+                    ref={popupRef}
+                    className="fixed z-[9999] bg-white border border-gray-300 rounded-md shadow-lg"
+                    style={{ top: position.top, left: position.left }}
+                >
                     <Calendar
                         date={currentDate || new Date()}
                         onChange={(date: any) => {
@@ -82,7 +97,8 @@ const InlineDatePicker: React.FC<{ value: string | null; onChange: (val: string)
                         }}
                         color="#3b82f6"
                     />
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
@@ -99,16 +115,6 @@ export default function TransferOrderItemFields({
     itemInput,
     onItemInputChange,
     onItemMenuScrollToBottom,
-    classOptions,
-    classPagination,
-    classInput,
-    onClassInputChange,
-    onClassMenuScrollToBottom,
-    deptOptions,
-    deptPagination,
-    deptInput,
-    onDeptInputChange,
-    onDeptMenuScrollToBottom,
     isEditing = false,
 }: TOItemFieldsProps) {
     const [selectedNewItem, setSelectedNewItem] = useState<any>(null);
@@ -342,74 +348,6 @@ export default function TransferOrderItemFields({
                 />
             ),
             width: '250px',
-        },
-        {
-            name: 'Department',
-            selector: (row: TransferOrderFormItem) => row.department_name || 'N/A',
-            cell: (row, index) => (
-                <CustomAsyncSelect
-                    name={`department_${index}`}
-                    disabled={!formData.subsidiary}
-                    placeholder={!formData.subsidiary ? "Pilih Subsidiary dahulu" : "Select department..."}
-                    value={row.department ? {
-                        label: row.department_name || '',
-                        value: row.department.toString()
-                    } : null}
-                    defaultOptions={deptOptions}
-                    loadOptions={onDeptInputChange}
-                    onMenuScrollToBottom={onDeptMenuScrollToBottom}
-                    isLoading={deptPagination.loading}
-                    noOptionsMessage={() => "No departments found"}
-                    loadingMessage={() => "Loading departments..."}
-                    isSearchable={true}
-                    inputValue={deptInput}
-                    onInputChange={onDeptInputChange}
-                    onChange={(option) => {
-                        onUpdateItem(index, 'department', option ? parseInt(String(option.value)) : null);
-                        onUpdateItem(index, 'department_name', option ? option.label : '');
-                    }}
-                    className="w-full text-xs"
-                    menuPortalTarget={document.body}
-                    menuPosition="fixed"
-                />
-            ),
-            center: true,
-            width: '260px',
-            sortable: false
-        },
-        {
-            name: 'Class',
-            selector: (row: TransferOrderFormItem) => row.class || 0,
-            cell: (row, index) => (
-                <CustomAsyncSelect
-                    name={`class_${index}`}
-                    disabled={!formData.subsidiary}
-                    placeholder={!formData.subsidiary ? "Pilih Subsidiary dahulu" : "Select class..."}
-                    value={row.class ? {
-                        label: row.class_name || '',
-                        value: row.class.toString()
-                    } : null}
-                    defaultOptions={classOptions}
-                    loadOptions={onClassInputChange}
-                    onMenuScrollToBottom={onClassMenuScrollToBottom}
-                    isLoading={classPagination.loading}
-                    noOptionsMessage={() => "No classes found"}
-                    loadingMessage={() => "Loading classes..."}
-                    isSearchable={true}
-                    inputValue={classInput}
-                    onInputChange={onClassInputChange}
-                    onChange={(option) => {
-                        onUpdateItem(index, 'class', option ? parseInt(String(option.value)) : null);
-                        onUpdateItem(index, 'class_name', option ? option.label : '');
-                    }}
-                    className="w-full text-xs"
-                    menuPortalTarget={document.body}
-                    menuPosition="fixed"
-                />
-            ),
-            center: true,
-            width: '260px',
-            sortable: false
         },
         {
             name: 'Expected Ship Date',

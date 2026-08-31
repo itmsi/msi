@@ -482,18 +482,6 @@ export default function Edit() {
                                         itemInput={itemInputValue}
                                         onItemInputChange={handleItemInputChange}
                                         onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
-
-                                        classOptions={classOptions}
-                                        classPagination={classPagination}
-                                        classInput={classInputValue}
-                                        onClassInputChange={handleClassInputChange}
-                                        onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
-
-                                        deptOptions={deptOptions}
-                                        deptPagination={deptPagination}
-                                        deptInput={deptInputValue}
-                                        onDeptInputChange={handleDeptInputChange}
-                                        onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
                                     />
                                     </>
                                 )}

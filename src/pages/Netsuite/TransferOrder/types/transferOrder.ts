@@ -154,8 +154,6 @@ export interface TransferOrderItemRequest {
     item: number;
     quantity: number;
     description?: string;
-    department?: number;
-    class?: number;
     expectedshipdate?: string;
     expectedreceiptdate?: string;
     rate?: number;
@@ -199,10 +197,6 @@ export interface TransferOrderFormItem {
     item_displayname?: string;
     quantity: number;
     description: string;
-    department: number | null;
-    department_name: string;
-    class: number | null;
-    class_name: string;
     expectedshipdate: string | null;
     expectedreceiptdate: string | null;
     rate?: number | null;
