@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { getProfile } from '@/helpers/generalHelper';
-import { TransferOrderFormData, TransferOrderFormItem } from '../types/transferOrder';
+import { AttachFileItem, TransferOrderFormData, TransferOrderFormItem } from '../types/transferOrder';
 import { TransferOrderService } from '../services/transferOrderService';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
 import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
@@ -117,6 +117,7 @@ export const useTransferOrderCreate = () => {
             quantity: 1,
             description: '',
             expectedreceiptdate: null,
+            isNew: true,
         };
         setFormData(prev => ({ ...prev, items: [...prev.items, newItem] }));
     };
@@ -126,6 +127,10 @@ export const useTransferOrderCreate = () => {
             ...prev,
             items: prev.items.filter(i => i.id !== itemId),
         }));
+    };
+
+    const handleAddFiles = (files: AttachFileItem[]) => {
+        setFormData(prev => ({ ...prev, files }));
     };
 
     const handleUpdateItem = (index: number, field: string, value: any) => {
@@ -187,8 +192,9 @@ export const useTransferOrderCreate = () => {
                     description: item.description || '',
                     expectedreceiptdate: item.expectedreceiptdate || undefined,
                     rate: item.rate ?? undefined,
+                    amount: item.amount ?? undefined,
                 })),
-                files: (formData.files || []).map(f => ({ file_name: f.fileName, file_url: f.fileUrl })),
+                files: (formData.files || []).map(f => ({ fileName: f.fileName, fileUrl: f.fileUrl })),
             };
             const response = await TransferOrderService.createTransferOrder(payload as any);
             if (response.success) {
@@ -212,6 +218,7 @@ export const useTransferOrderCreate = () => {
 
     return {
         isSubmitting,
+        setIsSubmitting,
         formData,
         errors,
         handleInputChange,
@@ -221,6 +228,7 @@ export const useTransferOrderCreate = () => {
         handleRemoveItem,
         handleUpdateItem,
         handleSubmit,
+        handleAddFiles,
         masterData,
         loadingMasterData,
     };

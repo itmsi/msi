@@ -212,18 +212,6 @@ export default function TransferOrderItemFields({
             width: '90px',
             sortable: false,
         },
-        {
-            name: 'Amount',
-            selector: (row) => row.amount || 0,
-            cell: (row) => (
-                <div className="text-right text-sm text-gray-600 w-full pr-2">
-                    {row.amount ? row.amount.toLocaleString('id-ID') : '-'}
-                </div>
-            ),
-            right: true,
-            width: '130px',
-            sortable: false,
-        },
     ] : [];
 
     const statusColumns: TableColumn<TransferOrderFormItem>[] = isEditing ? [
@@ -293,11 +281,20 @@ export default function TransferOrderItemFields({
                     onChange={(e) => {
                         const quantity = toNumber(e.target.value);
                         onUpdateItem(index as number, 'quantity', quantity);
+                        // Perkalian otomatis qty x rate -> amount cuma buat item baru (isEditing=false di
+                        // Create, atau row.isNew di Edit). Item lama hasil load dari NetSuite gak disentuh
+                        // amount-nya biar ga ke-overwrite tanpa sengaja.
+                        if (!isEditing || row.isNew) {
+                            onUpdateItem(index as number, 'amount', quantity * (row.rate || 0));
+                        }
                     }}
                     onBlur={(e) => {
                         const quantity = toNumber(e.target.value);
                         if (quantity === 0) {
                             onUpdateItem(index as number, 'quantity', 1);
+                            if (!isEditing || row.isNew) {
+                                onUpdateItem(index as number, 'amount', 1 * (row.rate || 0));
+                            }
                         }
                     }}
                     onFocus={(e) => e.target.select()}
@@ -318,7 +315,32 @@ export default function TransferOrderItemFields({
                     value={row.rate ? String(row.rate) : ''}
                     onKeyPress={handleKeyPress}
                     onChange={(e) => {
-                        onUpdateItem(index as number, 'rate', toNumber(e.target.value));
+                        const rate = toNumber(e.target.value);
+                        onUpdateItem(index as number, 'rate', rate);
+                        if (!isEditing || row.isNew) {
+                            onUpdateItem(index as number, 'amount', rate * (row.quantity || 0));
+                        }
+                    }}
+                    onFocus={(e) => e.target.select()}
+                    placeholder="0"
+                    className="p-1 px-3 w-[130px] text-right"
+                />
+            ),
+            wrap: true,
+            center: true,
+            width: '150px',
+        },
+        {
+            name: 'Amount',
+            selector: (row: TransferOrderFormItem) => row.amount || 0,
+            cell: (row, index) => (
+                <InputField
+                    name={`amount_${index}`}
+                    type="text"
+                    value={row.amount ? String(row.amount) : ''}
+                    onKeyPress={handleKeyPress}
+                    onChange={(e) => {
+                        onUpdateItem(index as number, 'amount', toNumber(e.target.value));
                     }}
                     onFocus={(e) => e.target.select()}
                     placeholder="0"

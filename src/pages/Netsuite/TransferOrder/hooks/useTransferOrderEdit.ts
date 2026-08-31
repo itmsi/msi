@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { getProfile } from '@/helpers/generalHelper';
+import { getProfile, convertDateToTanggal } from '@/helpers/generalHelper';
 import { AttachFileItem, TransferOrderFormData, TransferOrderFormItem } from '../types/transferOrder';
 import { TransferOrderService } from '../services/transferOrderService';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
@@ -107,7 +107,9 @@ export const useTransferOrderEdit = (id: string | undefined) => {
                         item_displayname: item.item_displayname || item.item_name || '',
                         quantity: safeNumber(item.quantity) || 0,
                         description: item.description || '',
-                        expectedreceiptdate: item.expected_receipt_date || null,
+                        expectedreceiptdate: item.expected_receipt_date
+                            ? (convertDateToTanggal(new Date(item.expected_receipt_date)) || null)
+                            : null,
                         rate: item.transfer_price ?? null,
                         packed: item.packed,
                         picked: item.picked,
@@ -221,6 +223,7 @@ export const useTransferOrderEdit = (id: string | undefined) => {
             quantity: 1,
             description: '',
             expectedreceiptdate: null,
+            isNew: true,
         };
         setFormData(prev => ({ ...prev, items: [...prev.items, newItem] }));
     };
@@ -295,8 +298,9 @@ export const useTransferOrderEdit = (id: string | undefined) => {
                     description: item.description || '',
                     expectedreceiptdate: item.expectedreceiptdate || undefined,
                     rate: item.rate ?? undefined,
+                    amount: item.amount ?? undefined,
                 })),
-                files: (formData.files || []).map(f => ({ file_name: f.fileName, file_url: f.fileUrl })),
+                files: (formData.files || []).map(f => ({ fileName: f.fileName, fileUrl: f.fileUrl })),
             };
             const response = await TransferOrderService.updateTransferOrder(payload as any);
             if (response.success) {
@@ -327,6 +331,7 @@ export const useTransferOrderEdit = (id: string | undefined) => {
 
     return {
         isSubmitting,
+        setIsSubmitting,
         loadingDetail,
         formData,
         errors,

@@ -31,6 +31,7 @@ export default function Edit() {
 
     const {
         isSubmitting,
+        setIsSubmitting,
         loadingDetail,
         formData,
         errors,
@@ -493,6 +494,8 @@ export default function Edit() {
                                         pendingFiles={[]}
                                         deletedFileUrls={[]}
                                         isLoading={loadingMasterData}
+                                        isSubmitting={isSubmitting}
+                                        setIsSubmitting={setIsSubmitting}
                                         onAddFiles={handleAddFiles}
                                     />
                                 )}

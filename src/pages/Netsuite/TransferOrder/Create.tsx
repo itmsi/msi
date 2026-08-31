@@ -8,6 +8,7 @@ import { LoadingOverlay } from '@/components/common/Loading';
 import { useTransferOrderCreate } from './hooks/useTransferOrderCreate';
 import TransferOrderFields from './components/TransferOrderFields';
 import TransferOrderItemFields from './components/TransferOrderItemFields';
+import FilesTab from './components/tab/FilesTab';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
@@ -29,6 +30,7 @@ export default function Create() {
 
     const {
         isSubmitting,
+        setIsSubmitting,
         formData,
         errors,
         handleInputChange,
@@ -38,9 +40,12 @@ export default function Create() {
         handleRemoveItem,
         handleUpdateItem,
         handleSubmit,
+        handleAddFiles,
         masterData,
         loadingMasterData,
     } = useTransferOrderCreate();
+
+    const [activeTab, setActiveTab] = useState<'items' | 'files'>('items');
 
     const subsidiaryId = formData.subsidiary ? Number(formData.subsidiary) : undefined;
 
@@ -339,38 +344,83 @@ export default function Create() {
                         }}
                     />
 
-                    <div className='bg-white rounded-2xl shadow-sm'>
-                        {/* Transfer Order Items */}
-                        <div className="px-6 pt-4">
-                            <h3 className="text-lg font-primary-bold font-medium text-gray-900 mb-4">Transfer Order Items</h3>
-                            <div className="mb-4">
-                                <Label>Filter Item Type</Label>
-                                <CustomSelect
-                                    name="item_type_filter"
-                                    placeholder="All Item Types"
-                                    value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
-                                    options={itemTypeOptions}
-                                    isClearable={true}
-                                    onChange={(option: any) => {
-                                        handleItemTypeChange(option);
-                                    }}
-                                />
-                            </div>
+                    <div>
+                        {/* Tab Navigation */}
+                        <div className="border-b border-gray-200 px-6 overflow-auto">
+                            <nav className="flex space-x-8 overflow-auto">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('items')}
+                                    className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                        activeTab === 'items'
+                                            ? 'border-blue-500 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Items
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('files')}
+                                    className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                        activeTab === 'files'
+                                            ? 'border-blue-500 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Files
+                                </button>
+                            </nav>
                         </div>
-                        <TransferOrderItemFields
-                            formData={formData}
-                            errors={errors}
-                            onAddItem={handleAddItem}
-                            onRemoveItem={handleRemoveItem}
-                            onUpdateItem={handleUpdateItem}
 
-                            // Item Select Props
-                            itemOptions={itemOptions}
-                            itemPagination={itemPagination}
-                            itemInput={itemInputValue}
-                            onItemInputChange={handleItemInputChange}
-                            onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
-                        />
+                        <div className='bg-white rounded-b-2xl shadow-sm'>
+                            {/* Items Tab */}
+                            {activeTab === 'items' && (
+                                <>
+                                <div className="px-6 pt-4">
+                                    <div className="mb-4">
+                                        <Label>Filter Item Type</Label>
+                                        <CustomSelect
+                                            name="item_type_filter"
+                                            placeholder="All Item Types"
+                                            value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
+                                            options={itemTypeOptions}
+                                            isClearable={true}
+                                            onChange={(option: any) => {
+                                                handleItemTypeChange(option);
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <TransferOrderItemFields
+                                    formData={formData}
+                                    errors={errors}
+                                    onAddItem={handleAddItem}
+                                    onRemoveItem={handleRemoveItem}
+                                    onUpdateItem={handleUpdateItem}
+
+                                    // Item Select Props
+                                    itemOptions={itemOptions}
+                                    itemPagination={itemPagination}
+                                    itemInput={itemInputValue}
+                                    onItemInputChange={handleItemInputChange}
+                                    onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
+                                />
+                                </>
+                            )}
+
+                            {/* Files Tab */}
+                            {activeTab === 'files' && (
+                                <FilesTab
+                                    fileList={[]}
+                                    pendingFiles={formData.files || []}
+                                    isLoading={loadingMasterData}
+                                    isSubmitting={isSubmitting}
+                                    setIsSubmitting={setIsSubmitting}
+                                    onAddFiles={handleAddFiles}
+                                />
+                            )}
+                        </div>
                     </div>
 
                     {/* Form Actions */}
