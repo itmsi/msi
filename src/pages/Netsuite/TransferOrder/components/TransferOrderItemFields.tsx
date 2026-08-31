@@ -30,20 +30,6 @@ interface TOItemFieldsProps {
     onItemInputChange: (val: string) => Promise<any[]>;
     onItemMenuScrollToBottom: () => void;
 
-    // Item Class Props
-    classOptions: any[];
-    classPagination: any;
-    classInput: string;
-    onClassInputChange: (val: string) => Promise<any[]>;
-    onClassMenuScrollToBottom: () => void;
-
-    // Item Department Props
-    deptOptions: any[];
-    deptPagination: any;
-    deptInput: string;
-    onDeptInputChange: (val: string) => Promise<any[]>;
-    onDeptMenuScrollToBottom: () => void;
-
     isEditing?: boolean;
 }
 
@@ -129,16 +115,6 @@ export default function TransferOrderItemFields({
     itemInput,
     onItemInputChange,
     onItemMenuScrollToBottom,
-    classOptions,
-    classPagination,
-    classInput,
-    onClassInputChange,
-    onClassMenuScrollToBottom,
-    deptOptions,
-    deptPagination,
-    deptInput,
-    onDeptInputChange,
-    onDeptMenuScrollToBottom,
     isEditing = false,
 }: TOItemFieldsProps) {
     const [selectedNewItem, setSelectedNewItem] = useState<any>(null);
@@ -372,74 +348,6 @@ export default function TransferOrderItemFields({
                 />
             ),
             width: '250px',
-        },
-        {
-            name: 'Department',
-            selector: (row: TransferOrderFormItem) => row.department_name || 'N/A',
-            cell: (row, index) => (
-                <CustomAsyncSelect
-                    name={`department_${index}`}
-                    disabled={!formData.subsidiary}
-                    placeholder={!formData.subsidiary ? "Pilih Subsidiary dahulu" : "Select department..."}
-                    value={row.department ? {
-                        label: row.department_name || '',
-                        value: row.department.toString()
-                    } : null}
-                    defaultOptions={deptOptions}
-                    loadOptions={onDeptInputChange}
-                    onMenuScrollToBottom={onDeptMenuScrollToBottom}
-                    isLoading={deptPagination.loading}
-                    noOptionsMessage={() => "No departments found"}
-                    loadingMessage={() => "Loading departments..."}
-                    isSearchable={true}
-                    inputValue={deptInput}
-                    onInputChange={onDeptInputChange}
-                    onChange={(option) => {
-                        onUpdateItem(index, 'department', option ? parseInt(String(option.value)) : null);
-                        onUpdateItem(index, 'department_name', option ? option.label : '');
-                    }}
-                    className="w-full text-xs"
-                    menuPortalTarget={document.body}
-                    menuPosition="fixed"
-                />
-            ),
-            center: true,
-            width: '260px',
-            sortable: false
-        },
-        {
-            name: 'Class',
-            selector: (row: TransferOrderFormItem) => row.class || 0,
-            cell: (row, index) => (
-                <CustomAsyncSelect
-                    name={`class_${index}`}
-                    disabled={!formData.subsidiary}
-                    placeholder={!formData.subsidiary ? "Pilih Subsidiary dahulu" : "Select class..."}
-                    value={row.class ? {
-                        label: row.class_name || '',
-                        value: row.class.toString()
-                    } : null}
-                    defaultOptions={classOptions}
-                    loadOptions={onClassInputChange}
-                    onMenuScrollToBottom={onClassMenuScrollToBottom}
-                    isLoading={classPagination.loading}
-                    noOptionsMessage={() => "No classes found"}
-                    loadingMessage={() => "Loading classes..."}
-                    isSearchable={true}
-                    inputValue={classInput}
-                    onInputChange={onClassInputChange}
-                    onChange={(option) => {
-                        onUpdateItem(index, 'class', option ? parseInt(String(option.value)) : null);
-                        onUpdateItem(index, 'class_name', option ? option.label : '');
-                    }}
-                    className="w-full text-xs"
-                    menuPortalTarget={document.body}
-                    menuPosition="fixed"
-                />
-            ),
-            center: true,
-            width: '260px',
-            sortable: false
         },
         {
             name: 'Expected Ship Date',
