@@ -342,7 +342,7 @@ export default function TransferOrderFields({
 
                             {/* Employee */}
                             <div>
-                                <Label htmlFor="to-employee">Employee</Label>
+                                <Label htmlFor="to-employee">Employee <span className="text-red-500">*</span></Label>
                                 <CustomAsyncSelect
                                     name="employee"
                                     value={selectedEmployee}
@@ -357,7 +357,9 @@ export default function TransferOrderFields({
                                     inputValue={employeeInputValue}
                                     onInputChange={onEmployeeInputChange}
                                     placeholder="Select Employee..."
+                                    error={errors.employee}
                                 />
+                                <FieldError field="employee" />
                             </div>
                         </div>
 
