@@ -139,6 +139,28 @@ export const convertDateToTanggal = (date: Date): string => {
     return `${hari}/${bulan}/${tahun}`;
 };
 
+// Konversi tanggal dari response API (ISO "2026-09-02T00:00:00+07:00" ATAU raw NetSuite
+// "2/9/2026") ke format internal "D/M/YYYY", TANPA lewat `new Date(string)`.
+// new Date("2/9/2026") diparse sebagai MM/DD/YYYY (locale US) -> jadi 9 Februari, padahal
+// sumbernya D/M/YYYY (2 September). Parsing manual di sini menghindari ambiguitas itu.
+export const apiDateToTanggal = (dateStr?: string | null): string | null => {
+    if (!dateStr) return null;
+
+    const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) {
+        const [, year, month, day] = isoMatch;
+        return `${Number(day)}/${Number(month)}/${year}`;
+    }
+
+    const slashMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (slashMatch) {
+        const [, day, month, year] = slashMatch;
+        return `${Number(day)}/${Number(month)}/${year}`;
+    }
+
+    return dateStr;
+};
+
 //CODE ORIGINAL
 export const formatNumberInput = (value: string | number | undefined | null): string => {
     if (!value && value !== 0) return '';
