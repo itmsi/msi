@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { getProfile } from '@/helpers/generalHelper';
-import { TransferOrderFormData, TransferOrderFormItem } from '../types/transferOrder';
+import { AttachFileItem, TransferOrderFormData, TransferOrderFormItem } from '../types/transferOrder';
 import { TransferOrderService } from '../services/transferOrderService';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
 import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
@@ -116,12 +116,8 @@ export const useTransferOrderCreate = () => {
             item_displayname: selectedItem.data?.displayName || selectedItem.label,
             quantity: 1,
             description: '',
-            department: formData.department,
-            department_name: formData.department_name || '',
-            class: formData.class,
-            class_name: formData.class_name || '',
-            expectedshipdate: null,
             expectedreceiptdate: null,
+            isNew: true,
         };
         setFormData(prev => ({ ...prev, items: [...prev.items, newItem] }));
     };
@@ -131,6 +127,10 @@ export const useTransferOrderCreate = () => {
             ...prev,
             items: prev.items.filter(i => i.id !== itemId),
         }));
+    };
+
+    const handleAddFiles = (files: AttachFileItem[]) => {
+        setFormData(prev => ({ ...prev, files }));
     };
 
     const handleUpdateItem = (index: number, field: string, value: any) => {
@@ -154,6 +154,7 @@ export const useTransferOrderCreate = () => {
         }
         if (!formData.department) newErrors.department = 'Department wajib dipilih';
         if (!formData.class) newErrors.class = 'Class wajib dipilih';
+        if (!formData.employee) newErrors.employee = 'Employee wajib dipilih';
         if (!formData.items || formData.items.length === 0) {
             newErrors.items = 'Minimal 1 item harus ditambahkan';
         }
@@ -189,13 +190,11 @@ export const useTransferOrderCreate = () => {
                     item: item.itemId,
                     quantity: Number(item.quantity),
                     description: item.description || '',
-                    department: item.department || undefined,
-                    class: item.class || undefined,
-                    expectedshipdate: item.expectedshipdate || undefined,
                     expectedreceiptdate: item.expectedreceiptdate || undefined,
                     rate: item.rate ?? undefined,
+                    amount: item.amount ?? undefined,
                 })),
-                files: (formData.files || []).map(f => ({ file_name: f.fileName, file_url: f.fileUrl })),
+                files: (formData.files || []).map(f => ({ fileName: f.fileName, fileUrl: f.fileUrl })),
             };
             const response = await TransferOrderService.createTransferOrder(payload as any);
             if (response.success) {
@@ -219,6 +218,7 @@ export const useTransferOrderCreate = () => {
 
     return {
         isSubmitting,
+        setIsSubmitting,
         formData,
         errors,
         handleInputChange,
@@ -228,6 +228,7 @@ export const useTransferOrderCreate = () => {
         handleRemoveItem,
         handleUpdateItem,
         handleSubmit,
+        handleAddFiles,
         masterData,
         loadingMasterData,
     };

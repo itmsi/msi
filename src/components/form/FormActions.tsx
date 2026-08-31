@@ -11,6 +11,7 @@ interface FormActionsProps {
     cancelRoute?: string;
     submitText?: string;
     submittingText?: string;
+    children?: React.ReactNode;
 }
 
 const FormActions: React.FC<FormActionsProps> = ({
@@ -19,7 +20,8 @@ const FormActions: React.FC<FormActionsProps> = ({
     cancelRoute = '/home',
     submitText = 'Create',
     cancelText = 'Cancel',
-    submittingText = 'Creating...'
+    submittingText = 'Creating...',
+    children
 }) => {
     const navigate = useNavigate();
 
@@ -60,6 +62,8 @@ const FormActions: React.FC<FormActionsProps> = ({
                     )}
                 </Button>
             </PermissionGate>
+
+            {children}
         </div>
     );
 };
