@@ -182,6 +182,7 @@ export interface TransferOrderCreateRequest {
     custbody_me_logistic_vendor?: number;
     custbody_me_inv_customer?: number;
     custbody_msi_createdby_api?: string;
+    employee_id?: string;
     items: TransferOrderItemRequest[];
     files?: TransferOrderFileRequest[];
 }
