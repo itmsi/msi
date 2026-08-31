@@ -392,7 +392,7 @@ export default function Edit() {
                             selectedEmployee={selectedEmployee}
                             onEmployeeChange={(opt) => {
                                 setSelectedEmployee(opt);
-                                handleSelectChange('employee', opt ? Number(opt.value) : null);
+                                handleSelectChange('employee', opt?.data?.employee_id_netsuite ?? null);
                                 handleSelectChange('employee_name', opt?.label || '');
                             }}
 

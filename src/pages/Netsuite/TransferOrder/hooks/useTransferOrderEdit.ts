@@ -253,6 +253,7 @@ export const useTransferOrderEdit = (id: string | undefined) => {
         }
         if (!formData.department) newErrors.department = 'Department wajib dipilih';
         if (!formData.class) newErrors.class = 'Class wajib dipilih';
+        if (!formData.employee) newErrors.employee = 'Employee wajib dipilih';
         if (!formData.items || formData.items.length === 0) {
             newErrors.items = 'Minimal 1 item harus ditambahkan';
         }
