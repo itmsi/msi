@@ -154,7 +154,6 @@ export interface TransferOrderItemRequest {
     item: number;
     quantity: number;
     description?: string;
-    expectedshipdate?: string;
     expectedreceiptdate?: string;
     rate?: number;
 }
@@ -180,7 +179,6 @@ export interface TransferOrderCreateRequest {
     custbody_me_logistic_vendor?: number;
     custbody_me_inv_customer?: number;
     custbody_msi_createdby_api?: string;
-    employee_id?: string;
     items: TransferOrderItemRequest[];
     files?: TransferOrderFileRequest[];
 }
@@ -197,7 +195,6 @@ export interface TransferOrderFormItem {
     item_displayname?: string;
     quantity: number;
     description: string;
-    expectedshipdate: string | null;
     expectedreceiptdate: string | null;
     rate?: number | null;
     // read-only fulfillment info (populated when editing an existing TO)
