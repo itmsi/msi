@@ -31,6 +31,7 @@ export default function Edit() {
 
     const {
         isSubmitting,
+        setIsSubmitting,
         loadingDetail,
         formData,
         errors,
@@ -392,7 +393,7 @@ export default function Edit() {
                             selectedEmployee={selectedEmployee}
                             onEmployeeChange={(opt) => {
                                 setSelectedEmployee(opt);
-                                handleSelectChange('employee', opt ? Number(opt.value) : null);
+                                handleSelectChange('employee', opt?.data?.employee_id_netsuite ?? null);
                                 handleSelectChange('employee_name', opt?.label || '');
                             }}
 
@@ -482,18 +483,6 @@ export default function Edit() {
                                         itemInput={itemInputValue}
                                         onItemInputChange={handleItemInputChange}
                                         onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
-
-                                        classOptions={classOptions}
-                                        classPagination={classPagination}
-                                        classInput={classInputValue}
-                                        onClassInputChange={handleClassInputChange}
-                                        onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
-
-                                        deptOptions={deptOptions}
-                                        deptPagination={deptPagination}
-                                        deptInput={deptInputValue}
-                                        onDeptInputChange={handleDeptInputChange}
-                                        onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
                                     />
                                     </>
                                 )}
@@ -505,6 +494,8 @@ export default function Edit() {
                                         pendingFiles={[]}
                                         deletedFileUrls={[]}
                                         isLoading={loadingMasterData}
+                                        isSubmitting={isSubmitting}
+                                        setIsSubmitting={setIsSubmitting}
                                         onAddFiles={handleAddFiles}
                                     />
                                 )}
@@ -518,12 +509,11 @@ export default function Edit() {
                             cancelRoute="/netsuite/transfer-orders"
                             submitText="Update Transfer Order"
                             submittingText="Updating..."
-                        />
-                        {(statusName === 'FAILED' || statusName === 'PROCESSING') && (
-                            <div className="flex justify-end -mt-4 mb-4">
+                        >
+                            {(statusName === 'FAILED' || statusName === 'PROCESSING') && (
                                 <ElemRefresh />
-                            </div>
-                        )}
+                            )}
+                        </FormActions>
                     </div>
                 </>)}
             </div>

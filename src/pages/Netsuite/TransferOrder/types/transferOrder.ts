@@ -154,16 +154,14 @@ export interface TransferOrderItemRequest {
     item: number;
     quantity: number;
     description?: string;
-    department?: number;
-    class?: number;
-    expectedshipdate?: string;
     expectedreceiptdate?: string;
     rate?: number;
+    amount?: number;
 }
 
 export interface TransferOrderFileRequest {
-    file_name: string;
-    file_url: string;
+    fileName: string;
+    fileUrl: string;
 }
 
 export interface TransferOrderCreateRequest {
@@ -198,13 +196,10 @@ export interface TransferOrderFormItem {
     item_displayname?: string;
     quantity: number;
     description: string;
-    department: number | null;
-    department_name: string;
-    class: number | null;
-    class_name: string;
-    expectedshipdate: string | null;
     expectedreceiptdate: string | null;
     rate?: number | null;
+    // true hanya utk item yang baru ditambahkan di sesi form ini (bukan item lama hasil load dari NetSuite)
+    isNew?: boolean;
     // read-only fulfillment info (populated when editing an existing TO)
     packed?: number;
     picked?: number;

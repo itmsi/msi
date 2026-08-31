@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { getProfile } from '@/helpers/generalHelper';
+import { getProfile, apiDateToTanggal } from '@/helpers/generalHelper';
 import { AttachFileItem, TransferOrderFormData, TransferOrderFormItem } from '../types/transferOrder';
 import { TransferOrderService } from '../services/transferOrderService';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
@@ -107,12 +107,7 @@ export const useTransferOrderEdit = (id: string | undefined) => {
                         item_displayname: item.item_displayname || item.item_name || '',
                         quantity: safeNumber(item.quantity) || 0,
                         description: item.description || '',
-                        department: null,
-                        department_name: '',
-                        class: null,
-                        class_name: '',
-                        expectedshipdate: null,
-                        expectedreceiptdate: item.expected_receipt_date || null,
+                        expectedreceiptdate: apiDateToTanggal(item.expected_receipt_date),
                         rate: item.transfer_price ?? null,
                         packed: item.packed,
                         picked: item.picked,
@@ -225,12 +220,8 @@ export const useTransferOrderEdit = (id: string | undefined) => {
             item_displayname: selectedItem.data?.displayName || selectedItem.label,
             quantity: 1,
             description: '',
-            department: formData.department,
-            department_name: formData.department_name || '',
-            class: formData.class,
-            class_name: formData.class_name || '',
-            expectedshipdate: null,
             expectedreceiptdate: null,
+            isNew: true,
         };
         setFormData(prev => ({ ...prev, items: [...prev.items, newItem] }));
     };
@@ -255,11 +246,15 @@ export const useTransferOrderEdit = (id: string | undefined) => {
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
         if (!formData.trandate) newErrors.trandate = 'Transaction Date wajib diisi';
+        if (!formData.subsidiary) newErrors.subsidiary = 'Subsidiary wajib dipilih';
         if (!formData.location) newErrors.location = 'Location wajib dipilih';
         if (!formData.transferlocation) newErrors.transferlocation = 'Transfer To Location wajib dipilih';
         if (formData.location && formData.transferlocation && formData.location === formData.transferlocation) {
             newErrors.transferlocation = 'Transfer To Location tidak boleh sama dengan Location';
         }
+        if (!formData.department) newErrors.department = 'Department wajib dipilih';
+        if (!formData.class) newErrors.class = 'Class wajib dipilih';
+        if (!formData.employee) newErrors.employee = 'Employee wajib dipilih';
         if (!formData.items || formData.items.length === 0) {
             newErrors.items = 'Minimal 1 item harus ditambahkan';
         }
@@ -299,13 +294,11 @@ export const useTransferOrderEdit = (id: string | undefined) => {
                     item: item.itemId,
                     quantity: Number(item.quantity) || 0,
                     description: item.description || '',
-                    department: item.department || undefined,
-                    class: item.class || undefined,
-                    expectedshipdate: item.expectedshipdate || undefined,
                     expectedreceiptdate: item.expectedreceiptdate || undefined,
                     rate: item.rate ?? undefined,
+                    amount: item.amount ?? undefined,
                 })),
-                files: (formData.files || []).map(f => ({ file_name: f.fileName, file_url: f.fileUrl })),
+                files: (formData.files || []).map(f => ({ fileName: f.fileName, fileUrl: f.fileUrl })),
             };
             const response = await TransferOrderService.updateTransferOrder(payload as any);
             if (response.success) {
@@ -336,6 +329,7 @@ export const useTransferOrderEdit = (id: string | undefined) => {
 
     return {
         isSubmitting,
+        setIsSubmitting,
         loadingDetail,
         formData,
         errors,

@@ -1,5 +1,5 @@
 import Button from "@/components/ui/button/Button";
-import { usePosition, useDepartment } from "@/hooks/useAdministration";
+import { usePosition, useDepartment, useCompany } from "@/hooks/useAdministration";
 import { MdEdit, MdDeleteOutline, MdAdd, MdSearch } from "react-icons/md";
 import { TableColumn } from "react-data-table-component";
 import CustomDataTable from "@/components/ui/table/CustomDataTable";
@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { createActionsColumn, createDateColumn } from "@/components/ui/table";
 import { tableDateFormat } from "@/helpers/generalHelper";
 import { PermissionGate } from "@/components/common/PermissionComponents";
+import { departmentService } from "@/services/administrationService";
 
 export default function ManagePosition() {
     const {
@@ -40,36 +41,108 @@ export default function ManagePosition() {
         handleFilterChange,
         handleSearchChange,
         resetFilters,
-        setConfirmDelete
+        setConfirmDelete,
+        setFormData,
+        clearValidationError
     } = usePosition();
+
+    const {
+        companies,
+        fetchCompanies
+    } = useCompany();
 
     // Department hook for dropdown options  
     const {
-        departments,
-        fetchDepartments
+        departments
     } = useDepartment();
 
     // State for dropdown options
-    const [departmentOptions, setDepartmentOptions] = useState<Array<{value: string, label: string}>>([]);
+    const [departmentOptions, setDepartmentOptions] = useState<Array<{ value: string, label: string }>>([]);
+    const [companyOptions, setCompanyOptions] = useState<Array<{ value: string, label: string }>>([]);
+    const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
 
-    // Load departments when modal opens
+    // Load companies when modal opens
     useEffect(() => {
         if (isModalOpen) {
-            fetchDepartments(1, 100);
+            fetchCompanies(1, 100);
         }
-    }, [isModalOpen, fetchDepartments]);
+    }, [isModalOpen, fetchCompanies]);
 
-    // Update department options when departments data changes
+    const fetchDepartmentsByCompany = async (companyId: string) => {
+        if (!companyId) {
+            setDepartmentOptions([{ value: '', label: 'Select Company first' }]);
+            return;
+        }
+
+        try {
+            const response = await departmentService.getDepartments({
+                page: 1,
+                limit: 100,
+                sort_by: 'department_name',
+                sort_order: 'asc',
+                company_id: companyId,
+                search: '',
+                company_name: '',
+                department_parent_id: '',
+                department_name: ''
+            });
+
+            const options = [
+                { value: '', label: 'Select Department' },
+                ...(response?.success ? response.data.data || [] : []).map(dept => ({
+                    value: dept.department_id,
+                    label: dept.department_name
+                }))
+            ];
+
+            setDepartmentOptions(options);
+        } catch (error) {
+            console.error('Failed to fetch departments by company:', error);
+            setDepartmentOptions([{ value: '', label: 'No departments available' }]);
+        }
+    };
+
     useEffect(() => {
+        if (!isModalOpen) {
+            setSelectedCompanyId('');
+            setDepartmentOptions([{ value: '', label: 'Select Company first' }]);
+            return;
+        }
+
+        if (!selectedCompanyId) {
+            setDepartmentOptions([{ value: '', label: 'Select Company first' }]);
+            return;
+        }
+
+        fetchDepartmentsByCompany(selectedCompanyId);
+    }, [isModalOpen, selectedCompanyId]);
+
+    useEffect(() => {
+        if (!isModalOpen || !editingPosition) {
+            return;
+        }
+
+        const matchingDepartment = departments.find(dept => dept.department_id === editingPosition.department_id);
+        if (matchingDepartment) {
+            setSelectedCompanyId(matchingDepartment.company_id);
+            setFormData(prev => ({ ...prev, department_id: editingPosition.department_id }));
+        }
+    }, [isModalOpen, editingPosition, departments, setFormData]);
+
+    useEffect(() => {
+        if (!isModalOpen) {
+            return;
+        }
+
         const options = [
-            { value: '', label: 'Select Department' },
-            ...departments.map(dept => ({
-                value: dept.department_id,
-                label: dept.department_name
+            { value: '', label: 'Select Company' },
+            ...companies.map(company => ({
+                value: company.company_id,
+                label: company.company_name
             }))
         ];
-        setDepartmentOptions(options);
-    }, [departments]);
+        setCompanyOptions(options);
+    }, [isModalOpen, companies]);
 
     // Data table columns
     const columns: TableColumn<Position>[] = [
@@ -82,8 +155,8 @@ export default function ManagePosition() {
             selector: row => row.department_name || 'N/A',
         },
         createDateColumn(
-            'Created', 
-            'created_at', 
+            'Created',
+            'created_at',
             tableDateFormat
         ),
         createActionsColumn([
@@ -129,7 +202,7 @@ export default function ManagePosition() {
                                 Manage system positions and their configurations
                             </p>
                         </div>
-                        
+
                         <PermissionGate permission="create">
                             <Button
                                 onClick={handleAddPosition}
@@ -167,11 +240,11 @@ export default function ManagePosition() {
                             <CustomSelect
                                 id="sort_by"
                                 name="sort_by"
-                                value={filters.sort_by ? { 
-                                    value: filters.sort_by, 
-                                    label: sortByOptions.find(option => option.value === filters.sort_by)?.label || 'Sort By' 
+                                value={filters.sort_by ? {
+                                    value: filters.sort_by,
+                                    label: sortByOptions.find(option => option.value === filters.sort_by)?.label || 'Sort By'
                                 } : null}
-                                onChange={(selectedOption) => 
+                                onChange={(selectedOption) =>
                                     handleFilterChange('sort_by', selectedOption?.value || '')
                                 }
                                 options={sortByOptions}
@@ -187,11 +260,11 @@ export default function ManagePosition() {
                             <CustomSelect
                                 id="sort_order"
                                 name="sort_order"
-                                value={filters.sort_order ? { 
-                                    value: filters.sort_order, 
-                                    label: filters.sort_order === 'asc' ? 'Ascending' : 'Descending' 
+                                value={filters.sort_order ? {
+                                    value: filters.sort_order,
+                                    label: filters.sort_order === 'asc' ? 'Ascending' : 'Descending'
                                 } : null}
-                                onChange={(selectedOption) => 
+                                onChange={(selectedOption) =>
                                     handleFilterChange('sort_order', selectedOption?.value || '')
                                 }
                                 options={sortOrderOptions}
@@ -285,7 +358,7 @@ export default function ManagePosition() {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Position Name */}
                         <div>
-                            <Label htmlFor="title_name">Position Name *</Label>
+                            <Label htmlFor="title_name">Position Name <span className="text-error-500">*</span></Label>
                             <Input
                                 id="title_name"
                                 name="title_name"
@@ -302,15 +375,47 @@ export default function ManagePosition() {
                             )}
                         </div>
 
+                        {/* Company */}
+                        <div>
+                            <label className="block text-sm font-primary text-gray-700 mb-1">
+                                Company <span className="text-error-500">*</span>
+                            </label>
+                            <CustomSelect
+                                name="company_id"
+                                value={selectedCompanyId ? {
+                                    value: selectedCompanyId,
+                                    label: companies.find(company => company.company_id === selectedCompanyId)?.company_name || 'Select Company'
+                                } : null}
+                                onChange={(selectedOption) => {
+                                    const nextCompanyId = selectedOption?.value || '';
+                                    setSelectedCompanyId(nextCompanyId);
+                                    setFormData(prev => ({ ...prev, department_id: '' }));
+                                    if (validationErrors.department_id) {
+                                        clearValidationError('department_id');
+                                    }
+                                }}
+                                options={companyOptions}
+                                placeholder="-- Choose Company --"
+                                isSearchable
+                                isClearable
+                                className="bg-white rounded-xl"
+                            />
+                            {validationErrors.company_id && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {validationErrors.company_id}
+                                </p>
+                            )}
+                        </div>
+
                         {/* Department */}
                         <div>
-                            <Label htmlFor="department_id">Department *</Label>
+                            <Label htmlFor="department_id">Department <span className="text-error-500">*</span></Label>
                             <CustomSelect
                                 id="department_id"
                                 name="department_id"
-                                value={formData.department_id ? { 
-                                    value: formData.department_id, 
-                                    label: departments.find(d => d.department_id === formData.department_id)?.department_name || 'Select Department'
+                                value={formData.department_id ? {
+                                    value: formData.department_id,
+                                    label: departmentOptions.find(opt => opt.value === formData.department_id)?.label || 'Select Department'
                                 } : null}
                                 onChange={(selectedOption) => {
                                     handleInputChange({
@@ -321,9 +426,10 @@ export default function ManagePosition() {
                                     } as React.ChangeEvent<HTMLInputElement>);
                                 }}
                                 options={departmentOptions}
-                                placeholder="Select Department"
+                                placeholder={selectedCompanyId ? 'Select Department' : 'Select Company first'}
                                 isClearable={false}
                                 isSearchable
+                                isDisabled={!selectedCompanyId || isLoading}
                                 className={validationErrors.department_id ? 'border-red-500' : ''}
                             />
                             {validationErrors.department_id && (
@@ -344,11 +450,10 @@ export default function ManagePosition() {
                             </Button>
                             <Button
                                 disabled={isLoading}
-                                className={`rounded-[50px] ${
-                                    Object.keys(validationErrors).length > 0 
-                                            ? 'bg-red-600 hover:bg-red-700' 
-                                            : 'bg-blue-600 hover:bg-blue-700'
-                                } text-white`}
+                                className={`rounded-[50px] ${Object.keys(validationErrors).length > 0
+                                    ? 'bg-red-600 hover:bg-red-700'
+                                    : 'bg-blue-600 hover:bg-blue-700'
+                                    } text-white`}
                             >
                                 {isLoading ? 'Saving...' : (editingPosition ? 'Update Position' : 'Create Position')}
                             </Button>

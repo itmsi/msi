@@ -473,6 +473,7 @@ export interface Employee {
     company_name: string;
     classes_id_netsuite?: number | null;
     classes_name_netsuite?: string | null;
+    employee_id_netsuite?: number | null;
 }
 export interface UsersManage {
     id: string;
@@ -569,12 +570,12 @@ export interface EmployeeFormData {
     classes_name_netsuite?: string | null;
 }
 export interface UsersFormData {
-  email: string,
-  password: string,
-  is_customer: boolean,
-  is_active: boolean,
-  employee_id: string,
-  customer_id: string
+    email: string,
+    password: string,
+    is_customer: boolean,
+    is_active: boolean,
+    employee_id: string,
+    customer_id: string
 }
 
 // Employee validation errors
@@ -848,6 +849,7 @@ export interface PositionFormData {
 // Position validation errors
 export interface PositionValidationErrors {
     title_name?: string;
+    company_id?: string;
     department_id?: string;
     general?: string;
 }
