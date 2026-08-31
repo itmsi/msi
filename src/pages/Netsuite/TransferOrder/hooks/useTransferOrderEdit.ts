@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { getProfile, convertDateToTanggal } from '@/helpers/generalHelper';
+import { getProfile, apiDateToTanggal } from '@/helpers/generalHelper';
 import { AttachFileItem, TransferOrderFormData, TransferOrderFormItem } from '../types/transferOrder';
 import { TransferOrderService } from '../services/transferOrderService';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
@@ -107,9 +107,7 @@ export const useTransferOrderEdit = (id: string | undefined) => {
                         item_displayname: item.item_displayname || item.item_name || '',
                         quantity: safeNumber(item.quantity) || 0,
                         description: item.description || '',
-                        expectedreceiptdate: item.expected_receipt_date
-                            ? (convertDateToTanggal(new Date(item.expected_receipt_date)) || null)
-                            : null,
+                        expectedreceiptdate: apiDateToTanggal(item.expected_receipt_date),
                         rate: item.transfer_price ?? null,
                         packed: item.packed,
                         picked: item.picked,
