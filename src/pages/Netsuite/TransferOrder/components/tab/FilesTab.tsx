@@ -22,10 +22,17 @@ interface FilesTabProps {
     pendingFiles?: AttachFileItem[];
     deletedFileUrls?: string[];
     isLoading: boolean;
+    isSubmitting: boolean;
+    setIsSubmitting: (loading: boolean) => void;
     onAddFiles?: (files: AttachFileItem[]) => void;
 }
 
 const emptyEntry: AttachFileItem = { fileUrl: '', fileName: '' };
+
+interface AddEntryParams {
+    selectedFile?: File;
+    fileName?: string;
+}
 
 const getDocumentIcon = (fileName: string) => {
     const lowerFileName = fileName.toLowerCase();
@@ -48,6 +55,8 @@ const FilesTab: React.FC<FilesTabProps> = ({
     pendingFiles = [],
     deletedFileUrls = [],
     isLoading,
+    isSubmitting,
+    setIsSubmitting,
     onAddFiles,
 }) => {
     const { id } = useParams<{ id: string }>();
@@ -65,7 +74,6 @@ const FilesTab: React.FC<FilesTabProps> = ({
     const serverFileList = useRef<AttachFileItem[]>(fileList);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileName, setFileName] = useState<string>('');
-    const [isUploading, setIsUploading] = useState(false);
     const [loadingDelete, setLoadingDelete] = useState(false);
 
     const allowedExtensions = ['.jpg', '.jpeg', '.png', '.doc', '.docx', '.pdf'];
@@ -87,11 +95,14 @@ const FilesTab: React.FC<FilesTabProps> = ({
             e.target.value = '';
             return;
         }
-
         setSelectedFile(file);
-        setFileName(file.name);
-        setEntry(prev => ({ ...prev, fileName: !editingFile ? file.name : editingFile.fileName }));
+        setFileName(file.name.replace(/\.[^/.]+$/, ''));
         setEntryError('');
+        setEntry(prev => ({ ...prev, fileName: !editingFile ? file.name.replace(/\.[^/.]+$/, '') : editingFile.fileName.trim() }));
+        handleAddEntry({
+            selectedFile: file,
+            fileName: !editingFile ? file.name.replace(/\.[^/.]+$/, '') : editingFile.fileName.trim()
+        });
     };
 
     const allFiles: AttachFileItemLocal[] = useMemo(() => {
@@ -108,14 +119,29 @@ const FilesTab: React.FC<FilesTabProps> = ({
         onAddFiles?.([...existingFiles, ...updatedNewFiles]);
     };
 
-    const handleAddEntry = async () => {
-        if (!entry.fileName.trim()) {
+    const handleAddEntry = async ({ selectedFile: selectedFileParam, fileName: fileNameParam }: AddEntryParams = {}) => {
+        const selectedFileState = selectedFile ?? undefined;
+        const finalSelectedFile = selectedFileParam ?? selectedFileState;
+        const finalFileName = (fileNameParam ?? entry.fileName).trim();
+
+        if (!finalFileName) {
             setEntryError('File Name is required');
             return;
         }
 
+        // Cek duplikat: fileUrl dan fileName sama dengan yang sudah ada
+        const isDuplicate = allFiles.some(
+            f => f.fileUrl === entry.fileUrl.trim() && f.fileName === finalFileName
+                && !(editingFile && f.fileUrl === editingFile.fileUrl && f.fileName === editingFile.fileName)
+        );
+        if (isDuplicate) {
+            setEntryError('A file with the same URL and name already exists');
+            return;
+        }
+
+        // Cek nama file sudah dipakai
         const isDuplicateName = allFiles.some(
-            f => f.fileName.trim().toLowerCase() === entry.fileName.trim().toLowerCase()
+            f => f.fileName.trim().toLowerCase() === finalFileName.toLowerCase()
                 && !(editingFile && f.fileUrl === editingFile.fileUrl && f.fileName === editingFile.fileName)
         );
         if (isDuplicateName) {
@@ -123,19 +149,19 @@ const FilesTab: React.FC<FilesTabProps> = ({
             return;
         }
 
-        if (!editingFile && !selectedFile) {
+        if (!editingFile && !finalSelectedFile) {
             setEntryError('Pilih file terlebih dahulu');
             return;
         }
 
-        setIsUploading(true);
+        setIsSubmitting(true);
         try {
             const activeToId = String(toId ?? id ?? '');
             if (editingFile) {
                 const res = await TransferOrderService.attachFileUpdateDetailTO({
-                    ...(selectedFile ? { file: selectedFile } : {}),
+                    ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
                     id: editingFile.id,
-                    file_name: entry.fileName,
+                    file_name: finalSelectedFile === undefined ? finalFileName : editingFile.fileName,
                     created_by_api: profileSSOEmail,
                     fileUrl: editingFile.fileUrl ?? 'kosong',
                     netsuite_id: activeToId,
@@ -171,16 +197,28 @@ const FilesTab: React.FC<FilesTabProps> = ({
                 }
                 setEditingFile(null);
             } else {
-                if (!selectedFile) {
+                if (!finalSelectedFile) {
                     setEntryError('Pilih file terlebih dahulu');
                     return;
                 }
-                const res = await TransferOrderService.attachFileDetailTO({
-                    file: selectedFile,
-                    file_name: entry.fileName,
-                    created_by_api: profileSSOEmail,
-                    to_id: activeToId || 'temp-' + Date.now(),
-                });
+
+                const fileToUpload: File = finalSelectedFile;
+
+                // Ada id (edit mode) -> attach langsung ke record NetSuite yang sudah ada.
+                // Belum ada id (create mode) -> upload ke staging Nextcloud dulu (mirip PurchaseOrder attachFilePO),
+                // nanti digabung ke NetSuite waktu TO-nya disubmit.
+                const res = id
+                    ? await TransferOrderService.attachFileDetailTO({
+                        file: fileToUpload,
+                        file_name: finalFileName,
+                        created_by_api: profileSSOEmail,
+                        to_id: activeToId || 'temp-' + Date.now(),
+                    })
+                    : await TransferOrderService.attachFileTO({
+                        file: fileToUpload,
+                        file_name: finalFileName,
+                        netsuite_id: String(toId ?? 'temp-' + Date.now()),
+                    });
 
                 if (res.success) {
                     const uploadedEntry: AttachFileItem = {
@@ -202,7 +240,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
                 }
             }
         } finally {
-            setIsUploading(false);
+            setIsSubmitting(false);
         }
 
         setEntry(emptyEntry);
@@ -308,7 +346,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
             <Button
                 onClick={() => setShowForm(prev => !prev)}
                 type="button"
-                className="flex items-center gap-2 bg-blue-500 hover:text-white hover:bg-blue-600 ring-blue-800 rounded-xl text-xs p-3 mb-4"
+                className="flex items-center gap-2 bg-[#0253a5] hover:text-white hover:bg-[#023e7d] min-w-[150px] ring-blue-800 rounded-xl text-xs p-3 mb-4 shadow-sm"
             >
                 <FaPaperclip />
                 <span>Attach Files</span>
@@ -335,6 +373,8 @@ const FilesTab: React.FC<FilesTabProps> = ({
                         </div>
                     )}
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+
+                        {/* File picker — selalu tampil, baik add maupun edit */}
                         <div className="flex flex-col gap-1">
                             <input
                                 ref={fileAttachRef}
@@ -346,17 +386,17 @@ const FilesTab: React.FC<FilesTabProps> = ({
                             />
                             <label
                                 htmlFor="to-file-upload"
-                                className="flex items-center gap-2 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 min-h-[38px]"
+                                className="flex items-center justify-center gap-2 cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 h-[38px] w-[190px]"
                             >
-                                <FaPaperclip size={12} />
-                                <span className="truncate max-w-[160px]">
-                                    {fileName || 'Pilih file...'}
+                                <FaPaperclip size={20} />
+                                <span className="truncate break-all" title={fileName}>
+                                    {fileName || 'Attach file'}
                                 </span>
                             </label>
                             {fileName && (
                                 <div className="flex items-center gap-1 text-xs text-gray-500">
                                     <span className="text-lg">{getDocumentIcon(fileName)}</span>
-                                    <span className="truncate max-w-[160px]" title={fileName}>{fileName}</span>
+                                    <span className="truncate max-w-[160px] truncate break-all" title={fileName}>{fileName}</span>
                                 </div>
                             )}
                         </div>
@@ -371,16 +411,17 @@ const FilesTab: React.FC<FilesTabProps> = ({
                                 }}
                                 onKeyDown={e => e.key === 'Enter' && handleAddEntry()}
                                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                disabled={isSubmitting}
                             />
                         </div>
                         <div className="flex gap-1 self-start">
                             <Button
                                 type="button"
-                                onClick={handleAddEntry}
-                                disabled={isUploading}
+                                onClick={() => handleAddEntry()}
+                                disabled={isSubmitting}
                                 className="flex items-center gap-1 rounded-lg px-3 py-2 text-xs text-white min-h-[38px] disabled:opacity-60"
                             >
-                                <FaPlus size={10} /> {isUploading ? 'Uploading...' : editingFile ? 'Save' : 'Add'}
+                                <FaPlus size={10} /> {isSubmitting ? 'Uploading...' : editingFile ? 'Save' : 'Add'}
                             </Button>
                             {editingFile && (
                                 <Button
@@ -402,6 +443,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
             <CustomDataTable
                 columns={columns}
                 data={allFiles}
+                pagination={false}
                 loading={isLoading}
                 fixedHeader
                 fixedHeaderScrollHeight="500px"

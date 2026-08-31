@@ -466,7 +466,7 @@ export default function TransferOrderFields({
                     {/* Kolom kanan: Class, Customer */}
                     <div className="space-y-4">
                         <div>
-                            <Label htmlFor="to-class">Class</Label>
+                            <Label htmlFor="to-class">Class <span className="text-red-500">*</span></Label>
                             <CustomAsyncSelect
                                 name="class"
                                 disabled={!formData.subsidiary}

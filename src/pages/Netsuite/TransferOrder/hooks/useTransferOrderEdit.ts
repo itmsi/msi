@@ -223,6 +223,7 @@ export const useTransferOrderEdit = (id: string | undefined) => {
             quantity: 1,
             description: '',
             expectedreceiptdate: null,
+            isNew: true,
         };
         setFormData(prev => ({ ...prev, items: [...prev.items, newItem] }));
     };
@@ -297,8 +298,9 @@ export const useTransferOrderEdit = (id: string | undefined) => {
                     description: item.description || '',
                     expectedreceiptdate: item.expectedreceiptdate || undefined,
                     rate: item.rate ?? undefined,
+                    amount: item.amount ?? undefined,
                 })),
-                files: (formData.files || []).map(f => ({ file_name: f.fileName, file_url: f.fileUrl })),
+                files: (formData.files || []).map(f => ({ fileName: f.fileName, fileUrl: f.fileUrl })),
             };
             const response = await TransferOrderService.updateTransferOrder(payload as any);
             if (response.success) {
@@ -329,6 +331,7 @@ export const useTransferOrderEdit = (id: string | undefined) => {
 
     return {
         isSubmitting,
+        setIsSubmitting,
         loadingDetail,
         formData,
         errors,
