@@ -350,19 +350,6 @@ export default function TransferOrderItemFields({
             width: '250px',
         },
         {
-            name: 'Expected Ship Date',
-            selector: (row) => row.expectedshipdate || '-',
-            cell: (row, index) => (
-                <InlineDatePicker
-                    value={row.expectedshipdate}
-                    onChange={(val) => onUpdateItem(index as number, 'expectedshipdate', val)}
-                />
-            ),
-            center: true,
-            width: '180px',
-            sortable: false
-        },
-        {
             name: 'Expected Receipt Date',
             selector: (row) => row.expectedreceiptdate || '-',
             cell: (row, index) => (

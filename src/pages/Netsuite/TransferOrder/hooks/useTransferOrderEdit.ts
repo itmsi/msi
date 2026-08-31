@@ -107,7 +107,6 @@ export const useTransferOrderEdit = (id: string | undefined) => {
                         item_displayname: item.item_displayname || item.item_name || '',
                         quantity: safeNumber(item.quantity) || 0,
                         description: item.description || '',
-                        expectedshipdate: null,
                         expectedreceiptdate: item.expected_receipt_date || null,
                         rate: item.transfer_price ?? null,
                         packed: item.packed,
@@ -221,7 +220,6 @@ export const useTransferOrderEdit = (id: string | undefined) => {
             item_displayname: selectedItem.data?.displayName || selectedItem.label,
             quantity: 1,
             description: '',
-            expectedshipdate: null,
             expectedreceiptdate: null,
         };
         setFormData(prev => ({ ...prev, items: [...prev.items, newItem] }));
@@ -290,12 +288,10 @@ export const useTransferOrderEdit = (id: string | undefined) => {
                 custbody_me_logistic_vendor: formData.logistic_vendor || undefined,
                 custbody_me_inv_customer: formData.customer || undefined,
                 custbody_msi_createdby_api: profileSSO?.email || undefined,
-                employee_id: profileSSO?.employee_id || undefined,
                 items: formData.items.map(item => ({
                     item: item.itemId,
                     quantity: Number(item.quantity) || 0,
                     description: item.description || '',
-                    expectedshipdate: item.expectedshipdate || undefined,
                     expectedreceiptdate: item.expectedreceiptdate || undefined,
                     rate: item.rate ?? undefined,
                 })),

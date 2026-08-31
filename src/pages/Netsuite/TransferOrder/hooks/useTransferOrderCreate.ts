@@ -116,7 +116,6 @@ export const useTransferOrderCreate = () => {
             item_displayname: selectedItem.data?.displayName || selectedItem.label,
             quantity: 1,
             description: '',
-            expectedshipdate: null,
             expectedreceiptdate: null,
         };
         setFormData(prev => ({ ...prev, items: [...prev.items, newItem] }));
@@ -182,12 +181,10 @@ export const useTransferOrderCreate = () => {
                 custbody_me_logistic_vendor: formData.logistic_vendor || undefined,
                 custbody_me_inv_customer: formData.customer || undefined,
                 custbody_msi_createdby_api: formData.custbody_msi_createdby_api || 'T',
-                employee_id: profileSSO?.employee_id || undefined,
                 items: formData.items.map(item => ({
                     item: item.itemId,
                     quantity: Number(item.quantity),
                     description: item.description || '',
-                    expectedshipdate: item.expectedshipdate || undefined,
                     expectedreceiptdate: item.expectedreceiptdate || undefined,
                     rate: item.rate ?? undefined,
                 })),
