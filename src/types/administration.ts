@@ -473,6 +473,7 @@ export interface Employee {
     company_name: string;
     classes_id_netsuite?: number | null;
     classes_name_netsuite?: string | null;
+    employee_id_netsuite?: number | null;
 }
 export interface UsersManage {
     id: string;

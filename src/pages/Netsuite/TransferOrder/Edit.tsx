@@ -506,12 +506,11 @@ export default function Edit() {
                             cancelRoute="/netsuite/transfer-orders"
                             submitText="Update Transfer Order"
                             submittingText="Updating..."
-                        />
-                        {(statusName === 'FAILED' || statusName === 'PROCESSING') && (
-                            <div className="flex justify-end -mt-4 mb-4">
+                        >
+                            {(statusName === 'FAILED' || statusName === 'PROCESSING') && (
                                 <ElemRefresh />
-                            </div>
-                        )}
+                            )}
+                        </FormActions>
                     </div>
                 </>)}
             </div>
