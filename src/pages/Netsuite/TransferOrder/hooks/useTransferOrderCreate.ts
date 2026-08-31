@@ -154,6 +154,7 @@ export const useTransferOrderCreate = () => {
         }
         if (!formData.department) newErrors.department = 'Department wajib dipilih';
         if (!formData.class) newErrors.class = 'Class wajib dipilih';
+        if (!formData.employee) newErrors.employee = 'Employee wajib dipilih';
         if (!formData.items || formData.items.length === 0) {
             newErrors.items = 'Minimal 1 item harus ditambahkan';
         }
@@ -185,6 +186,7 @@ export const useTransferOrderCreate = () => {
                 custbody_me_logistic_vendor: formData.logistic_vendor || undefined,
                 custbody_me_inv_customer: formData.customer || undefined,
                 custbody_msi_createdby_api: formData.custbody_msi_createdby_api || 'T',
+                employee_id: profileSSO?.employee_id || undefined,
                 items: formData.items.map(item => ({
                     item: item.itemId,
                     quantity: Number(item.quantity),

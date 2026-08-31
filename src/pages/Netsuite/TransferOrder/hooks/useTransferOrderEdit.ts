@@ -255,11 +255,14 @@ export const useTransferOrderEdit = (id: string | undefined) => {
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
         if (!formData.trandate) newErrors.trandate = 'Transaction Date wajib diisi';
+        if (!formData.subsidiary) newErrors.subsidiary = 'Subsidiary wajib dipilih';
         if (!formData.location) newErrors.location = 'Location wajib dipilih';
         if (!formData.transferlocation) newErrors.transferlocation = 'Transfer To Location wajib dipilih';
         if (formData.location && formData.transferlocation && formData.location === formData.transferlocation) {
             newErrors.transferlocation = 'Transfer To Location tidak boleh sama dengan Location';
         }
+        if (!formData.department) newErrors.department = 'Department wajib dipilih';
+        if (!formData.class) newErrors.class = 'Class wajib dipilih';
         if (!formData.items || formData.items.length === 0) {
             newErrors.items = 'Minimal 1 item harus ditambahkan';
         }
@@ -295,6 +298,7 @@ export const useTransferOrderEdit = (id: string | undefined) => {
                 custbody_me_logistic_vendor: formData.logistic_vendor || undefined,
                 custbody_me_inv_customer: formData.customer || undefined,
                 custbody_msi_createdby_api: profileSSO?.email || undefined,
+                employee_id: profileSSO?.employee_id || undefined,
                 items: formData.items.map(item => ({
                     item: item.itemId,
                     quantity: Number(item.quantity) || 0,
