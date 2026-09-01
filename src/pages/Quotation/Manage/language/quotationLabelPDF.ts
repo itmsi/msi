@@ -228,7 +228,7 @@ export const quotationLabelPDF: TranslationMap = {
     },
     accessories: {
         id: 'Accessories',
-        en: 'Accessories', 
+        en: 'Accessories',
         zh: '配件'
     },
     afterSales_productSupport: {
@@ -256,7 +256,7 @@ export const quotationLabelPDF: TranslationMap = {
         en: 'HIGH LEVEL WARRANTY COMPONENT',
         zh: '高级保修组件'
     },
-    
+
     // After Sales Cards Content
     afterSales_maintenancePackage: {
         id: 'Paket Perawatan',
@@ -274,9 +274,9 @@ export const quotationLabelPDF: TranslationMap = {
         zh: '包括备件和润滑油'
     },
     afterSales_maintenanceService_onroad: {
-        id: 'Servis untuk PM 1 - PM 3 (5.000KM, 10.000KM, dan 20.000KM)',
-        en: 'Service for PM 1 - PM 3 (5,000KM, 10,000KM, and 20,000KM)',
-        zh: '保养服务PM 1 - PM 3（5,000公里、10,000公里、20,000公里）'
+        id: 'Servis untuk PM 1 - PM 3 (10.000KM, 20.000KM, dan 30.000KM)',
+        en: 'Service for PM 1 - PM 3 (10,000KM, 20,000KM, and 30,000KM)',
+        zh: '保养服务PM 1 - PM 3（10,000公里、20,000公里、30,000公里）'
     },
     afterSales_maintenanceService_offroad: {
         id: 'Servis untuk PM 1 - PM 3 (250, 500, 750 hour meter)',
@@ -407,7 +407,7 @@ export const quotationLabelPDF: TranslationMap = {
     },
     afterSales_konserOptions: {
         id: 'Spare Part / Service / Service & Spare Part',
-        en: 'Spare Part / Service / Service & Spare Part', 
+        en: 'Spare Part / Service / Service & Spare Part',
         zh: '备件 / 服务 / 服务和备件'
     },
 
@@ -734,7 +734,7 @@ export const quotationLabelPDF: TranslationMap = {
         en: 'Requirements:',
         zh: '要求：'
     },
-    
+
     // FilterSection Labels
     quotationFor: {
         id: 'Quotation For',
@@ -778,10 +778,10 @@ export const quotationLabelPDF: TranslationMap = {
     },
     clearAll: {
         id: 'Clear All',
-        en: 'Clear All',  
+        en: 'Clear All',
         zh: '清除全部'
     },
-    
+
     // EV MSF Section
     evFleetSolution: {
         id: 'MOTOR SIGHTS FLEET – SOLUSI UNIT EV',
@@ -953,7 +953,7 @@ export const quotationLabelPDF: TranslationMap = {
         en: '(Reads EV vehicle CANBus data)',
         zh: '(读取电动车 CANBus 数据)'
     },
-    
+
     // Specification Labels  
     spec_unitModel: {
         id: 'Model Unit',
