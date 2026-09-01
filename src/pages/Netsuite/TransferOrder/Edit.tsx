@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { MdOutlineSync } from 'react-icons/md';
+import { MdOutlineSync, MdInventory2, MdReceiptLong, MdOutlineAttachFile } from 'react-icons/md';
+import { TableColumn } from 'react-data-table-component';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import PageMeta from '@/components/common/PageMeta';
 import Alert from '@/components/ui/alert/Alert';
@@ -8,7 +9,7 @@ import Button from '@/components/ui/button/Button';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { useTransferOrderEdit } from './hooks/useTransferOrderEdit';
 import TransferOrderFields from './components/TransferOrderFields';
-import TransferOrderItemFields from './components/TransferOrderItemFields';
+import TransferOrderItemFields, { TOInvoiceSummary } from './components/TransferOrderItemFields';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
 import { usePODepartmentSelect } from '@/hooks/usePODepartmentSelect';
@@ -16,18 +17,24 @@ import { usePOItemsSelect } from '@/hooks/usePOItemsSelect';
 import { useEmployeeSelect } from '@/hooks/useEmployeeSelect';
 import { usePOVendorSelect } from '@/hooks/usePOVendorSelect';
 import { useSOCustomerSelect } from '@/hooks/useSOCustomerSelect';
-import { getProfile } from '@/helpers/generalHelper';
+import { getProfile, formatTanggal, formatCurrencyDynamic } from '@/helpers/generalHelper';
 import PageHeader from '@/components/common/PageHeader';
 import FilesTab from './components/tab/FilesTab';
+import FulfillmentReceiptTab from './components/tab/FulfillmentReceiptTab';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import Label from '@/components/form/Label';
 import FormActions from '@/components/form/FormActions';
+import CustomDataTable from '@/components/ui/table';
+import { TransferOrderFormItem } from './types/transferOrder';
+
+const formatQty = (value: number | string) =>
+    new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Number(value) || 0);
 
 export default function Edit() {
     const { id } = useParams<{ id: string }>();
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
-    const [activeTab, setActiveTab] = useState<'items' | 'files'>('items');
+    const [activeTab, setActiveTab] = useState<'items' | 'files' | 'fulfillmentreceipt'>('items');
 
     const {
         isSubmitting,
@@ -55,6 +62,12 @@ export default function Edit() {
     } = useTransferOrderEdit(id);
 
     const subsidiaryId = formData.subsidiary ? Number(formData.subsidiary) : undefined;
+
+    // TO cuma boleh diedit selagi masih "Pending Approval" di NetSuite. Begitu status berubah
+    // (Pending Fulfillment, Partially Fulfilled, dst) prosesnya sudah berjalan di NetSuite —
+    // record dikunci jadi view-only (gaya sama seperti Fulfillment/Receipts View) supaya data
+    // yang sudah dikirim ke NetSuite nggak berubah-ubah lagi dari sisi sini.
+    const isReadOnly = Boolean(formData.status_name) && formData.status_name !== 'Pending Approval';
 
     // Location (From) Select
     const {
@@ -246,6 +259,129 @@ export default function Edit() {
         }
     }, [loadingDetail]);
 
+    const readOnlyItemColumns: TableColumn<TransferOrderFormItem>[] = [
+        {
+            name: 'Item',
+            selector: row => row.item_displayname || row.item_name || '-',
+            cell: row => <span className="text-sm font-medium text-gray-900">{row.item_displayname || row.item_name || '-'}</span>,
+            wrap: true,
+            minWidth: '180px',
+        },
+        {
+            name: 'Committed',
+            selector: row => row.committed ?? 0,
+            cell: row => <span className="text-sm text-center w-full block">{row.committed ?? '-'}</span>,
+            center: true,
+            minWidth: '100px',
+        },
+        {
+            name: 'Picked',
+            selector: row => row.picked ?? 0,
+            cell: row => <span className="text-sm text-center w-full block">{row.picked ?? '-'}</span>,
+            center: true,
+            minWidth: '90px',
+        },
+        {
+            name: 'Packed',
+            selector: row => row.packed ?? 0,
+            cell: row => <span className="text-sm text-center w-full block">{row.packed ?? '-'}</span>,
+            center: true,
+            minWidth: '90px',
+        },
+        {
+            name: 'Fulfilled',
+            selector: row => row.fulfilled ?? row.shipped ?? 0,
+            cell: row => <span className="text-sm text-center w-full block">{row.fulfilled ?? row.shipped ?? '-'}</span>,
+            center: true,
+            minWidth: '100px',
+        },
+        {
+            name: 'Received',
+            selector: row => row.received ?? 0,
+            cell: row => <span className="text-sm text-center w-full block">{row.received ?? '-'}</span>,
+            center: true,
+            minWidth: '100px',
+        },
+        {
+            name: 'Back Ordered',
+            selector: row => row.backorder ?? 0,
+            cell: row => <span className="text-sm text-center w-full block">{row.backorder ?? '-'}</span>,
+            center: true,
+            minWidth: '110px',
+        },
+        {
+            name: 'Quantity',
+            selector: row => row.quantity || 0,
+            cell: row => <span className="text-sm text-right w-full block">{formatQty(row.quantity)}</span>,
+            right: true,
+            minWidth: '110px',
+        },
+        {
+            name: 'Transfer Price',
+            selector: row => row.rate || 0,
+            cell: row => <span className="text-sm text-right w-full block">{formatCurrencyDynamic(row.rate || 0, '')}</span>,
+            right: true,
+            minWidth: '130px',
+        },
+        {
+            name: 'Units',
+            selector: row => row.units || '-',
+            cell: row => <span className="text-sm text-center w-full block">{row.units || '-'}</span>,
+            center: true,
+            minWidth: '90px',
+        },
+        {
+            name: 'Amount',
+            selector: row => row.amount || 0,
+            cell: row => <span className="text-sm font-medium text-right w-full block">{formatCurrencyDynamic(row.amount || 0, '')}</span>,
+            right: true,
+            minWidth: '140px',
+        },
+        {
+            name: 'Description',
+            selector: row => row.description || '-',
+            cell: row => <span className="text-sm text-gray-600">{row.description || '-'}</span>,
+            wrap: true,
+            minWidth: '200px',
+        },
+        {
+            name: 'Expected Receipt Date',
+            selector: row => row.expectedreceiptdate || '-',
+            cell: row => <span className="text-sm">{row.expectedreceiptdate ? formatTanggal(row.expectedreceiptdate) : '-'}</span>,
+            center: true,
+            minWidth: '170px',
+        },
+        {
+            name: 'Commitment Confirmed',
+            selector: row => (row.commitment_confirmed ? 'Yes' : 'No'),
+            cell: row => (
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.commitment_confirmed ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                    {row.commitment_confirmed ? 'Yes' : 'No'}
+                </span>
+            ),
+            center: true,
+            minWidth: '170px',
+        },
+        {
+            name: 'Order Priority',
+            selector: row => row.order_priority || '-',
+            cell: row => <span className="text-sm text-center w-full block">{row.order_priority || '-'}</span>,
+            center: true,
+            minWidth: '130px',
+        },
+        {
+            name: 'Closed',
+            selector: row => (row.closed ? 'Yes' : 'No'),
+            cell: row => (
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.closed ? 'bg-gray-200 text-gray-700' : 'bg-blue-100 text-blue-800'}`}>
+                    {row.closed ? 'Closed' : 'Open'}
+                </span>
+            ),
+            center: true,
+            minWidth: '110px',
+        },
+    ];
+
     const ElemRefresh = () => (
         <PermissionGate permission="read">
             <Button
@@ -264,7 +400,7 @@ export default function Edit() {
     return (
         <>
             <PageMeta
-                title={`Edit Transfer Order | Netsuite`}
+                title={`${isReadOnly ? 'View' : 'Edit'} Transfer Order | Netsuite`}
                 description="Edit Netsuite Transfer Order"
                 image="/motor-sights-international.png"
             />
@@ -277,7 +413,7 @@ export default function Edit() {
                 ) : (<>
                     {/* Header */}
                     <PageHeader
-                        title="Edit Transfer Order"
+                        title={isReadOnly ? 'View Transfer Order' : 'Edit Transfer Order'}
                         backPath="/netsuite/transfer-orders"
                         subtitle={tranid || '-'}
                         actions={ <>
@@ -327,7 +463,107 @@ export default function Edit() {
                             </Alert>
                         )}
 
-                        {/* Transfer Order Fields */}
+                        {isReadOnly ? (<>
+                        {/* Read-only view (TO sudah masuk fulfillment di NetSuite) */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-2 space-y-6">
+                                <div className="bg-white shadow rounded-lg overflow-hidden">
+                                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                                        <h4 className="text-base font-semibold text-gray-900">Primary Information</h4>
+                                    </div>
+                                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                                        <dl className="space-y-4">
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Order #</dt>
+                                                <dd className="mt-1 text-sm text-gray-900 font-medium">{tranid || '-'}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Date</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.trandate ? formatTanggal(formData.trandate) : '-'}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Subsidiary</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.subsidiary_name || '-'}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">From Location</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.location_name || '-'}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">To Location</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.transferlocation_name || '-'}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Employee</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.employee_name || '-'}</dd>
+                                            </div>
+                                        </dl>
+                                        <dl className="space-y-4">
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Firmed</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.firmed ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Memo</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.memo || '-'}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Use Item Cost As Transfer Cost</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.use_item_cost_as_transfer_cost ? 'Yes' : 'No'}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Incoterm</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">DAP</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Logistic Vendor</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.logistic_vendor_name || '-'}</dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white shadow rounded-lg overflow-hidden">
+                                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                                        <h4 className="text-base font-semibold text-gray-900">Classification</h4>
+                                    </div>
+                                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                                        <dl className="space-y-4">
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Department</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.department_name || '-'}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Class</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.class_name || '-'}</dd>
+                                            </div>
+                                        </dl>
+                                        <dl className="space-y-4">
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">Customer</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.customer_name || '-'}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-sm font-medium text-gray-500">MSI - Created By API</dt>
+                                                <dd className="mt-1 text-sm text-gray-900">{formData.custbody_msi_createdby_api || '-'}</dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6 sticky top-0 self-start">
+                                <div className="bg-white shadow rounded-lg overflow-hidden">
+                                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                                        <h4 className="text-base font-semibold text-gray-900">Summary</h4>
+                                    </div>
+                                    <div className="p-6">
+                                        <TOInvoiceSummary items={formData.items} serverTotal={formData.total} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </>) : (
                         <TransferOrderFields
                             formData={formData}
                             errors={errors}
@@ -421,32 +657,44 @@ export default function Edit() {
                                 handleSelectChange('customer_name', opt?.label || '');
                             }}
                         />
+                        )}
 
                         <div>
                             {/* Tab Navigation */}
-                            <div className="border-b border-gray-200 px-6 overflow-auto">
-                                <nav className="flex space-x-8 overflow-auto">
+                            <div className="border-b border-gray-200 overflow-auto">
+                                <nav className="flex space-x-2 overflow-auto">
                                     <button
                                         type="button"
                                         onClick={() => setActiveTab('items')}
-                                        className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
                                             activeTab === 'items'
-                                                ? 'border-blue-500 text-blue-600'
+                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }`}
                                     >
-                                        Items
+                                        <MdInventory2 /> Items
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab('fulfillmentreceipt')}
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
+                                            activeTab === 'fulfillmentreceipt'
+                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        <MdReceiptLong /> Fulfillment &amp; Receipt
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setActiveTab('files')}
-                                        className={`py-2 px-1 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors ${
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
                                             activeTab === 'files'
-                                                ? 'border-blue-500 text-blue-600'
+                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }`}
                                     >
-                                        Files
+                                        <MdOutlineAttachFile /> Files
                                     </button>
                                 </nav>
                             </div>
@@ -454,6 +702,24 @@ export default function Edit() {
                             <div className='bg-white rounded-b-2xl shadow-sm'>
                                 {/* Items Tab */}
                                 {activeTab === 'items' && (
+                                    isReadOnly ? (
+                                        <div className="mb-6 space-y-6 p-6">
+                                            <h3 className="text-lg font-primary-bold font-medium text-gray-900">Transfer Order Items</h3>
+                                            <div className="font-secondary">
+                                                <CustomDataTable
+                                                    columns={readOnlyItemColumns}
+                                                    data={formData.items || []}
+                                                    pagination={false}
+                                                    responsive
+                                                    highlightOnHover
+                                                    striped={false}
+                                                    noDataComponent={
+                                                        <div className="text-center py-8 text-gray-500">No item lines found</div>
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+                                    ) : (
                                     <>
                                     <div className="px-6 pt-4">
                                         <div className="mb-4">
@@ -485,6 +751,11 @@ export default function Edit() {
                                         onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
                                     />
                                     </>
+                                    )
+                                )}
+
+                                {activeTab === 'fulfillmentreceipt' && (
+                                    <FulfillmentReceiptTab tranid={tranid} toNetsuiteId={toInternalId ? String(toInternalId) : null} />
                                 )}
 
                                 {activeTab === 'files' && (
@@ -503,6 +774,7 @@ export default function Edit() {
                         </div>
 
                         {/* Form Actions */}
+                        {!isReadOnly && (
                         <FormActions
                             onSubmit={handleSubmit}
                             isSubmitting={isSubmitting}
@@ -514,6 +786,7 @@ export default function Edit() {
                                 <ElemRefresh />
                             )}
                         </FormActions>
+                        )}
                     </div>
                 </>)}
             </div>

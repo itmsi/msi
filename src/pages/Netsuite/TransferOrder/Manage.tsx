@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useTransferOrder } from './hooks/useTransferOrder';
-import { formatDateTime, getProfile } from '@/helpers/generalHelper';
+import { formatDateTime, formatTanggal, getProfile } from '@/helpers/generalHelper';
 import {
     MdClear,
     MdSearch,
@@ -24,23 +24,15 @@ import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 
+// Samakan format Date List TO dengan List PO (pakai formatTanggal, format PO: "DD/M/YYYY")
 const formatDateID = (dateString: string) => {
     if (!dateString || dateString === '-') return '-';
     const isoMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (isoMatch) {
-        const [, , m, d] = isoMatch;
-        const year = isoMatch[1];
-        const monthNum = parseInt(m, 10);
-        const dayNum = parseInt(d, 10);
-        const monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-        return `${String(dayNum).padStart(2, '0')} ${monthNames[monthNum - 1]} ${year}`;
+        const [, year, m, d] = isoMatch;
+        return formatTanggal(`${parseInt(d, 10)}/${parseInt(m, 10)}/${year}`);
     }
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = date.toLocaleString('id-ID', { month: 'short' });
-    const year = date.getFullYear();
-    return `${day} ${month} ${year}`;
+    return formatTanggal(dateString);
 };
 
 export default function Manage() {
@@ -169,7 +161,26 @@ export default function Manage() {
             wrap: true,
             minWidth: '180px',
         },
-        createByDateColumn('Created By', 'created_at', 'created_by_name', '320px'),
+        {
+            id: 'created_by',
+            name: 'Created By',
+            selector: row => row.netsuite_id || row.id,
+            cell: row => (
+                <div className="flex flex-col py-2">
+                    <span className="font-medium text-gray-900">
+                        {row.created_by_name || '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        {row.created_at ? formatDateTime(row.created_at) : '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        Sid: {row.netsuite_id || '-'}
+                    </span>
+                </div>
+            ),
+            wrap: true,
+            width: '320px'
+        },
         createByDateColumn('Updated By', 'updated_at', 'updated_by_name', '320px'),
         createActionsColumn([
             {

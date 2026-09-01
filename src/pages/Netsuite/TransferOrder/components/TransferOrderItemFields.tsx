@@ -398,6 +398,9 @@ export default function TransferOrderItemFields({
         ])
     ];
 
+    const requiredClassificationMissing = !formData.subsidiary || !formData.location
+        || !formData.transferlocation || !formData.class || !formData.department;
+
     return (
         <div className="space-y-6">
             <div className="mb-6 space-y-6 p-6">
@@ -409,7 +412,7 @@ export default function TransferOrderItemFields({
                         <Label htmlFor="to-add-item">Select Item to Add</Label>
                         <CustomAsyncSelect
                             name="add_item"
-                            disabled={!formData.subsidiary}
+                            disabled={requiredClassificationMissing}
                             value={selectedNewItem}
                             onChange={(opt) => setSelectedNewItem(opt)}
                             defaultOptions={itemOptions}
@@ -421,7 +424,7 @@ export default function TransferOrderItemFields({
                             isSearchable={true}
                             inputValue={itemInput}
                             onInputChange={onItemInputChange}
-                            placeholder={!formData.subsidiary ? "Pilih Subsidiary dahulu" : "Cari item..."}
+                            placeholder={requiredClassificationMissing ? "Lengkapi field wajib dahulu" : "Cari item..."}
                         />
                     </div>
                     <div className="flex flex-col justify-end">
@@ -433,15 +436,15 @@ export default function TransferOrderItemFields({
                                     setSelectedNewItem(null);
                                 }
                             }}
-                            className={`flex items-center gap-2 ${(!selectedNewItem || !formData.subsidiary) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            disabled={!selectedNewItem || !formData.subsidiary}
+                            className={`flex items-center gap-2 ${(!selectedNewItem || requiredClassificationMissing) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={!selectedNewItem || requiredClassificationMissing}
                         >
                             <MdAdd size={18} />
                             Add Item
                         </Button>
                     </div>
                 </div>
-                {(!formData.subsidiary || !formData.location || !formData.transferlocation || !formData.class || !formData.department) && (
+                {requiredClassificationMissing && (
                     <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 mb-4">
                         Lengkapi field Subsidiary, Location, Transfer To Location, Class, dan Department terlebih dahulu sebelum menambahkan item.
                     </p>
@@ -487,13 +490,19 @@ export default function TransferOrderItemFields({
                         <p className="text-sm">Start by selecting an item from the dropdown above</p>
                     </div>
                 )}
+
+                {/* Invoice Summary — pola & posisi sama seperti di Items tab PO, tepat di bawah tabel item */}
+                {formData.items && formData.items.length > 0 && (
+                    <TOInvoiceSummary items={formData.items} serverTotal={formData.total} />
+                )}
             </div>
         </div>
     );
 }
 
-// Summary items Transfer Order — pola sama seperti InvoiceSummary (PO) / SOInvoiceSummary / QuotationInvoiceSummary,
-// tanpa Tax karena Transfer Order tidak punya konsep tax per line.
+// Summary items Transfer Order — pola sama persis seperti InvoiceSummary (PO) / SOInvoiceSummary /
+// QuotationInvoiceSummary. Transfer Order tidak punya konsep tax per line, jadi baris Tax selalu 0,
+// tapi tetap ditampilkan biar layout-nya konsisten dengan PO.
 export const TOInvoiceSummary: React.FC<{ items: TransferOrderFormItem[], serverTotal?: number }> = ({ items, serverTotal }) => {
     const summary = useMemo(() => {
         const totalQty = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
@@ -501,9 +510,10 @@ export const TOInvoiceSummary: React.FC<{ items: TransferOrderFormItem[], server
             const amount = item.amount != null ? Number(item.amount) : (Number(item.rate) || 0) * (Number(item.quantity) || 0);
             return sum + amount;
         }, 0);
+        const totalTax = 0;
         const grandTotal = serverTotal != null && serverTotal > 0 ? serverTotal : subtotal;
 
-        return { totalQty, subtotal, grandTotal };
+        return { totalQty, subtotal, totalTax, grandTotal };
     }, [items, serverTotal]);
 
     return (
@@ -516,6 +526,10 @@ export const TOInvoiceSummary: React.FC<{ items: TransferOrderFormItem[], server
                 <div className="flex justify-between text-sm text-gray-600">
                     <span>Subtotal</span>
                     <span className="font-medium text-gray-800">{formatCurrencyDynamic(summary.subtotal, '')}</span>
+                </div>
+                <div className="flex justify-between text-sm text-gray-600">
+                    <span>Tax</span>
+                    <span className="font-medium text-gray-800">{formatCurrencyDynamic(summary.totalTax, '')}</span>
                 </div>
                 <div className="border-t border-gray-300 pt-3 flex justify-between text-sm font-primary-bold">
                     <span>Grand Total</span>

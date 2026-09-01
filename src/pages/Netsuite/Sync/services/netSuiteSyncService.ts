@@ -2,7 +2,7 @@ import { apiPost, ApiResponse } from '@/helpers/apiHelper';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export type SyncMasterDataKey = 'departments' | 'locations' | 'terms' | 'classes' | 'items' | 'vendors' | 'customers' | 'invoice_sales_orders' | 'purchasing_orders' | 'sales_orders' | 'receives' | 'bill_payments' | 'inbound_shipments' | 'transfer_orders' | 'customer_returns' | 'quotations';
+export type SyncMasterDataKey = 'departments' | 'locations' | 'terms' | 'classes' | 'items' | 'vendors' | 'customers' | 'invoice_sales_orders' | 'purchasing_orders' | 'sales_orders' | 'receives' | 'bill_payments' | 'inbound_shipments' | 'transfer_orders' | 'customer_returns' | 'quotations' | 'fulfillments';
 
 // ─── Sync List Types ──────────────────────────────────────────────────────────
 
@@ -48,6 +48,8 @@ export const SYNC_MODULE_KEY_MAP: Record<string, SyncMasterDataKey> = {
     customer:           'customers',
     customers:          'customers',
     receives:            'receives',
+    fulfillment:         'fulfillments',
+    fulfillments:        'fulfillments',
     transfer_orders:      'transfer_orders',
     inbound_shipments:       'inbound_shipments',
     quotations:       'quotations',
@@ -81,6 +83,7 @@ export class NetSuiteSyncService {
         purchasing_orders: 'purchasing_orders',
         sales_orders: 'sales_orders',
         receives: 'receives',
+        fulfillments: 'fulfillments',
         bill_payments: 'bill_payments',
         inbound_shipments: 'inbound_shipments',
         transfer_orders: 'transfer_orders',

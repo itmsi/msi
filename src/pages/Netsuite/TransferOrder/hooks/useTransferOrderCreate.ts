@@ -22,11 +22,11 @@ const DEFAULT_FORM: TransferOrderFormData = {
     class: null,
     class_name: '',
     status: 'A',
-    incoterm: null,
+    incoterm: 1, // Hardcode DAP (id NetSuite 1 = DAP, 2 = EXW)
     employee: null,
     employee_name: '',
     firmed: false,
-    use_item_cost_as_transfer_cost: false,
+    use_item_cost_as_transfer_cost: true,
     logistic_vendor: null,
     logistic_vendor_name: '',
     customer: null,
@@ -154,7 +154,6 @@ export const useTransferOrderCreate = () => {
         }
         if (!formData.department) newErrors.department = 'Department wajib dipilih';
         if (!formData.class) newErrors.class = 'Class wajib dipilih';
-        if (!formData.employee) newErrors.employee = 'Employee wajib dipilih';
         if (!formData.items || formData.items.length === 0) {
             newErrors.items = 'Minimal 1 item harus ditambahkan';
         }
