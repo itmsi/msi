@@ -321,7 +321,7 @@ export default function Manage() {
                             fixedHeaderScrollHeight="625px"
                             responsive
                             highlightOnHover
-                            // onRowClicked={(row) => navigate(`/netsuite/fulfillments/view/${row.id}`)}
+                            onRowClicked={(row) => navigate(`/netsuite/fulfillments/view/${row.id}`)}
                             striped={false}
                             persistTableHead
                             borderRadius="8px"
