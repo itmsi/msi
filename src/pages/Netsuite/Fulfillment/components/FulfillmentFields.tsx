@@ -50,7 +50,7 @@ export default function FulfillmentFields({ fulfillment }: FulfillmentFieldsProp
                         </div>
                         <div>
                             <dt className="text-sm font-medium text-gray-500">Incoterm</dt>
-                            <dd className="mt-1 text-sm text-gray-900">DAP</dd>
+                            <dd className="mt-1 text-sm text-gray-900">-</dd>
                         </div>
                     </dl>
                 </div>

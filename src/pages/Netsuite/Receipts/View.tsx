@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdArrowBack } from 'react-icons/md';
-import { TableColumn } from 'react-data-table-component';
+import { MdArrowBack, MdInventory2 } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
 import Badge from '@/components/ui/badge/Badge';
 import Button from '@/components/ui/button/Button';
-import CustomDataTable from '@/components/ui/table';
-import { formatDateLocal, formatDateTime } from '@/helpers/generalHelper';
+import { formatDateTime } from '@/helpers/generalHelper';
 import { ReceiptService } from './services/receiptService';
 import { ReceiptItem, ReceiptLineItem } from './types/receipt';
+import ReceiptFields from './components/ReceiptFields';
+import ReceiptItemFields from './components/ReceiptItemFields';
 
 const parseLines = (lines?: string | ReceiptLineItem[]): ReceiptLineItem[] => {
     if (!lines) return [];
@@ -21,12 +21,6 @@ const parseLines = (lines?: string | ReceiptLineItem[]): ReceiptLineItem[] => {
     }
 };
 
-const formatQty = (value: number) =>
-    new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value || 0);
-
-const formatAmount = (value: number) =>
-    new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value || 0);
-
 export default function View() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -34,6 +28,7 @@ export default function View() {
     const [receipt, setReceipt] = useState<ReceiptItem | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'items'>('items');
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -76,54 +71,6 @@ export default function View() {
 
     const lines = parseLines(receipt.lines);
 
-    const lineColumns: TableColumn<ReceiptLineItem>[] = [
-        {
-            name: 'Item',
-            selector: row => row.item_display || '-',
-            cell: row => (
-                <div className="py-1">
-                    <div className="text-sm font-medium text-gray-900">{row.item_display || '-'}</div>
-                    {row.description && <div className="text-xs text-gray-500">{row.description}</div>}
-                </div>
-            ),
-            wrap: true,
-            minWidth: '260px',
-        },
-        {
-            name: 'Quantity',
-            selector: row => row.quantity,
-            cell: row => <span className="text-sm text-right w-full block">{formatQty(row.quantity)}</span>,
-            right: true,
-            minWidth: '110px',
-        },
-        {
-            name: 'Rate',
-            selector: row => row.rate,
-            cell: row => <span className="text-sm text-right w-full block">{formatAmount(row.rate)}</span>,
-            right: true,
-            minWidth: '130px',
-        },
-        {
-            name: 'Amount',
-            selector: row => row.amount,
-            cell: row => <span className="text-sm font-medium text-right w-full block">{formatAmount(row.amount)}</span>,
-            right: true,
-            minWidth: '140px',
-        },
-        {
-            name: 'Location',
-            selector: row => row.location_display || '-',
-            wrap: true,
-            minWidth: '180px',
-        },
-        {
-            name: 'Memo',
-            selector: row => row.memo || '-',
-            wrap: true,
-            minWidth: '200px',
-        },
-    ];
-
     return (
         <>
             <PageMeta
@@ -163,121 +110,28 @@ export default function View() {
                     </div>
                 </div>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Primary Information */}
-                    <div className="lg:col-span-2 space-y-6">
-                        <div className="bg-white shadow rounded-lg overflow-hidden">
-                            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                <h4 className="text-base font-semibold text-gray-900">Primary Information</h4>
-                            </div>
-                            <div className="p-6">
-                                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Document No.</dt>
-                                        <dd className="mt-1 text-sm text-gray-900 font-medium">{receipt.tranid || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Date</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{receipt.trandate ? formatDateLocal(receipt.trandate) : '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Name</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{receipt.vendor_name || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Type</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{receipt.source_type_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Created From</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{receipt.createdfrom_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">NetSuite ID</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{receipt.netsuite_id || '-'}</dd>
-                                    </div>
-                                    <div className="sm:col-span-2">
-                                        <dt className="text-sm font-medium text-gray-500">Memo</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{receipt.memo || '-'}</dd>
-                                    </div>
-                                </dl>
-                            </div>
-                        </div>
+                <ReceiptFields receipt={receipt} />
 
-                        {/* Classification */}
-                        <div className="bg-white shadow rounded-lg overflow-hidden">
-                            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                <h4 className="text-base font-semibold text-gray-900">Classification</h4>
-                            </div>
-                            <div className="p-6">
-                                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Subsidiary</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{receipt.subsidiary_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Location</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{receipt.location_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Department</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{receipt.department_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Class</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{receipt.class_display || '-'}</dd>
-                                    </div>
-                                </dl>
-                            </div>
-                        </div>
+                {/* Tab Navigation — style sama seperti tab di TO Edit.tsx / Fulfillment View.tsx */}
+                <div>
+                    <div className="border-b border-gray-200 overflow-auto">
+                        <nav className="flex space-x-2 overflow-auto">
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab('items')}
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
+                                    activeTab === 'items'
+                                        ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                            >
+                                <MdInventory2 /> Items
+                            </button>
+                        </nav>
                     </div>
 
-                    {/* Meta */}
-                    <div className="space-y-6">
-                        <div className="bg-white shadow rounded-lg overflow-hidden">
-                            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                <h4 className="text-base font-semibold text-gray-900">Record Info</h4>
-                            </div>
-                            <div className="p-6">
-                                <dl className="space-y-4">
-                                    <div>
-                                        <dt className="text-xs font-medium text-gray-500">Created By</dt>
-                                        <dd className="mt-1 text-sm text-gray-900 font-medium">{receipt.created_by_name || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-xs font-medium text-gray-500">Created At</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{receipt.created_at ? formatDateTime(receipt.created_at) : '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-xs font-medium text-gray-500">Updated At</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{receipt.updated_at ? formatDateTime(receipt.updated_at) : '-'}</dd>
-                                    </div>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Item Lines */}
-                <div className="bg-white shadow rounded-lg overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h4 className="text-base font-semibold text-gray-900">Item Lines</h4>
-                    </div>
-                    <div className="font-secondary">
-                        <CustomDataTable
-                            columns={lineColumns}
-                            data={lines}
-                            pagination
-                            paginationPerPage={10}
-                            paginationRowsPerPageOptions={[10, 20, 50]}
-                            responsive
-                            highlightOnHover
-                            striped={false}
-                            noDataComponent={
-                                <div className="p-6 text-center text-sm text-gray-500">No item lines found</div>
-                            }
-                        />
+                    <div className="bg-white rounded-b-2xl shadow-sm">
+                        {activeTab === 'items' && <ReceiptItemFields lines={lines} />}
                     </div>
                 </div>
             </div>
