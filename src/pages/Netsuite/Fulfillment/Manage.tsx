@@ -1,0 +1,335 @@
+import { useCallback, useMemo, useState } from 'react'
+import { TableColumn } from 'react-data-table-component';
+import { useNavigate } from 'react-router-dom';
+import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdVisibility, MdOutlineSync } from 'react-icons/md';
+import Input from '@/components/form/input/InputField';
+import CustomSelect from '@/components/form/select/CustomSelect';
+import PageMeta from '@/components/common/PageMeta';
+import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
+import { createByDateColumn } from '@/components/ui/table/columnUtils';
+import { getProfile, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
+import { useFulfillment } from './hooks/useFulfillment';
+import { FulfillmentItem } from './types/fulfillment';
+import Button from '@/components/ui/button/Button';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
+
+const STATUS_OPTIONS = [
+    { value: 'pending', label: 'Pending Fulfillment' },
+    { value: 'picked', label: 'Picked' },
+    { value: 'packed', label: 'Packed' },
+    { value: 'shipped', label: 'Shipped' },
+];
+
+export default function Manage() {
+    const navigate = useNavigate();
+    const profileSSO = getProfile() as any;
+    const profileSSOId = profileSSO?.classes_id_netsuite || null;
+
+    const {
+        fulfillment,
+        syncInfo,
+        loading,
+        error,
+        pagination,
+        searchValue,
+        sortOrder,
+        statusFilter,
+        activeFilterCount,
+        setSearchValue,
+        handlePageChange,
+        handleRowsPerPageChange,
+        handleFilterChange,
+        handleKeyPress,
+        handleClearSearch,
+        handleClearFilters,
+        isSyncing,
+        handleSync,
+    } = useFulfillment(profileSSOId);
+
+    const handlePageChangeAman = useCallback((halamanBaru: number) => {
+        const halamanSaatIni = pagination?.page || 1;
+        if (halamanBaru === halamanSaatIni) return;
+        handlePageChange(halamanBaru);
+    }, [pagination?.page, handlePageChange]);
+
+    const handleRowsPerPageAman = useCallback((limitBaru: number, halamanBaru: number) => {
+        const halamanSaatIni = pagination?.page || 1;
+        const limitSaatIni = pagination?.limit || 10;
+        if (limitBaru === limitSaatIni && halamanBaru === halamanSaatIni) return;
+        handleRowsPerPageChange(limitBaru, halamanBaru);
+    }, [pagination?.page, pagination?.limit, handleRowsPerPageChange]);
+
+
+    const columns: TableColumn<FulfillmentItem>[] = [
+        {
+            id: 'doc_number',
+            name: 'Document Number',
+            selector: row => row.number || '-',
+            cell: row => (
+                <div className="items-center gap-3 py-2">
+                    <div className="font-medium text-gray-900">{row.number || '-'}</div>
+                    <div className="block text-sm text-gray-500">{formatTanggal(row.date)}</div>
+                </div>
+            ),
+            wrap: true,
+            width: '230px',
+            pinned: 'left'
+        },
+        {
+            id: 'internal_id',
+            name: 'Internal ID',
+            selector: row => row.netsuite_id || '-',
+            wrap: true,
+            width: '140px',
+            center: true,
+        },
+        {
+            id: 'source_type',
+            name: 'Type',
+            selector: row => row.source_type_display || '-',
+            wrap: true,
+            width: '200px',
+            center: true,
+        },
+        {
+            id: 'entity_name',
+            name: 'Customer',
+            selector: row => row.entity_name || '-',
+            wrap: true,
+            width: '260px',
+        },
+        {
+            id: 'createdfrom',
+            name: 'Created From',
+            selector: row => row.createdfrom_number || '-',
+            wrap: true,
+            width: '260px',
+        },
+        {
+            id: 'location',
+            name: 'Location',
+            selector: row => row.location_display || '-',
+            wrap: true,
+            width: '220px',
+        },
+        {
+            id: 'transferlocation',
+            name: 'Ship To',
+            selector: row => row.transferlocation_display || '-',
+            wrap: true,
+            width: '220px',
+        },
+        {
+            id: 'status',
+            name: 'Status',
+            selector: row => row.status_label || '-',
+            cell: row => (
+                <div className="items-center capitalize">
+                    {row.status_label ? (
+                        <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
+                            {row.status_label}
+                        </span>
+                    ) : '-'}
+                </div>
+            ),
+            center: true,
+            width: '180px'
+        },
+        createByDateColumn('Created By', 'created_at', 'created_by', '320px'),
+        createActionsColumn([
+            {
+                icon: MdVisibility,
+                onClick: (row: FulfillmentItem) => navigate(`/netsuite/fulfillments/view/${row.id}`),
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                tooltip: 'View Detail',
+                permission: 'read',
+            },
+        ])
+    ];
+
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const handleToggleFilter = () => {
+        setShowAdvancedFilters(prev => !prev);
+    };
+
+    const SearchAndFilters = useMemo(() => {
+        return (<>
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                <div className="flex-1">
+                    <div className="relative flex">
+                        <div className="relative flex-1">
+                            <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                            <Input
+                                id='search'
+                                type="text"
+                                placeholder="Search fulfillment... (Press Enter)"
+                                value={searchValue}
+                                onChange={(e) => setSearchValue(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                className={`pl-10 py-2 w-full ${searchValue ? 'pr-10' : 'pr-4'}`}
+                            />
+                            {searchValue && (
+                                <button
+                                    onClick={handleClearSearch}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                    type="button"
+                                >
+                                    <MdClear className="h-4 w-4" />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+                <div className="flex items-center">
+                    <CustomSelect
+                        id="sort_order"
+                        name="sort_order"
+                        value={sortOrder ? {
+                            value: sortOrder,
+                            label: sortOrder === 'asc' ? 'Ascending' : 'Descending'
+                        } : null}
+                        onChange={(selectedOption) =>
+                            handleFilterChange('sort_order', selectedOption?.value || '')
+                        }
+                        options={[
+                            { value: 'asc', label: 'Ascending' },
+                            { value: 'desc', label: 'Descending' }
+                        ]}
+                        placeholder="Order by"
+                        isClearable={false}
+                        isSearchable={false}
+                        className="w-full"
+                    />
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        onClick={handleToggleFilter}
+                        className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
+                        size="sm"
+                    >
+                        <MdFilterListAlt className="w-4 h-4 mr-2" />
+                        Filter
+                        {activeFilterCount > 0 && (
+                            <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-blue-600 text-white">
+                                {activeFilterCount}
+                            </span>
+                        )}
+                        {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                    </Button>
+                </div>
+            </div>
+
+            {/* Advanced Filters */}
+            {showAdvancedFilters && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <CustomSelect
+                                id="filter_status"
+                                name="filter_status"
+                                value={statusFilter ? STATUS_OPTIONS.find(o => o.value === statusFilter) || null : null}
+                                onChange={(opt) => handleFilterChange('status', opt?.value || '')}
+                                options={STATUS_OPTIONS}
+                                placeholder="All Status"
+                                isClearable={true}
+                                isSearchable={true}
+                            />
+                        </div>
+                    </div>
+                    {activeFilterCount > 0 && (
+                        <div className="mt-3 flex justify-end">
+                            <Button
+                                onClick={handleClearFilters}
+                                size="sm"
+                                className="bg-transparent border border-red-300 text-red-600 hover:bg-red-50"
+                            >
+                                <MdClear className="w-4 h-4 mr-1" />
+                                Clear All
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            )}
+        </>);
+    }, [searchValue, sortOrder, statusFilter, activeFilterCount, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, handleClearFilters]);
+
+    return (
+        <>
+            <PageMeta
+                title="Item Fulfillments - Motor Sights International"
+                description="Manage Item Fulfillments - Motor Sights International"
+                image="/motor-sights-international.png"
+            />
+
+            <div className="space-y-6">
+                {/* Header */}
+                <PageHeaderManage
+                    title="Item Fulfillments"
+                    subtitle="Manage Item Fulfillments"
+                    actions={[
+                        {
+                            key: 'sync',
+                            element: (
+                                <Button
+                                    onClick={() => handleSync()}
+                                    disabled={isSyncing}
+                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                    variant='outline'
+                                >
+                                    <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                    <div>
+                                        <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                    </div>
+                                </Button>
+                            )
+                        }
+                    ]}
+                />
+                {
+                    syncInfo && (<>
+                        <span className='block text-xs text-green-600 pe-6 text-end mb-0'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
+                    </>)
+                }
+
+                {/* Search & Filter */}
+                <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
+                    {SearchAndFilters}
+                </div>
+                {/* Table */}
+                <div className="bg-white shadow rounded-lg">
+                    <div className="p-6 font-secondary">
+                        {error && (
+                            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                                <p className="text-red-600">{error}</p>
+                            </div>
+                        )}
+
+                        <CustomDataTable
+                            columns={columns}
+                            data={fulfillment}
+                            loading={loading}
+                            pagination
+                            paginationServer
+                            paginationTotalRows={pagination?.total || 0}
+                            paginationPerPage={pagination?.limit || 10}
+                            paginationDefaultPage={pagination?.page || 1}
+                            paginationRowsPerPageOptions={[10, 20, 50, 100]}
+                            onChangePage={handlePageChangeAman}
+                            onChangeRowsPerPage={handleRowsPerPageAman}
+                            fixedHeader={true}
+                            fixedHeaderScrollHeight="625px"
+                            responsive
+                            highlightOnHover
+                            // onRowClicked={(row) => navigate(`/netsuite/fulfillments/view/${row.id}`)}
+                            striped={false}
+                            persistTableHead
+                            borderRadius="8px"
+                        />
+                    </div>
+                </div>
+            </div>
+        </>
+
+    )
+}

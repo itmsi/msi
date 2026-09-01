@@ -128,6 +128,8 @@ const NetSuiteSync = lazy(() => import('@/pages/Netsuite/Sync/Manage'));
 const Receive = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Receive'));
 const ManageReceive = lazy(() => import('@/pages/Netsuite/Receipts/Manage'));
 const ViewReceive = lazy(() => import('@/pages/Netsuite/Receipts/View'));
+const ManageFulfillment = lazy(() => import('@/pages/Netsuite/Fulfillment/Manage'));
+const ViewFulfillment = lazy(() => import('@/pages/Netsuite/Fulfillment/View'));
 const ManageSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Manage'));
 const ManageBillPayment = lazy(() => import('@/pages/Netsuite/BillPayment/Manage'));
 const ViewBillPayment = lazy(() => import('@/pages/Netsuite/BillPayment/View'));
@@ -1088,6 +1090,23 @@ export const routes: TAppRoute[] = [
         roles: ['Manage Receipts Netsuite'],
         requiredPermissions: ['read'],
         component: ViewReceive,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/fulfillments',
+        name: 'Fulfillment Netsuite',
+        isProtected: true,
+        roles: ['Fulfillment Netsuite'],
+        component: ManageFulfillment,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/fulfillments/view/:id',
+        name: 'Fulfillment Netsuite',
+        isProtected: true,
+        roles: ['Fulfillment Netsuite'],
+        requiredPermissions: ['read'],
+        component: ViewFulfillment,
         layout: AppLayout,
     },
     {
