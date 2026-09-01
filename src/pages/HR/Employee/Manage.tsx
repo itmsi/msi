@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useCandidateManagement } from './hooks/Usecandidatemanagement';
 import { CandidateCardSkeleton } from './components/Candidatecardskeleton';
 import { CandidateCard } from './components/Candidatecard';
-import { OfferingSummaryCards } from './components/OfferingSummaryCards';
+// import { OfferingSummaryCards } from './components/OfferingSummaryCards';
 import FilterSection from './components/FilterSection';
 import PageHeaderManage from '@/components/common/PageHeaderManage';
 import { candidateService } from './services/hrService';
@@ -28,7 +28,7 @@ export default function ManageCandidate() {
         loadingMore,
         hasMore,
         pagination,
-        offeringCount,
+        // offeringCount,
         filters,
         searchValue,
         setSearchValue,
@@ -218,7 +218,7 @@ export default function ManageCandidate() {
                 />
 
                 {/* Offering status summary */}
-                <OfferingSummaryCards counts={offeringCount} total={pagination?.total ?? candidates.length} />
+                {/* <OfferingSummaryCards counts={offeringCount} total={pagination?.total ?? candidates.length} /> */}
 
 
                 <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
@@ -259,7 +259,7 @@ export default function ManageCandidate() {
                             <CandidateCard key={c.candidate_id} candidate={c} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} index={index} />
                         ))}
                         {loadingMore &&
-                            Array.from({ length: 3 }).map((_, i) => <CandidateCardSkeleton key={`more-${i}`} />)}
+                            Array.from({ length: 8 }).map((_, i) => <CandidateCardSkeleton key={`more-${i}`} />)}
                     </motion.div>
                     // </AnimatePresence>
                 )}

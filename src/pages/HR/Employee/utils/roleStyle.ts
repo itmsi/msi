@@ -8,7 +8,15 @@ export const ROLE_STYLE: Record<string, string> = {
     VP: 'bg-amber-100 text-amber-800 border-amber-200',
     BOD: 'bg-pink-100 text-pink-800 border-pink-200',
     PUB: 'bg-teal-100 text-teal-800 border-teal-200',
+    USER: 'bg-teal-100 text-teal-800 border-teal-200',
 };
 export const DEFAULT_ROLE_STYLE = 'bg-gray-100 text-gray-800 border-gray-200';
 // Stored role casing isn't consistent ("hr" vs "HR") — normalize before lookup/display.
 export const getRoleStyle = (role: string) => ROLE_STYLE[role.toUpperCase()] || DEFAULT_ROLE_STYLE;
+
+// Display-only rename — "PUB" is still the stored/submitted value everywhere
+// (existing records, API payloads) so nothing but the on-screen label changes.
+const ROLE_LABEL_OVERRIDES: Record<string, string> = {
+    PUB: 'USER',
+};
+export const getRoleLabel = (role: string) => ROLE_LABEL_OVERRIDES[role.toUpperCase()] || role.toUpperCase();

@@ -1,8 +1,8 @@
 ﻿import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { use, graphic } from 'echarts/core';
+import { BarChart, PieChart } from 'echarts/charts';
 import ReactECharts from 'echarts-for-react';
-import * as echarts from 'echarts/core';
-import { PieChart, BarChart } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
 import {
     TitleComponent,
@@ -21,13 +21,13 @@ import { PurchaseOrderDashboardItem } from './types/purchaseorder';
 import { usePurchaseOrderDashboard, ChartDataPoint, MultiSeriesChartData } from './hooks/usePurchaseOrderDashboard';
 import NavigationPO from './components/NavigationPO';
 
-echarts.use([PieChart, BarChart, CanvasRenderer, TitleComponent, TooltipComponent, LegendComponent, GridComponent]);
+use([PieChart, BarChart, CanvasRenderer, TitleComponent, TooltipComponent, LegendComponent, GridComponent]);
 
 // --- Helpers ---
 const SUBSIDIARY_MAP: Record<string, { label: string; color: string }> = {
-    'PT Indonesia Equipment Line':   { label: 'IEL', color: 'bg-[#bf1920] text-white' },
+    'PT Indonesia Equipment Line': { label: 'IEL', color: 'bg-[#bf1920] text-white' },
     'PT Indonesia Equipment Centre': { label: 'IEC', color: 'bg-[#f59e0b] text-white' },
-    'Motor Sights International':    { label: 'MSI', color: 'bg-[#0253a5] text-white' },
+    'Motor Sights International': { label: 'MSI', color: 'bg-[#0253a5] text-white' },
 };
 
 function getSubsidiaryBadge(subsidiaryDisplay: string) {
@@ -123,7 +123,7 @@ function POStatusChart({ data, loading }: { data: MultiSeriesChartData; loading:
             type: 'bar',
             barMaxWidth: 36,
             itemStyle: {
-                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                color: new graphic.LinearGradient(0, 0, 0, 1, [
                     { offset: 0, color: s.color },
                     { offset: 1, color: s.lightColor },
                 ]),
@@ -155,7 +155,7 @@ function SubsidiaryChart({ data, loading }: { data: ChartDataPoint[]; loading: b
             data: reversed.map(d => ({
                 value: d.value,
                 itemStyle: {
-                    color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                    color: new graphic.LinearGradient(1, 0, 0, 0, [
                         { offset: 0, color: '#6366f1' },
                         { offset: 1, color: '#c7d2fe' },
                     ]),
@@ -209,24 +209,24 @@ function POItemList({ title, items, loading, accentClass }: POItemListProps) {
                                 </div>
                                 <div className="space-y-1">
                                     <div className="text-xs text-gray-700">
-                                        Vendor: <span className="font-bold font-secondary block">{item.vendor_name || '-'}</span> 
+                                        Vendor: <span className="font-bold font-secondary block">{item.vendor_name || '-'}</span>
                                     </div>
                                     {title === 'Pending Approval' && (
                                         <div className="text-xs text-gray-700">
                                             Next Approver: <span className="font-bold font-secondary block">
                                                 {item.nextapprover || '-'}
-                                            </span> 
+                                            </span>
                                         </div>
                                     )}
                                     <div className="text-xs text-gray-700">
                                         Memo: <span className="font-primary-bold block">
                                             {item.memo || '-'}
-                                        </span> 
+                                        </span>
                                     </div>
                                     <div className="text-xs text-gray-700">
                                         Created By: <span className="font-primary-bold block">
                                             {item.created_by_name || '-'}
-                                        </span> 
+                                        </span>
                                     </div>
                                     {/* <div className="mt-2">
                                         {badgeType === 'approval'
@@ -272,12 +272,12 @@ export default function Dashboard() {
             parsePoDate(a.po_date) - parsePoDate(b.po_date);
 
         result.pendingApprovalItems = items?.pending_approval?.sort(sortByDate) || [];
-        result.pendingReceiptItems  = items?.pending_receipt?.sort(sortByDate) || [];
-        result.pendingBillItems     = items?.pending_bill?.sort(sortByDate) || [];
+        result.pendingReceiptItems = items?.pending_receipt?.sort(sortByDate) || [];
+        result.pendingBillItems = items?.pending_bill?.sort(sortByDate) || [];
 
         return result;
     }, [items]);
-    
+
     return (
         <>
             <PageMeta
@@ -289,7 +289,7 @@ export default function Dashboard() {
             {/* Page Content */}
             <div className="space-y-6">
                 {/* Page Header */}
-                
+
                 <div className="bg-white shadow rounded-lg">
                     <div className="px-6 py-4 border-b border-gray-200">
                         <div className="flex justify-between items-center">
@@ -309,9 +309,9 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <StatCard
                         icon={
-                            <MdPendingActions 
+                            <MdPendingActions
                                 className="text-amber-600"
-                                style={{ 
+                                style={{
                                     position: 'absolute',
                                     left: '-28px',
                                     top: '-31px',
@@ -328,9 +328,9 @@ export default function Dashboard() {
                     />
                     <StatCard
                         icon={
-                            <MdReceiptLong 
+                            <MdReceiptLong
                                 className="text-blue-600"
-                                style={{ 
+                                style={{
                                     position: 'absolute',
                                     left: '-28px',
                                     top: '-31px',
@@ -347,9 +347,9 @@ export default function Dashboard() {
                     />
                     <StatCard
                         icon={
-                            <MdRequestPage 
+                            <MdRequestPage
                                 className="text-emerald-600"
-                                style={{ 
+                                style={{
                                     position: 'absolute',
                                     left: '-28px',
                                     top: '-31px',

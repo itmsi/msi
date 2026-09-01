@@ -3,14 +3,13 @@ import React from 'react';
 import { interviewScheduleService, interviewFormService, type InterviewSchedule, type InterviewFormItem, type ScheduleCreateRequest } from '../../Candidate/services/interviewService';
 import { generateInterviewPDFBlob } from '../utils/PDFInterviewReport';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaChartSimple, FaChevronDown, FaChevronUp, FaClipboardCheck, FaRegPenToSquare, FaSpinner } from 'react-icons/fa6';
+import { FaPlus, FaChevronDown, FaChevronUp, FaClipboardCheck, FaRegPenToSquare, FaSpinner } from 'react-icons/fa6';
 import { MdAdd, MdDeleteOutline } from 'react-icons/md';
-import ModalScoreInterview from '../../Candidate/components/ModalScoreInterview';
-import { getMultipliedScore } from '../../Candidate/components/InterviewScoreChart';
+import InterviewScoreChart, { getMultipliedScore } from '../../Candidate/components/InterviewScoreChart';
 import FormScoringCanvas from './FormScoringCanvas';
 import { PDFPreviewModal } from './PDFPreviewModal';
 import InterviewerScoreCard from './InterviewerScoreCard';
-import { dedupeFormsByCategory } from '../utils/interviewFormHelpers';
+import { dedupeFormsByCategory, getAssignRoleArr, getLatestInterviewerForms } from '../utils/interviewFormHelpers';
 import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import { Modal } from '@/components/ui/modal';
 import Button from '@/components/ui/button/Button';
@@ -31,12 +30,7 @@ interface DateInterviewTabProps {
 }
 
 const ROLE_OPTIONS = ['HR', 'GM', 'VP', 'BOD', 'PUB'];
-// const DURATION_OPTIONS = ['15m', '30m', '45m', '60m', '90m'];
-// Cap chips shown per row so rows with many assigned roles don't grow taller than others.
 const MAX_VISIBLE_ROLES = 5;
-
-// Same badge language as the rest of the app (e.g. /netsuite/sales-orders StatusTypeBadge):
-// bg-X-100 / text-X-800 / border-X-200, rounded-full, bordered — no custom hex or shadows.
 const ROLE_STYLE: Record<string, string> = {
     HR: 'bg-indigo-100 text-indigo-800 border-indigo-200',
     GM: 'bg-green-100 text-green-800 border-green-200',
@@ -45,8 +39,11 @@ const ROLE_STYLE: Record<string, string> = {
     PUB: 'bg-teal-100 text-teal-800 border-teal-200',
 };
 const DEFAULT_ROLE_STYLE = 'bg-gray-100 text-gray-800 border-gray-200';
-// Stored role casing isn't consistent ("hr" vs "HR") — normalize before lookup/display.
 const getRoleStyle = (role: string) => ROLE_STYLE[role.toUpperCase()] || DEFAULT_ROLE_STYLE;
+const ROLE_LABEL_OVERRIDES: Record<string, string> = {
+    PUB: 'USER',
+};
+const getRoleLabel = (role: string) => ROLE_LABEL_OVERRIDES[role.toUpperCase()] || role.toUpperCase();
 
 const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTabProps) => {
     const [schedules, setSchedules] = useState<InterviewSchedule[]>([]);
@@ -58,8 +55,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
     const [showDeleteFormConfirm, setShowDeleteFormConfirm] = useState(false);
     const [deletingFormId, setDeletingFormId] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
-    // Panel penilaian interview kini dirender inline di bawah baris jadwalnya,
-    // bukan lagi offcanvas — hanya satu panel yang aktif dalam satu waktu.
     const [scoringPanel, setScoringPanel] = useState<{ scheduleId: string; editingFormId?: string } | null>(null);
     const [expandedSchedules, setExpandedSchedules] = useState<Record<string, boolean>>({});
     const [scheduleForms, setScheduleForms] = useState<Record<string, InterviewFormItem[]>>({});
@@ -71,12 +66,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
 
     const [form, setForm] = useState({ date: '', time: '', duration: '', assign_role: [] as string[] });
 
-    const getAssignRoleArr = (s: InterviewSchedule): string[] => {
-        if (!s.assign_role) return [];
-        if (typeof s.assign_role === 'string') return s.assign_role.split(',').map(r => r.trim());
-        return (s.assign_role?.role || '').split(',').map(r => r.trim()).filter(Boolean);
-    };
-
     const fetchData = async () => {
         if (!candidateId) return;
         setLoading(true);
@@ -84,9 +73,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
             const result = await interviewScheduleService.getList(candidateId);
             const list = result.data || [];
             setSchedules(list);
-            // Prefetch forms per schedule — the row's score badge and the
-            // expanded-view "no submissions yet" state both read scheduleForms
-            // directly without fetching on their own, so this can't be lazy.
             list.forEach((s) => { fetchScheduleForms(s.schedule_interview_id); });
         } catch {
             toast.error('Failed to load schedules');
@@ -127,7 +113,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
     };
 
     const closeScoringPanel = () => {
-        // if (scoringPanel) fetchScheduleForms(scoringPanel.scheduleId);
+        if (scoringPanel) fetchScheduleForms(scoringPanel.scheduleId);
         setScoringPanel(null);
     };
 
@@ -181,28 +167,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
         setPdfPreview(null);
     };
 
-    const handleOpenScoreStats = async (scheduleId: string) => {
-        const forms = scheduleForms[scheduleId];
-        if (forms) {
-            setFormScoreData(getFormScoreData(forms));
-            setShowFormScore(true);
-            return;
-        }
-
-        setLoadingForms(prev => ({ ...prev, [scheduleId]: true }));
-        try {
-            const result = await interviewFormService.getList({ schedule_interview_id: scheduleId });
-            const loadedForms = result.data || [];
-            setScheduleForms(prev => ({ ...prev, [scheduleId]: loadedForms }));
-            setFormScoreData(getFormScoreData(loadedForms));
-            setShowFormScore(true);
-        } catch {
-            toast.error('Failed to load interview forms');
-        } finally {
-            setLoadingForms(prev => ({ ...prev, [scheduleId]: false }));
-        }
-    };
-
     const openAdd = () => {
         setEditing(null);
         setForm({ date: '', time: '', duration: '', assign_role: [] });
@@ -215,8 +179,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
         const rawTime = s.schedule_interview_time || '';
         const dateOnly = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate;
         const timeOnly = rawTime.length > 5 ? rawTime.substring(0, 5) : rawTime;
-        // Normalize casing so chips match ROLE_OPTIONS regardless of how it was stored
-        // ("hr" vs "HR") — also self-heals the data since it re-saves uppercase.
         setForm({ date: dateOnly, time: timeOnly, duration: s.schedule_interview_duration || '', assign_role: getAssignRoleArr(s).map(r => r.toUpperCase()) });
         setShowModal(true);
     };
@@ -357,11 +319,11 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                         <div className="flex flex-nowrap gap-1">
                                                             {visibleRoles.map((role, i) => (
                                                                 <span key={i} className={`shrink-0 inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-primary ${getRoleStyle(role)}`}>
-                                                                    {role.toUpperCase()}
+                                                                    {getRoleLabel(role)}
                                                                 </span>
                                                             ))}
                                                             {extraRoles.length > 0 && (
-                                                                <Tooltip content={extraRoles.map(r => r.toUpperCase()).join(', ')} position="top">
+                                                                <Tooltip content={extraRoles.map(r => getRoleLabel(r)).join(', ')} position="top">
                                                                     <span className={`shrink-0 inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-primary ${DEFAULT_ROLE_STYLE}`}>
                                                                         +{extraRoles.length}
                                                                     </span>
@@ -378,13 +340,13 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                     }
                                                     const forms = scheduleForms[s.schedule_interview_id] || [];
                                                     if (!forms.length) return <span className="text-xs text-[#9AA2BA]">Not scored</span>;
-                                                    const totalScore = forms.reduce((sum, f) => {
+                                                    const totalScore = getLatestInterviewerForms(forms).reduce((sum, f) => {
                                                         const categoryScore = f.detail_interviews?.reduce((s2, d) => s2 + (parseInt(d.score) || 0), 0) || 0;
                                                         return sum + getMultipliedScore(f.company_value, categoryScore);
                                                     }, 0);
                                                     return (
                                                         <div className="flex items-center gap-1.5">
-                                                            <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-bold bg-indigo-100 text-indigo-800 border-indigo-200">
+                                                            <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs border rounded-full font-primary-bold bg-indigo-100 text-indigo-800 border-indigo-200">
                                                                 {totalScore}
                                                             </span>
                                                         </div>
@@ -410,7 +372,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                             </PermissionButton>
                                                         </Tooltip>
                                                     }
-                                                    <Tooltip content="Score Stats" position="top">
+                                                    {/* <Tooltip content="Score Stats" position="top">
                                                         <PermissionButton
                                                             permission={['read']}
                                                             onClick={() => handleOpenScoreStats(s.schedule_interview_id)}
@@ -418,7 +380,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                         >
                                                             <FaChartSimple className="w-4 h-4" />
                                                         </PermissionButton>
-                                                    </Tooltip>
+                                                    </Tooltip> */}
                                                     <Tooltip content="Edit Schedule" position="top">
                                                         <PermissionButton
                                                             permission={['read']}
@@ -515,8 +477,6 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
             <Modal
                 isOpen={!!scoringPanel}
                 onClose={closeScoringPanel}
-                // showCloseButton={true}
-                // title={`${scoringPanel?.editingFormId ? 'Edit' : 'New'} Score`}
                 className="w-5xl! max-w-full min-h-[90vh] rounded-2xl! border! border-[#E7E9F0]! shadow-xl! max-h-[85vh]! overflow-hidden! flex! flex-col!"
             >
                 {scoringPanel && (() => {
@@ -556,7 +516,15 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                 })()}
             </Modal>
 
-            <ModalScoreInterview show={showFormScore} onClose={() => setShowFormScore(false)} scoreData={formScoreData} />
+            <Modal
+                isOpen={showFormScore}
+                onClose={() => setShowFormScore(false)}
+                className="max-w-4xl! rounded-2xl! max-h-[85vh]! overflow-y-auto!"
+            >
+                <div className="px-0 py-5">
+                    <InterviewScoreChart metrics={formScoreData} />
+                </div>
+            </Modal>
 
             {pdfPreview && (
                 <PDFPreviewModal
@@ -641,7 +609,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                         className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${active ? 'bg-[#0253a5] text-white border-[#0253a5]' : 'bg-white text-[#5B6480] border-[#E7E9F0] hover:border-[#C4C9DA]'
                                             }`}
                                     >
-                                        {role}
+                                        {getRoleLabel(role)}
                                     </button>
                                 );
                             })}

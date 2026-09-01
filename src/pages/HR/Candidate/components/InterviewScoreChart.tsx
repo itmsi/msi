@@ -8,6 +8,7 @@ import {
     Legend,
 } from 'chart.js';
 import { Radar } from 'react-chartjs-2';
+import { formatDecimal } from '../../Employee/utils/interviewFormHelpers';
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
@@ -33,13 +34,12 @@ const DESIRED_ORDER = ['SIAH', '7 Values', 'CSE', 'SDT', 'EXPERIENCE'];
 export const getMultipliedScore = (companyValue: string, score: number): number => {
     switch (companyValue) {
         case 'SIAH':
-            return score * 2;
+            return formatDecimal(score * 2);
         case '7 Values': {
-            const multipliedValue = score * 1.7;
-            return Math.floor(multipliedValue) + (multipliedValue % 1 >= 0.5 ? 1 : 0);
+            return formatDecimal(score * 1.7);
         }
         case 'CSE':
-            return score * 2;
+            return formatDecimal(score * 2);
         default:
             return score;
     }
@@ -64,8 +64,8 @@ const InterviewScoreChart = ({ metrics = [] }: InterviewScoreChartProps) => {
 
     if (!isValid) {
         return (
-            <div className="p-4 border rounded bg-white shadow-sm m-2 text-center">
-                <h5 className="mb-3 font-semibold">Interview Scoring</h5>
+            <div className="p-4 border rounded bg-white text-center">
+                <h5 className="mb-3 font-primary-bold">Interview Scoring</h5>
                 <p className="text-gray-500">No scoring data available or insufficient data to display chart</p>
             </div>
         );
@@ -206,7 +206,7 @@ const InterviewScoreChart = ({ metrics = [] }: InterviewScoreChartProps) => {
     };
 
     return (
-        <div className="p-4 border rounded bg-white shadow-sm m-2">
+        <div className="p-4 bg-white">
             <div className="flex flex-col lg:flex-row items-center gap-6">
                 {/* Chart */}
                 <div className="w-full lg:w-2/3" style={{ height: '400px' }}>
@@ -216,12 +216,12 @@ const InterviewScoreChart = ({ metrics = [] }: InterviewScoreChartProps) => {
                 {/* Score Summary */}
                 <div className="w-full lg:w-1/3 text-center">
                     <div className="mb-4">
-                        <div className="text-5xl font-bold text-[#0253a5]">{total}</div>
+                        <div className="text-5xl font-primary-bold text-[#0253a5]">{total}</div>
                         <div className="text-2xl text-gray-600 mt-1">{remark}</div>
                     </div>
                     <div className="mb-4">
                         <span className="text-gray-400 text-sm">Recommendation</span>
-                        <h5 className="text-base font-semibold text-gray-800">{recommendation}</h5>
+                        <h5 className="text-base font-primary-bold text-gray-800">{recommendation}</h5>
                     </div>
                 </div>
             </div>
@@ -239,7 +239,7 @@ const InterviewScoreChart = ({ metrics = [] }: InterviewScoreChartProps) => {
                         return (
                             <div key={value} className="border border-gray-200 rounded-lg p-3">
                                 <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm font-bold text-gray-800">{value}</span>
+                                    <span className="text-sm font-primary-bold text-gray-800">{value}</span>
                                     <span
                                         className={`text-xs px-2 py-0.5 rounded-full font-medium ${achieved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
                                             }`}
@@ -250,7 +250,7 @@ const InterviewScoreChart = ({ metrics = [] }: InterviewScoreChartProps) => {
                                 <div className="space-y-1 text-xs text-gray-600 mb-2">
                                     <div className="flex justify-between">
                                         <span>Actual Score:</span>
-                                        <span className="font-bold">{actual}</span>
+                                        <span className="font-primary-bold">{actual}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span>Standard Target:</span>
@@ -258,7 +258,7 @@ const InterviewScoreChart = ({ metrics = [] }: InterviewScoreChartProps) => {
                                     </div>
                                     <div className="flex justify-between">
                                         <span>Percentage:</span>
-                                        <span className="font-bold text-[#0253a5]">{pct}%</span>
+                                        <span className="font-primary-bold text-[#0253a5]">{pct}%</span>
                                     </div>
                                 </div>
                                 {/* Progress Bar */}

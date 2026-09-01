@@ -7,7 +7,7 @@ export class CandidateService {
     static async getCandidates(params: Partial<CandidateRequest> = {}): Promise<CandidateListResult> {
         const requestData: CandidateRequest = {
             page: 1,
-            limit: 10,
+            limit: 12,
             search: '',
             sort_by: 'created_at',
             sort_order: 'desc',

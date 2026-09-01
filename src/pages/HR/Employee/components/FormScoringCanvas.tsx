@@ -261,7 +261,7 @@ const ScoringForm = ({ title, caption, companyValue, aspects, scheduleInterviewI
                     <div className="text-[10px] uppercase tracking-wide text-gray-500 mt-0.5">Total Score</div>
                 </div>
             </div>
-            <div className="overflow-y-auto mb-0 max-h-[65dvh] md:pb-25 pb-55">
+            <div className="overflow-y-auto mb-0 max-h-[50dvh] md:pb-25 pb-55">
                 <HRAccordion
                     allowMultiple
                     defaultOpenFirst
@@ -431,7 +431,7 @@ const SDTForm = ({ scheduleInterviewId, interviewId, onSuccess }: { scheduleInte
                         isClearable
                     />
                 </div>
-                <div><Label>Auto Point</Label><div className="px-3 py-2 bg-[#FAFAFB] border border-[#E7E9F0] rounded-lg text-lg font-bold text-[#1F2430]">{pointValue || '-'}</div></div>
+                <div><Label>Auto Point</Label><div className="px-3 py-2 bg-[#FAFAFB] border border-[#E7E9F0] rounded-lg text-lg font-primary-bold text-[#1F2430]">{pointValue || '-'}</div></div>
                 <div><label>Remark</label>
                     <TextArea value={remark} onChange={(e) => setRemark(e.target.value)} rows={3} placeholder="Remark" />
                 </div>

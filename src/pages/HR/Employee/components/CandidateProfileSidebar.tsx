@@ -118,7 +118,7 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
                 </InfoRow>
                 <InfoRow icon={MdMail} label="Email">{candidate.candidate_email || '-'}</InfoRow>
                 <InfoRow icon={MdPhone} label="Phone">{candidate.candidate_phone || '-'}</InfoRow>
-                <InfoRow icon={MdLocationOn} label="Address">{formatAddress(candidate) || '-'}</InfoRow>
+                <InfoRow icon={MdLocationOn} label="Address" fullWidth={true}>{formatAddress(candidate) || '-'}</InfoRow>
             </div>
 
             <div className="mt-2 pt-4 border-t border-[#E7E9F0] grid grid-cols-2 gap-x-2">

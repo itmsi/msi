@@ -39,7 +39,7 @@ const mapPODetailToForm = (detail: PODetailData): ItemReceiptPayload => {
         memo: detail.memo || '',
         subsidiary: detail.subsidiary ?? 0,
         subsidiary_display: detail.subsidiary_display || '',
-        trandate: flatpickr.formatDate(new Date(), "d/m/Y"), // Set default receive date ke sekarang, bisa diubah sesuai kebutuhan
+        trandate: detail.trandate || flatpickr.formatDate(new Date(), "d/m/Y"), // Set default receive date ke sekarang, bisa diubah sesuai kebutuhan
         location: detail.location !== undefined ? Number(detail.location) : 0,
         location_display: detail.location_display || '',
         department: detail.department !== undefined ? Number(detail.department) : 0,
@@ -77,7 +77,7 @@ const mapReceiptItemToForm = (receipt: ReceiptItem): ItemReceiptPayload => {
         memo: receipt.memo || '',
         vendorid: Number(receipt.vendor_id) || null,
         vendor_name: receipt.vendor_name || null,
-        trandate: flatpickr.formatDate(new Date(), "d/m/Y"),
+        trandate: receipt.trandate || flatpickr.formatDate(new Date(), "d/m/Y"),
         subsidiary: Number(receipt.subsidiary) || 0,
         subsidiary_display: receipt.subsidiary_display || '',
         location: Number(receipt.location) || 0,

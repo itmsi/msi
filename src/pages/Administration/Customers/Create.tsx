@@ -35,7 +35,7 @@ interface CreateCustomerFormData {
 
 export default function CreateCustomer() {
     const navigate = useNavigate();
-    const [taxBuyerTypes, setTaxBuyerTypes] = useState<{value: string, label: string}[]>([]);
+    const [taxBuyerTypes, setTaxBuyerTypes] = useState<{ value: string, label: string }[]>([]);
 
     useEffect(() => {
         const fetchTaxTypes = async () => {
@@ -50,10 +50,10 @@ export default function CreateCustomer() {
     }, []);
 
     // Hook for creating customer
-    const { 
+    const {
         isCreating,
         isValidating,
-        validationErrors, 
+        validationErrors,
         validationResult,
         showConfirmation,
         validateCustomer,
@@ -61,8 +61,9 @@ export default function CreateCustomer() {
         cancelConfirmation,
         clearFieldError
     } = useCreateCustomer();
-    
-    const [contactErrors, setContactErrors] = useState<Record<string,string>>({});
+
+    const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     // State for form data
     const [formData, setFormData] = useState<CreateCustomerFormData>({
@@ -95,7 +96,7 @@ export default function CreateCustomer() {
             clearFieldError(field as keyof CustomerValidationErrors);
         }
     };
-    
+
     // Contact person handlers
     const handleAddContact = () => {
         setFormData(prev => ({
@@ -114,11 +115,11 @@ export default function CreateCustomer() {
     const handleContactChange = (index: number, field: keyof ContactPerson, value: string | number) => {
         setFormData(prev => ({
             ...prev,
-            contact_persons: prev.contact_persons.map((contact, i) => 
+            contact_persons: prev.contact_persons.map((contact, i) =>
                 i === index ? { ...contact, [field]: value } : contact
             )
         }));
-        
+
         // Clear error for this specific field when user types
         const errorKey = `contact_${index}_${field}`;
         if (contactErrors[errorKey]) {
@@ -133,7 +134,7 @@ export default function CreateCustomer() {
     // Validate contact persons
     const validateContacts = (): boolean => {
         const errors: Record<string, string> = {};
-        
+
         formData.contact_persons.forEach((contact, index) => {
             // Validate email format if provided
             if (contact.contact_person_email && contact.contact_person_email.trim()) {
@@ -141,7 +142,7 @@ export default function CreateCustomer() {
                     errors[`contact_${index}_contact_person_email`] = 'Invalid email format';
                 }
             }
-            
+
             // Validate phone format if provided
             if (contact.contact_person_phone && contact.contact_person_phone.trim()) {
                 if (!CustomerUtilityService.validatePhone(contact.contact_person_phone)) {
@@ -149,44 +150,59 @@ export default function CreateCustomer() {
                 }
             }
         });
-        
+
         setContactErrors(errors);
         return Object.keys(errors).length === 0;
     };
 
     // Form validation
     const validateForm = (): boolean => {
-        const errors: CustomerValidationErrors = {};
-        
-        if (!formData.customer_name.trim()) {
-            errors.customer_name = 'Customer name is required';
+
+        const next: Record<string, string> = {};
+
+        if (!formData.customer_name.trim()) next.customer_name = 'Customer name is required';
+        if (!formData.customer_address.trim()) next.customer_address = 'Customer address is required';
+        if (!formData.contact_person.trim()) next.contact_person = 'Contact person is required';
+
+        const customerPhone = formData.customer_phone.replace(/\s|-/g, '');
+        if (customerPhone && customerPhone.length < 7) {
+            next.customer_phone = 'Phone number must be at least 7 characters';
         }
 
-        if (!formData.contact_person.trim()) {
-            errors.contact_person = 'Contact person is required';
-        }
-    
-        
-        if (!formData.customer_phone.trim()) {
-            errors.customer_phone = 'Customer phone is required';
-        }
-        
-        if (!formData.customer_address.trim()) {
-            errors.customer_address = 'Customer address is required';
-        }
+        setErrors(next);
+        return Object.keys(next).length === 0;
 
-        return Object.keys(errors).length === 0;
+        // const errors: CustomerValidationErrors = {};
+
+        // if (!formData.customer_name.trim()) {
+        //     errors.customer_name = 'Customer name is required';
+        // }
+
+        // // if (!formData.contact_person.trim()) {
+        // //     errors.contact_person = 'Contact person is required';
+        // // }
+
+
+        // // if (!formData.customer_phone.trim()) {
+        // //     errors.customer_phone = 'Customer phone is required';
+        // // }
+
+        // if (!formData.customer_address.trim()) {
+        //     errors.customer_address = 'Customer address is required';
+        // }
+
+        // return Object.keys(errors).length === 0;
     };
 
     // Form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!validateForm()) {
             toast.error('Please fix the validation errors');
             return;
         }
-        
+
         // Validate contact persons
         if (!validateContacts()) {
             toast.error('Please fix contact person errors');
@@ -196,7 +212,7 @@ export default function CreateCustomer() {
         try {
             // First validate for duplicates
             const response = await validateCustomer(formData);
-            
+
             if (!response.success) {
                 toast.error(response.message || 'Validation failed');
             }
@@ -209,7 +225,7 @@ export default function CreateCustomer() {
     const handleConfirmCreation = async () => {
         try {
             const response = await proceedWithCreation();
-            
+
             if (response.success) {
                 toast.success('Customer created successfully');
                 navigate('/quotations/administration/customers');
@@ -234,7 +250,7 @@ export default function CreateCustomer() {
                         {data.message}
                     </p>
                     <p className="text-sm text-green-600">
-                       The customer can be created successfully.
+                        The customer can be created successfully.
                     </p>
                 </div>
             );
@@ -261,7 +277,7 @@ export default function CreateCustomer() {
                                 <span className="font-medium">Entered Name:</span>
                                 <span className="text-gray-900 font-primary-bold">{data?.duplicates?.[0]?.requestName || '-'}</span>
                             </div>
-                            
+
                             <div className="grid grid-cols-1 gap-2">
                                 <span className="font-medium">Matched Name:</span>
                                 <ul className="list-outside list-disc rounded-xl pl-5">
@@ -269,7 +285,7 @@ export default function CreateCustomer() {
                                         <li key={index}><span className="text-gray-900 font-primary-bold">{duplicate.matchedName}</span></li>
                                     ))}
                                 </ul>
-                                
+
                             </div>
                         </div>
                         {/* {data.duplicates.map((duplicate, index) => (
@@ -333,10 +349,10 @@ export default function CreateCustomer() {
                         <div className="md:col-span-3 p-8 relative">
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 <h2 className="text-lg font-primary-bold font-medium text-gray-900 md:col-span-2">Basic Information</h2>
-                                
+
                                 {/* Customer Name */}
                                 <div className="md:col-span-4">
-                                    <Label htmlFor="customer_name">Customer Name *</Label>
+                                    <Label htmlFor="customer_name">Customer Name <span className="text-error-500">*</span></Label>
                                     <Input
                                         id="customer_name"
                                         type="text"
@@ -346,7 +362,8 @@ export default function CreateCustomer() {
                                             handleInputChange('customer_name', replaceDot.toUpperCase());
                                         }}
                                         placeholder="Enter customer name"
-                                        error={!!validationErrors.customer_name}
+                                        error={!!errors.customer_name || !!validationErrors.customer_name}
+                                        hint={errors.customer_name || validationErrors.customer_name}
                                     />
                                     {validationErrors.customer_name && (
                                         <span className="text-sm text-red-500">{validationErrors.customer_name}</span>
@@ -360,39 +377,32 @@ export default function CreateCustomer() {
                                         value={formData.customer_code}
                                         onChange={(e) => handleInputChange('customer_code', e.target.value)}
                                         placeholder="Enter customer code"
-                                        error={!!validationErrors.customer_code}
                                     />
-                                    {validationErrors.customer_code && (
-                                        <span className="text-sm text-red-500">{validationErrors.customer_code}</span>
-                                    )}
                                 </div>
                                 <div className="md:col-span-2">
-                                    <Label htmlFor="contact_person">Contact Person *</Label>
+                                    <Label htmlFor="contact_person">Contact Person <span className="text-error-500">*</span></Label>
                                     <Input
                                         id="contact_person"
                                         type="text"
                                         value={formData.contact_person}
                                         onChange={(e) => handleInputChange('contact_person', e.target.value)}
                                         placeholder="Enter contact person"
-                                        error={!!validationErrors.contact_person}
+                                        error={!!errors.contact_person || !!validationErrors.contact_person}
+                                        hint={errors.contact_person || validationErrors.contact_person}
                                     />
                                     {validationErrors.contact_person && (
                                         <span className="text-sm text-red-500">{validationErrors.contact_person}</span>
                                     )}
                                 </div>
                                 <div className="md:col-span-2">
-                                    <Label htmlFor="job_title">Job Title *</Label>
+                                    <Label htmlFor="job_title">Job Title </Label>
                                     <Input
                                         id="job_title"
                                         type="text"
                                         value={formData.job_title}
                                         onChange={(e) => handleInputChange('job_title', e.target.value)}
                                         placeholder="Enter job title"
-                                        error={!!validationErrors.job_title}
                                     />
-                                    {validationErrors.job_title && (
-                                        <span className="text-sm text-red-500">{validationErrors.job_title}</span>
-                                    )}
                                 </div>
 
                                 {/* Customer Email */}
@@ -409,7 +419,7 @@ export default function CreateCustomer() {
 
                                 {/* Customer Phone */}
                                 <div className="md:col-span-2">
-                                    <Label htmlFor="customer_phone">Phone *</Label>
+                                    <Label htmlFor="customer_phone">Phone</Label>
                                     <Input
                                         id="customer_phone"
                                         type="text"
@@ -417,27 +427,23 @@ export default function CreateCustomer() {
                                         onChange={(e) => handleInputChange('customer_phone', e.target.value)}
                                         placeholder="Enter customer phone"
                                         onKeyPress={handleKeyPress}
-                                        error={!!validationErrors.customer_phone}
+                                        error={!!errors.customer_phone || !!validationErrors.customer_phone}
+                                        hint={errors.customer_phone || validationErrors.customer_phone}
                                     />
-                                    {validationErrors.customer_phone && (
-                                        <span className="text-sm text-red-500">{validationErrors.customer_phone}</span>
-                                    )}
                                 </div>
 
                                 {/* Customer Address */}
                                 <div className="md:col-span-4">
-                                    <Label htmlFor="customer_address">Address *</Label>
+                                    <Label htmlFor="customer_address">Address <span className="text-error-500">*</span></Label>
                                     <Input
                                         id="customer_address"
                                         type="text"
                                         value={formData.customer_address}
                                         onChange={(e) => handleInputChange('customer_address', e.target.value)}
                                         placeholder="Enter customer address"
-                                        error={!!validationErrors.customer_address}
+                                        error={!!errors.customer_address || !!validationErrors.customer_address}
+                                        hint={errors.customer_address || validationErrors.customer_address}
                                     />
-                                    {validationErrors.customer_address && (
-                                        <span className="text-sm text-red-500">{validationErrors.customer_address}</span>
-                                    )}
                                 </div>
 
                                 {/* Customer City */}
@@ -555,7 +561,7 @@ export default function CreateCustomer() {
                             </Button>
                             <Button
                                 onClick={() => {
-                                    const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
+                                    const fakeEvent = { preventDefault: () => { } } as React.FormEvent;
                                     handleSubmit(fakeEvent);
                                 }}
                                 disabled={isCreating || isValidating}

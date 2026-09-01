@@ -18,7 +18,7 @@ export const useCandidateManagement = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const location = useLocation();
     // const urlPage = Math.max(Number(searchParams.get('page')) || 1, 1);
-    const urlLimit = Math.max(Number(searchParams.get('limit')) || 10, 1);
+    const urlLimit = Math.max(Number(searchParams.get('limit')) || 12, 1);
 
     const urlFilters: FilterState = {
         search: searchParams.get('search') ?? '',

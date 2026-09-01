@@ -15,7 +15,7 @@ const INTERVIEWER_OPTIONS = [
     { value: 'GM', label: 'GM' },
     { value: 'VP', label: 'VP' },
     { value: 'BOD', label: 'BOD' },
-    { value: 'PUB', label: 'PUB' },
+    { value: 'PUB', label: 'USER' },
 ];
 
 interface FilterSectionProps {
@@ -55,7 +55,11 @@ export default function FilterSection({ filters, onFilterChange, onClearFilters 
                     <CustomSelect
                         placeholder="All Interviewers"
                         options={INTERVIEWER_OPTIONS}
-                        value={filters.assign_role ? { value: filters.assign_role, label: filters.assign_role } : null}
+                        value={
+                            filters.assign_role
+                                ? INTERVIEWER_OPTIONS.find((o) => o.value === filters.assign_role) || { value: filters.assign_role, label: filters.assign_role }
+                                : null
+                        }
                         onChange={(opt) => onFilterChange({ assign_role: opt?.value || '' })}
                         isClearable
                         isSearchable={false}
