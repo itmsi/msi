@@ -281,6 +281,7 @@ const AppSidebar: React.FC = () => {
                 'Sales Order Netsuite',
                 'Transfer Order Netsuite',
                 'Manage Receipts Netsuite',
+                'Fulfillment Netsuite',
                 'Bill Payment Netsuite',
                 'Quotation Netsuite'
             ],
@@ -290,6 +291,7 @@ const AppSidebar: React.FC = () => {
                 { name: "Sales Orders", path: "/netsuite/sales-orders", allowedRoles: ['Sales Order Netsuite'] },
                 { name: "Transfer Orders", path: "/netsuite/transfer-orders", allowedRoles: ['Transfer Order Netsuite'] },
                 { name: "Receipts", path: "/netsuite/receipts", allowedRoles: ['Manage Receipts Netsuite'] },
+                { name: "Fulfillments", path: "/netsuite/fulfillments", allowedRoles: ['Fulfillment Netsuite'] },
                 { name: "Bill Payment", path: "/netsuite/bill-payment", allowedRoles: ['Bill Payment Netsuite'] },
                 { name: "Quotation", path: "/netsuite/quotation", allowedRoles: ['Quotation Netsuite'] },
                 { name: "Admin Sync", path: "/netsuite/sync", allowedRoles: ['Admin Sync Netsuite'] },
