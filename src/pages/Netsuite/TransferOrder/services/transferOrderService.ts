@@ -114,7 +114,7 @@ export class TransferOrderService {
     }
 
     static async attachFileDeleteDetailTO(id: string, toId: string): Promise<any> {
-        const response = await apiDelete(`${API_BASE_URL}/netsuite/attach_file/${id}/${toId}`);
+        const response = await apiDelete(`${API_BASE_URL}/netsuite/attach_file/${id}/${toId}/transfer_order`);
         return response.data;
     }
 }
