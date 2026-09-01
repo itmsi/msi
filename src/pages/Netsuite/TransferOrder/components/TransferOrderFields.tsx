@@ -4,7 +4,6 @@ import Checkbox from '@/components/form/input/Checkbox';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import { TransferOrderFormData } from '../types/transferOrder';
-import { TOInvoiceSummary } from './TransferOrderItemFields';
 import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
 import { useEffect, useRef, useState } from 'react';
 import { convertDateToTanggal, formatTanggal, parseTanggalToDate } from '@/helpers/generalHelper';
@@ -217,9 +216,9 @@ export default function TransferOrderFields({
     return (
         <div className="space-y-6 mb-6">
 
-            {/* Primary Information (kiri) + Summary (kanan) — sejajar persis seperti record Transfer Order di NetSuite */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm space-y-6 p-6">
+            {/* Primary Information — full width selagi masih editable; Summary item pindah ke tab Items (pola sama seperti PO) */}
+            <div className="grid grid-cols-1 gap-6 items-start">
+                <div className="bg-white rounded-2xl shadow-sm space-y-6 p-6">
                     <h3 className="text-md font-primary-bold font-medium text-gray-900">Primary Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
 
@@ -342,7 +341,7 @@ export default function TransferOrderFields({
 
                             {/* Employee */}
                             <div>
-                                <Label htmlFor="to-employee">Employee <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="to-employee">Employee</Label>
                                 <CustomAsyncSelect
                                     name="employee"
                                     value={selectedEmployee}
@@ -392,16 +391,14 @@ export default function TransferOrderFields({
                                 onChange={(checked) => onSelectChange('use_item_cost_as_transfer_cost', checked)}
                             />
 
-                            {/* Incoterm */}
+                            {/* Incoterm — dihardcode DAP (netsuite id 1) buat semua TO dari aplikasi ini */}
                             <div>
                                 <Label htmlFor="to-incoterm">Incoterm</Label>
                                 <InputField
                                     id="to-incoterm"
                                     name="incoterm"
-                                    type="number"
-                                    value={formData.incoterm ?? ''}
-                                    onChange={(e) => onSelectChange('incoterm', e.target.value ? Number(e.target.value) : null)}
-                                    placeholder="Incoterm ID"
+                                    value="DAP"
+                                    disabled
                                 />
                             </div>
 
@@ -426,12 +423,6 @@ export default function TransferOrderFields({
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* Summary (kotak terpisah di kanan, seperti di NetSuite; isinya pakai pola InvoiceSummary PO/SO/Quotation) */}
-                <div className="lg:col-span-1 bg-white rounded-2xl shadow-sm p-6">
-                    <h3 className="text-md font-primary-bold font-medium text-gray-900 mb-4">Summary</h3>
-                    <TOInvoiceSummary items={formData.items} serverTotal={formData.total} />
                 </div>
             </div>
 
