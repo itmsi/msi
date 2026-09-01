@@ -469,7 +469,7 @@ export default function TransferOrderItemFields({
                             responsive
                             striped={false}
                             highlightOnHover={false}
-                            className={`min-h-[300px]`}
+                            className={`min-h-[100px]`}
                             noDataComponent={
                                 <div className="text-center py-8 text-gray-500">
                                     No items added yet

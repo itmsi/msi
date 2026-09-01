@@ -17,6 +17,7 @@ const SOURCE_TYPE_OPTIONS = [
     { value: 'purchase_order', label: 'Purchase Order' },
     { value: 'transfer_order', label: 'Transfer Order' },
     { value: 'customer_return', label: 'Customer Return' },
+    { value: 'inbound_shipment', label: 'Inbound Shipment' },
 ];
 
 export default function Manage() {

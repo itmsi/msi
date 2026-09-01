@@ -59,6 +59,8 @@ export interface ReceiptItem {
     vendor_name: string;
     createdfrom: string;
     createdfrom_display: string;
+    inboundshipment?: string | null;
+    inboundshipment_display?: string | null;
     source_type: string | null;
     source_type_display: string | null;
     subsidiary: string;
