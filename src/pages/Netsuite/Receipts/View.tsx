@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MdInventory2, MdOutlineAttachFile, MdOutlineComment } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
 import Button from '@/components/ui/button/Button';
-import { formatDateTime } from '@/helpers/generalHelper';
 import { ReceiptService } from './services/receiptService';
 import { ReceiptItem } from './types/receipt';
 import ReceiptFields from './components/ReceiptFields';
@@ -12,6 +11,7 @@ import FilesItems from '../Fulfillment/components/FilesItems';
 import NotesTab from '../Fulfillment/components/tab/NotesTab';
 import useGoBack from '@/hooks/useGoBack';
 import PageHeader from '@/components/common/PageHeader';
+import { FaExternalLinkAlt } from 'react-icons/fa';
 
 const parseLines = <T,>(lines?: string | T[] | null): T[] => {
     if (!lines) return [];
@@ -77,6 +77,12 @@ export default function View() {
     const lines = parseLines(receipt.lines);
     const files = parseLines(receipt.files);
     const notes = parseLines(receipt.user_notes);
+    const sourceLink =
+        receipt.source_type === 'transfer_order' && receipt.createdfrom
+            ? `/netsuite/transfer-orders/edit/${receipt.createdfrom}`
+            : receipt.source_type === 'purchase_order' && receipt.createdfrom
+                ? `/netsuite/purchase-order/edit/${receipt.createdfrom}`
+                : null;
 
     return (
         <>
@@ -91,8 +97,25 @@ export default function View() {
                 <PageHeader
                     title="Receipt Details"
                     backPath={() => goBack(`/netsuite/receipts`)}
-                    // subtitle={receipt.tranid}
-                    subtitle={`${receipt?.tranid || ''} - Last Modified: ${receipt.last_modified_netsuite ? formatDateTime(receipt.last_modified_netsuite) : '-'}`}
+                    // subtitle={`${receipt?.tranid || ''} - Last Modified: ${receipt.last_modified_netsuite ? formatDateTime(receipt.last_modified_netsuite) : '-'}`}
+                    subtitle={
+                        <>
+                            {sourceLink ? (
+                                <Link
+                                    className="flex text-blue-400 hover:underline items-center gap-1 me-1"
+                                    to={sourceLink}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <FaExternalLinkAlt className="me-1" />
+                                    {receipt.createdfrom_display || '-'}
+                                </Link>
+                            ) : (
+                                <span className="text-gray-600">{receipt.createdfrom_display || '-'}</span>
+                            )}
+                            {receipt.tranid && <span className="text-gray-600"> - {receipt.tranid}</span>}
+                        </>
+                    }
                     actions={
                         <>
                             {receipt?.status_display && (
@@ -113,7 +136,7 @@ export default function View() {
                             <button
                                 type="button"
                                 onClick={() => setActiveTab('items')}
-                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'items'
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'items'
                                     ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}
@@ -123,7 +146,7 @@ export default function View() {
                             <button
                                 type="button"
                                 onClick={() => setActiveTab('files')}
-                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'files'
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'files'
                                     ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}
@@ -133,7 +156,7 @@ export default function View() {
                             <button
                                 type="button"
                                 onClick={() => setActiveTab('notes')}
-                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'notes'
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'notes'
                                     ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}
