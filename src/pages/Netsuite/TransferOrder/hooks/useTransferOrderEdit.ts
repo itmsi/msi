@@ -89,7 +89,7 @@ export const useTransferOrderEdit = (id: string | undefined) => {
                     department_name: to.department_name || '',
                     class: safeNumber(to.class_id),
                     class_name: to.class_name || '',
-                    incoterm: safeNumber(to.incoterm_id),
+                    incoterm: 1, // Hardcode DAP (id NetSuite 1 = DAP, 2 = EXW), abaikan incoterm_id asli dari NetSuite
                     employee: safeNumber(to.employee_id),
                     employee_name: to.employee_name || '',
                     firmed: Boolean(to.firmed),
@@ -254,7 +254,6 @@ export const useTransferOrderEdit = (id: string | undefined) => {
         }
         if (!formData.department) newErrors.department = 'Department wajib dipilih';
         if (!formData.class) newErrors.class = 'Class wajib dipilih';
-        if (!formData.employee) newErrors.employee = 'Employee wajib dipilih';
         if (!formData.items || formData.items.length === 0) {
             newErrors.items = 'Minimal 1 item harus ditambahkan';
         }

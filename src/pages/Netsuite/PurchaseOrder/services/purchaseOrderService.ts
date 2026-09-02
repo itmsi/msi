@@ -155,10 +155,10 @@ export class PurchaseOrderService {
         const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/approval`, params as Record<string, any>);
         return response.data as POApprovalResponse;
     }
-    
+
     static async getPOById(id: string): Promise<PODetailResponse> {
         const response = await apiGet<PODetailResponse>(`${API_BASE_URL}/netsuite/purchasing-orders/${id}`);
-        
+
         return response.data;
     }
 
@@ -211,7 +211,7 @@ export class PurchaseOrderService {
         return response.data as PostReceiptResponse;
     }
 
-    
+
     static async syncReceiptItems(params: Partial<PurchaseOrderRequest> = {}): Promise<ReceiptResponse> {
         const requestData: PurchaseOrderRequest = {
             page: 1,
@@ -226,7 +226,7 @@ export class PurchaseOrderService {
         const response = await apiPost(`${API_BASE_URL}/netsuite/purchasing-orders/receive-list/sync`, requestData as Record<string, any>);
         return response.data as ReceiptResponse;
     }
-    
+
     static async getHistoryReceiptById(params: Partial<any> = {}): Promise<HistoryLogResponse> {
         const requestData = {
             ...params
@@ -251,7 +251,7 @@ export class PurchaseOrderService {
         fd.append('file_name', payload.file_name);
         fd.append('fileUrl', payload.fileUrl);
         const response = await apiPostMultipart<ResponseAttachUpdateItem>(`${API_BASE_URL}/netsuite/purchasing-orders/upload-update`, fd);
-        
+
         return response.data;
     }
 
@@ -287,7 +287,7 @@ export class PurchaseOrderService {
     }
 
     static async attachFileDeleteDetailPO(id: string, poId: string): Promise<any> {
-        const response = await apiDelete(`${API_BASE_URL}/netsuite/attach_file/${id}/${poId}`);
+        const response = await apiDelete(`${API_BASE_URL}/netsuite/attach_file/${id}/${poId}/purchase_order`);
         return response.data;
     }
     static async getDashboardPurchaseOrders(params: Partial<PurchaseOrderDashboardRequest> = {}): Promise<GetPurchaseOrderListResponse> {

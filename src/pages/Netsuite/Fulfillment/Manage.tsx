@@ -1,32 +1,32 @@
 import { useCallback, useMemo, useState } from 'react'
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
-import { MdClear, MdSearch, MdOutlineSync, MdFilterListAlt, MdExpandLess, MdExpandMore, MdVisibility } from 'react-icons/md';
+import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdVisibility, MdOutlineSync } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { createByDateColumn } from '@/components/ui/table/columnUtils';
 import { getProfile, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
-import { useReceipt } from './hooks/useReceipt';
-import { ReceiptItem } from './types/receipt';
+import { useFulfillment } from './hooks/useFulfillment';
+import { FulfillmentItem } from './types/fulfillment';
 import Button from '@/components/ui/button/Button';
 import PageHeaderManage from '@/components/common/PageHeaderManage';
 
-const SOURCE_TYPE_OPTIONS = [
-    { value: 'purchase_order', label: 'Purchase Order' },
-    { value: 'transfer_order', label: 'Transfer Order' },
-    { value: 'customer_return', label: 'Customer Return' },
-    { value: 'inbound_shipment', label: 'Inbound Shipment' },
+const STATUS_OPTIONS = [
+    { value: 'pending', label: 'Pending Fulfillment' },
+    { value: 'picked', label: 'Picked' },
+    { value: 'packed', label: 'Packed' },
+    { value: 'shipped', label: 'Shipped' },
 ];
 
 export default function Manage() {
     const navigate = useNavigate();
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
-    
+
     const {
-        receipt,
+        fulfillment,
         syncInfo,
         loading,
         error,
@@ -34,7 +34,6 @@ export default function Manage() {
         searchValue,
         sortOrder,
         statusFilter,
-        typeFilter,
         activeFilterCount,
         setSearchValue,
         handlePageChange,
@@ -45,16 +44,14 @@ export default function Manage() {
         handleClearFilters,
         isSyncing,
         handleSync,
-        // handleSyncById,
-        // handleDownloadInvoice,
-    } = useReceipt(profileSSOId);
-    
+    } = useFulfillment(profileSSOId);
+
     const handlePageChangeAman = useCallback((halamanBaru: number) => {
         const halamanSaatIni = pagination?.page || 1;
         if (halamanBaru === halamanSaatIni) return;
         handlePageChange(halamanBaru);
     }, [pagination?.page, handlePageChange]);
-    
+
     const handleRowsPerPageAman = useCallback((limitBaru: number, halamanBaru: number) => {
         const halamanSaatIni = pagination?.page || 1;
         const limitSaatIni = pagination?.limit || 10;
@@ -63,15 +60,15 @@ export default function Manage() {
     }, [pagination?.page, pagination?.limit, handleRowsPerPageChange]);
 
 
-    const columns: TableColumn<ReceiptItem>[] = [
+    const columns: TableColumn<FulfillmentItem>[] = [
         {
             id: 'doc_number',
             name: 'Document Number',
-            selector: row => row.tranid || '-',
+            selector: row => row.number || '-',
             cell: row => (
                 <div className="items-center gap-3 py-2">
-                    <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
-                    <div className="block text-sm text-gray-500">{formatTanggal(row.trandate)}</div>
+                    <div className="font-medium text-gray-900">{row.number || '-'}</div>
+                    <div className="block text-sm text-gray-500">{formatTanggal(row.date)}</div>
                 </div>
             ),
             wrap: true,
@@ -95,11 +92,18 @@ export default function Manage() {
             center: true,
         },
         {
-            id: 'vendor_name',
-            name: 'Name',
-            selector: row => row.vendor_name || '-',
+            id: 'entity_name',
+            name: 'Customer',
+            selector: row => row.entity_name || '-',
             wrap: true,
-            width: '300px',
+            width: '260px',
+        },
+        {
+            id: 'createdfrom',
+            name: 'Created From',
+            selector: row => row.createdfrom_number || '-',
+            wrap: true,
+            width: '260px',
         },
         {
             id: 'location',
@@ -107,48 +111,47 @@ export default function Manage() {
             selector: row => row.location_display || '-',
             wrap: true,
             width: '220px',
-            center: true,
         },
         {
-            id: 'memo',
-            name: 'Memo',
-            selector: row => row.memo || '-',
+            id: 'transferlocation',
+            name: 'Ship To',
+            selector: row => row.transferlocation_display || '-',
             wrap: true,
-            width: '300px',
+            width: '220px',
         },
         {
             id: 'status',
             name: 'Status',
-            selector: row => row.status_display || '-',
+            selector: row => row.status_label || '-',
             cell: row => (
                 <div className="items-center capitalize">
-                    {row.status_display ? (
+                    {row.status_label ? (
                         <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
-                            {row.status_display}
+                            {row.status_label}
                         </span>
                     ) : '-'}
                 </div>
             ),
             center: true,
-            width: '200px'
+            width: '180px'
         },
-        createByDateColumn('Created By', 'created_at', 'created_by_name', '320px'),
+        createByDateColumn('Created By', 'created_at', 'created_by', '320px'),
         createActionsColumn([
             {
                 icon: MdVisibility,
-                onClick: (row: ReceiptItem) => navigate(`/netsuite/receipts/view/${row.id}`),
+                onClick: (row: FulfillmentItem) => navigate(`/netsuite/fulfillments/view/${row.id}`),
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'View Detail',
                 permission: 'read',
             },
         ])
     ];
-    
+
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const handleToggleFilter = () => {
         setShowAdvancedFilters(prev => !prev);
     };
-    
+
     const SearchAndFilters = useMemo(() => {
         return (<>
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -159,7 +162,7 @@ export default function Manage() {
                             <Input
                                 id='search'
                                 type="text"
-                                placeholder="Search project... (Press Enter)"
+                                placeholder="Search fulfillment... (Press Enter)"
                                 value={searchValue}
                                 onChange={(e) => setSearchValue(e.target.value)}
                                 onKeyPress={handleKeyPress}
@@ -221,14 +224,14 @@ export default function Manage() {
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                             <CustomSelect
-                                id="filter_source_type"
-                                name="filter_source_type"
-                                value={typeFilter ? SOURCE_TYPE_OPTIONS.find(o => o.value === typeFilter) || null : null}
-                                onChange={(opt) => handleFilterChange('source_type', opt?.value || '')}
-                                options={SOURCE_TYPE_OPTIONS}
-                                placeholder="All Types"
+                                id="filter_status"
+                                name="filter_status"
+                                value={statusFilter ? STATUS_OPTIONS.find(o => o.value === statusFilter) || null : null}
+                                onChange={(opt) => handleFilterChange('status', opt?.value || '')}
+                                options={STATUS_OPTIONS}
+                                placeholder="All Status"
                                 isClearable={true}
                                 isSearchable={true}
                             />
@@ -249,21 +252,21 @@ export default function Manage() {
                 </div>
             )}
         </>);
-    }, [searchValue, sortOrder, statusFilter, typeFilter, activeFilterCount, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, handleClearFilters]);
+    }, [searchValue, sortOrder, statusFilter, activeFilterCount, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, showAdvancedFilters, handleToggleFilter, handleClearFilters]);
 
     return (
         <>
             <PageMeta
-                title="Item Receipts - Motor Sights International"
-                description="Manage Item Receipts - Motor Sights International"
+                title="Item Fulfillments - Motor Sights International"
+                description="Manage Item Fulfillments - Motor Sights International"
                 image="/motor-sights-international.png"
             />
-            
+
             <div className="space-y-6">
                 {/* Header */}
                 <PageHeaderManage
-                    title="Item Receipts"
-                    subtitle="Manage Item Receipts"
+                    title="Item Fulfillments"
+                    subtitle="Manage Item Fulfillments"
                     actions={[
                         {
                             key: 'sync',
@@ -288,7 +291,7 @@ export default function Manage() {
                         <span className='block text-xs text-green-600 pe-6 text-end mb-0'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
                     </>)
                 }
-                
+
                 {/* Search & Filter */}
                 <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
                     {SearchAndFilters}
@@ -304,7 +307,7 @@ export default function Manage() {
 
                         <CustomDataTable
                             columns={columns}
-                            data={receipt}
+                            data={fulfillment}
                             loading={loading}
                             pagination
                             paginationServer
@@ -318,7 +321,7 @@ export default function Manage() {
                             fixedHeaderScrollHeight="625px"
                             responsive
                             highlightOnHover
-                            onRowClicked={(row) => navigate(`/netsuite/receipts/view/${row.id}`)}
+                            onRowClicked={(row) => navigate(`/netsuite/fulfillments/view/${row.id}`)}
                             striped={false}
                             persistTableHead
                             borderRadius="8px"
