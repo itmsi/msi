@@ -103,6 +103,12 @@ const INITIAL_ITEMS: Omit<MasterDataItem, 'status' | 'lastSync' | 'errorMessage'
         icon: 'inbound_shipments',
     },
     {
+        key: 'fulfillments',
+        label: 'Fulfillment',
+        description: 'Sync item fulfillments from NetSuite',
+        icon: 'fulfillments',
+    },
+    {
         key: 'transfer_orders',
         label: 'Transfer Orders',
         description: 'Sync transfer orders from NetSuite',
