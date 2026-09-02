@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { TableColumn } from 'react-data-table-component';
 import { MdOutlineSync } from 'react-icons/md';
@@ -45,8 +45,19 @@ export default function FulfillmentReceiptTab({ tranid, toNetsuiteId }: Fulfillm
         {
             name: 'Date',
             selector: row => row.date || '-',
-            cell: row => <span className="text-sm text-gray-700">{row.date ? formatTanggal(row.date) : '-'}</span>,
-            width: '150px',
+            cell: row => (<>
+                <Link
+                    to={row.type === 'Item Fulfillment'
+                        ? `/netsuite/fulfillments/view/${row.netsuite_id}`
+                        : `/netsuite/receipts/view/${row.netsuite_id}`
+                    }
+                    className="absolute inset-0"
+                />
+                <div className="items-center py-2">
+                    <div className="font-medium text-gray-900">{formatTanggal(row.date || '-')}</div>
+                </div>
+            </>),
+            width: '220px',
         },
         {
             name: 'Type',
@@ -57,11 +68,16 @@ export default function FulfillmentReceiptTab({ tranid, toNetsuiteId }: Fulfillm
                 </span>
             ),
             width: '160px',
+            center: true,
         },
         {
             name: 'Number',
             selector: row => row.number || '-',
-            cell: row => <span className="text-sm font-medium text-gray-900">{row.number || '-'}</span>,
+            cell: row => (<>
+                <div className="items-center py-2">
+                    <div className="font-medium text-gray-900">{row.number || '-'}</div>
+                </div>
+            </>),
             wrap: true,
             width: '200px',
         },
@@ -70,6 +86,7 @@ export default function FulfillmentReceiptTab({ tranid, toNetsuiteId }: Fulfillm
             selector: row => row.status_label || '-',
             wrap: true,
             width: '200px',
+            center: true,
         },
         {
             name: 'Link Type',

@@ -1,23 +1,27 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { MdArrowBack, MdInventory2, MdOutlineComment } from 'react-icons/md';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { MdInventory2, MdOutlineAttachFile, MdOutlineComment } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
-import Badge from '@/components/ui/badge/Badge';
 import Button from '@/components/ui/button/Button';
 import { FulfillmentService } from './services/fulfillmentService';
 import { FulfillmentItem } from './types/fulfillment';
 import FulfillmentFields from './components/FulfillmentFields';
 import FulfillmentItemFields from './components/FulfillmentItemFields';
 import NotesTab from './components/tab/NotesTab';
+import FilesItems from './components/FilesItems';
+import PageHeader from '@/components/common/PageHeader';
+import useGoBack from '@/hooks/useGoBack';
+import { FaExternalLinkAlt } from 'react-icons/fa';
 
 export default function View() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const goBack = useGoBack();
 
     const [fulfillment, setFulfillment] = useState<FulfillmentItem | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'items' | 'notes'>('items');
+    const [activeTab, setActiveTab] = useState<'items' | 'notes' | 'files'>('items');
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -59,6 +63,7 @@ export default function View() {
     }
 
     const lines = fulfillment.lines || [];
+    const files = fulfillment.files || [];
     const notes = fulfillment.user_notes || [];
 
     return (
@@ -71,31 +76,28 @@ export default function View() {
 
             <div className="space-y-6">
                 {/* Header */}
-                <div className="bg-white shadow rounded-lg">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div className="flex items-center gap-4">
-                                <button
-                                    onClick={() => navigate('/netsuite/fulfillments')}
-                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
-                                    title="Back to List"
-                                >
-                                    <MdArrowBack size={24} />
-                                </button>
-                                <div>
-                                    <h3 className="text-xl leading-6 font-primary-bold text-gray-900 flex items-center gap-3">
-                                        {fulfillment.number}
-                                        <div className="text-sm">
-                                            <Badge color="light" variant="light">
-                                                {fulfillment.status_label || '-'}
-                                            </Badge>
-                                        </div>
-                                    </h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Fullfillment Details"
+                    backPath={() => goBack(`/netsuite/fulfillments`)}
+                    // subtitle={fulfillment.number}
+                    subtitle={<>
+                        <Link
+                            className='flex text-blue-400 hover:underline items-center gap-1 me-1'
+                            to={`/netsuite/transfer-orders/edit/${fulfillment.createdfrom_id}`} target="_blank">
+                            <FaExternalLinkAlt className='me-1' /> {fulfillment?.createdfrom_number || '-'}
+                        </Link>
+                        {(`${fulfillment?.number ? ' - ' + fulfillment?.number || '' : ''}`)}
+                    </>}
+                    actions={
+                        <>
+                            {fulfillment?.status_label && (
+                                <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
+                                    {fulfillment.status_label || '-'}
+                                </span>
+                            )}
+                        </>
+                    }
+                />
 
                 <FulfillmentFields fulfillment={fulfillment} />
 
@@ -106,22 +108,30 @@ export default function View() {
                             <button
                                 type="button"
                                 onClick={() => setActiveTab('items')}
-                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                    activeTab === 'items'
-                                        ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'items'
+                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
                             >
                                 <MdInventory2 /> Items
                             </button>
                             <button
                                 type="button"
+                                onClick={() => setActiveTab('files')}
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'files'
+                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                            >
+                                <MdOutlineAttachFile /> Files
+                            </button>
+                            <button
+                                type="button"
                                 onClick={() => setActiveTab('notes')}
-                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                    activeTab === 'notes'
-                                        ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'notes'
+                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
                             >
                                 <MdOutlineComment /> Notes
                             </button>
@@ -130,6 +140,11 @@ export default function View() {
 
                     <div className="bg-white rounded-b-2xl shadow-sm">
                         {activeTab === 'items' && <FulfillmentItemFields lines={lines} />}
+                        {activeTab === 'files' &&
+                            <FilesItems
+                                files={files}
+                            />
+                        }
                         {activeTab === 'notes' && <NotesTab notes={notes} />}
                     </div>
                 </div>

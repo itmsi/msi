@@ -1,21 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdArrowBack, MdInventory2 } from 'react-icons/md';
+import { MdInventory2, MdOutlineAttachFile, MdOutlineComment } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
-import Badge from '@/components/ui/badge/Badge';
 import Button from '@/components/ui/button/Button';
 import { formatDateTime } from '@/helpers/generalHelper';
 import { ReceiptService } from './services/receiptService';
-import { ReceiptItem, ReceiptLineItem } from './types/receipt';
+import { ReceiptItem } from './types/receipt';
 import ReceiptFields from './components/ReceiptFields';
 import ReceiptItemFields from './components/ReceiptItemFields';
+import FilesItems from '../Fulfillment/components/FilesItems';
+import NotesTab from '../Fulfillment/components/tab/NotesTab';
+import useGoBack from '@/hooks/useGoBack';
+import PageHeader from '@/components/common/PageHeader';
 
-const parseLines = (lines?: string | ReceiptLineItem[]): ReceiptLineItem[] => {
+const parseLines = <T,>(lines?: string | T[] | null): T[] => {
     if (!lines) return [];
-    if (Array.isArray(lines)) return lines;
+    if (Array.isArray(lines)) return lines as T[];
+
     try {
         const parsed = JSON.parse(lines);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed) ? (parsed as T[]) : [];
     } catch {
         return [];
     }
@@ -24,11 +28,12 @@ const parseLines = (lines?: string | ReceiptLineItem[]): ReceiptLineItem[] => {
 export default function View() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const goBack = useGoBack();
 
     const [receipt, setReceipt] = useState<ReceiptItem | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'items'>('items');
+    const [activeTab, setActiveTab] = useState<'items' | 'notes' | 'files'>('items');
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -70,6 +75,8 @@ export default function View() {
     }
 
     const lines = parseLines(receipt.lines);
+    const files = parseLines(receipt.files);
+    const notes = parseLines(receipt.user_notes);
 
     return (
         <>
@@ -81,34 +88,21 @@ export default function View() {
 
             <div className="space-y-6">
                 {/* Header */}
-                <div className="bg-white shadow rounded-lg">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div className="flex items-center gap-4">
-                                <button
-                                    onClick={() => navigate('/netsuite/receipts')}
-                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
-                                    title="Back to List"
-                                >
-                                    <MdArrowBack size={24} />
-                                </button>
-                                <div>
-                                    <h3 className="text-xl leading-6 font-primary-bold text-gray-900 flex items-center gap-3">
-                                        {receipt.tranid}
-                                        <div className="text-sm">
-                                            <Badge color="light" variant="light">
-                                                {receipt.status_display || '-'}
-                                            </Badge>
-                                        </div>
-                                    </h3>
-                                    <p className="mt-1 text-sm text-gray-500">
-                                        Last Modified: {receipt.last_modified_netsuite ? formatDateTime(receipt.last_modified_netsuite) : '-'}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Receipt Details"
+                    backPath={() => goBack(`/netsuite/receipts`)}
+                    // subtitle={receipt.tranid}
+                    subtitle={`${receipt?.tranid || ''} - Last Modified: ${receipt.last_modified_netsuite ? formatDateTime(receipt.last_modified_netsuite) : '-'}`}
+                    actions={
+                        <>
+                            {receipt?.status_display && (
+                                <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
+                                    {receipt.status_display || '-'}
+                                </span>
+                            )}
+                        </>
+                    }
+                />
 
                 <ReceiptFields receipt={receipt} />
 
@@ -119,19 +113,44 @@ export default function View() {
                             <button
                                 type="button"
                                 onClick={() => setActiveTab('items')}
-                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                    activeTab === 'items'
-                                        ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'items'
+                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
                             >
                                 <MdInventory2 /> Items
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab('files')}
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'files'
+                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                            >
+                                <MdOutlineAttachFile /> Files
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab('notes')}
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'notes'
+                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                            >
+                                <MdOutlineComment /> Notes
                             </button>
                         </nav>
                     </div>
 
                     <div className="bg-white rounded-b-2xl shadow-sm">
                         {activeTab === 'items' && <ReceiptItemFields lines={lines} />}
+                        {activeTab === 'files' &&
+                            <FilesItems
+                                files={files}
+                            />
+                        }
+                        {activeTab === 'notes' && <NotesTab notes={notes} />}
                     </div>
                 </div>
             </div>

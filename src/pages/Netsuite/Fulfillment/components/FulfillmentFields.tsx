@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { formatTanggal } from '@/helpers/generalHelper';
 import { FulfillmentItem } from '../types/fulfillment';
+import { StatusTypeBadge } from '@/components/ui/badge/StatusBadge';
 
 interface FulfillmentFieldsProps {
     fulfillment: FulfillmentItem;
@@ -10,135 +11,121 @@ interface FulfillmentFieldsProps {
 // Primary Information / Approval Information / Classification / Additional Information.
 export default function FulfillmentFields({ fulfillment }: FulfillmentFieldsProps) {
     return (
-        <div className="grid grid-cols-1 gap-6">
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <h4 className="text-base font-semibold text-gray-900">Primary Information</h4>
-                </div>
-                <div className="p-6">
-                    <dl className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-6">
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Ref. No.</dt>
-                            <dd className="mt-1 text-sm text-gray-900 font-medium">{fulfillment.number || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Date</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.date ? formatTanggal(fulfillment.date) : '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Memo</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.memo || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Created From</dt>
-                            <dd className="mt-1 text-sm text-gray-900">
-                                {fulfillment.source_type === 'transfer_order' && fulfillment.createdfrom_id ? (
-                                    <Link
-                                        to={`/netsuite/transfer-orders/edit/${fulfillment.createdfrom_id}`}
-                                        className="text-blue-600 hover:underline"
-                                    >
-                                        {fulfillment.createdfrom_number || '-'}
-                                    </Link>
-                                ) : (
-                                    fulfillment.createdfrom_number || '-'
-                                )}
-                            </dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Posting Period</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.postingperiod || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Incoterm</dt>
-                            <dd className="mt-1 text-sm text-gray-900">-</dd>
-                        </div>
-                    </dl>
+        <div className="space-y-6 gap-2">
+            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                <h3 className="text-md font-primary-bold font-medium text-gray-900">Primary Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Ref. No.</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.number || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Created From</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">
+                            {fulfillment.source_type === 'transfer_order' && fulfillment.createdfrom_id ? (
+                                <Link
+                                    to={`/netsuite/transfer-orders/edit/${fulfillment.createdfrom_id}`}
+                                    className="text-blue-600 hover:underline"
+                                >
+                                    {fulfillment.createdfrom_number || '-'}
+                                </Link>
+                            ) : (
+                                fulfillment.createdfrom_number || '-'
+                            )}
+                        </p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Date</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.date ? formatTanggal(fulfillment.date) : '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Posting Period</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.postingperiod || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Incoterm</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">-</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Memo</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.memo || '-'}</p>
+                    </div>
                 </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <h4 className="text-base font-semibold text-gray-900">Approval Information</h4>
-                </div>
-                <div className="p-6">
-                    <dl className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-6">
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Created By</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.created_by_netsuite || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Delegate Approver</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.custbody_me_delegate_approver || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">In Delegation</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.custbody_me_wf_in_delegation ? 'Yes' : 'No'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Approval Status</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.custbody_me_approval_status_display || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Next Approver</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.nextapprover || '-'}</dd>
-                        </div>
-                    </dl>
+            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                <h3 className="text-md font-primary-bold font-medium text-gray-900">Approval Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Approval Status</p>
+                        <StatusTypeBadge
+                            type={Number(fulfillment.custbody_me_approval_status) as 1 | 2 | 3}
+                        />
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Next Approver</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.nextapprover || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Created By</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.created_by_netsuite || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Delegate Approver</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.custbody_me_delegate_approver || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">In Delegation</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.custbody_me_wf_in_delegation ? 'Yes' : 'No'}</p>
+                    </div>
                 </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <h4 className="text-base font-semibold text-gray-900">Classification</h4>
-                </div>
-                <div className="p-6">
-                    <dl className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-6">
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">China Cash Flow Item</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.custbody_cseg_cn_cfi_display || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Destination Location</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.transferlocation_display || '-'}</dd>
-                        </div>
-                    </dl>
+            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                <h3 className="text-md font-primary-bold font-medium text-gray-900">Classification</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-6">
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">China Cash Flow Item</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.custbody_cseg_cn_cfi_display || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Destination Location</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.transferlocation_display || '-'}</p>
+                    </div>
                 </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <h4 className="text-base font-semibold text-gray-900">Additional Information</h4>
-                </div>
-                <div className="p-6">
-                    <dl className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-6">
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Logistic Vendor</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.custbody_me_logistic_vendor_display || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Rate ID</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.custbody_me_rate_id_display || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Total Packages</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.custbody_me_total_packages || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Gross Weight</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.custbody_me_gross_weight || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Packages</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.custbody_me_packages || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Related Invoice</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.custbody_me_related_invoice || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Status</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{fulfillment.status_label || '-'}</dd>
-                        </div>
-                    </dl>
+            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                <h3 className="text-md font-primary-bold font-medium text-gray-900">Additional Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-6">
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Logistic Vendor</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.custbody_me_logistic_vendor_display || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Rate ID</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.custbody_me_rate_id_display || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Total Packages</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.custbody_me_total_packages || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Gross Weight</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.custbody_me_gross_weight || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Packages</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.custbody_me_packages || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Related Invoice</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.custbody_me_related_invoice || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Status</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.status_label || '-'}</p>
+                    </div>
                 </div>
             </div>
         </div>

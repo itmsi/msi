@@ -110,7 +110,12 @@ export interface FulfillmentItem {
     deleted_by?: string | null;
     is_delete?: boolean;
 }
-
+export interface AttachFileItem {
+    id?: string;
+    fileUrl: string;
+    fileName: string;
+    created_by_api?: string;
+}
 export interface FulfillmentResponse {
     success: boolean;
     data: {
