@@ -6,7 +6,6 @@ import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
-import { createByDateColumn } from '@/components/ui/table/columnUtils';
 import { getProfile, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import { useFulfillment } from './hooks/useFulfillment';
 import { FulfillmentItem } from './types/fulfillment';
@@ -44,6 +43,7 @@ export default function Manage() {
         handleClearFilters,
         isSyncing,
         handleSync,
+        handleSyncById,
     } = useFulfillment(profileSSOId);
 
     const handlePageChangeAman = useCallback((halamanBaru: number) => {
@@ -74,14 +74,6 @@ export default function Manage() {
             wrap: true,
             width: '230px',
             pinned: 'left'
-        },
-        {
-            id: 'internal_id',
-            name: 'Internal ID',
-            selector: row => row.netsuite_id || '-',
-            wrap: true,
-            width: '140px',
-            center: true,
         },
         {
             id: 'source_type',
@@ -135,13 +127,39 @@ export default function Manage() {
             center: true,
             width: '180px'
         },
-        createByDateColumn('Created By', 'created_at', 'created_by', '320px'),
+        {
+            id: 'created_by',
+            name: 'Created By',
+            selector: row => row.netsuite_id || row.id,
+            cell: row => (
+                <div className="flex flex-col py-2">
+                    <span className="font-medium text-gray-900">
+                        {row.created_by || '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        {row.created_at ? formatDateTime(row.created_at) : '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        Fulfillment ID: {row.netsuite_id || '-'}
+                    </span>
+                </div>
+            ),
+            wrap: true,
+            width: '320px'
+        },
         createActionsColumn([
             {
                 icon: MdVisibility,
                 onClick: (row: FulfillmentItem) => navigate(`/netsuite/fulfillments/view/${row.id}`),
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'View Detail',
+                permission: 'read',
+            },
+            {
+                icon: MdOutlineSync,
+                onClick: handleSyncById,
+                className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                tooltip: 'Sync this Fulfillment',
                 permission: 'read',
             },
         ])

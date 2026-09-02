@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdArrowBack, MdInventory2 } from 'react-icons/md';
+import toast from 'react-hot-toast';
+import { MdArrowBack, MdInventory2, MdOutlineSync } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 import Badge from '@/components/ui/badge/Badge';
 import Button from '@/components/ui/button/Button';
 import { formatDateTime } from '@/helpers/generalHelper';
@@ -29,28 +31,45 @@ export default function View() {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'items'>('items');
+    const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
+    const fetchDetail = useCallback(async () => {
+        if (!id) return;
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await ReceiptService.getReceiptDetail(id);
+            if (response.success && response.data) {
+                setReceipt(response.data);
+            } else {
+                setError('Item Receipt not found');
+            }
+        } catch (err: any) {
+            console.error('Error fetching receipt details:', err);
+            setError(err.message || 'Failed to load receipt details');
+        } finally {
+            setLoading(false);
+        }
+    }, [id]);
 
     useEffect(() => {
-        const fetchDetail = async () => {
-            if (!id) return;
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await ReceiptService.getReceiptDetail(id);
-                if (response.success && response.data) {
-                    setReceipt(response.data);
-                } else {
-                    setError('Item Receipt not found');
-                }
-            } catch (err: any) {
-                console.error('Error fetching receipt details:', err);
-                setError(err.message || 'Failed to load receipt details');
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchDetail();
-    }, [id]);
+    }, [fetchDetail]);
+
+    const handleSyncById = useCallback(async () => {
+        if (isSyncing || !id) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi Receipt: ${id}...`);
+        try {
+            await ReceiptService.syncReceiptById(id);
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            await fetchDetail();
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, id, fetchDetail]);
 
     if (loading) {
         return (
@@ -106,6 +125,19 @@ export default function View() {
                                     </p>
                                 </div>
                             </div>
+                            <PermissionGate permission="read">
+                                <Button
+                                    onClick={() => handleSyncById()}
+                                    disabled={isSyncing}
+                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                    variant='outline'
+                                >
+                                    <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                    <div>
+                                        <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                    </div>
+                                </Button>
+                            </PermissionGate>
                         </div>
                     </div>
                 </div>
