@@ -22,6 +22,8 @@ export interface TransferOrderRequest {
     transferlocation?: number | string;
     status_name?: string;
     status_code?: string;
+    start_date?: string;
+    end_date?: string;
     classes?: number;
 }
 

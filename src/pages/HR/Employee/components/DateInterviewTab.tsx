@@ -290,14 +290,14 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
             ) : (
                 <div className="bg-white rounded-xl overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-272.5 text-sm">
+                        <table className="w-full min-w-[600px] text-sm">
                             <thead>
                                 <tr className="bg-[#dfe8f2] border-b border-[#E7E9F0]">
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Created by</th>
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Assigned</th>
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Score</th>
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Date</th>
-                                    <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151] w-32">Action</th>
+                                    <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151] w-30 sticky right-0 z-1 bg-[#dfe8f2] shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.15)]">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#F0F1F5]">
@@ -357,8 +357,13 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
                                                 <div className="text-[#1F2430]">{formatIndonesianDate(s.schedule_interview_date)}</div>
                                                 <div className="text-xs text-[#9AA2BA]">{s.schedule_interview_time} {s.schedule_interview_duration ? `(${s.schedule_interview_duration})` : ''}</div>
                                             </td>
-                                            <td className="px-4 py-3">
-                                                <div className="flex items-center gap-3">
+                                            <td
+                                                className={`sticky right-0 z-10 ${expandedSchedules[s.schedule_interview_id] || scoringPanel?.scheduleId === s.schedule_interview_id
+                                                    ? 'bg-[#F5F7FF]'
+                                                    : 'bg-white'
+                                                    }`}
+                                            >
+                                                <div className="flex items-center px-4 py-3 shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.15)]">
                                                     {loadingForms[s.schedule_interview_id] ?
                                                         <FaSpinner className="w-3.5 h-3.5 animate-spin text-[#9AA2BA]" />
                                                         :

@@ -12,6 +12,8 @@ export const useTransferOrder = (profileSSO?: number) => {
     const [filterLocation, setFilterLocation] = useState<string>('');
     const [filterTransferLocation, setFilterTransferLocation] = useState<string>('');
     const [filterStatus, setFilterStatus] = useState<string>('');
+    const [filterStartDate, setFilterStartDate] = useState<string>('');
+    const [filterEndDate, setFilterEndDate] = useState<string>('');
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -47,6 +49,12 @@ export const useTransferOrder = (profileSSO?: number) => {
                 ...(overrides?.status_name !== undefined
                     ? (overrides.status_name ? { status_name: overrides.status_name } : {})
                     : (filterStatus ? { status_name: filterStatus } : {})),
+                ...(overrides?.start_date !== undefined
+                    ? (overrides.start_date ? { start_date: overrides.start_date } : {})
+                    : (filterStartDate ? { start_date: filterStartDate } : {})),
+                ...(overrides?.end_date !== undefined
+                    ? (overrides.end_date ? { end_date: overrides.end_date } : {})
+                    : (filterEndDate ? { end_date: filterEndDate } : {})),
                 ...(profileSSO !== undefined ? { classes: profileSSO } : {}),
             };
 
@@ -68,7 +76,7 @@ export const useTransferOrder = (profileSSO?: number) => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, filterLocation, filterTransferLocation, filterStatus, pagination.page, pagination.page_size, profileSSO]);
+    }, [searchValue, sortOrder, filterLocation, filterTransferLocation, filterStatus, filterStartDate, filterEndDate, pagination.page, pagination.page_size, profileSSO]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
@@ -107,6 +115,13 @@ export const useTransferOrder = (profileSSO?: number) => {
         fetchTransferOrders(override);
     }, [fetchTransferOrders]);
 
+    const handleDateRangeChange = useCallback((startDate: string, endDate: string) => {
+        setFilterStartDate(startDate);
+        setFilterEndDate(endDate);
+        setPagination(prev => ({ ...prev, page: 1 }));
+        fetchTransferOrders({ page: 1, start_date: startDate, end_date: endDate });
+    }, [fetchTransferOrders]);
+
     // Initial load
     useEffect(() => {
         fetchTransferOrders();
@@ -132,6 +147,8 @@ export const useTransferOrder = (profileSSO?: number) => {
         setFilterLocation('');
         setFilterTransferLocation('');
         setFilterStatus('');
+        setFilterStartDate('');
+        setFilterEndDate('');
         setSortOrder('desc');
         setPagination(prev => ({ ...prev, page: 1 }));
         fetchTransferOrders({
@@ -141,6 +158,8 @@ export const useTransferOrder = (profileSSO?: number) => {
             location: '',
             transferlocation: '',
             status_name: '',
+            start_date: '',
+            end_date: '',
         });
     }, [fetchTransferOrders]);
 
@@ -148,7 +167,7 @@ export const useTransferOrder = (profileSSO?: number) => {
         filterLocation,
         filterTransferLocation,
         filterStatus,
-    ].filter(Boolean).length;
+    ].filter(Boolean).length + (filterStartDate && filterEndDate ? 1 : 0);
 
     const [isSyncing, setIsSyncing] = useState(false);
 
@@ -193,12 +212,15 @@ export const useTransferOrder = (profileSSO?: number) => {
         filterLocation,
         filterTransferLocation,
         filterStatus,
+        filterStartDate,
+        filterEndDate,
         activeFilterCount,
         setSearchValue,
         fetchTransferOrders,
         handlePageChange,
         handleRowsPerPageChange,
         handleFilterChange,
+        handleDateRangeChange,
         handleSearch,
         executeSearch,
         handleKeyPress,

@@ -63,10 +63,6 @@ export default function Edit() {
 
     const subsidiaryId = formData.subsidiary ? Number(formData.subsidiary) : undefined;
 
-    // TO cuma boleh diedit selagi masih "Pending Approval" di NetSuite. Begitu status berubah
-    // (Pending Fulfillment, Partially Fulfilled, dst) prosesnya sudah berjalan di NetSuite —
-    // record dikunci jadi view-only (gaya sama seperti Fulfillment/Receipts View) supaya data
-    // yang sudah dikirim ke NetSuite nggak berubah-ubah lagi dari sisi sini.
     const isReadOnly = Boolean(formData.status_name) && formData.status_name !== 'Pending Approval';
 
     // Location (From) Select
@@ -416,7 +412,7 @@ export default function Edit() {
                         title={isReadOnly ? 'View Transfer Order' : 'Edit Transfer Order'}
                         backPath="/netsuite/transfer-orders"
                         subtitle={tranid || '-'}
-                        actions={ <>
+                        actions={<>
                             {(Boolean(toInternalId) && statusName !== 'PROCESSING') && (
                                 <PermissionGate permission="read">
                                     <Button
@@ -464,199 +460,184 @@ export default function Edit() {
                         )}
 
                         {isReadOnly ? (<>
-                        {/* Read-only view (TO sudah masuk fulfillment di NetSuite) */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2 space-y-6">
-                                <div className="bg-white shadow rounded-lg overflow-hidden">
-                                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                        <h4 className="text-base font-semibold text-gray-900">Primary Information</h4>
+                            {/* Read-only view (TO sudah masuk fulfillment di NetSuite) */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div className="lg:col-span-2 space-y-6">
+                                    <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                                        <h3 className="text-md font-primary-bold font-medium text-gray-900">Primary Information</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <p className="mb-1.5 block text-sm text-gray-700">Order #</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{tranid || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="mb-1.5 block text-sm text-gray-700">Firmed</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.firmed ? 'Yes' : 'No'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="mb-1.5 block text-sm text-gray-700">Date</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.trandate ? formatTanggal(formData.trandate) : '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="mb-1.5 block text-sm text-gray-700">Memo</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.memo || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="mb-1.5 block text-sm text-gray-700">Subsidiary</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.subsidiary_name || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="mb-1.5 block text-sm text-gray-700">Use Item Cost As Transfer Cost</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.use_item_cost_as_transfer_cost ? 'Yes' : 'No'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="mb-1.5 block text-sm text-gray-700">From Location</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.location_name || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="mb-1.5 block text-sm text-gray-700">Incoterm</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">DAP</p>
+                                            </div>
+                                            <div>
+                                                <p className="mb-1.5 block text-sm text-gray-700">To Location</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.transferlocation_name || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="mb-1.5 block text-sm text-gray-700">Employee</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.employee_name || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="mb-1.5 block text-sm text-gray-700">Logistic Vendor</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.logistic_vendor_name || '-'}</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
-                                        <dl className="space-y-4">
+
+
+                                    <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                                        <h3 className="text-md font-primary-bold font-medium text-gray-900">Classification</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <dt className="text-sm font-medium text-gray-500">Order #</dt>
-                                                <dd className="mt-1 text-sm text-gray-900 font-medium">{tranid || '-'}</dd>
+                                                <p className="mb-1.5 block text-sm text-gray-700">Department</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.department_name || '-'}</p>
                                             </div>
                                             <div>
-                                                <dt className="text-sm font-medium text-gray-500">Date</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.trandate ? formatTanggal(formData.trandate) : '-'}</dd>
+                                                <p className="mb-1.5 block text-sm text-gray-700">Customer</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.customer_name || '-'}</p>
                                             </div>
                                             <div>
-                                                <dt className="text-sm font-medium text-gray-500">Subsidiary</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.subsidiary_name || '-'}</dd>
+                                                <p className="mb-1.5 block text-sm text-gray-700">Class</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.class_name || '-'}</p>
                                             </div>
                                             <div>
-                                                <dt className="text-sm font-medium text-gray-500">From Location</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.location_name || '-'}</dd>
+                                                <p className="mb-1.5 block text-sm text-gray-700">MSI - Created By API</p>
+                                                <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{formData.custbody_msi_createdby_api || '-'}</p>
                                             </div>
-                                            <div>
-                                                <dt className="text-sm font-medium text-gray-500">To Location</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.transferlocation_name || '-'}</dd>
-                                            </div>
-                                            <div>
-                                                <dt className="text-sm font-medium text-gray-500">Employee</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.employee_name || '-'}</dd>
-                                            </div>
-                                        </dl>
-                                        <dl className="space-y-4">
-                                            <div>
-                                                <dt className="text-sm font-medium text-gray-500">Firmed</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.firmed ? 'Yes' : 'No'}</dd>
-                                            </div>
-                                            <div>
-                                                <dt className="text-sm font-medium text-gray-500">Memo</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.memo || '-'}</dd>
-                                            </div>
-                                            <div>
-                                                <dt className="text-sm font-medium text-gray-500">Use Item Cost As Transfer Cost</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.use_item_cost_as_transfer_cost ? 'Yes' : 'No'}</dd>
-                                            </div>
-                                            <div>
-                                                <dt className="text-sm font-medium text-gray-500">Incoterm</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">DAP</dd>
-                                            </div>
-                                            <div>
-                                                <dt className="text-sm font-medium text-gray-500">Logistic Vendor</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.logistic_vendor_name || '-'}</dd>
-                                            </div>
-                                        </dl>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-white shadow rounded-lg overflow-hidden">
-                                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                        <h4 className="text-base font-semibold text-gray-900">Classification</h4>
-                                    </div>
-                                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
-                                        <dl className="space-y-4">
-                                            <div>
-                                                <dt className="text-sm font-medium text-gray-500">Department</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.department_name || '-'}</dd>
-                                            </div>
-                                            <div>
-                                                <dt className="text-sm font-medium text-gray-500">Class</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.class_name || '-'}</dd>
-                                            </div>
-                                        </dl>
-                                        <dl className="space-y-4">
-                                            <div>
-                                                <dt className="text-sm font-medium text-gray-500">Customer</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.customer_name || '-'}</dd>
-                                            </div>
-                                            <div>
-                                                <dt className="text-sm font-medium text-gray-500">MSI - Created By API</dt>
-                                                <dd className="mt-1 text-sm text-gray-900">{formData.custbody_msi_createdby_api || '-'}</dd>
-                                            </div>
-                                        </dl>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div className="space-y-6 sticky top-0 self-start">
-                                <div className="bg-white shadow rounded-lg overflow-hidden">
-                                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                        <h4 className="text-base font-semibold text-gray-900">Summary</h4>
-                                    </div>
-                                    <div className="p-6">
+                                <div className="sticky top-0 self-start">
+                                    <div className='bg-white rounded-2xl shadow-sm p-6'>
                                         <TOInvoiceSummary items={formData.items} serverTotal={formData.total} />
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         </>) : (
-                        <TransferOrderFields
-                            formData={formData}
-                            errors={errors}
-                            masterData={masterData}
-                            loadingMasterData={loadingMasterData}
-                            onInputChange={handleInputChange}
-                            onSelectChange={handleSelectChange}
-                            onDateChange={handleDateChange}
+                            <TransferOrderFields
+                                formData={formData}
+                                errors={errors}
+                                masterData={masterData}
+                                loadingMasterData={loadingMasterData}
+                                onInputChange={handleInputChange}
+                                onSelectChange={handleSelectChange}
+                                onDateChange={handleDateChange}
 
-                            locationOptions={locationOptions}
-                            locationPagination={locationPagination}
-                            locationInputValue={locationInputValue}
-                            onLocationInputChange={handleLocationInputChange}
-                            onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
-                            selectedLocation={selectedLocation}
-                            onLocationChange={(opt) => {
-                                setSelectedLocation(opt);
-                                handleSelectChange('location', opt ? Number(opt.value) : null);
-                                handleSelectChange('location_name', opt?.label || '');
-                            }}
+                                locationOptions={locationOptions}
+                                locationPagination={locationPagination}
+                                locationInputValue={locationInputValue}
+                                onLocationInputChange={handleLocationInputChange}
+                                onLocationMenuScrollToBottom={handleLocationMenuScrollToBottom}
+                                selectedLocation={selectedLocation}
+                                onLocationChange={(opt) => {
+                                    setSelectedLocation(opt);
+                                    handleSelectChange('location', opt ? Number(opt.value) : null);
+                                    handleSelectChange('location_name', opt?.label || '');
+                                }}
 
-                            transferLocationOptions={transferLocationOptions}
-                            transferLocationPagination={transferLocationPagination}
-                            transferLocationInputValue={transferLocationInputValue}
-                            onTransferLocationInputChange={handleTransferLocationInputChange}
-                            onTransferLocationMenuScrollToBottom={handleTransferLocationMenuScrollToBottom}
-                            selectedTransferLocation={selectedTransferLocation}
-                            onTransferLocationChange={(opt) => {
-                                setSelectedTransferLocation(opt);
-                                handleSelectChange('transferlocation', opt ? Number(opt.value) : null);
-                                handleSelectChange('transferlocation_name', opt?.label || '');
-                            }}
+                                transferLocationOptions={transferLocationOptions}
+                                transferLocationPagination={transferLocationPagination}
+                                transferLocationInputValue={transferLocationInputValue}
+                                onTransferLocationInputChange={handleTransferLocationInputChange}
+                                onTransferLocationMenuScrollToBottom={handleTransferLocationMenuScrollToBottom}
+                                selectedTransferLocation={selectedTransferLocation}
+                                onTransferLocationChange={(opt) => {
+                                    setSelectedTransferLocation(opt);
+                                    handleSelectChange('transferlocation', opt ? Number(opt.value) : null);
+                                    handleSelectChange('transferlocation_name', opt?.label || '');
+                                }}
 
-                            deptOptions={deptOptions}
-                            deptPagination={deptPagination}
-                            deptInputValue={deptInputValue}
-                            onDeptInputChange={handleDeptInputChange}
-                            onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
-                            selectedDepartment={selectedDepartment}
-                            onDepartmentChange={(opt) => {
-                                setSelectedDepartment(opt);
-                                handleSelectChange('department', opt ? Number(opt.value) : null);
-                                handleSelectChange('department_name', opt?.label || '');
-                            }}
+                                deptOptions={deptOptions}
+                                deptPagination={deptPagination}
+                                deptInputValue={deptInputValue}
+                                onDeptInputChange={handleDeptInputChange}
+                                onDeptMenuScrollToBottom={handleDeptMenuScrollToBottom}
+                                selectedDepartment={selectedDepartment}
+                                onDepartmentChange={(opt) => {
+                                    setSelectedDepartment(opt);
+                                    handleSelectChange('department', opt ? Number(opt.value) : null);
+                                    handleSelectChange('department_name', opt?.label || '');
+                                }}
 
-                            classOptions={classOptions}
-                            classPagination={classPagination}
-                            classInputValue={classInputValue}
-                            onClassInputChange={handleClassInputChange}
-                            onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
-                            selectedClass={selectedClass}
-                            onClassChange={(opt) => {
-                                setSelectedClass(opt);
-                                handleSelectChange('class', opt ? Number(opt.value) : null);
-                                handleSelectChange('class_name', opt?.label || '');
-                            }}
+                                classOptions={classOptions}
+                                classPagination={classPagination}
+                                classInputValue={classInputValue}
+                                onClassInputChange={handleClassInputChange}
+                                onClassMenuScrollToBottom={handleClassMenuScrollToBottom}
+                                selectedClass={selectedClass}
+                                onClassChange={(opt) => {
+                                    setSelectedClass(opt);
+                                    handleSelectChange('class', opt ? Number(opt.value) : null);
+                                    handleSelectChange('class_name', opt?.label || '');
+                                }}
 
-                            employeeOptions={employeeOptions}
-                            employeePagination={employeePagination}
-                            employeeInputValue={employeeInputValue}
-                            onEmployeeInputChange={handleEmployeeInputChange}
-                            onEmployeeMenuScrollToBottom={handleEmployeeMenuScrollToBottom}
-                            selectedEmployee={selectedEmployee}
-                            onEmployeeChange={(opt) => {
-                                setSelectedEmployee(opt);
-                                handleSelectChange('employee', opt?.data?.employee_id_netsuite ?? null);
-                                handleSelectChange('employee_name', opt?.label || '');
-                            }}
+                                employeeOptions={employeeOptions}
+                                employeePagination={employeePagination}
+                                employeeInputValue={employeeInputValue}
+                                onEmployeeInputChange={handleEmployeeInputChange}
+                                onEmployeeMenuScrollToBottom={handleEmployeeMenuScrollToBottom}
+                                selectedEmployee={selectedEmployee}
+                                onEmployeeChange={(opt) => {
+                                    setSelectedEmployee(opt);
+                                    handleSelectChange('employee', opt?.data?.employee_id_netsuite ?? null);
+                                    handleSelectChange('employee_name', opt?.label || '');
+                                }}
 
-                            logisticVendorOptions={logisticVendorOptions}
-                            logisticVendorPagination={logisticVendorPagination}
-                            logisticVendorInputValue={logisticVendorInputValue}
-                            onLogisticVendorInputChange={handleLogisticVendorInputChange}
-                            onLogisticVendorMenuScrollToBottom={handleLogisticVendorMenuScrollToBottom}
-                            selectedLogisticVendor={selectedLogisticVendor}
-                            onLogisticVendorChange={(opt) => {
-                                setSelectedLogisticVendor(opt);
-                                handleSelectChange('logistic_vendor', opt ? Number(opt.value) : null);
-                                handleSelectChange('logistic_vendor_name', opt?.label || '');
-                            }}
+                                logisticVendorOptions={logisticVendorOptions}
+                                logisticVendorPagination={logisticVendorPagination}
+                                logisticVendorInputValue={logisticVendorInputValue}
+                                onLogisticVendorInputChange={handleLogisticVendorInputChange}
+                                onLogisticVendorMenuScrollToBottom={handleLogisticVendorMenuScrollToBottom}
+                                selectedLogisticVendor={selectedLogisticVendor}
+                                onLogisticVendorChange={(opt) => {
+                                    setSelectedLogisticVendor(opt);
+                                    handleSelectChange('logistic_vendor', opt ? Number(opt.value) : null);
+                                    handleSelectChange('logistic_vendor_name', opt?.label || '');
+                                }}
 
-                            customerOptions={customerOptions}
-                            customerPagination={customerPagination}
-                            customerInputValue={customerInputValue}
-                            onCustomerInputChange={handleCustomerInputChange}
-                            onCustomerMenuScrollToBottom={handleCustomerMenuScrollToBottom}
-                            selectedCustomer={selectedCustomer}
-                            onCustomerChange={(opt) => {
-                                setSelectedCustomer(opt);
-                                handleSelectChange('customer', opt ? Number(opt.value) : null);
-                                handleSelectChange('customer_name', opt?.label || '');
-                            }}
-                        />
+                                customerOptions={customerOptions}
+                                customerPagination={customerPagination}
+                                customerInputValue={customerInputValue}
+                                onCustomerInputChange={handleCustomerInputChange}
+                                onCustomerMenuScrollToBottom={handleCustomerMenuScrollToBottom}
+                                selectedCustomer={selectedCustomer}
+                                onCustomerChange={(opt) => {
+                                    setSelectedCustomer(opt);
+                                    handleSelectChange('customer', opt ? Number(opt.value) : null);
+                                    handleSelectChange('customer_name', opt?.label || '');
+                                }}
+                            />
                         )}
 
                         <div>
@@ -666,33 +647,30 @@ export default function Edit() {
                                     <button
                                         type="button"
                                         onClick={() => setActiveTab('items')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                            activeTab === 'items'
-                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                        }`}
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'items'
+                                            ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
                                     >
                                         <MdInventory2 /> Items
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setActiveTab('fulfillmentreceipt')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                            activeTab === 'fulfillmentreceipt'
-                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                        }`}
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'fulfillmentreceipt'
+                                            ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
                                     >
                                         <MdReceiptLong /> Fulfillment &amp; Receipt
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setActiveTab('files')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                            activeTab === 'files'
-                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                        }`}
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'files'
+                                            ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
                                     >
                                         <MdOutlineAttachFile /> Files
                                     </button>
@@ -720,37 +698,37 @@ export default function Edit() {
                                             </div>
                                         </div>
                                     ) : (
-                                    <>
-                                    <div className="px-6 pt-4">
-                                        <div className="mb-4">
-                                            <Label>Filter Item Type</Label>
-                                            <CustomSelect
-                                                name="item_type_filter"
-                                                placeholder="All Item Types"
-                                                value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
-                                                options={itemTypeOptions}
-                                                isClearable={true}
-                                                onChange={(option: any) => {
-                                                    handleItemTypeChange(option);
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                    <TransferOrderItemFields
-                                        formData={formData}
-                                        errors={errors}
-                                        onAddItem={handleAddItem}
-                                        onRemoveItem={handleRemoveItem}
-                                        onUpdateItem={handleUpdateItem}
-                                        isEditing
+                                        <>
+                                            <div className="px-6 pt-4">
+                                                <div className="mb-4">
+                                                    <Label>Filter Item Type</Label>
+                                                    <CustomSelect
+                                                        name="item_type_filter"
+                                                        placeholder="All Item Types"
+                                                        value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
+                                                        options={itemTypeOptions}
+                                                        isClearable={true}
+                                                        onChange={(option: any) => {
+                                                            handleItemTypeChange(option);
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <TransferOrderItemFields
+                                                formData={formData}
+                                                errors={errors}
+                                                onAddItem={handleAddItem}
+                                                onRemoveItem={handleRemoveItem}
+                                                onUpdateItem={handleUpdateItem}
+                                                isEditing
 
-                                        itemOptions={itemOptions}
-                                        itemPagination={itemPagination}
-                                        itemInput={itemInputValue}
-                                        onItemInputChange={handleItemInputChange}
-                                        onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
-                                    />
-                                    </>
+                                                itemOptions={itemOptions}
+                                                itemPagination={itemPagination}
+                                                itemInput={itemInputValue}
+                                                onItemInputChange={handleItemInputChange}
+                                                onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
+                                            />
+                                        </>
                                     )
                                 )}
 
@@ -775,17 +753,17 @@ export default function Edit() {
 
                         {/* Form Actions */}
                         {!isReadOnly && (
-                        <FormActions
-                            onSubmit={handleSubmit}
-                            isSubmitting={isSubmitting}
-                            cancelRoute="/netsuite/transfer-orders"
-                            submitText="Update Transfer Order"
-                            submittingText="Updating..."
-                        >
-                            {(statusName === 'FAILED' || statusName === 'PROCESSING') && (
-                                <ElemRefresh />
-                            )}
-                        </FormActions>
+                            <FormActions
+                                onSubmit={handleSubmit}
+                                isSubmitting={isSubmitting}
+                                cancelRoute="/netsuite/transfer-orders"
+                                submitText="Update Transfer Order"
+                                submittingText="Updating..."
+                            >
+                                {(statusName === 'FAILED' || statusName === 'PROCESSING') && (
+                                    <ElemRefresh />
+                                )}
+                            </FormActions>
                         )}
                     </div>
                 </>)}

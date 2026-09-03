@@ -73,7 +73,7 @@ export default function EmployeeCandidateDetail() {
                         <div className="text-[13px] text-[#9AA2BA]">{error || 'This candidate may have been removed.'}</div>
                     </div>
                 ) : (
-                    <div className="grid lg:grid-cols-[340px_1fr] gap-5 items-start">
+                    <div className="grid lg:grid-cols-[300px_1fr] gap-5 items-start">
                         <CandidateProfileSidebar candidate={candidate} />
 
                         <div className='overflow-auto pb-3'>
