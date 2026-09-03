@@ -72,7 +72,7 @@ export default function SignInForm() {
                         className="mx-auto h-20 w-auto mb-6"
                     />
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                        Sign in to your account...
+                        Sign in to your account
                     </h2>
                 </div>
                 <div className="bg-white rounded-lg shadow-md p-8">
