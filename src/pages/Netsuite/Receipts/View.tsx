@@ -1,23 +1,27 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { MdArrowBack, MdInventory2, MdOutlineSync } from 'react-icons/md';
+import { MdInventory2, MdOutlineSync, MdOutlineAttachFile, MdOutlineComment } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
 import { PermissionGate } from '@/components/common/PermissionComponents';
-import Badge from '@/components/ui/badge/Badge';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import Button from '@/components/ui/button/Button';
-import { formatDateTime } from '@/helpers/generalHelper';
 import { ReceiptService } from './services/receiptService';
-import { ReceiptItem, ReceiptLineItem } from './types/receipt';
+import { ReceiptItem } from './types/receipt';
 import ReceiptFields from './components/ReceiptFields';
 import ReceiptItemFields from './components/ReceiptItemFields';
+import FilesItems from '../Fulfillment/components/FilesItems';
+import NotesTab from '../Fulfillment/components/tab/NotesTab';
+import useGoBack from '@/hooks/useGoBack';
+import PageHeader from '@/components/common/PageHeader';
+import { FaExternalLinkAlt } from 'react-icons/fa';
 
-const parseLines = (lines?: string | ReceiptLineItem[]): ReceiptLineItem[] => {
+const parseLines = <T,>(lines?: string | T[] | null): T[] => {
     if (!lines) return [];
-    if (Array.isArray(lines)) return lines;
+    if (Array.isArray(lines)) return lines as T[];
+
     try {
         const parsed = JSON.parse(lines);
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed) ? (parsed as T[]) : [];
     } catch {
         return [];
     }
@@ -26,11 +30,12 @@ const parseLines = (lines?: string | ReceiptLineItem[]): ReceiptLineItem[] => {
 export default function View() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const goBack = useGoBack();
 
     const [receipt, setReceipt] = useState<ReceiptItem | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'items'>('items');
+    const [activeTab, setActiveTab] = useState<'items' | 'files' | 'notes'>('items');
     const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
     const fetchDetail = useCallback(async () => {
@@ -89,6 +94,14 @@ export default function View() {
     }
 
     const lines = parseLines(receipt.lines);
+    const files = parseLines(receipt.files);
+    const notes = parseLines(receipt.user_notes);
+    const sourceLink =
+        receipt.source_type === 'transfer_order' && receipt.createdfrom
+            ? `/netsuite/transfer-orders/edit/${receipt.createdfrom}`
+            : receipt.source_type === 'purchase_order' && receipt.createdfrom
+                ? `/netsuite/purchase-order/edit/${receipt.createdfrom}`
+                : null;
 
     return (
         <>
@@ -100,31 +113,35 @@ export default function View() {
 
             <div className="space-y-6">
                 {/* Header */}
-                <div className="bg-white shadow rounded-lg">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div className="flex items-center gap-4">
-                                <button
-                                    onClick={() => navigate('/netsuite/receipts')}
-                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
-                                    title="Back to List"
+                <PageHeader
+                    title="Receipt Details"
+                    backPath={() => goBack(`/netsuite/receipts`)}
+                    // subtitle={`${receipt?.tranid || ''} - Last Modified: ${receipt.last_modified_netsuite ? formatDateTime(receipt.last_modified_netsuite) : '-'}`}
+                    subtitle={
+                        <>
+                            {sourceLink ? (
+                                <Link
+                                    className="flex text-blue-400 hover:underline items-center gap-1 me-1"
+                                    to={sourceLink}
+                                    target="_blank"
+                                    rel="noreferrer"
                                 >
-                                    <MdArrowBack size={24} />
-                                </button>
-                                <div>
-                                    <h3 className="text-xl leading-6 font-primary-bold text-gray-900 flex items-center gap-3">
-                                        {receipt.tranid}
-                                        <div className="text-sm">
-                                            <Badge color="light" variant="light">
-                                                {receipt.status_display || '-'}
-                                            </Badge>
-                                        </div>
-                                    </h3>
-                                    <p className="mt-1 text-sm text-gray-500">
-                                        Last Modified: {receipt.last_modified_netsuite ? formatDateTime(receipt.last_modified_netsuite) : '-'}
-                                    </p>
-                                </div>
-                            </div>
+                                    <FaExternalLinkAlt className="me-1" />
+                                    {receipt.createdfrom_display || '-'}
+                                </Link>
+                            ) : (
+                                <span className="text-gray-600">{receipt.createdfrom_display || '-'}</span>
+                            )}
+                            {receipt.tranid && <span className="text-gray-600"> - {receipt.tranid}</span>}
+                        </>
+                    }
+                    actions={
+                        <>
+                            {receipt?.status_display && (
+                                <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
+                                    {receipt.status_display || '-'}
+                                </span>
+                            )}
                             <PermissionGate permission="read">
                                 <Button
                                     onClick={() => handleSyncById()}
@@ -133,14 +150,12 @@ export default function View() {
                                     variant='outline'
                                 >
                                     <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
-                                    <div>
-                                        <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
-                                    </div>
+                                    <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
                                 </Button>
                             </PermissionGate>
-                        </div>
-                    </div>
-                </div>
+                        </>
+                    }
+                />
 
                 <ReceiptFields receipt={receipt} />
 
@@ -151,19 +166,44 @@ export default function View() {
                             <button
                                 type="button"
                                 onClick={() => setActiveTab('items')}
-                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                    activeTab === 'items'
-                                        ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'items'
+                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
                             >
                                 <MdInventory2 /> Items
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab('files')}
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'files'
+                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                            >
+                                <MdOutlineAttachFile /> Files
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab('notes')}
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'notes'
+                                    ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                            >
+                                <MdOutlineComment /> Notes
                             </button>
                         </nav>
                     </div>
 
                     <div className="bg-white rounded-b-2xl shadow-sm">
                         {activeTab === 'items' && <ReceiptItemFields lines={lines} />}
+                        {activeTab === 'files' &&
+                            <FilesItems
+                                files={files}
+                            />
+                        }
+                        {activeTab === 'notes' && <NotesTab notes={notes} />}
                     </div>
                 </div>
             </div>

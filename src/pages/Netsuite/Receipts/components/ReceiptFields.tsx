@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { formatDateLocal } from '@/helpers/generalHelper';
+import { formatTanggal } from '@/helpers/generalHelper';
 import { ReceiptItem } from '../types/receipt';
 
 interface ReceiptFieldsProps {
@@ -16,89 +16,81 @@ export default function ReceiptFields({ receipt }: ReceiptFieldsProps) {
             : null;
 
     return (
-        <div className="grid grid-cols-1 gap-6">
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <h4 className="text-base font-semibold text-gray-900">Primary Information</h4>
-                </div>
-                <div className="p-6">
-                    <dl className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-6">
+        <div className="space-y-6 gap-2">
+            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                <h3 className="text-md font-primary-bold font-medium text-gray-900">Primary Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Reference #</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.tranid || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Created From</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">
+                            {createdFromHref && receipt.createdfrom ? (
+                                <Link to={createdFromHref} className="text-blue-600 hover:underline">
+                                    {receipt.createdfrom_display || '-'}
+                                </Link>
+                            ) : (
+                                receipt.createdfrom_display || '-'
+                            )}
+                        </p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Date</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.trandate ? formatTanggal(receipt.trandate) : '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Posting Period</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">-</p>
+                    </div>
+                    {receipt.inboundshipment && (
                         <div>
-                            <dt className="text-sm font-medium text-gray-500">Reference #</dt>
-                            <dd className="mt-1 text-sm text-gray-900 font-medium">{receipt.tranid || '-'}</dd>
+                            <p className="mb-1.5 block text-sm text-gray-700">Inbound Shipment</p>
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.inboundshipment_display || '-'}</p>
                         </div>
+                    )}
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Memo</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.memo || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Incoterm</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">-</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Currency</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">-</p>
+                    </div>
+                    {receipt.source_type !== 'transfer_order' && (
                         <div>
-                            <dt className="text-sm font-medium text-gray-500">Created From</dt>
-                            <dd className="mt-1 text-sm text-gray-900">
-                                {createdFromHref && receipt.createdfrom ? (
-                                    <Link to={createdFromHref} className="text-blue-600 hover:underline">
-                                        {receipt.createdfrom_display || '-'}
-                                    </Link>
-                                ) : (
-                                    receipt.createdfrom_display || '-'
-                                )}
-                            </dd>
+                            <p className="mb-1.5 block text-sm text-gray-700">Vendor</p>
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.vendor_name || '-'}</p>
                         </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Date</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{receipt.trandate ? formatDateLocal(receipt.trandate) : '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Posting Period</dt>
-                            <dd className="mt-1 text-sm text-gray-900">-</dd>
-                        </div>
-                        {receipt.inboundshipment && (
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">Inbound Shipment</dt>
-                                <dd className="mt-1 text-sm text-gray-900">{receipt.inboundshipment_display || '-'}</dd>
-                            </div>
-                        )}
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Memo</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{receipt.memo || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Incoterm</dt>
-                            <dd className="mt-1 text-sm text-gray-900">-</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Currency</dt>
-                            <dd className="mt-1 text-sm text-gray-900">-</dd>
-                        </div>
-                        {receipt.source_type !== 'transfer_order' && (
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">Vendor</dt>
-                                <dd className="mt-1 text-sm text-gray-900">{receipt.vendor_name || '-'}</dd>
-                            </div>
-                        )}
-                    </dl>
+                    )}
                 </div>
             </div>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                    <h4 className="text-base font-semibold text-gray-900">Classification</h4>
-                </div>
-                <div className="p-6">
-                    <dl className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-6">
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Subsidiary</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{receipt.subsidiary_display || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Department</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{receipt.department_display || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Class</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{receipt.class_display || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-sm font-medium text-gray-500">Location</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{receipt.location_display || '-'}</dd>
-                        </div>
-                    </dl>
-                </div>
+            <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
+                <h3 className="text-md font-primary-bold font-medium text-gray-900">Classification</h3>
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Subsidiary</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.subsidiary_display || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Location</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.location_display || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Class</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.class_display || '-'}</p>
+                    </div>
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Department</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.department_display || '-'}</p>
+                    </div>
+                </dl>
             </div>
         </div>
     );

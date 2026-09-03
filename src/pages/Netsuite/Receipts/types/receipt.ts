@@ -78,8 +78,23 @@ export interface ReceiptItem {
     updated_at: string;
     // Cuma ada di response detail (GET by id), gak ada di list - JSON-encoded string, JSON.parse dulu kalau dipakai.
     lines?: string | ReceiptLineItem[];
+    files?: AttachFileItem[];
+    user_notes?: ReceiveUserNote[];
 }
-
+export interface AttachFileItem {
+    id?: string;
+    fileUrl: string;
+    fileName: string;
+    created_by_api?: string;
+}
+export interface ReceiveUserNote {
+    date: string;
+    note: string;
+    type: string | null;
+    title: string;
+    author: string;
+    direction: string;
+}
 export interface ReceiptResponse {
     success: boolean;
     data: {

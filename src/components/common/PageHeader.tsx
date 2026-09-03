@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Button from '@/components/ui/button/Button';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
@@ -5,10 +6,10 @@ import { useNavigate } from 'react-router-dom';
 interface PageHeaderProps {
     title: string;
     backPath: string | (() => void); // Bisa berupa string atau fungsi untuk navigasi kembali
-    subtitle?: string | null;
+    subtitle?: ReactNode | null;
 
     // Slot untuk konten kanan (badge, tombol, dll)
-    actions?: React.ReactNode;
+    actions?: ReactNode;
 }
 
 export default function PageHeader({ title, backPath, subtitle, actions }: PageHeaderProps) {
@@ -35,7 +36,15 @@ export default function PageHeader({ title, backPath, subtitle, actions }: PageH
                 <div className="flex items-center gap-4 justify-between w-full lg:flex-row flex-col">
                     <div>
                         <h1 className="ms-2 font-primary-bold font-normal text-xl">{title}</h1>
-                        {subtitle && <p className="ms-2 text-sm text-gray-600">{subtitle}</p>}
+                        {subtitle !== null && subtitle !== undefined && (
+                            typeof subtitle === 'string' || typeof subtitle === 'number' ? (
+                                <p className="ms-2 text-sm text-gray-600">{subtitle}</p>
+                            ) : (
+                                <div className="ms-2 text-sm text-gray-600 flex items-center gap-1 flex-wrap">
+                                    {subtitle}
+                                </div>
+                            )
+                        )}
                     </div>
 
                     {actions && (
