@@ -174,7 +174,7 @@ export default function Manage() {
                         {row.created_at ? formatDateTime(row.created_at) : '-'}
                     </span>
                     <span className="text-xs text-gray-500">
-                        Sid: {row.netsuite_id || '-'}
+                        TO ID: {row.netsuite_id || '-'}
                     </span>
                 </div>
             ),

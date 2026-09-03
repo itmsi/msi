@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { MdInventory2, MdOutlineAttachFile, MdOutlineComment } from 'react-icons/md';
+import toast from 'react-hot-toast';
+import { MdInventory2, MdOutlineAttachFile, MdOutlineComment, MdOutlineSync } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { FulfillmentService } from './services/fulfillmentService';
 import { FulfillmentItem } from './types/fulfillment';
@@ -21,29 +23,46 @@ export default function View() {
     const [fulfillment, setFulfillment] = useState<FulfillmentItem | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'items' | 'notes' | 'files'>('items');
+    const [activeTab, setActiveTab] = useState<'items' | 'files' | 'notes'>('items');
+    const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
+    const fetchDetail = useCallback(async () => {
+        if (!id) return;
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await FulfillmentService.getFulfillmentDetail(id);
+            if (response.success && response.data) {
+                setFulfillment(response.data);
+            } else {
+                setError('Item Fulfillment not found');
+            }
+        } catch (err: any) {
+            console.error('Error fetching fulfillment details:', err);
+            setError(err.message || 'Failed to load fulfillment details');
+        } finally {
+            setLoading(false);
+        }
+    }, [id]);
 
     useEffect(() => {
-        const fetchDetail = async () => {
-            if (!id) return;
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await FulfillmentService.getFulfillmentDetail(id);
-                if (response.success && response.data) {
-                    setFulfillment(response.data);
-                } else {
-                    setError('Item Fulfillment not found');
-                }
-            } catch (err: any) {
-                console.error('Error fetching fulfillment details:', err);
-                setError(err.message || 'Failed to load fulfillment details');
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchDetail();
-    }, [id]);
+    }, [fetchDetail]);
+
+    const handleSyncById = useCallback(async () => {
+        if (isSyncing || !id) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi Fulfillment: ${id}...`);
+        try {
+            await FulfillmentService.syncFulfillmentById(id);
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            await fetchDetail();
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, id, fetchDetail]);
 
     if (loading) {
         return (
@@ -95,6 +114,17 @@ export default function View() {
                                     {fulfillment.status_label || '-'}
                                 </span>
                             )}
+                            <PermissionGate permission="read">
+                                <Button
+                                    onClick={() => handleSyncById()}
+                                    disabled={isSyncing}
+                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                    variant='outline'
+                                >
+                                    <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                    <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                </Button>
+                            </PermissionGate>
                         </>
                     }
                 />

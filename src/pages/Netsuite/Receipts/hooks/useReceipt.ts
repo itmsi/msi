@@ -140,21 +140,21 @@ export const useReceipt = (profileSSO?: number) => {
         }
     }, [isSyncing, fetchReceipt]);
 
-    // const handleSyncById = useCallback(async (row: PurchaseOrderItem) => {
-    //     if (isSyncing) return;
-    //     if (!row?.po_id) return;
-    //     setIsSyncing(true);
-    //     const toastId = toast.loading(`Sinkronisasi PO: ${row.po_number || row.po_id}...`);
-    //     try {
-    //         await PurchaseOrderService.syncPOById(String(row.po_id));
-    //         toast.success('Sinkronisasi berhasil', { id: toastId });
-    //         fetchReceipt({ page: paginationRef.current.page, limit: paginationRef.current.limit });
-    //     } catch (err: any) {
-    //         toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
-    //     } finally {
-    //         setIsSyncing(false);
-    //     }
-    // }, [isSyncing, fetchReceipt]);
+    const handleSyncById = useCallback(async (row: ReceiptItem) => {
+        if (isSyncing) return;
+        if (!row?.netsuite_id && !row?.id) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi Receipt: ${row.tranid || row.id}...`);
+        try {
+            await ReceiptService.syncReceiptById(String(row.netsuite_id || row.id));
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            fetchReceipt({ page: paginationRef.current.page, limit: paginationRef.current.limit });
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, fetchReceipt]);
 
     // const handleDownloadInvoice = useCallback(async (row: PurchaseOrderItem) => {
     //     if (!row?.po_id) return;
@@ -234,7 +234,7 @@ export const useReceipt = (profileSSO?: number) => {
         handleClearFilters,
         isSyncing,
         handleSync,
-        // handleSyncById,
+        handleSyncById,
         // handleDownloadInvoice,
     };
 };

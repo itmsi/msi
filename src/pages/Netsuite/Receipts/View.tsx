@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { MdInventory2, MdOutlineAttachFile, MdOutlineComment } from 'react-icons/md';
+import { useCallback, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { MdInventory2, MdOutlineSync, MdOutlineAttachFile, MdOutlineComment } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
+import { PermissionGate } from '@/components/common/PermissionComponents';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import Button from '@/components/ui/button/Button';
 import { ReceiptService } from './services/receiptService';
 import { ReceiptItem } from './types/receipt';
@@ -33,29 +35,46 @@ export default function View() {
     const [receipt, setReceipt] = useState<ReceiptItem | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'items' | 'notes' | 'files'>('items');
+    const [activeTab, setActiveTab] = useState<'items' | 'files' | 'notes'>('items');
+    const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
+    const fetchDetail = useCallback(async () => {
+        if (!id) return;
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await ReceiptService.getReceiptDetail(id);
+            if (response.success && response.data) {
+                setReceipt(response.data);
+            } else {
+                setError('Item Receipt not found');
+            }
+        } catch (err: any) {
+            console.error('Error fetching receipt details:', err);
+            setError(err.message || 'Failed to load receipt details');
+        } finally {
+            setLoading(false);
+        }
+    }, [id]);
 
     useEffect(() => {
-        const fetchDetail = async () => {
-            if (!id) return;
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await ReceiptService.getReceiptDetail(id);
-                if (response.success && response.data) {
-                    setReceipt(response.data);
-                } else {
-                    setError('Item Receipt not found');
-                }
-            } catch (err: any) {
-                console.error('Error fetching receipt details:', err);
-                setError(err.message || 'Failed to load receipt details');
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchDetail();
-    }, [id]);
+    }, [fetchDetail]);
+
+    const handleSyncById = useCallback(async () => {
+        if (isSyncing || !id) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi Receipt: ${id}...`);
+        try {
+            await ReceiptService.syncReceiptById(id);
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            await fetchDetail();
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, id, fetchDetail]);
 
     if (loading) {
         return (
@@ -123,6 +142,17 @@ export default function View() {
                                     {receipt.status_display || '-'}
                                 </span>
                             )}
+                            <PermissionGate permission="read">
+                                <Button
+                                    onClick={() => handleSyncById()}
+                                    disabled={isSyncing}
+                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                    variant='outline'
+                                >
+                                    <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                    <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                </Button>
+                            </PermissionGate>
                         </>
                     }
                 />

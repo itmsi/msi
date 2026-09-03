@@ -6,7 +6,6 @@ import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
-import { createByDateColumn } from '@/components/ui/table/columnUtils';
 import { getProfile, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import { useReceipt } from './hooks/useReceipt';
 import { ReceiptItem } from './types/receipt';
@@ -45,7 +44,7 @@ export default function Manage() {
         handleClearFilters,
         isSyncing,
         handleSync,
-        // handleSyncById,
+        handleSyncById,
         // handleDownloadInvoice,
     } = useReceipt(profileSSOId);
     
@@ -77,14 +76,6 @@ export default function Manage() {
             wrap: true,
             width: '230px',
             pinned: 'left'
-        },
-        {
-            id: 'internal_id',
-            name: 'Internal ID',
-            selector: row => row.netsuite_id || '-',
-            wrap: true,
-            width: '140px',
-            center: true,
         },
         {
             id: 'source_type',
@@ -132,13 +123,39 @@ export default function Manage() {
             center: true,
             width: '200px'
         },
-        createByDateColumn('Created By', 'created_at', 'created_by_name', '320px'),
+        {
+            id: 'created_by',
+            name: 'Created By',
+            selector: row => row.netsuite_id || row.id,
+            cell: row => (
+                <div className="flex flex-col py-2">
+                    <span className="font-medium text-gray-900">
+                        {row.created_by_name || '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        {row.created_at ? formatDateTime(row.created_at) : '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        Receipt ID: {row.netsuite_id || '-'}
+                    </span>
+                </div>
+            ),
+            wrap: true,
+            width: '320px'
+        },
         createActionsColumn([
             {
                 icon: MdVisibility,
                 onClick: (row: ReceiptItem) => navigate(`/netsuite/receipts/view/${row.id}`),
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'View Detail',
+                permission: 'read',
+            },
+            {
+                icon: MdOutlineSync,
+                onClick: handleSyncById,
+                className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                tooltip: 'Sync this Receipt',
                 permission: 'read',
             },
         ])
