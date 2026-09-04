@@ -224,11 +224,11 @@ export default function Manage() {
                     >
                         <MdFilterListAlt className="w-4 h-4 mr-2" />
                         Filter
-                        {activeFilterCount > 0 && (
+                        {/* {activeFilterCount > 0 && (
                             <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-blue-600 text-white">
                                 {activeFilterCount}
                             </span>
-                        )}
+                        )} */}
                         {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
                     </Button>
                 </div>
@@ -236,7 +236,7 @@ export default function Manage() {
 
             {/* Advanced Filters */}
             {showAdvancedFilters && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
@@ -252,18 +252,18 @@ export default function Manage() {
                             />
                         </div>
                     </div>
-                    {activeFilterCount > 0 && (
-                        <div className="mt-3 flex justify-end">
-                            <Button
-                                onClick={handleClearFilters}
-                                size="sm"
-                                className="bg-transparent border border-red-300 text-red-600 hover:bg-red-50"
-                            >
-                                <MdClear className="w-4 h-4 mr-1" />
-                                Clear All
-                            </Button>
-                        </div>
-                    )}
+                    {/* {activeFilterCount > 0 && ( */}
+                    <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
+                        <Button
+                            onClick={handleClearFilters}
+                            className="px-4 py-2 bg-transparent hover:bg-gray-100 text-gray-600 border border-gray-300"
+                            size="sm"
+                        >
+                            <MdClear className="w-4 h-4 mr-1" />
+                            Clear All
+                        </Button>
+                    </div>
+                    {/* )} */}
                 </div>
             )}
         </>);

@@ -299,7 +299,7 @@ export default function Manage() {
                 <div className="flex items-center gap-2">
                     <Button
                         onClick={() => setShowAdvancedFilters(prev => !prev)}
-                        className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
+                        className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
                         size="sm"
                     >
                         <MdFilterListAlt className="w-4 h-4 mr-2" />
@@ -316,7 +316,7 @@ export default function Manage() {
 
             {/* Advanced Filters */}
             {showAdvancedFilters && (
-                <div className="mt-4 p-4">
+                <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">From Location</label>
@@ -410,22 +410,22 @@ export default function Manage() {
                             </div>
                         </div>
                     </div>
-                    {activeFilterCount > 0 && (
-                        <div className="mt-3 flex justify-end">
-                            <Button
-                                onClick={() => {
-                                    setSelectedLocationFilter(null);
-                                    setSelectedTransferLocationFilter(null);
-                                    handleClearAllFilters();
-                                }}
-                                size="sm"
-                                className="bg-transparent border border-red-300 text-red-600 hover:bg-red-50"
-                            >
-                                <MdClear className="w-4 h-4 mr-1" />
-                                Clear All
-                            </Button>
-                        </div>
-                    )}
+                    {/* {activeFilterCount > 0 && ( */}
+                    <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
+                        <Button
+                            onClick={() => {
+                                setSelectedLocationFilter(null);
+                                setSelectedTransferLocationFilter(null);
+                                handleClearAllFilters();
+                            }}
+                            className="px-4 py-2 bg-transparent hover:bg-gray-100 text-gray-600 border border-gray-300"
+                            size="sm"
+                        >
+                            <MdClear className="w-4 h-4 mr-1" />
+                            Clear All
+                        </Button>
+                    </div>
+                    {/* )} */}
                 </div>
             )}
         </>
