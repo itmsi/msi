@@ -134,22 +134,22 @@ const Manage = () => {
     return (
         <>
             <PageMeta
-                title="Netsuite Items - Motor Sights International"
+                title="Items - Motor Sights International"
                 description="Manage NetSuite Items - Motor Sights International"
                 image="/motor-sights-international.png"
             />
 
-            <div className="space-y-6">
+            <div className="space-y-3">
                 {/* Header */}
-                <div className="bg-white shadow rounded-lg mb-3">
+                <div className="bg-white shadow rounded-lg">
                     <div className="px-6 py-4 border-b border-gray-200">
                         <div className="flex justify-between items-center">
                             <div>
                                 <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Netsuite Items
+                                    Items
                                 </h3>
                                 <p className="mt-1 text-sm text-gray-500">
-                                    List of NetSuite Inventory and Non-inventory Items
+                                    List of Inventory and Non-inventory Items
                                 </p>
                             </div>
                         </div>
