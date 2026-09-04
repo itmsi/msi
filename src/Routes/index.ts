@@ -141,6 +141,7 @@ const EditSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Edit'));
 const ManageTransferOrder = lazy(() => import('@/pages/Netsuite/TransferOrder/Manage'));
 const CreateTransferOrder = lazy(() => import('@/pages/Netsuite/TransferOrder/Create'));
 const EditTransferOrder = lazy(() => import('@/pages/Netsuite/TransferOrder/Edit'));
+const ManageNetsuiteItems = lazy(() => import('@/pages/Netsuite/Items/Manage'));
 // ========================================
 
 // DIVISION
@@ -173,8 +174,8 @@ export type TAppRoute = {
     name: string;
     component: LazyExoticComponent<ComponentType<object>> | ComponentType<object>;
     layout?:
-        | LazyExoticComponent<ComponentType<{ children: React.ReactNode }>>
-        | ComponentType<{ children: React.ReactNode }>;
+    | LazyExoticComponent<ComponentType<{ children: React.ReactNode }>>
+    | ComponentType<{ children: React.ReactNode }>;
     isProtected?: boolean;
     isUnProtected?: boolean;
     roles?: string[];
@@ -411,7 +412,7 @@ export const routes: TAppRoute[] = [
         requiredPermissions: ['read'],
         layout: AppLayout,
     },
-    
+
     {
         path: '/quotations/products',
         name: 'Product Quotation',
@@ -492,7 +493,7 @@ export const routes: TAppRoute[] = [
         component: EditAccessories,
         layout: AppLayout,
     },
-    
+
     {
         path: '/quotations/term-condition/create',
         name: 'TNC Quotation',
@@ -586,7 +587,7 @@ export const routes: TAppRoute[] = [
         requiredPermissions: ['read'],
         layout: AppLayout,
     },
-    
+
     {
         path: '/quotations-iti/products',
         name: 'Product ITI Quotation',
@@ -667,7 +668,7 @@ export const routes: TAppRoute[] = [
         component: EditAccessoriesITI,
         layout: AppLayout,
     },
-    
+
     {
         path: '/quotations-iti/term-condition/create',
         name: 'TNC ITI Quotation',
@@ -1019,6 +1020,14 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Sales Invoice Netsuite'],
         component: ManageInvoiceSalesOrder,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/items',
+        name: 'Item Netsuite',
+        isProtected: true,
+        roles: ['Item Netsuite'],
+        component: ManageNetsuiteItems,
         layout: AppLayout,
     },
     {
