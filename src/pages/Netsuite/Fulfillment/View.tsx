@@ -169,7 +169,7 @@ export default function View() {
                     </div>
 
                     <div className="bg-white rounded-b-2xl shadow-sm">
-                        {activeTab === 'items' && <FulfillmentItemFields lines={lines} />}
+                        {activeTab === 'items' && <FulfillmentItemFields lines={lines} sourceType={fulfillment.source_type} />}
                         {activeTab === 'files' &&
                             <FilesItems
                                 files={files}

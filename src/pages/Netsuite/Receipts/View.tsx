@@ -197,7 +197,7 @@ export default function View() {
                     </div>
 
                     <div className="bg-white rounded-b-2xl shadow-sm">
-                        {activeTab === 'items' && <ReceiptItemFields lines={lines} />}
+                        {activeTab === 'items' && <ReceiptItemFields lines={lines} sourceType={receipt.source_type} />}
                         {activeTab === 'files' &&
                             <FilesItems
                                 files={files}

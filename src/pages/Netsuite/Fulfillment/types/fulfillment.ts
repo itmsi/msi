@@ -42,6 +42,10 @@ export interface FulfillmentLineItem {
     transaction: string;
     inventory_detail: any[];
     linesequencenumber: number;
+    on_hand: number | null;
+    rate: number;
+    currency: string | null;
+    currency_display: string | null;
 }
 
 export interface FulfillmentUserNote {
@@ -99,6 +103,10 @@ export interface FulfillmentItem {
     class: string;
     class_display: string;
     datecreated: string;
+    incoterm_id?: string | null;
+    incoterm_name?: string | null;
+    currency?: string | null;
+    currency_display?: string | null;
     lines?: FulfillmentLineItem[];
     user_notes?: FulfillmentUserNote[];
     files?: any[];
