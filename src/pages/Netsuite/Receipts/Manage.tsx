@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { TableColumn } from 'react-data-table-component';
-import { useNavigate } from 'react-router-dom';
-import { MdClear, MdSearch, MdOutlineSync, MdFilterListAlt, MdExpandLess, MdExpandMore, MdVisibility } from 'react-icons/md';
+import { Link } from 'react-router-dom';
+import { MdClear, MdSearch, MdOutlineSync, MdFilterListAlt, MdExpandLess, MdExpandMore } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
@@ -20,10 +20,9 @@ const SOURCE_TYPE_OPTIONS = [
 ];
 
 export default function Manage() {
-    const navigate = useNavigate();
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
-    
+
     const {
         receipt,
         syncInfo,
@@ -47,13 +46,13 @@ export default function Manage() {
         handleSyncById,
         // handleDownloadInvoice,
     } = useReceipt(profileSSOId);
-    
+
     const handlePageChangeAman = useCallback((halamanBaru: number) => {
         const halamanSaatIni = pagination?.page || 1;
         if (halamanBaru === halamanSaatIni) return;
         handlePageChange(halamanBaru);
     }, [pagination?.page, handlePageChange]);
-    
+
     const handleRowsPerPageAman = useCallback((limitBaru: number, halamanBaru: number) => {
         const halamanSaatIni = pagination?.page || 1;
         const limitSaatIni = pagination?.limit || 10;
@@ -67,12 +66,16 @@ export default function Manage() {
             id: 'doc_number',
             name: 'Document Number',
             selector: row => row.tranid || '-',
-            cell: row => (
+            cell: row => (<>
+                <Link
+                    to={`/netsuite/receipts/view/${row.id}`}
+                    className="absolute inset-0"
+                />
                 <div className="items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
                     <div className="block text-sm text-gray-500">{formatTanggal(row.trandate)}</div>
                 </div>
-            ),
+            </>),
             wrap: true,
             width: '230px',
             pinned: 'left'
@@ -127,7 +130,11 @@ export default function Manage() {
             id: 'created_by',
             name: 'Created By',
             selector: row => row.netsuite_id || row.id,
-            cell: row => (
+            cell: row => (<>
+                <Link
+                    to={`/netsuite/receipts/view/${row.id}`}
+                    className="absolute inset-0"
+                />
                 <div className="flex flex-col py-2">
                     <span className="font-medium text-gray-900">
                         {row.created_by_name || '-'}
@@ -139,33 +146,27 @@ export default function Manage() {
                         Receipt ID: {row.netsuite_id || '-'}
                     </span>
                 </div>
-            ),
+            </>),
             wrap: true,
             width: '320px'
         },
         createActionsColumn([
-            {
-                icon: MdVisibility,
-                onClick: (row: ReceiptItem) => navigate(`/netsuite/receipts/view/${row.id}`),
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'View Detail',
-                permission: 'read',
-            },
             {
                 icon: MdOutlineSync,
                 onClick: handleSyncById,
                 className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
                 tooltip: 'Sync this Receipt',
                 permission: 'read',
+                width: '88px',
             },
         ])
     ];
-    
+
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const handleToggleFilter = () => {
         setShowAdvancedFilters(prev => !prev);
     };
-    
+
     const SearchAndFilters = useMemo(() => {
         return (<>
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -275,7 +276,7 @@ export default function Manage() {
                 description="Manage Item Receipts - Motor Sights International"
                 image="/motor-sights-international.png"
             />
-            
+
             <div className="space-y-6">
                 {/* Header */}
                 <PageHeaderManage
@@ -305,7 +306,7 @@ export default function Manage() {
                         <span className='block text-xs text-green-600 pe-6 text-end mb-0'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
                     </>)
                 }
-                
+
                 {/* Search & Filter */}
                 <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
                     {SearchAndFilters}
@@ -335,7 +336,6 @@ export default function Manage() {
                             fixedHeaderScrollHeight="625px"
                             responsive
                             highlightOnHover
-                            onRowClicked={(row) => navigate(`/netsuite/receipts/view/${row.id}`)}
                             striped={false}
                             persistTableHead
                             borderRadius="8px"

@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { TableColumn } from 'react-data-table-component';
-import { useNavigate } from 'react-router-dom';
-import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdVisibility, MdOutlineSync } from 'react-icons/md';
+import { Link } from 'react-router-dom';
+import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdOutlineSync } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
@@ -20,7 +20,6 @@ const STATUS_OPTIONS = [
 ];
 
 export default function Manage() {
-    const navigate = useNavigate();
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
 
@@ -65,12 +64,16 @@ export default function Manage() {
             id: 'doc_number',
             name: 'Document Number',
             selector: row => row.number || '-',
-            cell: row => (
+            cell: row => (<>
+                <Link
+                    to={`/netsuite/fulfillments/view/${row.id}`}
+                    className="absolute inset-0"
+                />
                 <div className="items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">{row.number || '-'}</div>
                     <div className="block text-sm text-gray-500">{formatTanggal(row.date)}</div>
                 </div>
-            ),
+            </>),
             wrap: true,
             width: '230px',
             pinned: 'left'
@@ -95,7 +98,7 @@ export default function Manage() {
             name: 'Created From',
             selector: row => row.createdfrom_number || '-',
             wrap: true,
-            width: '260px',
+            minWidth: '260px',
         },
         {
             id: 'location',
@@ -131,7 +134,11 @@ export default function Manage() {
             id: 'created_by',
             name: 'Created By',
             selector: row => row.netsuite_id || row.id,
-            cell: row => (
+            cell: row => (<>
+                <Link
+                    to={`/netsuite/fulfillments/view/${row.id}`}
+                    className="absolute inset-0"
+                />
                 <div className="flex flex-col py-2">
                     <span className="font-medium text-gray-900">
                         {row.created_by || '-'}
@@ -143,24 +150,18 @@ export default function Manage() {
                         Fulfillment ID: {row.netsuite_id || '-'}
                     </span>
                 </div>
-            ),
+            </>),
             wrap: true,
             width: '320px'
         },
         createActionsColumn([
-            {
-                icon: MdVisibility,
-                onClick: (row: FulfillmentItem) => navigate(`/netsuite/fulfillments/view/${row.id}`),
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'View Detail',
-                permission: 'read',
-            },
             {
                 icon: MdOutlineSync,
                 onClick: handleSyncById,
                 className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
                 tooltip: 'Sync this Fulfillment',
                 permission: 'read',
+                width: '88px',
             },
         ])
     ];
@@ -339,7 +340,7 @@ export default function Manage() {
                             fixedHeaderScrollHeight="625px"
                             responsive
                             highlightOnHover
-                            onRowClicked={(row) => navigate(`/netsuite/fulfillments/view/${row.id}`)}
+                            // onRowClicked={(row) => navigate(`/netsuite/fulfillments/view/${row.id}`)}
                             striped={false}
                             persistTableHead
                             borderRadius="8px"

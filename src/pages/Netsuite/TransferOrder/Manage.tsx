@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTransferOrder } from './hooks/useTransferOrder';
 import { formatDateTime, formatTanggal, formatDateToYMD, getProfile } from '@/helpers/generalHelper';
 import { DateRange } from 'react-date-range';
@@ -28,17 +28,6 @@ import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import moment from 'moment';
-
-// Samakan format Date List TO dengan List PO (pakai formatTanggal, format PO: "DD/M/YYYY")
-const formatDateID = (dateString: string) => {
-    if (!dateString || dateString === '-') return '-';
-    const isoMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (isoMatch) {
-        const [, year, m, d] = isoMatch;
-        return formatTanggal(`${parseInt(d, 10)}/${parseInt(m, 10)}/${year}`);
-    }
-    return formatTanggal(dateString);
-};
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -167,13 +156,13 @@ export default function Manage() {
             name: 'Document Number',
             selector: row => row.tranid || '-',
             cell: row => (<>
-                <a
-                    href={`/netsuite/transfer-orders/edit/${row.netsuite_id || row.id}`}
+                <Link
+                    to={`/netsuite/transfer-orders/edit/${row.netsuite_id || row.id}`}
                     className="absolute inset-0"
                 />
                 <div className="items-center py-2">
                     <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
-                    <div className="block text-sm text-gray-500">{formatDateID(row.tran_date || '-')}</div>
+                    <div className="block text-sm text-gray-500">{formatTanggal(row.tran_date || '-')}</div>
                 </div>
             </>),
             wrap: true,
@@ -222,7 +211,11 @@ export default function Manage() {
             id: 'created_by',
             name: 'Created By',
             selector: row => row.netsuite_id || row.id,
-            cell: row => (
+            cell: row => (<>
+                <Link
+                    to={`/netsuite/transfer-orders/edit/${row.netsuite_id || row.id}`}
+                    className="absolute inset-0"
+                />
                 <div className="flex flex-col py-2">
                     <span className="font-medium text-gray-900">
                         {row.created_by_name || '-'}
@@ -234,7 +227,7 @@ export default function Manage() {
                         TO ID: {row.netsuite_id || '-'}
                     </span>
                 </div>
-            ),
+            </>),
             wrap: true,
             width: '320px'
         },
@@ -521,7 +514,7 @@ export default function Manage() {
                             fixedHeaderScrollHeight="625px"
                             responsive
                             highlightOnHover
-                            onRowClicked={(row) => navigate(`/netsuite/transfer-orders/edit/${row.netsuite_id || row.id}`)}
+                            // onRowClicked={(row) => navigate(`/netsuite/transfer-orders/edit/${row.netsuite_id || row.id}`)}
                             striped={false}
                             persistTableHead
                             borderRadius="8px"
