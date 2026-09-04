@@ -66,7 +66,7 @@ export default function Manage() {
             selector: row => row.number || '-',
             cell: row => (<>
                 <Link
-                    to={`/netsuite/fulfillments/view/${row.id}`}
+                    to={`/netsuite/fulfillments/view/${row.netsuite_id || row.id}`}
                     className="absolute inset-0"
                 />
                 <div className="items-center gap-3 py-2">
@@ -87,9 +87,14 @@ export default function Manage() {
             center: true,
         },
         {
+            // Label header digeneralisir jadi "Vendor / Customer" karena list ini
+            // mencampur 3 source_type: Sales Order -> Customer, Vendor Return ->
+            // Vendor, Transfer Order -> tidak ada entity sama sekali (row lain di
+            // kolom "Type" sudah menjelaskan sumbernya).
             id: 'entity_name',
-            name: 'Customer',
+            name: 'Vendor / Customer',
             selector: row => row.entity_name || '-',
+            cell: row => <span>{row.source_type === 'transfer_order' ? '-' : (row.entity_name || '-')}</span>,
             wrap: true,
             width: '260px',
         },
@@ -136,7 +141,7 @@ export default function Manage() {
             selector: row => row.netsuite_id || row.id,
             cell: row => (<>
                 <Link
-                    to={`/netsuite/fulfillments/view/${row.id}`}
+                    to={`/netsuite/fulfillments/view/${row.netsuite_id || row.id}`}
                     className="absolute inset-0"
                 />
                 <div className="flex flex-col py-2">

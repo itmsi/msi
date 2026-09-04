@@ -68,7 +68,7 @@ export default function Manage() {
             selector: row => row.tranid || '-',
             cell: row => (<>
                 <Link
-                    to={`/netsuite/receipts/view/${row.id}`}
+                    to={`/netsuite/receipts/view/${row.netsuite_id || row.id}`}
                     className="absolute inset-0"
                 />
                 <div className="items-center gap-3 py-2">
@@ -132,7 +132,7 @@ export default function Manage() {
             selector: row => row.netsuite_id || row.id,
             cell: row => (<>
                 <Link
-                    to={`/netsuite/receipts/view/${row.id}`}
+                    to={`/netsuite/receipts/view/${row.netsuite_id || row.id}`}
                     className="absolute inset-0"
                 />
                 <div className="flex flex-col py-2">

@@ -4,6 +4,7 @@ import { FulfillmentLineItem } from '../types/fulfillment';
 
 interface FulfillmentItemFieldsProps {
     lines: FulfillmentLineItem[];
+    sourceType?: string | null;
 }
 
 const formatQty = (value: number | string) =>
@@ -11,7 +12,12 @@ const formatQty = (value: number | string) =>
 
 // Style tabel item lines disamain dengan Item Lines Transfer Order (TransferOrder/Edit.tsx
 // readOnlyItemColumns) — heading di atas, tanpa pagination, cell polos text-sm.
-export default function FulfillmentItemFields({ lines }: FulfillmentItemFieldsProps) {
+export default function FulfillmentItemFields({ lines, sourceType }: FulfillmentItemFieldsProps) {
+    // Rate & Currency cuma relevan untuk Item Fulfillment yang dibuat dari
+    // Vendor Return Authorization (satu-satunya tipe yang menampilkan kedua
+    // kolom ini di UI NetSuite, karena berkaitan dengan nilai retur ke vendor).
+    const showRateCurrency = sourceType === 'vendor_return';
+
     const lineColumns: TableColumn<FulfillmentLineItem>[] = [
         {
             name: 'Item',
@@ -24,6 +30,13 @@ export default function FulfillmentItemFields({ lines }: FulfillmentItemFieldsPr
             ),
             wrap: true,
             minWidth: '240px',
+        },
+        {
+            name: 'On Hand',
+            selector: row => row.on_hand ?? '-',
+            cell: row => <span className="text-sm text-right w-full block">{row.on_hand !== null && row.on_hand !== undefined ? formatQty(row.on_hand) : '-'}</span>,
+            right: true,
+            minWidth: '100px',
         },
         {
             name: 'Quantity',
@@ -60,6 +73,24 @@ export default function FulfillmentItemFields({ lines }: FulfillmentItemFieldsPr
             wrap: true,
             minWidth: '160px',
         },
+        ...(showRateCurrency
+            ? [
+                {
+                    name: 'Rate',
+                    selector: (row: FulfillmentLineItem) => row.rate,
+                    cell: (row: FulfillmentLineItem) => <span className="text-sm text-right w-full block">{formatQty(row.rate)}</span>,
+                    right: true,
+                    minWidth: '110px',
+                },
+                {
+                    name: 'Currency',
+                    selector: (row: FulfillmentLineItem) => row.currency_display || '-',
+                    cell: (row: FulfillmentLineItem) => <span className="text-sm text-center w-full block">{row.currency_display || '-'}</span>,
+                    center: true,
+                    minWidth: '100px',
+                },
+            ]
+            : []),
     ];
 
     return (

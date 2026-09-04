@@ -28,19 +28,28 @@ export interface ReceiptRequest {
 // Item line, cuma ada di response detail (GET by id) - lihat msi_get_item_receipts.js
 export interface ReceiptLineItem {
     line: number;
+    line_id: string;
     item: string;
     item_display: string;
+    itemtype: string;
     description: string;
     quantity: number;
     rate: number;
     amount: number;
     memo: string;
+    on_hand: number | null;
     location: string;
     location_display: string;
     department: string;
     department_display: string;
     class: string;
     class_display: string;
+    restock: boolean | string | null;
+    landed_cost: number | string | null;
+    currency: string | null;
+    currency_display: string | null;
+    cseg_msi_pro_segmen: string | null;
+    cseg_msi_pro_segmen_display: string | null;
     inventorydetail: string;
 }
 
@@ -67,6 +76,14 @@ export interface ReceiptItem {
     subsidiary_display: string;
     location: string;
     location_display: string;
+    transferlocation?: string | null;
+    transferlocation_display?: string | null;
+    postingperiod?: string | null;
+    incoterm_id?: string | null;
+    incoterm_name?: string | null;
+    currency?: string | null;
+    currency_display?: string | null;
+    exchangerate?: string | number | null;
     department: string;
     department_display: string;
     class: string;
