@@ -625,6 +625,18 @@ export const formatIntegerValue = (value: string | number): string => {
     return Math.round(numValue).toString();
 };
 
+export const formatQty = (value?: string | number | null, decimals: number = 0): string => {
+    if (value === undefined || value === null || value === '') return '-';
+
+    const numValue = Number(value);
+    if (isNaN(numValue)) return String(value);
+
+    return new Intl.NumberFormat('id-ID', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+    }).format(numValue);
+};
+
 export const formatPercentageValue = (value: string | number): string => {
     if (!value) return '';
     const numValue = typeof value === 'string' ? parseFloat(value) : value;

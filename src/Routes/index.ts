@@ -142,6 +142,7 @@ const ManageTransferOrder = lazy(() => import('@/pages/Netsuite/TransferOrder/Ma
 const CreateTransferOrder = lazy(() => import('@/pages/Netsuite/TransferOrder/Create'));
 const EditTransferOrder = lazy(() => import('@/pages/Netsuite/TransferOrder/Edit'));
 const ManageNetsuiteItems = lazy(() => import('@/pages/Netsuite/Items/Manage'));
+const ViewNetsuiteItems = lazy(() => import('@/pages/Netsuite/Items/View'));
 // ========================================
 
 // DIVISION
@@ -1028,6 +1029,15 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Item Netsuite'],
         component: ManageNetsuiteItems,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/items/view/:internalId',
+        name: 'Item Netsuite',
+        isProtected: true,
+        roles: ['Item Netsuite'],
+        requiredPermissions: ['read'],
+        component: ViewNetsuiteItems,
         layout: AppLayout,
     },
     {

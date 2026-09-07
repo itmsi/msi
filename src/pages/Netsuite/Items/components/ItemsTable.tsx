@@ -1,4 +1,5 @@
 import { TableColumn } from 'react-data-table-component';
+import { Link, useLocation } from 'react-router-dom';
 import CustomDataTable from '@/components/ui/table';
 import { Item, ItemsPagination } from '../types/items';
 
@@ -17,24 +18,24 @@ const ItemsTable = ({
     onChangePage,
     onChangeRowsPerPage,
 }: ItemsTableProps) => {
+    const location = useLocation();
+
     const columns: TableColumn<Item>[] = [
-        // {
-        //     name: 'Internal ID',
-        //     selector: row => row.internalId || '-',
-        //     wrap: true,
-        //     width: '140px'
-        // },
         {
             name: 'Item ID',
             selector: row => row.itemId || '-',
-            cell: row => (
+            cell: row => (<>
+                <Link
+                    to={`/netsuite/items/view/${row.internalId}`}
+                    state={{ from: location.search }}
+                    className="absolute inset-0 cursor-pointer"
+                />
                 <div className="items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">{row.itemId || '-'}</div>
-                    <div className="block text-sm text-gray-500">ID: {row.internalId || '-'}</div>
                 </div>
-            ),
+            </>),
             wrap: true,
-            width: '180px'
+            width: '350px'
         },
         {
             name: 'Display Name',
@@ -56,15 +57,7 @@ const ItemsTable = ({
             ),
             center: true,
             width: '180px'
-        },
-        // {
-        //     name: 'Last Modified Date',
-        //     selector: row => row.lastModifiedDate || '-',
-        //     format: row => formatLastModified(row.lastModifiedDate),
-        //     wrap: true,
-        //     width: '220px',
-        //     center: true
-        // },
+        }
     ];
 
     return (
