@@ -87,7 +87,7 @@ const InlineDatePicker: React.FC<{ value: string | null; onChange: (val: string)
             {show && createPortal(
                 <div
                     ref={popupRef}
-                    className="fixed z-[9999] bg-white border border-gray-300 rounded-md shadow-lg"
+                    className="fixed z-9999 bg-white border border-gray-300 rounded-md shadow-lg"
                     style={{ top: position.top, left: position.left }}
                 >
                     <Calendar
@@ -296,7 +296,7 @@ export default function TransferOrderItemFields({
                         }
                     }}
                     onFocus={(e) => e.target.select()}
-                    className="p-1 px-3 w-[100px] text-center"
+                    className="p-1 px-3 w-25 text-center"
                 />
             ),
             wrap: true,
@@ -321,7 +321,7 @@ export default function TransferOrderItemFields({
                     }}
                     onFocus={(e) => e.target.select()}
                     placeholder="0"
-                    className="p-1 px-3 w-[130px] text-right"
+                    className="p-1 px-3 w-32.5 text-right"
                 />
             ),
             wrap: true,
@@ -342,7 +342,7 @@ export default function TransferOrderItemFields({
                     }}
                     onFocus={(e) => e.target.select()}
                     placeholder="0"
-                    className="p-1 px-3 w-[130px] text-right"
+                    className="p-1 px-3 w-32.5 text-right"
                 />
             ),
             wrap: true,
@@ -362,7 +362,7 @@ export default function TransferOrderItemFields({
                     }}
                     rows={2}
                     placeholder="Enter item description..."
-                    className={`w-full px-3 py-2 my-2 w-[220px] border-0 border-b-1 rounded-none focus:border-b-blue-500 ${errors[`description_${idx}`] ? 'border-red-500 ' : 'border-gray-300'
+                    className={`w-full px-3 py-2 my-2 border-0 border-b rounded-none focus:border-b-blue-500 ${errors[`description_${idx}`] ? 'border-red-500 ' : 'border-gray-300'
                         }`}
                 />
             ),
@@ -478,7 +478,7 @@ export default function TransferOrderItemFields({
                             responsive
                             striped={false}
                             highlightOnHover={false}
-                            className={`min-h-[100px]`}
+                            className={`min-h-25`}
                             noDataComponent={
                                 <div className="text-center py-8 text-gray-500">
                                     No items added yet

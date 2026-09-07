@@ -352,22 +352,20 @@ export default function Create() {
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab('items')}
-                                    className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                        activeTab === 'items'
+                                    className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'items'
                                             ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
+                                        }`}
                                 >
                                     <MdInventory2 /> Items
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab('files')}
-                                    className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${
-                                        activeTab === 'files'
+                                    className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'files'
                                             ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
+                                        }`}
                                 >
                                     <MdOutlineAttachFile /> Files
                                 </button>
@@ -378,37 +376,37 @@ export default function Create() {
                             {/* Items Tab */}
                             {activeTab === 'items' && (
                                 <>
-                                <div className="px-6 pt-4">
-                                    <div className="mb-4">
-                                        <Label>Filter Item Type</Label>
-                                        <CustomSelect
-                                            name="item_type_filter"
-                                            placeholder="All Item Types"
-                                            value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
-                                            options={itemTypeOptions}
-                                            isClearable={true}
-                                            onChange={(option: any) => {
-                                                handleItemTypeChange(option);
-                                            }}
-                                        />
+                                    <div className="px-6 pt-4">
+                                        <div className="mb-4">
+                                            <Label>Filter Item Type</Label>
+                                            <CustomSelect
+                                                name="item_type_filter"
+                                                placeholder="All Item Types"
+                                                value={itemTypeFilter.length > 0 ? itemTypeOptions.find((o: any) => o.value === itemTypeFilter[0]) : null}
+                                                options={itemTypeOptions}
+                                                isClearable={true}
+                                                onChange={(option: any) => {
+                                                    handleItemTypeChange(option);
+                                                }}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                <TransferOrderItemFields
-                                    formData={formData}
-                                    errors={errors}
-                                    onAddItem={handleAddItem}
-                                    onAddItems={handleAddItems}
-                                    onRemoveItem={handleRemoveItem}
-                                    onUpdateItem={handleUpdateItem}
+                                    <TransferOrderItemFields
+                                        formData={formData}
+                                        errors={errors}
+                                        onAddItem={handleAddItem}
+                                        onAddItems={handleAddItems}
+                                        onRemoveItem={handleRemoveItem}
+                                        onUpdateItem={handleUpdateItem}
 
-                                    // Item Select Props
-                                    itemOptions={itemOptions}
-                                    itemPagination={itemPagination}
-                                    itemInput={itemInputValue}
-                                    onItemInputChange={handleItemInputChange}
-                                    onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
-                                    itemTypeIds={itemTypeFilter}
-                                />
+                                        // Item Select Props
+                                        itemOptions={itemOptions}
+                                        itemPagination={itemPagination}
+                                        itemInput={itemInputValue}
+                                        onItemInputChange={handleItemInputChange}
+                                        onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
+                                        itemTypeIds={itemTypeFilter}
+                                    />
                                 </>
                             )}
 
