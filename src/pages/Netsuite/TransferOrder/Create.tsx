@@ -37,6 +37,7 @@ export default function Create() {
         handleSelectChange,
         handleDateChange,
         handleAddItem,
+        handleAddItems,
         handleRemoveItem,
         handleUpdateItem,
         handleSubmit,
@@ -396,6 +397,7 @@ export default function Create() {
                                     formData={formData}
                                     errors={errors}
                                     onAddItem={handleAddItem}
+                                    onAddItems={handleAddItems}
                                     onRemoveItem={handleRemoveItem}
                                     onUpdateItem={handleUpdateItem}
 
@@ -405,6 +407,7 @@ export default function Create() {
                                     itemInput={itemInputValue}
                                     onItemInputChange={handleItemInputChange}
                                     onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
+                                    itemTypeIds={itemTypeFilter}
                                 />
                                 </>
                             )}

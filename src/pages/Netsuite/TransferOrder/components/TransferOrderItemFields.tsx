@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { MdAdd, MdDeleteOutline } from 'react-icons/md';
+import { MdAdd, MdContentPaste, MdDeleteOutline } from 'react-icons/md';
 import Label from '@/components/form/Label';
 import InputField from '@/components/form/input/InputField';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
@@ -12,6 +12,8 @@ import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import TextArea from '@/components/form/input/TextArea';
+import PasteItemsModal from './PasteItemsModal';
+import { ResolvedPasteItem } from '@/hooks/useItemNamesResolver';
 import { Calendar } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
@@ -20,6 +22,7 @@ interface TOItemFieldsProps {
     formData: TransferOrderFormData;
     errors: Record<string, string>;
     onAddItem: (selectedItem: any) => void;
+    onAddItems: (items: ResolvedPasteItem[]) => void;
     onRemoveItem: (id: string) => void;
     onUpdateItem: (index: number, field: string, value: any) => void;
 
@@ -29,6 +32,7 @@ interface TOItemFieldsProps {
     itemInput: string;
     onItemInputChange: (val: string) => Promise<any[]>;
     onItemMenuScrollToBottom: () => void;
+    itemTypeIds?: string[];
 
     isEditing?: boolean;
 }
@@ -54,8 +58,6 @@ const InlineDatePicker: React.FC<{ value: string | null; onChange: (val: string)
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Popup dipindah ke document.body lewat portal supaya tidak ke-clip oleh
-    // overflow-y-auto pada wrapper tabel item, lalu diposisikan fixed mengikuti trigger.
     useEffect(() => {
         if (!show) return;
         const handleScroll = () => setShow(false);
@@ -108,6 +110,7 @@ export default function TransferOrderItemFields({
     formData,
     errors,
     onAddItem,
+    onAddItems,
     onRemoveItem,
     onUpdateItem,
     itemOptions,
@@ -115,9 +118,11 @@ export default function TransferOrderItemFields({
     itemInput,
     onItemInputChange,
     onItemMenuScrollToBottom,
+    itemTypeIds,
     isEditing = false,
 }: TOItemFieldsProps) {
     const [selectedNewItem, setSelectedNewItem] = useState<any>(null);
+    const [showPasteModal, setShowPasteModal] = useState(false);
 
     const BATCH_SIZE = 50;
     const [displayCount, setDisplayCount] = useState(BATCH_SIZE);
@@ -148,10 +153,6 @@ export default function TransferOrderItemFields({
         [formData.items, displayCount]
     );
 
-    // Kolom read-only ini urutannya disamakan persis dengan tabel Items di record
-    // Transfer Order asli NetSuite: Item, Committed, Picked, Packed, Fulfilled,
-    // Received, Back Ordered, Quantity, Transfer Price, Units, Amount,
-    // Description, Expected Receipt Date, Order Priority, Commitment Confirmed, Closed.
     const progressColumns: TableColumn<TransferOrderFormItem>[] = isEditing ? [
         {
             name: 'Committed',
@@ -281,9 +282,6 @@ export default function TransferOrderItemFields({
                     onChange={(e) => {
                         const quantity = toNumber(e.target.value);
                         onUpdateItem(index as number, 'quantity', quantity);
-                        // Perkalian otomatis qty x rate -> amount cuma buat item baru (isEditing=false di
-                        // Create, atau row.isNew di Edit). Item lama hasil load dari NetSuite gak disentuh
-                        // amount-nya biar ga ke-overwrite tanpa sengaja.
                         if (!isEditing || row.isNew) {
                             onUpdateItem(index as number, 'amount', quantity * (row.rate || 0));
                         }
@@ -364,9 +362,8 @@ export default function TransferOrderItemFields({
                     }}
                     rows={2}
                     placeholder="Enter item description..."
-                    className={`w-full px-3 py-2 my-2 w-[220px] border-0 border-b-1 rounded-none focus:border-b-blue-500 ${
-                        errors[`description_${idx}`] ? 'border-red-500 ' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 my-2 w-[220px] border-0 border-b-1 rounded-none focus:border-b-blue-500 ${errors[`description_${idx}`] ? 'border-red-500 ' : 'border-gray-300'
+                        }`}
                 />
             ),
             width: '250px',
@@ -443,6 +440,18 @@ export default function TransferOrderItemFields({
                             Add Item
                         </Button>
                     </div>
+                    <div className="flex flex-col justify-end">
+                        <Button
+                            type="button"
+                            onClick={() => setShowPasteModal(true)}
+                            variant="outline"
+                            className={`flex items-center gap-2 ${requiredClassificationMissing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={requiredClassificationMissing}
+                        >
+                            <MdContentPaste size={18} />
+                            Paste from Excel
+                        </Button>
+                    </div>
                 </div>
                 {requiredClassificationMissing && (
                     <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 mb-4">
@@ -496,13 +505,18 @@ export default function TransferOrderItemFields({
                     <TOInvoiceSummary items={formData.items} serverTotal={formData.total} />
                 )}
             </div>
+
+            <PasteItemsModal
+                isOpen={showPasteModal}
+                onClose={() => setShowPasteModal(false)}
+                onConfirm={onAddItems}
+                itemTypeIds={itemTypeIds}
+                existingInternalIds={(formData.items || []).map(item => String(item.itemId))}
+            />
         </div>
     );
 }
 
-// Summary items Transfer Order — pola sama persis seperti InvoiceSummary (PO) / SOInvoiceSummary /
-// QuotationInvoiceSummary. Transfer Order tidak punya konsep tax per line, jadi baris Tax selalu 0,
-// tapi tetap ditampilkan biar layout-nya konsisten dengan PO.
 export const TOInvoiceSummary: React.FC<{ items: TransferOrderFormItem[], serverTotal?: number }> = ({ items, serverTotal }) => {
     const summary = useMemo(() => {
         const totalQty = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);

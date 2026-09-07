@@ -46,6 +46,7 @@ export default function Edit() {
         handleSelectChange,
         handleDateChange,
         handleAddItem,
+        handleAddItems,
         handleRemoveItem,
         handleUpdateItem,
         handleSubmit,
@@ -718,6 +719,7 @@ export default function Edit() {
                                                 formData={formData}
                                                 errors={errors}
                                                 onAddItem={handleAddItem}
+                                                onAddItems={handleAddItems}
                                                 onRemoveItem={handleRemoveItem}
                                                 onUpdateItem={handleUpdateItem}
                                                 isEditing
@@ -727,6 +729,7 @@ export default function Edit() {
                                                 itemInput={itemInputValue}
                                                 onItemInputChange={handleItemInputChange}
                                                 onItemMenuScrollToBottom={handleItemMenuScrollToBottom}
+                                                itemTypeIds={itemTypeFilter}
                                             />
                                         </>
                                     )

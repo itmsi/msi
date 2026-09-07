@@ -6,7 +6,9 @@ import {
     ItemSerialNumbersResponse,
     ItemTierPricesResponse,
     ItemsListResponse,
-    ItemsRequest
+    ItemsRequest,
+    ValidateItemNamesRequest,
+    ValidateItemNamesResponse
 } from '../types/items';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -14,7 +16,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export const DEFAULT_ITEM_TYPE = ['Non-inventory Item', 'Inventory Item'];
 export const DEFAULT_ITEM_TYPE_ID = ['InvtPart', 'NonInvtPart'];
 
-// Locations, serial numbers, dan tier prices memakai bentuk request yang sama
 const buildRelationRequest = (params: Partial<ItemRelationRequest> = {}): ItemRelationRequest => ({
     page: 1,
     limit: 10,
@@ -38,6 +39,14 @@ export class ItemsService {
 
         const response = await apiPost(`${API_BASE_URL}/netsuite/items/get-list`, requestData as Record<string, unknown>);
         return response.data as ItemsListResponse;
+    }
+
+    static async validateItemNames(params: ValidateItemNamesRequest): Promise<ValidateItemNamesResponse> {
+        const response = await apiPost(
+            `${API_BASE_URL}/netsuite/items/validate-names`,
+            params as Record<string, unknown>
+        );
+        return response.data as ValidateItemNamesResponse;
     }
 
     static async getItemById(internalId: string): Promise<ItemDetailResponse> {

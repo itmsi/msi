@@ -34,6 +34,45 @@ export type ItemsRequest = {
     item_type_id?: string[];
 }
 
+export type ValidateItemNamesRequest = {
+    names: string[];
+    item_type?: string[];
+    item_type_id?: string[];
+}
+
+export type ItemNameStatus = 'found' | 'ambiguous' | 'not_found';
+
+export interface ItemNameMatch {
+    internalId: string;
+    itemId: string;
+    displayName: string;
+    itemType?: string;
+    itemTypeId?: string;
+}
+
+export interface ItemNameResult {
+    name: string;
+    status: ItemNameStatus;
+    item: ItemNameMatch | null;
+    candidates: ItemNameMatch[];
+    matched_by?: 'itemId' | 'displayName' | null;
+}
+
+export interface ValidateItemNamesSummary {
+    found: number;
+    ambiguous: number;
+    not_found: number;
+}
+
+export interface ValidateItemNamesResponse {
+    success: boolean;
+    data: {
+        results: ItemNameResult[];
+        summary: ValidateItemNamesSummary;
+    };
+    message: string;
+}
+
 export interface ItemDetail {
     id: string;
     netsuite_id: string;
@@ -52,7 +91,6 @@ export interface ItemDetailResponse {
     message: string;
 }
 
-// Request yang dipakai bersama oleh locations, serial numbers, dan tier prices
 export type ItemRelationRequest = {
     page: number;
     limit: number;
@@ -83,7 +121,6 @@ export interface ItemLocation {
     qtyOnOrder: string;
     qtyCommitted: string;
     qtyBackOrder: string;
-    // Bentuk isi array belum tersedia pada contoh response, dipakai untuk jumlah saja
     serialNumbers: unknown[];
 }
 
