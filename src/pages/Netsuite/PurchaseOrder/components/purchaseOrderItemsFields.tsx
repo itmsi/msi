@@ -238,6 +238,12 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         {
             name: 'Product Name',
             selector: (row: TablePOItem) => row.product_name || 'N/A',
+              cell:row => (
+                <div className="items-center gap-3 py-2">
+                    <div className="block text-sm text-gray-500">{row.item_displayname|| '-'}</div>
+                    <div className="font-medium text-gray-900">{row.product_name || 'N/A'}</div>
+                </div>
+            ),
             sortable: false,
             grow: 2
         },
