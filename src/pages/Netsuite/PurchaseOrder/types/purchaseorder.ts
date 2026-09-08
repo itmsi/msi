@@ -221,6 +221,7 @@ export interface TablePOItem {
     id?: string;
     product_id: string;
     product_name: string;
+    item_displayname: string;
     itemId: string | number;
     qty: number;
     rate: number;
@@ -400,6 +401,7 @@ export interface PODetailLine {
     isbillable?: string;
     transaction?: number;
     item_display?: string;
+    item_displayname?: string;
     class_display?: string;
     units_display?: string | null;
     quantitybilled?: number;
