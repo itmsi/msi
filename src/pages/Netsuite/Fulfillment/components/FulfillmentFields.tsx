@@ -7,9 +7,21 @@ interface FulfillmentFieldsProps {
     fulfillment: FulfillmentItem;
 }
 
+// Label "Vendor"/"Customer" mengikuti tipe transaksi asal (createdfrom.type),
+// sama seperti field Entity di UI NetSuite: Vendor Return Authorization ->
+// Vendor, Sales Order -> Customer, Transfer Order tidak punya entity sama sekali.
+const entityLabel = (sourceType?: string | null) => {
+    if (sourceType === 'vendor_return') return 'Vendor';
+    if (sourceType === 'sales_order') return 'Customer';
+    return null;
+};
+
 // Grouping field-nya disamain dengan record Item Fulfillment di NetSuite:
 // Primary Information / Approval Information / Classification / Additional Information.
 export default function FulfillmentFields({ fulfillment }: FulfillmentFieldsProps) {
+    const entityFieldLabel = entityLabel(fulfillment.source_type);
+    const isTransferOrder = fulfillment.source_type === 'transfer_order';
+
     return (
         <div className="space-y-6 gap-2">
             <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
@@ -34,6 +46,12 @@ export default function FulfillmentFields({ fulfillment }: FulfillmentFieldsProp
                             )}
                         </p>
                     </div>
+                    {entityFieldLabel && (
+                        <div>
+                            <p className="mb-1.5 block text-sm text-gray-700">{entityFieldLabel}</p>
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.entity_name || '-'}</p>
+                        </div>
+                    )}
                     <div>
                         <p className="mb-1.5 block text-sm text-gray-700">Date</p>
                         <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.date ? formatTanggal(fulfillment.date) : '-'}</p>
@@ -44,7 +62,7 @@ export default function FulfillmentFields({ fulfillment }: FulfillmentFieldsProp
                     </div>
                     <div>
                         <p className="mb-1.5 block text-sm text-gray-700">Incoterm</p>
-                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">-</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.incoterm_name || '-'}</p>
                     </div>
                     <div>
                         <p className="mb-1.5 block text-sm text-gray-700">Memo</p>
@@ -88,10 +106,12 @@ export default function FulfillmentFields({ fulfillment }: FulfillmentFieldsProp
                         <p className="mb-1.5 block text-sm text-gray-700">China Cash Flow Item</p>
                         <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.custbody_cseg_cn_cfi_display || '-'}</p>
                     </div>
-                    <div>
-                        <p className="mb-1.5 block text-sm text-gray-700">Destination Location</p>
-                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.transferlocation_display || '-'}</p>
-                    </div>
+                    {isTransferOrder && (
+                        <div>
+                            <p className="mb-1.5 block text-sm text-gray-700">Destination Location</p>
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{fulfillment.transferlocation_display || '-'}</p>
+                        </div>
+                    )}
                 </div>
             </div>
 

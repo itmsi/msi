@@ -6,6 +6,15 @@ interface ReceiptFieldsProps {
     receipt: ReceiptItem;
 }
 
+// Label entity mengikuti tipe transaksi asal (createdfrom.type): Purchase Order
+// & Inbound Shipment -> Vendor, Customer Return -> Customer, Transfer Order
+// tidak punya entity sama sekali.
+const entityLabel = (sourceType?: string | null) => {
+    if (sourceType === 'customer_return') return 'Customer';
+    if (sourceType === 'purchase_order' || sourceType === 'inbound_shipment') return 'Vendor';
+    return null;
+};
+
 // Grouping field-nya disamain dengan record Item Receipt di NetSuite:
 // Primary Information / Classification.
 export default function ReceiptFields({ receipt }: ReceiptFieldsProps) {
@@ -14,6 +23,8 @@ export default function ReceiptFields({ receipt }: ReceiptFieldsProps) {
         : receipt.source_type === 'purchase_order'
             ? `/netsuite/purchase-order/edit/${receipt.createdfrom}`
             : null;
+    const entityFieldLabel = entityLabel(receipt.source_type);
+    const isTransferOrder = receipt.source_type === 'transfer_order';
 
     return (
         <div className="space-y-6 gap-2">
@@ -42,7 +53,7 @@ export default function ReceiptFields({ receipt }: ReceiptFieldsProps) {
                     </div>
                     <div>
                         <p className="mb-1.5 block text-sm text-gray-700">Posting Period</p>
-                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">-</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.postingperiod || '-'}</p>
                     </div>
                     {receipt.inboundshipment && (
                         <div>
@@ -56,15 +67,19 @@ export default function ReceiptFields({ receipt }: ReceiptFieldsProps) {
                     </div>
                     <div>
                         <p className="mb-1.5 block text-sm text-gray-700">Incoterm</p>
-                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">-</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.incoterm_name || '-'}</p>
                     </div>
                     <div>
                         <p className="mb-1.5 block text-sm text-gray-700">Currency</p>
-                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">-</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.currency_display || '-'}</p>
                     </div>
-                    {receipt.source_type !== 'transfer_order' && (
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Exchange Rate</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.exchangerate ?? '-'}</p>
+                    </div>
+                    {entityFieldLabel && (
                         <div>
-                            <p className="mb-1.5 block text-sm text-gray-700">Vendor</p>
+                            <p className="mb-1.5 block text-sm text-gray-700">{entityFieldLabel}</p>
                             <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.vendor_name || '-'}</p>
                         </div>
                     )}
@@ -79,9 +94,15 @@ export default function ReceiptFields({ receipt }: ReceiptFieldsProps) {
                         <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.subsidiary_display || '-'}</p>
                     </div>
                     <div>
-                        <p className="mb-1.5 block text-sm text-gray-700">Location</p>
+                        <p className="mb-1.5 block text-sm text-gray-700">To Location</p>
                         <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.location_display || '-'}</p>
                     </div>
+                    {isTransferOrder && (
+                        <div>
+                            <p className="mb-1.5 block text-sm text-gray-700">From Location</p>
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.transferlocation_display || '-'}</p>
+                        </div>
+                    )}
                     <div>
                         <p className="mb-1.5 block text-sm text-gray-700">Class</p>
                         <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.class_display || '-'}</p>

@@ -18,17 +18,17 @@ interface CustomSelectProps extends Omit<SelectProps<Option>, 'styles' | 'onChan
     onChange?: (selectedOption: { value: string; label: string; } | null) => void;
 }
 
-const CustomSelect: React.FC<CustomSelectProps> = ({ 
-    error, 
-    isSearchable = true, 
-    isClearable = true, 
-    success, 
-    disabled, 
-    className = '', 
+const CustomSelect: React.FC<CustomSelectProps> = ({
+    error,
+    isSearchable = true,
+    isClearable = true,
+    success,
+    disabled,
+    className = '',
     menuPortalTarget,
     menuPosition = 'absolute',
     onChange,
-    ...props 
+    ...props
 }) => {
     const handleChange = (newValue: SingleValue<Option> | MultiValue<Option>, _actionMeta: ActionMeta<Option>) => {
         if (onChange) {
@@ -68,37 +68,37 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                     height: '44px',
                     borderRadius: '0.5rem',
                     borderWidth: '1px',
-                    boxShadow: state.isFocused 
-                        ? (error 
-                            ? '0 0 0 3px rgba(239, 68, 68, 0.2)' 
-                            : success 
+                    boxShadow: state.isFocused
+                        ? (error
+                            ? '0 0 0 3px rgba(239, 68, 68, 0.2)'
+                            : success
                                 ? '0 0 0 3px rgba(34, 197, 94, 0.2)'
                                 : '0 0 0 3px rgba(59, 130, 246, 0.2)'
-                          ) 
+                        )
                         : 'none',
-                    borderColor: state.isFocused 
-                        ? (error 
-                            ? '#ef4444' 
-                            : success 
+                    borderColor: state.isFocused
+                        ? (error
+                            ? '#ef4444'
+                            : success
                                 ? '#22c55e'
                                 : '#3b82f6'
-                          )
-                        : (error 
-                            ? '#ef4444' 
-                            : success 
+                        )
+                        : (error
+                            ? '#ef4444'
+                            : success
                                 ? '#22c55e'
                                 : '#d1d5db'
-                          ),
-                    backgroundColor: (state.isDisabled || disabled) 
-                        ? '#f3f4f6' 
+                        ),
+                    backgroundColor: (state.isDisabled || disabled)
+                        ? '#f3f4f6'
                         : 'transparent',
                     cursor: (state.isDisabled || disabled) ? 'not-allowed' : 'default',
                     opacity: (state.isDisabled || disabled) ? 0.4 : 1,
                     '&:hover': {
-                        borderColor: error 
-                            ? '#ef4444' 
-                            : success 
-                                ? '#22c55e' 
+                        borderColor: error
+                            ? '#ef4444'
+                            : success
+                                ? '#22c55e'
                                 : 'trasnsparent',
                     }
                 };
@@ -157,12 +157,16 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 padding: 0,
                 borderRadius: '0.5rem'
             }),
+            menuPortal: (baseStyles) => ({
+                ...baseStyles,
+                zIndex: 9999
+            }),
             option: (baseStyles, state) => ({
                 ...baseStyles,
-                backgroundColor: state.isSelected 
-                    ? '#3b82f6' 
-                    : state.isFocused 
-                        ? '#eff6ff' 
+                backgroundColor: state.isSelected
+                    ? '#3b82f6'
+                    : state.isFocused
+                        ? '#eff6ff'
                         : 'white',
                 color: state.isSelected ? 'white' : '#374151',
                 padding: '8px 16px',

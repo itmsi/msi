@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTransferOrder } from './hooks/useTransferOrder';
-import { formatDateTime, formatTanggal, getProfile } from '@/helpers/generalHelper';
+import { formatDateTime, formatTanggal, formatDateToYMD, getProfile } from '@/helpers/generalHelper';
+import { DateRange } from 'react-date-range';
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 import {
     MdClear,
     MdSearch,
@@ -11,6 +14,7 @@ import {
     MdExpandMore,
     MdOutlineSync,
     MdAdd,
+    MdDateRange,
 } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import PageMeta from '@/components/common/PageMeta';
@@ -23,17 +27,7 @@ import PageHeaderManage from '@/components/common/PageHeaderManage';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
-
-// Samakan format Date List TO dengan List PO (pakai formatTanggal, format PO: "DD/M/YYYY")
-const formatDateID = (dateString: string) => {
-    if (!dateString || dateString === '-') return '-';
-    const isoMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (isoMatch) {
-        const [, year, m, d] = isoMatch;
-        return formatTanggal(`${parseInt(d, 10)}/${parseInt(m, 10)}/${year}`);
-    }
-    return formatTanggal(dateString);
-};
+import moment from 'moment';
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -51,11 +45,14 @@ export default function Manage() {
         filterLocation,
         filterTransferLocation,
         filterStatus,
+        filterStartDate,
+        filterEndDate,
         activeFilterCount,
         setSearchValue,
         handlePageChange,
         handleRowsPerPageChange,
         handleFilterChange,
+        handleDateRangeChange,
         handleKeyPress,
         handleClearSearch,
         handleClearAllFilters,
@@ -92,6 +89,46 @@ export default function Manage() {
     const [selectedLocationFilter, setSelectedLocationFilter] = useState<any>(null);
     const [selectedTransferLocationFilter, setSelectedTransferLocationFilter] = useState<any>(null);
 
+    // Date range filter
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [dateRangeState, setDateRangeState] = useState([{
+        startDate: new Date(),
+        endDate: new Date(),
+        key: 'selection',
+    }]);
+    const datePickerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
+                setShowDatePicker(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Reset tampilan kalender kalau filter tanggal dibersihkan dari luar (Clear All).
+    useEffect(() => {
+        if (!filterStartDate && !filterEndDate) {
+            setDateRangeState([{ startDate: new Date(), endDate: new Date(), key: 'selection' }]);
+        }
+    }, [filterStartDate, filterEndDate]);
+
+    const handleDateRangeSelect = useCallback((item: any) => {
+        const selection = item.selection;
+        setDateRangeState([selection]);
+        if (selection.startDate && selection.endDate) {
+            handleDateRangeChange(formatDateToYMD(selection.startDate), formatDateToYMD(selection.endDate));
+        }
+    }, [handleDateRangeChange]);
+
+    const handleClearDateRange = useCallback(() => {
+        setDateRangeState([{ startDate: new Date(), endDate: new Date(), key: 'selection' }]);
+        setShowDatePicker(false);
+        handleDateRangeChange('', '');
+    }, [handleDateRangeChange]);
+
     const handlePageChangeSafe = useCallback((newPage: number) => {
         const currentPage = pagination?.page || 1;
         if (newPage === currentPage) return;
@@ -105,18 +142,27 @@ export default function Manage() {
         handleRowsPerPageChange(newLimit, newPage);
     }, [pagination?.page, pagination?.page_size, handleRowsPerPageChange]);
 
+    const statusTypeOptions = [
+        { value: 'Pending Approval', label: 'Pending Approval' },
+        { value: 'Pending Fulfillment', label: 'Pending Fulfillment' },
+        { value: 'Pending Receipt', label: 'Pending Receipt' },
+        { value: 'Partially Fulfilled', label: 'Partially Fulfilled' },
+        { value: 'Received', label: 'Received' },
+        { value: 'Pending Receipt/Partially Fulfilled', label: 'Pending Receipt/Partially Fulfilled' },
+    ];
+
     const columns: TableColumn<TransferOrderListItem>[] = [
         {
             name: 'Document Number',
             selector: row => row.tranid || '-',
             cell: row => (<>
-                <a
-                    href={`/netsuite/transfer-orders/edit/${row.netsuite_id || row.id}`}
+                <Link
+                    to={`/netsuite/transfer-orders/edit/${row.netsuite_id || row.id}`}
                     className="absolute inset-0"
                 />
                 <div className="items-center py-2">
                     <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
-                    <div className="block text-sm text-gray-500">{formatDateID(row.tran_date || '-')}</div>
+                    <div className="block text-sm text-gray-500">{formatTanggal(row.tran_date || '-')}</div>
                 </div>
             </>),
             wrap: true,
@@ -148,7 +194,7 @@ export default function Manage() {
                 </div>
             ),
             center: true,
-            width: '260px'
+            width: '280px'
         },
         {
             name: 'Memo',
@@ -165,7 +211,11 @@ export default function Manage() {
             id: 'created_by',
             name: 'Created By',
             selector: row => row.netsuite_id || row.id,
-            cell: row => (
+            cell: row => (<>
+                <Link
+                    to={`/netsuite/transfer-orders/edit/${row.netsuite_id || row.id}`}
+                    className="absolute inset-0"
+                />
                 <div className="flex flex-col py-2">
                     <span className="font-medium text-gray-900">
                         {row.created_by_name || '-'}
@@ -174,10 +224,10 @@ export default function Manage() {
                         {row.created_at ? formatDateTime(row.created_at) : '-'}
                     </span>
                     <span className="text-xs text-gray-500">
-                        Sid: {row.netsuite_id || '-'}
+                        TO ID: {row.netsuite_id || '-'}
                     </span>
                 </div>
-            ),
+            </>),
             wrap: true,
             width: '320px'
         },
@@ -192,7 +242,12 @@ export default function Manage() {
             }
         ]),
     ];
-
+    const getDateRangeDisplayText = (): string => {
+        if (filterStartDate && filterEndDate) {
+            return `${moment(filterStartDate).format('DD MMM YYYY')} - ${moment(filterEndDate).format('DD MMM YYYY')}`;
+        }
+        return 'Select Date Range';
+    };
     const SearchAndFilters = useMemo(() => (
         <>
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -244,16 +299,16 @@ export default function Manage() {
                 <div className="flex items-center gap-2">
                     <Button
                         onClick={() => setShowAdvancedFilters(prev => !prev)}
-                        className="h-[42px] px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
+                        className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
                         size="sm"
                     >
                         <MdFilterListAlt className="w-4 h-4 mr-2" />
                         Filter
-                        {activeFilterCount > 0 && (
+                        {/* {activeFilterCount > 0 && (
                             <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-blue-600 text-white">
                                 {activeFilterCount}
                             </span>
-                        )}
+                        )} */}
                         {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
                     </Button>
                 </div>
@@ -261,8 +316,8 @@ export default function Manage() {
 
             {/* Advanced Filters */}
             {showAdvancedFilters && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">From Location</label>
                             <CustomAsyncSelect
@@ -303,35 +358,78 @@ export default function Manage() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <Input
-                                type="text"
-                                value={filterStatus}
-                                onChange={(e) => handleFilterChange('status_name', e.target.value)}
-                                placeholder="e.g. Pending Approval"
-                                className="w-full"
+                            <CustomSelect
+                                options={statusTypeOptions}
+                                value={statusTypeOptions.find(option => option.value === filterStatus) || null}
+                                onChange={(option) => handleFilterChange('status_name', option?.value || '')}
+                                placeholder="Select status_name"
+                                isClearable={false}
+                                isSearchable={false}
                             />
                         </div>
-                    </div>
-                    {activeFilterCount > 0 && (
-                        <div className="mt-3 flex justify-end">
-                            <Button
-                                onClick={() => {
-                                    setSelectedLocationFilter(null);
-                                    setSelectedTransferLocationFilter(null);
-                                    handleClearAllFilters();
-                                }}
-                                size="sm"
-                                className="bg-transparent border border-red-300 text-red-600 hover:bg-red-50"
-                            >
-                                <MdClear className="w-4 h-4 mr-1" />
-                                Clear All
-                            </Button>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                            <div className="relative" ref={datePickerRef}>
+                                <div
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-h-[43px] flex items-center justify-between"
+                                    onClick={() => setShowDatePicker(!showDatePicker)}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <MdDateRange className="text-gray-400" />
+                                        <span className={`${filterStartDate && filterEndDate
+                                            ? 'text-gray-900'
+                                            : 'text-gray-500'
+                                            }`}>
+                                            {getDateRangeDisplayText()}
+                                        </span>
+                                    </div>
+                                    {filterStartDate && filterEndDate && (
+                                        <MdClear
+                                            className="text-gray-400 hover:text-gray-600 cursor-pointer shrink-0"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleClearDateRange();
+                                            }}
+                                        />
+                                    )}
+                                </div>
+
+                                {showDatePicker && (
+                                    <div className="absolute top-full right-0 mt-1 z-50 bg-white border border-gray-300 rounded-md shadow-lg">
+                                        <DateRange
+                                            editableDateInputs={true}
+                                            onChange={handleDateRangeSelect}
+                                            moveRangeOnFirstSelection={false}
+                                            ranges={dateRangeState}
+                                            direction="horizontal"
+                                            rangeColors={['#0253a5']}
+                                            color="#0253a5"
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    )}
+                    </div>
+                    {/* {activeFilterCount > 0 && ( */}
+                    <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
+                        <Button
+                            onClick={() => {
+                                setSelectedLocationFilter(null);
+                                setSelectedTransferLocationFilter(null);
+                                handleClearAllFilters();
+                            }}
+                            className="px-4 py-2 bg-transparent hover:bg-gray-100 text-gray-600 border border-gray-300"
+                            size="sm"
+                        >
+                            <MdClear className="w-4 h-4 mr-1" />
+                            Clear All
+                        </Button>
+                    </div>
+                    {/* )} */}
                 </div>
             )}
         </>
-    ), [searchValue, sortOrder, filterLocation, filterTransferLocation, filterStatus, activeFilterCount, showAdvancedFilters, locationOptions, transferLocationOptions, selectedLocationFilter, selectedTransferLocationFilter]);
+    ), [searchValue, sortOrder, filterLocation, filterTransferLocation, filterStatus, activeFilterCount, showAdvancedFilters, locationOptions, transferLocationOptions, selectedLocationFilter, selectedTransferLocationFilter, showDatePicker, dateRangeState, filterStartDate, filterEndDate, handleDateRangeSelect, handleClearDateRange]);
 
     return (
         <>
@@ -416,7 +514,7 @@ export default function Manage() {
                             fixedHeaderScrollHeight="625px"
                             responsive
                             highlightOnHover
-                            onRowClicked={(row) => navigate(`/netsuite/transfer-orders/edit/${row.netsuite_id || row.id}`)}
+                            // onRowClicked={(row) => navigate(`/netsuite/transfer-orders/edit/${row.netsuite_id || row.id}`)}
                             striped={false}
                             persistTableHead
                             borderRadius="8px"

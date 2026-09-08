@@ -6,6 +6,7 @@ import { AttachFileItem, TransferOrderFormData, TransferOrderFormItem } from '..
 import { TransferOrderService } from '../services/transferOrderService';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
 import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
+import { ResolvedPasteItem } from '@/hooks/useItemNamesResolver';
 
 const DEFAULT_FORM: TransferOrderFormData = {
     customform: 135,
@@ -122,6 +123,25 @@ export const useTransferOrderCreate = () => {
         setFormData(prev => ({ ...prev, items: [...prev.items, newItem] }));
     };
 
+    // Dipakai paste dari Excel: seluruh item masuk dalam satu kali update state
+    const handleAddItems = (items: ResolvedPasteItem[]) => {
+        if (!items.length) return;
+
+        const timestamp = Date.now();
+        const newItems: TransferOrderFormItem[] = items.map((item, index) => ({
+            id: `${item.internalId}-${timestamp}-${index}`,
+            itemId: Number(item.internalId),
+            item_name: item.itemId || item.displayName,
+            item_displayname: item.displayName || item.itemId,
+            quantity: item.quantity,
+            description: '',
+            expectedreceiptdate: null,
+            isNew: true,
+        }));
+
+        setFormData(prev => ({ ...prev, items: [...prev.items, ...newItems] }));
+    };
+
     const handleRemoveItem = (itemId: string) => {
         setFormData(prev => ({
             ...prev,
@@ -224,6 +244,7 @@ export const useTransferOrderCreate = () => {
         handleSelectChange,
         handleDateChange,
         handleAddItem,
+        handleAddItems,
         handleRemoveItem,
         handleUpdateItem,
         handleSubmit,

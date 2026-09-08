@@ -1,12 +1,11 @@
 import { useCallback, useMemo, useState } from 'react'
 import { TableColumn } from 'react-data-table-component';
-import { useNavigate } from 'react-router-dom';
-import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdVisibility, MdOutlineSync } from 'react-icons/md';
+import { Link } from 'react-router-dom';
+import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdOutlineSync } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
-import { createByDateColumn } from '@/components/ui/table/columnUtils';
 import { getProfile, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import { useFulfillment } from './hooks/useFulfillment';
 import { FulfillmentItem } from './types/fulfillment';
@@ -21,7 +20,6 @@ const STATUS_OPTIONS = [
 ];
 
 export default function Manage() {
-    const navigate = useNavigate();
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
 
@@ -44,6 +42,7 @@ export default function Manage() {
         handleClearFilters,
         isSyncing,
         handleSync,
+        handleSyncById,
     } = useFulfillment(profileSSOId);
 
     const handlePageChangeAman = useCallback((halamanBaru: number) => {
@@ -65,23 +64,19 @@ export default function Manage() {
             id: 'doc_number',
             name: 'Document Number',
             selector: row => row.number || '-',
-            cell: row => (
+            cell: row => (<>
+                <Link
+                    to={`/netsuite/fulfillments/view/${row.netsuite_id || row.id}`}
+                    className="absolute inset-0"
+                />
                 <div className="items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">{row.number || '-'}</div>
                     <div className="block text-sm text-gray-500">{formatTanggal(row.date)}</div>
                 </div>
-            ),
+            </>),
             wrap: true,
             width: '230px',
             pinned: 'left'
-        },
-        {
-            id: 'internal_id',
-            name: 'Internal ID',
-            selector: row => row.netsuite_id || '-',
-            wrap: true,
-            width: '140px',
-            center: true,
         },
         {
             id: 'source_type',
@@ -92,9 +87,14 @@ export default function Manage() {
             center: true,
         },
         {
+            // Label header digeneralisir jadi "Vendor / Customer" karena list ini
+            // mencampur 3 source_type: Sales Order -> Customer, Vendor Return ->
+            // Vendor, Transfer Order -> tidak ada entity sama sekali (row lain di
+            // kolom "Type" sudah menjelaskan sumbernya).
             id: 'entity_name',
-            name: 'Customer',
+            name: 'Vendor / Customer',
             selector: row => row.entity_name || '-',
+            cell: row => <span>{row.source_type === 'transfer_order' ? '-' : (row.entity_name || '-')}</span>,
             wrap: true,
             width: '260px',
         },
@@ -103,7 +103,7 @@ export default function Manage() {
             name: 'Created From',
             selector: row => row.createdfrom_number || '-',
             wrap: true,
-            width: '260px',
+            minWidth: '260px',
         },
         {
             id: 'location',
@@ -135,14 +135,38 @@ export default function Manage() {
             center: true,
             width: '180px'
         },
-        createByDateColumn('Created By', 'created_at', 'created_by', '320px'),
+        {
+            id: 'created_by',
+            name: 'Created By',
+            selector: row => row.netsuite_id || row.id,
+            cell: row => (<>
+                <Link
+                    to={`/netsuite/fulfillments/view/${row.netsuite_id || row.id}`}
+                    className="absolute inset-0"
+                />
+                <div className="flex flex-col py-2">
+                    <span className="font-medium text-gray-900">
+                        {row.created_by || '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        {row.created_at ? formatDateTime(row.created_at) : '-'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        Fulfillment ID: {row.netsuite_id || '-'}
+                    </span>
+                </div>
+            </>),
+            wrap: true,
+            width: '320px'
+        },
         createActionsColumn([
             {
-                icon: MdVisibility,
-                onClick: (row: FulfillmentItem) => navigate(`/netsuite/fulfillments/view/${row.id}`),
-                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
-                tooltip: 'View Detail',
+                icon: MdOutlineSync,
+                onClick: handleSyncById,
+                className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                tooltip: 'Sync this Fulfillment',
                 permission: 'read',
+                width: '88px',
             },
         ])
     ];
@@ -209,11 +233,11 @@ export default function Manage() {
                     >
                         <MdFilterListAlt className="w-4 h-4 mr-2" />
                         Filter
-                        {activeFilterCount > 0 && (
+                        {/* {activeFilterCount > 0 && (
                             <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-blue-600 text-white">
                                 {activeFilterCount}
                             </span>
-                        )}
+                        )} */}
                         {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
                     </Button>
                 </div>
@@ -221,7 +245,7 @@ export default function Manage() {
 
             {/* Advanced Filters */}
             {showAdvancedFilters && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -237,18 +261,18 @@ export default function Manage() {
                             />
                         </div>
                     </div>
-                    {activeFilterCount > 0 && (
-                        <div className="mt-3 flex justify-end">
-                            <Button
-                                onClick={handleClearFilters}
-                                size="sm"
-                                className="bg-transparent border border-red-300 text-red-600 hover:bg-red-50"
-                            >
-                                <MdClear className="w-4 h-4 mr-1" />
-                                Clear All
-                            </Button>
-                        </div>
-                    )}
+                    {/* {activeFilterCount > 0 && ( */}
+                    <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
+                        <Button
+                            onClick={handleClearFilters}
+                            className="px-4 py-2 bg-transparent hover:bg-gray-100 text-gray-600 border border-gray-300"
+                            size="sm"
+                        >
+                            <MdClear className="w-4 h-4 mr-1" />
+                            Clear All
+                        </Button>
+                    </div>
+                    {/* )} */}
                 </div>
             )}
         </>);
@@ -321,7 +345,7 @@ export default function Manage() {
                             fixedHeaderScrollHeight="625px"
                             responsive
                             highlightOnHover
-                            onRowClicked={(row) => navigate(`/netsuite/fulfillments/view/${row.id}`)}
+                            // onRowClicked={(row) => navigate(`/netsuite/fulfillments/view/${row.id}`)}
                             striped={false}
                             persistTableHead
                             borderRadius="8px"

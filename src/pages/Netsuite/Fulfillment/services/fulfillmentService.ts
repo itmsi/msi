@@ -22,4 +22,9 @@ export class FulfillmentService {
         const response = await apiGet<FulfillmentDetailResponse>(`${API_BASE_URL}/netsuite/items/get-fulfillment/${id}`);
         return response.data;
     }
+
+    static async syncFulfillmentById(id: string): Promise<FulfillmentDetailResponse> {
+        const response = await apiGet<FulfillmentDetailResponse>(`${API_BASE_URL}/netsuite/items/get-fulfillment/sync/${id}`);
+        return response.data;
+    }
 }

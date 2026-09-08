@@ -295,12 +295,12 @@ export default function AIChatPage() {
         const token = localStorage.getItem("auth_token");
 
         // ─── Streaming via Socket.IO with HTTP fallback ─────────
-        const SOCKET_BASE = import.meta.env.VITE_API_BASE_URL;
-        const SOCKET_PATH = "/api/mosa/ai-assistant";
-        const HTTP_URL =  `http://localhost:9587/api/mosa/ai-assistant/chat/stream`;
         // const SOCKET_BASE = import.meta.env.VITE_API_BASE_URL;
         // const SOCKET_PATH = "/api/mosa/ai-assistant";
-        // const HTTP_URL =  `${import.meta.env.VITE_API_BASE_URL}/mosa/ai-assistant/chat/stream`;
+        // const HTTP_URL =  `http://localhost:9587/api/mosa/ai-assistant/chat/stream`;
+        const SOCKET_BASE = import.meta.env.VITE_API_BASE_URL;
+        const SOCKET_PATH = "/api/mosa/ai-assistant";
+        const HTTP_URL =  `${import.meta.env.VITE_API_BASE_URL}/mosa/ai-assistant/chat/stream`;
         let accumulatedText = "";
         let newSessionId: string | undefined = activeThreadSession;
 

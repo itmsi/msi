@@ -174,11 +174,27 @@ const AppSidebar: React.FC = () => {
         {
             name: "Calculator Tools",
             icon: <MdCalculate />,
-            // allowedRoles: ['Manage ROA ROE Calculate'],
+            allowedRoles: [
+                'Manage ROA ROE Calculate',
+                'Hauling Calculator',
+                'Nanogrid Calculator'
+            ],
             subItems: [
-                { name: "Return on Equity", path: buildPath("/roe-roa-calculator/manage"), allowedRoles: ['Manage ROA ROE Calculate'], },
-                { name: "Hauling Calculator", path: buildPath("/hauling-calculator") },
-                { name: "Nanogrid Calculator", path: buildPath("/nanogrid-calculator") },
+                {
+                    name: "Return on Equity",
+                    path: buildPath("/roe-roa-calculator/manage"),
+                    allowedRoles: ['Manage ROA ROE Calculate'],
+                },
+                {
+                    name: "Hauling Calculator",
+                    path: buildPath("/hauling-calculator"),
+                    allowedRoles: ['Hauling Calculator'],
+                },
+                {
+                    name: "Nanogrid Calculator",
+                    path: buildPath("/nanogrid-calculator"),
+                    allowedRoles: ['Nanogrid Calculator']
+                },
             ],
         },
         {
@@ -283,12 +299,14 @@ const AppSidebar: React.FC = () => {
                 'Manage Receipts Netsuite',
                 'Fulfillment Netsuite',
                 'Bill Payment Netsuite',
-                'Quotation Netsuite'
+                'Quotation Netsuite',
+                'Item Netsuite'
             ],
             subItems: [
                 { name: "Purchase Orders", path: "/netsuite/purchase-order", allowedRoles: ['Purchase Orders Netsuite'] },
                 { name: "Sales Invoice", path: "/netsuite/invoice-sales-order", allowedRoles: ['Sales Invoice Netsuite'] },
                 { name: "Sales Orders", path: "/netsuite/sales-orders", allowedRoles: ['Sales Order Netsuite'] },
+                { name: "Items", path: "/netsuite/items", allowedRoles: ['Item Netsuite'] },
                 { name: "Transfer Orders", path: "/netsuite/transfer-orders", allowedRoles: ['Transfer Order Netsuite'] },
                 { name: "Receipts", path: "/netsuite/receipts", allowedRoles: ['Manage Receipts Netsuite'] },
                 { name: "Fulfillments", path: "/netsuite/fulfillments", allowedRoles: ['Fulfillment Netsuite'] },

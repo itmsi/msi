@@ -137,6 +137,22 @@ export const useFulfillment = (profileSSO?: number) => {
         }
     }, [isSyncing, fetchFulfillment]);
 
+    const handleSyncById = useCallback(async (row: FulfillmentItem) => {
+        if (isSyncing) return;
+        if (!row?.netsuite_id && !row?.id) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi Fulfillment: ${row.number || row.id}...`);
+        try {
+            await FulfillmentService.syncFulfillmentById(String(row.netsuite_id || row.id));
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            fetchFulfillment({ page: pagination.page, limit: pagination.limit });
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, fetchFulfillment, pagination.page, pagination.limit]);
+
     const activeFilterCount = [statusFilter].filter(Boolean).length;
 
     return {
@@ -162,5 +178,6 @@ export const useFulfillment = (profileSSO?: number) => {
         handleClearFilters,
         isSyncing,
         handleSync,
+        handleSyncById,
     };
 };
