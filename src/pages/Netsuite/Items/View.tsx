@@ -28,8 +28,8 @@ const View = () => {
     const backToList = () => navigate(`/netsuite/items${listSearch}`);
 
     const { item, loading, error, handleSyncById, isSyncing } = useItemDetail(internalId);
-    // const [activeTab, setActiveTab] = useState<TabType>('location');
-    const [activeTab, setActiveTab] = useState<TabType>('serial_number');
+    const [activeTab, setActiveTab] = useState<TabType>('location');
+    // const [activeTab, setActiveTab] = useState<TabType>('serial_number');
 
     // Spinner hanya untuk load pertama, supaya refetch detail tidak me-remount tab
     if (loading && !item) {
