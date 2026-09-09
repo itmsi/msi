@@ -24,8 +24,8 @@ export default function FulfillmentItemFields({ lines, sourceType }: Fulfillment
             selector: row => row.item_display || '-',
             cell: row => (
                 <div className="py-1">
-                    <span className="text-sm font-medium text-gray-900">{row.item_display || '-'}</span>
-                    {row.memo && <div className="text-xs text-gray-500">{row.item_displayname}</div>}
+                    <span className="text-sm font-medium text-gray-900">{row.item_displayname || '-'}</span>
+                    {row.item_display && <div className="text-xs text-gray-500">{row.item_display}</div>}
                 </div>
             ),
             wrap: true,
