@@ -3,7 +3,8 @@ import { TableColumn } from 'react-data-table-component';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePurchaseOrder } from './hooks/usePurchaseOrder';
 // import Badge from '@/components/ui/badge/Badge';
-import { MdAdd, MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch, MdOutlineSync } from 'react-icons/md';
+import { MdAdd, MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch, MdOutlineSync, MdLink } from 'react-icons/md';
+import toast from 'react-hot-toast';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
@@ -58,6 +59,17 @@ export default function Manage() {
         if (limitBaru === limitSaatIni && halamanBaru === halamanSaatIni) return;
         handleRowsPerPageChange(limitBaru, halamanBaru);
     }, [pagination?.page, pagination?.limit, handleRowsPerPageChange]);
+
+    const handleCopyNetsuiteLink = useCallback((row: PurchaseOrderItem) => {
+        const netsuiteId = row.po_id ?? row.id;
+        const template = import.meta.env.VITE_NETSUITE_URL || '';
+        const link = template.replace('{id}', String(netsuiteId));
+        navigator.clipboard.writeText(link).then(() => {
+            toast.success('Link berhasil disalin');
+        }).catch(() => {
+            toast.error('Gagal menyalin link');
+        });
+    }, []);
 
     const columns: TableColumn<PurchaseOrderItem>[] = [
         {
@@ -192,6 +204,13 @@ export default function Manage() {
                 onClick: handleDownloadInvoice,
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'Download Purchase Order',
+                permission: 'read',
+            },
+            {
+                icon: MdLink,
+                onClick: handleCopyNetsuiteLink,
+                className: 'text-gray-600 hover:text-gray-700 hover:bg-gray-100',
+                tooltip: 'Copy NetSuite Link',
                 permission: 'read',
             },
             {
