@@ -24,7 +24,7 @@ export class ReceiptService {
     }
 
     static async syncReceiptById(id: string): Promise<ReceiptDetailResponse> {
-        const response = await apiGet<ReceiptDetailResponse>(`${API_BASE_URL}/netsuite/items/get-receipts/sync/${id}`);
+        const response = await apiGet<ReceiptDetailResponse>(`${API_BASE_URL}/netsuite/items/sync-receipts/${id}`);
         return response.data;
     }
 }
