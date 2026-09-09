@@ -62,7 +62,7 @@ export default function Manage() {
 
     const handleCopyNetsuiteLink = useCallback((row: PurchaseOrderItem) => {
         const netsuiteId = row.po_id ?? row.id;
-        const template = import.meta.env.VITE_NETSUITE_PO_URL || '';
+        const template = import.meta.env.VITE_NETSUITE_URL || '';
         const link = template.replace('{id}', String(netsuiteId));
         navigator.clipboard.writeText(link).then(() => {
             toast.success('Link berhasil disalin');
