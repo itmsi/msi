@@ -27,6 +27,7 @@ export interface FulfillmentRequest {
 export interface FulfillmentLineItem {
     item: string;
     item_display: string;
+    item_displayname: string;
     memo: string;
     class: string;
     class_display: string;
