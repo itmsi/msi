@@ -31,6 +31,7 @@ export interface ReceiptLineItem {
     line_id: string;
     item: string;
     item_display: string;
+    item_displayname: string;
     itemtype: string;
     description: string;
     quantity: number;
