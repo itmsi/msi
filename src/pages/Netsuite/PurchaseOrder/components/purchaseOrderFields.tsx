@@ -9,10 +9,10 @@ import TextArea from '@/components/form/input/TextArea';
 import { Calendar } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
-import { 
-    getPrimaryInfoFields, 
-    getAdditionalInfoFields, 
-    getClassificationInfoFields, 
+import {
+    getPrimaryInfoFields,
+    getAdditionalInfoFields,
+    getClassificationInfoFields,
     // getInterCompanyManageFields 
 } from './FieldForm';
 import { POVendorSelectOption, POVendorPaginationState } from '@/hooks/usePOVendorSelect';
@@ -144,7 +144,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     const primaryFields = getPrimaryInfoFields(masterData || undefined);
     const additionalFields = getAdditionalInfoFields(masterData || undefined);
     const classificationFields = getClassificationInfoFields(
-        masterData || undefined, 
+        masterData || undefined,
         subsidiaryId ? Number(subsidiaryId) : undefined
     );
     // const interCompanyFields = getInterCompanyManageFields();
@@ -161,7 +161,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                     {label} {required && <span className="text-red-500">*</span>} {(editReceive && name === 'memo') && <span className="text-red-500">*</span>}
                 </Label>
                 {((formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null)) && !(editReceive && name === 'memo') ? (
-                    <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                    <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{
                         String(formData[name]) || '-'
                     }</p>
                 ) : <>
@@ -171,9 +171,8 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                         value={String(formData[name]) ?? ''}
                         onKeyPress={type === 'number' ? handleKeyPress : undefined}
                         onChange={onInputChange}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                            errors[name] ? 'border-red-500' : 'border-gray-300'
-                        } ${(editReceive && name === 'memo') ? 'border-1 border-[#14B8A6]' : 'border-1 rounded'}`}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors[name] ? 'border-red-500' : 'border-gray-300'
+                            } ${(editReceive && name === 'memo') ? 'border border-[#14B8A6]' : 'border rounded'}`}
                         placeholder={placeholder || `Enter ${label.toLowerCase()}`}
                         min={type === 'number' ? "1" : undefined}
                     />
@@ -187,7 +186,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     const renderSelect = (
         name: keyof PurchaseOrderForm,
         label: string,
-        options: Array<{label: string, value: string}>,
+        options: Array<{ label: string, value: string }>,
         placeholder?: string,
         required: boolean = false,
         isClearable: boolean = true,
@@ -200,24 +199,24 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                     {label} {required && <span className="text-red-500">*</span>}
                 </Label>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                    <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                    <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{
                         options.find(option => String(option.value) === String(formData[name] ?? ''))?.label || '-'
                     }</p>
                 ) : <>
-                <CustomSelect
-                    options={options}
-                    value={options.find(option => String(option.value) === String(formData[name] ?? '')) || null}
-                    onChange={(option) => onSelectChange(name, option?.value || '')}
-                    placeholder={placeholder || `Pilih ${label.toLowerCase()}`}
-                    isClearable={isClearable}
-                    isSearchable={isSearchable}
-                    className="font-secondary"
-                    error={errors[name]}
-                    disabled={disabled}
-                />
-                {errors[name] && (
-                    <p className="text-red-500 text-sm mt-1">{errors[name]}</p>
-                )}
+                    <CustomSelect
+                        options={options}
+                        value={options.find(option => String(option.value) === String(formData[name] ?? '')) || null}
+                        onChange={(option) => onSelectChange(name, option?.value || '')}
+                        placeholder={placeholder || `Pilih ${label.toLowerCase()}`}
+                        isClearable={isClearable}
+                        isSearchable={isSearchable}
+                        className="font-secondary"
+                        error={errors[name]}
+                        disabled={disabled}
+                    />
+                    {errors[name] && (
+                        <p className="text-red-500 text-sm mt-1">{errors[name]}</p>
+                    )}
                 </>}
             </div>
         );
@@ -226,7 +225,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
     const renderSimpleDate = (field: any) => {
         const [showDatePicker, setShowDatePicker] = React.useState(false);
         const datePickerRef = React.useRef<HTMLDivElement>(null);
-        
+
         const fieldValue = formData[field.name as keyof PurchaseOrderForm];
         const currentDate = fieldValue ? parseTanggalToDate(String(fieldValue)) : null;
 
@@ -259,38 +258,37 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                     {field.label} {field.required && <span className="text-red-500">*</span>}
                 </Label>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                    <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                    <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{
                         currentDate ? formatDate(currentDate.toISOString()) : (field.placeholder || `-`)
                     }</p>
                 ) : <>
-                <div className="relative" ref={datePickerRef}>
-                    <div 
-                        className={`flex items-center justify-between w-full px-3 py-2 border rounded-lg cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 ${
-                            errors[field.name as keyof PurchaseOrderForm] ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        onClick={() => setShowDatePicker(!showDatePicker)}
-                    >
-                        <span className={currentDate ? "text-gray-700" : "text-gray-400"}>
-                            {currentDate ? formatTanggal(String(fieldValue)) : (field.placeholder || `Pilih ${field.label.toLowerCase()}`)}
-                        </span>
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    {showDatePicker && (
-                        <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-                            <Calendar
-                                date={currentDate || new Date()}
-                                onChange={handleDateChange}
-                                color="#3b82f6"
-                                // minDate={field.minDate || new Date()}
-                            />
+                    <div className="relative" ref={datePickerRef}>
+                        <div
+                            className={`flex items-center justify-between w-full px-3 py-2 border rounded-lg cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500 ${errors[field.name as keyof PurchaseOrderForm] ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            onClick={() => setShowDatePicker(!showDatePicker)}
+                        >
+                            <span className={currentDate ? "text-gray-700" : "text-gray-400"}>
+                                {currentDate ? formatTanggal(String(fieldValue)) : (field.placeholder || `Pilih ${field.label.toLowerCase()}`)}
+                            </span>
+                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
                         </div>
+                        {showDatePicker && (
+                            <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                                <Calendar
+                                    date={currentDate || new Date()}
+                                    onChange={handleDateChange}
+                                    color="#3b82f6"
+                                // minDate={field.minDate || new Date()}
+                                />
+                            </div>
+                        )}
+                    </div>
+                    {errors[field.name as keyof PurchaseOrderForm] && (
+                        <p className="text-red-500 text-sm mt-1">{errors[field.name as keyof PurchaseOrderForm]}</p>
                     )}
-                </div>
-                {errors[field.name as keyof PurchaseOrderForm] && (
-                    <p className="text-red-500 text-sm mt-1">{errors[field.name as keyof PurchaseOrderForm]}</p>
-                )}
                 </>}
             </div>
         );
@@ -299,9 +297,9 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
         switch (field.type) {
             case "text":
                 return renderInput(
-                    field.name, 
-                    field.label, 
-                    'text', 
+                    field.name,
+                    field.label,
+                    'text',
                     field.placeholder,
                     field.required || false
                 );
@@ -313,41 +311,40 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             {field.label} {field.required && <span className="text-red-500">*</span>}
                         </Label>
                         {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                            <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[100px] flex items-start">{
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-25 flex items-start">{
                                 String(formData[field.name as keyof PurchaseOrderForm] || '-')
                             }</p>
                         ) : (<>
-                        <TextArea 
-                            name={field.name}
-                            value={String(formData[field.name as keyof PurchaseOrderForm] || '')}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                                const syntheticEvent = {
-                                    target: {
-                                        name: field.name,
-                                        value: e.target.value
-                                    }
-                                } as React.ChangeEvent<HTMLInputElement>;
-                                onInputChange(syntheticEvent);
-                            }}
-                            rows={9} 
-                            placeholder={field.placeholder || `Masukkan ${field.label.toLowerCase()}`}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                                errors[field.name as keyof PurchaseOrderForm] ? 'border-red-500 ' : 'border-gray-300'
-                            }`}
-                        />
-                        {errors[field.name as keyof PurchaseOrderForm] && (
-                            <p className="text-red-500 text-sm mt-1">{errors[field.name as keyof PurchaseOrderForm]}</p>
-                        )}
+                            <TextArea
+                                name={field.name}
+                                value={String(formData[field.name as keyof PurchaseOrderForm] || '')}
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                                    const syntheticEvent = {
+                                        target: {
+                                            name: field.name,
+                                            value: e.target.value
+                                        }
+                                    } as React.ChangeEvent<HTMLInputElement>;
+                                    onInputChange(syntheticEvent);
+                                }}
+                                rows={9}
+                                placeholder={field.placeholder || `Masukkan ${field.label.toLowerCase()}`}
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors[field.name as keyof PurchaseOrderForm] ? 'border-red-500 ' : 'border-gray-300'
+                                    }`}
+                            />
+                            {errors[field.name as keyof PurchaseOrderForm] && (
+                                <p className="text-red-500 text-sm mt-1">{errors[field.name as keyof PurchaseOrderForm]}</p>
+                            )}
                         </>)}
                     </div>
                 );
 
             case "select":
                 return renderSelect(
-                    field.name, 
-                    field.label, 
-                    field.options || [], 
-                    field.placeholder || `Pilih ${field.label.toLowerCase()}`, 
+                    field.name,
+                    field.label,
+                    field.options || [],
+                    field.placeholder || `Pilih ${field.label.toLowerCase()}`,
                     field.required || false,
                     !field.required, // isClearable based on required
                     true,   // isSearchable
@@ -363,29 +360,29 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             Location <span className="text-red-500">*</span>
                         </Label>
                         {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                            <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{
                                 selectedLocation?.label || '-'
                             }</p>
                         ) : (<>
-                        <CustomAsyncSelect
-                            name="location"
-                            placeholder="Select location..."
-                            value={selectedLocation}
-                            error={locationError}
-                            defaultOptions={locationOptions}
-                            loadOptions={onLocationInputChange}
-                            onMenuScrollToBottom={onLocationMenuScrollToBottom}
-                            isLoading={locationPagination.loading}
-                            noOptionsMessage={() => "No locations found"}
-                            loadingMessage={() => "Loading locations..."}
-                            isSearchable={true}
-                            inputValue={locationInputValue}
-                            onInputChange={onLocationInputChange}
-                            onChange={onLocationChange}
-                        />
-                        {locationError && (
-                            <span className="text-sm text-red-500 mt-1 block">{locationError}</span>
-                        )}
+                            <CustomAsyncSelect
+                                name="location"
+                                placeholder="Select location..."
+                                value={selectedLocation}
+                                error={locationError}
+                                defaultOptions={locationOptions}
+                                loadOptions={onLocationInputChange}
+                                onMenuScrollToBottom={onLocationMenuScrollToBottom}
+                                isLoading={locationPagination.loading}
+                                noOptionsMessage={() => "No locations found"}
+                                loadingMessage={() => "Loading locations..."}
+                                isSearchable={true}
+                                inputValue={locationInputValue}
+                                onInputChange={onLocationInputChange}
+                                onChange={onLocationChange}
+                            />
+                            {locationError && (
+                                <span className="text-sm text-red-500 mt-1 block">{locationError}</span>
+                            )}
                         </>)}
                     </div>
                 );
@@ -396,29 +393,29 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             Vendor <span className="text-red-500">*</span>
                         </Label>
                         {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                            <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                                formData.vendor_name  || '-'
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{
+                                formData.vendor_name || '-'
                             }</p>
                         ) : (<>
-                        <CustomAsyncSelect
-                            name="vendorid"
-                            placeholder="Select vendor..."
-                            value={selectedVendor}
-                            error={vendorError}
-                            defaultOptions={vendorOptions}
-                            loadOptions={onVendorInputChange}
-                            onMenuScrollToBottom={onVendorMenuScrollToBottom}
-                            isLoading={vendorPagination.loading}
-                            noOptionsMessage={() => "No vendors found"}
-                            loadingMessage={() => "Loading vendors..."}
-                            isSearchable={true}
-                            inputValue={vendorInputValue}
-                            onInputChange={onVendorInputChange}
-                            onChange={onVendorChange}
-                        />
-                        {vendorError && (
-                            <span className="text-sm text-red-500 mt-1 block">{vendorError}</span>
-                        )}
+                            <CustomAsyncSelect
+                                name="vendorid"
+                                placeholder="Select vendor..."
+                                value={selectedVendor}
+                                error={vendorError}
+                                defaultOptions={vendorOptions}
+                                loadOptions={onVendorInputChange}
+                                onMenuScrollToBottom={onVendorMenuScrollToBottom}
+                                isLoading={vendorPagination.loading}
+                                noOptionsMessage={() => "No vendors found"}
+                                loadingMessage={() => "Loading vendors..."}
+                                isSearchable={true}
+                                inputValue={vendorInputValue}
+                                onInputChange={onVendorInputChange}
+                                onChange={onVendorChange}
+                            />
+                            {vendorError && (
+                                <span className="text-sm text-red-500 mt-1 block">{vendorError}</span>
+                            )}
                         </>)}
                     </div>
                 );
@@ -429,29 +426,29 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             Terms <span className="text-red-500">*</span>
                         </Label>
                         {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                            <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                                formData.terms_display  || '-'
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{
+                                formData.terms_display || '-'
                             }</p>
                         ) : (<>
-                        <CustomAsyncSelect
-                            name="termsid"
-                            placeholder="Select terms..."
-                            value={selectedTerm}
-                            error={termError}
-                            defaultOptions={termOptions}
-                            loadOptions={onTermInputChange}
-                            onMenuScrollToBottom={onTermMenuScrollToBottom}
-                            isLoading={termPagination.loading}
-                            noOptionsMessage={() => "No terms found"}
-                            loadingMessage={() => "Loading terms..."}
-                            isSearchable={true}
-                            inputValue={termInputValue}
-                            onInputChange={onTermInputChange}
-                            onChange={onTermChange}
-                        />
-                        {termError && (
-                            <span className="text-sm text-red-500 mt-1 block">{termError}</span>
-                        )}
+                            <CustomAsyncSelect
+                                name="termsid"
+                                placeholder="Select terms..."
+                                value={selectedTerm}
+                                error={termError}
+                                defaultOptions={termOptions}
+                                loadOptions={onTermInputChange}
+                                onMenuScrollToBottom={onTermMenuScrollToBottom}
+                                isLoading={termPagination.loading}
+                                noOptionsMessage={() => "No terms found"}
+                                loadingMessage={() => "Loading terms..."}
+                                isSearchable={true}
+                                inputValue={termInputValue}
+                                onInputChange={onTermInputChange}
+                                onChange={onTermChange}
+                            />
+                            {termError && (
+                                <span className="text-sm text-red-500 mt-1 block">{termError}</span>
+                            )}
                         </>)}
                     </div>
                 );
@@ -462,33 +459,33 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             Class <span className="text-red-500">*</span>
                         </Label>
                         {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                            <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
-                                formData.class_name  || '-'
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{
+                                formData.class_name || '-'
                             }</p>
                         ) : (<>
-                        <CustomAsyncSelect
-                            name="classid"
-                            placeholder="Select class..."
-                            value={selectedClass}
-                            // value={formData.class ? {
-                            //     label: formData.class_name || '',
-                            //     value: formData.class.toString()
-                            // } : null}
-                            error={classError}
-                            defaultOptions={classOptions}
-                            loadOptions={onClassInputChange}
-                            onMenuScrollToBottom={onClassMenuScrollToBottom}
-                            isLoading={classPagination.loading}
-                            noOptionsMessage={() => "No classes found"}
-                            loadingMessage={() => "Loading classes..."}
-                            isSearchable={true}
-                            inputValue={classInputValue}
-                            onInputChange={onClassInputChange}
-                            onChange={onClassChange}
-                        />
-                        {classError && (
-                            <span className="text-sm text-red-500 mt-1 block">{classError}</span>
-                        )}
+                            <CustomAsyncSelect
+                                name="classid"
+                                placeholder="Select class..."
+                                value={selectedClass}
+                                // value={formData.class ? {
+                                //     label: formData.class_name || '',
+                                //     value: formData.class.toString()
+                                // } : null}
+                                error={classError}
+                                defaultOptions={classOptions}
+                                loadOptions={onClassInputChange}
+                                onMenuScrollToBottom={onClassMenuScrollToBottom}
+                                isLoading={classPagination.loading}
+                                noOptionsMessage={() => "No classes found"}
+                                loadingMessage={() => "Loading classes..."}
+                                isSearchable={true}
+                                inputValue={classInputValue}
+                                onInputChange={onClassInputChange}
+                                onChange={onClassChange}
+                            />
+                            {classError && (
+                                <span className="text-sm text-red-500 mt-1 block">{classError}</span>
+                            )}
                         </>)}
                     </div>
                 );
@@ -499,37 +496,37 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             Department <span className="text-red-500">*</span>
                         </Label>
                         {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                            <p className="mt-1 text-gray-800 text-md border-0 border-b-1 rounded-none min-h-[42px] flex items-center">{
+                            <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{
                                 departmentOptions.find(option => String(option.value) === String(formData.department ?? ''))?.label || '-'
                             }</p>
                         ) : (<>
-                        <CustomAsyncSelect
-                            name="departmentid"
-                            placeholder="Select department..."
-                            value={selectedDepartment}
-                            error={departmentError}
-                            defaultOptions={departmentOptions}
-                            loadOptions={onDepartmentInputChange}
-                            onMenuScrollToBottom={onDepartmentMenuScrollToBottom}
-                            isLoading={departmentPagination.loading}
-                            noOptionsMessage={() => "No departments found"}
-                            loadingMessage={() => "Loading departments..."}
-                            isSearchable={true}
-                            inputValue={departmentInputValue}
-                            onInputChange={onDepartmentInputChange}
-                            onChange={onDepartmentChange}
-                        />
-                        {departmentError && (
-                            <span className="text-sm text-red-500 mt-1 block">{departmentError}</span>
-                        )}
+                            <CustomAsyncSelect
+                                name="departmentid"
+                                placeholder="Select department..."
+                                value={selectedDepartment}
+                                error={departmentError}
+                                defaultOptions={departmentOptions}
+                                loadOptions={onDepartmentInputChange}
+                                onMenuScrollToBottom={onDepartmentMenuScrollToBottom}
+                                isLoading={departmentPagination.loading}
+                                noOptionsMessage={() => "No departments found"}
+                                loadingMessage={() => "Loading departments..."}
+                                isSearchable={true}
+                                inputValue={departmentInputValue}
+                                onInputChange={onDepartmentInputChange}
+                                onChange={onDepartmentChange}
+                            />
+                            {departmentError && (
+                                <span className="text-sm text-red-500 mt-1 block">{departmentError}</span>
+                            )}
                         </>)}
                     </div>
                 );
             default:
                 return renderInput(
-                    field.name, 
-                    field.label, 
-                    'text', 
+                    field.name,
+                    field.label,
+                    'text',
                     field.placeholder,
                     field.required || false
                 );
@@ -542,31 +539,31 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
                     <h3 className="text-md font-primary-bold font-medium text-gray-900">Primary Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {primaryFields.map((field) => (
-                                <div key={field.name}>
-                                    {renderField(field)}
-                                </div>
-                            ))}
+                        {primaryFields.map((field) => (
+                            <div key={field.name}>
+                                {renderField(field)}
+                            </div>
+                        ))}
                     </div>
                 </div>
                 <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
                     <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Additional Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {additionalFields.map((field) => (
-                                <div key={field.name}>
-                                    {renderField(field)}
-                                </div>
-                            ))}
+                        {additionalFields.map((field) => (
+                            <div key={field.name}>
+                                {renderField(field)}
+                            </div>
+                        ))}
                     </div>
                 </div>
                 <div className="bg-white rounded-2xl shadow-sm mb-6 space-y-6 p-6">
                     <h3 className="text-md font-primary-bold font-medium text-gray-900 md:col-span-2">Classification</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {classificationFields.map((field) => (
-                                <div key={field.name}>
-                                    {renderField(field)}
-                                </div>
-                            ))}
+                        {classificationFields.map((field) => (
+                            <div key={field.name}>
+                                {renderField(field)}
+                            </div>
+                        ))}
                     </div>
                 </div>
                 {modeEdit && (
@@ -576,7 +573,7 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                             <div>
                                 <p className='mb-1.5 block text-sm text-gray-700'>Approval Status</p>
                                 <StatusTypeBadge
-                                    type={Number(formData.approvalstatus) as 1 | 2 | 3} 
+                                    type={Number(formData.approvalstatus) as 1 | 2 | 3}
                                 />
                             </div>
                             <div>
@@ -609,9 +606,9 @@ const purchaseOrderFields: React.FC<POFormFieldsProps> = ({
                 formData.items && formData.items.length > 0 && (
                     <div className="sticky top-0 self-start">
                         <div className='bg-white rounded-2xl shadow-sm p-6'>
-                            <InvoiceSummary 
-                                items={formData.items} 
-                                currency={formData.currency_symbol || ''} 
+                            <InvoiceSummary
+                                items={formData.items}
+                                currency={formData.currency_symbol || ''}
                                 serverTotal={Number(formData.foreigntotal)}
                             />
                         </div>

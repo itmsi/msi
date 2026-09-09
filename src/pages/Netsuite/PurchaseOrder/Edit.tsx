@@ -542,45 +542,45 @@ export default function Edit() {
                                 <nav className="flex space-x-2 overflow-auto">
                                     <button
                                         onClick={() => setActiveTab('items')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'items'
-                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'items'
+                                            ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                     >
                                         <MdInventory2 /> Items
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('files')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'files'
-                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'files'
+                                            ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                     >
                                         <MdOutlineAttachFile /> Files
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('usernotes')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'usernotes'
-                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'usernotes'
+                                            ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                     >
                                         <MdOutlineComment /> User Notes
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('receipt')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'receipt'
-                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'receipt'
+                                            ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                     >
                                         <MdReceiptLong /> Receipt & Bill
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('historyreceipt')}
-                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'historyreceipt'
-                                                ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'historyreceipt'
+                                            ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                             }`}
                                     >
                                         <MdHistory /> History Receipt

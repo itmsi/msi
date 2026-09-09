@@ -51,7 +51,7 @@ const getDocumentIcon = (fileName: string) => {
         return <FaRegFile />;
     }
 };
-const sortById = (data : any, ascending = true) => {
+const sortById = (data: any, ascending = true) => {
     return [...data].sort((a, b) => {
         const idA = Number(a.id);
         const idB = Number(b.id);
@@ -70,7 +70,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
     onAddFiles,
 }) => {
     const { id } = useParams<{ id: string }>();
-    
+
     const profileSSO = getProfile() as any;
     const profileSSOEmail = profileSSO?.email || 'no-email';
     const dataFiles = sortById(fileList, false);
@@ -109,12 +109,11 @@ const FilesTab: React.FC<FilesTabProps> = ({
         setFileName(file.name.replace(/\.[^/.]+$/, ''));
         setEntryError('');
         setEntry(prev => ({ ...prev, fileName: !editingFile ? file.name.replace(/\.[^/.]+$/, '') : editingFile.fileName.trim() }));
-        console.log('Selected file:', editingFile);
         // if (!editingFile) {
-            handleAddEntry({ 
-                selectedFile: file, 
-                fileName: !editingFile ? file.name.replace(/\.[^/.]+$/, '') : editingFile.fileName.trim()
-            });
+        handleAddEntry({
+            selectedFile: file,
+            fileName: !editingFile ? file.name.replace(/\.[^/.]+$/, '') : editingFile.fileName.trim()
+        });
         // }
     };
 
@@ -168,7 +167,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
                     // Mode edit file yang sudah ada di server
                     const res = await PurchaseOrderService.attachFileUpdateDetailPO(
                         {
-                        ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
+                            ...(finalSelectedFile ? { file: finalSelectedFile } : {}),
                             type: 'purchase_order',
                             id: editingFile.id,
                             file_name: finalSelectedFile === undefined ? finalFileName : editingFile.fileName,
@@ -352,9 +351,9 @@ const FilesTab: React.FC<FilesTabProps> = ({
     const handleDelete = async (row: AttachFileItemLocal) => {
         setLoadingDelete(true);
         try {
-            
-            const res = id ? 
-                await PurchaseOrderService.attachFileDeleteDetailPO(String(row.id), String(poId || id)) : 
+
+            const res = id ?
+                await PurchaseOrderService.attachFileDeleteDetailPO(String(row.id), String(poId || id)) :
                 await PurchaseOrderService.attachFilePODelete({ fileUrl: row.fileUrl })
             if (res.success) {
                 if (row.isNew) {
@@ -458,7 +457,7 @@ const FilesTab: React.FC<FilesTabProps> = ({
                         </div>
                     )}
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
-                        
+
                         {/* File picker — selalu tampil, baik add maupun edit */}
                         <div className="flex flex-col gap-1">
                             <input

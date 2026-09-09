@@ -29,6 +29,10 @@ const useItemRelation = <T,>(fetcher: RelationFetcher<T>, netsuiteItemId?: strin
         paginationRef.current = pagination;
     }, [pagination]);
 
+    // Filter tambahan per tab, mis. is_used untuk serial numbers.
+    // Disimpan di ref supaya fetch berikutnya selalu memakai nilai terbaru
+    const filtersRef = useRef<Partial<ItemRelationRequest>>({});
+
     const fetchRows = useCallback(async (params?: Partial<ItemRelationRequest>) => {
         if (!netsuiteItemId) return;
 
@@ -41,6 +45,10 @@ const useItemRelation = <T,>(fetcher: RelationFetcher<T>, netsuiteItemId?: strin
                 limit: params?.limit ?? paginationRef.current.limit,
                 search: params?.search !== undefined ? params.search : searchValue,
                 netsuite_item_id: netsuiteItemId,
+                // Filter aktif diambil dari ref, key yang bernilai undefined sudah dibuang
+                // di handleFilterChange sehingga tidak pernah ikut terkirim
+                ...filtersRef.current,
+                ...params,
             });
 
             if (!response?.success) {
@@ -60,6 +68,20 @@ const useItemRelation = <T,>(fetcher: RelationFetcher<T>, netsuiteItemId?: strin
             setLoading(false);
         }
     }, [fetcher, netsuiteItemId, searchValue]);
+
+    // Key yang bernilai undefined dibuang, jadi filter yang tidak dipilih
+    // tidak pernah muncul di payload
+    const handleFilterChange = useCallback((newFilters: Partial<ItemRelationRequest>) => {
+        const merged: Partial<ItemRelationRequest> = { ...filtersRef.current, ...newFilters };
+
+        (Object.keys(merged) as (keyof ItemRelationRequest)[]).forEach(key => {
+            if (merged[key] === undefined) delete merged[key];
+        });
+
+        filtersRef.current = merged;
+        setPagination(prev => ({ ...prev, page: 1 }));
+        fetchRows({ page: 1 });
+    }, [fetchRows]);
 
     const handlePageChange = useCallback((page: number) => {
         if (page === paginationRef.current.page) return;
@@ -110,6 +132,7 @@ const useItemRelation = <T,>(fetcher: RelationFetcher<T>, netsuiteItemId?: strin
         searchValue,
         setSearchValue,
         fetchRows,
+        handleFilterChange,
         handlePageChange,
         handleRowsPerPageChange,
         handleSearch,

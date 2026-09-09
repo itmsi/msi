@@ -1120,7 +1120,6 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             (index + 1).toString() + '.',
             acc.accessory_part_name + ' (qty: ' + acc.quantity + ')',
         ]);
-        console.log({ accData })
 
         const accTableStartY = itemYPos - 1;
         autoTable(doc, {
@@ -1245,15 +1244,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 let item2YPos = renderItemImageAndName(next, item2StartX, yPos, itemWidth);
                 item2YPos = renderItemSpecifications(next, item2StartX, item2YPos, itemWidth, margin).finalY;
 
-                // Render item1's accessories directly and let autoTable's own (accurate) pagination
-                // decide if it needs to break to a new page - no more guessing at its height up front.
                 item1YPos = renderItemAccessories(current, item1StartX, item1YPos, itemWidth, item1RightMargin, 1);
                 const pageAfterItem1Accessories = (doc as any).internal.getCurrentPageInfo().pageNumber;
 
-                console.log({ current, next })
                 if (pageAfterItem1Accessories > pairPage) {
-                    // item1's accessories genuinely didn't fit and moved to a new page - keep item2's
-                    // accessories together with it there, instead of splitting them across two pages
                     renderItemAccessories(next, item2StartX, margin + headerHeight + 5, itemWidth, margin);
                 } else {
                     item2YPos = renderItemAccessories(next, item2StartX, item2YPos, itemWidth, margin);
@@ -1261,16 +1255,12 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
 
                 itemIndex += 2;
             } else {
-                // Single item alone on the page (last odd item, or the next item has notes and
-                // needs its own page). No sibling column to coordinate with, so just draw in place
-                // and let autoTable's own (more accurate) pagination handle genuine overflow.
                 const itemWidth = (pageWidth - 2 * margin) * 0.6;
                 const startX = margin + (pageWidth - 2 * margin) * 0.2;
 
                 let itemYPos = renderItemImageAndName(current, startX, yPos, itemWidth);
                 itemYPos = renderItemSpecifications(current, startX, itemYPos, itemWidth, startX).finalY;
                 renderItemAccessories(current, startX, itemYPos, itemWidth, startX, 1);
-                console.log(current)
 
                 itemIndex += 1;
             }

@@ -148,10 +148,11 @@ export const useIupVisit = () => {
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [confirmDelete, setConfirmDelete] = useState<{ 
-        show: boolean; 
+    const [confirmDelete, setConfirmDelete] = useState<{
+        show: boolean;
         iup_visit_history_id?: string;
-        name?: string }>({ show: false });
+        name?: string
+    }>({ show: false });
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const [showForm, setShowForm] = useState(false);
@@ -195,21 +196,20 @@ export const useIupVisit = () => {
             } else {
                 await fetchVisits();
             }
-            setConfirmDelete({show: false});
+            setConfirmDelete({ show: false });
         } catch (err) {
             console.error(err);
             toast.error("Gagal menghapus kunjungan.");
-            setConfirmDelete({show: false});
+            setConfirmDelete({ show: false });
         } finally {
             setDeletingId(null);
             setConfirmDelete({ show: false });
         }
     };
-    
+
     const deleteVisit = useCallback((zone: VisitHistoryItem) => {
-        console.log('handleConfirmDeleted', zone)
         setConfirmDelete({ show: true, iup_visit_history_id: zone.iup_visit_history_id, name: zone.title });
-    },[confirmDelete]);
+    }, [confirmDelete]);
 
     const fillCurrentLocation = useCallback(() => {
         if (!navigator.geolocation) {
@@ -224,10 +224,10 @@ export const useIupVisit = () => {
             }));
             setErrors((prev) => ({ ...prev, latitude: undefined, longitude: undefined }));
         },
-        (err) => {
-            console.error(err);
-            toast.error("Gagal mengambil lokasi. Pastikan izin lokasi diaktifkan.");
-        },{ enableHighAccuracy: true, timeout: 10000 }
+            (err) => {
+                console.error(err);
+                toast.error("Gagal mengambil lokasi. Pastikan izin lokasi diaktifkan.");
+            }, { enableHighAccuracy: true, timeout: 10000 }
         );
     }, []);
     // ---- form helpers ----
@@ -301,9 +301,9 @@ export const useIupVisit = () => {
         longitude: form.longitude,
         description: form.description,
         image: form.imageLinks
-        .map((l) => l.trim())
-        .filter(Boolean)
-        .map((file_link) => ({ file_link })),
+            .map((l) => l.trim())
+            .filter(Boolean)
+            .map((file_link) => ({ file_link })),
     });
 
     /** Validasi form, lalu kirim create/update ke API. Return true kalau sukses. */
@@ -348,7 +348,7 @@ export const useIupVisit = () => {
         refetch: fetchVisits,
         deleteVisit,
         handleConfirmDeleted,
-        
+
         confirmDelete,
         setConfirmDelete,
 

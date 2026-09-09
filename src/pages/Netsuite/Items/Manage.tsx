@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdSearch } from 'react-icons/md';
+import { MdClear, MdExpandLess, MdExpandMore, MdFilterListAlt, MdOutlineSync, MdSearch } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import PageMeta from '@/components/common/PageMeta';
@@ -8,6 +8,8 @@ import Button from '@/components/ui/button/Button';
 import { useItems } from './hooks/useItems';
 import ItemsTable from './components/ItemsTable';
 import FilterSection from './components/FilterSection';
+import PageHeaderManage from '@/components/common/PageHeaderManage';
+import { formatDateTime } from '@/helpers/generalHelper';
 
 const Manage = () => {
     const location = useLocation();
@@ -26,6 +28,10 @@ const Manage = () => {
         handleItemTypeChange,
         handleKeyPress,
         handleClearSearch,
+        syncInfo,
+        isSyncing,
+        handleSync,
+        handleSyncById,
     } = useItems();
 
     const handlePageChangeAman = useCallback((halamanBaru: number) => {
@@ -42,7 +48,7 @@ const Manage = () => {
     }, [pagination?.page, pagination?.limit, handleRowsPerPageChange]);
 
     const params = new URLSearchParams(location.search);
-    const filterKeys = ['item_type'];
+    const filterKeys = ['item_type', 'location_id'];
 
     // Mengecek apakah minimal salah satu key di atas ada di URL
     const hasActiveFilter = filterKeys.some(key => params.has(key) && params.get(key) !== '');
@@ -53,7 +59,7 @@ const Manage = () => {
     };
 
     const handleClearFilters = () => {
-        handleItemTypeChange('');
+        handleFilterChange({ item_type: [], location_id: '' });
     };
 
     const SearchAndFilters = useMemo(() => {
@@ -122,8 +128,10 @@ const Manage = () => {
             {showAdvancedFilters && (
                 <FilterSection
                     filterItemType={filters.item_type[0] || ''}
+                    filterLocation={filters.location_id}
                     onFilterChange={(field, value) => {
                         if (field === 'item_type') handleItemTypeChange(value);
+                        if (field === 'location') handleFilterChange({ location_id: value });
                     }}
                     onClearFilters={handleClearFilters}
                 />
@@ -141,20 +149,33 @@ const Manage = () => {
 
             <div className="space-y-3">
                 {/* Header */}
-                <div className="bg-white shadow rounded-lg">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
-                                    Items
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    List of Inventory and Non-inventory Items
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <PageHeaderManage
+                    title="Items"
+                    subtitle="List of Inventory and Non-inventory Items"
+                    actions={[
+                        {
+                            key: 'sync',
+                            element: (
+                                <Button
+                                    onClick={() => handleSync()}
+                                    disabled={isSyncing}
+                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                    variant='outline'
+                                >
+                                    <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                    <div>
+                                        <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                    </div>
+                                </Button>
+                            )
+                        }
+                    ]}
+                />
+                {
+                    syncInfo && (<>
+                        <span className='block text-xs text-green-600 pe-6 text-end mb-0'>Last Sync: {formatDateTime(syncInfo.created_at)} by {syncInfo.created_by_name}</span>
+                    </>)
+                }
 
                 {/* Search & Filter */}
                 <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
@@ -176,6 +197,7 @@ const Manage = () => {
                             pagination={pagination}
                             onChangePage={handlePageChangeAman}
                             onChangeRowsPerPage={handleRowsPerPageAman}
+                            handleSyncById={handleSyncById}
                         />
                     </div>
                 </div>

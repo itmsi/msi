@@ -77,4 +77,11 @@ export class ItemsService {
         );
         return response.data as ItemTierPricesResponse;
     }
+
+    static async syncItemsById(id: string): Promise<{ success: boolean; message: string; data?: any }> {
+        const response = await apiPost<{ success: boolean; message: string; data?: any }>(
+            `${API_BASE_URL}/netsuite/items/sync/${id}`
+        );
+        return response.data;
+    }
 }

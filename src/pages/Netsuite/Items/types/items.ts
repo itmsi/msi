@@ -17,11 +17,17 @@ export interface ItemsListData {
     items: Item[];
     pagination: ItemsPagination;
 }
+export interface SyncInfo {
+    sync_status: string;
+    created_at: string;
+    created_by_name: string;
+}
 
 export interface ItemsListResponse {
     success: boolean;
     data: ItemsListData;
     message: string;
+    sync_info?: SyncInfo;
 }
 
 export type ItemsRequest = {
@@ -32,6 +38,8 @@ export type ItemsRequest = {
     sort_order?: 'asc' | 'desc' | '';
     item_type?: string[];
     item_type_id?: string[];
+    // Tidak dikirim sama sekali kalau filter location tidak dipilih
+    location_id?: string;
 }
 
 export type ValidateItemNamesRequest = {
@@ -98,6 +106,8 @@ export type ItemRelationRequest = {
     sort_by?: string;
     sort_order?: 'asc' | 'desc' | '';
     netsuite_item_id: string;
+    // Khusus serial numbers. Tidak dikirim sama sekali kalau filter status tidak dipilih
+    is_used?: boolean;
 }
 
 export interface ItemRelationListData<T> {

@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { MdLocationOn, MdOutlineSell, MdQrCode2 } from 'react-icons/md';
+import { MdLocationOn, MdOutlineSell, MdOutlineSync, MdQrCode2 } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
 import PageHeader from '@/components/common/PageHeader';
 import Button from '@/components/ui/button/Button';
@@ -27,8 +27,9 @@ const View = () => {
     const listSearch = (location.state as { from?: string } | null)?.from || '';
     const backToList = () => navigate(`/netsuite/items${listSearch}`);
 
-    const { item, loading, error } = useItemDetail(internalId);
-    const [activeTab, setActiveTab] = useState<TabType>('location');
+    const { item, loading, error, handleSyncById, isSyncing } = useItemDetail(internalId);
+    // const [activeTab, setActiveTab] = useState<TabType>('location');
+    const [activeTab, setActiveTab] = useState<TabType>('serial_number');
 
     // Spinner hanya untuk load pertama, supaya refetch detail tidak me-remount tab
     if (loading && !item) {
@@ -62,18 +63,31 @@ const View = () => {
                     title={`Item Details`}
                     backPath={backToList}
                     subtitle={`${item?.display_name || '-'}`}
-                    actions={item.type ? (
-                        <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
-                            {item.type}
-                        </span>
-                    ) : null}
+                    actions={<>
+                        <Button
+                            onClick={() => handleSyncById(String(internalId))}
+                            disabled={isSyncing}
+                            className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600 py-2"
+                            variant='outline'
+                        >
+                            <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                            <div>
+                                <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                            </div>
+                        </Button>
+                        {item.type && (
+                            <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
+                                {item.type}
+                            </span>
+                        )}
+                    </>}
                 />
 
                 <ItemFields item={item} />
 
                 {/* Tab Navigation — style sama seperti tab di Fulfillment View.tsx */}
                 <div>
-                    <div className="border-b border-gray-200 overflow-auto">
+                    <div className="overflow-auto">
                         <nav className="flex space-x-2 overflow-auto">
                             {TABS.map(tab => (
                                 <button

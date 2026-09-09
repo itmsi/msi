@@ -18,18 +18,18 @@ interface ModalApprovalProps {
     submit?: boolean;
 }
 
-export default function ModalApproval({ 
-    isOpen, 
-    titleModal, 
+export default function ModalApproval({
+    isOpen,
+    titleModal,
     descriptionModal,
-    onClose, 
-    poId, 
+    onClose,
+    poId,
     onSuccess,
     reopen = false,
     resubmit = false,
     submit = false
 }: ModalApprovalProps) {
-    
+
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.email || null;
     const [note, setNote] = useState('');
@@ -69,7 +69,6 @@ export default function ModalApproval({
 
             toast.success(response.message || 'Approval berhasil disubmit');
             handleClose();
-            console.log('Approval response:', response);
             onSuccess?.();
         } catch (err: any) {
             const msg = err?.response?.data?.message || err?.message || 'Gagal submit approval';

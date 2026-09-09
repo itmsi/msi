@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { MdInventory2, MdOutlineAttachFile, MdOutlineComment, MdOutlineSync } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
-import { PermissionGate } from '@/components/common/PermissionComponents';
 import Button from '@/components/ui/button/Button';
 import { FulfillmentService } from './services/fulfillmentService';
 import { FulfillmentItem } from './types/fulfillment';
@@ -109,22 +108,20 @@ export default function View() {
                     </>}
                     actions={
                         <>
+                            <Button
+                                onClick={() => handleSyncById()}
+                                disabled={isSyncing}
+                                className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600 py-2"
+                                variant='outline'
+                            >
+                                <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                            </Button>
                             {fulfillment?.status_label && (
                                 <span className="inline-flex items-center justify-center gap-1 px-3 py-1 text-xs text-gray-800 border-gray-200 border rounded-full font-medium bg-[#d0e6ef]">
                                     {fulfillment.status_label || '-'}
                                 </span>
                             )}
-                            <PermissionGate permission="read">
-                                <Button
-                                    onClick={() => handleSyncById()}
-                                    disabled={isSyncing}
-                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
-                                    variant='outline'
-                                >
-                                    <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
-                                    <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
-                                </Button>
-                            </PermissionGate>
                         </>
                     }
                 />
@@ -138,7 +135,7 @@ export default function View() {
                             <button
                                 type="button"
                                 onClick={() => setActiveTab('items')}
-                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'items'
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'items'
                                     ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}
@@ -148,7 +145,7 @@ export default function View() {
                             <button
                                 type="button"
                                 onClick={() => setActiveTab('files')}
-                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'files'
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'files'
                                     ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}
@@ -158,7 +155,7 @@ export default function View() {
                             <button
                                 type="button"
                                 onClick={() => setActiveTab('notes')}
-                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-[100px] font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'notes'
+                                className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === 'notes'
                                     ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                     }`}

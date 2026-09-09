@@ -7,17 +7,12 @@ interface FulfillmentFieldsProps {
     fulfillment: FulfillmentItem;
 }
 
-// Label "Vendor"/"Customer" mengikuti tipe transaksi asal (createdfrom.type),
-// sama seperti field Entity di UI NetSuite: Vendor Return Authorization ->
-// Vendor, Sales Order -> Customer, Transfer Order tidak punya entity sama sekali.
 const entityLabel = (sourceType?: string | null) => {
     if (sourceType === 'vendor_return') return 'Vendor';
     if (sourceType === 'sales_order') return 'Customer';
     return null;
 };
 
-// Grouping field-nya disamain dengan record Item Fulfillment di NetSuite:
-// Primary Information / Approval Information / Classification / Additional Information.
 export default function FulfillmentFields({ fulfillment }: FulfillmentFieldsProps) {
     const entityFieldLabel = entityLabel(fulfillment.source_type);
     const isTransferOrder = fulfillment.source_type === 'transfer_order';

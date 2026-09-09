@@ -28,33 +28,33 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 }) => {
 
     const { subsidiaryOptions, loading: subsidiaryLoading, initializeOptions } = useSubsidiarySelect();
-    
+
     useEffect(() => {
         initializeOptions();
     }, [initializeOptions]);
-    
+
     const currentSubsidiaryValue = filterSubsidiary
         ? subsidiaryOptions.find(o => o.value === filterSubsidiary) || null
         : null;
 
     // Approval Status
     const { approvalStatusOptions, loading: approvalStatusLoading, initializeOptions: initializeApprovalStatusOptions } = useApprovalStatusSelect();
-    
+
     useEffect(() => {
         initializeApprovalStatusOptions();
     }, [initializeApprovalStatusOptions]);
-    
+
     const currentApprovalStatusValue = filterApprovalStatus
         ? approvalStatusOptions.find(o => o.value === filterApprovalStatus) || null
         : null;
 
     // Status
     const { poStatusOptions, loading: statusLoading, initializeOptions: initializeStatusOptions } = usePOStatusSelect();
-    
+
     useEffect(() => {
         initializeStatusOptions();
     }, [initializeStatusOptions]);
-    
+
     const currentStatusValue = filterStatus
         ? poStatusOptions.find(o => o.value === filterStatus) || null
         : null;
@@ -71,7 +71,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         initialized: locationInitialized,
         isLoading: locationLoading
     } = usePOLocationSelect(30, false);
-    
+
     const [selectedLocation, setSelectedLocation] = useState<any>(null);
     const [locationSelectError, setLocationSelectError] = useState<string>('');
 
@@ -81,8 +81,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             initializeLocationOptions();
         }
     }, [locationInitialized, locationLoading, initializeLocationOptions]);
-    
+
     // Sync internal state with filter props
+
     useEffect(() => {
         if (filterLocation) {
             const locationOption = POLocationOptions.find(opt => opt.value === filterLocation);
@@ -90,19 +91,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 if (!selectedLocation || selectedLocation.value !== filterLocation) {
                     setSelectedLocation(locationOption);
                 }
-            } else if (selectedLocation?.value !== filterLocation) {
-                // If exact match not found but filterLocation exists, create a temporary option
-                // This handles cases where the option hasn't loaded yet
-                setSelectedLocation({ 
-                    value: filterLocation, 
-                    label: `Location ${filterLocation}` 
-                });
             }
         } else if (!filterLocation && selectedLocation) {
             setSelectedLocation(null);
         }
     }, [filterLocation, POLocationOptions]);
-    
+
     const {
         employeeOptions,
         pagination: employeePagination,
@@ -125,9 +119,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         onClearFilters();
         setSelectedEmployee(null);
     };
-    
+
     // Check if any filters are active
-    
+
     const [searchParams] = useSearchParams();
     const checkToggleFilter = searchParams.get('subsidiary') || searchParams.get('location') || searchParams.get('approvalstatus') || searchParams.get('po_status') || searchParams.get('created_by');
     const hasActiveFilters = checkToggleFilter !== null;
@@ -151,7 +145,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         isLoading={subsidiaryLoading}
                     />
                 </div>
-                
+
                 {/* Location */}
                 <div>
                     <label htmlFor='location' className="block text-sm font-medium text-gray-700 mb-1">Location</label>
@@ -198,7 +192,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         isLoading={approvalStatusLoading}
                     />
                 </div>
-                
+
 
                 {/* STATUS */}
                 <div>
@@ -216,7 +210,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         isLoading={statusLoading}
                     />
                 </div>
-                
+
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Created By</label>
                     <CustomAsyncSelect
@@ -245,10 +239,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         }
                     />
                 </div>
-                
-                
+
+
             </div>
-            
+
             {/* Filter actions */}
             {hasActiveFilters && (
                 <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
