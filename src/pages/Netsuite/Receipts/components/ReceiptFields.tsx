@@ -83,6 +83,10 @@ export default function ReceiptFields({ receipt }: ReceiptFieldsProps) {
                             <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.vendor_name || '-'}</p>
                         </div>
                     )}
+                    <div>
+                        <p className="mb-1.5 block text-sm text-gray-700">Created By</p>
+                        <p className="mt-1 text-gray-800 text-md border-0 border-b rounded-none min-h-10.5 flex items-center">{receipt.created_by_name || receipt.created_by_netsuite || '-'}</p>
+                    </div>
                 </div>
             </div>
 
