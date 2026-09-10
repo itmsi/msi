@@ -33,7 +33,8 @@ const UserNoteTab: React.FC<UserNoteTabProps> = ({
         {
             name: 'Date',
             selector: row => row.date ? formatTanggal(row.date) || '-' : '-',
-            width: '200px',
+            width: '250px',
+            wrap: true
         },
         {
             name: 'Author',
