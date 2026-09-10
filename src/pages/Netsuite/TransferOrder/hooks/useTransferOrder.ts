@@ -41,11 +41,11 @@ export const useTransferOrder = (profileSSO?: number) => {
                     ? (overrides.search ? { search: overrides.search } : {})
                     : (searchValue ? { search: searchValue } : {})),
                 ...(overrides?.location !== undefined
-                    ? (overrides.location ? { location: overrides.location } : {})
-                    : (filterLocation ? { location: filterLocation } : {})),
+                    ? (overrides.location ? { from_location_id: overrides.location } : {})
+                    : (filterLocation ? { from_location_id: filterLocation } : {})),
                 ...(overrides?.transferlocation !== undefined
-                    ? (overrides.transferlocation ? { transferlocation: overrides.transferlocation } : {})
-                    : (filterTransferLocation ? { transferlocation: filterTransferLocation } : {})),
+                    ? (overrides.transferlocation ? { to_location_id: overrides.transferlocation } : {})
+                    : (filterTransferLocation ? { to_location_id: filterTransferLocation } : {})),
                 ...(overrides?.status_name !== undefined
                     ? (overrides.status_name ? { status_name: overrides.status_name } : {})
                     : (filterStatus ? { status_name: filterStatus } : {})),
