@@ -2,11 +2,13 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { ApiError } from '@/helpers/apiHelper';
 import { ItemDetail } from '../types/items';
 import { ItemsService } from '../services/itemsService';
+import toast from 'react-hot-toast';
 
 export const useItemDetail = (internalId?: string) => {
     const [item, setItem] = useState<ItemDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isSyncing, setIsSyncing] = useState(false);
 
     const fetchItemDetail = useCallback(async () => {
         if (!internalId) return;
@@ -34,8 +36,6 @@ export const useItemDetail = (internalId?: string) => {
         }
     }, [internalId]);
 
-    // StrictMode menjalankan effect dua kali saat development,
-    // guard ini menjaga detail hanya di-fetch sekali per internalId
     const fetchedIdRef = useRef<string | undefined>(undefined);
 
     useEffect(() => {
@@ -45,10 +45,27 @@ export const useItemDetail = (internalId?: string) => {
         fetchItemDetail();
     }, [internalId, fetchItemDetail]);
 
+
+    const handleSyncById = async (toId: string) => {
+        if (isSyncing || !toId) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi Item: ${toId}...`);
+        try {
+            await ItemsService.syncItemsById(toId);
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            await fetchItemDetail();
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    };
     return {
         item,
         loading,
         error,
         fetchItemDetail,
+        isSyncing,
+        handleSyncById,
     };
 };

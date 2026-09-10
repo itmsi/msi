@@ -362,8 +362,7 @@ const SDTForm = ({ scheduleInterviewId, interviewId, onSuccess }: { scheduleInte
     const [loadingData, setLoadingData] = useState(false);
     const currentAspect = SDT_ASPECTS.find((a) => a.key === selectedAspect);
     const pointValue = currentAspect?.point || 0;
-    console.log(scheduleInterviewId)
-    // Load existing data if editing
+
     useEffect(() => {
         if (!interviewId) return;
         let cancelled = false;
@@ -415,11 +414,19 @@ const SDTForm = ({ scheduleInterviewId, interviewId, onSuccess }: { scheduleInte
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-                <h4 className="text-base font-primary-bold text-[#0253a5]">SDT Assessment</h4>
-                <p className="text-sm text-gray-500">Assess motivation and self-determination.</p>
+            <div className="flex items-start justify-between gap-3">
+                <div>
+                    <h4 className="text-base font-primary-bold text-[#0253a5]">SDT Assessment</h4>
+                    <p className="text-sm text-gray-500">Assess motivation and self-determination.</p>
+                </div>
+                <div className="inline-flex flex-col items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-4 py-2">
+                    <div className="text-lg font-primary-bold text-[#1F2430] leading-none">
+                        {pointValue}
+                    </div>
+                    <div className="text-[10px] uppercase tracking-wide text-gray-500 mt-0.5">Total Score</div>
+                </div>
             </div>
-            <div className="bg-white rounded-2xl border border-[#E7E9F0] p-4 space-y-4">
+            <div className="overflow-y-auto mb-0 max-h-[50dvh] md:pb-25 pb-55">
                 <div>
                     <Label>Select SDT Aspect</Label>
                     <CustomSelect
@@ -436,11 +443,13 @@ const SDTForm = ({ scheduleInterviewId, interviewId, onSuccess }: { scheduleInte
                     <TextArea value={remark} onChange={(e) => setRemark(e.target.value)} rows={3} placeholder="Remark" />
                 </div>
             </div>
-            <div className="flex justify-end pt-2">
-                <Button type="submit" disabled={isSubmitting || !selectedAspect}>
-                    {isSubmitting ? 'Saving...' : isEditing ? 'Update SDT' : 'Save SDT'}
-                </Button>
-            </div>
+            <PermissionGate permission={["create", "update"]}>
+                <div className="flex justify-end py-5 px-6 border-t border-gray-200 absolute bottom-0 left-0 right-0 bg-white">
+                    <Button type="submit" disabled={isSubmitting || !selectedAspect}>
+                        {isSubmitting ? 'Saving...' : isEditing ? 'Update SDT' : 'Save SDT'}
+                    </Button>
+                </div>
+            </PermissionGate>
         </form>
     );
 };

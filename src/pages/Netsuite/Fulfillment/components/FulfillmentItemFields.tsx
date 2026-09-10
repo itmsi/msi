@@ -10,12 +10,7 @@ interface FulfillmentItemFieldsProps {
 const formatQty = (value: number | string) =>
     new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Number(value) || 0);
 
-// Style tabel item lines disamain dengan Item Lines Transfer Order (TransferOrder/Edit.tsx
-// readOnlyItemColumns) — heading di atas, tanpa pagination, cell polos text-sm.
 export default function FulfillmentItemFields({ lines, sourceType }: FulfillmentItemFieldsProps) {
-    // Rate & Currency cuma relevan untuk Item Fulfillment yang dibuat dari
-    // Vendor Return Authorization (satu-satunya tipe yang menampilkan kedua
-    // kolom ini di UI NetSuite, karena berkaitan dengan nilai retur ke vendor).
     const showRateCurrency = sourceType === 'vendor_return';
 
     const lineColumns: TableColumn<FulfillmentLineItem>[] = [

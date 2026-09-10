@@ -1,7 +1,8 @@
 import { TableColumn } from 'react-data-table-component';
 import { Link, useLocation } from 'react-router-dom';
-import CustomDataTable from '@/components/ui/table';
+import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { Item, ItemsPagination } from '../types/items';
+import { MdOutlineSync } from 'react-icons/md';
 
 interface ItemsTableProps {
     items: Item[];
@@ -9,6 +10,7 @@ interface ItemsTableProps {
     pagination: ItemsPagination;
     onChangePage: (page: number) => void;
     onChangeRowsPerPage: (limit: number, page: number) => void;
+    handleSyncById: (row: Item) => void;
 }
 
 const ItemsTable = ({
@@ -17,6 +19,7 @@ const ItemsTable = ({
     pagination,
     onChangePage,
     onChangeRowsPerPage,
+    handleSyncById,
 }: ItemsTableProps) => {
     const location = useLocation();
 
@@ -57,7 +60,16 @@ const ItemsTable = ({
             ),
             center: true,
             width: '180px'
-        }
+        },
+        createActionsColumn([
+            {
+                icon: MdOutlineSync,
+                onClick: handleSyncById,
+                className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                tooltip: 'Sync this TO',
+                permission: 'read',
+            }
+        ]),
     ];
 
     return (

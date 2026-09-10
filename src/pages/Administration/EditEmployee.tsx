@@ -5,7 +5,7 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import CustomSelect from "@/components/form/select/CustomSelect";
 import CustomAsyncSelect from "@/components/form/select/CustomAsyncSelect";
-import { MdArrowBack, MdEdit, MdKeyboardArrowLeft, MdSave, MdExpandMore, MdExpandLess } from "react-icons/md";
+import { MdArrowBack, MdSave, MdExpandMore, MdExpandLess } from "react-icons/md";
 import LoadingSpinner from "@/components/common/Loading";
 import PageMeta from "@/components/common/PageMeta";
 import Avatar from "@/components/common/Avatar";
@@ -14,17 +14,18 @@ import { usePOClassSelect } from "@/hooks/usePOClassSelect";
 import { EmployeePermissionDetail, EmployeeMenuPermission, EmployeeSystemPermission } from "@/types/administration";
 import Switch from "@/components/form/switch/Switch";
 import TextArea from "@/components/form/input/TextArea";
+import PageHeader from "@/components/common/PageHeader";
 
 export default function EditEmployee() {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    
+
     // Hooks for employee detail
-    const { 
-        employee, 
+    const {
+        employee,
         setEmployee,
-        isLoading, 
-        error, 
+        isLoading,
+        error,
         fetchEmployee,
         updateEmployee,
         formData,
@@ -34,13 +35,13 @@ export default function EditEmployee() {
     } = useEmployeeDetail();
 
     // Hooks for dropdown options
-    const { 
-        companies, 
+    const {
+        companies,
         fetchCompanies,
-        departments, 
+        departments,
         fetchDepartmentsByCompany,
-        positions, 
-        fetchPositionsByDepartment 
+        positions,
+        fetchPositionsByDepartment
     } = useDropdownData();
 
     // Hook for NetSuite Class
@@ -52,15 +53,15 @@ export default function EditEmployee() {
         handleMenuScrollToBottom: handleItemClassScrollToBottom,
         initializeOptions: initializeItemClassOptions
     } = usePOClassSelect(30);
-    
+
     const [selectedClass, setSelectedClass] = useState<any>(null);
     const [hasInitializedClass, setHasInitializedClass] = useState(false);
 
     // State for dropdown options
-    const [departmentOptions, setDepartmentOptions] = useState<Array<{value: string, label: string}>>([]);
-    const [positionOptions, setPositionOptions] = useState<Array<{value: string, label: string}>>([]);
-    const [companyOptions, setCompanyOptions] = useState<Array<{value: string, label: string}>>([]);
-    
+    const [departmentOptions, setDepartmentOptions] = useState<Array<{ value: string, label: string }>>([]);
+    const [positionOptions, setPositionOptions] = useState<Array<{ value: string, label: string }>>([]);
+    const [companyOptions, setCompanyOptions] = useState<Array<{ value: string, label: string }>>([]);
+
     // State for accordion expansion
     const [expandedSystems, setExpandedSystems] = useState<Set<string>>(new Set());
     const [hasInitiallyExpanded, setHasInitiallyExpanded] = useState(false);
@@ -80,7 +81,7 @@ export default function EditEmployee() {
     // Set initial NetSuite Class selection when employee data loads (only once)
     useEffect(() => {
         if (!hasInitializedClass && employee && employee.classes_id_netsuite && POClassOptions.length > 0) {
-            const initialClass = POClassOptions.find(option => 
+            const initialClass = POClassOptions.find(option =>
                 option.value === employee.classes_id_netsuite?.toString()
             );
             if (initialClass) {
@@ -191,13 +192,13 @@ export default function EditEmployee() {
             'duplicate': 5,  // Duplicate
             'guide': 6       // Guide
         };
-        
+
         // First filter to only include CRUD permissions
         const crudPermissions = permissions.filter(permission => {
             const permissionName = permission.permission_name.toLowerCase();
             return Object.keys(crudOrderMap).some(key => permissionName.includes(key));
         });
-        
+
         // Then sort the filtered CRUD permissions
         return crudPermissions.sort((a, b) => {
             // Get priority for permission a
@@ -208,7 +209,7 @@ export default function EditEmployee() {
                     break;
                 }
             }
-            
+
             // Get priority for permission b
             let bPriority = 999;
             for (const [key, priority] of Object.entries(crudOrderMap)) {
@@ -217,12 +218,12 @@ export default function EditEmployee() {
                     break;
                 }
             }
-            
+
             // If priorities are different, sort by priority
             if (aPriority !== bPriority) {
                 return aPriority - bPriority;
             }
-            
+
             // If same priority, sort alphabetically
             return a.permission_name.localeCompare(b.permission_name);
         });
@@ -244,11 +245,11 @@ export default function EditEmployee() {
     // Check if all permissions in system are checked
     const isSystemAllChecked = (systemId: string): boolean => {
         if (!employee) return false;
-        
+
         const system = employee.permission_detail.find(sys => sys.system_id === systemId);
         if (!system) return false;
 
-        return system.permission_detail.every(menu => 
+        return system.permission_detail.every(menu =>
             menu.permission_detail.every(permission => permission.permission_status)
         );
     };
@@ -289,17 +290,17 @@ export default function EditEmployee() {
         const currentSystem = employee.permission_detail.find(system => system.system_id === systemId);
         const currentMenu = currentSystem?.permission_detail.find(menu => menu.menu_id === menuId);
         const currentPermission = currentMenu?.permission_detail.find(perm => perm.permission_id === permissionId);
-        
+
         if (!currentPermission) return;
 
         const permissionName = currentPermission.permission_name.toLowerCase();
-        
+
         // Determine if this is a CRUD permission
-        const isCUD = permissionName.includes('write') || permissionName.includes('create') || 
-                     permissionName.includes('edit') || permissionName.includes('update') || 
-                     permissionName.includes('delete') || permissionName.includes('remove') ||
-                     permissionName.includes('duplicate') || permissionName.includes('duplicate');
-        
+        const isCUD = permissionName.includes('write') || permissionName.includes('create') ||
+            permissionName.includes('edit') || permissionName.includes('update') ||
+            permissionName.includes('delete') || permissionName.includes('remove') ||
+            permissionName.includes('duplicate') || permissionName.includes('duplicate');
+
         const isRead = permissionName.includes('read') || permissionName.includes('view');
 
         // Update the employee's permission_detail
@@ -338,8 +339,8 @@ export default function EditEmployee() {
                                     // If unchecking Read, automatically uncheck Create/Update/Delete
                                     updatedPermissions = updatedPermissions.map(permission => {
                                         const pName = permission.permission_name.toLowerCase();
-                                        if (pName.includes('write') || pName.includes('create') || 
-                                            pName.includes('edit') || pName.includes('update') || 
+                                        if (pName.includes('write') || pName.includes('create') ||
+                                            pName.includes('edit') || pName.includes('update') ||
                                             pName.includes('delete') || pName.includes('remove') ||
                                             pName.includes('duplicate') || pName.includes('duplicate')) {
                                             return {
@@ -371,7 +372,7 @@ export default function EditEmployee() {
     // Form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!id || !employee) return;
 
         // Combine form data with permission data
@@ -433,333 +434,316 @@ export default function EditEmployee() {
                 image="/motor-sights-international.png"
             />
 
-            <div className="bg-gray-50 overflow-auto">
-                <div className="mx-auto px-4 sm:px-3">
+            <div className="mx-auto px-0">
+                <PageHeader
+                    title="Edit Employee"
+                    backPath={'/employees'}
+                />
+                {/* Employee Information */}
+                <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm">
 
-                    {/* HEADER */}
-                    <div className="flex items-center justify-between h-16 bg-white shadow-sm border-b rounded-2xl p-6 mb-8">
-                        <div className="flex items-center gap-1">
-                            <Link to="/employees">
-                                <Button
-                                    variant="outline"
-                                    className="flex items-center gap-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 ring-0 border-none shadow-none me-1"
-                                >
-                                    <MdKeyboardArrowLeft size={20} />
-                                </Button>
-                            </Link>
-                            <div className="border-l border-gray-300 h-6 mx-3"></div>
-                            <MdEdit size={20} className="text-primary" />
-                            <h1 className="ms-2 font-primary-bold font-normal text-xl">Edit Employee</h1>
+                    {/* PROFILE HEADER */}
+                    <div className="p-8 border-b border-gray-200">
+                        <div className="flex flex-col items-center gap-6 sm:flex-row">
+                            <div className="relative">
+                                <Avatar
+                                    src={employee.employee_foto}
+                                    nama={employee.employee_name}
+                                    size={96}
+                                    className="border-2 border-gray-200"
+                                    alt="Profile Preview"
+                                />
+                            </div>
+
+                            <div className="text-center sm:text-left">
+                                <h2 className="text-2xl font-primary-bold text-gray-900 mb-2">
+                                    {employee?.employee_name}
+                                </h2>
+                                <div className="space-y-1 text-sm text-gray-600">
+                                    <p className="font-medium">{employee?.title_name}</p>
+                                    <p>{employee?.department_name} • {employee?.company_name}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
+                        <div className="lg:col-span-1 p-8 relative">
+                            <div className="space-y-6">
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 lg:col-span-4">Basic Information</h2>
+                                {/* Employee Name */}
+                                <div className="lg:col-span-2">
+                                    <Label htmlFor="employee_name">Name</Label>
+                                    <Input
+                                        id="employee_name"
+                                        type="text"
+                                        value={formData.employee_name}
+                                        onChange={(e) => handleInputChange('employee_name', e.target.value)}
+                                        placeholder="Enter employee name"
+                                        error={!!validationErrors.employee_name}
+                                    />
+                                    {validationErrors.employee_name && (
+                                        <span className="text-sm text-red-500">{validationErrors.employee_name}</span>
+                                    )}
+                                </div>
 
+                                {/* Employee Email */}
+                                <div className="lg:col-span-2">
+                                    <Label htmlFor="employee_email">Email</Label>
+                                    <Input
+                                        id="employee_email"
+                                        type="email"
+                                        value={formData.employee_email || ''}
+                                        onChange={(e) => handleInputChange('employee_email', e.target.value)}
+                                        placeholder="Enter employee email"
+                                        error={!!validationErrors.employee_email}
+                                    />
+                                    {validationErrors.employee_email && (
+                                        <span className="text-sm text-red-500">{validationErrors.employee_email}</span>
+                                    )}
+                                </div>
 
-                    {/* Employee Information */}
-                    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm">
-                        
-                        {/* PROFILE HEADER */}
-                        <div className="p-8 border-b border-gray-200">
-                            <div className="flex flex-col items-center gap-6 sm:flex-row">
-                                <div className="relative">
-                                    <Avatar
-                                        src={employee.employee_foto}
-                                        nama={employee.employee_name}
-                                        size={96}
-                                        className="border-2 border-gray-200"
-                                        alt="Profile Preview"
+                                {/* Company */}
+                                <div className="lg:col-span-2">
+                                    <Label htmlFor="company_id">Company *</Label>
+                                    <CustomSelect
+                                        options={companyOptions}
+                                        value={companyOptions.find(option => option.value === formData.company_id) || null}
+                                        onChange={(option) => handleInputChange('company_id', option?.value || '')}
+                                        placeholder="Select Company"
+                                        isClearable={false}
+                                        isSearchable={true}
+                                    />
+                                    {validationErrors.company_id && (
+                                        <span className="text-sm text-red-500">{validationErrors.company_id}</span>
+                                    )}
+                                </div>
+
+                                {/* Department */}
+                                <div className="lg:col-span-2">
+                                    <Label htmlFor="department_id">Department *</Label>
+                                    <CustomSelect
+                                        options={departmentOptions}
+                                        value={departmentOptions.find(option => option.value === formData.department_id) || null}
+                                        onChange={(option) => handleInputChange('department_id', option?.value || '')}
+                                        placeholder="Select Company first"
+                                        isClearable={false}
+                                        isSearchable={true}
+                                        disabled={!formData.company_id}
+                                    />
+                                    {validationErrors.department_id && (
+                                        <span className="text-sm text-red-500">{validationErrors.department_id}</span>
+                                    )}
+                                </div>
+
+                                {/* Position */}
+                                <div className="lg:col-span-2">
+                                    <Label htmlFor="title_id">Position *</Label>
+                                    <CustomSelect
+                                        options={positionOptions}
+                                        value={positionOptions.find(option => option.value === formData.title_id) || null}
+                                        onChange={(option) => handleInputChange('title_id', option?.value || '')}
+                                        placeholder="Select Department first"
+                                        isClearable={false}
+                                        isSearchable={true}
+                                        disabled={!formData.department_id}
+                                    />
+                                    {validationErrors.title_id && (
+                                        <span className="text-sm text-red-500">{validationErrors.title_id}</span>
+                                    )}
+                                </div>
+
+                                {/* Employee Mobile */}
+                                <div className="lg:col-span-2">
+                                    <Label htmlFor="employee_mobile">Mobile Phone</Label>
+                                    <Input
+                                        id="employee_mobile"
+                                        type="tel"
+                                        value={formData.employee_mobile || ''}
+                                        onChange={(e) => handleInputChange('employee_mobile', e.target.value)}
+                                        placeholder="Enter mobile phone"
                                     />
                                 </div>
-                                
-                                <div className="text-center sm:text-left">
-                                    <h2 className="text-2xl font-primary-bold text-gray-900 mb-2">
-                                        {employee?.employee_name}
-                                    </h2>
-                                    <div className="space-y-1 text-sm text-gray-600">
-                                        <p className="font-medium">{employee?.title_name}</p>
-                                        <p>{employee?.department_name} • {employee?.company_name}</p>
-                                    </div>
+
+                                {/* Employee Office Number */}
+                                <div className="lg:col-span-2">
+                                    <Label htmlFor="employee_office_number">Office Phone</Label>
+                                    <Input
+                                        id="employee_office_number"
+                                        type="tel"
+                                        value={formData.employee_office_number || ''}
+                                        onChange={(e) => handleInputChange('employee_office_number', e.target.value)}
+                                        placeholder="Enter office phone"
+                                    />
+                                </div>
+
+                                {/* Employee Address */}
+                                <div className="lg:col-span-2">
+                                    <Label htmlFor="employee_address">Address</Label>
+                                    <TextArea
+                                        value={formData.employee_address || ''}
+                                        onChange={(e) => handleInputChange('employee_address', e.target.value)}
+                                        placeholder="Enter employee address"
+                                    />
+                                </div>
+
+                                {/* NetSuite Class */}
+                                <div className="lg:col-span-2">
+                                    <Label>NetSuite Class</Label>
+                                    <CustomAsyncSelect
+                                        name="classes_id_netsuite"
+                                        placeholder="Select NetSuite class..."
+                                        value={selectedClass}
+                                        error={validationErrors.classes_id_netsuite ? String(validationErrors.classes_id_netsuite) : undefined}
+                                        defaultOptions={POClassOptions}
+                                        loadOptions={handleItemClassInputChange}
+                                        onMenuScrollToBottom={handleItemClassScrollToBottom}
+                                        isLoading={itemClassPagination.loading}
+                                        noOptionsMessage={() => "No classes found"}
+                                        loadingMessage={() => "Loading classes..."}
+                                        isSearchable={true}
+                                        inputValue={itemClassInputValue}
+                                        onInputChange={handleItemClassInputChange}
+                                        onChange={(option) => {
+                                            setSelectedClass(option);
+                                            // Update both netsuite class fields
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                classes_id_netsuite: option?.value ? Number(option.value) : null,
+                                                classes_name_netsuite: option?.label || null
+                                            }));
+
+                                            // Clear validation error if exists
+                                            if (validationErrors.classes_id_netsuite) {
+                                                // setValidationErrors not available in EditEmployee, but that's okay
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Employee Status */}
+                                <div className="lg:col-span-4">
+                                    <Switch
+                                        label="Status Employee"
+                                        showStatusText={true}
+                                        checked={formData.employee_status === 'active'}
+                                        onChange={(checked) => handleInputChange('employee_status', checked ? 'active' : 'inactive')}
+                                    />
+                                </div>
+
+                                {/* Employee Salses */}
+                                <div className="lg:col-span-4">
+                                    <Switch
+                                        label="Status Sales"
+                                        showStatusText={true}
+                                        checked={formData.is_sales_quotation === true || formData.is_sales_quotation === 'true'}
+                                        onChange={(checked) => handleInputChange('is_sales_quotation', checked ? 'true' : 'false')}
+                                    />
                                 </div>
                             </div>
+                            <div className="absolute top-7 bottom-7 right-0 border-r border-gray-300 hidden lg:block mx-3"></div>
                         </div>
-                        <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
-                            <div className="lg:col-span-1 p-8 relative">
-                                <div className="space-y-6">
-                                    <h2 className="text-lg font-primary-bold font-medium text-gray-900 lg:col-span-4">Basic Information</h2>
-                                    {/* Employee Name */}
-                                    <div className="lg:col-span-2">
-                                        <Label htmlFor="employee_name">Name</Label>
-                                        <Input
-                                            id="employee_name"
-                                            type="text"
-                                            value={formData.employee_name}
-                                            onChange={(e) => handleInputChange('employee_name', e.target.value)}
-                                            placeholder="Enter employee name"
-                                            error={!!validationErrors.employee_name}
-                                        />
-                                        {validationErrors.employee_name && (
-                                            <span className="text-sm text-red-500">{validationErrors.employee_name}</span>
-                                        )}
-                                    </div>
 
-                                    {/* Employee Email */}
-                                    <div className="lg:col-span-2">
-                                        <Label htmlFor="employee_email">Email</Label>
-                                        <Input
-                                            id="employee_email"
-                                            type="email"
-                                            value={formData.employee_email || ''}
-                                            onChange={(e) => handleInputChange('employee_email', e.target.value)}
-                                            placeholder="Enter employee email"
-                                            error={!!validationErrors.employee_email}
-                                        />
-                                        {validationErrors.employee_email && (
-                                            <span className="text-sm text-red-500">{validationErrors.employee_email}</span>
-                                        )}
-                                    </div>
+                        {/* Permissions Section - Accordion with Select All */}
+                        {employee && employee.permission_detail && employee.permission_detail.length > 0 && (
+                            <div className="lg:col-span-2 p-8 lg:ps-0">
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Permission</h2>
+                                <div className="space-y-4 max-h-[870px] overflow-y-auto">
+                                    {employee.permission_detail.map((system: EmployeeSystemPermission) => {
+                                        const isExpanded = expandedSystems.has(system.system_id);
+                                        const isAllChecked = isSystemAllChecked(system.system_id);
 
-                                    {/* Company */}
-                                    <div className="lg:col-span-2">
-                                        <Label htmlFor="company_id">Company *</Label>
-                                        <CustomSelect
-                                            options={companyOptions}
-                                            value={companyOptions.find(option => option.value === formData.company_id) || null}
-                                            onChange={(option) => handleInputChange('company_id', option?.value || '')}
-                                            placeholder="Select Company"
-                                            isClearable={false}
-                                            isSearchable={true}
-                                        />
-                                        {validationErrors.company_id && (
-                                            <span className="text-sm text-red-500">{validationErrors.company_id}</span>
-                                        )}
-                                    </div>
+                                        return (
+                                            <div key={system.system_id} className="border border-gray-300 rounded-lg overflow-hidden">
+                                                {/* Accordion Header */}
+                                                <div className="bg-gray-50 border-b border-gray-200">
+                                                    <div className="flex items-center justify-between p-4">
+                                                        <div className="flex items-center gap-3">
+                                                            {/* Select All Switch */}
+                                                            <Switch
+                                                                label="Select All"
+                                                                checked={isAllChecked}
+                                                                className="capitalize font-secondary font-normal"
+                                                                onChange={(checked) => toggleSystemAllPermissions(system.system_id, checked)}
+                                                            />
 
-                                    {/* Department */}
-                                    <div className="lg:col-span-2">
-                                        <Label htmlFor="department_id">Department *</Label>
-                                        <CustomSelect
-                                            options={departmentOptions}
-                                            value={departmentOptions.find(option => option.value === formData.department_id) || null}
-                                            onChange={(option) => handleInputChange('department_id', option?.value || '')}
-                                            placeholder="Select Company first"
-                                            isClearable={false}
-                                            isSearchable={true}
-                                            disabled={!formData.company_id}
-                                        />
-                                        {validationErrors.department_id && (
-                                            <span className="text-sm text-red-500">{validationErrors.department_id}</span>
-                                        )}
-                                    </div>
-
-                                    {/* Position */}
-                                    <div className="lg:col-span-2">
-                                        <Label htmlFor="title_id">Position *</Label>
-                                        <CustomSelect
-                                            options={positionOptions}
-                                            value={positionOptions.find(option => option.value === formData.title_id) || null}
-                                            onChange={(option) => handleInputChange('title_id', option?.value || '')}
-                                            placeholder="Select Department first"
-                                            isClearable={false}
-                                            isSearchable={true}
-                                            disabled={!formData.department_id}
-                                        />
-                                        {validationErrors.title_id && (
-                                            <span className="text-sm text-red-500">{validationErrors.title_id}</span>
-                                        )}
-                                    </div>
-
-                                    {/* Employee Mobile */}
-                                    <div className="lg:col-span-2">
-                                        <Label htmlFor="employee_mobile">Mobile Phone</Label>
-                                        <Input
-                                            id="employee_mobile"
-                                            type="tel"
-                                            value={formData.employee_mobile || ''}
-                                            onChange={(e) => handleInputChange('employee_mobile', e.target.value)}
-                                            placeholder="Enter mobile phone"
-                                        />
-                                    </div>
-
-                                    {/* Employee Office Number */}
-                                    <div className="lg:col-span-2">
-                                        <Label htmlFor="employee_office_number">Office Phone</Label>
-                                        <Input
-                                            id="employee_office_number"
-                                            type="tel"
-                                            value={formData.employee_office_number || ''}
-                                            onChange={(e) => handleInputChange('employee_office_number', e.target.value)}
-                                            placeholder="Enter office phone"
-                                        />
-                                    </div>
-
-                                    {/* Employee Address */}
-                                    <div className="lg:col-span-2">
-                                        <Label htmlFor="employee_address">Address</Label>
-                                        <TextArea
-                                            value={formData.employee_address || ''}
-                                            onChange={(e) => handleInputChange('employee_address', e.target.value)}
-                                            placeholder="Enter employee address"
-                                        />
-                                    </div>
-
-                                    {/* NetSuite Class */}
-                                    <div className="lg:col-span-2">
-                                        <Label>NetSuite Class</Label>
-                                        <CustomAsyncSelect
-                                            name="classes_id_netsuite"
-                                            placeholder="Select NetSuite class..."
-                                            value={selectedClass}
-                                            error={validationErrors.classes_id_netsuite ? String(validationErrors.classes_id_netsuite) : undefined}
-                                            defaultOptions={POClassOptions}
-                                            loadOptions={handleItemClassInputChange}
-                                            onMenuScrollToBottom={handleItemClassScrollToBottom}
-                                            isLoading={itemClassPagination.loading}
-                                            noOptionsMessage={() => "No classes found"}
-                                            loadingMessage={() => "Loading classes..."}
-                                            isSearchable={true}
-                                            inputValue={itemClassInputValue}
-                                            onInputChange={handleItemClassInputChange}
-                                            onChange={(option) => {
-                                                setSelectedClass(option);
-                                                // Update both netsuite class fields
-                                                setFormData(prev => ({
-                                                    ...prev,
-                                                    classes_id_netsuite: option?.value ? Number(option.value) : null,
-                                                    classes_name_netsuite: option?.label || null
-                                                }));
-                                                
-                                                // Clear validation error if exists
-                                                if (validationErrors.classes_id_netsuite) {
-                                                    // setValidationErrors not available in EditEmployee, but that's okay
-                                                }
-                                            }}
-                                        />
-                                    </div>
-
-                                    {/* Employee Status */}
-                                    <div className="lg:col-span-4">
-                                        <Switch 
-                                            label="Status Employee" 
-                                            showStatusText={true} 
-                                            checked={formData.employee_status === 'active'}
-                                            onChange={(checked) => handleInputChange('employee_status', checked ? 'active' : 'inactive')}
-                                        />
-                                    </div>
-
-                                    {/* Employee Salses */}
-                                    <div className="lg:col-span-4">
-                                        <Switch 
-                                            label="Status Sales" 
-                                            showStatusText={true} 
-                                            checked={formData.is_sales_quotation === true || formData.is_sales_quotation === 'true'}
-                                            onChange={(checked) => handleInputChange('is_sales_quotation', checked ? 'true' : 'false')}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="absolute top-7 bottom-7 right-0 border-r border-gray-300 hidden lg:block mx-3"></div>
-                            </div>
-
-                            {/* Permissions Section - Accordion with Select All */}
-                            {employee && employee.permission_detail && employee.permission_detail.length > 0 && (
-                                <div className="lg:col-span-2 p-8 lg:ps-0">
-                                    <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">Permission</h2>
-                                    <div className="space-y-4 max-h-[870px] overflow-y-auto">
-                                        {employee.permission_detail.map((system: EmployeeSystemPermission) => {
-                                            const isExpanded = expandedSystems.has(system.system_id);
-                                            const isAllChecked = isSystemAllChecked(system.system_id);
-                                            
-                                            return (
-                                                <div key={system.system_id} className="border border-gray-300 rounded-lg overflow-hidden">
-                                                    {/* Accordion Header */}
-                                                    <div className="bg-gray-50 border-b border-gray-200">
-                                                        <div className="flex items-center justify-between p-4">
-                                                            <div className="flex items-center gap-3">
-                                                                {/* Select All Switch */}
-                                                                    <Switch
-                                                                        label="Select All"
-                                                                        checked={isAllChecked}
-                                                                        className="capitalize font-secondary font-normal"
-                                                                        onChange={(checked) => toggleSystemAllPermissions(system.system_id, checked)}
-                                                                    />
-                                                                
-                                                                {/* Clickable System Name Area */}
-                                                                <div 
-                                                                    className="flex items-center cursor-pointer hover:text-primary transition-colors"
-                                                                    onClick={() => toggleSystemExpansion(system.system_id)}
-                                                                >
-                                                                    {/* System Name */}
-                                                                    <h4 className="font-semibold text-lg text-gray-900">
-                                                                        {system.system_name}
-                                                                    </h4>
-                                                                </div>
-                                                            </div>
-                                                            
-                                                            {/* Expand/Collapse Button */}
+                                                            {/* Clickable System Name Area */}
                                                             <div
+                                                                className="flex items-center cursor-pointer hover:text-primary transition-colors"
                                                                 onClick={() => toggleSystemExpansion(system.system_id)}
-                                                                className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
                                                             >
-                                                                {isExpanded ? (
-                                                                    <MdExpandLess className="w-6 h-6" />
-                                                                ) : (
-                                                                    <MdExpandMore className="w-6 h-6" />
-                                                                )}
+                                                                {/* System Name */}
+                                                                <h4 className="font-semibold text-lg text-gray-900">
+                                                                    {system.system_name}
+                                                                </h4>
                                                             </div>
+                                                        </div>
+
+                                                        {/* Expand/Collapse Button */}
+                                                        <div
+                                                            onClick={() => toggleSystemExpansion(system.system_id)}
+                                                            className="flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+                                                        >
+                                                            {isExpanded ? (
+                                                                <MdExpandLess className="w-6 h-6" />
+                                                            ) : (
+                                                                <MdExpandMore className="w-6 h-6" />
+                                                            )}
                                                         </div>
                                                     </div>
-                                                    
-                                                    {/* Accordion Content */}
-                                                    {isExpanded && (
-                                                        <div className="p-6">
-                                                            <div className="space-y-4">
-                                                                {system.permission_detail.map((menu: EmployeeMenuPermission) => (
-                                                                    <div key={menu.menu_id} className="border border-gray-200 rounded-lg p-4">
-                                                                        <h5 className="font-medium text-gray-900 mb-3">{menu.menu_name}</h5>
-                                                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                                                                            {sortPermissionsByCRUD(menu.permission_detail).map((permission: EmployeePermissionDetail) => (
-                                                                                <div key={permission.permission_id}>
-                                                                                    <Switch
-                                                                                        label={permission.permission_name}
-                                                                                        checked={permission.permission_status || false}
-                                                                                        className="capitalize font-secondary font-normal"
-                                                                                        onChange={(checked) => handlePermissionChange(system.system_id, menu.menu_id, permission.permission_id, checked)}
-                                                                                    />
-                                                                                </div>
-                                                                            ))}
-                                                                        </div>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
+
+                                                {/* Accordion Content */}
+                                                {isExpanded && (
+                                                    <div className="p-6">
+                                                        <div className="space-y-4">
+                                                            {system.permission_detail.map((menu: EmployeeMenuPermission) => (
+                                                                <div key={menu.menu_id} className="border border-gray-200 rounded-lg p-4">
+                                                                    <h5 className="font-medium text-gray-900 mb-3">{menu.menu_name}</h5>
+                                                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                                                                        {sortPermissionsByCRUD(menu.permission_detail).map((permission: EmployeePermissionDetail) => (
+                                                                            <div key={permission.permission_id}>
+                                                                                <Switch
+                                                                                    label={permission.permission_name}
+                                                                                    checked={permission.permission_status || false}
+                                                                                    className="capitalize font-secondary font-normal"
+                                                                                    onChange={(checked) => handlePermissionChange(system.system_id, menu.menu_id, permission.permission_id, checked)}
+                                                                                />
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                            )}
-                            
-                            {/* Form Actions */}
-                            <div className="flex justify-end gap-4 p-6 border-t border-gray-200 lg:col-span-3">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => navigate('/employees')}
-                                    className="px-6 rounded-full"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={isUpdating}
-                                    className="px-6 flex items-center gap-2 rounded-full"
-                                >
-                                    <MdSave size={20} />
-                                    {isUpdating ? 'Saving...' : 'Update Employee'}
-                                </Button>
                             </div>
+                        )}
+
+                        {/* Form Actions */}
+                        <div className="flex justify-end gap-4 p-6 border-t border-gray-200 lg:col-span-3">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => navigate('/employees')}
+                                className="px-6 rounded-full"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={isUpdating}
+                                className="px-6 flex items-center gap-2 rounded-full"
+                            >
+                                <MdSave size={20} />
+                                {isUpdating ? 'Saving...' : 'Update Employee'}
+                            </Button>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </>
     );

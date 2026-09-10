@@ -277,7 +277,6 @@ export const useIupZoneSIte = ({ segmentasion }: { segmentasion: string }) => {
     };
 
     const deleteZone = useCallback((zone: IupZonaSiteItem) => {
-        console.log('handleConfirmDeleted', zone)
         setConfirmDelete({ show: true, iup_zona_site_id: zone.iup_zona_site_id, name: zone.iup_zona_site_name });
     }, [confirmDelete]);
 

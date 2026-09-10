@@ -77,7 +77,7 @@ const InlineDatePicker: React.FC<{ value: string | null; onChange: (val: string)
         <div className="relative">
             <div
                 ref={triggerRef}
-                className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer bg-white hover:border-gray-400 text-sm min-w-[140px]"
+                className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg cursor-pointer bg-white hover:border-gray-400 text-sm min-w-35"
                 onClick={handleToggle}
             >
                 <span className={currentDate ? "text-gray-700" : "text-gray-400"}>

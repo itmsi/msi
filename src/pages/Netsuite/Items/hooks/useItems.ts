@@ -1,13 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { ApiError } from '@/helpers/apiHelper';
-import { Item, ItemsPagination, ItemsRequest } from '../types/items';
+import { Item, ItemsPagination, ItemsRequest, SyncInfo } from '../types/items';
 import { DEFAULT_ITEM_TYPE, ItemsService } from '../services/itemsService';
+import toast from 'react-hot-toast';
+import { NetSuiteSyncService } from '../../Sync/services/netSuiteSyncService';
 
 type FilterState = {
     search: string;
     sort_order: 'asc' | 'desc' | '';
     item_type: string[];
+    location_id: string;
 };
 
 // Param list dikirim ke URL sebagai comma separated value
@@ -27,6 +30,7 @@ export const useItems = () => {
         search: searchParams.get('search') || '',
         sort_order: (searchParams.get('sort_order') as FilterState['sort_order']) || 'desc',
         item_type: parseListParam(searchParams.get('item_type')),
+        location_id: searchParams.get('location_id') || '',
     };
 
     const [searchValue, setSearchValue] = useState(urlFilters.search);
@@ -34,6 +38,8 @@ export const useItems = () => {
     const [items, setItems] = useState<Item[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const [syncInfo, setSyncInfo] = useState<SyncInfo | null>(null);
     const [pagination, setPagination] = useState<ItemsPagination>({
         page: urlPage,
         limit: urlLimit,
@@ -61,12 +67,16 @@ export const useItems = () => {
             setLoading(true);
             setError(null);
 
+            // location_id dikeluarkan dari spread supaya tidak terkirim sebagai string kosong
+            const { location_id, ...restFilters } = urlFilters;
+
             const response = await ItemsService.getItems({
                 page: urlPage,
                 limit: urlLimit,
                 sort_by: 'lastModifiedDate',
-                ...urlFilters,
+                ...restFilters,
                 item_type: urlFilters.item_type.length ? urlFilters.item_type : DEFAULT_ITEM_TYPE,
+                ...(location_id ? { location_id } : {}),
                 ...params,
             });
 
@@ -83,6 +93,10 @@ export const useItems = () => {
                 total: 0,
                 totalPages: 0
             });
+
+            if (response.sync_info) {
+                setSyncInfo(response.sync_info);
+            }
         } catch (err) {
             const apiError = err as ApiError;
             setItems([]);
@@ -136,7 +150,44 @@ export const useItems = () => {
         setSearchValue(urlFilters.search);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location.search]);
+    const [isSyncing, setIsSyncing] = useState(false);
 
+    const handleSync = useCallback(async () => {
+        if (isSyncing) return;
+        setIsSyncing(true);
+        const toastId = toast.loading('Sinkronisasi data transfer order...');
+        try {
+            await NetSuiteSyncService.sync('items');
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            fetchItems({
+                page: urlPage,
+                limit: urlLimit,
+            });
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, fetchItems]);
+
+    const handleSyncById = useCallback(async (row: Item) => {
+        if (isSyncing) return;
+        if (!row?.internalId) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi Item: ${row.displayName || ''}...`);
+        try {
+            await ItemsService.syncItemsById(String(row.internalId));
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            fetchItems({
+                page: urlPage,
+                limit: urlLimit,
+            });
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, fetchItems, pagination]);
     return {
         items,
         filters: urlFilters,
@@ -153,5 +204,9 @@ export const useItems = () => {
         executeSearch,
         handleKeyPress,
         handleClearSearch,
+        syncInfo,
+        isSyncing,
+        handleSync,
+        handleSyncById,
     };
 };

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 // import { MdClear, MdSearch } from 'react-icons/md';
 // import Input from '@/components/form/input/InputField';
 import CustomDataTable from '@/components/ui/table';
 import { useItemSerialNumbers } from '../../hooks/useItemRelation';
 import { ItemSerialNumber } from '../../types/items';
+import CustomSelect from '@/components/form/select/CustomSelect';
 
 interface SerialNumberTabProps {
     netsuiteItemId?: string;
@@ -18,11 +19,27 @@ const SerialNumberTab: React.FC<SerialNumberTabProps> = ({ netsuiteItemId }) => 
         pagination,
         // searchValue,
         // setSearchValue,
+        handleFilterChange,
         handlePageChange,
         handleRowsPerPageChange,
         // handleKeyPress,
         // handleClearSearch,
     } = useItemSerialNumbers(netsuiteItemId);
+
+    const statusOptions = [
+        { value: '', label: 'All Status' },
+        { value: 'true', label: 'Active' },
+        { value: 'false', label: 'Inactive' }
+    ];
+
+    // Status hanya state tampilan. Yang dikirim ke API adalah is_used (boolean),
+    // dan saat "All Status" key-nya tidak ikut dikirim sama sekali
+    const [status, setStatus] = useState('');
+
+    const handleStatusChange = (value: string) => {
+        setStatus(value);
+        handleFilterChange({ is_used: value === '' ? undefined : value === 'true' });
+    };
 
     const columns: TableColumn<ItemSerialNumber>[] = [
         {
@@ -84,6 +101,20 @@ const SerialNumberTab: React.FC<SerialNumberTabProps> = ({ netsuiteItemId }) => 
                 </div>
             </div> */}
 
+            {/* Status Filter */}
+            <div className="w-80 flex-none mb-4">
+                <CustomSelect
+                    id="item_status"
+                    name="item_status"
+                    options={statusOptions}
+                    value={statusOptions.find(option => option.value === status) || statusOptions[0]}
+                    onChange={(option) => handleStatusChange(option?.value || '')}
+                    placeholder="Status"
+                    isClearable={false}
+                    isSearchable={false}
+                    className="font-secondary"
+                />
+            </div>
             {error && (
                 <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
                     <p className="text-red-600">{error}</p>

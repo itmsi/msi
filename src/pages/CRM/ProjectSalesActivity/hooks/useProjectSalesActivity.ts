@@ -16,7 +16,7 @@ type FilterState = {
 
 export const useProjectSalesActivity = () => {
     const [searchParams, setSearchParams] = useSearchParams();
-    const location = useLocation(); 
+    const location = useLocation();
 
     const urlPage = Math.max(Number(searchParams.get('page')) || 1, 1);
     const urlLimit = Math.max(Number(searchParams.get('limit')) || 10, 1);
@@ -49,13 +49,13 @@ export const useProjectSalesActivity = () => {
         const params = new URLSearchParams();
         if (page > 1) params.set('page', String(page));
         if (limit !== 10) params.set('limit', String(limit));
-        
+
         Object.entries(currentFilters).forEach(([key, value]) => {
             if (value && value !== 'desc') {
                 params.set(key, value);
             }
         });
-        
+
         setSearchParams(params);
     }, [setSearchParams]);
 
@@ -72,7 +72,7 @@ export const useProjectSalesActivity = () => {
                 ...params
             };
             const response = await ActivityServices.getPSA(requestParams);
-            
+
             setActivities(response.data);
             setPagination(response.pagination);
         } catch (err: any) {
@@ -85,13 +85,9 @@ export const useProjectSalesActivity = () => {
 
     const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
         const updatedFilters = { ...urlFilters, ...newFilters };
-        console.log({
-            updatedFilters,
-            newFilters
-        })
         updateUrlParams(updatedFilters, 1, urlLimit);
     }, [urlFilters, urlLimit, updateUrlParams]);
-    
+
     const handlePageChange = useCallback((page: number) => {
         updateUrlParams(urlFilters, page, urlLimit);
     }, [urlFilters, urlLimit, updateUrlParams]);
@@ -107,7 +103,7 @@ export const useProjectSalesActivity = () => {
     const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter') executeSearch();
     }, [executeSearch]);
-    
+
     const handleClearSearch = useCallback(() => {
         setSearchValue('');
         handleFilterChange({ search: '' });
@@ -115,10 +111,10 @@ export const useProjectSalesActivity = () => {
 
     useEffect(() => {
         fetchProjectSalesActivity();
-        
+
         // Memastikan input text search ter-reset jika user memencet tombol Back
         setSearchValue(urlFilters.search);
-        
+
     }, [location.search]);
 
     return {
@@ -127,11 +123,11 @@ export const useProjectSalesActivity = () => {
         loading,
         error,
         pagination,
-        
+
         filters: urlFilters,
         searchValue,
         setSearchValue,
-        
+
         // Actions
         fetchProjectSalesActivity,
         handlePageChange,

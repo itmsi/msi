@@ -108,20 +108,14 @@ const EditContractor: React.FC = () => {
             </div>
         );
     }
-console.log({
-    goBack,
-    a: window.history.state,
-    b: window.history.state.idx,
-    c: window.history.state.navigationType
-})
     return (
         <>
-            <PageMeta 
-                title="Edit Contractor - CRM" 
+            <PageMeta
+                title="Edit Contractor - CRM"
                 description="Edit contractor with customer data and IUP information"
                 image="/motor-sights-international.png"
             />
-        
+
             <div className="mx-auto">
                 {/* Header dengan back button */}
                 <PageHeader
@@ -135,63 +129,57 @@ console.log({
                     <nav className="flex justify-between w-[910px] xl:w-full">
                         <button
                             onClick={() => setActiveTab('info_contractor')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                activeTab === 'info_contractor'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'info_contractor'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             <AiOutlineIdcard size={'1.5rem'} /> Detail Contractor
                         </button>
                         <button
                             onClick={() => setActiveTab('survey')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                activeTab === 'survey'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'survey'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             <MdTaskAlt size={'1.5rem'} /> Survey
                         </button>
                         {quotationPermissions.canRead && (
                             <button
                                 onClick={() => setActiveTab('quotation')}
-                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                    activeTab === 'quotation'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
+                                className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'quotation'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
                             >
                                 <GrDocumentVerified size={'1.5rem'} /> Quotation
                             </button>
                         )}
                         <button
                             onClick={() => setActiveTab('roe')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                activeTab === 'roe'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'roe'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             <GiChart size={'1.5rem'} /> Return of Equity
                         </button>
                         <button
                             onClick={() => setActiveTab('project')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                activeTab === 'project'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'project'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             <TbTopologyStar3 size={'1.5rem'} /> Projects
                         </button>
                         <button
                             onClick={() => setActiveTab('activity')}
-                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${
-                                activeTab === 'activity'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
+                            className={`py-2 px-1 border-b-2 font-normal text-lg transition-colors w-60 inline-flex items-center gap-2 justify-center ${activeTab === 'activity'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
                         >
                             <AiOutlineHistory size={'1.5rem'} /> Activity
                         </button>
@@ -251,7 +239,7 @@ console.log({
                             onBrandMenuScroll={handleBrandMenuScrollToBottom}
                             onBrandSelect={handleBrandSelect}
                         />
-                
+
                         <ActivitySelections
                             formData={formData.iup_customers.activity_status}
                             onInputChange={handleActivitySelectionChange}
@@ -272,23 +260,23 @@ console.log({
                 )}
                 {/* Quotation Tab */}
                 {activeTab === 'quotation' && quotationPermissions.canRead && (
-                    <ContractorQuotationInformation 
+                    <ContractorQuotationInformation
                         customerID={formData.customer_data.customer_id || ''}
                     />
                 )}
                 {activeTab === 'roe' && quotationPermissions.canRead && (
-                    <ContractorROEInformation 
+                    <ContractorROEInformation
                         iup_customer_id={formData.iup_customers.iup_customer_id || ''}
                     />
                 )}
                 {/* Activity Tab */}
                 {activeTab === 'project' && (
-                    <ContractorProjectInformation 
+                    <ContractorProjectInformation
                         iup_customer_id={formData.iup_customers.iup_customer_id || ''}
                     />
                 )}
                 {activeTab === 'activity' && (
-                    <ContractorActivityInformation 
+                    <ContractorActivityInformation
                         activityData={formData.iup_customers.activity_data || []}
                     />
                 )}

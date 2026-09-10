@@ -290,7 +290,7 @@ const DateInterviewTab = ({ candidateId, isActive, candidate }: DateInterviewTab
             ) : (
                 <div className="bg-white rounded-xl overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-[600px] text-sm">
+                        <table className="w-full min-w-150 text-sm">
                             <thead>
                                 <tr className="bg-[#dfe8f2] border-b border-[#E7E9F0]">
                                     <th className="text-left px-4 py-3 font-secondary font-semibold text-[#374151]">Created by</th>
