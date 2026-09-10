@@ -93,6 +93,7 @@ export interface ReceiptItem {
     datecreated_netsuite: string;
     created_at: string;
     created_by_name: string;
+    created_by_netsuite: string;
     updated_at: string;
     // Cuma ada di response detail (GET by id), gak ada di list - JSON-encoded string, JSON.parse dulu kalau dipakai.
     lines?: string | ReceiptLineItem[];

@@ -146,7 +146,7 @@ export default function Manage() {
                 />
                 <div className="flex flex-col py-2">
                     <span className="font-medium text-gray-900">
-                        {row.created_by || '-'}
+                        {row.created_by || row.created_by_netsuite || '-'}
                     </span>
                     <span className="text-xs text-gray-500">
                         {row.created_at ? formatDateTime(row.created_at) : '-'}
