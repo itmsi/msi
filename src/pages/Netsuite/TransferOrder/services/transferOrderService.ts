@@ -5,6 +5,8 @@ import {
     TransferOrderDetailResponse,
     TransferOrderCreateRequest,
     TransferOrderUpdateRequest,
+    TransferOrderExportRequest,
+    TransferOrderExportResponse,
     AttachFileItem,
 } from '../types/transferOrder';
 
@@ -72,6 +74,14 @@ export class TransferOrderService {
         return response.data;
     }
 
+    static async exportTransferOrders(payload: TransferOrderExportRequest): Promise<TransferOrderExportResponse> {
+        const response = await apiPost<TransferOrderExportResponse>(
+            `${API_BASE_URL}/netsuite/transfer-orders/export`,
+            payload
+        );
+        return response.data;
+    }
+
     static async syncTransferOrderById(id: string): Promise<{ success: boolean; message: string; data?: any }> {
         const response = await apiPost<{ success: boolean; message: string; data?: any }>(
             `${API_BASE_URL}/netsuite/transfer-orders/sync/${id}`
@@ -79,7 +89,6 @@ export class TransferOrderService {
         return response.data;
     }
 
-    // Staging upload (mirrors PurchaseOrder's attachFilePO) — used before the TO has a real netsuite_id (Create mode)
     static async attachFileTO(payload: { file: File; file_name: string; netsuite_id: string }): Promise<TOAttachmentResponse> {
         const fd = new FormData();
         fd.append('file', payload.file);
@@ -89,7 +98,6 @@ export class TransferOrderService {
         return response.data;
     }
 
-    // Generic attachment endpoint (mirrors PurchaseOrder detail attachments), type = 'transfer_order'
     static async attachFileDetailTO(payload: { file: File; file_name: string; created_by_api?: string; to_id: string }): Promise<TOAttachmentResponse> {
         const fd = new FormData();
         fd.append('file', payload.file);

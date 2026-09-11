@@ -1154,3 +1154,6 @@ p {
 .ai-generate-btn:hover:not(:disabled) svg {
     transform: rotate(20deg) scale(1.15);
 }
+.rdrMonthAndYearPickers {
+    font-family: var(--font-secondary);
+}

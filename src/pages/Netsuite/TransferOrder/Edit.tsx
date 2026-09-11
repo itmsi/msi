@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { MdOutlineSync, MdInventory2, MdReceiptLong, MdOutlineAttachFile } from 'react-icons/md';
 import { TableColumn } from 'react-data-table-component';
 import { PermissionGate } from '@/components/common/PermissionComponents';
@@ -32,6 +32,7 @@ const formatQty = (value: number | string) =>
 
 export default function Edit() {
     const { id } = useParams<{ id: string }>();
+    const location = useLocation();
     const profileSSO = getProfile() as any;
     const profileSSOId = profileSSO?.classes_id_netsuite || null;
     const [activeTab, setActiveTab] = useState<'items' | 'files' | 'fulfillmentreceipt'>('items');
@@ -260,7 +261,7 @@ export default function Edit() {
         {
             name: 'Item',
             selector: row => row.item_displayname || row.item_name || '-',
-            cell:row => (
+            cell: row => (
                 <div className="items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">{row.item_displayname || 'N/A'}</div>
                     <div className="block text-sm text-gray-500">{row.item_name || '-'}</div>
@@ -416,7 +417,7 @@ export default function Edit() {
                     {/* Header */}
                     <PageHeader
                         title={isReadOnly ? 'View Transfer Order' : 'Edit Transfer Order'}
-                        backPath="/netsuite/transfer-orders"
+                        backPath={`/netsuite/transfer-orders${location.search}`}
                         subtitle={tranid || '-'}
                         actions={<>
                             {(Boolean(toInternalId) && statusName !== 'PROCESSING') && (
