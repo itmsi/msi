@@ -75,6 +75,7 @@ export interface FulfillmentItem {
     source_type_display?: string | null;
     postingperiod: string;
     last_modified: string;
+    created_by_name: string;
     created_by_netsuite: string;
     custbody_me_wf_created_by?: string;
     custbody_me_approval_status?: string;
