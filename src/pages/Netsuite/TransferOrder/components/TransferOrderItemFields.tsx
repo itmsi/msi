@@ -124,6 +124,25 @@ export default function TransferOrderItemFields({
     const [selectedNewItem, setSelectedNewItem] = useState<any>(null);
     const [showPasteModal, setShowPasteModal] = useState(false);
 
+    // Format label item menjadi "itemId - displayName"
+    const formatItemOption = useCallback((opt: any) => {
+        if (!opt) return opt;
+        const itemId = opt?.data?.itemId ?? opt?.itemId;
+        const displayName = opt?.data?.displayName ?? opt?.displayName ?? '';
+        if (!itemId) return opt;
+        return { ...opt, label: displayName ? `${itemId} - ${displayName}` : String(itemId) };
+    }, []);
+
+    const formattedItemOptions = useMemo(
+        () => (itemOptions || []).map(formatItemOption),
+        [itemOptions, formatItemOption]
+    );
+
+    const loadFormattedItemOptions = useCallback(async (val: string) => {
+        const opts = await onItemInputChange(val);
+        return (opts || []).map(formatItemOption);
+    }, [onItemInputChange, formatItemOption]);
+
     const BATCH_SIZE = 50;
     const [displayCount, setDisplayCount] = useState(BATCH_SIZE);
     const hasMoreItems = displayCount < (formData.items?.length || 0);
@@ -412,8 +431,8 @@ export default function TransferOrderItemFields({
                             disabled={requiredClassificationMissing}
                             value={selectedNewItem}
                             onChange={(opt) => setSelectedNewItem(opt)}
-                            defaultOptions={itemOptions}
-                            loadOptions={onItemInputChange}
+                            defaultOptions={formattedItemOptions}
+                            loadOptions={loadFormattedItemOptions}
                             onMenuScrollToBottom={onItemMenuScrollToBottom}
                             isLoading={itemPagination.loading}
                             noOptionsMessage={() => "No items found"}
