@@ -1,31 +1,80 @@
 import { useState, useEffect, useCallback } from 'react';
-import { TransferOrderListItem, TransferOrderRequest, SyncInfo } from '../types/transferOrder';
+import { TransferOrderListItem, TransferOrderRequest, SyncInfo, Pagination } from '../types/transferOrder';
 import toast from 'react-hot-toast';
 import { TransferOrderService } from '../services/transferOrderService';
 import { NetSuiteSyncService } from '../../Sync/services/netSuiteSyncService';
+import { useLocation, useSearchParams } from 'react-router';
+import { ApiError } from '@/helpers/apiHelper';
+
+type FilterState = {
+    search: string;
+    sort_order: 'asc' | 'desc';
+    from_location_id: string;
+    to_location_id: string;
+    status_name: string;
+    start_date: string;
+    end_date: string;
+};
+
+const EMPTY_FILTERS: FilterState = {
+    search: '',
+    sort_order: 'desc',
+    from_location_id: '',
+    to_location_id: '',
+    status_name: '',
+    start_date: '',
+    end_date: '',
+};
+
+// Nilai kosong tidak ikut dikirim ke API
+const buildActiveFilters = (filters: FilterState): Partial<TransferOrderRequest> => {
+    const entries = Object.entries(filters).filter(([, value]) => value !== '' && value !== null && value !== undefined);
+    return Object.fromEntries(entries) as Partial<TransferOrderRequest>;
+};
 
 export const useTransferOrder = (profileSSO?: number) => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const location = useLocation();
     const [searchValue, setSearchValue] = useState('');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-    // Advanced filters
-    const [filterLocation, setFilterLocation] = useState<string>('');
-    const [filterTransferLocation, setFilterTransferLocation] = useState<string>('');
-    const [filterStatus, setFilterStatus] = useState<string>('');
-    const [filterStartDate, setFilterStartDate] = useState<string>('');
-    const [filterEndDate, setFilterEndDate] = useState<string>('');
+    const urlPage = Math.max(Number(searchParams.get('page')) || 1, 1);
+    const urlLimit = Math.max(Number(searchParams.get('limit')) || 10, 1);
 
+    const urlFilters: FilterState = {
+        search: searchParams.get('search') || '',
+        sort_order: (searchParams.get('sort_order') as FilterState['sort_order']) || 'desc',
+        from_location_id: searchParams.get('from_location_id') || '',
+        to_location_id: searchParams.get('to_location_id') || '',
+        status_name: searchParams.get('status_name') || '',
+        start_date: searchParams.get('start_date') || '',
+        end_date: searchParams.get('end_date') || '',
+    };
+
+    const [transferOrders, setTransferOrders] = useState<TransferOrderListItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [transferOrders, setTransferOrders] = useState<TransferOrderListItem[]>([]);
     const [syncInfo, setSyncInfo] = useState<SyncInfo | null>(null);
 
-    const [pagination, setPagination] = useState({
-        page: 1,
-        page_size: 10,
-        total_records: 0,
-        total_pages: 0,
+    const [pagination, setPagination] = useState<Pagination>({
+        page: urlPage,
+        limit: urlLimit,
+        total: 0,
+        totalPages: 0,
     });
+
+    const updateUrlParams = useCallback((currentFilters: FilterState, page: number, limit: number) => {
+        const params = new URLSearchParams();
+        if (page > 1) params.set('page', String(page));
+        if (limit !== 10) params.set('limit', String(limit));
+
+        Object.entries(currentFilters).forEach(([key, value]) => {
+            if (value && value !== 'desc') { // Jangan masukkan nilai kosong atau default sort
+                params.set(key, value);
+            }
+        });
+
+        setSearchParams(params);
+    }, [setSearchParams]);
 
     const fetchTransferOrders = useCallback(async (overrides?: Partial<TransferOrderRequest>) => {
         try {
@@ -33,141 +82,81 @@ export const useTransferOrder = (profileSSO?: number) => {
             setError(null);
 
             const requestBody: TransferOrderRequest = {
-                page: overrides?.page ?? pagination.page,
-                limit: overrides?.limit ?? pagination.page_size,
+                page: urlPage,
+                limit: urlLimit,
                 sort_by: 'created_at',
-                sort_order: overrides?.sort_order ?? sortOrder,
-                ...(overrides?.search !== undefined
-                    ? (overrides.search ? { search: overrides.search } : {})
-                    : (searchValue ? { search: searchValue } : {})),
-                ...(overrides?.location !== undefined
-                    ? (overrides.location ? { from_location_id: overrides.location } : {})
-                    : (filterLocation ? { from_location_id: filterLocation } : {})),
-                ...(overrides?.transferlocation !== undefined
-                    ? (overrides.transferlocation ? { to_location_id: overrides.transferlocation } : {})
-                    : (filterTransferLocation ? { to_location_id: filterTransferLocation } : {})),
-                ...(overrides?.status_name !== undefined
-                    ? (overrides.status_name ? { status_name: overrides.status_name } : {})
-                    : (filterStatus ? { status_name: filterStatus } : {})),
-                ...(overrides?.start_date !== undefined
-                    ? (overrides.start_date ? { start_date: overrides.start_date } : {})
-                    : (filterStartDate ? { start_date: filterStartDate } : {})),
-                ...(overrides?.end_date !== undefined
-                    ? (overrides.end_date ? { end_date: overrides.end_date } : {})
-                    : (filterEndDate ? { end_date: filterEndDate } : {})),
                 ...(profileSSO !== undefined ? { classes: profileSSO } : {}),
+                ...buildActiveFilters(urlFilters),
+                ...overrides,
             };
 
             const response = await TransferOrderService.getTransferOrders(requestBody);
 
-            setTransferOrders(response.data.items || []);
-            setPagination({
-                page: response.data.pagination.page || 1,
-                page_size: response.data.pagination.limit || 10,
-                total_records: response.data.pagination.total || 0,
-                total_pages: response.data.pagination.totalPages || 0,
+            setTransferOrders(response.data?.items || []);
+            setPagination(response.data?.pagination || {
+                page: urlPage,
+                limit: urlLimit,
+                total: 0,
+                totalPages: 0,
             });
-            if (response.sync_info) {
-                setSyncInfo(response.sync_info);
-            }
-        } catch (err: any) {
-            setError(err?.message || 'Failed to fetch transfer orders data');
+            setSyncInfo(response.sync_info || null);
+        } catch (err) {
+            const apiError = err as ApiError;
+            setError(apiError?.message || 'Failed to fetch transfer orders data');
             console.error('Error fetching transfer orders data:', err);
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, filterLocation, filterTransferLocation, filterStatus, filterStartDate, filterEndDate, pagination.page, pagination.page_size, profileSSO]);
+    }, [urlFilters, urlLimit, urlPage]);
+
+    const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
+        const updatedFilters = { ...urlFilters, ...newFilters };
+        updateUrlParams(updatedFilters, 1, urlLimit); // Reset ke page 1 tiap filter berubah
+    }, [urlFilters, urlLimit, updateUrlParams]);
 
     const handlePageChange = useCallback((page: number) => {
-        setPagination(prev => ({ ...prev, page }));
-        fetchTransferOrders({ page });
-    }, [fetchTransferOrders]);
+        updateUrlParams(urlFilters, page, urlLimit);
+    }, [urlFilters, urlLimit, updateUrlParams]);
 
     const handleRowsPerPageChange = useCallback((limit: number, page: number) => {
-        setPagination(prev => ({ ...prev, page_size: limit, page }));
-        fetchTransferOrders({ limit, page });
-    }, [fetchTransferOrders]);
-
-    const handleSearch = useCallback((searchQuery: string) => {
-        setPagination(prev => ({ ...prev, page: 1 }));
-        fetchTransferOrders({ search: searchQuery, page: 1 });
-    }, [fetchTransferOrders]);
-
-    const handleFilterChange = useCallback((filterType: string, value: string) => {
-        if (filterType === 'sort_order') {
-            setSortOrder(value as 'asc' | 'desc');
-        } else if (filterType === 'location') {
-            setFilterLocation(value);
-        } else if (filterType === 'transferlocation') {
-            setFilterTransferLocation(value);
-        } else if (filterType === 'status_name') {
-            setFilterStatus(value);
-        }
-
-        setPagination(prev => ({ ...prev, page: 1 }));
-
-        const override: Partial<TransferOrderRequest> = { page: 1 };
-        if (filterType === 'sort_order') override.sort_order = value as 'asc' | 'desc';
-        else if (filterType === 'location') override.location = value;
-        else if (filterType === 'transferlocation') override.transferlocation = value;
-        else if (filterType === 'status_name') override.status_name = value;
-
-        fetchTransferOrders(override);
-    }, [fetchTransferOrders]);
+        updateUrlParams(urlFilters, page, limit);
+    }, [urlFilters, updateUrlParams]);
 
     const handleDateRangeChange = useCallback((startDate: string, endDate: string) => {
-        setFilterStartDate(startDate);
-        setFilterEndDate(endDate);
-        setPagination(prev => ({ ...prev, page: 1 }));
-        fetchTransferOrders({ page: 1, start_date: startDate, end_date: endDate });
-    }, [fetchTransferOrders]);
-
-    // Initial load
-    useEffect(() => {
-        fetchTransferOrders();
-    }, []);
+        handleFilterChange({ start_date: startDate, end_date: endDate });
+    }, [handleFilterChange]);
 
     const executeSearch = useCallback(() => {
-        handleSearch(searchValue);
-    }, [handleSearch, searchValue]);
+        handleFilterChange({ search: searchValue });
+    }, [handleFilterChange, searchValue]);
 
     const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            executeSearch();
-        }
+        if (e.key === 'Enter') executeSearch();
     }, [executeSearch]);
 
     const handleClearSearch = useCallback(() => {
         setSearchValue('');
-        handleSearch('');
-    }, [handleSearch]);
+        handleFilterChange({ search: '' });
+    }, [handleFilterChange]);
 
     const handleClearAllFilters = useCallback(() => {
         setSearchValue('');
-        setFilterLocation('');
-        setFilterTransferLocation('');
-        setFilterStatus('');
-        setFilterStartDate('');
-        setFilterEndDate('');
-        setSortOrder('desc');
-        setPagination(prev => ({ ...prev, page: 1 }));
-        fetchTransferOrders({
-            page: 1,
-            sort_order: 'desc',
-            search: '',
-            location: '',
-            transferlocation: '',
-            status_name: '',
-            start_date: '',
-            end_date: '',
-        });
-    }, [fetchTransferOrders]);
+        updateUrlParams(EMPTY_FILTERS, 1, urlLimit);
+    }, [updateUrlParams, urlLimit]);
+
+    useEffect(() => {
+        fetchTransferOrders();
+
+        // Memastikan input text search ter-reset jika user memencet tombol Back
+        setSearchValue(urlFilters.search);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location.search]);
 
     const activeFilterCount = [
-        filterLocation,
-        filterTransferLocation,
-        filterStatus,
-    ].filter(Boolean).length + (filterStartDate && filterEndDate ? 1 : 0);
+        urlFilters.from_location_id,
+        urlFilters.to_location_id,
+        urlFilters.status_name,
+    ].filter(Boolean).length + (urlFilters.start_date && urlFilters.end_date ? 1 : 0);
 
     const [isSyncing, setIsSyncing] = useState(false);
 
@@ -179,8 +168,9 @@ export const useTransferOrder = (profileSSO?: number) => {
             await NetSuiteSyncService.sync('transfer_orders');
             toast.success('Sinkronisasi berhasil', { id: toastId });
             fetchTransferOrders({ page: 1 });
-        } catch (err: any) {
-            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } catch (err) {
+            const apiError = err as ApiError;
+            toast.error(apiError?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
         } finally {
             setIsSyncing(false);
         }
@@ -194,26 +184,22 @@ export const useTransferOrder = (profileSSO?: number) => {
         try {
             await TransferOrderService.syncTransferOrderById(String(row.netsuite_id || row.id));
             toast.success('Sinkronisasi berhasil', { id: toastId });
-            fetchTransferOrders({ page: pagination.page, limit: pagination.page_size });
-        } catch (err: any) {
-            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+            fetchTransferOrders({ page: urlPage, limit: urlLimit });
+        } catch (err) {
+            const apiError = err as ApiError;
+            toast.error(apiError?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
         } finally {
             setIsSyncing(false);
         }
-    }, [isSyncing, fetchTransferOrders, pagination.page, pagination.page_size]);
+    }, [isSyncing, fetchTransferOrders, urlPage, urlLimit]);
 
     return {
         transferOrders,
+        filters: urlFilters,
         loading,
         error,
         pagination,
         searchValue,
-        sortOrder,
-        filterLocation,
-        filterTransferLocation,
-        filterStatus,
-        filterStartDate,
-        filterEndDate,
         activeFilterCount,
         setSearchValue,
         fetchTransferOrders,
@@ -221,7 +207,6 @@ export const useTransferOrder = (profileSSO?: number) => {
         handleRowsPerPageChange,
         handleFilterChange,
         handleDateRangeChange,
-        handleSearch,
         executeSearch,
         handleKeyPress,
         handleClearSearch,

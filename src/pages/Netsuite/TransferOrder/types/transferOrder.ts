@@ -18,13 +18,34 @@ export interface TransferOrderRequest {
     sort_by?: string;
     sort_order?: string;
     search?: string;
-    location?: number | string;
-    transferlocation?: number | string;
+    from_location_id?: number | string;
+    to_location_id?: number | string;
     status_name?: string;
     status_code?: string;
-    start_date?: string;
-    end_date?: string;
+    start_date?: string | null;
+    end_date?: string | null;
     classes?: number;
+}
+
+// ─── EXPORT EXCEL ──────────────────────────────────────────────────
+// Dibuat sebagai type alias supaya bisa langsung dikirim ke apiPost tanpa cast
+export type TransferOrderExportRequest = {
+    page: null;
+    limit: null;
+    start_date: string;
+    end_date: string;
+    include_child: boolean;
+    status_name?: string;
+}
+
+export interface TransferOrderExportResponse {
+    success: boolean;
+    message: string;
+    data: {
+        file_url: string;
+        file_name?: string;
+        expires_at?: string;
+    };
 }
 
 export interface TransferOrderListItem {
