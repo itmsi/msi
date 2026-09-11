@@ -1136,7 +1136,6 @@ export const routes: TAppRoute[] = [
         name: 'Inventory Adjustment Netsuite',
         isProtected: true,
         roles: ['Inventory Adjustment Netsuite'],
-        requiredPermissions: ['update', 'read'],
         component: ManageInventoryAdjustment,
         layout: AppLayout,
     },
