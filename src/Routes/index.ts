@@ -130,6 +130,9 @@ const ManageReceive = lazy(() => import('@/pages/Netsuite/Receipts/Manage'));
 const ViewReceive = lazy(() => import('@/pages/Netsuite/Receipts/View'));
 const ManageFulfillment = lazy(() => import('@/pages/Netsuite/Fulfillment/Manage'));
 const ViewFulfillment = lazy(() => import('@/pages/Netsuite/Fulfillment/View'));
+const ManageInventoryAdjustment = lazy(() => import('@/pages/Netsuite/InventoryAdjustment/Manage'));
+const ViewInventoryAdjustment = lazy(() => import('@/pages/Netsuite/InventoryAdjustment/View'));
+const CreateInventoryAdjustment = lazy(() => import('@/pages/Netsuite/InventoryAdjustment/Create'));
 const ManageSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Manage'));
 const ManageBillPayment = lazy(() => import('@/pages/Netsuite/BillPayment/Manage'));
 const ViewBillPayment = lazy(() => import('@/pages/Netsuite/BillPayment/View'));
@@ -1126,6 +1129,32 @@ export const routes: TAppRoute[] = [
         roles: ['Fulfillment Netsuite'],
         requiredPermissions: ['read'],
         component: ViewFulfillment,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/inventory-adjustments',
+        name: 'Inventory Adjustment Netsuite',
+        isProtected: true,
+        roles: ['Inventory Adjustment Netsuite'],
+        component: ManageInventoryAdjustment,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/inventory-adjustments/view/:id',
+        name: 'Inventory Adjustment Netsuite',
+        isProtected: true,
+        roles: ['Inventory Adjustment Netsuite'],
+        requiredPermissions: ['read'],
+        component: ViewInventoryAdjustment,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/inventory-adjustments/create',
+        name: 'Inventory Adjustment Netsuite',
+        isProtected: true,
+        roles: ['Inventory Adjustment Netsuite'],
+        requiredPermissions: ['create'],
+        component: CreateInventoryAdjustment,
         layout: AppLayout,
     },
     {

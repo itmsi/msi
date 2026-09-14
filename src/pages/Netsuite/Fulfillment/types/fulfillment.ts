@@ -19,6 +19,8 @@ export interface FulfillmentRequest {
     sort_order: string;
     search: string;
     status?: string;
+    // vendor_return | transfer_order | sales_order, sama dengan field source_type di response
+    source_type?: string;
     entity_id?: string;
     location?: string;
     classes?: number;
