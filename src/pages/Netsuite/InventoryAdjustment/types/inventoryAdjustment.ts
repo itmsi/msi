@@ -165,6 +165,8 @@ export interface CreateInventoryAdjustmentRequest {
     department: number;
     class: number;
     adjlocation: number;
+    trandate?: string;
+    postingperiod?: number;
     memo?: string;
     customer?: number;
     created_by?: string;
@@ -172,6 +174,7 @@ export interface CreateInventoryAdjustmentRequest {
     custbody_me_inv_customer?: number;
     custbody_me_purchase_order_number?: number | string;
     custbody_msi_cycle_count_cumber?: string;
+    custbody_me_opening_balance?: boolean;
     lines: CreateInventoryAdjustmentLine[];
 }
 
@@ -215,6 +218,8 @@ export interface InventoryAdjustmentFormData {
     department_name: string;
     class: number | null;
     class_name: string;
+    trandate: string;
+    postingperiod: number | null;
     memo: string;
     customer: number | null;
     customer_name: string;
@@ -222,5 +227,6 @@ export interface InventoryAdjustmentFormData {
     custbody_me_inv_customer: number | null;
     custbody_me_purchase_order_number: string;
     custbody_msi_cycle_count_cumber: string;
+    custbody_me_opening_balance: boolean;
     lines: InventoryAdjustmentFormLine[];
 }
