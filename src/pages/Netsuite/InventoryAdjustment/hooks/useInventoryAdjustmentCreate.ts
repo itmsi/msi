@@ -1,21 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { getProfile } from '@/helpers/generalHelper';
 import { InventoryAdjustmentService } from '../services/inventoryAdjustmentService';
 import { InventoryAdjustmentFormData, InventoryAdjustmentFormLine, CreateInventoryAdjustmentRequest } from '../types/inventoryAdjustment';
+import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
+import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
 
 const buildDefaultForm = (): InventoryAdjustmentFormData => ({
-    customform: null,
+    customform: 112, // Custom Form Inventory Adjustment — fix di NetSuite
     subsidiary: null,
     subsidiary_name: '',
-    account: null,
+    account: 128, // default & satu-satunya pilihan saat ini: Inventory Asset
     adjlocation: null,
     adjlocation_name: '',
     department: null,
     department_name: '',
     class: null,
     class_name: '',
+    trandate: '',
+    postingperiod: null,
     memo: '',
     customer: null,
     customer_name: '',
@@ -23,6 +27,7 @@ const buildDefaultForm = (): InventoryAdjustmentFormData => ({
     custbody_me_inv_customer: null,
     custbody_me_purchase_order_number: '',
     custbody_msi_cycle_count_cumber: '',
+    custbody_me_opening_balance: false,
     lines: [],
 });
 
@@ -33,6 +38,29 @@ export const useInventoryAdjustmentCreate = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [formData, setFormData] = useState<InventoryAdjustmentFormData>(buildDefaultForm());
+    const [masterData, setMasterData] = useState<MasterDataFormFieldItems | null>(null);
+    const [loadingMasterData, setLoadingMasterData] = useState(true);
+
+    useEffect(() => {
+        const loadMasterData = async () => {
+            try {
+                setLoadingMasterData(true);
+                const response = await PurchaseOrderService.getFieldComponentById();
+                if (response.data.success) {
+                    setMasterData(response.data.data);
+                } else {
+                    toast.error('Failed to load master data');
+                }
+            } catch (error) {
+                console.error('Error loading master data:', error);
+                toast.error('Error loading master data');
+            } finally {
+                setLoadingMasterData(false);
+            }
+        };
+
+        loadMasterData();
+    }, []);
 
     const clearError = (field: string) => {
         if (errors[field]) {
@@ -125,6 +153,8 @@ export const useInventoryAdjustmentCreate = () => {
                 department: Number(formData.department),
                 class: Number(formData.class),
                 adjlocation: Number(formData.adjlocation),
+                trandate: formData.trandate || undefined,
+                postingperiod: formData.postingperiod ?? undefined,
                 memo: formData.memo || undefined,
                 customer: formData.customer ?? undefined,
                 created_by: profileSSO?.user_id || undefined,
@@ -132,6 +162,7 @@ export const useInventoryAdjustmentCreate = () => {
                 custbody_me_inv_customer: formData.custbody_me_inv_customer ?? undefined,
                 custbody_me_purchase_order_number: formData.custbody_me_purchase_order_number || undefined,
                 custbody_msi_cycle_count_cumber: formData.custbody_msi_cycle_count_cumber || undefined,
+                custbody_me_opening_balance: formData.custbody_me_opening_balance || undefined,
                 lines: formData.lines.map(line => ({
                     item: Number(line.item),
                     location: Number(line.location),
@@ -172,6 +203,8 @@ export const useInventoryAdjustmentCreate = () => {
         isSubmitting,
         formData,
         errors,
+        masterData,
+        loadingMasterData,
         handleInputChange,
         handleSelectChange,
         handleAddLine,
