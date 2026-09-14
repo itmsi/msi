@@ -36,9 +36,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         handleInputChange: handleLocationInputChange,
         handleMenuScrollToBottom: handleLocationMenuScrollToBottom,
         initializeOptions: initializeLocationOptions,
+        getLocationById,
         initialized: locationInitialized,
         isLoading: locationLoading
-    } = usePOLocationSelect(30, false);
+    } = usePOLocationSelect(30);
 
     const [pickedLocation, setPickedLocation] = useState<SelectOption | null>(null);
     const [locationSelectError, setLocationSelectError] = useState<string>('');
@@ -49,6 +50,28 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             initializeLocationOptions();
         }
     }, [locationInitialized, locationLoading, initializeLocationOptions]);
+
+    useEffect(() => {
+        let active = true;
+
+        const loadSelectedLocation = async () => {
+            if (!filterLocation) {
+                setPickedLocation(null);
+                return;
+            }
+
+            const locationOption = await getLocationById(filterLocation);
+            if (active && locationOption) {
+                setPickedLocation(locationOption);
+            }
+        };
+
+        loadSelectedLocation();
+
+        return () => {
+            active = false;
+        };
+    }, [filterLocation, getLocationById]);
 
     const selectedLocation = useMemo(() => {
         if (!filterLocation) return null;

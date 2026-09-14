@@ -79,7 +79,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         handleInputChange: handleLocationInputChange,
         handleMenuScrollToBottom: handleLocationMenuScrollToBottom,
         initializeOptions: initializeLocationOptions,
-    } = usePOLocationSelect(30, false);
+    } = usePOLocationSelect(30);
 
     // To Location
     const {
