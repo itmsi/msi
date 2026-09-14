@@ -24,6 +24,8 @@ export default function Create() {
         isSubmitting,
         formData,
         errors,
+        masterData,
+        loadingMasterData,
         handleInputChange,
         handleSelectChange,
         handleAddLine,
@@ -157,6 +159,8 @@ export default function Create() {
                     <InventoryAdjustmentFormFields
                         formData={formData}
                         errors={errors}
+                        masterData={masterData}
+                        loadingMasterData={loadingMasterData}
                         onInputChange={handleInputChange}
                         onSelectChange={handleSelectChange}
 
