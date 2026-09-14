@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import Button from '@/components/ui/button/Button';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
+import { SelectOption } from '@/types/asyncSelect';
 
 interface FilterSectionProps {
     filterItemType?: string;
@@ -39,7 +40,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         isLoading: locationLoading
     } = usePOLocationSelect(30, false);
 
-    const [selectedLocation, setSelectedLocation] = useState<any>(null);
+    const [pickedLocation, setPickedLocation] = useState<SelectOption | null>(null);
     const [locationSelectError, setLocationSelectError] = useState<string>('');
 
     // Initialize hooks only once when not yet initialized
@@ -49,19 +50,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         }
     }, [locationInitialized, locationLoading, initializeLocationOptions]);
 
-    // Sync internal state with filter props
-    useEffect(() => {
-        if (filterLocation) {
-            const locationOption = POLocationOptions.find(opt => opt.value === filterLocation);
-            if (locationOption) {
-                if (!selectedLocation || selectedLocation.value !== filterLocation) {
-                    setSelectedLocation(locationOption);
-                }
-            }
-        } else if (!filterLocation && selectedLocation) {
-            setSelectedLocation(null);
-        }
-    }, [filterLocation, POLocationOptions]);
+    const selectedLocation = useMemo(() => {
+        if (!filterLocation) return null;
+        if (pickedLocation?.value === filterLocation) return pickedLocation;
+        return POLocationOptions.find(opt => opt.value === filterLocation) || null;
+    }, [filterLocation, pickedLocation, POLocationOptions]);
     return (
         <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -101,7 +94,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         onInputChange={handleLocationInputChange}
                         onChange={
                             (option) => {
-                                setSelectedLocation(option);
+                                setPickedLocation(option);
                                 onFilterChange('location', option?.value || '');
                                 if (locationSelectError) {
                                     setLocationSelectError('');
