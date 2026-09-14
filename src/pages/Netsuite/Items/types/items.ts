@@ -106,6 +106,7 @@ export type ItemRelationRequest = {
     sort_by?: string;
     sort_order?: 'asc' | 'desc' | '';
     netsuite_item_id: string;
+    location_id?: string;
     // Khusus serial numbers. Tidak dikirim sama sekali kalau filter status tidak dipilih
     is_used?: boolean;
 }
@@ -137,7 +138,7 @@ export interface ItemLocation {
 export interface ItemSerialNumber {
     id: string;
     item_id: string;
-    inventorylocationId: string;
+    location_name: string;
     serial_number: string;
     is_used: boolean;
     created_at?: string;

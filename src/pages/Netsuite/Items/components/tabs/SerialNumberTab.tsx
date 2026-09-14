@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 // import { MdClear, MdSearch } from 'react-icons/md';
 // import Input from '@/components/form/input/InputField';
@@ -6,6 +6,9 @@ import CustomDataTable from '@/components/ui/table';
 import { useItemSerialNumbers } from '../../hooks/useItemRelation';
 import { ItemSerialNumber } from '../../types/items';
 import CustomSelect from '@/components/form/select/CustomSelect';
+import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
+import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
+import { SelectOption } from '@/types/asyncSelect';
 
 interface SerialNumberTabProps {
     netsuiteItemId?: string;
@@ -28,13 +31,32 @@ const SerialNumberTab: React.FC<SerialNumberTabProps> = ({ netsuiteItemId }) => 
 
     const statusOptions = [
         { value: '', label: 'All Status' },
-        { value: 'true', label: 'Active' },
-        { value: 'false', label: 'Inactive' }
+        { value: 'true', label: 'Used' },
+        { value: 'false', label: 'Not Used' }
     ];
 
     // Status hanya state tampilan. Yang dikirim ke API adalah is_used (boolean),
     // dan saat "All Status" key-nya tidak ikut dikirim sama sekali
     const [status, setStatus] = useState('');
+    const {
+        POLocationOptions,
+        pagination: locationPagination,
+        inputValue: locationInputValue,
+        handleInputChange: handleLocationInputChange,
+        handleMenuScrollToBottom: handleLocationMenuScrollToBottom,
+        initializeOptions: initializeLocationOptions,
+        initialized: locationInitialized,
+        isLoading: locationLoading
+    } = usePOLocationSelect(30);
+    const [pickedLocation, setPickedLocation] = useState<SelectOption | null>(null);
+
+    useEffect(() => {
+        if (!locationInitialized && !locationLoading) {
+            initializeLocationOptions();
+        }
+    }, [locationInitialized, locationLoading, initializeLocationOptions]);
+
+    const selectedLocation = useMemo(() => pickedLocation, [pickedLocation]);
 
     const handleStatusChange = (value: string) => {
         setStatus(value);
@@ -55,7 +77,7 @@ const SerialNumberTab: React.FC<SerialNumberTabProps> = ({ netsuiteItemId }) => 
         },
         {
             name: 'Location ID',
-            selector: row => row.inventorylocationId || '-',
+            selector: row => row.location_name || '-',
             center: true,
             width: '160px'
         },
@@ -67,7 +89,7 @@ const SerialNumberTab: React.FC<SerialNumberTabProps> = ({ netsuiteItemId }) => 
                     ? 'bg-green-50 text-green-700 border-green-200'
                     : 'bg-gray-50 text-gray-600 border-gray-200'
                     }`}>
-                    {row.is_used ? 'Available' : 'Not Available'}
+                    {row.is_used ? 'Used' : 'Not Used'}
                 </span>
             ),
             center: true,
@@ -102,7 +124,7 @@ const SerialNumberTab: React.FC<SerialNumberTabProps> = ({ netsuiteItemId }) => 
             </div> */}
 
             {/* Status Filter */}
-            <div className="w-80 flex-none mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 space-y-4">
                 <CustomSelect
                     id="item_status"
                     name="item_status"
@@ -113,6 +135,27 @@ const SerialNumberTab: React.FC<SerialNumberTabProps> = ({ netsuiteItemId }) => 
                     isClearable={false}
                     isSearchable={false}
                     className="font-secondary"
+                />
+                <CustomAsyncSelect
+                    id="location"
+                    name="location"
+                    placeholder="All Locations"
+                    value={selectedLocation}
+                    defaultOptions={POLocationOptions}
+                    loadOptions={handleLocationInputChange}
+                    onMenuScrollToBottom={handleLocationMenuScrollToBottom}
+                    isLoading={locationPagination.loading}
+                    noOptionsMessage={() => "No locations found"}
+                    loadingMessage={() => "Loading locations..."}
+                    isSearchable={true}
+                    inputValue={locationInputValue}
+                    onInputChange={handleLocationInputChange}
+                    onChange={
+                        (option) => {
+                            setPickedLocation(option);
+                            handleFilterChange({ location_id: option?.value || undefined });
+                        }
+                    }
                 />
             </div>
             {error && (

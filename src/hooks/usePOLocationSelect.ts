@@ -26,14 +26,14 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
     const [isLoading, setIsLoading] = useState(false);
 
     const loadPOLocationOptions = useCallback(async (
-        inputValue: string = '', 
+        inputValue: string = '',
         loadedOptions: POLocationSelectOption[] = [],
         page: number = 1,
         reset: boolean = false
     ) => {
         // Prevent multiple simultaneous calls
         if (isLoading) return loadedOptions;
-        
+
         try {
             setIsLoading(true);
             setPagination(prev => ({ ...prev, loading: true }));
@@ -56,15 +56,15 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
 
                 const updatedOptions = reset ? newOptions : [...loadedOptions, ...newOptions];
                 setPOLocationOptions(updatedOptions);
-                
+
                 const hasMoreData = response.data.pagination.page < response.data.pagination.totalPages;
-                
+
                 setPagination({
                     page: response.data.pagination.page,
                     hasMore: hasMoreData,
                     loading: false
                 });
-                
+
                 if (reset) setInitialized(true);
 
                 return updatedOptions;
@@ -85,7 +85,7 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
         setInputValue(inputValue);
         setPOLocationOptions([]);
         setPagination({ page: 1, hasMore: true, loading: false });
-        
+
         return await loadPOLocationOptions(inputValue, [], 1, true);
     }, [loadPOLocationOptions]);
 
@@ -120,15 +120,37 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
         return null;
     }, []);
 
+    const getLocationById = useCallback(async (locationId: string): Promise<POLocationSelectOption | null> => {
+        if (!locationId) return null;
+
+        try {
+            const response = await PurchaseOrderService.getPOLocation({
+                search: locationId,
+                limit,
+                ...(subsidiary_id !== undefined ? { subsidiary_id } : {}),
+                ...(is_parent !== undefined ? { is_parent } : {})
+            });
+
+            const match = response.success
+                ? response.data.items.find((item: LocationItem) => String(item.id) === String(locationId))
+                : undefined;
+
+            return match ? { value: String(match.id), label: match.name, data: match } : null;
+        } catch (error) {
+            console.error('Error getting location by id:', error);
+            return null;
+        }
+    }, [limit, is_parent, subsidiary_id]);
+
     // Reset location options ketika subsidiary_id berubah
     const resetLocationOptions = useCallback(async () => {
         if (isLoading) return; // Prevent reset during loading
-        
+
         setPOLocationOptions([]);
         setInputValue('');
         setInitialized(false);
         setPagination({ page: 1, hasMore: true, loading: false });
-        
+
         if (subsidiary_id) {
             await loadPOLocationOptions('', [], 1, true);
         }
@@ -143,6 +165,7 @@ export const usePOLocationSelect = (limit: number = 30, is_parent?: boolean, sub
         initializeOptions,
         loadPOLocationOptions,
         getPOItemById,
+        getLocationById,
         resetLocationOptions,
         initialized, // Export initialized state
         isLoading, // Export loading state
