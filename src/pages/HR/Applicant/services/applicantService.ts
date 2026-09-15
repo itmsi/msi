@@ -6,6 +6,8 @@ import {
     ApplicantFormListResult,
     ApplicantFormUpdateRequest,
     ApplicantFormUpdateResponse,
+    ApplicantInvitationCreateRequest,
+    ApplicantInvitationCreateResponse,
 } from '../types/applicant';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -41,6 +43,11 @@ export class ApplicantService {
 
     static async getApplicantFormById(id: string): Promise<ApplicantFormDetailResponse> {
         const response = await apiGet<ApplicantFormDetailResponse>(`${API_BASE_URL}/career/applicant-forms/${id}`);
+        return response.data;
+    }
+
+    static async createApplicantInvitation(payload: ApplicantInvitationCreateRequest): Promise<ApplicantInvitationCreateResponse> {
+        const response = await apiPost<ApplicantInvitationCreateResponse>(`${API_BASE_URL}/career/applicant-invitations/create`, payload);
         return response.data;
     }
 

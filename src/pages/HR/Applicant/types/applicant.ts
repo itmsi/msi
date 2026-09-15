@@ -164,6 +164,19 @@ export type ApplicantFormUpdateRequest = ApplicantFormListSections & {
 
 export type ApplicantFormScalarField = Exclude<keyof ApplicantFormUpdateRequest, ApplicantListSection>;
 
+export type ApplicantInvitationCreateRequest = {
+    full_name: string;
+    email: string;
+    no_mobile: string;
+}
+
+export type ApplicantInvitationField = keyof ApplicantInvitationCreateRequest;
+
+export interface ApplicantInvitationCreateResponse {
+    success: boolean;
+    message: string;
+}
+
 export interface ApplicantFormUpdateResponse {
     success: boolean;
     message: string;

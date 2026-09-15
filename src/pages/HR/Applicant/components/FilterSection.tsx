@@ -9,6 +9,8 @@ import {
 import Input from '@/components/form/input/InputField';
 import Button from '@/components/ui/button/Button';
 import CustomSelect from '@/components/form/select/CustomSelect';
+import { useLanguage } from '@/components/lang/useLanguage';
+import { applicantManage } from '../language/applicantManage';
 
 export type ApplicantFilterField = 'sort_order' | 'is_completed';
 
@@ -31,17 +33,6 @@ interface FilterSectionProps {
     defaultOpen?: boolean;
 }
 
-const SORT_ORDER_OPTIONS = [
-    { value: 'desc', label: 'Terbaru' },
-    { value: 'asc', label: 'Terlama' },
-];
-
-const COMPLETED_OPTIONS = [
-    { value: '', label: 'Semua Status' },
-    { value: 'true', label: 'Selesai' },
-    { value: 'false', label: 'Belum Selesai' },
-];
-
 const FilterSection: React.FC<FilterSectionProps> = ({
     searchValue,
     onSearchChange,
@@ -50,10 +41,23 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     filters,
     onFilterChange,
     onClearFilters,
-    searchPlaceholder = 'Cari... (tekan Enter)',
+    searchPlaceholder,
     defaultOpen = false,
 }) => {
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(defaultOpen);
+    const { langField } = useLanguage(applicantManage);
+
+    const sortOrderOptions = [
+        { value: '', label: '' },
+        { value: 'desc', label: langField('newest') },
+        { value: 'asc', label: langField('oldest') },
+    ];
+
+    const completedOptions = [
+        { value: '', label: langField('allStatus') },
+        { value: 'true', label: langField('completed') },
+        { value: 'false', label: langField('notCompleted') },
+    ];
 
     return (
         <>
@@ -65,7 +69,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                             <Input
                                 id="search"
                                 type="text"
-                                placeholder={searchPlaceholder}
+                                placeholder={searchPlaceholder || langField('searchDefaultPlaceholder')}
                                 value={searchValue}
                                 onChange={(e) => onSearchChange(e.target.value)}
                                 onKeyPress={onSearchKeyPress}
@@ -88,10 +92,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     <CustomSelect
                         id="sort_order"
                         name="sort_order"
-                        value={SORT_ORDER_OPTIONS.find(option => option.value === filters.sort_order) || null}
+                        value={sortOrderOptions.find(option => option.value === filters.sort_order) || null}
                         onChange={(option) => onFilterChange('sort_order', option?.value || 'desc')}
-                        options={SORT_ORDER_OPTIONS}
-                        placeholder="Urutkan"
+                        options={sortOrderOptions}
+                        placeholder={langField('orderBy')}
                         isClearable={false}
                         isSearchable={false}
                         className="w-40"
@@ -105,7 +109,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         size="sm"
                     >
                         <MdFilterListAlt className="w-4 h-4 mr-2" />
-                        Filter
+                        {langField('filter')}
                         {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
                     </Button>
                 </div>
@@ -115,14 +119,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label htmlFor="is_completed" className="block text-sm font-medium text-gray-700 mb-1">Status Formulir</label>
+                            <label htmlFor="is_completed" className="block text-sm font-medium text-gray-700 mb-1">{langField('formStatus')}</label>
                             <CustomSelect
                                 id="is_completed"
                                 name="is_completed"
-                                value={COMPLETED_OPTIONS.find(option => option.value === filters.is_completed) || COMPLETED_OPTIONS[0]}
+                                value={completedOptions.find(option => option.value === filters.is_completed) || completedOptions[0]}
                                 onChange={(option) => onFilterChange('is_completed', option?.value || '')}
-                                options={COMPLETED_OPTIONS}
-                                placeholder="Semua Status"
+                                options={completedOptions}
+                                placeholder={langField('allStatus')}
                                 isClearable={false}
                                 isSearchable={false}
                             />
@@ -136,7 +140,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                             size="sm"
                         >
                             <MdClear className="w-4 h-4 mr-1" />
-                            Clear All
+                            {langField('clearAll')}
                         </Button>
                     </div>
                 </div>

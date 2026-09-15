@@ -13,8 +13,8 @@ export const getApplicantFormStatus = (
     return expiresAt.getTime() < now.getTime() ? 'expired' : 'pending';
 };
 
-export const APPLICANT_STATUS_DISPLAY: Record<ApplicantFormStatus, { label: string; className: string }> = {
-    completed: { label: 'Selesai', className: 'bg-green-50 text-green-700 border-green-200' },
-    pending: { label: 'Menunggu Pengisian', className: 'bg-amber-50 text-amber-700 border-amber-200' },
-    expired: { label: 'Kadaluarsa', className: 'bg-red-50 text-red-700 border-red-200' },
+export const APPLICANT_STATUS_DISPLAY: Record<ApplicantFormStatus, { labelKey: string; className: string }> = {
+    completed: { labelKey: 'statusCompleted', className: 'bg-green-50 text-green-700 border-green-200' },
+    pending: { labelKey: 'statusPending', className: 'bg-amber-50 text-amber-700 border-amber-200' },
+    expired: { labelKey: 'statusExpired', className: 'bg-red-50 text-red-700 border-red-200' },
 };

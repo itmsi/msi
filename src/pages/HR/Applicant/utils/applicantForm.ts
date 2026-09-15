@@ -1,5 +1,8 @@
 import moment from 'moment';
 import {
+    ApplicantAnswer,
+    ApplicantEducation,
+    ApplicantFamilyMember,
     ApplicantFormDetail,
     ApplicantFormListItem,
     ApplicantFormListSections,
@@ -74,11 +77,116 @@ const toSectionRows = <K extends ApplicantListSection>(section: K, value: unknow
         }, template)) as ApplicantFormListSections[K];
 };
 
-const toDateInputValue = (value: string | null): string => {
+const toRowsWithDefault = <K extends ApplicantListSection>(section: K, value: unknown): ApplicantFormListSections[K] => {
+    const rows = toSectionRows(section, value);
+    return (rows.length > 0 ? rows : [createEmptyRow[section]()]) as ApplicantFormListSections[K];
+};
+
+export const FOLLOWING_QUESTION_TEMPLATES = [
+    'Apakah Anda pernah terlibat dalam tindakan kriminal?',
+    'Apakah Anda pernah menggunakan atau mengonsumsi narkotika, psikotropika, atau zat terlarang lainnya?',
+    'Apakah Anda bersedia ditempatkan di lokasi kerja mana pun sesuai kebutuhan perusahaan?',
+];
+
+const toFollowingAnswerRows = (value: unknown): ApplicantAnswer[] => {
+    const rows = toSectionRows('following_answers', value);
+    return rows.length > 0 ? rows : FOLLOWING_QUESTION_TEMPLATES.map(question => ({ question, answers: '' }));
+};
+
+type LangField = (key: string) => string;
+
+interface TypeOption {
+    value: string;
+    labelKey: string;
+    nameKey: string;
+}
+
+export const EDUCATION_SCHOOL_TYPES: TypeOption[] = [
+    { value: 'university', labelKey: 'university', nameKey: 'universityName' },
+    { value: 'high_school', labelKey: 'highSchool', nameKey: 'highSchoolName' },
+    { value: 'junior_school', labelKey: 'juniorHighSchool', nameKey: 'juniorHighSchoolName' },
+    { value: 'elementary_school', labelKey: 'elementarySchool', nameKey: 'elementarySchoolName' },
+];
+
+export const FAMILY_RELATIONSHIPS: TypeOption[] = [
+    { value: 'ayah', labelKey: 'father', nameKey: 'fatherName' },
+    { value: 'ibu', labelKey: 'mother', nameKey: 'motherName' },
+    { value: 'suami/istri', labelKey: 'spouse', nameKey: 'spouseName' },
+    { value: 'anak ke-1', labelKey: 'firstChild', nameKey: 'firstChildName' },
+    { value: 'anak ke-2', labelKey: 'secondChild', nameKey: 'secondChildName' },
+    { value: 'anak ke-3', labelKey: 'thirdChild', nameKey: 'thirdChildName' },
+    { value: 'anak ke-4', labelKey: 'fourthChild', nameKey: 'fourthChildName' },
+];
+
+const normalizeType = (value: string): string => value.trim().toLowerCase();
+
+const findTypeOption = (options: TypeOption[], value: string) =>
+    options.find(option => normalizeType(option.value) === normalizeType(value));
+
+export const getSchoolTypeLabel = (type: string, langField: LangField): string => {
+    const option = findTypeOption(EDUCATION_SCHOOL_TYPES, type);
+    return option ? langField(option.labelKey) : type || '-';
+};
+
+export const getSchoolNameLabel = (type: string, langField: LangField): string => {
+    const option = findTypeOption(EDUCATION_SCHOOL_TYPES, type);
+    return langField(option ? option.nameKey : 'schoolName');
+};
+
+export const getFamilyRelationshipLabel = (relationship: string, langField: LangField): string => {
+    const option = findTypeOption(FAMILY_RELATIONSHIPS, relationship);
+    return option ? langField(option.labelKey) : relationship || '-';
+};
+
+export const getFamilyNameLabel = (relationship: string, langField: LangField): string => {
+    const option = findTypeOption(FAMILY_RELATIONSHIPS, relationship);
+    return langField(option ? option.nameKey : 'familyMemberName');
+};
+
+const orderRowsByType = <T extends object>(
+    rows: T[],
+    options: { value: string }[],
+    getType: (row: T) => string,
+    createRow: (type: string) => T
+): T[] => {
+    const isKnownType = (row: T) => options.some(option => normalizeType(option.value) === normalizeType(getType(row)));
+
+    const fixedRows = options.flatMap(({ value: type }) => {
+        const matches = rows.filter(row => normalizeType(getType(row)) === normalizeType(type));
+        return matches.length > 0 ? matches : [createRow(type)];
+    });
+
+    return [...fixedRows, ...rows.filter(row => !isKnownType(row))];
+};
+
+const toEducationRows = (value: unknown): ApplicantEducation[] =>
+    orderRowsByType(
+        toSectionRows('educational_background', value),
+        EDUCATION_SCHOOL_TYPES,
+        row => row.type_of_school,
+        type => ({ ...createEmptyRow.educational_background(), type_of_school: type })
+    );
+
+const toFamilyRows = (value: unknown): ApplicantFamilyMember[] =>
+    orderRowsByType(
+        toSectionRows('family_background', value),
+        FAMILY_RELATIONSHIPS,
+        row => row.relationship,
+        relationship => ({ ...createEmptyRow.family_background(), relationship })
+    );
+
+export const toDateInputValue = (value: string | null): string => {
     if (!value) return '';
-    const date = moment(value);
+    const date = moment(value, ['YYYY-MM-DD', moment.ISO_8601], true);
     return date.isValid() ? date.format('YYYY-MM-DD') : '';
 };
+
+export const parseApplicantDate = (value: string): Date | null => {
+    const dateValue = toDateInputValue(value);
+    return dateValue ? moment(dateValue, 'YYYY-MM-DD').toDate() : null;
+};
+
+export const toApplicantDateValue = (date: Date): string => moment(date).format('YYYY-MM-DD');
 
 export const createEmptyApplicantForm = (): ApplicantFormUpdateRequest => ({
     full_name: '',
@@ -128,12 +236,12 @@ export const toApplicantFormValues = (detail: ApplicantFormDetail): ApplicantFor
     relogion: detail.relogion || '',
     tshirt_size: detail.tshirt_size || '',
     driver_license: toSectionRows('driver_license', detail.driver_license),
-    educational_background: toSectionRows('educational_background', detail.educational_background),
-    informal_education_special_qualification: toSectionRows('informal_education_special_qualification', detail.informal_education_special_qualification),
-    family_background: toSectionRows('family_background', detail.family_background),
-    working_experiences: toSectionRows('working_experiences', detail.working_experiences),
-    references_old_company: toSectionRows('references_old_company', detail.references_old_company),
-    following_answers: toSectionRows('following_answers', detail.following_answers),
+    educational_background: toEducationRows(detail.educational_background),
+    informal_education_special_qualification: toRowsWithDefault('informal_education_special_qualification', detail.informal_education_special_qualification),
+    family_background: toFamilyRows(detail.family_background),
+    working_experiences: toRowsWithDefault('working_experiences', detail.working_experiences),
+    references_old_company: toRowsWithDefault('references_old_company', detail.references_old_company),
+    following_answers: toFollowingAnswerRows(detail.following_answers),
 });
 
 export const pickApplicantSummary = (detail: ApplicantFormDetail): ApplicantFormListItem => ({

@@ -2,8 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { ApiError } from '@/helpers/apiHelper';
+import { useLanguage } from '@/components/lang/useLanguage';
 import { ApplicantService } from '../services/applicantService';
 import { ApplicantFormListItem, Pagination } from '../types/applicant';
+import { applicantManage } from '../language/applicantManage';
 
 type CompletedFilter = '' | 'true' | 'false';
 
@@ -26,7 +28,14 @@ const parseCompletedFilter = (value: string | null): CompletedFilter => (
 export const useApplicant = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const location = useLocation();
+    const { langField } = useLanguage(applicantManage);
     const [searchValue, setSearchValue] = useState('');
+
+    const listQueryKey = (() => {
+        const params = new URLSearchParams(location.search);
+        params.delete('lang');
+        return params.toString();
+    })();
 
     const urlPage = Math.max(Number(searchParams.get('page')) || 1, 1);
     const urlLimit = Math.max(Number(searchParams.get('limit')) || 10, 1);
@@ -49,6 +58,8 @@ export const useApplicant = () => {
 
     const updateUrlParams = useCallback((currentFilters: FilterState, page: number, limit: number) => {
         const params = new URLSearchParams();
+        const langParam = searchParams.get('lang');
+        if (langParam) params.set('lang', langParam);
         if (page > 1) params.set('page', String(page));
         if (limit !== 10) params.set('limit', String(limit));
 
@@ -59,7 +70,7 @@ export const useApplicant = () => {
         });
 
         setSearchParams(params);
-    }, [setSearchParams]);
+    }, [searchParams, setSearchParams]);
 
     const fetchApplicants = useCallback(async () => {
         try {
@@ -76,7 +87,7 @@ export const useApplicant = () => {
 
             if (!result.success) {
                 setApplicants([]);
-                setError(result.message || 'Failed to fetch applicant data');
+                setError(result.message || langField('fetchFailed'));
                 return;
             }
 
@@ -85,12 +96,12 @@ export const useApplicant = () => {
         } catch (err) {
             const apiError = err as ApiError;
             setApplicants([]);
-            setError(apiError?.message || 'Failed to fetch applicant data');
+            setError(apiError?.message || langField('fetchFailed'));
             console.error('Error fetching applicant data:', err);
         } finally {
             setLoading(false);
         }
-    }, [urlFilters.search, urlFilters.sort_order, urlFilters.is_completed, urlPage, urlLimit]);
+    }, [urlFilters.search, urlFilters.sort_order, urlFilters.is_completed, urlPage, urlLimit, langField]);
 
     const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
         updateUrlParams({ ...urlFilters, ...newFilters }, 1, urlLimit);
@@ -120,23 +131,23 @@ export const useApplicant = () => {
 
     const handleCopyLink = useCallback(async (applicant: ApplicantFormListItem) => {
         if (!applicant.applicant_form_url) {
-            toast.error('Link formulir tidak tersedia');
+            toast.error(langField('linkNotAvailable'));
             return;
         }
 
         try {
             await navigator.clipboard.writeText(applicant.applicant_form_url);
-            toast.success('Link formulir disalin');
+            toast.success(langField('linkCopied'));
         } catch {
-            toast.error('Gagal menyalin link formulir');
+            toast.error(langField('linkCopyFailed'));
         }
-    }, []);
+    }, [langField]);
 
     useEffect(() => {
         fetchApplicants();
         setSearchValue(urlFilters.search);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location.search]);
+    }, [listQueryKey]);
 
     const activeFilterCount = [urlFilters.is_completed].filter(Boolean).length;
 

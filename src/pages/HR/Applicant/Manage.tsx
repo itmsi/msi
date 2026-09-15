@@ -1,11 +1,20 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { MdAdd } from 'react-icons/md';
 import PageMeta from '@/components/common/PageMeta';
 import PageHeaderManage from '@/components/common/PageHeaderManage';
+import { PermissionGate } from '@/components/common/PermissionComponents';
+import Button from '@/components/ui/button/Button';
+import { useLanguage } from '@/components/lang/useLanguage';
+import { applicantManage } from './language/applicantManage';
 import { useApplicant } from './hooks/useApplicant';
 import FilterSection, { ApplicantFilterField } from './components/FilterSection';
 import ApplicantTable from './components/ApplicantTable';
+import CreateApplicantModal from './components/CreateApplicantModal';
 
 export default function Manage() {
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const { langField } = useLanguage(applicantManage);
+
     const {
         applicants,
         filters,
@@ -22,6 +31,7 @@ export default function Manage() {
         handleClearSearch,
         handleClearFilters,
         handleCopyLink,
+        fetchApplicants,
     } = useApplicant();
 
     const handleFilterFieldChange = useCallback((field: ApplicantFilterField, value: string) => {
@@ -41,19 +51,35 @@ export default function Manage() {
                 image="/motor-sights-international.png"
             />
 
-            <div className="space-y-6">
+            <div className="space-y-3">
                 <PageHeaderManage
-                    title="Formulir Pelamar"
-                    subtitle="Pantau formulir pelamar yang masuk sebelum membuka detailnya"
+                    title={langField('applicantForms')}
+                    subtitle={langField('applicantFormsDescription')}
+                    actions={[
+                        {
+                            key: 'create',
+                            element: (
+                                <PermissionGate permission="create">
+                                    <Button
+                                        onClick={() => setShowCreateModal(true)}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <MdAdd size={20} />
+                                        <span>{langField('inviteApplicant')}</span>
+                                    </Button>
+                                </PermissionGate>
+                            ),
+                        },
+                    ]}
                 />
 
-                <div className="bg-white shadow rounded-lg px-6 py-4 mt-3">
+                <div className="bg-white shadow rounded-lg px-6 py-4">
                     <FilterSection
                         searchValue={searchValue}
                         onSearchChange={setSearchValue}
                         onSearchKeyPress={handleKeyPress}
                         onClearSearch={handleClearSearch}
-                        searchPlaceholder="Cari nama, email, posisi, atau kota... (tekan Enter)"
+                        searchPlaceholder={langField('searchPlaceholder')}
                         filters={filters}
                         onFilterChange={handleFilterFieldChange}
                         onClearFilters={handleClearFilters}
@@ -80,6 +106,12 @@ export default function Manage() {
                     </div>
                 </div>
             </div>
+
+            <CreateApplicantModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                onSuccess={fetchApplicants}
+            />
         </>
     );
 }

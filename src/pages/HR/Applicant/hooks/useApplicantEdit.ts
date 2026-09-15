@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { ApiError } from '@/helpers/apiHelper';
+import { useLanguage } from '@/components/lang/useLanguage';
 import { ApplicantService } from '../services/applicantService';
+import { applicantLabels } from '../language/applicantLabels';
 import {
     ApplicantFormListItem,
     ApplicantFormListSections,
@@ -21,6 +23,7 @@ export type ApplicantFormErrors = Partial<Record<ApplicantFormScalarField, strin
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const useApplicantEdit = (id?: string) => {
+    const { langField } = useLanguage(applicantLabels);
     const [summary, setSummary] = useState<ApplicantFormListItem | null>(null);
     const [formData, setFormData] = useState<ApplicantFormUpdateRequest>(createEmptyApplicantForm);
     const [errors, setErrors] = useState<ApplicantFormErrors>({});
@@ -39,7 +42,7 @@ export const useApplicantEdit = (id?: string) => {
 
             if (!response?.success || !response?.data) {
                 setSummary(null);
-                setError(response?.message || 'Formulir pelamar tidak ditemukan');
+                setError(response?.message || langField('applicantFormNotFound'));
                 return;
             }
 
@@ -49,11 +52,11 @@ export const useApplicantEdit = (id?: string) => {
         } catch (err) {
             const apiError = err as ApiError;
             setSummary(null);
-            setError(apiError?.message || 'Gagal memuat formulir pelamar');
+            setError(apiError?.message || langField('loadApplicantFormFailed'));
         } finally {
             setLoading(false);
         }
-    }, [id]);
+    }, [id, langField]);
 
     const fetchedIdRef = useRef<string | undefined>(undefined);
 
@@ -71,6 +74,16 @@ export const useApplicantEdit = (id?: string) => {
             const next = { ...prev };
             delete next[field];
             return next;
+        });
+    }, []);
+
+    const handleDriverLicenseToggle = useCallback((name: string, checked: boolean) => {
+        setFormData(prev => {
+            const withoutName = prev.driver_license.filter(license => license.name !== name);
+            return {
+                ...prev,
+                driver_license: checked ? [...withoutName, { name }] : withoutName,
+            };
         });
     }, []);
 
@@ -106,9 +119,9 @@ export const useApplicantEdit = (id?: string) => {
     const validateForm = (): boolean => {
         const nextErrors: ApplicantFormErrors = {};
 
-        if (!formData.full_name.trim()) nextErrors.full_name = 'Nama lengkap wajib diisi';
+        if (!formData.full_name.trim()) nextErrors.full_name = 'fullNameRequired';
         if (formData.email.trim() && !EMAIL_PATTERN.test(formData.email.trim())) {
-            nextErrors.email = 'Format email tidak valid';
+            nextErrors.email = 'emailInvalid';
         }
 
         setErrors(nextErrors);
@@ -119,7 +132,7 @@ export const useApplicantEdit = (id?: string) => {
         if (!id || isSubmitting) return;
 
         if (!validateForm()) {
-            toast.error('Lengkapi field yang wajib diisi');
+            toast.error(langField('completeRequiredFields'));
             return;
         }
 
@@ -128,15 +141,15 @@ export const useApplicantEdit = (id?: string) => {
             const response = await ApplicantService.updateApplicantForm(id, formData);
 
             if (!response?.success) {
-                toast.error(response?.message || 'Formulir pelamar tidak berhasil diperbarui');
+                toast.error(response?.message || langField('updateUnsuccessful'));
                 return;
             }
 
-            toast.success(response.message || 'Formulir pelamar berhasil diperbarui');
+            toast.success(response.message || langField('updateSuccess'));
             await fetchApplicantForm();
         } catch (err) {
             const apiError = err as ApiError;
-            toast.error(apiError?.message || 'Gagal memperbarui formulir pelamar');
+            toast.error(apiError?.message || langField('updateFailed'));
         } finally {
             setIsSubmitting(false);
         }
@@ -151,6 +164,7 @@ export const useApplicantEdit = (id?: string) => {
         isSubmitting,
         fetchApplicantForm,
         handleFieldChange,
+        handleDriverLicenseToggle,
         handleRowAdd,
         handleRowRemove,
         handleRowChange,
