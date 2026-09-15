@@ -17,6 +17,7 @@ import {
     pickApplicantSummary,
     toApplicantFormValues,
 } from '../utils/applicantForm';
+import { generateApplicantFormPDF } from '../utils/applicantPdfGenerator';
 
 export type ApplicantFormErrors = Partial<Record<ApplicantFormScalarField, string>>;
 
@@ -26,10 +27,12 @@ export const useApplicantEdit = (id?: string) => {
     const { langField } = useLanguage(applicantLabels);
     const [summary, setSummary] = useState<ApplicantFormListItem | null>(null);
     const [formData, setFormData] = useState<ApplicantFormUpdateRequest>(createEmptyApplicantForm);
+    const [savedFormData, setSavedFormData] = useState<ApplicantFormUpdateRequest | null>(null);
     const [errors, setErrors] = useState<ApplicantFormErrors>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
     const fetchApplicantForm = useCallback(async () => {
         if (!id) return;
@@ -46,8 +49,11 @@ export const useApplicantEdit = (id?: string) => {
                 return;
             }
 
+            const values = toApplicantFormValues(response.data);
+
             setSummary(pickApplicantSummary(response.data));
-            setFormData(toApplicantFormValues(response.data));
+            setFormData(values);
+            setSavedFormData(values);
             setErrors({});
         } catch (err) {
             const apiError = err as ApiError;
@@ -155,6 +161,21 @@ export const useApplicantEdit = (id?: string) => {
         }
     };
 
+    const handleExportPdf = async () => {
+        if (!savedFormData || !summary || isExporting) return;
+
+        setIsExporting(true);
+        try {
+            await generateApplicantFormPDF(savedFormData, summary);
+            toast.success(langField('exportPdfSuccess'));
+        } catch (err) {
+            console.error('Error generating applicant form PDF:', err);
+            toast.error(langField('exportPdfFailed'));
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     return {
         summary,
         formData,
@@ -162,7 +183,9 @@ export const useApplicantEdit = (id?: string) => {
         loading,
         error,
         isSubmitting,
+        isExporting,
         fetchApplicantForm,
+        handleExportPdf,
         handleFieldChange,
         handleDriverLicenseToggle,
         handleRowAdd,

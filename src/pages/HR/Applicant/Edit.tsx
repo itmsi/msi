@@ -1,5 +1,6 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PageMeta from '@/components/common/PageMeta';
+import { PermissionGate } from '@/components/common/PermissionComponents';
 import PageHeader from '@/components/common/PageHeader';
 import { LoadingOverlay } from '@/components/common/Loading';
 import Alert from '@/components/ui/alert/Alert';
@@ -12,6 +13,7 @@ import { useApplicantEdit } from './hooks/useApplicantEdit';
 import ApplicantFields from './components/ApplicantFields';
 import ApplicantSections from './components/ApplicantSections';
 import ApplicantSummaryCard from './components/ApplicantSummaryCard';
+import { DownloadButton } from '@/components/ui/button/DownloadButton';
 
 export default function Edit() {
     const { id } = useParams<{ id: string }>();
@@ -36,6 +38,8 @@ export default function Edit() {
         loading,
         error,
         isSubmitting,
+        isExporting,
+        handleExportPdf,
         handleFieldChange,
         handleDriverLicenseToggle,
         handleRowAdd,
@@ -70,6 +74,16 @@ export default function Edit() {
                     title={langField(readOnly ? 'applicantFormDetail' : 'editApplicantForm')}
                     backPath={listPath}
                     subtitle={summary.name || '-'}
+                    actions={
+                        <PermissionGate permission="read">
+                            <DownloadButton
+                                fileName="Download PDF"
+                                variant="secondary"
+                                onClick={handleExportPdf}
+                                loading={isExporting}
+                            />
+                        </PermissionGate>
+                    }
                 />
 
                 {!summary.is_completed && (

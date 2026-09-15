@@ -510,6 +510,16 @@ export const applicantLabels: TranslationMap = {
         en: 'Saving',
         zh: '正在保存',
     },
+    exportPdf: {
+        id: 'Export PDF',
+        en: 'Export PDF',
+        zh: '导出 PDF',
+    },
+    exportingPdf: {
+        id: 'Membuat PDF...',
+        en: 'Generating PDF...',
+        zh: '正在生成 PDF...',
+    },
 
     // Validation & Toast Messages
     fullNameRequired: {
@@ -541,6 +551,16 @@ export const applicantLabels: TranslationMap = {
         id: 'Formulir pelamar berhasil diperbarui',
         en: 'Applicant form updated successfully',
         zh: '申请表更新成功',
+    },
+    exportPdfSuccess: {
+        id: 'PDF formulir pelamar berhasil diunduh',
+        en: 'Applicant form PDF downloaded successfully',
+        zh: '申请表 PDF 下载成功',
+    },
+    exportPdfFailed: {
+        id: 'Gagal membuat PDF formulir pelamar',
+        en: 'Failed to generate applicant form PDF',
+        zh: '生成申请表 PDF 失败',
     },
     updateFailed: {
         id: 'Gagal memperbarui formulir pelamar',
