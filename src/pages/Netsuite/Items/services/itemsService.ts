@@ -79,7 +79,7 @@ export class ItemsService {
     }
 
     static async syncItemsById(id: string): Promise<{ success: boolean; message: string; data?: any }> {
-        const response = await apiPost<{ success: boolean; message: string; data?: any }>(
+        const response = await apiGet<{ success: boolean; message: string; data?: any }>(
             `${API_BASE_URL}/netsuite/items/sync/${id}`
         );
         return response.data;
