@@ -3,7 +3,7 @@ import { TableColumn } from 'react-data-table-component';
 import { Link, useLocation } from 'react-router-dom';
 import { MdContentCopy } from 'react-icons/md';
 import CustomDataTable from '@/components/ui/table';
-import { formatDateLocal, formatDateTime, tableDateFormatTime } from '@/helpers/generalHelper';
+import { formatDateLocal, tableDateFormatTime } from '@/helpers/generalHelper';
 import { ApplicantFormListItem, Pagination } from '../types/applicant';
 import { APPLICANT_STATUS_DISPLAY, getApplicantFormStatus } from '../utils/applicantStatus';
 import { createByDateColumn, createDateColumn } from '@/components/ui/table/columnUtils';
