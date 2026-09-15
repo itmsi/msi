@@ -328,13 +328,19 @@ const AppSidebar: React.FC = () => {
             name: "HRM",
             icon: <FaUsers />,
             allowedRoles: [
-                'Candidate HRM'
+                'Candidate HRM',
+                'Applicant HRM'
             ],
             subItems: [
                 {
                     name: "Candidate Management",
                     allowedRoles: ['Candidate HRM'],
                     subItems: candidateGroupSubItems,
+                },
+                {
+                    name: "Applicants",
+                    path: buildPath("/hr/applicants"),
+                    allowedRoles: ['Applicant HRM'],
                 },
             ],
         },

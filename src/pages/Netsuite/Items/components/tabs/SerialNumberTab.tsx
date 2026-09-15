@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 // import { MdClear, MdSearch } from 'react-icons/md';
 // import Input from '@/components/form/input/InputField';
@@ -55,8 +55,6 @@ const SerialNumberTab: React.FC<SerialNumberTabProps> = ({ netsuiteItemId }) => 
             initializeLocationOptions();
         }
     }, [locationInitialized, locationLoading, initializeLocationOptions]);
-
-    const selectedLocation = useMemo(() => pickedLocation, [pickedLocation]);
 
     const handleStatusChange = (value: string) => {
         setStatus(value);
@@ -124,7 +122,7 @@ const SerialNumberTab: React.FC<SerialNumberTabProps> = ({ netsuiteItemId }) => 
             </div> */}
 
             {/* Status Filter */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <CustomSelect
                     id="item_status"
                     name="item_status"
@@ -140,7 +138,7 @@ const SerialNumberTab: React.FC<SerialNumberTabProps> = ({ netsuiteItemId }) => 
                     id="location"
                     name="location"
                     placeholder="All Locations"
-                    value={selectedLocation}
+                    value={pickedLocation}
                     defaultOptions={POLocationOptions}
                     loadOptions={handleLocationInputChange}
                     onMenuScrollToBottom={handleLocationMenuScrollToBottom}
