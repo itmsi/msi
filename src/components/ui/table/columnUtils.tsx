@@ -7,24 +7,23 @@ import { formatDateTime } from '@/helpers/generalHelper';
 // Common column configurations with React components
 export const createSerialNumberColumn = (pagination?: { current_page: number; per_page: number }): TableColumn<any> => ({
     name: 'No',
-    selector: (_row: any, index?: number) => 
+    selector: (_row: any, index?: number) =>
         ((pagination?.current_page || 1) - 1) * (pagination?.per_page || 10) + (index || 0) + 1,
     width: '60px',
     center: true, // This handles both header and cell centering
 });
 
 export const createStatusColumn = (
-    statusField = 'is_active', 
-    activeText = 'Active', 
+    statusField = 'is_active',
+    activeText = 'Active',
     inactiveText = 'Inactive'
 ): TableColumn<any> => ({
     name: 'Status',
     cell: (row: any) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            row[statusField] 
-                ? 'bg-green-100 text-green-800' 
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row[statusField]
+                ? 'bg-green-100 text-green-800'
                 : 'bg-red-100 text-red-800'
-        }`}>
+            }`}>
             {row[statusField] ? activeText : inactiveText}
         </span>
     ),
@@ -43,33 +42,30 @@ export const createStatusToggleColumn = (
     cell: (row: any) => {
         const isActive = row[statusField];
         const isDisabled = disabled ? disabled(row) : false;
-        
+
         return (
             <div className="flex items-center gap-2">
                 {/* Toggle Switch */}
                 <button
                     onClick={() => !isDisabled && onToggle(row, !isActive)}
                     disabled={isDisabled}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                        isDisabled 
-                            ? 'cursor-not-allowed opacity-50 bg-gray-200' 
-                            : isActive 
-                                ? 'bg-green-500 hover:bg-green-600' 
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isDisabled
+                            ? 'cursor-not-allowed opacity-50 bg-gray-200'
+                            : isActive
+                                ? 'bg-green-500 hover:bg-green-600'
                                 : 'bg-gray-300 hover:bg-gray-400'
-                    }`}
+                        }`}
                     title={isDisabled ? 'Cannot change status' : `Click to ${isActive ? 'deactivate' : 'activate'}`}
                 >
                     <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                            isActive ? 'translate-x-6' : 'translate-x-1'
-                        }`}
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${isActive ? 'translate-x-6' : 'translate-x-1'
+                            }`}
                     />
                 </button>
-                
+
                 {/* Status Text */}
-                <span className={`text-xs font-medium ${
-                    isActive ? 'text-green-700' : 'text-gray-600'
-                }`}>
+                <span className={`text-xs font-medium ${isActive ? 'text-green-700' : 'text-gray-600'
+                    }`}>
                     {isActive ? activeText : inactiveText}
                 </span>
             </div>
@@ -91,9 +87,10 @@ export const createDateColumn = (
     selector: (row: any) => row[dateField],
     format: (row: any) => {
         const date = new Date(row[dateField]);
-        return formatOptions 
+        return row[dateField] ? formatOptions
             ? date.toLocaleDateString('id-ID', formatOptions)
-            : date.toLocaleDateString();
+            : date.toLocaleDateString()
+            : '-'
     },
     center: true,
     wrap: true,
@@ -126,7 +123,7 @@ export const createByDateColumn = (
 export const createActionsColumn = (actions: Array<{
     icon: React.ComponentType<any>;
     onClick: (row: any) => void;
-    permission?: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide' ;
+    permission?: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide';
     className?: string;
     tooltip?: string;
     condition?: (row: any) => boolean;
@@ -147,9 +144,8 @@ export const createActionsColumn = (actions: Array<{
                             <PermissionButton
                                 permission={action.permission || 'read'}
                                 onClick={() => action.onClick(row)}
-                                className={`p-2 rounded-md text-sm font-medium transition-colors relative ${
-                                    action.className || 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                                }`}
+                                className={`p-2 rounded-md text-sm font-medium transition-colors relative ${action.className || 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                    }`}
                                 disabled={action.disable ? action.disable(row) : false}
                             >
                                 <Icon className="w-4 h-4" />
@@ -163,7 +159,7 @@ export const createActionsColumn = (actions: Array<{
     center: true,
     id: `actions-${actions.map(a => a.title).join('-')}`,
     ignoreRowClick: true,
-    ...(actions[0]?.pinned && { pinned: actions[0]?.pinned  }),
+    ...(actions[0]?.pinned && { pinned: actions[0]?.pinned }),
 });
 // Badge component for status display
 export const StatusBadge: React.FC<{
@@ -172,19 +168,18 @@ export const StatusBadge: React.FC<{
     inactiveText?: string;
     activeColor?: string;
     inactiveColor?: string;
-}> = ({ 
-    status, 
-    activeText = 'Active', 
+}> = ({
+    status,
+    activeText = 'Active',
     inactiveText = 'Inactive',
     activeColor = 'bg-green-100 text-green-800',
     inactiveColor = 'bg-red-100 text-red-800'
 }) => (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-        status ? activeColor : inactiveColor
-    }`}>
-        {status ? activeText : inactiveText}
-    </span>
-);
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${status ? activeColor : inactiveColor
+            }`}>
+            {status ? activeText : inactiveText}
+        </span>
+    );
 
 // Toggle switch component for status changes
 export const StatusToggle: React.FC<{
@@ -195,56 +190,53 @@ export const StatusToggle: React.FC<{
     disabled?: boolean;
     showText?: boolean;
     size?: 'sm' | 'md' | 'lg';
-}> = ({ 
-    status, 
-    onToggle, 
-    activeText = 'Active', 
+}> = ({
+    status,
+    onToggle,
+    activeText = 'Active',
     inactiveText = 'Inactive',
     disabled = false,
     showText = true,
     size = 'md'
 }) => {
-    const sizeClasses = {
-        sm: { toggle: 'h-5 w-9', thumb: 'h-3 w-3', activePos: 'translate-x-5', inactivePos: 'translate-x-1' },
-        md: { toggle: 'h-6 w-11', thumb: 'h-4 w-4', activePos: 'translate-x-6', inactivePos: 'translate-x-1' },
-        lg: { toggle: 'h-7 w-12', thumb: 'h-5 w-5', activePos: 'translate-x-6', inactivePos: 'translate-x-1' }
+        const sizeClasses = {
+            sm: { toggle: 'h-5 w-9', thumb: 'h-3 w-3', activePos: 'translate-x-5', inactivePos: 'translate-x-1' },
+            md: { toggle: 'h-6 w-11', thumb: 'h-4 w-4', activePos: 'translate-x-6', inactivePos: 'translate-x-1' },
+            lg: { toggle: 'h-7 w-12', thumb: 'h-5 w-5', activePos: 'translate-x-6', inactivePos: 'translate-x-1' }
+        };
+
+        const currentSize = sizeClasses[size];
+
+        return (
+            <div className="flex items-center gap-2">
+                {/* Toggle Switch */}
+                <button
+                    onClick={() => !disabled && onToggle(!status)}
+                    disabled={disabled}
+                    className={`relative inline-flex ${currentSize.toggle} items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${disabled
+                            ? 'cursor-not-allowed opacity-50 bg-gray-200'
+                            : status
+                                ? 'bg-green-500 hover:bg-green-600'
+                                : 'bg-gray-300 hover:bg-gray-400'
+                        }`}
+                    title={disabled ? 'Cannot change status' : `Click to ${status ? 'deactivate' : 'activate'}`}
+                >
+                    <span
+                        className={`inline-block ${currentSize.thumb} transform rounded-full bg-white transition-transform duration-200 ease-in-out ${status ? currentSize.activePos : currentSize.inactivePos
+                            }`}
+                    />
+                </button>
+
+                {/* Status Text */}
+                {showText && (
+                    <span className={`text-xs font-medium ${status ? 'text-green-700' : 'text-gray-600'
+                        }`}>
+                        {status ? activeText : inactiveText}
+                    </span>
+                )}
+            </div>
+        );
     };
-
-    const currentSize = sizeClasses[size];
-
-    return (
-        <div className="flex items-center gap-2">
-            {/* Toggle Switch */}
-            <button
-                onClick={() => !disabled && onToggle(!status)}
-                disabled={disabled}
-                className={`relative inline-flex ${currentSize.toggle} items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                    disabled 
-                        ? 'cursor-not-allowed opacity-50 bg-gray-200' 
-                        : status 
-                            ? 'bg-green-500 hover:bg-green-600' 
-                            : 'bg-gray-300 hover:bg-gray-400'
-                }`}
-                title={disabled ? 'Cannot change status' : `Click to ${status ? 'deactivate' : 'activate'}`}
-            >
-                <span
-                    className={`inline-block ${currentSize.thumb} transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                        status ? currentSize.activePos : currentSize.inactivePos
-                    }`}
-                />
-            </button>
-            
-            {/* Status Text */}
-            {showText && (
-                <span className={`text-xs font-medium ${
-                    status ? 'text-green-700' : 'text-gray-600'
-                }`}>
-                    {status ? activeText : inactiveText}
-                </span>
-            )}
-        </div>
-    );
-};
 
 // Action button component
 export const ActionButton: React.FC<{
@@ -265,9 +257,8 @@ export const ActionButton: React.FC<{
     return (
         <button
             onClick={onClick}
-            className={`p-2 rounded-md text-sm font-medium transition-colors ${
-                className || variantClasses[variant]
-            }`}
+            className={`p-2 rounded-md text-sm font-medium transition-colors ${className || variantClasses[variant]
+                }`}
             title={tooltip}
         >
             <Icon className="w-4 h-4" />

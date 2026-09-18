@@ -532,7 +532,7 @@ export const tableDateFormatTime = {
     year: 'numeric' as const,
     hour: '2-digit' as const,
     minute: '2-digit' as const,
-    second: '2-digit' as const
+    // second: '2-digit' as const
 }
 export const formatDateMoment = (value: string | Date | null | undefined) => {
     if (!value) return '-';

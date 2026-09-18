@@ -14,6 +14,7 @@ import {
 import type { CandidateItem } from '../types/Candidate';
 import { getRoleStyle, getRoleLabel } from '../utils/roleStyle';
 import { getAssignRoleArr } from '../utils/interviewFormHelpers';
+import { Link } from 'react-router';
 
 interface CandidateCardProps {
     candidate: CandidateItem;
@@ -101,7 +102,6 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete }: Candidate
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [menuOpen]);
 
-    const handleCardClick = () => onView(candidate);
     const handleCardKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -170,12 +170,12 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete }: Candidate
                     </div>
                 )}
             </div>
-            <div
+            <Link
                 role="button"
                 tabIndex={0}
-                onClick={handleCardClick}
+                to={`/hr/candidate/${candidate.candidate_id}`}
                 onKeyDown={handleCardKeyDown}
-                className="p-5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#8B93B8]/40 rounded-2xl"
+                className="block p-5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#8B93B8]/40 rounded-2xl"
             >
                 <div className="flex items-start justify-between mb-4 pr-8">
                     <div className="flex items-center gap-3 min-w-0">
@@ -269,7 +269,7 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete }: Candidate
                         </span>
                     </div>
                 )}
-            </div>
+            </Link>
         </motion.div>
     );
 }

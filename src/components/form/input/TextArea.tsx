@@ -4,6 +4,7 @@ import { twMerge } from "tailwind-merge";
 
 interface TextareaProps {
     placeholder?: string;
+    id?: string;
     name?: string;
     rows?: number;
     value?: string;
@@ -13,10 +14,12 @@ interface TextareaProps {
     error?: boolean;
     readonly?: boolean;
     hint?: string;
+    autoComplete?: string;
 }
 
 const TextArea: React.FC<TextareaProps> = ({
     placeholder = "Enter your message",
+    id,
     name,
     rows = 3,
     value = "",
@@ -26,6 +29,7 @@ const TextArea: React.FC<TextareaProps> = ({
     error = false,
     readonly = false,
     hint = "",
+    autoComplete,
 }) => {
 
     let textareaClasses = `font-secondary w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3:text-white/30 ${className}`;
@@ -44,12 +48,14 @@ const TextArea: React.FC<TextareaProps> = ({
         <div className="relative">
             <textarea
                 placeholder={placeholder}
+                id={id}
                 name={name}
                 rows={rows}
                 value={value}
                 onChange={onChange}
                 disabled={disabled}
                 readOnly={readonly}
+                autoComplete={autoComplete}
                 className={clsx(
                     twMerge(
                         textareaClasses,

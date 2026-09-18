@@ -169,6 +169,8 @@ const HRCandidateList = lazy(() => import('@/pages/HR/Employee/Manage'));
 const HRCandidateCreate = lazy(() => import('@/pages/HR/Candidate/Create'));
 const HRCandidateDetail = lazy(() => import('@/pages/HR/Employee/Detail'));
 const HRCandidateEdit = lazy(() => import('@/pages/HR/Employee/Edit'));
+const HRApplicantList = lazy(() => import('@/pages/HR/Applicant/Manage'));
+const HRApplicantEdit = lazy(() => import('@/pages/HR/Applicant/Edit'));
 
 // AI Chat
 const AIChatPage = lazy(() => import('@/pages/AIChat'));
@@ -1336,6 +1338,23 @@ export const routes: TAppRoute[] = [
         roles: ['Candidate HRM'],
         requiredPermissions: ['read'],
         component: HRCandidateDetail,
+        layout: AppLayout,
+    },
+    {
+        path: '/hr/applicants',
+        name: 'Applicant HRM',
+        isProtected: true,
+        roles: ['Applicant HRM'],
+        component: HRApplicantList,
+        layout: AppLayout,
+    },
+    {
+        path: '/hr/applicants/edit/:id',
+        name: 'Applicant HRM',
+        isProtected: true,
+        roles: ['Applicant HRM'],
+        requiredPermissions: ['read'],
+        component: HRApplicantEdit,
         layout: AppLayout,
     },
     {

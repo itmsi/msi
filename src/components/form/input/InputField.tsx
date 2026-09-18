@@ -23,11 +23,13 @@ interface InputProps {
     onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
     hint?: string;
     readonly?: boolean;
+    autoComplete?: string;
 }
 
 const Input: FC<InputProps> = ({
     type = "text",
     id,
+    autoComplete,
     name,
     placeholder,
     value,
@@ -76,6 +78,7 @@ const Input: FC<InputProps> = ({
                 maxLength={maxLength}
                 disabled={disabled}
                 readOnly={readonly}
+                autoComplete={autoComplete}
                 className={clsx(
                     twMerge(
                         inputClasses,

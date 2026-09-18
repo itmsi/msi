@@ -34,10 +34,10 @@ const ReceiptTab: React.FC<ReceiptTabProps> = ({
             wrap: true,
             cell: row => (
                 <>
-                <Link to={`/netsuite/purchase-order/${poId}/receive/${row.receipt_id}`} className="absolute inset-0" />
-                <div className="py-1">
-                    <div className="font-medium text-gray-900">{row.trandate ? formatTanggal(row.trandate) || '-' : '-'}</div>
-                </div>
+                    <Link to={`/netsuite/receipts/view/${row.receipt_id}`} className="absolute inset-0" />
+                    <div className="py-1">
+                        <div className="font-medium text-gray-900">{row.trandate ? formatTanggal(row.trandate) || '-' : '-'}</div>
+                    </div>
                 </>
             ),
             width: '200px',
@@ -52,9 +52,9 @@ const ReceiptTab: React.FC<ReceiptTabProps> = ({
             selector: row => row.status_display || '-',
             cell: row => (
                 row.status !== '' ? (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#d0e6ef] text-gray-800 border border-gray-200 capitalize">
-                    {row.status_display || '-'}
-                </span>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#d0e6ef] text-gray-800 border border-gray-200 capitalize">
+                        {row.status_display || '-'}
+                    </span>
                 ) : '-'
             ),
             center: true,
