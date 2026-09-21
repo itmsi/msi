@@ -158,7 +158,7 @@ export const useSalesOrderEdit = (id: string | undefined) => {
                         taxcode_name: item.taxcode_name || '',
                         // tax_amount: item.tax_amount || 0,
                     })),
-                    files: (so.files || []).map((file: any) => ({
+                    files: (Array.isArray(so.files) ? so.files : []).map((file: any) => ({
                         id: file.file_id ?? '',
                         fileName: file.fileName || '',
                         fileUrl: file.fileUrl || '',
