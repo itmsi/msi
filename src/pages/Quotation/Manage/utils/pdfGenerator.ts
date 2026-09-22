@@ -1807,6 +1807,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             yPos = bagianInvestasi(yPos, kontrakItems);
 
             const manfaatItems = [
+                langField('benefit_wharehouseStafAvailability'),
                 langField('benefit_technicianAvailability'),
                 langField('benefit_sparePartsAvailability'),
                 langField('benefit_noLogisticsCost'),
@@ -1903,7 +1904,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             yPos = bagianInvestasi(yPos, kontrakItems);
 
             const manfaatItems = [
-                langField('benefit_technicianAvailability') + '.',
+                langField('benefit_wharehouseStafAvailability'),
+                langField('benefit_technicianAvailability'),
                 langField('benefit_sparePartsAvailability'),
                 langField('benefit_noLogisticsCost'),
                 langField('benefit_readyUnit'),
@@ -2006,6 +2008,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             yPos = bagianInvestasi(yPos, kontrakItems);
 
             const manfaatItems = [
+                langField('benefit_wharehouseStafAvailability'),
                 langField('benefit_technicianAvailability'),
                 langField('benefit_sparePartsAvailability'),
                 langField('benefit_noLogisticsCost'),
@@ -2101,7 +2104,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             yPos = bagianInvestasi(yPos, kontrakItems);
 
             const manfaatItems = [
-                langField('benefit_technicianAvailability') + '.',
+                langField('benefit_wharehouseStafAvailability'),
+                langField('benefit_technicianAvailability'),
                 langField('benefit_sparePartsAvailability'),
                 langField('benefit_noLogisticsCost'),
                 langField('benefit_readyUnit'),
