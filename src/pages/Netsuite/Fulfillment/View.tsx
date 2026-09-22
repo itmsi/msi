@@ -84,6 +84,16 @@ export default function View() {
     const files = fulfillment.files || [];
     const notes = fulfillment.user_notes || [];
 
+    // Rute "Created From" beda per source_type: transfer_order & sales_order sudah
+    // punya halaman edit di app ini, vendor_return belum -> tampil sebagai teks saja.
+    const createdFromPath = fulfillment.createdfrom_id
+        ? fulfillment.source_type === 'transfer_order'
+            ? `/netsuite/transfer-orders/edit/${fulfillment.createdfrom_id}`
+            : fulfillment.source_type === 'sales_order'
+                ? `/netsuite/sales-orders/edit/${fulfillment.createdfrom_id}`
+                : null
+        : null;
+
     return (
         <>
             <PageMeta
@@ -99,11 +109,15 @@ export default function View() {
                     backPath={() => goBack(`/netsuite/fulfillments`)}
                     // subtitle={fulfillment.number}
                     subtitle={<>
-                        <Link
-                            className='flex text-blue-400 hover:underline items-center gap-1 me-1'
-                            to={`/netsuite/transfer-orders/edit/${fulfillment.createdfrom_id}`} target="_blank">
-                            <FaExternalLinkAlt className='me-1' /> {fulfillment?.createdfrom_number || '-'}
-                        </Link>
+                        {createdFromPath ? (
+                            <Link
+                                className='flex text-blue-400 hover:underline items-center gap-1 me-1'
+                                to={createdFromPath} target="_blank">
+                                <FaExternalLinkAlt className='me-1' /> {fulfillment?.createdfrom_number || '-'}
+                            </Link>
+                        ) : (
+                            <span className='me-1'>{fulfillment?.createdfrom_number || '-'}</span>
+                        )}
                         {(`${fulfillment?.number ? ' - ' + fulfillment?.number || '' : ''}`)}
                     </>}
                     actions={

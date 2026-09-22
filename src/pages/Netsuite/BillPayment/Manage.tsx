@@ -71,9 +71,6 @@ export default function Manage() {
                 <div className="items-center py-2">
                     <div className="font-medium text-gray-900">{row.transactionnumber || '-'}</div>
                     <div className="block text-sm text-gray-500">{row.trandate ? formatDateLocal(row.trandate) : '-'}</div>
-                    <span className="text-xs text-gray-500">
-                        Bill ID: {row.netsuite_id?.toString() || '-'}
-                    </span>
                 </div>
             ),
             wrap: true,
@@ -155,6 +152,7 @@ export default function Manage() {
                 <div className="items-start py-2">
                     <div className="font-medium text-gray-900">{row.custbody_me_wf_created_by_display || '-'}</div>
                     <div className="text-sm text-gray-500">{formatDateTime(row.created_at)}</div>
+                    <div className="text-xs text-gray-500">Bill Payment ID: {row.netsuite_id || '-'}</div>
                 </div>
             ),
             wrap: true,
