@@ -161,7 +161,7 @@ export default function Manage() {
         createActionsColumn([
             {
                 icon: MdVisibility,
-                onClick: (row: BillPayment) => navigate(`/netsuite/bill-payment/view/${row.id}`),
+                onClick: (row: BillPayment) => navigate(`/netsuite/bill-payment/view/${row.netsuite_id}`),
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'View Detail',
                 permission: 'read',
@@ -330,7 +330,7 @@ export default function Manage() {
                             fixedHeaderScrollHeight="625px"
                             responsive
                             highlightOnHover
-                            onRowClicked={(row) => navigate(`/netsuite/bill-payment/view/${row.id}`)}
+                            onRowClicked={(row) => navigate(`/netsuite/bill-payment/view/${row.netsuite_id}`)}
                             striped={false}
                             persistTableHead
                             borderRadius="8px"
