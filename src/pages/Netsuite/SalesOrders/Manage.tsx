@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useSalesOrder } from './hooks/useSalesOrder';
-import { formatDateTime, formatCurrencyDynamic } from '@/helpers/generalHelper';
+import { formatDateTime, formatCurrencyDynamic, formatTanggal } from '@/helpers/generalHelper';
 import {
     MdClear,
     MdSearch,
@@ -33,25 +33,6 @@ const SO_STATUS_OPTIONS = [
     { value: 'G', label: 'Billed' },
     { value: 'H', label: 'Closed' },
 ];
-
-const formatDateID = (dateString: string) => {
-    if (!dateString || dateString === '-') return '-';
-    const isoMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (isoMatch) {
-        const [, , m, d] = isoMatch;
-        const year = isoMatch[1];
-        const monthNum = parseInt(m, 10);
-        const dayNum = parseInt(d, 10);
-        const monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-        return `${String(dayNum).padStart(2, '0')} ${monthNames[monthNum - 1]} ${year}`;
-    }
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString;
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = date.toLocaleString('id-ID', { month: 'short' });
-    const year = date.getFullYear();
-    return `${day} ${month} ${year}`;
-};
 
 export default function Manage() {
     const navigate = useNavigate();
@@ -105,10 +86,7 @@ export default function Manage() {
                 />
                 <div className="items-center py-2">
                     <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
-                    <div className="block text-sm text-gray-500">{formatDateID(row.tran_date || '-')}</div>
-                    <div className="text-xs text-gray-500">
-                        SO ID: {row.customer_id || '-'}
-                    </div>
+                    <div className="block text-sm text-gray-500">{formatTanggal(row.tran_date)}</div>
                 </div>
             </>),
             wrap: true,
@@ -212,7 +190,7 @@ export default function Manage() {
             wrap: true,
             minWidth: '180px',
         },
-        createByDateColumn('Updated By', 'last_modified', 'last_modified_by_name', '320px'),
+        createByDateColumn('Updated By', 'last_modified', 'last_modified_by_name', '320px', 'netsuite_id', 'SO ID'),
         createActionsColumn([
             {
                 icon: MdOutlineSync,

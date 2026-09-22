@@ -78,12 +78,6 @@ export default function Manage() {
             pinned: 'left',
         },
         {
-            name: 'Subsidiary',
-            selector: row => row.subsidiary_display || '-',
-            wrap: true,
-            minWidth: '300px',
-        },
-        {
             name: 'Vendor Name',
             selector: row => row.entity_display || '-',
             cell: row => (
