@@ -163,8 +163,8 @@ export default function QuotationItemFields({
             selector: (row: QuotationFormItem) => row.item_displayname || 'N/A',
             cell: row => (
                 <div className="items-center gap-3 py-2">
-                    <div className="font-medium text-gray-900">{row.item_displayname || 'N/A'}</div>
-                    <div className="block text-sm text-gray-500">{row.item_name || '-'}</div>
+                    <div className="block text-sm text-gray-500">{row.item_displayname || 'N/A'}</div>
+                    <div className="font-medium text-gray-900">{row.item_name || '-'}</div>
                 </div>
             ),
             grow: 2,
