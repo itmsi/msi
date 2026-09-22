@@ -1589,7 +1589,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             doc.setTextColor(23, 26, 31);
             setFontSafe(doc, 'Futura', 'bold');
             if (offroad) {
-                doc.text('VENDOR HELD STOCK', workshopBoxX + 5, workshopY);
+                doc.text('PARTS AVAILABILTY ASSURANCE PROGRAM', workshopBoxX + 5, workshopY);
 
                 workshopY += 5;
                 doc.setFontSize(7);
@@ -1623,7 +1623,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             const manfaatLabel = langField('benefits_label');
             setFontByLanguage(doc, manfaatLabel, 'Futura', 'bold', language);
             doc.text(manfaatLabel, workshopBoxX + 5, workshopY);
-            workshopY += 6;
+            workshopY += 4;
 
             // Manfaat items
             doc.setFontSize(7);
