@@ -77,7 +77,7 @@ const SerialNumberTab: React.FC<SerialNumberTabProps> = ({ netsuiteItemId }) => 
             name: 'Location ID',
             selector: row => row.location_name || '-',
             center: true,
-            width: '160px'
+            maxWidth: '350px'
         },
         {
             name: 'Status',
