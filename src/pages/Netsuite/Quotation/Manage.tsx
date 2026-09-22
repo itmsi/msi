@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuotation } from './hooks/useQuotation';
-import { formatCurrencyDynamic, getStatusBadge, formatDateLocal, formatDateTime } from '@/helpers/generalHelper';
+import { formatCurrencyDynamic, getStatusBadge, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdEdit, MdAdd, MdOutlineSync } from 'react-icons/md';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Input from '@/components/form/input/InputField';
@@ -75,20 +75,12 @@ export default function Manage() {
             cell: row => (
                 <div className="items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
-                    <div className="block text-sm text-gray-500">{row.tran_date ? formatDateLocal(row.tran_date) : '-'}</div>
+                    <div className="block text-sm text-gray-500">{formatTanggal(row.tran_date)}</div>
                 </div>
             ),
             wrap: true,
             width: '230px',
             pinned: 'left'
-        },
-        {
-            id: 'subsidiary_name',
-            name: 'Subsidiary',
-            selector: row => row.subsidiary_name || '-',
-            wrap: true,
-            width: '220px',
-            center: true
         },
         {
             id: 'customer_name',

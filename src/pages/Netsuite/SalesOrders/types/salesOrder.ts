@@ -4,7 +4,7 @@ export interface SalesOrderRequest {
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
     search?: string;
-    status?: string;
+    status_code?: string;
     tran_date_start?: string;
     tran_date_end?: string;
 }
