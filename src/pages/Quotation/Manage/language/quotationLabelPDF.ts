@@ -608,9 +608,9 @@ export const quotationLabelPDF: TranslationMap = {
 
     // Workshop descriptions
     workshop_vhsDescription: {
-        id: 'adalah sistem yang ditawarkan Motor Sights untuk memenuhi kebutuhan stok secara berkelanjutan sesuai dengan kesepakatan.*',
+        id: 'adalah sistem yang ditawarkan oleh Motor Sights untuk memenuhi kebutuhan stok secara berkelanjutan sesuai dengan kesepakatan.*',
         en: 'is a system offered by Motor Sights to meet stock requirements sustainably in accordance with the agreement.*',
-        zh: '是由 Motor Sights 提供的一种系统，用于根据协议持续满足库存需求。*'
+        zh: '是由 Motor Sights 提供的一种系统，用于根据协议可持续地满足库存需求。*'
     },
     workshop_ihwDescription: {
         id: 'Program inovatif untuk menghadirkan pelayanan yang paripurna demi kelancaran operasi unit customer dengan banyak manfaat*',
@@ -651,47 +651,52 @@ export const quotationLabelPDF: TranslationMap = {
     },
 
     // Benefits (Manfaat)
+    benefit_wharehouseStafAvailability: {
+        id: 'Ketersediaan Staf Gudang',
+        en: 'Warehouse Staff Availability',
+        zh: '仓库员工可用性'
+    },
     benefit_technicianAvailability: {
-        id: 'Ketersediaan Teknisi (stand by mekanik)',
-        en: 'Technician Availability (stand by mechanic)',
-        zh: '技师可用性（待机机械师）'
+        id: 'Ketersediaan Teknisi (mekanik siaga).',
+        en: 'Technician Availability (stand by mechanic).',
+        zh: '技师可用性（待命机修工）。'
     },
     benefit_sparePartsAvailability: {
-        id: 'Jaminan ketersediaan suku cadang fast moving',
-        en: 'Guaranteed availability of fast moving spare parts',
-        zh: '保证快速流动备件的可用性'
+        id: 'Jaminan ketersediaan suku cadang fast moving, critical, dan slow moving',
+        en: 'Guaranteed availability of fast moving, critical, and slow moving spare parts (Additional Request)',
+        zh: '确保快速周转、关键及慢速周转备件的供应（额外请求）',
     },
     benefit_noLogisticsCost: {
-        id: 'Tanpa biaya logistik',
-        en: 'No logistics costs',
-        zh: '无物流费用'
+        id: 'Tidak ada biaya logistik.',
+        en: 'No logistics costs.',
+        zh: '无物流成本。',
     },
     benefit_readyUnit: {
-        id: 'Unit selalu siap bertugas',
-        en: 'Units always ready for duty',
-        zh: '设备随时准备投入使用'
+        id: 'Unit selalu siap beroperasi.',
+        en: 'Units always ready for duty.',
+        zh: '设备始终处于待命状态。',
     },
     benefit_noWorryStock: {
-        id: 'Tanpa khawatir harus membeli stock sisa setelah masa kontrak berakhir',
-        en: 'No worries about having to buy remaining stock after contract period ends',
-        zh: '合同期结束后无需担心购买剩余库存'
+        id: 'Tidak perlu khawatir harus membeli sisa stok setelah masa kontrak berakhir.',
+        en: 'No worries about having to buy remaining stock after the contract period ends.',
+        zh: '无需担心合同期结束后必须购买剩余库存。',
     },
 
     // Requirements (Syarat)
     requirement_noDeposit: {
-        id: 'Tanpa deposit untuk pembelian mulai dari 30 unit atau lebih.',
-        en: 'No deposit for purchases starting from 30 units or more.',
-        zh: '购买30台或以上设备无需押金。'
+        id: 'PAAP 1 - Model Cicilan Tetap, cicilan bulanan berdasarkan total nilai stok suku cadang.',
+        en: 'PAAP 1 - Fixed Installment Model, monthly installments based on the total spare parts stock value.',
+        zh: 'PAAP 1 - 固定分期付款模式，根据备件库存总价值支付月度分期款。',
     },
     requirement_withDeposit: {
-        id: 'Pembelian 5-29 unit berlaku dengan deposit/Bank Guarantee sebesar stock yang disediakan.**',
-        en: 'Purchases of 5-29 units apply with deposit/Bank Guarantee equal to the stock provided.**',
-        zh: '购买5-29台设备需缴纳相当于所提供库存的押金/银行担保。**'
+        id: 'PAAP 2 - Kontrak Siklus Deposit Bergulir, pembayaran berdasarkan siklus dengan deposit awal pada awal kontrak.',
+        en: 'PAAP 2 - Rolling Deposit Cycle Contract, cycle-based payment with an initial deposit at the beginning of the contract.',
+        zh: 'PAAP 2 - 滚动押金周期合同，按周期付款，并在合同开始时支付初始押金。',
     },
     requirement_customerProvides: {
-        id: 'Pelanggan menyediakan tempat penyimpanan barang & infrastruktur penunjang (listrik, internet rak, dll.), serta akomodasi manpower (mobilitas mess, & konsumsi).',
-        en: 'Customer provides storage space & supporting infrastructure (electricity, internet rack, etc.), as well as manpower accommodation (mobility, mess, & consumption).',
-        zh: '客户提供存储空间和支持基础设施（电力、网络机架等），以及人力住宿（交通、食宿和消费）。'
+        id: 'Customer menyediakan ruang penyimpanan dan infrastruktur pendukung (listrik, internet, rak, dll.), serta akomodasi tenaga kerja (mobilitas, mess, dan konsumsi).',
+        en: 'Customer provides storage space & supporting infrastructure (electricity, internet, rack, etc.), as well as manpower accommodation (mobility, mess, & consumption).',
+        zh: '客户提供存储空间及配套基础设施（电力、网络、货架等），以及人员住宿与生活支持（交通、宿舍及餐食）。',
     },
 
     // Notes for on-road
@@ -711,16 +716,16 @@ export const quotationLabelPDF: TranslationMap = {
         zh: '*IHW套餐和相关服务不包含在设备购买价格中。'
     },
     notes_depositDetails: {
-        id: '**Deposit menyesuaikan stock spare part yang disediakan. Detai akan didiskusikan bersama team Spare Part kami',
-        en: '**Deposit adjusts to the spare parts stock provided. Details will be discussed with our Spare Parts team',
-        zh: '**押金根据所提供的备件库存进行调整。详情将与我们的备件团队讨论'
+        id: '**Deposit PAAP 2 disesuaikan dengan stok suku cadang yang disediakan. Detailnya akan didiskusikan dengan tim Spare Parts kami.',
+        en: '**Deposit for PAAP 2 adjusts to the spare parts stock provided. Details will be discussed with our Spare Parts team.',
+        zh: '**PAAP 2 的押金将根据所提供的备件库存进行调整。具体细节将与我们的备件团队进一步讨论。',
     },
 
     // Notes for off-road (slightly different)
     notes_vhsPackage: {
-        id: '*Paket VHS dan layanan terkait tidak termasuk dalam harga pembelian unit.',
-        en: '*VHS package and related services are not included in the unit purchase price.',
-        zh: '*VHS套餐和相关服务不包含在设备购买价格中。'
+        id: '*Paket PAAP dan layanan terkait tidak termasuk dalam harga pembelian unit.',
+        en: '*PAAP package and related services are not included in the unit purchase price.',
+        zh: '*PAAP 套餐及相关服务不包含在设备购买价格中。',
     },
 
     // Section labels  
