@@ -82,8 +82,8 @@ export default function View() {
             selector: row => row.ref_no || '-',
             cell: row => (
                 <div className="py-1">
-                    <div className="text-sm font-medium text-gray-900">{row.ref_no || '-'}</div>
-                    {row.apply_id && <div className="text-xs text-gray-400">ID: {row.apply_id}</div>}
+                    <div className="text-sm text-gray-500">{row.ref_no || '-'}</div>
+                    {row.apply_id && <div className="text-sm font-medium text-gray-900">ID: {row.apply_id}</div>}
                 </div>
             ),
             wrap: true,
@@ -146,8 +146,8 @@ export default function View() {
             selector: row => row.ref_no || '-',
             cell: row => (
                 <div className="py-1">
-                    <div className="text-sm font-medium text-gray-900">{row.ref_no || '-'}</div>
-                    {row.credit_id && <div className="text-xs text-gray-400">ID: {row.credit_id}</div>}
+                    <div className="text-sm text-gray-500">{row.ref_no || '-'}</div>
+                    {row.credit_id && <div className="text-sm font-medium text-gray-900">ID: {row.credit_id}</div>}
                 </div>
             ),
             wrap: true,

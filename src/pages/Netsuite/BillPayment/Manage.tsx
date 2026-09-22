@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import { useBillPayment } from './hooks/useBillPayment';
-import { formatCurrencyDynamic, getStatusBadge, formatDateLocal, formatDateTime } from '@/helpers/generalHelper';
+import { formatCurrencyDynamic, getStatusBadge, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdOutlineSync } from 'react-icons/md';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -68,9 +68,9 @@ export default function Manage() {
             name: 'Doc Number',
             selector: row => row.transactionnumber || '-',
             cell: row => (
-                <div className="items-center py-2">
+                <div className="items-center gap-3 py-2">
                     <div className="font-medium text-gray-900">{row.transactionnumber || '-'}</div>
-                    <div className="block text-sm text-gray-500">{row.trandate ? formatDateLocal(row.trandate) : '-'}</div>
+                    <div className="block text-sm text-gray-500">{formatTanggal(row.trandate)}</div>
                 </div>
             ),
             wrap: true,
