@@ -128,7 +128,7 @@ export default function Manage() {
             center: true,
             width: '200px'
         },
-        createByDateColumn('Created By', 'created_at', 'custbody_me_wf_created_by_name', '320px'),
+        createByDateColumn('Created By', 'created_at', 'custbody_me_wf_created_by_name', '320px', 'netsuite_id', 'Quotation ID'),
         createByDateColumn('Updated By', 'updated_at', 'update_by_name', '320px'),
         createActionsColumn([
             {

@@ -101,7 +101,9 @@ export const createByDateColumn = (
     name: string,
     dateField: string,
     createdByField: string,
-    width: string = '200px'
+    width: string = '200px',
+    extraField?: string,
+    extraLabel?: string
 ): TableColumn<any> => ({
     name,
     selector: (row: any) => row[dateField],
@@ -113,6 +115,11 @@ export const createByDateColumn = (
             <span className="text-xs text-gray-500">
                 {row[dateField] ? formatDateTime(row[dateField]) : '-'}
             </span>
+            {extraField && (
+                <span className="text-xs text-gray-500">
+                    {extraLabel}: {row[extraField] ?? '-'}
+                </span>
+            )}
         </div>
     ),
     id: `${name}-${dateField}-${createdByField}`,
