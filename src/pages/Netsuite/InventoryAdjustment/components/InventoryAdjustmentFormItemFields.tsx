@@ -71,8 +71,8 @@ export default function InventoryAdjustmentFormItemFields({
             selector: row => row.item_displayname || '-',
             cell: row => (
                 <div className="py-1">
-                    <span className="text-sm font-medium text-gray-900">{row.item_displayname || '-'}</span>
-                    {row.item_name && <div className="text-xs text-gray-500">{row.item_name}</div>}
+                    <span className="text-sm text-gray-500">{row.item_displayname || '-'}</span>
+                    {row.item_name && <div className="text-sm font-medium text-gray-900">{row.item_name}</div>}
                 </div>
             ),
             wrap: true,

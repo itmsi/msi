@@ -186,9 +186,7 @@ export default function Manage() {
             cell: row => (
                 <div className="items-center py-2">
                     <div className="font-medium text-gray-900">{row.tranid || '-'}</div>
-                    <div className="block text-sm text-gray-500">{formatDateTime(row.trandate || '-')}</div><div className="text-xs text-gray-500">
-                        SI ID: {row.id || '-'}
-                    </div>
+                    <div className="block text-sm text-gray-500">{formatDateTime(row.trandate || '-')}</div>
                 </div>
             ),
             wrap: true,
@@ -315,7 +313,7 @@ export default function Manage() {
             minWidth: '180px',
         },
         {
-            name: 'Modified Date',
+            name: 'Updated By',
             selector: row => row.faktur_updated_at || '-',
             cell: row => (
                 <div className="items-center py-2">
