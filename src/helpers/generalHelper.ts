@@ -84,23 +84,30 @@ export const parseDecimalInput = (value: string | number | undefined | null, def
     return isNaN(result) ? defaultVal : result;
 };
 
-// Format tanggal dari "24/3/2026" menjadi "24 March 2026" 
+// Format tanggal dari "24/3/2026" atau ISO "2026-03-24T00:00:00+07:00" menjadi "24 March 2026"
 export const formatTanggal = (dateString?: string): string => {
     if (!dateString) return '-';
 
-    // Split string berdasarkan "/" 
-    const parts = dateString.trim().split('/');
-    if (parts.length !== 3) return dateString; // return original jika format tidak valid
+    const trimmed = dateString.trim();
 
-    const [hari, bulanNum, tahun] = parts;
+    // Format "DD/MM/YYYY" (raw NetSuite, dipakai mis. Fulfillment)
+    const slashParts = trimmed.split('/');
+    if (slashParts.length === 3) {
+        const [hari, bulanNum, tahun] = slashParts;
+        const namaBulan = ENUM_MONTH.find(m => m.value === bulanNum.padStart(2, '0'));
+        if (namaBulan) return `${hari} ${namaBulan.label} ${tahun}`;
+    }
 
-    // Cari nama bulan dari ENUM_MONTH
-    const namaBulan = ENUM_MONTH.find(m => m.value === bulanNum.padStart(2, '0'));
+    // Format ISO "YYYY-MM-DD..." (dipakai mis. Quotation & Bill Payment)
+    const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) {
+        const [, tahun, bulanNum, hari] = isoMatch;
+        const namaBulan = ENUM_MONTH.find(m => m.value === bulanNum);
+        if (namaBulan) return `${parseInt(hari, 10)} ${namaBulan.label} ${tahun}`;
+    }
 
-    // Jika bulan tidak ditemukan, return original
-    if (!namaBulan) return dateString;
-
-    return `${hari} ${namaBulan.label} ${tahun}`;
+    // Format tidak dikenali -> tampilkan apa adanya
+    return dateString;
 };
 
 // Parse tanggal dari format "25/3/2026"

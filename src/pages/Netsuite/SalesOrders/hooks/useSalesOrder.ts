@@ -47,9 +47,9 @@ export const useSalesOrder = () => {
                 ...(overrides?.search !== undefined
                     ? (overrides.search ? { search: overrides.search } : {})
                     : (searchValue ? { search: searchValue } : {})),
-                ...(overrides?.status !== undefined
-                    ? (overrides.status ? { status: overrides.status } : {})
-                    : (filterStatus ? { status: filterStatus } : {})),
+                ...(overrides?.status_code !== undefined
+                    ? (overrides.status_code ? { status_code: overrides.status_code } : {})
+                    : (filterStatus ? { status_code: filterStatus } : {})),
                 ...(overrides?.tran_date_start !== undefined
                     ? (overrides.tran_date_start ? { tran_date_start: overrides.tran_date_start } : {})
                     : (filterStartDate ? { tran_date_start: filterStartDate } : {})),
@@ -108,7 +108,7 @@ export const useSalesOrder = () => {
 
         const override: Partial<SalesOrderRequest> = { page: 1 };
         if (filterType === 'sort_order') override.sort_order = value as 'asc' | 'desc';
-        else if (filterType === 'status') override.status = value;
+        else if (filterType === 'status') override.status_code = value;
         else if (filterType === 'tran_date_start') override.tran_date_start = value;
         else if (filterType === 'tran_date_end') override.tran_date_end = value;
 
@@ -146,7 +146,7 @@ export const useSalesOrder = () => {
             page: 1,
             sort_order: 'desc',
             search: '',
-            status: '',
+            status_code: '',
             tran_date_start: '',
             tran_date_end: '',
         });
