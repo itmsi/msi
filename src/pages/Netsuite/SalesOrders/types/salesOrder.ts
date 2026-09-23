@@ -163,6 +163,7 @@ export interface SalesOrderFormItem {
     id: string;              // internal UI key
     itemId: number;
     item_name: string;
+    item_displayname: string;
     qty: number;
     rate: number;
     amount: number;

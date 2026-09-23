@@ -142,6 +142,7 @@ export const useSalesOrderEdit = (id: string | undefined) => {
                         id: `${item.item_id || 'item'}-${idx}-${Date.now()}`,
                         itemId: safeNumber(item.item_id) || 0,
                         item_name: item.item_name || '',
+                        item_displayname: item.item_displayname || '',
                         ...calcLineAmounts(item),
                         qty: calcLineAmounts(item).quantity || 0,
                         // qty: safeNumber(item.quantity) || 0,
@@ -257,7 +258,8 @@ export const useSalesOrderEdit = (id: string | undefined) => {
         const newItem: SalesOrderFormItem = {
             id: `${selectedItem.value}-${Date.now()}`,
             itemId: Number(selectedItem.value),
-            item_name: selectedItem.label,
+            item_name: selectedItem.data?.itemId || selectedItem.label,
+            item_displayname: selectedItem.data?.displayName || '',
             qty: 1,
             rate: 0,
             amount: 0,

@@ -116,7 +116,8 @@ export const useSalesOrderCreate = () => {
         const newItem: SalesOrderFormItem = {
             id: `${selectedItem.value}-${Date.now()}`,
             itemId: Number(selectedItem.value),
-            item_name: selectedItem.label,
+            item_name: selectedItem.data?.itemId || selectedItem.label,
+            item_displayname: selectedItem.data?.displayName || '',
             qty: 1,
             rate: 0,
             amount: 0,
