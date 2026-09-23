@@ -161,8 +161,8 @@ export default function SalesOrderItemFields({
             selector: (row: SalesOrderFormItem) => row.item_name || 'N/A',
             cell: row => (
                 <div className="items-center gap-3 py-2">
-                    <div className="font-medium text-gray-900">{row.item_name || 'N/A'}</div>
-                    <div className="block text-sm text-gray-500">{row.itemId || '-'}</div>
+                    <div className="block text-sm text-gray-500">{row.item_name || 'N/A'}</div>
+                    <div className="font-medium text-gray-900">{row.itemId || '-'}</div>
                 </div>
             ),
             grow: 2,
