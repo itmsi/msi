@@ -13,6 +13,22 @@ const safeNumber = (val: any): number | null => {
     return isNaN(n) ? null : n;
 };
 
+// API bisa mengirim multi-select sebagai array atau string ("1" / "1,2")
+const toIdArray = (val: any): number[] => {
+    if (val === null || val === undefined || val === '') return [];
+    const raw = Array.isArray(val) ? val : String(val).split(',');
+    return raw
+        .map((v) => safeNumber(typeof v === 'string' ? v.trim() : v))
+        .filter((n): n is number => n !== null);
+};
+
+const toNameArray = (val: any, idCount: number): string[] => {
+    if (Array.isArray(val)) return val.map(String);
+    if (val === null || val === undefined || val === '') return [];
+    const str = String(val);
+    return idCount > 1 ? str.split(',').map((s) => s.trim()) : [str];
+};
+
 const calcLineAmounts = (line: QuotationItem) => {
     const val_rate = line.rate != null ? Number(line.rate) : 0;
     const quantity = line.quantity ?? line.quantity ?? 0;
@@ -118,6 +134,8 @@ export const useQuotationEdit = (id: string | undefined) => {
                     return dateStr;
                 };
 
+                const bankIds = toIdArray(quo.custbody_msi_bank_payment_so);
+
                 setFormData(prev => ({
                     ...prev,
                     title: quo.title || '',
@@ -151,8 +169,8 @@ export const useQuotationEdit = (id: string | undefined) => {
                     partner_name: quo.partner_name || '',
                     custbody_me_approval_status: safeNumber(quo?.custbody_me_approval_status) || 1,
                     custbody_me_approval_status_name: quo?.custbody_me_approval_status_name || '',
-                    custbody_msi_bank_payment_so: Array.isArray(quo.custbody_msi_bank_payment_so) ? quo.custbody_msi_bank_payment_so : [],
-                    custbody_msi_bank_payment_so_name: Array.isArray(quo.custbody_msi_bank_payment_so_name) ? quo.custbody_msi_bank_payment_so_name : [],
+                    custbody_msi_bank_payment_so: bankIds,
+                    custbody_msi_bank_payment_so_name: toNameArray(quo.custbody_msi_bank_payment_so_name, bankIds.length),
                     custbody_cseg_cn_cfi: safeNumber(quo.custbody_cseg_cn_cfi),
                     expectedclosedate: formatApiDate(quo.expectedclosedate) || null,
                     custbody_msi_quotation_no_iec: quo.custbody_msi_quotation_no_iec || '',
