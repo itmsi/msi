@@ -114,6 +114,17 @@ export interface SyncInfo {
     created_by_name: string;
 }
 
+export interface QuotationDownloadRequest {
+    recId: number;
+}
+
+export interface QuotationDownloadResponse {
+    success: boolean;
+    mimeType: string;
+    fileName: string;
+    fileContent: string;
+}
+
 export interface QuotationListResponse {
     success: boolean;
     message: string;
