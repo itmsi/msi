@@ -185,6 +185,39 @@ export const useQuotation = () => {
         }
     }, [isSyncing, fetchQuotations, pagination.page, pagination.page_size]);
 
+    const handleDownloadQuotation = useCallback(async (row: Quotation) => {
+        if (!row?.netsuite_id) return;
+        const toastId = toast.loading(`Mengunduh Quotation: ${row.tranid || row.netsuite_id}...`);
+        try {
+            const response = await QuotationService.downloadQuotation({
+                recId: Number(row.netsuite_id),
+            });
+
+            if (response?.fileContent && response?.fileName) {
+                const byteChars = atob(response.fileContent);
+                const byteArr = new Uint8Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) {
+                    byteArr[i] = byteChars.charCodeAt(i);
+                }
+                const blob = new Blob([byteArr], { type: response.mimeType || 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = response.fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                toast.success('Quotation berhasil diunduh', { id: toastId });
+            } else {
+                toast.error('Gagal mengunduh quotation', { id: toastId });
+            }
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal mengunduh quotation', { id: toastId });
+        }
+    }, []);
+
     const activeFilterCount = [
         filterApprovalStatus,
         filterStartDate,
@@ -218,5 +251,6 @@ export const useQuotation = () => {
         handleClearAllFilters,
         handleSync,
         handleSyncById,
+        handleDownloadQuotation,
     };
 };
