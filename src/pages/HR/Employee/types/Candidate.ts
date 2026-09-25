@@ -125,6 +125,7 @@ export interface CandidateItem {
     schedule_interview: CandidateScheduleInterview | null;
     candidate_status: string;
     candidate_status_offering_letter: string | null;
+    is_employee?: boolean;
     group_name: string | null;
     company_name: string | null;
     department_name: string | null;
@@ -201,6 +202,8 @@ export type CandidateDetail = {
 
     candidate_status: string;
     candidate_status_offering_letter: string | null;
+
+    is_employee?: boolean;
 
     created_at: string;
     created_by: string;

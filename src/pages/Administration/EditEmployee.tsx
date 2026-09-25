@@ -5,6 +5,7 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import CustomSelect from "@/components/form/select/CustomSelect";
 import CustomAsyncSelect from "@/components/form/select/CustomAsyncSelect";
+import GroupSelectField from "@/components/form/select/GroupSelectField";
 import { MdArrowBack, MdSave, MdExpandMore, MdExpandLess } from "react-icons/md";
 import LoadingSpinner from "@/components/common/Loading";
 import PageMeta from "@/components/common/PageMeta";
@@ -585,6 +586,20 @@ export default function EditEmployee() {
                                         placeholder="Enter employee address"
                                     />
                                 </div>
+
+                                {/* Group */}
+                                <GroupSelectField
+                                    className="lg:col-span-2"
+                                    value={formData.group_id}
+                                    valueLabel={employee?.group_name}
+                                    error={validationErrors.group_id ? String(validationErrors.group_id) : undefined}
+                                    onChange={(option) => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            group_id: option?.value || ''
+                                        }));
+                                    }}
+                                />
 
                                 {/* NetSuite Class */}
                                 <div className="lg:col-span-2">

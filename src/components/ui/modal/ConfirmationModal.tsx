@@ -99,7 +99,7 @@ export default function ConfirmationModal({
             showCloseButton={!loading}
             className={`${sizeClass} ${className}`}
             title={title}
-            classTitle={`${colors.background} ${colors.colorText}`}
+            classTitle={`${colors.background} ${colors.colorText} z-99`}
         >
             <div className="p-6">
                 {/* Content */}
@@ -127,8 +127,8 @@ export default function ConfirmationModal({
                 <div className="mt-5 gap-3 sm:mt-6 sm:flex sm:flex-row-reverse">
                     <Button
                         className={`rounded-[50px] ${loading
-                                ? colors.confirmButtonDisabled
-                                : `${colors.confirmButton} focus:ring-2 focus:ring-offset-2`
+                            ? colors.confirmButtonDisabled
+                            : `${colors.confirmButton} focus:ring-2 focus:ring-offset-2`
                             }`}
                         onClick={handleConfirm}
                         disabled={loading}

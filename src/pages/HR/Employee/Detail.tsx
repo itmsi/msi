@@ -28,7 +28,7 @@ export default function EmployeeCandidateDetail() {
     const [searchParams] = useSearchParams();
     const groupId = searchParams.get('groupId');
     const backPath = groupId ? `/hr/candidate/group/${groupId}` : '/hr/candidate';
-    const { candidate, loading, error } = useCandidateDetail(id);
+    const { candidate, loading, error, refetch } = useCandidateDetail(id);
     const [tab, setTab] = useState<TabKey>('interview');
 
     return (
@@ -74,7 +74,7 @@ export default function EmployeeCandidateDetail() {
                     </div>
                 ) : (
                     <div className="grid lg:grid-cols-[300px_1fr] gap-5 items-start">
-                        <CandidateProfileSidebar candidate={candidate} />
+                        <CandidateProfileSidebar candidate={candidate} onGeneratedEmployee={refetch} />
 
                         <div className='overflow-auto pb-3'>
                             <div className="flex gap-1 px-3 pt-2 overflow-x-auto overflow-y-hidden">

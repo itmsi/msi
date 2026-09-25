@@ -2,9 +2,12 @@ import { useState } from 'react';
 import {
     MdMail, MdPhone, MdLocationOn, MdCake, MdPerson, MdFavorite, MdPublic,
     MdTag, MdBusiness, MdOutlineFileDownload, MdEditCalendar,
-    MdOutlineEditNote, MdGroup,
+    MdOutlineEditNote, MdGroup, MdHowToReg, MdVerified,
 } from 'react-icons/md';
+import { PermissionGate } from '@/components/common/PermissionComponents';
+import ConfirmationModal from '@/components/ui/modal/ConfirmationModal';
 import type { CandidateDetail } from '../types/Candidate';
+import { useCandidateToEmployee } from '../hooks/UseCandidateToEmployee';
 import moment from 'moment';
 // @ts-expect-error moment ships this locale file without a type declaration for the submodule path
 import 'moment/locale/id';
@@ -50,10 +53,15 @@ function formatAddress(c: CandidateDetail) {
 
 interface CandidateProfileSidebarProps {
     candidate: CandidateDetail;
+    onGeneratedEmployee?: () => void;
 }
 
-export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarProps) {
+export function CandidateProfileSidebar({ candidate, onGeneratedEmployee }: CandidateProfileSidebarProps) {
     const [imgError, setImgError] = useState(false);
+    const { isConfirmOpen, isGenerating, openConfirm, closeConfirm, generateEmployee } = useCandidateToEmployee(onGeneratedEmployee);
+
+    const canGenerateEmployee = candidate.candidate_status === 'Complete' && candidate.is_employee === false;
+    const isEmployee = candidate.candidate_status === 'Complete' && candidate.is_employee === true;
 
     const s = STATUS_STYLE[candidate.candidate_status] || DEFAULT_STATUS_STYLE;
     const cs = candidate.company_name
@@ -66,7 +74,7 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
         : null;
     const resumeUrl = candidate.candidate_resume || null;
 
-    return (
+    return (<>
         <div className="bg-white rounded-2xl border border-[#E7E9F0] shadow-sm p-6 lg:sticky lg:top-6">
             <div className="flex flex-col items-center text-center">
                 {photoSrc && !imgError ? (
@@ -98,7 +106,29 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
                     {candidate.candidate_status || '-'}
                 </span>
 
+                {canGenerateEmployee && (
+                    <PermissionGate permission="create">
+                        <button
+                            type="button"
+                            onClick={openConfirm}
+                            disabled={isGenerating}
+                            className="w-full flex items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 mt-4 text-sm font-primary-bold text-white bg-[#047857] hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            <MdHowToReg size={16} />
+                            {isGenerating ? 'Processing...' : 'Set as Employee'}
+                        </button>
+                    </PermissionGate>
+                )}
 
+                {isEmployee && (
+                    <div className="w-full flex items-start gap-2 rounded-lg px-3 py-2.5 mt-4 bg-[#ECFDF5] border border-[#A7F3D0] text-left">
+                        <MdVerified size={16} className="text-[#047857] mt-0.5 shrink-0" />
+                        <div className="min-w-0">
+                            <p className="text-[13px] font-secondary font-semibold text-[#047857]">Registered as Employee</p>
+                            <p className="text-[11px] text-[#059669]">This candidate already has an employee record.</p>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="mt-5 pt-5 border-t border-[#E7E9F0] space-y-0.5">
@@ -160,5 +190,17 @@ export function CandidateProfileSidebar({ candidate }: CandidateProfileSidebarPr
                 Created by {candidate.created_by_name || '-'} · Updated by {candidate.updated_by_name || '-'}
             </p>
         </div>
-    );
+
+        <ConfirmationModal
+            isOpen={isConfirmOpen}
+            onClose={closeConfirm}
+            onConfirm={() => generateEmployee(candidate.candidate_id)}
+            title="Set as Employee"
+            message={`Register ${candidate.candidate_name} as an employee? An employee record will be created from this candidate data.`}
+            confirmText="Set as Employee"
+            cancelText="Cancel"
+            type="success"
+            loading={isGenerating}
+        />
+    </>);
 }

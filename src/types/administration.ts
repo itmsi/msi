@@ -471,6 +471,8 @@ export interface Employee {
     title_name: string;
     department_name: string;
     company_name: string;
+    group_id?: string | null;
+    group_name?: string | null;
     classes_id_netsuite?: number | null;
     classes_name_netsuite?: string | null;
     employee_id_netsuite?: number | null;
@@ -566,6 +568,7 @@ export interface EmployeeFormData {
     gender_id?: string | null;
     island_id?: string;
     permission_detail?: EmployeeSystemPermission[];
+    group_id?: string | null;
     classes_id_netsuite?: number | null;
     classes_name_netsuite?: string | null;
 }
@@ -595,6 +598,7 @@ export interface EmployeeValidationErrors {
     is_sales_quotation?: boolean;
     gender_id?: string;
     island_id?: string;
+    group_id?: string;
     employee_foto?: string;
     // Customer fields
     customer_name?: string;

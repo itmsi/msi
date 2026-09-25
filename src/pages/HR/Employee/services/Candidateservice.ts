@@ -37,6 +37,14 @@ export class CandidateService {
         return response.data;
     }
 
+    static async generateEmployeeFromCandidate(candidateId: string): Promise<{ success: boolean; message: string }> {
+        const response = await apiPost<{ success: boolean; message: string }>(
+            `${API_BASE_URL}/employees/genearted-employee-for-candidate`,
+            { candidate_id: candidateId }
+        );
+        return response.data;
+    }
+
     static async getCandidateById(id: string): Promise<CandidateDetail> {
         const response = await apiGet<{ success: boolean; message: string; data: CandidateDetail }>(
             `${API_BASE_URL}/hrm/candidates/${id}`
