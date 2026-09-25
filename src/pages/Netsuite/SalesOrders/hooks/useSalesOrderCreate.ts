@@ -6,6 +6,7 @@ import { SalesOrderFormData, SalesOrderFormItem } from '../types/salesOrder';
 import { SalesOrderService } from '../services/salesOrderService';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
 import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
+import { getInitialPriceLevel, parsePriceLevels } from '../utils/priceLevel';
 
 const DEFAULT_FORM: SalesOrderFormData = {
     customform: 104,
@@ -113,14 +114,19 @@ export const useSalesOrderCreate = () => {
     // Items management
     const handleAddItem = (selectedItem: any) => {
         if (!selectedItem) return;
+        const priceLevelOptions = parsePriceLevels(selectedItem.data?.priceLevels);
+        const initialPriceLevel = getInitialPriceLevel(priceLevelOptions);
         const newItem: SalesOrderFormItem = {
             id: `${selectedItem.value}-${Date.now()}`,
             itemId: Number(selectedItem.value),
             item_name: selectedItem.data?.itemId || selectedItem.label,
             item_displayname: selectedItem.data?.displayName || '',
             qty: 1,
-            rate: 0,
-            amount: 0,
+            ...initialPriceLevel,
+            amount: initialPriceLevel.rate,
+            gross_amount: initialPriceLevel.rate,
+            tax_amount: 0,
+            price_level_options: priceLevelOptions,
             description: '',
             department: formData.department,
             department_name: formData.department_name || '',
@@ -217,6 +223,8 @@ export const useSalesOrderCreate = () => {
                     class: item.class || undefined,
                     location: item.location || undefined,
                     taxcode: item.taxcode || undefined,
+                    price_level: item.price_level ?? undefined,
+                    price_level_name: item.price_level_name || undefined,
                 })),
                 files: formData.files || [],
             };

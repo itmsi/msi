@@ -3,7 +3,9 @@ import { MdAdd, MdDeleteOutline } from 'react-icons/md';
 import Label from '@/components/form/Label';
 import InputField from '@/components/form/input/InputField';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
-import { SalesOrderFormData, SalesOrderFormItem } from '../types/salesOrder';
+import { PriceLevelOption, SalesOrderFormData, SalesOrderFormItem } from '../types/salesOrder';
+import { CUSTOM_PRICE_LEVEL, getPriceForQty, isCustomPriceLevel, parsePriceLevels } from '../utils/priceLevel';
+import { ItemsService } from '@/pages/Netsuite/Items/services/itemsService';
 import { formatCurrencyDynamic, formatCurrencyTyping, formatNumberPriceKoma, handleCurrencyKeyPress, handleKeyPress, parseCurrencyIDR } from '@/helpers/generalHelper';
 import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
 import Button from '@/components/ui/button/Button';
@@ -145,6 +147,63 @@ export default function SalesOrderItemFields({
         }
     };
 
+    // Price level per item untuk baris yang dimuat dari SO (belum punya price_level_options)
+    const [priceLevelCache, setPriceLevelCache] = useState<Record<number, PriceLevelOption[]>>({});
+    const [loadingPriceLevelIds, setLoadingPriceLevelIds] = useState<number[]>([]);
+
+    const getPriceLevelOptions = (row: SalesOrderFormItem): PriceLevelOption[] | undefined =>
+        row.price_level_options ?? priceLevelCache[row.itemId];
+
+    const loadPriceLevels = async (row: SalesOrderFormItem) => {
+        if (getPriceLevelOptions(row) || loadingPriceLevelIds.includes(row.itemId)) return;
+        setLoadingPriceLevelIds(prev => [...prev, row.itemId]);
+        try {
+            const response = await ItemsService.getItemById(String(row.itemId));
+            const options = parsePriceLevels((response.data as any)?.price_levels);
+            setPriceLevelCache(prev => ({ ...prev, [row.itemId]: options }));
+        } catch (error) {
+            console.error('Error loading item price levels:', error);
+            setPriceLevelCache(prev => ({ ...prev, [row.itemId]: [] }));
+        } finally {
+            setLoadingPriceLevelIds(prev => prev.filter(id => id !== row.itemId));
+        }
+    };
+
+    const handlePriceLevelChange = (index: number, row: SalesOrderFormItem, name: string) => {
+        if (isCustomPriceLevel(name)) {
+            // Custom: rate tetap, user isi manual
+            updateItemById(index, 'price_level', CUSTOM_PRICE_LEVEL.id);
+            updateItemById(index, 'price_level_name', CUSTOM_PRICE_LEVEL.name);
+            return;
+        }
+        const level = getPriceLevelOptions(row)?.find(o => o.name === name);
+        if (!level) return;
+
+        const qty = toNumber(row.qty) || 1;
+        const rate = getPriceForQty(level, qty);
+        updateItemById(index, 'price_level', level.id);
+        updateItemById(index, 'price_level_name', level.name);
+        updateItemById(index, 'rate', rate);
+        updateTaxCalculation(index, qty * rate, row.taxcode_name);
+    };
+
+    // Qty berubah -> rate ikut quantity tier price level yang dipilih (By Line Quantity)
+    const handleQtyChange = (index: number, row: SalesOrderFormItem, qty: number) => {
+        // Amount dihitung ulang (Qty x Rate) di hook, Amount manual ikut tertimpa
+        onUpdateItem(index, 'qty', qty);
+        const level = isCustomPriceLevel(row.price_level_name)
+            ? undefined
+            : getPriceLevelOptions(row)?.find(o => o.name === row.price_level_name);
+        if (!level) {
+            updateTaxCalculation(index, qty * toNumber(row.rate), row.taxcode_name);
+            return;
+        }
+
+        const rate = getPriceForQty(level, qty || 1);
+        updateItemById(index, 'rate', rate);
+        updateTaxCalculation(index, (qty || 1) * rate, row.taxcode_name);
+    };
+
     // Reset displayCount ketika items berubah (misal item ditambah/dihapus)
     useEffect(() => {
         setDisplayCount(BATCH_SIZE);
@@ -211,13 +270,13 @@ export default function SalesOrderItemFields({
                     onKeyPress={handleKeyPress}
                     onChange={(e) => {
                         const qty = toNumber(e.target.value);
-                        
-                        onUpdateItem(index as number, 'qty', qty);
+
+                        handleQtyChange(index as number, row, qty);
                     }}
                     onBlur={(e) => {
                         const qty = toNumber(e.target.value);
                         if (qty === 0) {
-                            onUpdateItem(index as number, 'qty', 1);
+                            handleQtyChange(index as number, row, 1);
                         }
                     }}
                     onFocus={(e) => e.target.select()}
@@ -228,6 +287,51 @@ export default function SalesOrderItemFields({
             wrap: true,
             center: true,
             width: '120px',
+        },
+        {
+            name: 'Price Level',
+            selector: (row: SalesOrderFormItem) => row.price_level_name || CUSTOM_PRICE_LEVEL.name,
+            cell: (row, index) => {
+                const selectedName = row.price_level_name || CUSTOM_PRICE_LEVEL.name;
+                const levels = getPriceLevelOptions(row);
+                // Nilai terpilih selalu ada di options walau daftar price level belum dimuat
+                // Harga price level dari NetSuite selalu IDR
+                const options = [
+                    ...(levels
+                        ? levels.map(level => ({ value: level.name, label: `${level.name} (${formatCurrencyDynamic(getPriceForQty(level, toNumber(row.qty) || 1), 'IDR')})` }))
+                        : isCustomPriceLevel(selectedName) ? [] : [{ value: selectedName, label: selectedName }]),
+                    { value: CUSTOM_PRICE_LEVEL.name, label: CUSTOM_PRICE_LEVEL.name },
+                ];
+
+                return (<>
+                    {(formData.custbody_me_approval_status === 2 || formData.custbody_me_approval_status === 3) || (formData.custbody_me_approval_status === 1 && formData.nextapprover !== null) ? (
+                        <p className="mt-1 text-gray-800 text-md min-h-[42px] flex items-center">
+                            {selectedName}
+                        </p>
+                    ) : (
+                    <div className="w-full">
+                        <CustomSelect
+                            options={options}
+                            value={{ label: selectedName, value: selectedName }}
+                            onChange={(option) => {
+                                if (option) handlePriceLevelChange(index as number, row, option.value);
+                            }}
+                            onMenuOpen={() => loadPriceLevels(row)}
+                            isLoading={loadingPriceLevelIds.includes(row.itemId)}
+                            isClearable={false}
+                            isSearchable={false}
+                            placeholder="Select price level"
+                            className="text-xs"
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                        />
+                    </div>
+                    )}
+                </>);
+            },
+            center: true,
+            width: '250px',
+            sortable: false
         },
         {
             name: 'Rate',
@@ -257,6 +361,11 @@ export default function SalesOrderItemFields({
                         const rate = fobVal;
                         const amount = quantity * rate;
                         
+                        // Rate diubah manual -> price level jadi Custom (sama seperti di NetSuite)
+                        if (!isCustomPriceLevel(row.price_level_name)) {
+                            updateItemById(index as number, 'price_level', CUSTOM_PRICE_LEVEL.id);
+                            updateItemById(index as number, 'price_level_name', CUSTOM_PRICE_LEVEL.name);
+                        }
                         updateItemById(index as number, 'custcol_msi_fob', fobVal);
                         updateItemById(index as number, 'rate', rate);
                         updateItemById(index as number, 'amount', amount);
@@ -265,7 +374,7 @@ export default function SalesOrderItemFields({
                         updateTaxCalculation(index as number, amount, row.taxcode_name);
                     }}
                     onFocus={(e) => e.target.select()}
-                    className="border-1 rounded p-1 px-3 w-[285px] text-center"
+                    className="border-1 rounded p-1 px-3 w-full text-center"
                     placeholder="0"
                 />
                 )}
@@ -278,18 +387,27 @@ export default function SalesOrderItemFields({
             name: 'Amount',
             selector: (row: SalesOrderFormItem) => row.amount || 0,
             cell: (row, index) => (<>
-                <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                    formatCurrencyDynamic(row.amount.toString(), formData?.currency_name || '')
-                }</p>
+                {/* Amount hanya bisa diisi manual saat price level Custom; Rate tidak ikut berubah */}
+                {isCustomPriceLevel(row.price_level_name) && !((formData.custbody_me_approval_status === 2 || formData.custbody_me_approval_status === 3) || (formData.custbody_me_approval_status === 1 && formData.nextapprover !== null)) ? (
                 <InputField
                     name={`amount_${index}`}
                     type="text"
-                    value={row.amount && row.amount > 0 ? formatNumberPriceKoma(row.amount) : ''}
-                    disabled={true}
-                    readonly={true}
-                    className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text hidden"
-                    placeholder="Auto calculated"
+                    value={row.amount && row.amount > 0 ? formatCurrencyTyping(row.amount.toString()) : '0'}
+                    onKeyPress={handleCurrencyKeyPress}
+                    onChange={(e) => {
+                        const amount = parseCurrencyIDR(e.target.value);
+                        updateItemById(index as number, 'amount', amount);
+                        updateTaxCalculation(index as number, amount, row.taxcode_name);
+                    }}
+                    onFocus={(e) => e.target.select()}
+                    className="border-1 rounded p-1 px-3 w-full text-center"
+                    placeholder="0"
                 />
+                ) : (
+                <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                    formatCurrencyDynamic(row.amount.toString(), formData?.currency_name || '')
+                }</p>
+                )}
             </>),
             center: true,
             width: '250px',
