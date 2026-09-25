@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { MdAdd, MdDeleteOutline } from 'react-icons/md';
+import { MdAdd, MdDeleteOutline, MdWarningAmber } from 'react-icons/md';
 import Label from '@/components/form/Label';
 import InputField from '@/components/form/input/InputField';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
@@ -386,7 +386,12 @@ export default function SalesOrderItemFields({
         {
             name: 'Amount',
             selector: (row: SalesOrderFormItem) => row.amount || 0,
-            cell: (row, index) => (<>
+            cell: (row, index) => {
+                // Amount manual boleh beda dari Qty x Rate (seperti NetSuite), cukup diberi peringatan
+                const calculatedAmount = toNumber(row.qty) * toNumber(row.rate);
+                const isAmountMismatch = Math.abs(toNumber(row.amount) - calculatedAmount) > 0.005;
+
+                return (<div className="flex w-full flex-col items-center gap-1 py-2">
                 {/* Amount hanya bisa diisi manual saat price level Custom; Rate tidak ikut berubah */}
                 {isCustomPriceLevel(row.price_level_name) && !((formData.custbody_me_approval_status === 2 || formData.custbody_me_approval_status === 3) || (formData.custbody_me_approval_status === 1 && formData.nextapprover !== null)) ? (
                 <InputField
@@ -408,7 +413,14 @@ export default function SalesOrderItemFields({
                     formatCurrencyDynamic(row.amount.toString(), formData?.currency_name || '')
                 }</p>
                 )}
-            </>),
+                {isAmountMismatch && (
+                    <p className="flex items-center gap-1 text-xs text-amber-600">
+                        <MdWarningAmber size={14} className="shrink-0" />
+                        Tidak sama dengan Qty × Rate ({formatCurrencyDynamic(calculatedAmount, formData?.currency_name || '')})
+                    </p>
+                )}
+                </div>);
+            },
             center: true,
             width: '250px',
             sortable: false
