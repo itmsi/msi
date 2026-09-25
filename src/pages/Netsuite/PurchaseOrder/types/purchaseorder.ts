@@ -206,6 +206,8 @@ export interface DataItems {
     itemId: string;
     displayName: string;
     locations: any[];
+    // Raw JSONB dari NetSuite: { [qty]: [{ priceLevel, price }] }
+    priceLevels?: unknown;
 }
 
 export interface POItemsRequest {

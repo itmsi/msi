@@ -30,6 +30,8 @@ export interface SalesOrderItem {
     tax_rate?: string;
     gross_amount?: number;
     tax_amount?: number;
+    price_level?: string | number | null;
+    price_level_name?: string | null;
 }
 
 export interface SalesOrder {
@@ -91,6 +93,8 @@ export interface SalesOrderItemRequest {
     class?: number | null;
     location?: number | null;
     taxcode?: number | null;
+    price_level?: number | null;
+    price_level_name?: string;
 }
 
 // Create request body
@@ -179,6 +183,19 @@ export interface SalesOrderFormItem {
     tax_rate?: string;
     gross_amount?: number;
     tax_amount?: number;
+    price_level?: number | null;
+    price_level_name?: string;
+    // Daftar price level milik item (dari master item), undefined = belum dimuat
+    price_level_options?: PriceLevelOption[];
+}
+
+export interface PriceLevelOption {
+    id: number | null;
+    name: string;
+    // Harga tier pertama (qty terkecil)
+    price: number;
+    // Quantity pricing: harga berlaku jika qty >= minQty, urut minQty ascending
+    tiers: { minQty: number; price: number }[];
 }
 
 export interface BaseOption {
