@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { MdAdd, MdDeleteOutline } from 'react-icons/md';
 import { TableColumn } from 'react-data-table-component';
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
 import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
+import { useFormattedItemOptions } from '@/hooks/useFormattedItemOptions';
 import Button from '@/components/ui/button/Button';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { InventoryAdjustmentFormData, InventoryAdjustmentFormLine } from '../types/inventoryAdjustment';
@@ -47,23 +48,8 @@ export default function InventoryAdjustmentFormItemFields({
     const isHeaderComplete = !!(formData.subsidiary && formData.adjlocation && formData.department && formData.class);
 
     // Format label item menjadi "itemId - displayName", sama seperti di Transfer Order
-    const formatItemOption = useCallback((opt: any) => {
-        if (!opt) return opt;
-        const itemId = opt?.data?.itemId ?? opt?.itemId;
-        const displayName = opt?.data?.displayName ?? opt?.displayName ?? '';
-        if (!itemId) return opt;
-        return { ...opt, label: displayName ? `${itemId} - ${displayName}` : String(itemId) };
-    }, []);
-
-    const formattedItemOptions = useMemo(
-        () => (item.options || []).map(formatItemOption),
-        [item.options, formatItemOption]
-    );
-
-    const loadFormattedItemOptions = useCallback(async (val: string) => {
-        const opts = await item.onInputChange(val);
-        return (opts || []).map(formatItemOption);
-    }, [item, formatItemOption]);
+    const { defaultOptions: formattedItemOptions, loadOptions: loadFormattedItemOptions } =
+        useFormattedItemOptions(item.options, item.onInputChange);
 
     const lineColumns: TableColumn<InventoryAdjustmentFormLine>[] = [
         {
