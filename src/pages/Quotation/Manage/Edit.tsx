@@ -42,6 +42,7 @@ import { QuotationService } from './services/quotationService';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from './language/quotationLabels';
+// import EditableField from '@/components/form/editor/EditableField';
 
 export default function EditQuotation() {
     const navigate = useNavigate();
@@ -1794,6 +1795,21 @@ export default function EditQuotation() {
                             </div>
 
                             <div className="md:col-span-2">
+                                {/* <EditableField
+                                    id="wysiwyg-editor"
+                                    label={termConditionLoading ? langField('termContentLoading') : langField('termContent')}
+                                    value={termConditionContent}
+                                    // onChange={(value: string) => updateField('description', value)}
+                                    onChange={(content) => {
+                                        setTermConditionContent(content);
+                                        handleInputChange('term_content_directory', content);
+                                    }}
+                                    placeholder="Remarks..."
+                                    disabled={termConditionLoading}
+                                    editing={true}
+                                    showAction={true}
+                                // error={errors.keterangan}
+                                /> */}
                                 <WysiwygEditor
                                     id="wysiwyg-editor"
                                     label={termConditionLoading ? langField('termContentLoading') : langField('termContent')}

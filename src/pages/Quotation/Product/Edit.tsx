@@ -312,6 +312,7 @@ export default function EditProduct() {
             }
 
             const success = await updateProduct(id, formDataToSend);
+            console.log({ success });
 
             if (success) {
                 toast.success('Produk berhasil diperbarui');

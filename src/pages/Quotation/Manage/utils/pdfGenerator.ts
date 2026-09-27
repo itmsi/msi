@@ -30,6 +30,60 @@ const formatCurrency = (value: string | number): string => {
     }).format(numValue);
 };
 
+type PdfHtmlTableRenderOptions = {
+    doc: jsPDF;
+    tableElement: HTMLTableElement;
+    startY: number;
+    left: number;
+    width: number;
+    margin?: number;
+    pageHeight?: number;
+    footerHeight?: number;
+    onPageBreak?: () => void;
+};
+
+const renderHtmlTableToPdf = ({
+    doc,
+    tableElement,
+    startY,
+    left,
+    width,
+    margin = 12,
+    footerHeight = 20,
+    onPageBreak,
+}: PdfHtmlTableRenderOptions): number => {
+    if (!tableElement.rows.length) {
+        return startY;
+    }
+
+    autoTable(doc, {
+        startY,
+        html: tableElement,
+        margin: {
+            left,
+            right: margin,
+            bottom: footerHeight + margin
+        },
+        tableWidth: width,
+        theme: 'grid',
+        styles: {
+            fontSize: 8,
+            cellPadding: 1.5,
+            font: 'Futura',
+            fontStyle: 'normal',
+            textColor: [23, 26, 31],
+            lineColor: [200, 200, 200],
+            lineWidth: 0.2,
+            valign: 'middle'
+        },
+        didDrawPage: () => {
+            onPageBreak?.();
+        }
+    });
+
+    return (doc as any).lastAutoTable?.finalY || startY + tableElement.rows.length * 7;
+};
+
 export const generateQuotationPDF = async (data: ManageQuotationDataPDF, language: string) => {
     const doc = new jsPDF({
         orientation: 'portrait',
@@ -480,11 +534,30 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 }
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const element = node as Element;
+                const tagName = element.tagName.toLowerCase();
 
                 // Handle different HTML elements
-                if (element.tagName.toLowerCase() === 'b' ||
-                    element.tagName.toLowerCase() === 'u' ||
-                    element.tagName.toLowerCase() === 'i') {
+                if (tagName === 'table') {
+                    const newFinalY = renderHtmlTableToPdf({
+                        doc,
+                        tableElement: element as HTMLTableElement,
+                        startY: termYPos,
+                        left: margin,
+                        width: maxTermWidth,
+                        margin,
+                        pageHeight,
+                        footerHeight,
+                        onPageBreak: () => {
+                            addHeader();
+                            addFooter();
+                            termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
+                        }
+                    });
+                    termYPos = newFinalY + 4;
+                    return;
+                }
+
+                if (tagName === 'b' || tagName === 'u' || tagName === 'i') {
                     // Process bold/underline/italic headers
                     const text = element.textContent?.trim();
                     if (text) {
@@ -515,7 +588,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                         });
                         termYPos += 3; // Extra spacing after headers
                     }
-                } else if (element.tagName.toLowerCase() === 'ol') {
+                } else if (tagName === 'ol') {
                     // Process ordered lists
                     const listItems = element.querySelectorAll('li');
                     listItems.forEach((li, index) => {
@@ -557,10 +630,33 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                             }
                         }
                     });
-                } else if (element.tagName.toLowerCase() === 'div') {
+                } else if (tagName === 'div') {
+                    if (element.querySelector('table')) {
+                        const tableElement = element.querySelector('table') as HTMLTableElement | null;
+                        if (tableElement) {
+                            const newFinalY = renderHtmlTableToPdf({
+                                doc,
+                                tableElement,
+                                startY: termYPos,
+                                left: margin,
+                                width: maxTermWidth,
+                                margin,
+                                pageHeight,
+                                footerHeight,
+                                onPageBreak: () => {
+                                    addHeader();
+                                    addFooter();
+                                    termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
+                                }
+                            });
+                            termYPos = newFinalY + 4;
+                            return;
+                        }
+                    }
+
                     // Process div content (but skip if it only contains lists or other processed elements)
                     const hasOnlyProcessableChildren = Array.from(element.children).every(child =>
-                        ['ol', 'ul', 'b', 'u', 'i', 'br'].includes(child.tagName.toLowerCase())
+                        ['ol', 'ul', 'b', 'u', 'i', 'br', 'table'].includes(child.tagName.toLowerCase())
                     );
 
                     if (!hasOnlyProcessableChildren) {
@@ -607,7 +703,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                         // Process children elements
                         Array.from(element.childNodes).forEach(child => processNode(child));
                     }
-                } else if (element.tagName.toLowerCase() === 'br') {
+                } else if (tagName === 'br') {
                     termYPos += 3;
                 }
             }
@@ -1158,25 +1254,117 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     const renderItemNotes = (item: any, startX: number, startYPos: number, width: number, minBoxHeight: number = 0): number => {
         let itemYPos = startYPos;
 
+        const specificationResult = renderItemSpecifications(item, startX, itemYPos, width, startX);
+        itemYPos = specificationResult.finalY;
+
         if (!(item.notes && String(item.notes).trim().length > 0)) {
-            return itemYPos;
+            return Math.max(itemYPos, startYPos + specificationResult.boxHeight);
         }
 
-        setFontByLanguage(doc, langField('notes_label'), 'Futura', 'bold', language);
-        doc.setFontSize(10);
-        doc.setTextColor(23, 26, 31);
-        doc.text(langField('notes_label'), startX + 8, itemYPos, { align: 'center' });
-        itemYPos += 5;
+        // setFontByLanguage(doc, langField('notes_label'), 'Futura', 'bold', language);
+        // doc.setFontSize(10);
+        // doc.setTextColor(23, 26, 31);
+        // doc.text(langField('notes_label'), startX + 8, itemYPos, { align: 'center' });
+        // itemYPos += 5;
 
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
         setFontSafe(doc, 'Futura', 'normal');
         const notesBoxStartY = itemYPos;
-        const wrappedNotes = doc.splitTextToSize(String(item.notes), width - 6);
-        wrappedNotes.forEach((line: string) => {
-            doc.text(line, startX + 3, itemYPos + 2);
-            itemYPos += 4.5;
-        });
+
+        const notesHtml = String(item.notes);
+        const notesDocument = new DOMParser().parseFromString(notesHtml, 'text/html');
+        const renderNotesNode = (node: Node): void => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.textContent?.replace(/\s+/g, ' ').trim();
+                if (!text) return;
+
+                doc.setFontSize(9);
+                doc.setTextColor(0, 0, 0);
+                setFontSafe(doc, 'Futura', 'normal');
+                doc.splitTextToSize(text, width - 6).forEach((line: string) => {
+                    if (itemYPos + 5 > pageHeight - footerHeight - margin) {
+                        doc.addPage();
+                        addHeader();
+                        addFooter();
+                        itemYPos = margin + headerHeight + 5;
+                    }
+                    doc.text(line, startX + 3, itemYPos);
+                    itemYPos += 4.5;
+                });
+                return;
+            }
+
+            if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+            const element = node as Element;
+            const tagName = element.tagName.toLowerCase();
+
+            if (tagName === 'table') {
+                itemYPos = renderHtmlTableToPdf({
+                    doc,
+                    tableElement: element as HTMLTableElement,
+                    startY: itemYPos,
+                    left: startX,
+                    width,
+                    margin,
+                    pageHeight,
+                    footerHeight,
+                    onPageBreak: () => {
+                        addHeader();
+                        addFooter();
+                    }
+                }) + 4;
+                return;
+            }
+
+            if (/^h[1-6]$/.test(tagName)) {
+                const headingText = element.textContent?.replace(/\s+/g, ' ').trim();
+                if (!headingText) return;
+
+                doc.setFontSize(tagName === 'h1' ? 13 : 11);
+                doc.setTextColor(23, 26, 31);
+                setFontSafe(doc, 'Futura', 'bold');
+                const align = element.getAttribute('style')?.includes('text-align: center') ? 'center' : 'left';
+                const x = align === 'center' ? startX + width / 2 : startX + 3;
+                doc.splitTextToSize(headingText, width - 6).forEach((line: string) => {
+                    if (itemYPos + 6 > pageHeight - footerHeight - margin) {
+                        doc.addPage();
+                        addHeader();
+                        addFooter();
+                        itemYPos = margin + headerHeight + 5;
+                    }
+                    doc.text(line, x, itemYPos, { align });
+                    itemYPos += 5;
+                });
+                itemYPos += 2;
+                return;
+            }
+
+            if (tagName === 'br') {
+                itemYPos += 3;
+                return;
+            }
+
+            if (tagName === 'li') {
+                const listText = element.textContent?.replace(/\s+/g, ' ').trim();
+                if (listText) {
+                    doc.setFontSize(9);
+                    setFontSafe(doc, 'Futura', 'normal');
+                    doc.splitTextToSize(`• ${listText}`, width - 8).forEach((line: string) => {
+                        doc.text(line, startX + 3, itemYPos);
+                        itemYPos += 4.5;
+                    });
+                }
+                return;
+            }
+
+            Array.from(element.childNodes).forEach(renderNotesNode);
+            if (['p', 'div', 'section', 'ul', 'ol'].includes(tagName)) itemYPos += 2;
+        };
+
+        Array.from(notesDocument.body.childNodes).forEach(renderNotesNode);
+
         itemYPos += 4;
 
         // Rounded border for notes block, matching specifications/accessories styling.
@@ -1218,15 +1406,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             if (currentHasNotes) {
                 const fullWidth = pageWidth - 2 * margin;
                 const headerYPos = renderItemImageAndName(current, margin, yPos, fullWidth);
-
-                const itemWidth = (pageWidth - 2 * margin) * 0.5 - 2.5;
-                const leftStartX = margin;
-                const notesStartX = margin + itemWidth + 5;
-
-                const leftSpecResult = renderItemSpecifications(current, leftStartX, headerYPos, itemWidth, notesStartX - 5);
-                renderItemAccessories(current, leftStartX, leftSpecResult.finalY, itemWidth, notesStartX - 5, 1);
-
-                renderItemNotes(current, notesStartX, headerYPos, itemWidth, leftSpecResult.boxHeight);
+                const fullWidthNotesEndY = renderItemNotes(current, margin, headerYPos, fullWidth);
+                renderItemAccessories(current, margin, fullWidthNotesEndY, fullWidth, margin, 1);
 
                 itemIndex += 1;
             } else if (canPairWithNext && next) {

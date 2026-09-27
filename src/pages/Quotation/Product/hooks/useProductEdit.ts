@@ -6,11 +6,11 @@ export interface UseProductEditReturn {
     // Loading states
     isLoading: boolean;
     isUpdating: boolean;
-    
+
     // Data states
     productData: ItemProduct | null;
     validationErrors: ItemProductValidationErrors;
-    
+
     // Actions
     loadProduct: (productId: string) => Promise<ItemProduct | null>;
     clearFieldError: (field: keyof ItemProductValidationErrors) => void;
@@ -34,7 +34,7 @@ export function useProductEdit(): UseProductEditReturn {
         setIsLoading(true);
         try {
             const response = await ItemProductService.getItemProductById(productId);
-            
+
             if (response.data?.status && response.data?.data) {
                 const product = response.data.data;
                 setProductData(product);

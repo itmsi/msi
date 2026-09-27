@@ -14,8 +14,9 @@ import { getDefaultSpecs } from '../../Product/hooks/useProductCreate';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from '../language/quotationLabels';
 import { quotationLabelPDF } from '../language/quotationLabelPDF';
-import TextArea from '@/components/form/input/TextArea';
+// import TextArea from '@/components/form/input/TextArea';
 import { handleKeyPress } from '@/helpers/generalHelper';
+import EditableField from '@/components/form/editor/EditableField';
 
 interface QuantityCellProps {
     value: number;
@@ -630,23 +631,58 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                             </div>
                                         </div>
                                     )
-                                }
-                                )}
-
-                                <div className='col-span-2'>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="notes">
-                                        Notes
-                                    </label>
-                                    <TextArea
-                                        name="notes"
-                                        rows={3}
-                                        value={initialData.notes || ''}
-                                        onChange={(e) => handleFieldUpdate('notes', e.target.value)}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-vertical"
-                                        placeholder="Tambahkan catatan..."
-                                    />
-                                </div>
+                                })}
                             </div>
+                        </div>
+
+                        <div className="pt-6 border-t border-gray-200">
+                            <EditableField
+                                id="notes-editor"
+                                label={'Notes'}
+                                value={initialData.notes || ''}
+                                onChange={(content) => {
+                                    handleFieldUpdate('notes', content);
+                                }}
+                                placeholder="Remarks..."
+                                editing={true}
+                                showAction={true}
+                                preview={(
+                                    <div className="space-y-4">
+                                        <div className="overflow-hidden rounded-lg border border-gray-200">
+                                            <table className="w-full text-left text-sm">
+                                                <thead className="bg-gray-100">
+                                                    <tr>
+                                                        <th className="px-3 py-2 font-medium text-gray-700">Label</th>
+                                                        <th className="px-3 py-2 font-medium text-gray-700">Value</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {editableSpecifications.map((spec, index) => (
+                                                        <tr key={index} className="border-t border-gray-200">
+                                                            <td className="px-3 py-2 text-gray-900">
+                                                                {translateSpecLabel(spec.componen_product_specification_label ?? '')}
+                                                            </td>
+                                                            <td className="px-3 py-2 text-gray-700">
+                                                                {spec.componen_product_specification_value || ''}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div className="rounded-lg border border-gray-200 bg-white p-3">
+                                            <p className="text-sm font-medium text-gray-700 mb-2">Notes</p>
+                                            <div
+                                                className="text-sm text-gray-700 prose max-w-none"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: initialData.notes || '<p class="text-gray-400 italic">No notes yet</p>'
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            />
                         </div>
 
                         {/* Product Pricing Info */}

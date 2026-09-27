@@ -18,7 +18,7 @@ export const useProduct = () => {
     const fetchProduct = useCallback(async (params: Partial<ItemProductRequest> = {}) => {
         setLoading(true);
         setError(null);
-        
+
         try {
             const response = await ItemProductService.getItemProduct(params);
             if (response.status) {
@@ -46,11 +46,11 @@ export const useProduct = () => {
     const updateProduct = useCallback(async (productId: string, productData: Partial<Omit<ItemProduct, 'componen_product_id'>>) => {
         setLoading(true);
         setError(null);
-        
+
         try {
             const updatedProduct = await ItemProductService.updateItemProduct(productId, productData);
             // Update local state
-            setProduct(prev => prev.map(product => 
+            setProduct(prev => prev.map(product =>
                 product.componen_product_id === productId ? updatedProduct : product
             ));
             return updatedProduct;
@@ -66,7 +66,7 @@ export const useProduct = () => {
     const deleteProduct = useCallback(async (productId: string) => {
         setLoading(true);
         setError(null);
-        
+
         try {
             await ItemProductService.deleteItemProduct(productId);
             // Remove from local state

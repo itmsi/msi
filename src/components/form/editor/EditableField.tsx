@@ -15,6 +15,7 @@ interface EditableFieldProps {
     id: string;
     showAction?: boolean;
     editing?: boolean;
+    preview?: React.ReactNode;
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({
@@ -27,7 +28,8 @@ const EditableField: React.FC<EditableFieldProps> = ({
     error,
     id,
     showAction = true,
-    editing = false
+    editing = false,
+    preview
 }) => {
     const [isEditing, setIsEditing] = useState(editing);
     const snapshotRef = useRef<string>('');
@@ -67,7 +69,9 @@ const EditableField: React.FC<EditableFieldProps> = ({
                     )}
                 </div>
                 <div className="w-full min-h-[100px] p-4 bg-gray-50 border border-gray-200 rounded-lg prose max-w-none text-gray-700 reset-content">
-                    {value ? (
+                    {preview ? (
+                        <div className="space-y-4">{preview}</div>
+                    ) : value ? (
                         <div dangerouslySetInnerHTML={{ __html: value }} />
                     ) : (
                         <span className="text-gray-400 italic">No content yet</span>
@@ -81,29 +85,34 @@ const EditableField: React.FC<EditableFieldProps> = ({
     return (
         <div>
             {showAction && (
-            <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-sm text-gray-700 font-medium">
-                    {label}
-                </label>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        onClick={handleCancel}
-                        className="gap-2 px-2.5 py-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:text-red-800 transition-colors"
-                    >
-                        <FaTimes className="w-3 h-3" />
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={handleDone}
-                        className="gap-2 px-2.5 py-1 text-xs font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:text-green-800 transition-colors"
-                    >
-                        <FaCheck className="w-3 h-3" />
-                        Done
-                    </Button>
+                <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-sm text-gray-700 font-medium">
+                        {label}
+                    </label>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={handleCancel}
+                            className="gap-2 px-2.5 py-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 hover:text-red-800 transition-colors"
+                        >
+                            <FaTimes className="w-3 h-3" />
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={handleDone}
+                            className="gap-2 px-2.5 py-1 text-xs font-medium text-green-600 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 hover:text-green-800 transition-colors"
+                        >
+                            <FaCheck className="w-3 h-3" />
+                            Done
+                        </Button>
+                    </div>
                 </div>
-            </div>
+            )}
+            {preview && (
+                <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                    {preview}
+                </div>
             )}
             <TinyMceEditor
                 id={id}
