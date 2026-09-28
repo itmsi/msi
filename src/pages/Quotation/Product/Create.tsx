@@ -2,11 +2,12 @@ import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import FileUpload from "@/components/ui/FileUpload/FileUpload";
-import { MdAdd, MdKeyboardArrowLeft, MdSave } from "react-icons/md";
+import EditableField from "@/components/form/editor/EditableField";
+import { MdAdd, MdKeyboardArrowLeft, MdSave, MdDeleteOutline } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
 import { handleKeyPress } from "@/helpers/generalHelper";
 import CustomSelect from "@/components/form/select/CustomSelect";
-import { useCreateProduct, getDefaultSpecs } from "./hooks/useProductCreate";
+import { useCreateProduct, getDefaultSpecs, makeSpec } from "./hooks/useProductCreate";
 
 export default function CreateProduct() {
     const {
@@ -355,44 +356,104 @@ export default function CreateProduct() {
                         </div>
 
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
-                                Spesifikasi Produk
-                            </h2>
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900">
+                                    Spesifikasi Produk
+                                </h2>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            componen_product_specifications: [...prev.componen_product_specifications, makeSpec('')]
+                                        }));
+                                    }}
+                                    className="flex items-center gap-1.5 text-xs"
+                                >
+                                    <MdAdd size={14} />
+                                    Tambah Spesifikasi
+                                </Button>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {formData.componen_product_specifications.map((spec, index) => (
-                                    <div key={`${spec.specification_label_name}-${index}`}>
-                                        <Label htmlFor={`spec_${index}`}>
-                                            {spec.specification_label_name || spec.componen_product_specification_label}
-                                        </Label>
-                                        <Input
-                                            id={`spec_${index}`}
-                                            type="text"
-                                            value={spec.specification_value_name || spec.componen_product_specification_value || ''}
-                                            onChange={(e) => {
-                                                const newSpecs = [...formData.componen_product_specifications];
-                                                newSpecs[index] = {
-                                                    ...newSpecs[index],
-                                                    specification_value_name: e.target.value,
-                                                    componen_product_specification_value: e.target.value
-                                                };
+                                    <div key={index} className="grid gap-2 grid-cols-1 md:grid-cols-2 relative border border-gray-200 rounded-lg p-4 space-y-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const newSpecs = formData.componen_product_specifications.filter((_, i) => i !== index);
                                                 setFormData(prev => ({
                                                     ...prev,
                                                     componen_product_specifications: newSpecs
                                                 }));
                                             }}
-                                            placeholder="Masukkan nilai spesifikasi"
-                                        />
-                                        {spec.componen_product_specification_description && (
-                                            <p className="mt-1 text-xs text-gray-500">
-                                                {spec.componen_product_specification_description}
-                                            </p>
-                                        )}
+                                            className="absolute top-2 right-2 text-gray-400 hover:text-red-600"
+                                            aria-label="Hapus spesifikasi"
+                                        >
+                                            <MdDeleteOutline size={18} />
+                                        </button>
+                                        <div>
+                                            <Label htmlFor={`spec_label_${index}`}>Label</Label>
+                                            <Input
+                                                id={`spec_label_${index}`}
+                                                type="text"
+                                                value={spec.specification_label_name || spec.componen_product_specification_label || ''}
+                                                onChange={(e) => {
+                                                    const newSpecs = [...formData.componen_product_specifications];
+                                                    newSpecs[index] = {
+                                                        ...newSpecs[index],
+                                                        specification_label_name: e.target.value,
+                                                        componen_product_specification_label: e.target.value
+                                                    };
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        componen_product_specifications: newSpecs
+                                                    }));
+                                                }}
+                                                placeholder="Nama spesifikasi"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label htmlFor={`spec_value_${index}`}>Value</Label>
+                                            <Input
+                                                id={`spec_value_${index}`}
+                                                type="text"
+                                                value={spec.specification_value_name || spec.componen_product_specification_value || ''}
+                                                onChange={(e) => {
+                                                    const newSpecs = [...formData.componen_product_specifications];
+                                                    newSpecs[index] = {
+                                                        ...newSpecs[index],
+                                                        specification_value_name: e.target.value,
+                                                        componen_product_specification_value: e.target.value
+                                                    };
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        componen_product_specifications: newSpecs
+                                                    }));
+                                                }}
+                                                placeholder="Masukkan nilai spesifikasi"
+                                            />
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </>}
 
+
+                    {/* Custom Section */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <EditableField
+                            id="componen_product_custom-editor"
+                            label="Custom"
+                            value={formData.componen_product_custom}
+                            onChange={(content) => handleInputChange('componen_product_custom', content)}
+                            placeholder="Tambahkan informasi custom..."
+                            editing={true}
+                            showAction={false}
+                        />
+                    </div>
 
                     {/* Image Upload Section */}
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

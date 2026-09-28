@@ -6,6 +6,7 @@ import { AttachFileItem, SalesOrderFormData, SalesOrderFormItem, SalesOrderItem 
 import { SalesOrderService } from '../services/salesOrderService';
 import { PurchaseOrderService } from '@/pages/Netsuite/PurchaseOrder/services/purchaseOrderService';
 import { MasterDataFormFieldItems } from '@/pages/Netsuite/PurchaseOrder/types/purchaseorder';
+import { CUSTOM_PRICE_LEVEL, getInitialPriceLevel, parsePriceLevels } from '../utils/priceLevel';
 
 // Helper untuk konversi angka yang aman
 const safeNumber = (val: any): number | null => {
@@ -157,6 +158,9 @@ export const useSalesOrderEdit = (id: string | undefined) => {
                         location_name: item.location_name || '',
                         taxcode: item.taxcode,
                         taxcode_name: item.taxcode_name || '',
+                        // Data lama tanpa price level dianggap Custom (rate diisi manual)
+                        price_level: item.price_level_name ? safeNumber(item.price_level) : CUSTOM_PRICE_LEVEL.id,
+                        price_level_name: item.price_level_name || CUSTOM_PRICE_LEVEL.name,
                         // tax_amount: item.tax_amount || 0,
                     })),
                     files: (Array.isArray(so.files) ? so.files : []).map((file: any) => ({
@@ -255,14 +259,19 @@ export const useSalesOrderEdit = (id: string | undefined) => {
 
     const handleAddItem = (selectedItem: any) => {
         if (!selectedItem) return;
+        const priceLevelOptions = parsePriceLevels(selectedItem.data?.priceLevels);
+        const initialPriceLevel = getInitialPriceLevel(priceLevelOptions);
         const newItem: SalesOrderFormItem = {
             id: `${selectedItem.value}-${Date.now()}`,
             itemId: Number(selectedItem.value),
             item_name: selectedItem.data?.itemId || selectedItem.label,
             item_displayname: selectedItem.data?.displayName || '',
             qty: 1,
-            rate: 0,
-            amount: 0,
+            ...initialPriceLevel,
+            amount: initialPriceLevel.rate,
+            gross_amount: initialPriceLevel.rate,
+            tax_amount: 0,
+            price_level_options: priceLevelOptions,
             description: '',
             department: formData.department,
             department_name: formData.department_name || '',
@@ -350,6 +359,8 @@ export const useSalesOrderEdit = (id: string | undefined) => {
                     class: item.class || undefined,
                     location: item.location || undefined,
                     taxcode: item.taxcode || undefined,
+                    price_level: item.price_level ?? undefined,
+                    price_level_name: item.price_level_name || undefined,
                 })),
                 files: formData.files || [],
             };

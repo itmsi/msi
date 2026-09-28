@@ -30,6 +30,60 @@ const formatCurrency = (value: string | number): string => {
     }).format(numValue);
 };
 
+type PdfHtmlTableRenderOptions = {
+    doc: jsPDF;
+    tableElement: HTMLTableElement;
+    startY: number;
+    left: number;
+    width: number;
+    margin?: number;
+    pageHeight?: number;
+    footerHeight?: number;
+    onPageBreak?: () => void;
+};
+
+const renderHtmlTableToPdf = ({
+    doc,
+    tableElement,
+    startY,
+    left,
+    width,
+    margin = 12,
+    footerHeight = 20,
+    onPageBreak,
+}: PdfHtmlTableRenderOptions): number => {
+    if (!tableElement.rows.length) {
+        return startY;
+    }
+
+    autoTable(doc, {
+        startY,
+        html: tableElement,
+        margin: {
+            left,
+            right: margin,
+            bottom: footerHeight + margin
+        },
+        tableWidth: width,
+        theme: 'grid',
+        styles: {
+            fontSize: 8,
+            cellPadding: 1.5,
+            font: 'Futura',
+            fontStyle: 'normal',
+            textColor: [23, 26, 31],
+            lineColor: [200, 200, 200],
+            lineWidth: 0.2,
+            valign: 'middle'
+        },
+        didDrawPage: () => {
+            onPageBreak?.();
+        }
+    });
+
+    return (doc as any).lastAutoTable?.finalY || startY + tableElement.rows.length * 7;
+};
+
 export const generateQuotationPDF = async (data: ManageQuotationDataPDF, language: string) => {
     const doc = new jsPDF({
         orientation: 'portrait',
@@ -480,11 +534,30 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 }
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const element = node as Element;
+                const tagName = element.tagName.toLowerCase();
 
                 // Handle different HTML elements
-                if (element.tagName.toLowerCase() === 'b' ||
-                    element.tagName.toLowerCase() === 'u' ||
-                    element.tagName.toLowerCase() === 'i') {
+                if (tagName === 'table') {
+                    const newFinalY = renderHtmlTableToPdf({
+                        doc,
+                        tableElement: element as HTMLTableElement,
+                        startY: termYPos,
+                        left: margin,
+                        width: maxTermWidth,
+                        margin,
+                        pageHeight,
+                        footerHeight,
+                        onPageBreak: () => {
+                            addHeader();
+                            addFooter();
+                            termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
+                        }
+                    });
+                    termYPos = newFinalY + 4;
+                    return;
+                }
+
+                if (tagName === 'b' || tagName === 'u' || tagName === 'i') {
                     // Process bold/underline/italic headers
                     const text = element.textContent?.trim();
                     if (text) {
@@ -515,7 +588,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                         });
                         termYPos += 3; // Extra spacing after headers
                     }
-                } else if (element.tagName.toLowerCase() === 'ol') {
+                } else if (tagName === 'ol') {
                     // Process ordered lists
                     const listItems = element.querySelectorAll('li');
                     listItems.forEach((li, index) => {
@@ -557,10 +630,33 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                             }
                         }
                     });
-                } else if (element.tagName.toLowerCase() === 'div') {
+                } else if (tagName === 'div') {
+                    if (element.querySelector('table')) {
+                        const tableElement = element.querySelector('table') as HTMLTableElement | null;
+                        if (tableElement) {
+                            const newFinalY = renderHtmlTableToPdf({
+                                doc,
+                                tableElement,
+                                startY: termYPos,
+                                left: margin,
+                                width: maxTermWidth,
+                                margin,
+                                pageHeight,
+                                footerHeight,
+                                onPageBreak: () => {
+                                    addHeader();
+                                    addFooter();
+                                    termEndPage = (doc as any).internal.getCurrentPageInfo().pageNumber;
+                                }
+                            });
+                            termYPos = newFinalY + 4;
+                            return;
+                        }
+                    }
+
                     // Process div content (but skip if it only contains lists or other processed elements)
                     const hasOnlyProcessableChildren = Array.from(element.children).every(child =>
-                        ['ol', 'ul', 'b', 'u', 'i', 'br'].includes(child.tagName.toLowerCase())
+                        ['ol', 'ul', 'b', 'u', 'i', 'br', 'table'].includes(child.tagName.toLowerCase())
                     );
 
                     if (!hasOnlyProcessableChildren) {
@@ -607,7 +703,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                         // Process children elements
                         Array.from(element.childNodes).forEach(child => processNode(child));
                     }
-                } else if (element.tagName.toLowerCase() === 'br') {
+                } else if (tagName === 'br') {
                     termYPos += 3;
                 }
             }
@@ -1154,7 +1250,6 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
 
         return itemYPos;
     };
-
     const renderItemNotes = (item: any, startX: number, startYPos: number, width: number, minBoxHeight: number = 0): number => {
         let itemYPos = startYPos;
 
@@ -1189,6 +1284,132 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         return Math.max(itemYPos, notesBoxStartY - 10 + notesBoxHeight);
     };
 
+    // const renderItemNotes = (item: any, startX: number, startYPos: number, width: number, minBoxHeight: number = 0): number => {
+    //     let itemYPos = startYPos;
+
+    //     const specificationResult = renderItemSpecifications(item, startX, itemYPos, width, startX);
+    //     itemYPos = specificationResult.finalY;
+
+    //     if (!(item.notes && String(item.notes).trim().length > 0)) {
+    //         return Math.max(itemYPos, startYPos + specificationResult.boxHeight);
+    //     }
+
+    //     // setFontByLanguage(doc, langField('notes_label'), 'Futura', 'bold', language);
+    //     // doc.setFontSize(10);
+    //     // doc.setTextColor(23, 26, 31);
+    //     // doc.text(langField('notes_label'), startX + 8, itemYPos, { align: 'center' });
+    //     // itemYPos += 5;
+
+    //     doc.setFontSize(9);
+    //     doc.setTextColor(0, 0, 0);
+    //     setFontSafe(doc, 'Futura', 'normal');
+    //     const notesBoxStartY = itemYPos;
+
+    //     const notesHtml = String(item.notes);
+    //     const notesDocument = new DOMParser().parseFromString(notesHtml, 'text/html');
+    //     const renderNotesNode = (node: Node): void => {
+    //         if (node.nodeType === Node.TEXT_NODE) {
+    //             const text = node.textContent?.replace(/\s+/g, ' ').trim();
+    //             if (!text) return;
+
+    //             doc.setFontSize(9);
+    //             doc.setTextColor(0, 0, 0);
+    //             setFontSafe(doc, 'Futura', 'normal');
+    //             doc.splitTextToSize(text, width - 6).forEach((line: string) => {
+    //                 if (itemYPos + 5 > pageHeight - footerHeight - margin) {
+    //                     doc.addPage();
+    //                     addHeader();
+    //                     addFooter();
+    //                     itemYPos = margin + headerHeight + 5;
+    //                 }
+    //                 doc.text(line, startX + 3, itemYPos);
+    //                 itemYPos += 4.5;
+    //             });
+    //             return;
+    //         }
+
+    //         if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+    //         const element = node as Element;
+    //         const tagName = element.tagName.toLowerCase();
+
+    //         if (tagName === 'table') {
+    //             itemYPos = renderHtmlTableToPdf({
+    //                 doc,
+    //                 tableElement: element as HTMLTableElement,
+    //                 startY: itemYPos,
+    //                 left: startX,
+    //                 width,
+    //                 margin,
+    //                 pageHeight,
+    //                 footerHeight,
+    //                 onPageBreak: () => {
+    //                     addHeader();
+    //                     addFooter();
+    //                 }
+    //             }) + 4;
+    //             return;
+    //         }
+
+    //         if (/^h[1-6]$/.test(tagName)) {
+    //             const headingText = element.textContent?.replace(/\s+/g, ' ').trim();
+    //             if (!headingText) return;
+
+    //             doc.setFontSize(tagName === 'h1' ? 13 : 11);
+    //             doc.setTextColor(23, 26, 31);
+    //             setFontSafe(doc, 'Futura', 'bold');
+    //             const align = element.getAttribute('style')?.includes('text-align: center') ? 'center' : 'left';
+    //             const x = align === 'center' ? startX + width / 2 : startX + 3;
+    //             doc.splitTextToSize(headingText, width - 6).forEach((line: string) => {
+    //                 if (itemYPos + 6 > pageHeight - footerHeight - margin) {
+    //                     doc.addPage();
+    //                     addHeader();
+    //                     addFooter();
+    //                     itemYPos = margin + headerHeight + 5;
+    //                 }
+    //                 doc.text(line, x, itemYPos, { align });
+    //                 itemYPos += 5;
+    //             });
+    //             itemYPos += 2;
+    //             return;
+    //         }
+
+    //         if (tagName === 'br') {
+    //             itemYPos += 3;
+    //             return;
+    //         }
+
+    //         if (tagName === 'li') {
+    //             const listText = element.textContent?.replace(/\s+/g, ' ').trim();
+    //             if (listText) {
+    //                 doc.setFontSize(9);
+    //                 setFontSafe(doc, 'Futura', 'normal');
+    //                 doc.splitTextToSize(`• ${listText}`, width - 8).forEach((line: string) => {
+    //                     doc.text(line, startX + 3, itemYPos);
+    //                     itemYPos += 4.5;
+    //                 });
+    //             }
+    //             return;
+    //         }
+
+    //         Array.from(element.childNodes).forEach(renderNotesNode);
+    //         if (['p', 'div', 'section', 'ul', 'ol'].includes(tagName)) itemYPos += 2;
+    //     };
+
+    //     Array.from(notesDocument.body.childNodes).forEach(renderNotesNode);
+
+    //     itemYPos += 4;
+
+    //     // Rounded border for notes block, matching specifications/accessories styling.
+    //     // Kept at least as tall as the specifications box beside it so both columns line up.
+    //     const notesBoxHeight = Math.max(itemYPos - notesBoxStartY + 6, minBoxHeight);
+    //     // doc.setDrawColor(200, 200, 200);
+    //     // doc.setLineWidth(0.1);
+    //     // doc.roundedRect(startX, notesBoxStartY - 10, width, notesBoxHeight, 2, 2);
+
+    //     return Math.max(itemYPos, notesBoxStartY - 10 + notesBoxHeight);
+    // };
+
     // Group items into pages (max 2 items per page)
     const itemsWithContent = data.manage_quotation_items
         .map(item => item as any)
@@ -1199,6 +1420,143 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         );
 
     const hasNotes = (item: any): boolean => !!(item.notes && String(item.notes).trim().length > 0);
+
+    // Render HTML dari editor (WYSIWYG) ke PDF: teks, heading, list, dan tabel.
+    const renderHtmlBlock = (html: string, startX: number, startYPos: number, width: number): number => {
+        let blockYPos = startYPos;
+        const htmlDocument = new DOMParser().parseFromString(html, 'text/html');
+
+        const ensureSpace = (needed: number) => {
+            if (blockYPos + needed > pageHeight - footerHeight - margin) {
+                doc.addPage();
+                addHeader();
+                addFooter();
+                blockYPos = margin + headerHeight + 5;
+            }
+        };
+
+        const renderNode = (node: Node): void => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.textContent?.replace(/\s+/g, ' ').trim();
+                if (!text) return;
+
+                doc.setFontSize(9);
+                doc.setTextColor(0, 0, 0);
+                setFontByLanguage(doc, text, 'Futura', 'normal', language);
+                doc.splitTextToSize(text, width - 6).forEach((line: string) => {
+                    ensureSpace(5);
+                    doc.text(line, startX + 3, blockYPos);
+                    blockYPos += 4.5;
+                });
+                return;
+            }
+
+            if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+            const element = node as Element;
+            const tagName = element.tagName.toLowerCase();
+
+            if (tagName === 'table') {
+                ensureSpace(20);
+                blockYPos = renderHtmlTableToPdf({
+                    doc,
+                    tableElement: element as HTMLTableElement,
+                    startY: blockYPos,
+                    left: startX,
+                    width,
+                    margin,
+                    pageHeight,
+                    footerHeight,
+                    onPageBreak: () => {
+                        addHeader();
+                        addFooter();
+                    }
+                }) + 4;
+                return;
+            }
+
+            if (/^h[1-6]$/.test(tagName)) {
+                const headingText = element.textContent?.replace(/\s+/g, ' ').trim();
+                if (!headingText) return;
+
+                doc.setFontSize(tagName === 'h1' ? 13 : 11);
+                doc.setTextColor(23, 26, 31);
+                setFontByLanguage(doc, headingText, 'Futura', 'bold', language);
+                const align = element.getAttribute('style')?.includes('text-align: center') ? 'center' : 'left';
+                const x = align === 'center' ? startX + width / 2 : startX + 3;
+                doc.splitTextToSize(headingText, width - 6).forEach((line: string) => {
+                    ensureSpace(6);
+                    doc.text(line, x, blockYPos, { align });
+                    blockYPos += 5;
+                });
+                blockYPos += 2;
+                return;
+            }
+
+            if (tagName === 'br') {
+                blockYPos += 3;
+                return;
+            }
+
+            if (tagName === 'li') {
+                const listText = element.textContent?.replace(/\s+/g, ' ').trim();
+                if (!listText) return;
+
+                doc.setFontSize(9);
+                doc.setTextColor(0, 0, 0);
+                setFontByLanguage(doc, listText, 'Futura', 'normal', language);
+                doc.splitTextToSize(`• ${listText}`, width - 8).forEach((line: string) => {
+                    ensureSpace(5);
+                    doc.text(line, startX + 3, blockYPos);
+                    blockYPos += 4.5;
+                });
+                return;
+            }
+
+            Array.from(element.childNodes).forEach(renderNode);
+            if (['p', 'div', 'section', 'ul', 'ol'].includes(tagName)) blockYPos += 2;
+        };
+
+        Array.from(htmlDocument.body.childNodes).forEach(renderNode);
+
+        return blockYPos;
+    };
+
+    // Remark produk tampil di halaman tersendiri tepat setelah halaman produknya.
+    const renderItemCustomPage = (item: any): void => {
+        const customHtml = item?.componen_product_custom;
+        if (!customHtml || !String(customHtml).trim().length) return;
+
+        doc.addPage();
+        addHeader();
+        addFooter();
+        yPos = margin + headerHeight;
+
+        const contentWidth = pageWidth - 2 * margin;
+        // const remarkTitle = langField('spec_remark');
+
+        // doc.setFontSize(12);
+        // doc.setTextColor(0, 48, 97);
+        // setFontByLanguage(doc, remarkTitle, 'Futura', 'bold', language);
+        // doc.text(remarkTitle, margin, yPos);
+        // yPos += 6;
+
+        const productName = String(item.componen_product_name || '-');
+        doc.setFontSize(10);
+        doc.setTextColor(23, 26, 31);
+        setFontByLanguage(doc, productName, 'Futura', 'bold', language);
+        doc.splitTextToSize(productName, contentWidth).forEach((line: string) => {
+            doc.text(line, margin, yPos);
+            yPos += 5;
+        });
+
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.2);
+        doc.line(margin, yPos, pageWidth - margin, yPos);
+        yPos += 6;
+
+        yPos = renderHtmlBlock(String(customHtml), margin, yPos, contentWidth);
+    };
 
     if (itemsWithContent.length > 0) {
         let itemIndex = 0;
@@ -1227,6 +1585,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 renderItemAccessories(current, leftStartX, leftSpecResult.finalY, itemWidth, notesStartX - 5, 1);
 
                 renderItemNotes(current, notesStartX, headerYPos, itemWidth, leftSpecResult.boxHeight);
+                renderItemCustomPage(current);
 
                 itemIndex += 1;
             } else if (canPairWithNext && next) {
@@ -1253,6 +1612,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     item2YPos = renderItemAccessories(next, item2StartX, item2YPos, itemWidth, margin);
                 }
 
+                renderItemCustomPage(current);
+                renderItemCustomPage(next);
+
                 itemIndex += 2;
             } else {
                 const itemWidth = (pageWidth - 2 * margin) * 0.6;
@@ -1261,6 +1623,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 let itemYPos = renderItemImageAndName(current, startX, yPos, itemWidth);
                 itemYPos = renderItemSpecifications(current, startX, itemYPos, itemWidth, startX).finalY;
                 renderItemAccessories(current, startX, itemYPos, itemWidth, startX, 1);
+                renderItemCustomPage(current);
 
                 itemIndex += 1;
             }

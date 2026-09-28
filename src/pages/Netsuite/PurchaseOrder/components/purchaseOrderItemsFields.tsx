@@ -18,6 +18,7 @@ import { PODepartmentPaginationState, PODepartmentSelectOption } from '@/hooks/u
 import { POProjectSegmentationPaginationState, POProjectSegmentationSelectOption } from '@/hooks/usePOProjectSegmentationSelect';
 import TextArea from '@/components/form/input/TextArea';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
+import { useFormattedItemOptions } from '@/hooks/useFormattedItemOptions';
 import { LoadingOverlay } from '@/components/common/Loading';
 
 
@@ -134,6 +135,10 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [productSelectError, setProductSelectError] = useState<string>('');
+
+    // Format label item menjadi "itemId - displayName", sama seperti di Transfer Order
+    const { defaultOptions: formattedItemOptions, loadOptions: loadFormattedItemOptions } =
+        useFormattedItemOptions(POItemsOptions, handleProductInputChange);
 
     // Infinite scroll untuk tabel items
     const BATCH_SIZE = 50;
@@ -799,8 +804,8 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                             placeholder="Select product to add..."
                             value={selectedProduct}
                             error={productSelectError}
-                            defaultOptions={POItemsOptions}
-                            loadOptions={handleProductInputChange}
+                            defaultOptions={formattedItemOptions}
+                            loadOptions={loadFormattedItemOptions}
                             onMenuScrollToBottom={handleMenuScrollToBottom}
                             isLoading={pagination.loading}
                             noOptionsMessage={() => "No products found"}

@@ -42,6 +42,7 @@ import { QuotationService } from './services/quotationService';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from './language/quotationLabels';
+// import EditableField from '@/components/form/editor/EditableField';
 
 export default function EditQuotation() {
     const navigate = useNavigate();
@@ -228,6 +229,8 @@ export default function EditQuotation() {
                     cp_code_unique: item.cp_code_unique || '',
                     cp_notes: item.cp_notes || '',
                     notes: item.notes || '',
+                    cp_componen_product_custom: item.cp_componen_product_custom || '',
+                    componen_product_custom: item.componen_product_custom || '',
                     segment: item.segment || '',
                     msi_model: item.msi_model || '',
                     msi_product: item.msi_product || '',
@@ -717,6 +720,8 @@ export default function EditQuotation() {
                     cp_code_unique: apiProductData.cp_code_unique || '',
                     cp_notes: apiProductData.cp_notes || '',
                     notes: apiProductData.notes || '',
+                    cp_componen_product_custom: apiProductData.cp_componen_product_custom || '',
+                    componen_product_custom: apiProductData.componen_product_custom || '',
                     msi_model: apiProductData.msi_model || '',
                     msi_product: apiProductData.msi_product || '',
                     segment: apiProductData.segment || '',
@@ -837,6 +842,8 @@ export default function EditQuotation() {
                     cp_code_unique: existingItem.cp_code_unique || '',
                     cp_notes: existingItem.cp_notes || '',
                     notes: existingItem.notes || '',
+                    cp_componen_product_custom: existingItem.cp_componen_product_custom || '',
+                    componen_product_custom: existingItem.componen_product_custom || '',
                     msi_model: existingItem.msi_model || '',
                     msi_product: existingItem.msi_product || '',
                     segment: existingItem.segment || '',
@@ -946,6 +953,7 @@ export default function EditQuotation() {
                 selling_price_star_5: updatedProductData.selling_price_star_5 || currentItem.selling_price_star_5,
                 description: updatedProductData.componen_product_description || currentItem.description,
                 notes: updatedProductData.notes || (currentItem as any).notes || '',
+                componen_product_custom: updatedProductData.componen_product_custom ?? currentItem.componen_product_custom ?? '',
                 manage_quotation_item_specifications: updatedProductData.componen_product_specifications?.map((spec: any) => ({
                     manage_quotation_item_specification_label: spec.componen_product_specification_label || '',
                     manage_quotation_item_specification_value: spec.componen_product_specification_value || ''
@@ -1794,6 +1802,21 @@ export default function EditQuotation() {
                             </div>
 
                             <div className="md:col-span-2">
+                                {/* <EditableField
+                                    id="wysiwyg-editor"
+                                    label={termConditionLoading ? langField('termContentLoading') : langField('termContent')}
+                                    value={termConditionContent}
+                                    // onChange={(value: string) => updateField('description', value)}
+                                    onChange={(content) => {
+                                        setTermConditionContent(content);
+                                        handleInputChange('term_content_directory', content);
+                                    }}
+                                    placeholder="Remarks..."
+                                    disabled={termConditionLoading}
+                                    editing={true}
+                                    showAction={true}
+                                // error={errors.keterangan}
+                                /> */}
                                 <WysiwygEditor
                                     id="wysiwyg-editor"
                                     label={termConditionLoading ? langField('termContentLoading') : langField('termContent')}

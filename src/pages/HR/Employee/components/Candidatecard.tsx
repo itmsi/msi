@@ -6,6 +6,7 @@ import {
     MdGroup,
     MdCheckCircle,
     MdCancel,
+    MdVerified,
     MdEdit,
     MdMoreVert,
     MdSchedule,
@@ -115,6 +116,7 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete }: Candidate
     const interviewTime = candidate.schedule_interview?.schedule_interview_time || null;
     const assignedRoles = getAssignRoleArr(candidate.schedule_interview);
     const MAX_VISIBLE_ROLES = 5;
+    const isEmployee = candidate.candidate_status === 'Complete' && candidate.is_employee === true;
 
     return (
         <motion.div
@@ -123,6 +125,14 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete }: Candidate
             transition={{ duration: 0.2 }}
             className={`relative bg-white rounded-b-2xl border hover:border-[#C4C9DA] shadow-lg/10 hover:shadow-black/4 transition-all duration-200`} style={{ borderColor: cs.fg + '50' }}>
             <div className="h-0.5 rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${cs.fg}, ${s.dot})` }} />
+
+            {isEmployee && (
+                <div className="absolute bottom-0 right-0 w-24 h-24 overflow-hidden rounded-br-2xl pointer-events-none">
+                    <div className="absolute bottom-5 -right-9 w-36 -rotate-45 flex items-center justify-center gap-1 py-1 bg-[#047857] text-white text-[10px] font-primary shadow-sm">
+                        <MdVerified size={11} /> Employee
+                    </div>
+                </div>
+            )}
             <div ref={menuRef} className="absolute top-4 right-4 z-10">
                 <button
                     type="button"

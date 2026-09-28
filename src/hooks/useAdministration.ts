@@ -1,9 +1,9 @@
 import { administrationService, companyService, departmentService, employeesService, roleService, positionService, usersService } from "@/services/administrationService";
-import { 
-    Menu, 
-    MenuFormData, 
-    MenuPagination, 
-    PermissionItem, 
+import {
+    Menu,
+    MenuFormData,
+    MenuPagination,
+    PermissionItem,
     MenuValidationErrors,
     MenuFilters,
     MenuListRequest,
@@ -65,7 +65,7 @@ const getErrorMessage = (error: unknown): string => {
 export const useAdministration = () => {
     // Ref to prevent multiple initial calls
     const isInitialized = useRef(false);
-    
+
     // States - Updated to use new types
     const [loading, setLoading] = useState(false);
     const [pagination, setPagination] = useState<MenuPagination | null>(null);
@@ -85,7 +85,7 @@ export const useAdministration = () => {
         sort_by: '',
         sort_order: ''
     });
-    
+
     // Permission modal states (keeping for compatibility)
     const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
     const [selectedMenuForPermission, setSelectedMenuForPermission] = useState<Menu | null>(null);
@@ -159,7 +159,7 @@ export const useAdministration = () => {
 
 
         // Check for duplicate menu names (exclude current editing menu)
-        const duplicateMenu = menus.find(menu => 
+        const duplicateMenu = menus.find(menu =>
             menu.menu_name.toLowerCase() === formData.menu_name.toLowerCase() &&
             (!editingMenu || menu.menu_id !== editingMenu.menu_id)
         );
@@ -168,7 +168,7 @@ export const useAdministration = () => {
         }
 
         // Check for duplicate URLs (exclude current editing menu)
-        const duplicateUrl = menus.find(menu => 
+        const duplicateUrl = menus.find(menu =>
             menu.menu_url === formData.menu_url &&
             (!editingMenu || menu.menu_id !== editingMenu.menu_id)
         );
@@ -192,19 +192,19 @@ export const useAdministration = () => {
     // Handle form input changes - Updated for new types
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
-        
+
         // Clear validation error for this field when user starts typing
         if (validationErrors[name as keyof MenuValidationErrors]) {
             clearFieldError(name as keyof MenuValidationErrors);
         }
-        
+
         setFormData(prev => {
             const newData = {
                 ...prev,
-                [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked 
-                        : name === 'menu_order' ? parseInt(value) || 0
+                [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked
+                    : name === 'menu_order' ? parseInt(value) || 0
                         : name === 'menu_parent_id' ? (value ? value : null)
-                        : value
+                            : value
             };
 
             // Auto-generate menu_url from menu_name
@@ -231,7 +231,7 @@ export const useAdministration = () => {
         if (validationErrors[name as keyof MenuValidationErrors]) {
             clearFieldError(name as keyof MenuValidationErrors);
         }
-        
+
         setFormData(prev => ({
             ...prev,
             [name]: selectedOption ? selectedOption.value : ''
@@ -275,7 +275,7 @@ export const useAdministration = () => {
             try {
                 setLoading(true);
                 const response = await administrationService.deleteMenu(menu.menu_id);
-                
+
                 if (response.status === 200) {
                     toast.success('Menu deleted successfully');
                     fetchMenus(pagination?.current_page || 1, pagination?.per_page || 10);
@@ -295,20 +295,20 @@ export const useAdministration = () => {
     const handleToggleStatus = async (menu: Menu, newStatus: boolean) => {
         try {
             setLoading(true);
-            
+
             // Call API to update menu status
             const response = await administrationService.toggleMenuStatus(menu.menu_id, newStatus);
-            
+
             if (response.status === 200) {
                 // Update local state immediately for better UX
-                setMenus(prevMenus => 
-                    prevMenus.map(m => 
-                        m.menu_id === menu.menu_id 
+                setMenus(prevMenus =>
+                    prevMenus.map(m =>
+                        m.menu_id === menu.menu_id
                             ? { ...m, is_delete: !newStatus } // is_delete is opposite of active status
                             : m
                     )
                 );
-                
+
                 toast.success(`Menu ${newStatus ? 'activated' : 'deactivated'} successfully`);
             } else {
                 toast.error('Failed to update menu status');
@@ -316,11 +316,11 @@ export const useAdministration = () => {
         } catch (error) {
             console.error('Error updating menu status:', error);
             toast.error(getErrorMessage(error));
-            
+
             // Revert optimistic update on error
-            setMenus(prevMenus => 
-                prevMenus.map(m => 
-                    m.menu_id === menu.menu_id 
+            setMenus(prevMenus =>
+                prevMenus.map(m =>
+                    m.menu_id === menu.menu_id
                         ? { ...m, is_delete: newStatus } // Revert to original state
                         : m
                 )
@@ -334,7 +334,7 @@ export const useAdministration = () => {
     const handlePermissionMenu = async (menu: Menu) => {
         setSelectedMenuForPermission(menu);
         setIsPermissionModalOpen(true);
-        
+
         try {
             setPermissionLoading(true);
             setMenuPermissions([]);
@@ -399,7 +399,7 @@ export const useAdministration = () => {
 
         try {
             setPermissionLoading(true);
-            
+
             if (hasStatus) {
                 // Create permission
                 await administrationService.createMenuPermission({
@@ -432,18 +432,18 @@ export const useAdministration = () => {
 
     // Filter functions with debouncing
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    
+
     const handleFilterChange = useCallback((filterKey: keyof MenuFilters, value: string) => {
         setFilters(prev => ({
             ...prev,
             [filterKey]: value
         }));
-        
+
         // Debounce API calls for filter changes
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
-        
+
         debounceTimer.current = setTimeout(() => {
             // Create params with the new value instead of using stale state
             const requestParams: MenuListRequest = {
@@ -479,7 +479,7 @@ export const useAdministration = () => {
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
-        
+
         // Reset filters state
         setFilters({
             search: '',
@@ -487,7 +487,7 @@ export const useAdministration = () => {
             sort_by: '',
             sort_order: ''
         });
-        
+
         // Immediately fetch with cleared filters
         const clearedParams: MenuListRequest = {
             page: 1,
@@ -497,7 +497,7 @@ export const useAdministration = () => {
             search: undefined,
             menu_name: undefined
         };
-        
+
         administrationService.getMenus(clearedParams).then(response => {
             if (response.success) {
                 setMenus(response.data.data || []);
@@ -530,7 +530,7 @@ export const useAdministration = () => {
         formData,
         validationErrors,
         filters,
-        
+
         // Permission states
         isPermissionModalOpen,
         selectedMenuForPermission,
@@ -549,7 +549,7 @@ export const useAdministration = () => {
         handleCloseModal,
         handlePageChange,
         fetchMenus,
-        
+
         // Permission actions
         handlePermissionStatusChange,
         handleClosePermissionModal,
@@ -569,7 +569,7 @@ export const useAdministration = () => {
 export const useCompany = () => {
     // Ref to prevent multiple initial calls
     const isInitialized = useRef(false);
-    
+
     // States - Company management
     const [loading, setLoading] = useState(false);
     const [pagination, setPagination] = useState<CompanyPagination | null>(null);
@@ -631,7 +631,7 @@ export const useCompany = () => {
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-        
+
         // Clear validation error when user starts typing
         if (validationErrors[name as keyof CompanyValidationErrors]) {
             setValidationErrors(prev => ({ ...prev, [name]: undefined }));
@@ -690,7 +690,7 @@ export const useCompany = () => {
             errors.company_name = 'Company name contains invalid characters';
         } else {
             // Check for duplicate company name (excluding current company if editing)
-            const isDuplicate = companies.some(company => 
+            const isDuplicate = companies.some(company =>
                 company.company_name.toLowerCase() === data.company_name.trim().toLowerCase() &&
                 (!editingCompany || company.company_id !== editingCompany.company_id)
             );
@@ -708,8 +708,8 @@ export const useCompany = () => {
                 errors.company_email = 'Email address must not exceed 100 characters';
             } else {
                 // Check for duplicate email (excluding current company if editing)
-                const isDuplicateEmail = companies.some(company => 
-                    company.company_email && 
+                const isDuplicateEmail = companies.some(company =>
+                    company.company_email &&
                     company.company_email.toLowerCase() === data.company_email!.trim().toLowerCase() &&
                     (!editingCompany || company.company_id !== editingCompany.company_id)
                 );
@@ -739,13 +739,13 @@ export const useCompany = () => {
     // CRUD operations
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Clear previous errors
         setValidationErrors({});
-        
+
         // Run comprehensive validation
         const errors = validateCompanyForm(formData);
-        
+
         // If there are validation errors, show them and stop submission
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
@@ -755,7 +755,7 @@ export const useCompany = () => {
 
         try {
             setLoading(true);
-            
+
             if (editingCompany) {
                 const response = await companyService.updateCompany(editingCompany.company_id, formData);
                 if (response.status === 200 || response.status === 201) {
@@ -812,18 +812,18 @@ export const useCompany = () => {
 
     // Filter functions with debouncing
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    
+
     const handleFilterChange = useCallback((filterKey: keyof CompanyFilters, value: string) => {
         setFilters(prev => ({
             ...prev,
             [filterKey]: value
         }));
-        
+
         // Debounce API calls for filter changes
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
-        
+
         debounceTimer.current = setTimeout(() => {
             // Create params with the new value instead of using stale state
             const requestParams: CompanyListRequest = {
@@ -859,7 +859,7 @@ export const useCompany = () => {
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
-        
+
         // Reset filters state
         setFilters({
             search: '',
@@ -867,7 +867,7 @@ export const useCompany = () => {
             sort_by: '',
             sort_order: ''
         });
-        
+
         // Immediately fetch with cleared filters
         const clearedParams: CompanyListRequest = {
             page: 1,
@@ -877,7 +877,7 @@ export const useCompany = () => {
             search: undefined,
             company_name: undefined
         };
-        
+
         companyService.getCompanies(clearedParams).then(response => {
             if (response.success) {
                 setCompanies(response.data.data || []);
@@ -920,7 +920,7 @@ export const useCompany = () => {
         handleCloseModal,
         handlePageChange,
         fetchCompanies,
-        
+
         // Filter actions
         handleFilterChange,
         handleSearchChange,
@@ -936,7 +936,7 @@ export const useCompany = () => {
 export const useDepartment = () => {
     // Ref to prevent multiple initial calls
     const isInitialized = useRef(false);
-    
+
     // States - Department management
     const [loading, setLoading] = useState(false);
     const [pagination, setPagination] = useState<DepartmentPagination | null>(null);
@@ -1003,7 +1003,7 @@ export const useDepartment = () => {
     // Form validation - Only validate department_name as required
     const validateForm = (data: DepartmentFormData): DepartmentValidationErrors => {
         const errors: DepartmentValidationErrors = {};
-        
+
         if (!data.department_name?.trim()) {
             errors.department_name = 'Department name is required';
         } else if (data.department_name.trim().length < 2) {
@@ -1011,11 +1011,11 @@ export const useDepartment = () => {
         } else if (data.department_name.trim().length > 100) {
             errors.department_name = 'Department name must not exceed 100 characters';
         }
-        
+
         if (!data.company_id?.trim()) {
             errors.company_id = 'Company is required';
         }
-        
+
         return errors;
     };
 
@@ -1025,7 +1025,7 @@ export const useDepartment = () => {
             ...prev,
             [field]: value
         }));
-        
+
         // Clear validation error for this field
         if (validationErrors[field]) {
             setValidationErrors(prev => ({
@@ -1083,7 +1083,7 @@ export const useDepartment = () => {
     // Submit form
     const handleSubmit = useCallback(async () => {
         const errors = validateForm(formData);
-        
+
         if (Object.keys(errors).length > 0) {
             setValidationErrors(errors);
             return;
@@ -1091,7 +1091,7 @@ export const useDepartment = () => {
 
         try {
             setLoading(true);
-            
+
             if (editingDepartment) {
                 const response = await departmentService.updateDepartment(editingDepartment.department_id, formData);
                 if (response.status === 200) {
@@ -1139,7 +1139,7 @@ export const useDepartment = () => {
 
     // Filter change handler with debouncing
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    
+
     const handleFilterChange = useCallback((field: keyof DepartmentFilters, value: string) => {
         setFilters(prev => ({
             ...prev,
@@ -1150,7 +1150,7 @@ export const useDepartment = () => {
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
-        
+
         debounceTimer.current = setTimeout(() => {
             // Create params with the new value instead of using stale state
             const requestParams: DepartmentListRequest = {
@@ -1191,7 +1191,7 @@ export const useDepartment = () => {
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
-        
+
         // Reset filters state
         setFilters({
             search: '',
@@ -1202,7 +1202,7 @@ export const useDepartment = () => {
             sort_by: '',
             sort_order: ''
         });
-        
+
         // Immediately fetch with cleared filters
         const clearedParams: DepartmentListRequest = {
             page: 1,
@@ -1215,7 +1215,7 @@ export const useDepartment = () => {
             department_parent_id: undefined,
             department_name: undefined
         };
-        
+
         departmentService.getDepartments(clearedParams).then(response => {
             if (response.success) {
                 setDepartments(response.data.data || []);
@@ -1289,7 +1289,7 @@ export const useDepartment = () => {
         handlePageChange,
         fetchDepartments,
         fetchDepartmentsByCompany, // New function for dropdown filtering
-        
+
         // Filter actions
         handleFilterChange,
         handleSearchChange,
@@ -1349,12 +1349,12 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
         debouncedFetchTimeoutRef.current = setTimeout(async () => {
             if (requestId !== lastRequestRef.current) return;
             if (pendingRequestRef.current) return;
-            
+
             try {
                 pendingRequestRef.current = true;
                 setIsLoading(true);
                 const data = await employeesService.getEmployees(params);
-                
+
                 if (requestId === lastRequestRef.current) {
                     // For infinite scroll (appendData = true), combine existing data with new data
                     // For regular fetch (appendData = false), replace data
@@ -1542,17 +1542,17 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
 
     // Debounced filter change for search
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    
+
     const handleFilterChangeDebounced = useCallback((filterKey: keyof EmployeeFilters, value: string) => {
         setFilters(prev => ({
             ...prev,
             [filterKey]: value
         }));
-        
+
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
-        
+
         debounceTimer.current = setTimeout(() => {
             // Create params with the new value instead of using stale state
             const params: EmployeeListRequest = {
@@ -1566,10 +1566,10 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
                 department_name: filterKey === 'department_name' ? value : filters.department_name,
                 employee_status: filterKey === 'employee_status' ? value : filters.employee_status
             };
-            
+
             // Update pagination to first page if filtering
             setPagination(prev => ({ ...prev, page: 1 }));
-            
+
             debouncedFetch(params, false);
         }, 500);
     }, [pagination.limit, debouncedFetch]);
@@ -1591,7 +1591,7 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
-        
+
         // Reset filters state
         setFilters({
             search: "",
@@ -1603,10 +1603,10 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
             title_id: "",
             employee_status: ""
         });
-        
+
         // Reset pagination
         setPagination(prev => ({ ...prev, page: 1 }));
-        
+
         // Immediately fetch with cleared filters
         const clearedParams: EmployeeListRequest = {
             page: 1,
@@ -1619,7 +1619,7 @@ export const useEmployees = (autoInit: boolean = true, initialFilters: Partial<E
             department_name: "",
             employee_status: ""
         };
-        
+
         debouncedFetch(clearedParams, false);
     };
 
@@ -1746,12 +1746,12 @@ export const useUsersManage = (autoInit: boolean = true, initialFilters: Partial
         debouncedFetchTimeoutRef.current = setTimeout(async () => {
             if (requestId !== lastRequestRef.current) return;
             if (pendingRequestRef.current) return;
-            
+
             try {
                 pendingRequestRef.current = true;
                 setIsLoading(true);
                 const data = await usersService.getManageUsers(params);
-                
+
                 if (requestId === lastRequestRef.current) {
                     // For infinite scroll (appendData = true), combine existing data with new data
                     // For regular fetch (appendData = false), replace data
@@ -1825,7 +1825,7 @@ export const useUsersManage = (autoInit: boolean = true, initialFilters: Partial
 
     const resetUserPassword = async () => {
         if (!confirmResetPassword.user) return false;
-        
+
         setIsLoading(true);
         try {
             const res = await usersService.resetUserPassword({
@@ -1863,17 +1863,17 @@ export const useUsersManage = (autoInit: boolean = true, initialFilters: Partial
 
     // Debounced filter change for search
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    
+
     const handleFilterChangeDebounced = useCallback((filterKey: keyof UsersFilters, value: string | boolean) => {
         setFilters(prev => ({
             ...prev,
             [filterKey]: value
         }));
-        
+
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
-        
+
         debounceTimer.current = setTimeout(() => {
             // Create params with the new value instead of using stale state
             const params: UserListRequest = {
@@ -1895,10 +1895,10 @@ export const useUsersManage = (autoInit: boolean = true, initialFilters: Partial
             if (statusValue !== '') {
                 params.status = statusValue === 'true';
             }
-            
+
             // Update pagination to first page if filtering
             setPagination(prev => ({ ...prev, page: 1 }));
-            
+
             debouncedFetch(params, false);
         }, 500);
     }, [pagination.limit, debouncedFetch, filters]);
@@ -1916,7 +1916,7 @@ export const useUsersManage = (autoInit: boolean = true, initialFilters: Partial
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
-        
+
         // Reset filters state
         setFilters({
             search: "",
@@ -1925,10 +1925,10 @@ export const useUsersManage = (autoInit: boolean = true, initialFilters: Partial
             is_customer: "",
             status: ""
         });
-        
+
         // Reset pagination
         setPagination(prev => ({ ...prev, page: 1 }));
-        
+
         // Immediately fetch with cleared filters
         const clearedParams: UserListRequest = {
             page: 1,
@@ -1938,7 +1938,7 @@ export const useUsersManage = (autoInit: boolean = true, initialFilters: Partial
             sort_order: "",
             is_customer: ""
         };
-        
+
         debouncedFetch(clearedParams, false);
     };
 
@@ -2041,12 +2041,12 @@ export const useRole = () => {
         debouncedFetchTimeoutRef.current = setTimeout(async () => {
             if (requestId !== lastRequestRef.current) return;
             if (pendingRequestRef.current) return;
-            
+
             try {
                 pendingRequestRef.current = true;
                 setIsLoading(true);
                 const data = await roleService.getRoles(params);
-                
+
                 if (requestId === lastRequestRef.current) {
                     setRoles(data.data.data);
                     setPagination(data.data.pagination);
@@ -2091,7 +2091,7 @@ export const useRole = () => {
     const createRole = async (data: RoleFormData) => {
         setIsLoading(true);
         setValidationErrors({});
-        
+
         // Client-side validation
         const validationResult = validateRoleForm(data);
         if (!validationResult.isValid) {
@@ -2100,7 +2100,7 @@ export const useRole = () => {
             toast.error('Please fix the validation errors before submitting');
             return false;
         }
-        
+
         try {
             const response = await roleService.createRole(data);
             if (response.status === 200 || response.status === 201) {
@@ -2135,7 +2135,7 @@ export const useRole = () => {
     const updateRole = async (id: string, data: RoleFormData) => {
         setIsLoading(true);
         setValidationErrors({});
-        
+
         // Client-side validation
         const validationResult = validateRoleForm(data);
         if (!validationResult.isValid) {
@@ -2144,7 +2144,7 @@ export const useRole = () => {
             toast.error('Please fix the validation errors before submitting');
             return false;
         }
-        
+
         try {
             const response = await roleService.updateRole(id, data);
             if (response.status === 200 || response.status === 201) {
@@ -2193,7 +2193,7 @@ export const useRole = () => {
         }
 
         // Check for duplicate role names (exclude current editing role)
-        const duplicateRole = roles.find(role => 
+        const duplicateRole = roles.find(role =>
             role.role_name.toLowerCase().trim() === data.role_name.toLowerCase().trim() &&
             (!editingRole || role.role_id !== editingRole.role_id)
         );
@@ -2207,7 +2207,7 @@ export const useRole = () => {
             if (!parentRole) {
                 errors.role_parent_id = 'Selected parent role is invalid';
             }
-            
+
             // Prevent circular dependency
             if (editingRole && data.role_parent_id === editingRole.role_id) {
                 errors.role_parent_id = 'A role cannot be its own parent';
@@ -2223,10 +2223,10 @@ export const useRole = () => {
     // Comprehensive handleSubmit function for forms
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Clear previous errors
         setValidationErrors({});
-        
+
         // Run client-side validation first
         const validationResult = validateRoleForm(formData);
         if (!validationResult.isValid) {
@@ -2237,14 +2237,14 @@ export const useRole = () => {
 
         try {
             setIsLoading(true);
-            
+
             let success = false;
             if (editingRole) {
                 success = await updateRole(editingRole.role_id, formData);
             } else {
                 success = await createRole(formData);
             }
-            
+
             return success;
         } catch (error) {
             console.error('Error in handleSubmit:', error);
@@ -2264,7 +2264,7 @@ export const useRole = () => {
 
     const deleteRole = async (role: Role) => {
         setIsLoading(true);
-        
+
         try {
             const response = await roleService.deleteRole(role.role_id);
             if (response.status === 200 || response.status === 204) {
@@ -2330,18 +2330,18 @@ export const useRole = () => {
 
     // Debounced filter change for search
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    
+
     const handleFilterChangeDebounced = useCallback((filterKey: keyof RoleFilters, value: string) => {
         setFilters(prev => ({
             ...prev,
             [filterKey]: value
         }));
-        
+
         // Debounce API calls for filter changes
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
-        
+
         debounceTimer.current = setTimeout(() => {
             // Create params with the new value instead of using stale state
             const params: RoleListRequest = {
@@ -2353,10 +2353,10 @@ export const useRole = () => {
                 role_name: filterKey === 'role_name' ? value : filters.role_name,
                 role_parent_id: filterKey === 'role_parent_id' ? value : filters.role_parent_id
             };
-            
+
             // Update pagination to first page if filtering
             setPagination(prev => ({ ...prev, current_page: 1 }));
-            
+
             debouncedFetch(params);
         }, 500);
     }, [pagination.per_page, filters, debouncedFetch]);
@@ -2370,7 +2370,7 @@ export const useRole = () => {
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
-        
+
         // Reset filters state
         setFilters({
             search: "",
@@ -2379,10 +2379,10 @@ export const useRole = () => {
             role_name: "",
             role_parent_id: ""
         });
-        
+
         // Reset pagination
         setPagination(prev => ({ ...prev, current_page: 1 }));
-        
+
         // Immediately fetch with cleared filters
         const clearedParams: RoleListRequest = {
             page: 1,
@@ -2393,7 +2393,7 @@ export const useRole = () => {
             role_name: "",
             role_parent_id: ""
         };
-        
+
         debouncedFetch(clearedParams);
     };
 
@@ -2513,12 +2513,12 @@ export const usePosition = () => {
         debouncedFetchTimeoutRef.current = setTimeout(async () => {
             if (requestId !== lastRequestRef.current) return;
             if (pendingRequestRef.current) return;
-            
+
             try {
                 pendingRequestRef.current = true;
                 setIsLoading(true);
                 const data = await positionService.getPositions(params);
-                
+
                 if (requestId === lastRequestRef.current) {
                     setPositions(data.data.data);
                     setPagination(data.data.pagination);
@@ -2544,7 +2544,7 @@ export const usePosition = () => {
             department_name: filters.department_name,
             department_id: filters.department_id
         };
-        
+
         debouncedFetch(params);
     }, [debouncedFetch, pagination?.current_page, pagination?.per_page, filters]);
 
@@ -2595,10 +2595,10 @@ export const usePosition = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        
+
         try {
             const result = await positionService.submitPositionForm(formData, editingPosition);
-            
+
             if (result.success) {
                 toast.success(result.message);
                 setIsModalOpen(false);
@@ -2721,7 +2721,7 @@ export const usePosition = () => {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-        
+
         // Clear validation error for this field when user starts typing
         if (validationErrors[name as keyof PositionValidationErrors]) {
             setValidationErrors(prev => ({ ...prev, [name]: undefined }));
@@ -2874,6 +2874,7 @@ export const useEmployeeDetail = () => {
         employee_phone: '',
         gender_id: '',
         island_id: '',
+        group_id: '',
         classes_id_netsuite: null,
         classes_name_netsuite: null
     });
@@ -2885,7 +2886,7 @@ export const useEmployeeDetail = () => {
 
         try {
             const response = await employeesService.getEmployeeDetail(id);
-            
+
             if (response.success && response.data) {
                 // Map the response data to our EmployeeDetailData structure
                 const employeeData: EmployeeDetailData = {
@@ -2896,7 +2897,7 @@ export const useEmployeeDetail = () => {
                     permission_detail: response.data.permission_detail || []
                 };
                 setEmployee(employeeData);
-                
+
                 // Set form data from employee data
                 setFormData({
                     employee_name: response.data.employee_name,
@@ -2912,6 +2913,7 @@ export const useEmployeeDetail = () => {
                     employee_phone: response.data.employee_phone || '',
                     gender_id: response.data.gender_id || '',
                     island_id: response.data.island_id || '',
+                    group_id: response.data.group_id || '',
                     classes_id_netsuite: response.data.classes_id_netsuite || null,
                     classes_name_netsuite: response.data.classes_name_netsuite || null
                 });
@@ -2934,10 +2936,10 @@ export const useEmployeeDetail = () => {
 
         try {
             const response = await employeesService.updateEmployee(id, data);
-            
+
             if (response.status === 200 || response.status === 201) {
                 toast.success('Employee updated successfully');
-                
+
                 // Refresh employee data
                 await fetchEmployee(id);
                 return true;
@@ -2947,7 +2949,7 @@ export const useEmployeeDetail = () => {
             }
         } catch (err: any) {
             const errorMessage = getErrorMessage(err);
-            
+
             // Handle validation errors
             if (err.response?.status === 422 && err.response?.data?.errors) {
                 setValidationErrors(err.response.data.errors);
@@ -3108,7 +3110,7 @@ export const useCreateEmployee = () => {
 
         try {
             const response = await employeesService.createEmployeeWithPhoto(formData);
-            
+
             if (response.success) {
                 toast.success('Employee created successfully!');
                 return { success: true };
@@ -3118,15 +3120,15 @@ export const useCreateEmployee = () => {
                     setValidationErrors(response.errors);
                 }
                 toast.error(response.message || 'Failed to create employee');
-                return { 
-                    success: false, 
-                    message: response.message, 
-                    errors: response.errors 
+                return {
+                    success: false,
+                    message: response.message,
+                    errors: response.errors
                 };
             }
         } catch (err: any) {
             const errorMessage = getErrorMessage(err);
-            
+
             // Handle validation errors
             if (err.response?.status === 422 && err.response?.data?.errors) {
                 setValidationErrors(err.response.data.errors);
@@ -3136,11 +3138,11 @@ export const useCreateEmployee = () => {
             } else {
                 toast.error(`Failed to create employee: ${errorMessage}`);
             }
-            
-            return { 
-                success: false, 
-                message: errorMessage, 
-                errors: err.response?.data?.errors 
+
+            return {
+                success: false,
+                message: errorMessage,
+                errors: err.response?.data?.errors
             };
         } finally {
             setIsCreating(false);
@@ -3167,7 +3169,7 @@ export const useCreateUser = () => {
 
         try {
             const response = await usersService.createUsersWithPhoto(formData);
-            
+
             if (response.success) {
                 toast.success('User created successfully!');
                 return { success: true };
@@ -3177,15 +3179,15 @@ export const useCreateUser = () => {
                     setValidationErrors(response.errors);
                 }
                 toast.error(response.message || 'Failed to create user');
-                return { 
-                    success: false, 
-                    message: response.message, 
-                    errors: response.errors 
+                return {
+                    success: false,
+                    message: response.message,
+                    errors: response.errors
                 };
             }
         } catch (err: any) {
             const errorMessage = getErrorMessage(err);
-            
+
             // Handle validation errors
             if (err.response?.status === 422 && err.response?.data?.errors) {
                 setValidationErrors(err.response.data.errors);
@@ -3195,11 +3197,11 @@ export const useCreateUser = () => {
             } else {
                 toast.error(`Failed to create user: ${errorMessage}`);
             }
-            
-            return { 
-                success: false, 
-                message: errorMessage, 
-                errors: err.response?.data?.errors 
+
+            return {
+                success: false,
+                message: errorMessage,
+                errors: err.response?.data?.errors
             };
         } finally {
             setIsCreating(false);
@@ -3220,7 +3222,7 @@ export const useUserDetail = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [validationErrors, setValidationErrors] = useState<UserValidationErrors>({});
-    
+
     // Form state
     const [formData, setFormData] = useState<UserEditFormData>({
         email: '',
@@ -3230,7 +3232,7 @@ export const useUserDetail = () => {
         customer_id: '',
         foto: null
     });
-    
+
     // Photo states
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const [originalPhoto, setOriginalPhoto] = useState<string | null>(null);
@@ -3240,11 +3242,11 @@ export const useUserDetail = () => {
         setIsLoading(true);
         try {
             const response = await usersService.getManageUserById(id);
-            
+
             if (response.success && response.data) {
                 const userData = response.data;
                 setUser(userData);
-                
+
                 // Populate form data
                 setFormData({
                     email: userData.email || '',
@@ -3254,13 +3256,13 @@ export const useUserDetail = () => {
                     customer_id: userData.customer_id || '',
                     foto: null
                 });
-                
+
                 // Set photo preview
                 if (userData.photo) {
                     setPhotoPreview(userData.photo);
                     setOriginalPhoto(userData.photo);
                 }
-                
+
                 return true;
             } else {
                 toast.error('Failed to load user data');
@@ -3294,7 +3296,7 @@ export const useUserDetail = () => {
     // Handle file change
     const handleFileChange = useCallback((file: File | null) => {
         if (!file) return;
-        
+
         // Validate file type
         if (!file.type.startsWith('image/')) {
             toast.error('Please select a valid image file');
@@ -3340,13 +3342,13 @@ export const useUserDetail = () => {
     // Validate form
     const validateForm = useCallback((): boolean => {
         const errors: UserValidationErrors = {};
-        
+
         if (!formData.email.trim()) {
             errors.email = 'Email is required';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             errors.email = 'Please enter a valid email address';
         }
-        
+
         if (formData.password && formData.password.length < 6) {
             errors.password = 'Password must be at least 6 characters long';
         }
@@ -3365,7 +3367,7 @@ export const useUserDetail = () => {
         setIsSubmitting(true);
         try {
             let response;
-            
+
             if (formData.foto) {
                 // With photo upload
                 const submitData = new FormData();
@@ -3379,7 +3381,7 @@ export const useUserDetail = () => {
                     submitData.append('customer_id', formData.customer_id);
                 }
                 submitData.append('foto', formData.foto);
-                
+
                 response = await usersService.updateUserWithPhoto(id, submitData);
             } else {
                 // Without photo
@@ -3388,17 +3390,17 @@ export const useUserDetail = () => {
                     is_customer: formData.is_customer,
                     is_active: formData.is_active
                 };
-                
+
                 if (formData.password) {
                     submitData.password = formData.password;
                 }
                 if (formData.customer_id) {
                     submitData.customer_id = formData.customer_id;
                 }
-                
+
                 response = await usersService.updateUser(id, submitData);
             }
-            
+
             if (response.success) {
                 toast.success('User updated successfully');
                 return true;
@@ -3408,7 +3410,7 @@ export const useUserDetail = () => {
             }
         } catch (err: any) {
             const errorMessage = getErrorMessage(err);
-            
+
             if (err.response?.status === 422 && err.response?.data?.errors) {
                 setValidationErrors(err.response.data.errors);
                 toast.error('Please check the form for errors');
@@ -3429,11 +3431,11 @@ export const useUserDetail = () => {
         validationErrors,
         formData,
         photoPreview,
-        
+
         // Setters
         setFormData,
         setValidationErrors,
-        
+
         // Actions
         fetchUser,
         updateUser,

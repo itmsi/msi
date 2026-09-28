@@ -14,6 +14,7 @@ import { toast } from "react-hot-toast";
 import Switch from "@/components/form/switch/Switch";
 import { useCustomerSelect } from "@/hooks/useCustomerSelect";
 import CustomAsyncSelect from "@/components/form/select/CustomAsyncSelect";
+import GroupSelectField from "@/components/form/select/GroupSelectField";
 import { usePOClassSelect } from "@/hooks/usePOClassSelect";
 import PageHeader from "@/components/common/PageHeader";
 
@@ -40,6 +41,7 @@ interface CreateEmployeeFormData {
     is_customer: boolean;
     is_active: boolean;
     customer_foto?: File | null;
+    group_id: string;
     classes_id_netsuite?: number | null;
     classes_name_netsuite?: string | null;
 }
@@ -112,6 +114,7 @@ export default function CreateEmployee() {
         is_customer: true,
         is_active: true,
         customer_foto: null,
+        group_id: '',
         classes_id_netsuite: null,
         classes_name_netsuite: null
     });
@@ -256,6 +259,7 @@ export default function CreateEmployee() {
                 customer_password: '',
                 customer_id: '',
                 customer_foto: null,
+                group_id: '',
                 classes_id_netsuite: null,
                 classes_name_netsuite: null
             }));
@@ -416,6 +420,11 @@ export default function CreateEmployee() {
                 // Append photo if selected
                 if (formData.customer_foto) {
                     submitData.append('photo', formData.customer_foto);
+                }
+
+                // Append Group if selected
+                if (formData.group_id) {
+                    submitData.append('group_id', formData.group_id);
                 }
 
                 // Append NetSuite Class if selected
@@ -780,6 +789,25 @@ export default function CreateEmployee() {
                                     />
                                 </div>
                             )}
+
+                            <GroupSelectField
+                                className="md:col-span-2"
+                                value={formData.group_id}
+                                error={validationErrors.group_id ? String(validationErrors.group_id) : undefined}
+                                onChange={(option) => {
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        group_id: option?.value || ''
+                                    }));
+
+                                    if (validationErrors.group_id) {
+                                        setValidationErrors(prev => ({
+                                            ...prev,
+                                            group_id: undefined
+                                        }));
+                                    }
+                                }}
+                            />
 
                             <div className="md:col-span-2">
                                 <Label>

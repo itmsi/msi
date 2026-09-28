@@ -14,8 +14,11 @@ import { getDefaultSpecs } from '../../Product/hooks/useProductCreate';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from '../language/quotationLabels';
 import { quotationLabelPDF } from '../language/quotationLabelPDF';
-import TextArea from '@/components/form/input/TextArea';
+// import TextArea from '@/components/form/input/TextArea';
 import { handleKeyPress } from '@/helpers/generalHelper';
+// import EditableField from '@/components/form/editor/EditableField';
+import TextArea from '@/components/form/input/TextArea';
+import EditableField from '@/components/form/editor/EditableField';
 
 interface QuantityCellProps {
     value: number;
@@ -179,66 +182,48 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
         onChange(updatedData);
     }, [initialData, onChange]);
 
-    const handleSpecificationUpdate = useCallback((index: number, value: string) => {
-        if (!initialData || !onChange) return;
-
-        const updatedData = { ...initialData };
-        const existingSpecs = updatedData.componen_product_specifications || [];
-        const updatedSpecs = [];
-
-        for (let i = 0; i < defaultSpecifications.length; i++) {
-            const defaultSpec = defaultSpecifications[i];
-
-            const existingSpec = existingSpecs.find(spec =>
-                spec.componen_product_specification_label === defaultSpec.label ||
-                spec.specification_label_name === defaultSpec.label
-            );
-
-            const newValue = i === index ? value :
-                (existingSpec?.componen_product_specification_value ||
-                    existingSpec?.specification_value_name ||
-                    defaultSpec.value || '');
-
-            updatedSpecs.push({
-                componen_product_specification_label: defaultSpec.label,
-                componen_product_specification_value: newValue,
-                componen_product_specification_description: existingSpec?.componen_product_specification_description || null,
-                specification_label_name: defaultSpec.label,
-                specification_value_name: newValue
-            });
-        }
-
-        updatedData.componen_product_specifications = updatedSpecs;
-        onChange(updatedData);
-    }, [initialData, defaultSpecifications, onChange]);
-
+    // Spesifikasi produk mengikuti data yang tersimpan (label-nya bebas, diisi dari halaman Product).
+    // Template default hanya dipakai kalau produk belum punya spesifikasi sama sekali.
     const editableSpecifications = React.useMemo(() => {
         if (!initialData) return [];
 
-
         const existingSpecs = initialData.componen_product_specifications || [];
-        const editableSpecs = [];
-        // Map by matching label names, not by index
-        for (let i = 0; i < defaultSpecifications.length; i++) {
-            const defaultSpec = defaultSpecifications[i];
 
-            // Find matching specification by label name
-            const existingSpec = existingSpecs.find(spec =>
-                spec.componen_product_specification_label === defaultSpec.label ||
-                spec.specification_label_name === defaultSpec.label
-            );
+        if (existingSpecs.length > 0) {
+            return existingSpecs.map(spec => {
+                const label = spec.componen_product_specification_label || spec.specification_label_name || '';
+                const value = spec.componen_product_specification_value || spec.specification_value_name || '';
 
-            editableSpecs.push({
-                componen_product_specification_label: defaultSpec.label,
-                componen_product_specification_value: existingSpec?.componen_product_specification_value || existingSpec?.specification_value_name || defaultSpec.value || '',
-                componen_product_specification_description: existingSpec?.componen_product_specification_description || null,
-                specification_label_name: defaultSpec.label,
-                specification_value_name: existingSpec?.componen_product_specification_value || existingSpec?.specification_value_name || defaultSpec.value || ''
+                return {
+                    componen_product_specification_label: label,
+                    componen_product_specification_value: value,
+                    componen_product_specification_description: spec.componen_product_specification_description || null,
+                    specification_label_name: label,
+                    specification_value_name: value
+                };
             });
         }
 
-        return editableSpecs;
+        return defaultSpecifications.map(defaultSpec => ({
+            componen_product_specification_label: defaultSpec.label,
+            componen_product_specification_value: defaultSpec.value || '',
+            componen_product_specification_description: null,
+            specification_label_name: defaultSpec.label,
+            specification_value_name: defaultSpec.value || ''
+        }));
     }, [initialData?.componen_product_specifications, defaultSpecifications]);
+
+    const handleSpecificationUpdate = useCallback((index: number, value: string) => {
+        if (!initialData || !onChange) return;
+
+        const updatedSpecs = editableSpecifications.map((spec, i) => (
+            i === index
+                ? { ...spec, componen_product_specification_value: value, specification_value_name: value }
+                : spec
+        ));
+
+        onChange({ ...initialData, componen_product_specifications: updatedSpecs });
+    }, [initialData, editableSpecifications, onChange]);
 
     const addAccessoryItem = useCallback(() => {
         if (!selectedAccessory) {
@@ -610,6 +595,80 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                         </div>
 
                         {/* Product Specifications */}
+                        {/* <div className="border-b border-gray-200 pb-6">
+                            <h4 className="text-lg font-semibold text-gray-900 my-4">{langField('specifications')}</h4>
+                            <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4">
+                                {editableSpecifications.map((spec, index) => {
+                                    return (
+                                        <div key={index} className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-gray-900 mb-2">
+                                                    {translateSpecLabel(spec.componen_product_specification_label ?? '')}
+                                                </p>
+                                                <Input
+                                                    type="text"
+                                                    value={spec.componen_product_specification_value || ''}
+                                                    onChange={(e) => handleSpecificationUpdate(index, e.target.value)}
+                                                    placeholder={`${langField('enter')} ${translateSpecLabel(spec.componen_product_specification_label ?? '').toLowerCase()}`}
+                                                    className="w-full text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="pt-6 border-t border-gray-200">
+                            <EditableField
+                                id="notes-editor"
+                                label={'Notes'}
+                                value={initialData.notes || ''}
+                                onChange={(content) => {
+                                    handleFieldUpdate('notes', content);
+                                }}
+                                placeholder="Remarks..."
+                                editing={true}
+                                showAction={true}
+                                preview={(
+                                    <div className="space-y-4">
+                                        <div className="overflow-hidden rounded-lg border border-gray-200">
+                                            <table className="w-full text-left text-sm">
+                                                <thead className="bg-gray-100">
+                                                    <tr>
+                                                        <th className="px-3 py-2 font-medium text-gray-700">Label</th>
+                                                        <th className="px-3 py-2 font-medium text-gray-700">Value</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {editableSpecifications.map((spec, index) => (
+                                                        <tr key={index} className="border-t border-gray-200">
+                                                            <td className="px-3 py-2 text-gray-900">
+                                                                {translateSpecLabel(spec.componen_product_specification_label ?? '')}
+                                                            </td>
+                                                            <td className="px-3 py-2 text-gray-700">
+                                                                {spec.componen_product_specification_value || ''}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div className="rounded-lg border border-gray-200 bg-white p-3">
+                                            <p className="text-sm font-medium text-gray-700 mb-2">Notes</p>
+                                            <div
+                                                className="text-sm text-gray-700 prose max-w-none"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: initialData.notes || '<p class="text-gray-400 italic">No notes yet</p>'
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            />
+                        </div> */}
+
                         <div className="border-b border-gray-200 pb-6">
                             <h4 className="text-lg font-semibold text-gray-900 my-4">{langField('specifications')}</h4>
                             <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4">
@@ -646,9 +705,26 @@ const ProductDetailOffcanvas: React.FC<ProductDetailOffcanvasProps> = ({
                                         placeholder="Tambahkan catatan..."
                                     />
                                 </div>
+
+
+                                <div className="col-span-2 pt-6 border-t border-gray-200">
+                                    <label htmlFor='remark-editor' className="block text-sm font-medium text-gray-700 mb-1">
+                                        Remark
+                                    </label>
+                                    <EditableField
+                                        id="remark-editor"
+                                        label='Remark'
+                                        value={initialData.componen_product_custom || ''}
+                                        onChange={(content) => {
+                                            handleFieldUpdate('componen_product_custom', content);
+                                        }}
+                                        placeholder="Remarks..."
+                                        editing={true}
+                                        showAction={false}
+                                    />
+                                </div>
                             </div>
                         </div>
-
                         {/* Product Pricing Info */}
                         <div className="border-b border-gray-200 pb-6 hidden">
                             <h4 className="text-lg font-semibold text-gray-900 my-4">{langField('priceInformation')}</h4>

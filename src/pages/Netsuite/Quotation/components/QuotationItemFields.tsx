@@ -11,6 +11,7 @@ import { TableColumn } from 'react-data-table-component';
 import CustomDataTable, { createActionsColumn } from '@/components/ui/table';
 import { LoadingOverlay } from '@/components/common/Loading';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
+import { useFormattedItemOptions } from '@/hooks/useFormattedItemOptions';
 import TextArea from '@/components/form/input/TextArea';
 import CustomSelect from '@/components/form/select/CustomSelect';
 // import Input from '@/components/form/input/InputField';
@@ -85,6 +86,10 @@ export default function QuotationItemFields({
     onDeptMenuScrollToBottom,
 }: QuotationFormFieldsProps) {
     const [selectedNewItem, setSelectedNewItem] = useState<any>(null);
+
+    // Format label item menjadi "itemId - displayName", sama seperti di Transfer Order
+    const { defaultOptions: formattedItemOptions, loadOptions: loadFormattedItemOptions } =
+        useFormattedItemOptions(itemOptions, onItemInputChange);
 
     // Infinite scroll untuk tabel items
     const BATCH_SIZE = 50;
@@ -555,8 +560,8 @@ export default function QuotationItemFields({
                                 disabled={!formData.subsidiary}
                                 value={selectedNewItem}
                                 onChange={(opt) => setSelectedNewItem(opt)}
-                                defaultOptions={itemOptions}
-                                loadOptions={onItemInputChange}
+                                defaultOptions={formattedItemOptions}
+                                loadOptions={loadFormattedItemOptions}
                                 onMenuScrollToBottom={onItemMenuScrollToBottom}
                                 isLoading={itemPagination.loading}
                                 noOptionsMessage={() => "No items found"}

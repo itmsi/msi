@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuotation } from './hooks/useQuotation';
 import { formatCurrencyDynamic, getStatusBadge, formatTanggal, formatDateTime } from '@/helpers/generalHelper';
 import { MdClear, MdSearch, MdFilterListAlt, MdExpandLess, MdExpandMore, MdEdit, MdAdd, MdOutlineSync } from 'react-icons/md';
+import { FaRegFilePdf } from 'react-icons/fa6';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import Input from '@/components/form/input/InputField';
 import CustomSelect from '@/components/form/select/CustomSelect';
@@ -43,6 +44,7 @@ export default function Manage() {
         handleClearAllFilters,
         handleSync,
         handleSyncById,
+        handleDownloadQuotation,
     } = useQuotation();
 
     const handlePageChangeSafe = useCallback((newPage: number) => {
@@ -123,6 +125,13 @@ export default function Manage() {
         createByDateColumn('Created By', 'created_at', 'custbody_me_wf_created_by_name', '320px', 'netsuite_id', 'Quotation ID'),
         createByDateColumn('Updated By', 'updated_at', 'update_by_name', '320px'),
         createActionsColumn([
+            {
+                icon: FaRegFilePdf,
+                onClick: handleDownloadQuotation,
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                tooltip: 'Download Quotation',
+                permission: 'read',
+            },
             {
                 icon: MdOutlineSync,
                 onClick: (row: Quotation) => handleSyncById(row),

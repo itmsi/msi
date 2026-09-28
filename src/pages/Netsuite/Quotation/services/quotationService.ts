@@ -11,6 +11,8 @@ import {
     SOAttachmentResponse,
     SOAttachmentUpdate,
     ResponseAttachUpdateItem,
+    QuotationDownloadRequest,
+    QuotationDownloadResponse,
 } from '../types/quotation';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -79,6 +81,10 @@ export class QuotationService {
         return response.data;
     }
 
+    static async downloadQuotation(params: QuotationDownloadRequest): Promise<QuotationDownloadResponse> {
+        const response = await apiPost(`${API_BASE_URL}/netsuite/quotation/print`, params as Record<string, any>);
+        return response.data as QuotationDownloadResponse;
+    }
 
     static async attachFileQUO(payload: SOAttachment): Promise<SOAttachmentResponse> {
         const fd = new FormData();

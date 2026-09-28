@@ -43,6 +43,8 @@ export interface QuotationItem {
     description: string;
     cp_notes?: string;
     notes?: string;
+    cp_componen_product_custom?: string;
+    componen_product_custom?: string;
     image: imageItems[];
     manage_quotation_item_accessories?: QuotationItemAccessory[]; // Nested accessories
     manage_quotation_item_specifications?: QuotationItemSpecification[]; // Nested specifications
@@ -395,6 +397,8 @@ export interface ManageQuotationItem {
     cp_market_price: string;
     cp_componen_product_name: string;
     cp_image: string;
+    componen_product_custom?: string;
+    cp_componen_product_custom?: string;
     cp_componen_type?: number; // EV type support
     componen_type?: number;    // Alternative field name from API
 
@@ -481,6 +485,8 @@ export interface ManageQuotationItemPDF {
     componen_product_unit_model: string;
     componen_product_name: string;
     cp_componen_product_name: string;
+    componen_product_custom?: string;
+    cp_componen_product_custom?: string;
     product_type: string;
     quantity: number;
     price: string;
