@@ -1250,47 +1250,203 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
 
         return itemYPos;
     };
-
     const renderItemNotes = (item: any, startX: number, startYPos: number, width: number, minBoxHeight: number = 0): number => {
         let itemYPos = startYPos;
 
-        const specificationResult = renderItemSpecifications(item, startX, itemYPos, width, startX);
-        itemYPos = specificationResult.finalY;
-
         if (!(item.notes && String(item.notes).trim().length > 0)) {
-            return Math.max(itemYPos, startYPos + specificationResult.boxHeight);
+            return itemYPos;
         }
 
-        // setFontByLanguage(doc, langField('notes_label'), 'Futura', 'bold', language);
-        // doc.setFontSize(10);
-        // doc.setTextColor(23, 26, 31);
-        // doc.text(langField('notes_label'), startX + 8, itemYPos, { align: 'center' });
-        // itemYPos += 5;
+        setFontByLanguage(doc, langField('notes_label'), 'Futura', 'bold', language);
+        doc.setFontSize(10);
+        doc.setTextColor(23, 26, 31);
+        doc.text(langField('notes_label'), startX + 8, itemYPos, { align: 'center' });
+        itemYPos += 5;
 
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
         setFontSafe(doc, 'Futura', 'normal');
         const notesBoxStartY = itemYPos;
+        const wrappedNotes = doc.splitTextToSize(String(item.notes), width - 6);
+        wrappedNotes.forEach((line: string) => {
+            doc.text(line, startX + 3, itemYPos + 2);
+            itemYPos += 4.5;
+        });
+        itemYPos += 4;
 
-        const notesHtml = String(item.notes);
-        const notesDocument = new DOMParser().parseFromString(notesHtml, 'text/html');
-        const renderNotesNode = (node: Node): void => {
+        // Rounded border for notes block, matching specifications/accessories styling.
+        // Kept at least as tall as the specifications box beside it so both columns line up.
+        const notesBoxHeight = Math.max(itemYPos - notesBoxStartY + 6, minBoxHeight);
+        // doc.setDrawColor(200, 200, 200);
+        // doc.setLineWidth(0.1);
+        // doc.roundedRect(startX, notesBoxStartY - 10, width, notesBoxHeight, 2, 2);
+
+        return Math.max(itemYPos, notesBoxStartY - 10 + notesBoxHeight);
+    };
+
+    // const renderItemNotes = (item: any, startX: number, startYPos: number, width: number, minBoxHeight: number = 0): number => {
+    //     let itemYPos = startYPos;
+
+    //     const specificationResult = renderItemSpecifications(item, startX, itemYPos, width, startX);
+    //     itemYPos = specificationResult.finalY;
+
+    //     if (!(item.notes && String(item.notes).trim().length > 0)) {
+    //         return Math.max(itemYPos, startYPos + specificationResult.boxHeight);
+    //     }
+
+    //     // setFontByLanguage(doc, langField('notes_label'), 'Futura', 'bold', language);
+    //     // doc.setFontSize(10);
+    //     // doc.setTextColor(23, 26, 31);
+    //     // doc.text(langField('notes_label'), startX + 8, itemYPos, { align: 'center' });
+    //     // itemYPos += 5;
+
+    //     doc.setFontSize(9);
+    //     doc.setTextColor(0, 0, 0);
+    //     setFontSafe(doc, 'Futura', 'normal');
+    //     const notesBoxStartY = itemYPos;
+
+    //     const notesHtml = String(item.notes);
+    //     const notesDocument = new DOMParser().parseFromString(notesHtml, 'text/html');
+    //     const renderNotesNode = (node: Node): void => {
+    //         if (node.nodeType === Node.TEXT_NODE) {
+    //             const text = node.textContent?.replace(/\s+/g, ' ').trim();
+    //             if (!text) return;
+
+    //             doc.setFontSize(9);
+    //             doc.setTextColor(0, 0, 0);
+    //             setFontSafe(doc, 'Futura', 'normal');
+    //             doc.splitTextToSize(text, width - 6).forEach((line: string) => {
+    //                 if (itemYPos + 5 > pageHeight - footerHeight - margin) {
+    //                     doc.addPage();
+    //                     addHeader();
+    //                     addFooter();
+    //                     itemYPos = margin + headerHeight + 5;
+    //                 }
+    //                 doc.text(line, startX + 3, itemYPos);
+    //                 itemYPos += 4.5;
+    //             });
+    //             return;
+    //         }
+
+    //         if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+    //         const element = node as Element;
+    //         const tagName = element.tagName.toLowerCase();
+
+    //         if (tagName === 'table') {
+    //             itemYPos = renderHtmlTableToPdf({
+    //                 doc,
+    //                 tableElement: element as HTMLTableElement,
+    //                 startY: itemYPos,
+    //                 left: startX,
+    //                 width,
+    //                 margin,
+    //                 pageHeight,
+    //                 footerHeight,
+    //                 onPageBreak: () => {
+    //                     addHeader();
+    //                     addFooter();
+    //                 }
+    //             }) + 4;
+    //             return;
+    //         }
+
+    //         if (/^h[1-6]$/.test(tagName)) {
+    //             const headingText = element.textContent?.replace(/\s+/g, ' ').trim();
+    //             if (!headingText) return;
+
+    //             doc.setFontSize(tagName === 'h1' ? 13 : 11);
+    //             doc.setTextColor(23, 26, 31);
+    //             setFontSafe(doc, 'Futura', 'bold');
+    //             const align = element.getAttribute('style')?.includes('text-align: center') ? 'center' : 'left';
+    //             const x = align === 'center' ? startX + width / 2 : startX + 3;
+    //             doc.splitTextToSize(headingText, width - 6).forEach((line: string) => {
+    //                 if (itemYPos + 6 > pageHeight - footerHeight - margin) {
+    //                     doc.addPage();
+    //                     addHeader();
+    //                     addFooter();
+    //                     itemYPos = margin + headerHeight + 5;
+    //                 }
+    //                 doc.text(line, x, itemYPos, { align });
+    //                 itemYPos += 5;
+    //             });
+    //             itemYPos += 2;
+    //             return;
+    //         }
+
+    //         if (tagName === 'br') {
+    //             itemYPos += 3;
+    //             return;
+    //         }
+
+    //         if (tagName === 'li') {
+    //             const listText = element.textContent?.replace(/\s+/g, ' ').trim();
+    //             if (listText) {
+    //                 doc.setFontSize(9);
+    //                 setFontSafe(doc, 'Futura', 'normal');
+    //                 doc.splitTextToSize(`• ${listText}`, width - 8).forEach((line: string) => {
+    //                     doc.text(line, startX + 3, itemYPos);
+    //                     itemYPos += 4.5;
+    //                 });
+    //             }
+    //             return;
+    //         }
+
+    //         Array.from(element.childNodes).forEach(renderNotesNode);
+    //         if (['p', 'div', 'section', 'ul', 'ol'].includes(tagName)) itemYPos += 2;
+    //     };
+
+    //     Array.from(notesDocument.body.childNodes).forEach(renderNotesNode);
+
+    //     itemYPos += 4;
+
+    //     // Rounded border for notes block, matching specifications/accessories styling.
+    //     // Kept at least as tall as the specifications box beside it so both columns line up.
+    //     const notesBoxHeight = Math.max(itemYPos - notesBoxStartY + 6, minBoxHeight);
+    //     // doc.setDrawColor(200, 200, 200);
+    //     // doc.setLineWidth(0.1);
+    //     // doc.roundedRect(startX, notesBoxStartY - 10, width, notesBoxHeight, 2, 2);
+
+    //     return Math.max(itemYPos, notesBoxStartY - 10 + notesBoxHeight);
+    // };
+
+    // Group items into pages (max 2 items per page)
+    const itemsWithContent = data.manage_quotation_items
+        .map(item => item as any)
+        .filter(item =>
+            item.product_type === 'unit' && // Filter untuk unit products saja
+            ((item.manage_quotation_item_specifications && item.manage_quotation_item_specifications.length > 0) ||
+                (item.manage_quotation_item_accessories && item.manage_quotation_item_accessories.length > 0))
+        );
+
+    const hasNotes = (item: any): boolean => !!(item.notes && String(item.notes).trim().length > 0);
+
+    // Render HTML dari editor (WYSIWYG) ke PDF: teks, heading, list, dan tabel.
+    const renderHtmlBlock = (html: string, startX: number, startYPos: number, width: number): number => {
+        let blockYPos = startYPos;
+        const htmlDocument = new DOMParser().parseFromString(html, 'text/html');
+
+        const ensureSpace = (needed: number) => {
+            if (blockYPos + needed > pageHeight - footerHeight - margin) {
+                doc.addPage();
+                addHeader();
+                addFooter();
+                blockYPos = margin + headerHeight + 5;
+            }
+        };
+
+        const renderNode = (node: Node): void => {
             if (node.nodeType === Node.TEXT_NODE) {
                 const text = node.textContent?.replace(/\s+/g, ' ').trim();
                 if (!text) return;
 
                 doc.setFontSize(9);
                 doc.setTextColor(0, 0, 0);
-                setFontSafe(doc, 'Futura', 'normal');
+                setFontByLanguage(doc, text, 'Futura', 'normal', language);
                 doc.splitTextToSize(text, width - 6).forEach((line: string) => {
-                    if (itemYPos + 5 > pageHeight - footerHeight - margin) {
-                        doc.addPage();
-                        addHeader();
-                        addFooter();
-                        itemYPos = margin + headerHeight + 5;
-                    }
-                    doc.text(line, startX + 3, itemYPos);
-                    itemYPos += 4.5;
+                    ensureSpace(5);
+                    doc.text(line, startX + 3, blockYPos);
+                    blockYPos += 4.5;
                 });
                 return;
             }
@@ -1301,10 +1457,11 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             const tagName = element.tagName.toLowerCase();
 
             if (tagName === 'table') {
-                itemYPos = renderHtmlTableToPdf({
+                ensureSpace(20);
+                blockYPos = renderHtmlTableToPdf({
                     doc,
                     tableElement: element as HTMLTableElement,
-                    startY: itemYPos,
+                    startY: blockYPos,
                     left: startX,
                     width,
                     margin,
@@ -1324,69 +1481,82 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
 
                 doc.setFontSize(tagName === 'h1' ? 13 : 11);
                 doc.setTextColor(23, 26, 31);
-                setFontSafe(doc, 'Futura', 'bold');
+                setFontByLanguage(doc, headingText, 'Futura', 'bold', language);
                 const align = element.getAttribute('style')?.includes('text-align: center') ? 'center' : 'left';
                 const x = align === 'center' ? startX + width / 2 : startX + 3;
                 doc.splitTextToSize(headingText, width - 6).forEach((line: string) => {
-                    if (itemYPos + 6 > pageHeight - footerHeight - margin) {
-                        doc.addPage();
-                        addHeader();
-                        addFooter();
-                        itemYPos = margin + headerHeight + 5;
-                    }
-                    doc.text(line, x, itemYPos, { align });
-                    itemYPos += 5;
+                    ensureSpace(6);
+                    doc.text(line, x, blockYPos, { align });
+                    blockYPos += 5;
                 });
-                itemYPos += 2;
+                blockYPos += 2;
                 return;
             }
 
             if (tagName === 'br') {
-                itemYPos += 3;
+                blockYPos += 3;
                 return;
             }
 
             if (tagName === 'li') {
                 const listText = element.textContent?.replace(/\s+/g, ' ').trim();
-                if (listText) {
-                    doc.setFontSize(9);
-                    setFontSafe(doc, 'Futura', 'normal');
-                    doc.splitTextToSize(`• ${listText}`, width - 8).forEach((line: string) => {
-                        doc.text(line, startX + 3, itemYPos);
-                        itemYPos += 4.5;
-                    });
-                }
+                if (!listText) return;
+
+                doc.setFontSize(9);
+                doc.setTextColor(0, 0, 0);
+                setFontByLanguage(doc, listText, 'Futura', 'normal', language);
+                doc.splitTextToSize(`• ${listText}`, width - 8).forEach((line: string) => {
+                    ensureSpace(5);
+                    doc.text(line, startX + 3, blockYPos);
+                    blockYPos += 4.5;
+                });
                 return;
             }
 
-            Array.from(element.childNodes).forEach(renderNotesNode);
-            if (['p', 'div', 'section', 'ul', 'ol'].includes(tagName)) itemYPos += 2;
+            Array.from(element.childNodes).forEach(renderNode);
+            if (['p', 'div', 'section', 'ul', 'ol'].includes(tagName)) blockYPos += 2;
         };
 
-        Array.from(notesDocument.body.childNodes).forEach(renderNotesNode);
+        Array.from(htmlDocument.body.childNodes).forEach(renderNode);
 
-        itemYPos += 4;
-
-        // Rounded border for notes block, matching specifications/accessories styling.
-        // Kept at least as tall as the specifications box beside it so both columns line up.
-        const notesBoxHeight = Math.max(itemYPos - notesBoxStartY + 6, minBoxHeight);
-        // doc.setDrawColor(200, 200, 200);
-        // doc.setLineWidth(0.1);
-        // doc.roundedRect(startX, notesBoxStartY - 10, width, notesBoxHeight, 2, 2);
-
-        return Math.max(itemYPos, notesBoxStartY - 10 + notesBoxHeight);
+        return blockYPos;
     };
 
-    // Group items into pages (max 2 items per page)
-    const itemsWithContent = data.manage_quotation_items
-        .map(item => item as any)
-        .filter(item =>
-            item.product_type === 'unit' && // Filter untuk unit products saja
-            ((item.manage_quotation_item_specifications && item.manage_quotation_item_specifications.length > 0) ||
-                (item.manage_quotation_item_accessories && item.manage_quotation_item_accessories.length > 0))
-        );
+    // Remark produk tampil di halaman tersendiri tepat setelah halaman produknya.
+    const renderItemCustomPage = (item: any): void => {
+        const customHtml = item?.componen_product_custom;
+        if (!customHtml || !String(customHtml).trim().length) return;
 
-    const hasNotes = (item: any): boolean => !!(item.notes && String(item.notes).trim().length > 0);
+        doc.addPage();
+        addHeader();
+        addFooter();
+        yPos = margin + headerHeight;
+
+        const contentWidth = pageWidth - 2 * margin;
+        // const remarkTitle = langField('spec_remark');
+
+        // doc.setFontSize(12);
+        // doc.setTextColor(0, 48, 97);
+        // setFontByLanguage(doc, remarkTitle, 'Futura', 'bold', language);
+        // doc.text(remarkTitle, margin, yPos);
+        // yPos += 6;
+
+        const productName = String(item.componen_product_name || '-');
+        doc.setFontSize(10);
+        doc.setTextColor(23, 26, 31);
+        setFontByLanguage(doc, productName, 'Futura', 'bold', language);
+        doc.splitTextToSize(productName, contentWidth).forEach((line: string) => {
+            doc.text(line, margin, yPos);
+            yPos += 5;
+        });
+
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.2);
+        doc.line(margin, yPos, pageWidth - margin, yPos);
+        yPos += 6;
+
+        yPos = renderHtmlBlock(String(customHtml), margin, yPos, contentWidth);
+    };
 
     if (itemsWithContent.length > 0) {
         let itemIndex = 0;
@@ -1406,8 +1576,16 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             if (currentHasNotes) {
                 const fullWidth = pageWidth - 2 * margin;
                 const headerYPos = renderItemImageAndName(current, margin, yPos, fullWidth);
-                const fullWidthNotesEndY = renderItemNotes(current, margin, headerYPos, fullWidth);
-                renderItemAccessories(current, margin, fullWidthNotesEndY, fullWidth, margin, 1);
+
+                const itemWidth = (pageWidth - 2 * margin) * 0.5 - 2.5;
+                const leftStartX = margin;
+                const notesStartX = margin + itemWidth + 5;
+
+                const leftSpecResult = renderItemSpecifications(current, leftStartX, headerYPos, itemWidth, notesStartX - 5);
+                renderItemAccessories(current, leftStartX, leftSpecResult.finalY, itemWidth, notesStartX - 5, 1);
+
+                renderItemNotes(current, notesStartX, headerYPos, itemWidth, leftSpecResult.boxHeight);
+                renderItemCustomPage(current);
 
                 itemIndex += 1;
             } else if (canPairWithNext && next) {
@@ -1434,6 +1612,9 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     item2YPos = renderItemAccessories(next, item2StartX, item2YPos, itemWidth, margin);
                 }
 
+                renderItemCustomPage(current);
+                renderItemCustomPage(next);
+
                 itemIndex += 2;
             } else {
                 const itemWidth = (pageWidth - 2 * margin) * 0.6;
@@ -1442,6 +1623,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 let itemYPos = renderItemImageAndName(current, startX, yPos, itemWidth);
                 itemYPos = renderItemSpecifications(current, startX, itemYPos, itemWidth, startX).finalY;
                 renderItemAccessories(current, startX, itemYPos, itemWidth, startX, 1);
+                renderItemCustomPage(current);
 
                 itemIndex += 1;
             }

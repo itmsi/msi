@@ -547,6 +547,7 @@ export default function CreateQuotation() {
                     cp_code_unique: apiProductData.cp_code_unique || '',
                     cp_notes: apiProductData.cp_notes || '',
                     notes: apiProductData.notes || '',
+                    componen_product_custom: apiProductData.componen_product_custom || '',
                     msi_model: apiProductData.msi_model || '',
                     msi_product: apiProductData.msi_product || '',
                     segment: apiProductData.segment || '',
@@ -668,6 +669,7 @@ export default function CreateQuotation() {
                 cp_code_unique: existingItem.cp_code_unique || '',
                 cp_notes: existingItem.cp_notes || '',
                 notes: existingItem.notes || '',
+                componen_product_custom: existingItem.componen_product_custom || '',
                 msi_model: existingItem.msi_model || '',
                 msi_product: existingItem.msi_product || '',
                 segment: existingItem.segment || '',
@@ -772,6 +774,7 @@ export default function CreateQuotation() {
                 selling_price_star_5: updatedProductData.selling_price_star_5 || currentItem.selling_price_star_5,
                 description: updatedProductData.componen_product_description || currentItem.description,
                 notes: updatedProductData.notes || (currentItem as any).notes || '',
+                componen_product_custom: updatedProductData.componen_product_custom ?? currentItem.componen_product_custom ?? '',
                 manage_quotation_item_specifications: updatedProductData.componen_product_specifications?.map((spec: any) => ({
                     manage_quotation_item_specification_label: spec.componen_product_specification_label || '',
                     manage_quotation_item_specification_value: spec.componen_product_specification_value || ''

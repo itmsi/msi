@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 import { getCompanyName, formatNumberInput } from "@/helpers/generalHelper";
 import { ItemProductService } from "../services/productService";
 
-const makeSpec = (label: string): ProductSpecification => ({
+export const makeSpec = (label: string): ProductSpecification => ({
     componen_product_specification_label: label,
     componen_product_specification_value: '',
     componen_product_specification_description: '',
@@ -49,6 +49,7 @@ interface CreateProductFormData {
     selling_price_star_4: string;
     selling_price_star_5: string;
     componen_product_description: string;
+    componen_product_custom: string;
     componen_type: number;
     volume: string;
     componen_product_unit_model: string;
@@ -80,6 +81,7 @@ export const useCreateProduct = () => {
         selling_price_star_4: '',
         selling_price_star_5: '',
         componen_product_description: '',
+        componen_product_custom: '',
         componen_type: 1,
         volume: '',
         componen_product_unit_model: '',
@@ -199,6 +201,7 @@ export const useCreateProduct = () => {
             formDataToSend.append('code_unique', formData.code_unique);
             formDataToSend.append('product_type', formData.product_type);
             formDataToSend.append('componen_product_description', formData.componen_product_description);
+            formDataToSend.append('componen_product_custom', formData.componen_product_custom);
             formDataToSend.append('segment', segmentValue);
             formDataToSend.append('msi_model', msiModelValue);
             formDataToSend.append('msi_product', msiProductValue);

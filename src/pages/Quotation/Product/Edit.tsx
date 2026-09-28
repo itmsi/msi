@@ -4,7 +4,8 @@ import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import FileUpload from "@/components/ui/FileUpload/FileUpload";
-import { MdEdit, MdKeyboardArrowLeft, MdSave } from "react-icons/md";
+import EditableField from "@/components/form/editor/EditableField";
+import { MdEdit, MdKeyboardArrowLeft, MdSave, MdAdd, MdDeleteOutline } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
 import { toast } from "react-hot-toast";
 
@@ -13,7 +14,7 @@ import { ItemProductValidationErrors, ProductSpecification } from "./types/produ
 import { handleKeyPress, formatNumberInput } from "@/helpers/generalHelper";
 import CustomSelect from "@/components/form/select/CustomSelect";
 import { PermissionGate } from "@/components/common/PermissionComponents";
-import { getDefaultSpecs } from "./hooks/useProductCreate";
+import { getDefaultSpecs, makeSpec } from "./hooks/useProductCreate";
 
 interface EditProductFormData {
     code_unique: string;
@@ -30,6 +31,7 @@ interface EditProductFormData {
     selling_price_star_4: string;
     selling_price_star_5: string;
     componen_product_description: string;
+    componen_product_custom: string;
     componen_type: number;
     volume: string;
     componen_product_unit_model: string;
@@ -67,6 +69,7 @@ export default function EditProduct() {
         selling_price_star_4: '',
         selling_price_star_5: '',
         componen_product_description: '',
+        componen_product_custom: '',
         componen_type: 1,
         volume: '',
         componen_product_unit_model: '',
@@ -93,19 +96,14 @@ export default function EditProduct() {
             const product = await loadProduct(productId);
 
             if (product) {
-                const defaultSpecifications = getDefaultSpecs(product.componen_type || 1);
-
-                const specificationsData = defaultSpecifications.map(defaultSpec => {
-                    const apiSpec = product.componen_product_specifications?.find(spec =>
-                        spec.specification_label_name === defaultSpec.specification_label_name ||
-                        spec.componen_product_specification_label === defaultSpec.componen_product_specification_label
-                    );
-
-                    return apiSpec ? {
-                        ...defaultSpec,
-                        ...apiSpec
-                    } : defaultSpec;
-                });
+                // Spesifikasi sekarang bebas ditambah/diedit oleh user, jadi
+                // labelnya tidak lagi dijamin cocok dengan template default.
+                // Pakai apa yang tersimpan di API apa adanya; template default
+                // cuma dipakai sebagai starting point kalau produk belum
+                // punya spesifikasi tersimpan sama sekali.
+                const specificationsData = product.componen_product_specifications?.length
+                    ? product.componen_product_specifications
+                    : getDefaultSpecs(product.componen_type || 1);
 
                 setFormData({
                     code_unique: product.code_unique || '',
@@ -122,6 +120,7 @@ export default function EditProduct() {
                     selling_price_star_4: product.selling_price_star_4 ? formatNumberInput(product.selling_price_star_4.toString()) : '',
                     selling_price_star_5: product.selling_price_star_5 ? formatNumberInput(product.selling_price_star_5.toString()) : '',
                     componen_product_description: product.componen_product_description || '',
+                    componen_product_custom: product.componen_product_custom || '',
                     componen_type: product.componen_type || 1,
                     volume: product.volume || '',
                     componen_product_unit_model: product.componen_product_unit_model || '',
@@ -270,6 +269,7 @@ export default function EditProduct() {
             formDataToSend.append('code_unique', formData.code_unique);
             formDataToSend.append('product_type', formData.product_type);
             formDataToSend.append('componen_product_description', formData.componen_product_description);
+            formDataToSend.append('componen_product_custom', formData.componen_product_custom);
             formDataToSend.append('segment', segmentValue);
             formDataToSend.append('msi_model', msiModelValue);
             formDataToSend.append('msi_product', msiProductValue);
@@ -699,40 +699,87 @@ export default function EditProduct() {
                             </div>
                         </div>
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h2 className="text-lg font-primary-bold font-medium text-gray-900 mb-6">
-                                Spesifikasi Produk
-                            </h2>
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-lg font-primary-bold font-medium text-gray-900">
+                                    Spesifikasi Produk
+                                </h2>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setSpecifications(prev => [...prev, makeSpec('')])}
+                                    className="flex items-center gap-1.5 text-xs"
+                                >
+                                    <MdAdd size={14} />
+                                    Tambah Spesifikasi
+                                </Button>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {specifications.map((spec, index) => (
-                                    <div key={`${spec.specification_label_name}-${index}`}>
-                                        <Label htmlFor={`spec_${index}`}>
-                                            {spec.specification_label_name || spec.componen_product_specification_label}
-                                        </Label>
-                                        <Input
-                                            id={`spec_${index}`}
-                                            type="text"
-                                            value={spec.specification_value_name || spec.componen_product_specification_value || ''}
-                                            onChange={(e) => {
-                                                const newSpecs = [...specifications];
-                                                newSpecs[index] = {
-                                                    ...newSpecs[index],
-                                                    specification_value_name: e.target.value,
-                                                    componen_product_specification_value: e.target.value
-                                                };
-                                                setSpecifications(newSpecs);
+                                    <div key={index} className="relative border border-gray-200 rounded-lg p-4 space-y-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSpecifications(prev => prev.filter((_, i) => i !== index));
                                             }}
-                                            placeholder="Masukkan nilai spesifikasi"
-                                        />
-                                        {spec.componen_product_specification_description && (
-                                            <p className="mt-1 text-xs text-gray-500">
-                                                {spec.componen_product_specification_description}
-                                            </p>
-                                        )}
+                                            className="absolute top-2 right-2 text-gray-400 hover:text-red-600"
+                                            aria-label="Hapus spesifikasi"
+                                        >
+                                            <MdDeleteOutline size={18} />
+                                        </button>
+                                        <div>
+                                            <Label htmlFor={`spec_label_${index}`}>Label</Label>
+                                            <Input
+                                                id={`spec_label_${index}`}
+                                                type="text"
+                                                value={spec.specification_label_name || spec.componen_product_specification_label || ''}
+                                                onChange={(e) => {
+                                                    const newSpecs = [...specifications];
+                                                    newSpecs[index] = {
+                                                        ...newSpecs[index],
+                                                        specification_label_name: e.target.value,
+                                                        componen_product_specification_label: e.target.value
+                                                    };
+                                                    setSpecifications(newSpecs);
+                                                }}
+                                                placeholder="Nama spesifikasi"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label htmlFor={`spec_value_${index}`}>Value</Label>
+                                            <Input
+                                                id={`spec_value_${index}`}
+                                                type="text"
+                                                value={spec.specification_value_name || spec.componen_product_specification_value || ''}
+                                                onChange={(e) => {
+                                                    const newSpecs = [...specifications];
+                                                    newSpecs[index] = {
+                                                        ...newSpecs[index],
+                                                        specification_value_name: e.target.value,
+                                                        componen_product_specification_value: e.target.value
+                                                    };
+                                                    setSpecifications(newSpecs);
+                                                }}
+                                                placeholder="Masukkan nilai spesifikasi"
+                                            />
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </>}
+
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <EditableField
+                            id="componen_product_custom-editor"
+                            label="Custom"
+                            value={formData.componen_product_custom}
+                            onChange={(content) => handleInputChange('componen_product_custom', content)}
+                            placeholder="Tambahkan informasi custom..."
+                            editing={true}
+                            showAction={false}
+                        />
+                    </div>
 
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                         <FileUpload

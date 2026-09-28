@@ -31,6 +31,8 @@ export interface ItemProduct {
     selling_price_star_5: string;
     images: any[] | null;
     componen_product_description: string | null;
+    cp_componen_product_custom?: string | null;
+    componen_product_custom?: string | null;
     is_delete: boolean;
     componen_type: number;
     product_type: string;
