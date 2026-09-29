@@ -830,67 +830,64 @@ export default function EditQuotation() {
             return;
         }
 
-        // Initialize offcanvas data if not exists
-        if (!unsavedProductChanges[productId]) {
-            setUnsavedProductChanges(prev => ({
-                ...prev,
-                [productId]: {
-                    componen_product_id: existingItem.componen_product_id,
-                    componen_product_name: existingItem.componen_product_name,
-                    show_componen_product_name: existingItem.componen_product_name,
-                    code_unique: existingItem.code_unique || '',
-                    cp_code_unique: existingItem.cp_code_unique || '',
-                    cp_notes: existingItem.cp_notes || '',
-                    notes: existingItem.notes || '',
-                    cp_componen_product_custom: existingItem.cp_componen_product_custom || '',
-                    componen_product_custom: existingItem.componen_product_custom || '',
-                    msi_model: existingItem.msi_model || '',
-                    msi_product: existingItem.msi_product || '',
-                    segment: existingItem.segment || '',
-                    wheel_no: existingItem.wheel_no || '',
-                    engine: existingItem.engine || '',
-                    volume: existingItem.volume || '',
-                    horse_power: existingItem.horse_power || '',
-                    market_price: existingItem.market_price || '',
-                    product_type: existingItem.product_type || '',
-                    selling_price_star_1: existingItem.selling_price_star_1 || '',
-                    selling_price_star_2: existingItem.selling_price_star_2 || '',
-                    selling_price_star_3: existingItem.selling_price_star_3 || '',
-                    selling_price_star_4: existingItem.selling_price_star_4 || '',
-                    selling_price_star_5: existingItem.selling_price_star_5 || '',
-                    images: existingItem.image ? [existingItem.image] : null,
-                    componen_product_description: existingItem.description || '',
-                    is_delete: false,
-                    componen_type: (existingItem as any).componen_type || 1,
-                    componen_product_unit_model: existingItem.componen_product_unit_model || '',
-                    componen_product_specifications: existingItem.manage_quotation_item_specifications?.map((spec: any) => ({
-                        componen_product_specification_label: spec.manage_quotation_item_specification_label || spec.specification_label_name || '',
-                        componen_product_specification_value: spec.manage_quotation_item_specification_value || spec.specification_value_name || '',
-                        componen_product_specification_description: spec.manage_quotation_item_specification_description || null,
-                        specification_label_name: spec.manage_quotation_item_specification_label || spec.specification_label_name || '',
-                        specification_value_name: spec.manage_quotation_item_specification_value || spec.specification_value_name || ''
-                    })) || [],
-                    manage_quotation_item_accessories: existingItem.manage_quotation_item_accessories?.map((acc: any) => ({
-                        id: acc.accessory_id,
-                        accessory_id: acc.accessory_id,
-                        componen_product_name: acc.accessory_part_name,
-                        accessory_part_name: acc.accessory_part_name,
-                        code_unique: acc.accessory_part_number,
-                        accessory_part_number: acc.accessory_part_number,
-                        brand: acc.accessory_brand,
-                        accessory_brand: acc.accessory_brand,
-                        specification: acc.accessory_specification,
-                        accessory_specification: acc.accessory_specification,
-                        quantity: acc.quantity,
-                        description: acc.description
-                    })) || []
-                }
-            }));
-        }
+        setUnsavedProductChanges(prev => ({
+            ...prev,
+            [productId]: {
+                componen_product_id: existingItem.componen_product_id,
+                componen_product_name: existingItem.componen_product_name,
+                show_componen_product_name: existingItem.componen_product_name,
+                code_unique: existingItem.code_unique || '',
+                cp_code_unique: existingItem.cp_code_unique || '',
+                cp_notes: existingItem.cp_notes || '',
+                notes: existingItem.notes || '',
+                cp_componen_product_custom: existingItem.cp_componen_product_custom || '',
+                componen_product_custom: existingItem.componen_product_custom || '',
+                msi_model: existingItem.msi_model || '',
+                msi_product: existingItem.msi_product || '',
+                segment: existingItem.segment || '',
+                wheel_no: existingItem.wheel_no || '',
+                engine: existingItem.engine || '',
+                volume: existingItem.volume || '',
+                horse_power: existingItem.horse_power || '',
+                market_price: existingItem.market_price || '',
+                product_type: existingItem.product_type || '',
+                selling_price_star_1: existingItem.selling_price_star_1 || '',
+                selling_price_star_2: existingItem.selling_price_star_2 || '',
+                selling_price_star_3: existingItem.selling_price_star_3 || '',
+                selling_price_star_4: existingItem.selling_price_star_4 || '',
+                selling_price_star_5: existingItem.selling_price_star_5 || '',
+                images: existingItem.image ? [existingItem.image] : null,
+                componen_product_description: existingItem.description || '',
+                is_delete: false,
+                componen_type: (existingItem as any).componen_type || 1,
+                componen_product_unit_model: existingItem.componen_product_unit_model || '',
+                componen_product_specifications: existingItem.manage_quotation_item_specifications?.map((spec: any) => ({
+                    componen_product_specification_label: spec.manage_quotation_item_specification_label || spec.specification_label_name || '',
+                    componen_product_specification_value: spec.manage_quotation_item_specification_value || spec.specification_value_name || '',
+                    componen_product_specification_description: spec.manage_quotation_item_specification_description || null,
+                    specification_label_name: spec.manage_quotation_item_specification_label || spec.specification_label_name || '',
+                    specification_value_name: spec.manage_quotation_item_specification_value || spec.specification_value_name || ''
+                })) || [],
+                manage_quotation_item_accessories: existingItem.manage_quotation_item_accessories?.map((acc: any) => ({
+                    id: acc.accessory_id,
+                    accessory_id: acc.accessory_id,
+                    componen_product_name: acc.accessory_part_name,
+                    accessory_part_name: acc.accessory_part_name,
+                    code_unique: acc.accessory_part_number,
+                    accessory_part_number: acc.accessory_part_number,
+                    brand: acc.accessory_brand,
+                    accessory_brand: acc.accessory_brand,
+                    specification: acc.accessory_specification,
+                    accessory_specification: acc.accessory_specification,
+                    quantity: acc.quantity,
+                    description: acc.description
+                })) || []
+            }
+        }));
 
         setSelectedProductId(productId);
         setShowProductDetail(true);
-    }, [formData.manage_quotation_items, unsavedProductChanges]);
+    }, [formData.manage_quotation_items]);
 
     const handleCloseProductDetail = useCallback(() => {
         setShowProductDetail(false);
