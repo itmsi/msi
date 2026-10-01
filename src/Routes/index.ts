@@ -129,6 +129,7 @@ const Receive = lazy(() => import('@/pages/Netsuite/PurchaseOrder/Receive'));
 const ManageReceive = lazy(() => import('@/pages/Netsuite/Receipts/Manage'));
 const ViewReceive = lazy(() => import('@/pages/Netsuite/Receipts/View'));
 const ManageFulfillment = lazy(() => import('@/pages/Netsuite/Fulfillment/Manage'));
+const ManageNetsuiteActivity = lazy(() => import('@/pages/Netsuite/Activity/Manage'));
 const ViewFulfillment = lazy(() => import('@/pages/Netsuite/Fulfillment/View'));
 const ManageInventoryAdjustment = lazy(() => import('@/pages/Netsuite/InventoryAdjustment/Manage'));
 const ViewInventoryAdjustment = lazy(() => import('@/pages/Netsuite/InventoryAdjustment/View'));
@@ -1122,6 +1123,14 @@ export const routes: TAppRoute[] = [
         isProtected: true,
         roles: ['Fulfillment Netsuite'],
         component: ManageFulfillment,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/activity',
+        name: 'Activity Netsuite',
+        isProtected: true,
+        roles: ['Activity Netsuite'],
+        component: ManageNetsuiteActivity,
         layout: AppLayout,
     },
     {
