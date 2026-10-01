@@ -156,92 +156,53 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     />
                 </div>
 
-                {profileSSOITI === 'MSI' ? (<>
-                    <FilterAscDesc />
-                    <FilterStatus />
-                    <div className="flex items-center gap-2">
-                        <Button
-                            onClick={() => setShowAdvancedFilters(prev => !prev)}
-                            className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
-                            size="sm"
-                        >
-                            <MdFilterListAlt className="w-4 h-4 mr-2" />
-                            Filter
-                            {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
-                        </Button>
-                    </div>
-                </>) : (<>
-                    <ModuleNameSelectField
-                        label=""
-                        className="w-60"
-                        value={filters.module_name}
-                        onChange={(option) => onFilterChange('module_name', option?.value || '')}
-                    />
-                    <FilterStatus />
-                    <div className="flex w-60" ref={datePickerRef}>
-                        <div className="relative w-full">
-                            <button
-                                type="button"
-                                onClick={() => setShowDatePicker(prev => !prev)}
-                                className="h-10.5 flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white hover:bg-gray-50 w-full"
-                            >
-                                <MdDateRange className="w-4 h-4 text-gray-400" />
-                                {dateRangeDisplayText}
-                            </button>
-
-                            {showDatePicker && (
-                                <div className="absolute right-0 top-full mt-2 z-20 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-                                    <DateRange
-                                        ranges={dateRangeState}
-                                        onChange={handleDateRangeSelect}
-                                        moveRangeOnFirstSelection={false}
-                                        rangeColors={['#3b82f6']}
-                                        maxDate={new Date()}
-                                    />
-                                    <div className="flex justify-end px-3 py-2 border-t border-gray-200 bg-gray-50">
-                                        <Button type="button" onClick={() => setShowDatePicker(false)} size="sm" className="px-4 py-1">
-                                            Done
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <FilterAscDesc />
-                </>)}
+                <FilterAscDesc />
+                <div className="flex items-center gap-2">
+                    <Button
+                        onClick={() => setShowAdvancedFilters(prev => !prev)}
+                        className="h-10.5 px-4 py-2 bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300 relative"
+                        size="sm"
+                    >
+                        <MdFilterListAlt className="w-4 h-4 mr-2" />
+                        Filter
+                        {showAdvancedFilters ? <MdExpandLess className="w-4 h-4 ml-1" /> : <MdExpandMore className="w-4 h-4 ml-1" />}
+                    </Button>
+                </div>
 
             </div>
 
-            {profileSSOITI === 'MSI' && showAdvancedFilters && (
+            {showAdvancedFilters && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label htmlFor="type_data" className="block text-sm font-medium text-gray-700 mb-1">Type Data</label>
-                            <CustomSelect
-                                id="type_data"
-                                name="type_data"
-                                value={typeDataOptions.find(option => option.value === filters.type_data) || typeDataOptions[0]}
-                                onChange={(option) => onFilterChange('type_data', option?.value || '')}
-                                options={typeDataOptions}
-                                placeholder="All Types"
-                                isClearable={false}
-                                isSearchable={false}
-                            />
-                        </div>
+                        {profileSSOITI === 'MSI' && <>
+                            <div>
+                                <label htmlFor="type_data" className="block text-sm font-medium text-gray-700 mb-1">Type Data</label>
+                                <CustomSelect
+                                    id="type_data"
+                                    name="type_data"
+                                    value={typeDataOptions.find(option => option.value === filters.type_data) || typeDataOptions[0]}
+                                    onChange={(option) => onFilterChange('type_data', option?.value || '')}
+                                    options={typeDataOptions}
+                                    placeholder="All Types"
+                                    isClearable={false}
+                                    isSearchable={false}
+                                />
+                            </div>
 
-                        <div>
-                            <label htmlFor="client" className="block text-sm font-medium text-gray-700 mb-1">Client</label>
-                            <CustomSelect
-                                id="client"
-                                name="client"
-                                value={clientOptions.find(option => option.value === filters.client) || clientOptions[0]}
-                                onChange={(option) => onFilterChange('client', option?.value || '')}
-                                options={clientOptions}
-                                placeholder="All Clients"
-                                isClearable={false}
-                                isSearchable={false}
-                            />
-                        </div>
+                            <div>
+                                <label htmlFor="client" className="block text-sm font-medium text-gray-700 mb-1">Client</label>
+                                <CustomSelect
+                                    id="client"
+                                    name="client"
+                                    value={clientOptions.find(option => option.value === filters.client) || clientOptions[0]}
+                                    onChange={(option) => onFilterChange('client', option?.value || '')}
+                                    options={clientOptions}
+                                    placeholder="All Clients"
+                                    isClearable={false}
+                                    isSearchable={false}
+                                />
+                            </div>
+                        </>}
                         <div className="" ref={datePickerRef}>
                             <label htmlFor="client" className="block text-sm font-medium text-gray-700 mb-1">Date</label>
                             <div className="relative">
