@@ -7,7 +7,7 @@ import ActivityTable from './components/ActivityTable';
 
 const TYPE_DATA_OPTIONS = [
     { value: 'apps', label: 'APPS' },
-    { value: 'netsuite', label: 'netsuite' },
+    { value: 'netsuite', label: 'NETSUITE' },
 ];
 
 const CLIENT_OPTIONS = [
