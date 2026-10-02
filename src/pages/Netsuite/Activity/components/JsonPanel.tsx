@@ -11,8 +11,6 @@ const TOKEN_CLASS: Record<JsonTokenType, string> = {
     plain: 'text-gray-600',
 };
 
-// Satu token = satu elemen <span>. Response besar bisa menghasilkan puluhan ribu elemen,
-// jadi di atas batas ini JSON dirender sebagai teks biasa supaya halaman tetap ringan.
 const HIGHLIGHT_LIMIT = 30000;
 
 interface JsonHighlightProps {
@@ -38,7 +36,6 @@ const JsonHighlight = memo(({ json, highlight }: JsonHighlightProps) => {
 JsonHighlight.displayName = 'JsonHighlight';
 
 interface JsonPanelProps {
-    direction: 'request' | 'response';
     title: string;
     summary?: string;
     value: unknown;
@@ -72,14 +69,6 @@ const JsonPanel = ({ title, summary, value, copyLabel }: JsonPanelProps) => {
                 <div className="flex items-center gap-2 min-w-0">
                     <span className="text-sm font-medium text-gray-900 truncate">{title}</span>
                     {summary && <span className="text-xs text-gray-500 whitespace-nowrap">{summary}</span>}
-                    {/* {isLarge && (
-                        <span
-                            title="Syntax highlight dimatikan agar tetap ringan"
-                            className="text-[10px] px-1.5 py-0.5 rounded border border-amber-200 bg-amber-50 text-amber-700 whitespace-nowrap"
-                        >
-                            Large
-                        </span>
-                    )} */}
                 </div>
 
                 <button

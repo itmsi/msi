@@ -22,8 +22,6 @@ const CLIENT_STYLE: Record<string, string> = {
     MSI: 'bg-teal-50 text-teal-700 border-teal-200',
 };
 
-// Lebar panel dikirim lewat context, bukan lewat komponen baru setiap kali lebar berubah.
-// Komponen baru berarti panel di-mount ulang, sehingga JSON diproses ulang setiap resize.
 const PanelWidthContext = createContext(0);
 
 const ExpandedDetail = ({ data: row }: { data: ActivityRow }) => {
@@ -79,8 +77,6 @@ const ActivityTable: React.FC<ActivityTableProps> = ({
         setExpandedId(prev => (prev === row.id ? null : row.id));
     }, []);
 
-    // Lebar wrapper tabel mengikuti isi (width: max-content), jadi panel detail harus diberi
-    // lebar pasti sebesar area yang terlihat. Tanpa ini, JSON yang panjang ikut melebarkan tabel.
     useEffect(() => {
         const element = containerRef.current;
         if (!element) return;
@@ -110,7 +106,7 @@ const ActivityTable: React.FC<ActivityTableProps> = ({
             selector: row => row.url || '-',
             cell: row => (
                 <div className="flex flex-col py-2 min-w-0">
-                    <span className="font-medium text-gray-900">{row.module_name}</span>
+                    <span className="font-medium text-gray-900 uppercase">{row.module_name}</span>
                     <span className="text-xs text-gray-500 font-mono break-all">{row.url || '-'}</span>
                 </div>
             ),
@@ -124,15 +120,12 @@ const ActivityTable: React.FC<ActivityTableProps> = ({
             cell: row => {
                 const { date, time } = parseActivityTimestamp(row.created_at);
 
-                return (<>
-                    {/* <button onClick={() => toggleRow(row)} className="absolute inset-0 w-full h-full z-10" /> */}
+                return (
                     <div className="flex flex-col py-2">
                         <span className="font-mono font-medium text-gray-900">{time}</span>
-                        <span className="text-xs text-gray-500">
-                            {date}
-                        </span>
+                        <span className="text-xs text-gray-500">{date}</span>
                     </div>
-                </>);
+                );
             },
             width: '210px',
         },
@@ -186,25 +179,6 @@ const ActivityTable: React.FC<ActivityTableProps> = ({
             width: '120px',
             center: true,
         },
-        // {
-        //     id: 'records',
-        //     name: 'Record Count',
-        //     selector: row => getRecordCount(row) ?? -1,
-        //     cell: row => {
-        //         const recordCount = getRecordCount(row);
-        //         const pageInfo = getResponsePageInfo(row);
-
-        //         return (
-        //             <div className="flex flex-col py-2">
-        //                 <span className="text-gray-900">{recordCount === null ? '-' : `${recordCount} records`}</span>
-        //                 {pageInfo && (
-        //                     <span className="text-xs text-gray-500">Page {pageInfo.page}/{pageInfo.totalPages}</span>
-        //                 )}
-        //             </div>
-        //         );
-        //     },
-        //     width: '150px',
-        // }
     ];
 
     return (

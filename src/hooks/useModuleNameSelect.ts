@@ -71,7 +71,6 @@ export const useModuleNameSelect = (limit: number = 20) => {
             const envelope = response.data;
             const items = envelope?.data?.items ?? [];
 
-            // module_name sekaligus jadi value, karena itu yang dikirim balik sebagai filter.
             const newOptions: ModuleNameSelectOption[] = items.map(item => ({
                 value: item.module_name,
                 label: item.module_name,

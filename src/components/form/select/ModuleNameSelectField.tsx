@@ -6,7 +6,6 @@ import { ModuleNameSelectOption, useModuleNameSelect } from '@/hooks/useModuleNa
 interface ModuleNameSelectFieldProps {
     value?: string | null;
     onChange: (option: ModuleNameSelectOption | null) => void;
-    /** Isi dengan '' untuk menyembunyikan label, misalnya saat dipakai sebaris dengan filter lain. */
     label?: string;
     placeholder?: string;
     error?: string;
@@ -38,8 +37,7 @@ const ModuleNameSelectField = ({
         initializeOptions();
     }, [initializeOptions]);
 
-    // module_name sekaligus jadi labelnya, jadi nilai terpilih tidak perlu dicari ulang ke API.
-    const selectedOption = value ? { value, label: value } : null;
+    const selectedOption =value ? { value, label: value } : null;
 
     return (
         <div className={className}>

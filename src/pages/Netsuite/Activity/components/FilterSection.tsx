@@ -90,7 +90,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Kalender ikut nilai filter di URL, supaya tetap benar setelah refresh atau tombol Back.
     useEffect(() => {
         setDateRangeState([{
             startDate: filters.start_date ? moment(filters.start_date, 'YYYY-MM-DD').toDate() : new Date(),
@@ -115,7 +114,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         ? `${moment(filters.start_date).format('DD MMM YYYY')} - ${moment(filters.end_date).format('DD MMM YYYY')}`
         : 'Select Date Range';
 
-    const FilterAscDesc = () => (
+    const sortOrderFilter = (
         <div className="flex items-center gap-2">
             <CustomSelect
                 id="sort_order"
@@ -129,8 +128,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 className="w-40"
             />
         </div>
-    )
-    const FilterStatus = () => (
+    );
+
+    const statusFilter = (
         <CustomSelect
             id="status"
             name="status"
@@ -140,9 +140,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             placeholder="Status"
             isClearable={false}
             isSearchable={false}
-        // className="w-40"
         />
-    )
+    );
+
     return (
         <>
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -156,7 +156,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     />
                 </div>
 
-                <FilterAscDesc />
+                {sortOrderFilter}
                 <div className="flex items-center gap-2">
                     <Button
                         onClick={() => setShowAdvancedFilters(prev => !prev)}
@@ -235,7 +235,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         </div>
                         <div>
                             <label htmlFor="client" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <FilterStatus />
+                            {statusFilter}
                         </div>
 
                         <ModuleNameSelectField

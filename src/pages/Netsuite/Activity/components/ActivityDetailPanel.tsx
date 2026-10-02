@@ -25,13 +25,11 @@ const ActivityDetailPanel = ({ data, width, loading, error }: ActivityDetailPane
             ) : data ? (
                 <>
                     <JsonPanel
-                        direction="request"
                         title="Request Payload"
                         value={data.payload}
                         copyLabel="Copy Payload"
                     />
                     <JsonPanel
-                        direction="response"
                         title="Response Body"
                         summary={recordCount === null ? undefined : `${recordCount} records`}
                         value={data.response}

@@ -30,11 +30,9 @@ export interface ActivityItem {
     updated_at: string | null;
 }
 
-// Baris tabel: item asli plus id buatan frontend, karena response tidak punya id.
 export interface ActivityRow extends ActivityItem {
     id: string;
     activityId?: string;
-    rowNumber: number;
 }
 
 export interface ActivityDetailResponse {
