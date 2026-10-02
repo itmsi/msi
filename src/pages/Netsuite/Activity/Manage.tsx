@@ -43,7 +43,6 @@ export default function Manage() {
 
         handleFilterChange({ [field]: value });
     }, [handleFilterChange]);
-
     return (
         <>
             <PageMeta
@@ -71,7 +70,7 @@ export default function Manage() {
                         onFilterChange={handleFilterFieldChange}
                         onDateRangeChange={handleDateRangeChange}
                         onClearFilters={handleClearFilters}
-                        defaultOpen={activeFilterCount > 0}
+                        defaultOpen={activeFilterCount !== 0}
                     />
                 </div>
 
