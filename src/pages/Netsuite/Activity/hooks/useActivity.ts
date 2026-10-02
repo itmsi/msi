@@ -93,7 +93,7 @@ export const useActivity = () => {
                 return;
             }
 
-            setActivities(toActivityRows(result.items, result.pagination.page || urlPage, result.pagination.limit || urlLimit));
+            setActivities(toActivityRows(result.items));
             setPagination(result.pagination);
         } catch (err) {
             const apiError = err as ApiError;
@@ -135,10 +135,6 @@ export const useActivity = () => {
     const handleSearch = useCallback(() => {
         handleFilterChange({ search: searchValue });
     }, [handleFilterChange, searchValue]);
-
-    const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') handleSearch();
-    }, [handleSearch]);
 
     const handleClearSearch = useCallback(() => {
         setSearchValue('');
@@ -187,7 +183,6 @@ export const useActivity = () => {
         handlePageChange,
         handleRowsPerPageChange,
         handleSearch,
-        handleKeyPress,
         handleClearSearch,
         handleClearFilters,
     };

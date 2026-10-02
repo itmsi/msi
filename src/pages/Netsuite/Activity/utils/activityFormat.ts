@@ -9,18 +9,12 @@ const TIMESTAMP_FORMATS = [
     moment.ISO_8601,
 ];
 
-// Segmen teknis yang tidak perlu tampil pada label endpoint.
-const IGNORED_SEGMENTS = /^(api|v\d+|bridge)$/i;
-const ACTION_SEGMENTS = /^(get|get-.*|list|create|update|delete|remove|post|put|patch|sync|status)$/i;
-
 export interface ActivityTimestampParts {
     date: string;
     time: string;
     offset: string;
 }
 
-// parseZone dipakai agar waktu tampil sesuai offset yang tercatat di log,
-// bukan dikonversi ke timezone browser yang sedang membuka halaman.
 export const parseActivityTimestamp = (value?: string | null): ActivityTimestampParts => {
     if (!value) return { date: '-', time: '-', offset: '' };
 
@@ -34,28 +28,7 @@ export const parseActivityTimestamp = (value?: string | null): ActivityTimestamp
     };
 };
 
-const toTitleCase = (segment: string): string =>
-    segment
-        .split('-')
-        .filter(Boolean)
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-
-export const getEndpointLabel = (url?: string | null): string => {
-    if (!url) return '-';
-
-    const segments = url.split('?')[0].split('/').filter(Boolean).filter(segment => !IGNORED_SEGMENTS.test(segment));
-
-    while (segments.length > 1 && ACTION_SEGMENTS.test(segments[segments.length - 1])) {
-        segments.pop();
-    }
-
-    if (!segments.length) return url;
-
-    return segments.map(toTitleCase).join(' ');
-};
-
-export const getActivityStatus = (item: ActivityItem): { ok: boolean; label: string } => {
+export const getActivityStatus =(item: ActivityItem): { ok: boolean; label: string } => {
     const statusCode = Number(item.status_code);
     const ok = statusCode >= 200 && statusCode < 300;
 
@@ -72,22 +45,11 @@ export const getRecordCount = (item: ActivityItem): number | null => {
     return Array.isArray(item.response?.data) ? item.response.data.length : null;
 };
 
-export const getResponsePageInfo = (item: ActivityItem): { page: number; totalPages: number } | null => {
-    const page = item.response?.page;
-    const totalPages = item.response?.total_pages;
-
-    if (typeof page !== 'number' || typeof totalPages !== 'number') return null;
-
-    return { page, totalPages };
-};
-
-// Response tidak punya id, jadi baris diberi id buatan agar expand & keyField tetap stabil.
-export const toActivityRows = (items: ActivityItem[], page: number, limit: number): ActivityRow[] =>
+export const toActivityRows = (items: ActivityItem[]): ActivityRow[] =>
     items.map((item, index) => ({
         ...item,
         id: `${item.created_at || 'no-date'}-${item.url || 'no-url'}-${index}`,
         activityId: item.id,
-        rowNumber: (page - 1) * limit + index + 1,
     }));
 
 export const toRequestStartDate = (date: string): string =>
@@ -115,8 +77,7 @@ export interface JsonToken {
 
 const JSON_TOKEN_PATTERN = /("(?:\\.|[^\\"])*"\s*:|"(?:\\.|[^\\"])*"|\b(?:true|false)\b|\bnull\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g;
 
-// Pewarnaan JSON dibuat sendiri karena project tidak memakai library syntax highlighter.
-export const tokenizeJson = (json: string): JsonToken[] => {
+export const tokenizeJson =(json: string): JsonToken[] => {
     const tokens: JsonToken[] = [];
     let lastIndex = 0;
 

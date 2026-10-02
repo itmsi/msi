@@ -47,9 +47,7 @@ interface CustomDataTableProps<T> {
     progressComponent?: React.ReactNode;
     expandableRows?: boolean;
     expandableRowsComponent?: React.ComponentType<{ data: T }>;
-    /** Menentukan baris mana yang sedang terbuka, sehingga state buka/tutup dipegang halaman, bukan tabel. */
     isRowExpanded?: (row: T) => boolean;
-    /** Menyembunyikan tombol expand bawaan di kolom paling kiri, dipakai kalau halaman menyediakan tombolnya sendiri. */
     hideExpandButton?: boolean;
     conditionalRowStyles?: ConditionalStyles<T>[];
 
