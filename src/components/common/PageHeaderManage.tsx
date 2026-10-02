@@ -21,17 +21,17 @@ const PageHeaderManage: React.FC<PageHeaderCardProps> = ({
     return (
         <div className={`bg-white shadow rounded-lg ${className}`}>
             <div className="px-6 py-4 border-b border-gray-200">
-                <div className="flex flex-col md:flex-row lg:justify-between lg:items-center">
-                    
+                <div className="flex flex-col md:flex-row md:justify-between lg:items-center">
+
                     {/* Left Content */}
                     <div>
                         <h3 className="text-lg leading-6 font-primary-bold text-gray-900">
                             {title}
                         </h3>
                         {subtitle && (
-                        <p className="mt-1 text-sm text-gray-500">
-                            {subtitle}
-                        </p>
+                            <p className="mt-1 text-sm text-gray-500">
+                                {subtitle}
+                            </p>
                         )}
                     </div>
 

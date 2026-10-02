@@ -108,13 +108,9 @@ export const useCandidateManagement = () => {
         updateUrlParams({ ...urlFilters, ...newFilters });
     }, [urlFilters, updateUrlParams]);
 
-    const executeSearch = useCallback(() => {
+    const handleSearch = useCallback(() => {
         handleFilterChange({ search: searchValue });
     }, [handleFilterChange, searchValue]);
-
-    const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') executeSearch();
-    }, [executeSearch]);
 
     const handleClearSearch = useCallback(() => {
         setSearchValue('');
@@ -133,6 +129,15 @@ export const useCandidateManagement = () => {
         });
     }, [handleFilterChange]);
 
+    const activeFilterCount = [
+        urlFilters.candidate_status,
+        urlFilters.assign_role,
+        urlFilters.group_id,
+        urlFilters.company_id,
+        urlFilters.department_id,
+        urlFilters.title_id,
+    ].filter(Boolean).length;
+
     return {
         candidates,
         filters: urlFilters,
@@ -143,12 +148,12 @@ export const useCandidateManagement = () => {
         pagination,
         offeringCount,
         searchValue,
+        activeFilterCount,
         setSearchValue,
         fetchCandidates,
         loadMore,
         handleFilterChange,
-        executeSearch,
-        handleKeyPress,
+        handleSearch,
         handleClearSearch,
         handleClearFilters,
     };
