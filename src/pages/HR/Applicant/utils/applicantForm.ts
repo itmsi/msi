@@ -6,9 +6,78 @@ import {
     ApplicantFormDetail,
     ApplicantFormListItem,
     ApplicantFormListSections,
+    ApplicantFormScalarField,
     ApplicantFormUpdateRequest,
     ApplicantListSection,
+    ApplicantReference,
+    ApplicantWorkingExperience,
 } from '../types/applicant';
+
+export interface ApplicantScalarFieldConfig {
+    field: ApplicantFormScalarField;
+    labelKey: string;
+    type?: 'text' | 'email' | 'date' | 'textarea' | 'choice' | 'select';
+    options?: { value: string; label: string }[];
+    required?: boolean;
+    fullWidth?: boolean;
+}
+
+export const APPLICANT_FIELD_GROUPS: { titleKey: string; fields: ApplicantScalarFieldConfig[]; withDriverLicense?: boolean }[] = [
+    {
+        titleKey: 'personalInformation',
+        withDriverLicense: true,
+        fields: [
+            { field: 'full_name', labelKey: 'fullName', required: true },
+            { field: 'address_as_per_id_card', labelKey: 'addressIdCard', type: 'textarea', required: true },
+            { field: 'nickname', labelKey: 'nickname', required: true },
+            { field: 'present_address', labelKey: 'presentAddress', type: 'textarea', required: true },
+            { field: 'no_mobile', labelKey: 'mobileNumber', required: true },
+            { field: 'city', labelKey: 'city' },
+            { field: 'name_relationship_emergency_contact_number', labelKey: 'emergencyContact', required: true },
+            { field: 'place_date_of_birth', labelKey: 'placeDateOfBirth', required: true },
+            { field: 'email', labelKey: 'email', type: 'email', required: true },
+            {
+                field: 'blood_type',
+                labelKey: 'bloodType',
+                type: 'choice',
+                required: true,
+                options: [
+                    { value: 'A', label: 'A' },
+                    { value: 'B', label: 'B' },
+                    { value: 'O', label: 'O' },
+                    { value: 'AB', label: 'AB' },
+                ],
+            },
+            { field: 'id_number', labelKey: 'idNumber', required: true },
+            { field: 'tax_identification_number', labelKey: 'taxIdNumber' },
+            { field: 'position_applied_for', labelKey: 'positionAppliedFor', required: true },
+            { field: 'working_available_date', labelKey: 'availableToWork', type: 'date', required: true },
+            { field: 'marital_status', labelKey: 'maritalStatus', required: true },
+            {
+                field: 'relogion',
+                labelKey: 'religion',
+                type: 'select',
+                required: true,
+                options: [
+                    { value: 'Islam', label: 'Islam' },
+                    { value: 'Kristen Protestan', label: 'Kristen Protestan' },
+                    { value: 'Katolik', label: 'Katolik' },
+                    { value: 'Hindu', label: 'Hindu' },
+                    { value: 'Buddha', label: 'Buddha' },
+                    { value: 'Konghucu', label: 'Konghucu' },
+                    { value: 'Lainnya', label: 'Lainnya' },
+                ],
+            },
+            { field: 'height_weight', labelKey: 'heightWeight', required: true },
+            { field: 'tshirt_size', labelKey: 'tshirtSize', required: true },
+        ],
+    }
+];
+
+export const REQUIRED_APPLICANT_FIELDS: ApplicantFormScalarField[] = APPLICANT_FIELD_GROUPS
+    .flatMap(group => group.fields)
+    .filter(config => config.required)
+    .map(config => config.field);
 
 export const createEmptyRow: { [K in ApplicantListSection]: () => ApplicantFormListSections[K][number] } = {
     driver_license: () => ({ name: '' }),
@@ -99,18 +168,51 @@ interface TypeOption {
     value: string;
     labelKey: string;
     nameKey: string;
+    required?: boolean;
 }
-
-export const EDUCATION_SCHOOL_TYPES: TypeOption[] = [
-    { value: 'university', labelKey: 'university', nameKey: 'universityName' },
-    { value: 'high_school', labelKey: 'highSchool', nameKey: 'highSchoolName' },
-    { value: 'junior_school', labelKey: 'juniorHighSchool', nameKey: 'juniorHighSchoolName' },
-    { value: 'elementary_school', labelKey: 'elementarySchool', nameKey: 'elementarySchoolName' },
+export const EDUCATION_LEVEL_OPTIONS: { value: string; label: string }[] = [
+    { value: 'S3', label: 'S3' },
+    { value: 'S2', label: 'S2' },
+    { value: 'S1', label: 'S1' },
+    { value: 'D3', label: 'D3' },
+    { value: 'D1', label: 'D1' },
+    { value: 'SMA', label: 'SMA' },
+    { value: 'SMP', label: 'SMP' },
+    { value: 'SD', label: 'SD' },
 ];
 
+export interface ApplicantRowFieldConfig<T> {
+    key: keyof T & string;
+    labelKey: string;
+    type?: 'text' | 'textarea' | 'choice' | 'date' | 'number';
+    options?: { value: string; label: string }[];
+    required?: boolean;
+    fullWidth?: boolean;
+}
+
+export const EDUCATION_FIELDS: ApplicantRowFieldConfig<ApplicantEducation>[] = [
+    {
+        key: 'type_of_school',
+        labelKey: 'lastEducation',
+        type: 'choice',
+        options: EDUCATION_LEVEL_OPTIONS,
+        required: true,
+        fullWidth: true,
+    },
+    { key: 'name_of_school', labelKey: 'schoolName', required: true },
+    { key: 'location', labelKey: 'location', required: true },
+    { key: 'graduate', labelKey: 'degree' },
+    { key: 'major', labelKey: 'major' },
+    { key: 'graduation_year', labelKey: 'graduationYear', required: true },
+];
+
+export const REQUIRED_EDUCATION_FIELDS = EDUCATION_FIELDS
+    .filter(config => config.required)
+    .map(config => config.key);
+
 export const FAMILY_RELATIONSHIPS: TypeOption[] = [
-    { value: 'ayah', labelKey: 'father', nameKey: 'fatherName' },
-    { value: 'ibu', labelKey: 'mother', nameKey: 'motherName' },
+    { value: 'ayah', labelKey: 'father', nameKey: 'fatherName', required: true },
+    { value: 'ibu', labelKey: 'mother', nameKey: 'motherName', required: true },
     { value: 'suami/istri', labelKey: 'spouse', nameKey: 'spouseName' },
     { value: 'anak ke-1', labelKey: 'firstChild', nameKey: 'firstChildName' },
     { value: 'anak ke-2', labelKey: 'secondChild', nameKey: 'secondChildName' },
@@ -123,15 +225,38 @@ const normalizeType = (value: string): string => value.trim().toLowerCase();
 const findTypeOption = (options: TypeOption[], value: string) =>
     options.find(option => normalizeType(option.value) === normalizeType(value));
 
-export const getSchoolTypeLabel = (type: string, langField: LangField): string => {
-    const option = findTypeOption(EDUCATION_SCHOOL_TYPES, type);
-    return option ? langField(option.labelKey) : type || '-';
-};
+export const REQUIRED_FAMILY_FIELDS: (keyof ApplicantFamilyMember & string)[] = [
+    'name',
+    'age',
+    'employment',
+    'emergency_contact_number',
+];
 
-export const getSchoolNameLabel = (type: string, langField: LangField): string => {
-    const option = findTypeOption(EDUCATION_SCHOOL_TYPES, type);
-    return langField(option ? option.nameKey : 'schoolName');
-};
+export const isRequiredFamilyRelationship = (relationship: string): boolean =>
+    Boolean(findTypeOption(FAMILY_RELATIONSHIPS, relationship)?.required);
+
+export const REQUIRED_WORKING_EXPERIENCE_FIELDS: (keyof ApplicantWorkingExperience & string)[] = [
+    'name_of_company',
+    'date_from',
+    'date_final',
+    'name_of_supervisor',
+    'reason_of_leaving',
+    'pay_of_salary'
+];
+
+export const REQUIRED_REFERENCE_FIELDS: (keyof ApplicantReference & string)[] = [
+    'name',
+    'position_company',
+    'phone',
+];
+
+export const hasRowValue = (row: object): boolean =>
+    Object.values(row).some(value => String(value ?? '').trim());
+
+// Section yang minimal butuh 1 item: baris pertama selalu wajib, baris berikutnya
+// hanya wajib kalau sudah mulai diisi, supaya tidak ada baris terisi separuh.
+export const isRequiredListRow = (row: object, index: number): boolean =>
+    index === 0 || hasRowValue(row);
 
 export const getFamilyRelationshipLabel = (relationship: string, langField: LangField): string => {
     const option = findTypeOption(FAMILY_RELATIONSHIPS, relationship);
@@ -160,12 +285,7 @@ const orderRowsByType = <T extends object>(
 };
 
 const toEducationRows = (value: unknown): ApplicantEducation[] =>
-    orderRowsByType(
-        toSectionRows('educational_background', value),
-        EDUCATION_SCHOOL_TYPES,
-        row => row.type_of_school,
-        type => ({ ...createEmptyRow.educational_background(), type_of_school: type })
-    );
+    toRowsWithDefault('educational_background', value);
 
 const toFamilyRows = (value: unknown): ApplicantFamilyMember[] =>
     orderRowsByType(

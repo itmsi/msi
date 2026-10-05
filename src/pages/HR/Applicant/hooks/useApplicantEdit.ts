@@ -14,12 +14,22 @@ import {
 import {
     createEmptyApplicantForm,
     createEmptyRow,
+    isRequiredFamilyRelationship,
+    isRequiredListRow,
     pickApplicantSummary,
+    REQUIRED_APPLICANT_FIELDS,
+    REQUIRED_EDUCATION_FIELDS,
+    REQUIRED_FAMILY_FIELDS,
+    REQUIRED_REFERENCE_FIELDS,
+    REQUIRED_WORKING_EXPERIENCE_FIELDS,
     toApplicantFormValues,
 } from '../utils/applicantForm';
 import { generateApplicantFormPDF } from '../utils/applicantPdfGenerator';
 
 export type ApplicantFormErrors = Partial<Record<ApplicantFormScalarField, string>>;
+
+// Error field di dalam baris, dengan key `${section}.${index}.${field}`.
+export type ApplicantSectionErrors = Record<string, string>;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -29,6 +39,7 @@ export const useApplicantEdit = (id?: string) => {
     const [formData, setFormData] = useState<ApplicantFormUpdateRequest>(createEmptyApplicantForm);
     const [savedFormData, setSavedFormData] = useState<ApplicantFormUpdateRequest | null>(null);
     const [errors, setErrors] = useState<ApplicantFormErrors>({});
+    const [sectionErrors, setSectionErrors] = useState<ApplicantSectionErrors>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,6 +66,7 @@ export const useApplicantEdit = (id?: string) => {
             setFormData(values);
             setSavedFormData(values);
             setErrors({});
+            setSectionErrors({});
         } catch (err) {
             const apiError = err as ApiError;
             setSummary(null);
@@ -98,6 +110,13 @@ export const useApplicantEdit = (id?: string) => {
             ...prev,
             [section]: [...prev[section], createEmptyRow[section]()],
         }));
+        setSectionErrors(prev => {
+            if (!prev[section]) return prev;
+
+            const next = { ...prev };
+            delete next[section];
+            return next;
+        });
     }, []);
 
     const handleRowRemove = useCallback((section: ApplicantListSection, index: number) => {
@@ -120,18 +139,81 @@ export const useApplicantEdit = (id?: string) => {
             rows[index] = { ...rows[index], [key]: value };
             return { ...prev, [section]: rows };
         });
+        setSectionErrors(prev => {
+            const errorKey = `${section}.${index}.${String(key)}`;
+            if (!prev[errorKey]) return prev;
+
+            const next = { ...prev };
+            delete next[errorKey];
+            return next;
+        });
     }, []);
 
     const validateForm = (): boolean => {
         const nextErrors: ApplicantFormErrors = {};
+
+        REQUIRED_APPLICANT_FIELDS.forEach(field => {
+            if (!String(formData[field] ?? '').trim()) nextErrors[field] = 'fieldRequired';
+        });
 
         if (!formData.full_name.trim()) nextErrors.full_name = 'fullNameRequired';
         if (formData.email.trim() && !EMAIL_PATTERN.test(formData.email.trim())) {
             nextErrors.email = 'emailInvalid';
         }
 
+        const nextSectionErrors: ApplicantSectionErrors = {};
+
+        formData.educational_background.forEach((row, index) => {
+            REQUIRED_EDUCATION_FIELDS.forEach(key => {
+                if (!String(row[key] ?? '').trim()) {
+                    nextSectionErrors[`educational_background.${index}.${key}`] = 'fieldRequired';
+                }
+            });
+        });
+
+        formData.family_background.forEach((row, index) => {
+            if (!isRequiredFamilyRelationship(row.relationship)) return;
+
+            REQUIRED_FAMILY_FIELDS.forEach(key => {
+                if (!String(row[key] ?? '').trim()) {
+                    nextSectionErrors[`family_background.${index}.${key}`] = 'fieldRequired';
+                }
+            });
+        });
+
+        const validateMinimumOneItem = <T extends object>(
+            section: ApplicantListSection,
+            rows: T[],
+            keys: (keyof T & string)[]
+        ) => {
+            if (rows.length === 0) {
+                nextSectionErrors[section] = 'minimumOneItemRequired';
+                return;
+            }
+
+            rows.forEach((row, index) => {
+                if (!isRequiredListRow(row, index)) return;
+
+                keys.forEach(key => {
+                    if (!String(row[key] ?? '').trim()) {
+                        nextSectionErrors[`${section}.${index}.${key}`] = 'fieldRequired';
+                    }
+                });
+            });
+        };
+
+        validateMinimumOneItem('working_experiences', formData.working_experiences, REQUIRED_WORKING_EXPERIENCE_FIELDS);
+        validateMinimumOneItem('references_old_company', formData.references_old_company, REQUIRED_REFERENCE_FIELDS);
+
+        formData.following_answers.forEach((row, index) => {
+            if (!String(row.answers ?? '').trim()) {
+                nextSectionErrors[`following_answers.${index}.answers`] = 'fieldRequired';
+            }
+        });
+
         setErrors(nextErrors);
-        return Object.keys(nextErrors).length === 0;
+        setSectionErrors(nextSectionErrors);
+        return Object.keys(nextErrors).length === 0 && Object.keys(nextSectionErrors).length === 0;
     };
 
     const handleSubmit = async () => {
@@ -180,6 +262,7 @@ export const useApplicantEdit = (id?: string) => {
         summary,
         formData,
         errors,
+        sectionErrors,
         loading,
         error,
         isSubmitting,

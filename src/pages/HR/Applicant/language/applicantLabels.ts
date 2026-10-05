@@ -188,6 +188,11 @@ export const applicantLabels: TranslationMap = {
         en: 'Formal Education',
         zh: '正规教育',
     },
+    lastEducation: {
+        id: 'Pendidikan Terakhir',
+        en: 'Last Education',
+        zh: '最高学历',
+    },
     university: {
         id: 'Universitas',
         en: 'University',
@@ -522,6 +527,16 @@ export const applicantLabels: TranslationMap = {
     },
 
     // Validation & Toast Messages
+    fieldRequired: {
+        id: 'Wajib diisi',
+        en: 'This field is required',
+        zh: '此项为必填项',
+    },
+    minimumOneItemRequired: {
+        id: 'Minimal 1 item wajib diisi',
+        en: 'At least one item is required',
+        zh: '至少需要填写一项',
+    },
     fullNameRequired: {
         id: 'Nama lengkap wajib diisi',
         en: 'Full name is required',

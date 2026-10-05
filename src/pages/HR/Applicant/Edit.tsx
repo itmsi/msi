@@ -35,6 +35,7 @@ export default function Edit() {
         summary,
         formData,
         errors,
+        sectionErrors,
         loading,
         error,
         isSubmitting,
@@ -105,6 +106,7 @@ export default function Edit() {
                     <ApplicantSections
                         values={formData}
                         readOnly={readOnly}
+                        errors={sectionErrors}
                         onRowAdd={handleRowAdd}
                         onRowRemove={handleRowRemove}
                         onRowChange={handleRowChange}
