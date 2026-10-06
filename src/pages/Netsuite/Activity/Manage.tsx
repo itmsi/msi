@@ -28,6 +28,7 @@ export default function Manage() {
         setSearchValue,
         handleFilterChange,
         handleDateRangeChange,
+        handleTimeChange,
         handlePageChange,
         handleRowsPerPageChange,
         handleSearch,
@@ -69,6 +70,7 @@ export default function Manage() {
                         clientOptions={CLIENT_OPTIONS}
                         onFilterChange={handleFilterFieldChange}
                         onDateRangeChange={handleDateRangeChange}
+                        onTimeChange={handleTimeChange}
                         onClearFilters={handleClearFilters}
                         defaultOpen={activeFilterCount !== 0}
                     />
