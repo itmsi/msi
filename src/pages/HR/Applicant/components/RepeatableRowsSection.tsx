@@ -6,8 +6,10 @@ import Checkbox from '@/components/form/input/Checkbox';
 import Button from '@/components/ui/button/Button';
 import { DatePickerField } from '@/components/datepicker/DatePickerField';
 import { formatDateLocal, formatNumberInput } from '@/helpers/generalHelper';
+import { FormFieldOption, FormFieldType } from '@/types/form';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { parseApplicantDate, toApplicantDateValue, toDateInputValue } from '../utils/applicantForm';
+import { ApplicantSectionErrors } from '../hooks/useApplicantEdit';
 import { applicantLabels } from '../language/applicantLabels';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
@@ -15,8 +17,9 @@ import 'react-date-range/dist/theme/default.css';
 export interface RepeatableField<T> {
     key: keyof T & string;
     label: string | ((row: T) => string);
-    type?: 'text' | 'textarea' | 'choice' | 'date' | 'number';
-    options?: { value: string; label: string }[];
+    type?: FormFieldType;
+    options?: FormFieldOption[];
+    required?: boolean | ((row: T, index: number) => boolean);
     fullWidth?: boolean;
 }
 
@@ -27,6 +30,7 @@ interface RepeatableRowsSectionProps<T extends object> {
     rows: T[];
     fields: RepeatableField<T>[];
     readOnly: boolean;
+    errors?: ApplicantSectionErrors;
     onAdd?: () => void;
     onRemove?: (index: number) => void;
     onChange: (index: number, key: keyof T & string, value: string) => void;
@@ -39,15 +43,19 @@ const RepeatableRowsSection = <T extends object>({
     rows,
     fields,
     readOnly,
+    errors,
     onAdd,
     onRemove,
     onChange,
 }: RepeatableRowsSectionProps<T>) => {
     const { langField } = useLanguage(applicantLabels);
+    const columnCount = Math.max(fields.filter(field => !field.fullWidth).length, 1);
 
     return (
         <div className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
             <h3 className="text-lg font-primary-bold text-center pb-3 border-b border-b-gray-300 uppercase text-gray-900">{title}</h3>
+
+            {errors?.[id] && <p className="text-xs text-center text-red-500">{langField(errors[id])}</p>}
 
             {rows.length === 0 ? (
                 <p className="text-sm text-gray-500">-</p>
@@ -71,19 +79,23 @@ const RepeatableRowsSection = <T extends object>({
                                 )}
                             </div>
 
-                            <div className={`grid grid-cols-1 ${id !== 'working_experiences' ? `md:grid-cols-${fields.length}` : `md:grid-cols-${fields.length - 1}`} gap-4`}>
+                            <div className={`grid grid-cols-1 md:grid-cols-${columnCount} gap-4`}>
                                 {fields.map(field => {
                                     const value = String(row[field.key] ?? '');
                                     const label = typeof field.label === 'function' ? field.label(row) : field.label;
                                     const inputId = `${id}_${index}_${field.key}`;
+                                    const errorKey = errors?.[`${id}.${index}.${field.key}`];
+                                    const isRequired = typeof field.required === 'function' ? field.required(row, index) : Boolean(field.required);
+                                    const requiredMark = isRequired && !readOnly && <span className="text-red-500">*</span>;
+                                    const errorMessage = errorKey && <p className="mt-1 text-xs text-red-500">{langField(errorKey)}</p>;
 
                                     if (field.type === 'choice') {
                                         const options = field.options || [];
                                         const matchedOption = options.find(option => option.value.toLowerCase() === value.trim().toLowerCase());
 
                                         return (
-                                            <div key={field.key} className={field.fullWidth ? 'md:col-span-5' : undefined}>
-                                                <Label>{label}</Label>
+                                            <div key={field.key} className={field.fullWidth ? 'md:col-span-full' : undefined}>
+                                                <Label>{label} {requiredMark}</Label>
                                                 <div className="flex flex-wrap items-center gap-6 min-h-10.5">
                                                     {options.map(option => (
                                                         <Checkbox
@@ -99,6 +111,7 @@ const RepeatableRowsSection = <T extends object>({
                                                 {value.trim() && !matchedOption && (
                                                     <p className="mt-1 text-xs text-gray-500">{langField('savedAnswer')}: {value}</p>
                                                 )}
+                                                {errorMessage}
                                             </div>
                                         );
                                     }
@@ -107,13 +120,15 @@ const RepeatableRowsSection = <T extends object>({
                                         const dateValue = toDateInputValue(value);
 
                                         return (
-                                            <div key={field.key} className={field.fullWidth ? 'md:col-span-5' : undefined}>
+                                            <div key={field.key} className={field.fullWidth ? 'md:col-span-full' : undefined}>
                                                 <DatePickerField
                                                     name={field.key}
                                                     label={label}
+                                                    required={isRequired && !readOnly}
                                                     value={value}
                                                     placeholder={readOnly ? '-' : label}
                                                     readOnly={readOnly}
+                                                    error={errorKey ? langField(errorKey) : undefined}
                                                     onChange={(_, nextValue) => onChange(index, field.key, nextValue)}
                                                     parseValueToDate={parseApplicantDate}
                                                     convertDateToValue={toApplicantDateValue}
@@ -129,8 +144,8 @@ const RepeatableRowsSection = <T extends object>({
 
                                     if (field.type === 'number') {
                                         return (
-                                            <div key={field.key} className={field.fullWidth ? 'md:col-span-5' : undefined}>
-                                                <Label htmlFor={inputId}>{label}</Label>
+                                            <div key={field.key} className={field.fullWidth ? 'md:col-span-full' : undefined}>
+                                                <Label htmlFor={inputId}>{label} {requiredMark}</Label>
                                                 <Input
                                                     id={inputId}
                                                     name={field.key}
@@ -138,15 +153,17 @@ const RepeatableRowsSection = <T extends object>({
                                                     value={formatNumberInput(value)}
                                                     placeholder={readOnly ? '-' : label}
                                                     readonly={readOnly}
+                                                    error={Boolean(errorKey)}
                                                     onChange={(e) => onChange(index, field.key, e.target.value.replace(/\D/g, ''))}
                                                 />
+                                                {errorMessage}
                                             </div>
                                         );
                                     }
 
                                     return (
-                                        <div key={field.key} className={field.fullWidth ? 'md:col-span-5' : undefined}>
-                                            <Label htmlFor={inputId}>{label}</Label>
+                                        <div key={field.key} className={field.fullWidth ? 'md:col-span-full' : undefined}>
+                                            <Label htmlFor={inputId}>{label} {requiredMark}</Label>
                                             {field.type === 'textarea' ? (
                                                 <TextArea
                                                     id={inputId}
@@ -156,6 +173,7 @@ const RepeatableRowsSection = <T extends object>({
                                                     value={value}
                                                     placeholder={readOnly ? '-' : label}
                                                     readonly={readOnly}
+                                                    error={Boolean(errorKey)}
                                                     onChange={(e) => onChange(index, field.key, e.target.value)}
                                                 />
                                             ) : (
@@ -166,9 +184,11 @@ const RepeatableRowsSection = <T extends object>({
                                                     value={value}
                                                     placeholder={readOnly ? '-' : label}
                                                     readonly={readOnly}
+                                                    error={Boolean(errorKey)}
                                                     onChange={(e) => onChange(index, field.key, e.target.value)}
                                                 />
                                             )}
+                                            {errorMessage}
                                         </div>
                                     );
                                 })}

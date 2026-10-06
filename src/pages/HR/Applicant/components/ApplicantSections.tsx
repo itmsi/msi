@@ -11,16 +11,22 @@ import {
 } from '../types/applicant';
 import { applicantLabels } from '../language/applicantLabels';
 import {
+    EDUCATION_FIELDS,
     getFamilyNameLabel,
     getFamilyRelationshipLabel,
-    getSchoolNameLabel,
-    getSchoolTypeLabel,
+    isRequiredFamilyRelationship,
+    isRequiredListRow,
+    REQUIRED_FAMILY_FIELDS,
+    REQUIRED_REFERENCE_FIELDS,
+    REQUIRED_WORKING_EXPERIENCE_FIELDS,
 } from '../utils/applicantForm';
+import { ApplicantSectionErrors } from '../hooks/useApplicantEdit';
 import RepeatableRowsSection, { RepeatableField } from './RepeatableRowsSection';
 
 interface ApplicantSectionsProps {
     values: ApplicantFormListSections;
     readOnly: boolean;
+    errors?: ApplicantSectionErrors;
     onRowAdd: (section: ApplicantListSection) => void;
     onRowRemove: (section: ApplicantListSection, index: number) => void;
     onRowChange: <K extends ApplicantListSection>(
@@ -31,16 +37,12 @@ interface ApplicantSectionsProps {
     ) => void;
 }
 
-const ApplicantSections = ({ values, readOnly, onRowAdd, onRowRemove, onRowChange }: ApplicantSectionsProps) => {
+const ApplicantSections = ({ values, readOnly, errors, onRowAdd, onRowRemove, onRowChange }: ApplicantSectionsProps) => {
     const { langField } = useLanguage(applicantLabels);
 
-    const educationFields: RepeatableField<ApplicantEducation>[] = [
-        { key: 'name_of_school', label: (row) => getSchoolNameLabel(row.type_of_school, langField) },
-        { key: 'location', label: langField('location') },
-        { key: 'graduate', label: langField('degree') },
-        { key: 'major', label: langField('major') },
-        { key: 'graduation_year', label: langField('graduationYear') },
-    ];
+    const educationFields: RepeatableField<ApplicantEducation>[] = EDUCATION_FIELDS.map(
+        ({ labelKey, ...field }) => ({ ...field, label: langField(labelKey) })
+    );
 
     const informalEducationFields: RepeatableField<ApplicantInformalEducation>[] = [
         { key: 'type_of_training', label: langField('typeOfTraining') },
@@ -50,14 +52,24 @@ const ApplicantSections = ({ values, readOnly, onRowAdd, onRowRemove, onRowChang
         { key: 'periode', label: langField('period') },
     ];
 
-    const familyFields: RepeatableField<ApplicantFamilyMember>[] = [
+    // Wajib hanya untuk hubungan yang ditandai di FAMILY_RELATIONSHIPS, yaitu ayah dan ibu.
+    const isFamilyFieldRequired = (key: keyof ApplicantFamilyMember & string) =>
+        REQUIRED_FAMILY_FIELDS.includes(key)
+            ? (row: ApplicantFamilyMember) => isRequiredFamilyRelationship(row.relationship)
+            : undefined;
+
+    const familyFieldLabels: RepeatableField<ApplicantFamilyMember>[] = [
         { key: 'name', label: (row) => getFamilyNameLabel(row.relationship, langField) },
         { key: 'age', label: langField('age') },
         { key: 'employment', label: langField('occupation') },
         { key: 'emergency_contact_number', label: langField('emergencyContactNumber') },
     ];
 
-    const workingExperienceFields: RepeatableField<ApplicantWorkingExperience>[] = [
+    const familyFields: RepeatableField<ApplicantFamilyMember>[] = familyFieldLabels.map(
+        field => ({ ...field, required: isFamilyFieldRequired(field.key) })
+    );
+
+    const workingExperienceLabels: RepeatableField<ApplicantWorkingExperience>[] = [
         { key: 'name_of_company', label: langField('companyName') },
         { key: 'date_from', label: langField('startDate'), type: 'date' },
         { key: 'date_final', label: langField('endDate'), type: 'date' },
@@ -66,17 +78,32 @@ const ApplicantSections = ({ values, readOnly, onRowAdd, onRowRemove, onRowChang
         { key: 'reason_of_leaving', label: langField('reasonForLeaving'), type: 'textarea', fullWidth: true },
     ];
 
-    const referenceFields: RepeatableField<ApplicantReference>[] = [
+    const workingExperienceFields: RepeatableField<ApplicantWorkingExperience>[] = workingExperienceLabels.map(
+        field => ({
+            ...field,
+            required: REQUIRED_WORKING_EXPERIENCE_FIELDS.includes(field.key) ? isRequiredListRow : undefined,
+        })
+    );
+
+    const referenceLabels: RepeatableField<ApplicantReference>[] = [
         { key: 'name', label: langField('name') },
         { key: 'position_company', label: langField('positionCompany') },
         { key: 'phone', label: langField('phoneNumber') },
     ];
+
+    const referenceFields: RepeatableField<ApplicantReference>[] = referenceLabels.map(
+        field => ({
+            ...field,
+            required: REQUIRED_REFERENCE_FIELDS.includes(field.key) ? isRequiredListRow : undefined,
+        })
+    );
 
     const answerFields: RepeatableField<ApplicantAnswer>[] = [
         {
             key: 'answers',
             label: langField('answer'),
             type: 'choice',
+            required: true,
             options: [
                 { value: 'Ya', label: langField('yes') },
                 { value: 'Tidak', label: langField('no') },
@@ -89,10 +116,11 @@ const ApplicantSections = ({ values, readOnly, onRowAdd, onRowRemove, onRowChang
             <RepeatableRowsSection
                 id="educational_background"
                 title={langField('formalEducation')}
-                rowLabel={(row) => getSchoolTypeLabel(row.type_of_school, langField)}
+                rowLabel={() => langField('formalEducation')}
                 rows={values.educational_background}
                 fields={educationFields}
                 readOnly={readOnly}
+                errors={errors}
                 onChange={(index, key, value) => onRowChange('educational_background', index, key, value)}
             />
             <RepeatableRowsSection
@@ -113,6 +141,7 @@ const ApplicantSections = ({ values, readOnly, onRowAdd, onRowRemove, onRowChang
                 rows={values.family_background}
                 fields={familyFields}
                 readOnly={readOnly}
+                errors={errors}
                 onChange={(index, key, value) => onRowChange('family_background', index, key, value)}
             />
             <RepeatableRowsSection
@@ -122,6 +151,7 @@ const ApplicantSections = ({ values, readOnly, onRowAdd, onRowRemove, onRowChang
                 rows={values.working_experiences}
                 fields={workingExperienceFields}
                 readOnly={readOnly}
+                errors={errors}
                 onAdd={() => onRowAdd('working_experiences')}
                 onRemove={(index) => onRowRemove('working_experiences', index)}
                 onChange={(index, key, value) => onRowChange('working_experiences', index, key, value)}
@@ -133,6 +163,7 @@ const ApplicantSections = ({ values, readOnly, onRowAdd, onRowRemove, onRowChang
                 rows={values.references_old_company}
                 fields={referenceFields}
                 readOnly={readOnly}
+                errors={errors}
                 onAdd={() => onRowAdd('references_old_company')}
                 onRemove={(index) => onRowRemove('references_old_company', index)}
                 onChange={(index, key, value) => onRowChange('references_old_company', index, key, value)}
@@ -144,6 +175,7 @@ const ApplicantSections = ({ values, readOnly, onRowAdd, onRowRemove, onRowChang
                 rows={values.following_answers}
                 fields={answerFields}
                 readOnly={readOnly}
+                errors={errors}
                 onChange={(index, key, value) => onRowChange('following_answers', index, key, value)}
             />
         </>

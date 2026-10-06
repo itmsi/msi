@@ -188,45 +188,10 @@ export const applicantLabels: TranslationMap = {
         en: 'Formal Education',
         zh: '正规教育',
     },
-    university: {
-        id: 'Universitas',
-        en: 'University',
-        zh: '大学',
-    },
-    highSchool: {
-        id: 'SMA/SMK',
-        en: 'High School',
-        zh: '高中',
-    },
-    juniorHighSchool: {
-        id: 'SMP',
-        en: 'Junior High School',
-        zh: '初中',
-    },
-    elementarySchool: {
-        id: 'SD',
-        en: 'Elementary School',
-        zh: '小学',
-    },
-    universityName: {
-        id: 'Nama Universitas',
-        en: 'University Name',
-        zh: '大学名称',
-    },
-    highSchoolName: {
-        id: 'Nama SMA/SMK',
-        en: 'High School Name',
-        zh: '高中名称',
-    },
-    juniorHighSchoolName: {
-        id: 'Nama SMP',
-        en: 'Junior High School Name',
-        zh: '初中名称',
-    },
-    elementarySchoolName: {
-        id: 'Nama SD',
-        en: 'Elementary School Name',
-        zh: '小学名称',
+    lastEducation: {
+        id: 'Pendidikan Terakhir',
+        en: 'Last Education',
+        zh: '最高学历',
     },
     schoolName: {
         id: 'Nama Sekolah',
@@ -521,7 +486,59 @@ export const applicantLabels: TranslationMap = {
         zh: '正在生成 PDF...',
     },
 
+    // Attachments & Signature
+    attachments: {
+        id: 'Lampiran',
+        en: 'Attachments',
+        zh: '附件',
+    },
+    cvDocument: {
+        id: 'CV',
+        en: 'CV',
+        zh: '简历',
+    },
+    photo: {
+        id: 'Foto',
+        en: 'Photo',
+        zh: '照片',
+    },
+    otherDocuments: {
+        id: 'Dokumen Lainnya',
+        en: 'Other Documents',
+        zh: '其他文件',
+    },
+    noAttachments: {
+        id: 'Belum ada lampiran',
+        en: 'No attachments yet',
+        zh: '暂无附件',
+    },
+    untitledFile: {
+        id: 'Tanpa judul',
+        en: 'Untitled',
+        zh: '未命名',
+    },
+    signature: {
+        id: 'Tanda Tangan',
+        en: 'Signature',
+        zh: '签名',
+    },
+    signedAt: {
+        id: 'Ditandatangani',
+        en: 'Signed at',
+        zh: '签署日期',
+    },
+
     // Validation & Toast Messages
+    fieldRequired: {
+        id: 'Wajib diisi',
+        en: 'This field is required',
+        zh: '此项为必填项',
+    },
+    minimumOneItemRequired: {
+        id: 'Minimal 1 item wajib diisi',
+        en: 'At least one item is required',
+        zh: '至少需要填写一项',
+    },
     fullNameRequired: {
         id: 'Nama lengkap wajib diisi',
         en: 'Full name is required',

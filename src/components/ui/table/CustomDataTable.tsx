@@ -47,6 +47,8 @@ interface CustomDataTableProps<T> {
     progressComponent?: React.ReactNode;
     expandableRows?: boolean;
     expandableRowsComponent?: React.ComponentType<{ data: T }>;
+    isRowExpanded?: (row: T) => boolean;
+    hideExpandButton?: boolean;
     conditionalRowStyles?: ConditionalStyles<T>[];
 
     // Custom styling options
@@ -113,6 +115,8 @@ const CustomDataTable = <T extends Record<string, any>>({
     progressComponent,
     expandableRows = false,
     expandableRowsComponent,
+    isRowExpanded,
+    hideExpandButton = false,
     conditionalRowStyles,
 
     // Custom styling
@@ -354,6 +358,8 @@ const CustomDataTable = <T extends Record<string, any>>({
                 progressComponent={progressComponent || defaultProgressComponent}
                 expandableRows={expandableRows}
                 expandableRowsComponent={expandableRowsComponent}
+                expandableRowExpanded={isRowExpanded}
+                expandableRowsHideExpander={hideExpandButton}
                 conditionalRowStyles={conditionalRowStyles}
 
                 // Density
