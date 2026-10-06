@@ -1,16 +1,43 @@
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { MdArrowBack } from "react-icons/md";
+import { MdArrowBack, MdReceiptLong, MdCreditCard, MdHistory, MdOutlineComment } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
 import { BillPaymentService } from "./services/billPaymentService";
 import { BillPayment, AppliedToItem, CreditAppliedItem, WorkflowHistoryItem, UserNoteItem } from "./types/billPayment";
 import Badge from "@/components/ui/badge/Badge";
 import Button from "@/components/ui/button/Button";
-import { formatCurrencyID, formatDateTime, formatDateLocal } from "@/helpers/generalHelper";
+import { formatDateTime, formatDateLocal } from "@/helpers/generalHelper";
 import CustomDataTable from "@/components/ui/table";
 import { TableColumn } from "react-data-table-component";
 
 type TabType = 'applied_to' | 'credit_applied' | 'workflow_history' | 'user_notes';
+
+// Section & field dengan susunan 3 kolom seperti form NetSuite
+const InfoSection = ({ title, children }: { title: string; children: ReactNode }) => (
+    <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <h4 className="text-base font-semibold text-gray-900">{title}</h4>
+        </div>
+        <dl className="p-6 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-5">
+            {children}
+        </dl>
+    </div>
+);
+
+// Panel isi tab, style disamain dengan Item Lines di Receipts View (ReceiptItemFields)
+const TabPanel = ({ title, children }: { title: string; children: ReactNode }) => (
+    <div className="mb-6 space-y-6 p-6">
+        <h3 className="text-lg font-primary-bold font-medium text-gray-900">{title}</h3>
+        <div className="font-secondary">{children}</div>
+    </div>
+);
+
+const InfoField = ({ label, children }: { label: string; children: ReactNode }) => (
+    <div>
+        <dt className="text-sm font-medium text-gray-500">{label}</dt>
+        <dd className="mt-1 text-sm text-gray-900 break-words">{children}</dd>
+    </div>
+);
 
 export default function View() {
     const { id } = useParams<{ id: string }>();
@@ -54,6 +81,14 @@ export default function View() {
 
     const formatNSCurrency = (value: number) =>
         new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+
+    // Nilai bisa number atau string ("200000.00"); absolute dipakai untuk Amount (selalu positif di NetSuite)
+    const formatAmount = (value: number | string | null | undefined, absolute = false) => {
+        if (value === null || value === undefined || value === '') return '-';
+        const num = Number(value);
+        if (isNaN(num)) return String(value);
+        return formatNSCurrency(absolute ? Math.abs(num) : num);
+    };
 
     if (loading) {
         return (
@@ -278,11 +313,11 @@ export default function View() {
         }
     ];
 
-    const tabs: { key: TabType; label: string; count?: number }[] = [
-        { key: 'applied_to', label: 'Applied To', count: billData.applied_to?.length ?? 0 },
-        { key: 'credit_applied', label: 'Credit Applied', count: billData.credit_applied?.length ?? 0 },
-        { key: 'workflow_history', label: 'Workflow History', count: billData.workflow_history?.length ?? 0 },
-        { key: 'user_notes', label: 'User Notes', count: Array.isArray(billData.user_notes) ? billData.user_notes.length : 0 },
+    const tabs: { key: TabType; label: string; icon: ReactNode; count?: number }[] = [
+        { key: 'applied_to', label: 'Applied To', icon: <MdReceiptLong />, count: billData.applied_to?.length ?? 0 },
+        { key: 'credit_applied', label: 'Credit Applied', icon: <MdCreditCard />, count: billData.credit_applied?.length ?? 0 },
+        { key: 'workflow_history', label: 'Workflow History', icon: <MdHistory />, count: billData.workflow_history?.length ?? 0 },
+        { key: 'user_notes', label: 'User Notes', icon: <MdOutlineComment />, count: Array.isArray(billData.user_notes) ? billData.user_notes.length : 0 },
     ];
 
     return (
@@ -316,7 +351,13 @@ export default function View() {
                                         </div>
                                     </h3>
                                     <p className="mt-1 text-sm text-gray-500">
-                                        Last Modified: {billData.last_modified_netsuite ? formatDateTime(billData.last_modified_netsuite) : '-'}
+                                        {billData.entity_display || '-'}
+                                    </p>
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        NetSuite ID: {billData.netsuite_id || '-'}
+                                        {' · '}Last Modified: {billData.last_modified_netsuite ? formatDateTime(billData.last_modified_netsuite) : '-'}
+                                        {' · '}Created At: {billData.created_at ? formatDateTime(billData.created_at) : '-'}
+                                        {' · '}Updated At: {billData.updated_at ? formatDateTime(billData.updated_at) : '-'}
                                     </p>
                                 </div>
                             </div>
@@ -324,203 +365,85 @@ export default function View() {
                     </div>
                 </div>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Primary Information */}
-                    <div className="lg:col-span-2 space-y-6">
-                        <div className="bg-white shadow rounded-lg overflow-hidden">
-                            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                <h4 className="text-base font-semibold text-gray-900">Primary Information</h4>
-                            </div>
-                            <div className="p-6">
-                                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Transaction Number</dt>
-                                        <dd className="mt-1 text-sm text-gray-900 font-medium">{billData.transactionnumber || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Document No.</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.tranid || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Vendor (Entity)</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.entity_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Account</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.account_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Date</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.trandate ? formatDateLocal(billData.trandate) : '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Posting Period</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.postingperiod_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Created By</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.custbody_me_wf_created_by_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">NetSuite ID</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.netsuite_id || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-xs font-medium text-gray-500">Created At</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.created_at ? formatDateTime(billData.created_at) : '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-xs font-medium text-gray-500">Updated At</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.updated_at ? formatDateTime(billData.updated_at) : '-'}</dd>
-                                    </div>
-                                </dl>
-                            </div>
-                        </div>
-
-                        {/* Classification */}
-                        <div className="bg-white shadow rounded-lg overflow-hidden">
-                            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                <h4 className="text-base font-semibold text-gray-900">Classification</h4>
-                            </div>
-                            <div className="p-6">
-                                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Subsidiary</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.subsidiary_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Department</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.department_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Location</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.location_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Class</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.class_display || '-'}</dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">China Cash Flow Item</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">{billData.custbody_cseg_cn_cfi_display || '-'}</dd>
-                                    </div>
-                                    {/* <div>
-                                        <dt className="text-xs font-medium text-gray-500">Last Modified (NetSuite)</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">
-                                            {billData.last_modified_netsuite ? formatDateTime(billData.last_modified_netsuite) : '-'}
-                                        </dd>
-                                    </div> */}
-                                </dl>
-                            </div>
-                        </div>
+                {/* Primary Information */}
+                <InfoSection title="Primary Information">
+                    <div className="space-y-5">
+                        <InfoField label="Transaction Number">
+                            <span className="font-medium">{billData.transactionnumber || '-'}</span>
+                        </InfoField>
+                        <InfoField label="Payee">{billData.entity_display || '-'}</InfoField>
+                        <InfoField label="Account">{billData.account_display || '-'}</InfoField>
+                        <InfoField label="Balance">{formatAmount(billData.balance)}</InfoField>
+                        <InfoField label="Amount">
+                            <span className="font-medium">{formatAmount(billData.total, true)}</span>
+                        </InfoField>
                     </div>
-
-                    {/* Financial Summary */}
-                    <div className="space-y-6">
-                        <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-100">
-                            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
-                                <h4 className="text-lg font-bold text-gray-900">Financial Summary</h4>
-                            </div>
-                            <div className="p-6">
-                                <dl className="space-y-4">
-                                    <div className="flex justify-between items-center pt-2">
-                                        <dt className="text-lg font-bold text-gray-900">Total</dt>
-                                        <dd className="text-xl font-bold text-gray-900">
-                                            {formatNSCurrency(Math.abs(billData.total || 0))}
-                                        </dd>
-                                    </div>
-                                    <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
-                                        <div className="flex justify-between items-center text-xs">
-                                            <dt className="text-gray-500">Currency</dt>
-                                            <dd className="text-gray-900 font-medium">{billData.currency_display || '-'}</dd>
-                                        </div>
-                                        <div className="flex justify-between items-center text-xs">
-                                            <dt className="text-gray-500">Exchange Rate</dt>
-                                            <dd className="text-gray-900">{billData.exchangerate ?? '1.00'}</dd>
-                                        </div>
-                                        {billData.exchangerate && billData.exchangerate !== 1 && (
-                                            <div className="flex justify-between items-center pt-1 text-xs">
-                                                <dt className="text-gray-500 font-medium">Amount (IDR Base)</dt>
-                                                <dd className="text-gray-900 font-bold">
-                                                    {formatCurrencyID(Math.abs(billData.total || 0) * (billData.exchangerate || 1))}
-                                                </dd>
-                                            </div>
-                                        )}
-                                        <div className="flex justify-between items-center pt-1 text-xs">
-                                            <dt className="text-gray-500">Posting Period</dt>
-                                            <dd className="text-gray-900">{billData.postingperiod_display || '-'}</dd>
-                                        </div>
-                                    </div>
-                                </dl>
-                            </div>
-                        </div>
-
-                        {/* Approval Information */}
-                        <div className="bg-white shadow rounded-lg overflow-hidden">
-                            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                                <h4 className="text-base font-semibold text-gray-900">Approval Information</h4>
-                            </div>
-                            <div className="p-6">
-                                <dl className="space-y-4">
-                                    <div>
-                                        <dt className="text-xs font-medium text-gray-500 mb-1.5">Approval Status</dt>
-                                        <dd>
-                                            <Badge color={statusInfo.color} variant="light">
-                                                {billData.approvalstatus_display || statusInfo.label}
-                                            </Badge>
-                                        </dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-xs font-medium text-gray-500">Created By</dt>
-                                        <dd className="mt-1 text-sm text-gray-900 font-medium">
-                                            {billData.custbody_me_wf_created_by_display || '-'}
-                                        </dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-xs font-medium text-gray-500">Next Approver</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">
-                                            {billData.next_approver || '-'}
-                                        </dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-xs font-medium text-gray-500">Delegate Approver</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">
-                                            {billData.delegate_approver || '-'}
-                                        </dd>
-                                    </div>
-                                    <div>
-                                        <dt className="text-xs font-medium text-gray-500">In Delegation</dt>
-                                        <dd className="mt-1 text-sm text-gray-900">
-                                            {billData.in_delegation ? 'Yes' : 'No'}
-                                        </dd>
-                                    </div>
-                                </dl>
-                            </div>
-                        </div>
+                    <div className="space-y-5">
+                        <InfoField label="Currency">{billData.currency_display || '-'}</InfoField>
+                        <InfoField label="Exchange Rate">{formatAmount(billData.exchangerate ?? 1)}</InfoField>
+                        <InfoField label="Date">{billData.trandate ? formatDateLocal(billData.trandate) : '-'}</InfoField>
+                        <InfoField label="Posting Period">{billData.postingperiod_display || '-'}</InfoField>
                     </div>
-                </div>
+                    <div className="space-y-5">
+                        <InfoField label="Check #">{billData.tranid || '-'}</InfoField>
+                        <InfoField label="Memo">
+                            <span className="whitespace-pre-wrap">{billData.memo || '-'}</span>
+                        </InfoField>
+                    </div>
+                </InfoSection>
 
-                {/* Tabs Section */}
-                <div className="bg-white shadow rounded-lg overflow-hidden">
-                    {/* Tab Navigation */}
-                    <div className="border-b border-gray-200 px-6 overflow-auto">
-                        <nav className="flex space-x-8 overflow-auto">
+                {/* Approval Information */}
+                <InfoSection title="Approval Information">
+                    <div className="space-y-5">
+                        <InfoField label="Created By">{billData.custbody_me_wf_created_by_display || '-'}</InfoField>
+                        <InfoField label="Approval Status">
+                            <Badge color={statusInfo.color} variant="light">
+                                {billData.approvalstatus_display || statusInfo.label}
+                            </Badge>
+                        </InfoField>
+                        <InfoField label="Next Approver">{billData.next_approver || '-'}</InfoField>
+                    </div>
+                    <div className="space-y-5">
+                        <InfoField label="Delegate Approver">{billData.delegate_approver || '-'}</InfoField>
+                    </div>
+                    <div className="space-y-5">
+                        <InfoField label="In Delegation">{billData.in_delegation ? 'Yes' : 'No'}</InfoField>
+                    </div>
+                </InfoSection>
+
+                {/* Classification */}
+                <InfoSection title="Classification">
+                    <div className="space-y-5">
+                        <InfoField label="Subsidiary">{billData.subsidiary_display || '-'}</InfoField>
+                        <InfoField label="Department">{billData.department_display || '-'}</InfoField>
+                    </div>
+                    <div className="space-y-5">
+                        <InfoField label="Class">{billData.class_display || '-'}</InfoField>
+                        <InfoField label="Location">{billData.location_display || '-'}</InfoField>
+                    </div>
+                    <div className="space-y-5">
+                        <InfoField label="China Cash Flow Item">{billData.custbody_cseg_cn_cfi_display || '-'}</InfoField>
+                    </div>
+                </InfoSection>
+
+                {/* Tabs Section — style sama seperti tab Items di Receipts View.tsx */}
+                <div>
+                    <div className="border-b border-gray-200 overflow-auto">
+                        <nav className="flex space-x-2 overflow-auto">
                             {tabs.map(tab => (
                                 <button
                                     key={tab.key}
+                                    type="button"
                                     onClick={() => setActiveTab(tab.key)}
-                                    className={`py-4 px-1 border-b-2 lg:min-w-auto min-w-[120px] font-medium text-sm transition-colors flex items-center gap-2 ${
-                                        activeTab === tab.key
-                                            ? 'border-blue-500 text-blue-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
+                                    className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${activeTab === tab.key
+                                        ? 'border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
                                 >
-                                    {tab.label}
+                                    {tab.icon} {tab.label}
                                     {tab.count !== undefined && tab.count > 0 && (
-                                        <span className={`inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full ${
-                                            activeTab === tab.key ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
-                                        }`}>
+                                        <span className={`inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full ${activeTab === tab.key ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
+                                            }`}>
                                             {tab.count}
                                         </span>
                                     )}
@@ -529,70 +452,73 @@ export default function View() {
                         </nav>
                     </div>
 
-                    {/* Tab Content */}
-                    <div className="p-0 font-secondary">
+                    <div className="bg-white rounded-b-2xl shadow-sm">
                         {activeTab === 'applied_to' && (
-                            <CustomDataTable
-                                columns={appliedToColumns}
-                                data={billData.applied_to || []}
-                                pagination
-                                paginationPerPage={10}
-                                paginationRowsPerPageOptions={[10, 20, 50]}
-                                responsive
-                                highlightOnHover
-                                striped={false}
-                                noDataComponent={
-                                    <div className="p-6 text-center text-sm text-gray-500">No applied to data found</div>
-                                }
-                            />
+                            <TabPanel title="Applied To">
+                                <CustomDataTable
+                                    columns={appliedToColumns}
+                                    data={billData.applied_to || []}
+                                    pagination={false}
+                                    responsive
+                                    highlightOnHover
+                                    striped={false}
+                                    noDataComponent={
+                                        <div className="text-center py-8 text-gray-500">No applied to data found</div>
+                                    }
+                                />
+                            </TabPanel>
                         )}
 
                         {activeTab === 'credit_applied' && (
-                            <CustomDataTable
-                                columns={creditAppliedColumns}
-                                data={billData.credit_applied || []}
-                                pagination
-                                paginationPerPage={10}
-                                paginationRowsPerPageOptions={[10, 20, 50]}
-                                responsive
-                                highlightOnHover
-                                striped={false}
-                                noDataComponent={
-                                    <div className="p-6 text-center text-sm text-gray-500">No credit applied data found</div>
-                                }
-                            />
+                            <TabPanel title="Credit Applied">
+                                <CustomDataTable
+                                    columns={creditAppliedColumns}
+                                    data={billData.credit_applied || []}
+                                    pagination={false}
+                                    responsive
+                                    highlightOnHover
+                                    striped={false}
+                                    noDataComponent={
+                                        <div className="text-center py-8 text-gray-500">No credit applied data found</div>
+                                    }
+                                />
+                            </TabPanel>
                         )}
 
                         {activeTab === 'workflow_history' && (
-                            <CustomDataTable
-                                columns={workflowColumns}
-                                data={billData.workflow_history || []}
-                                pagination
-                                paginationPerPage={10}
-                                paginationRowsPerPageOptions={[10, 20, 50]}
-                                responsive
-                                highlightOnHover
-                                striped={false}
-                                noDataComponent={
-                                    <div className="p-6 text-center text-sm text-gray-500">No workflow history found</div>
-                                }
-                            />
+                            <TabPanel title="Workflow History">
+                                <CustomDataTable
+                                    columns={workflowColumns}
+                                    data={billData.workflow_history || []}
+                                    pagination
+                                    paginationPerPage={10}
+                                    paginationRowsPerPageOptions={[10, 20, 50]}
+                                    responsive
+                                    highlightOnHover
+                                    striped={false}
+                                    noDataComponent={
+                                        <div className="text-center py-8 text-gray-500">No workflow history found</div>
+                                    }
+                                />
+                            </TabPanel>
                         )}
 
                         {activeTab === 'user_notes' && (
-                            <CustomDataTable
-                                columns={userNotesColumns}
-                                data={Array.isArray(billData.user_notes) ? billData.user_notes : []}
-                                pagination
-                                paginationPerPage={10}
-                                paginationRowsPerPageOptions={[10, 20, 50]}
-                                responsive
-                                highlightOnHover
-                                striped={false}
-                                noDataComponent={
-                                    <div className="p-6 text-center text-sm text-gray-500">No user notes found</div>
-                                }
-                            />
+                            <TabPanel title="User Notes">
+                                <CustomDataTable
+                                    columns={userNotesColumns}
+                                    data={Array.isArray(billData.user_notes) ? billData.user_notes : []}
+                                    pagination
+                                    paginationPerPage={10}
+                                    paginationRowsPerPageOptions={[10, 20, 50]}
+                                    responsive
+                                    highlightOnHover
+                                    striped={false}
+                                    noDataComponent={
+                                        <div className="text-center py-8 text-gray-500">No user notes found</div>
+                                    }
+                                />
+                            </TabPanel>
                         )}
                     </div>
                 </div>
