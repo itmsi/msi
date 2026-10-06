@@ -3,7 +3,7 @@ import autoTable, { CellHookData, RowInput, UserOptions } from 'jspdf-autotable'
 import { loadCustomFonts, setFontSafe } from '@/utils/fontLoader';
 import { formatDateLocal, formatNumberInput } from '@/helpers/generalHelper';
 import { ApplicantFormAttachments, ApplicantFormListItem, ApplicantFormUpdateRequest } from '../types/applicant';
-import { toDateInputValue, toDownloadUrl, toPreviewUrl } from './applicantForm';
+import { toDateInputValue, toPreviewUrl } from './applicantForm';
 
 type RGB = [number, number, number];
 
@@ -425,41 +425,41 @@ export const generateApplicantFormPDF = async (
         },
     });
 
-    const attachedFiles = attachments?.files ?? [];
+    // const attachedFiles = attachments?.files ?? [];
 
-    if (attachedFiles.length) {
-        const fileLinks: string[] = [];
+    // if (attachedFiles.length) {
+    //     const fileLinks: string[] = [];
 
-        drawTable({
-            body: [
-                sectionRow('ATTACHMENTS/ LAMPIRAN', 3),
-                [
-                    headerCell('No'),
-                    headerCell('TITLE/ Nama Dokumen'),
-                    headerCell('LINK/ Tautan'),
-                ],
-                ...attachedFiles.map((file, index) => {
-                    const url = toDownloadUrl(file.file);
-                    fileLinks.push(url);
+    //     drawTable({
+    //         body: [
+    //             sectionRow('ATTACHMENTS/ LAMPIRAN', 3),
+    //             [
+    //                 headerCell('No'),
+    //                 headerCell('TITLE/ Nama Dokumen'),
+    //                 headerCell('LINK/ Tautan'),
+    //             ],
+    //             ...attachedFiles.map((file, index) => {
+    //                 const url = toDownloadUrl(file.file);
+    //                 fileLinks.push(url);
 
-                    return [
-                        { content: String(index + 1), styles: { halign: 'center' as const } },
-                        text(file.file_title),
-                        url,
-                    ];
-                }),
-            ],
-            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 80 }, 2: { cellWidth: 100 } },
-            didDrawCell: (data: CellHookData) => {
-                if (data.section !== 'body' || data.column.index !== 2 || data.row.index < 2) return;
+    //                 return [
+    //                     { content: String(index + 1), styles: { halign: 'center' as const } },
+    //                     text(file.file_title),
+    //                     url,
+    //                 ];
+    //             }),
+    //         ],
+    //         columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 80 }, 2: { cellWidth: 100 } },
+    //         didDrawCell: (data: CellHookData) => {
+    //             if (data.section !== 'body' || data.column.index !== 2 || data.row.index < 2) return;
 
-                const url = fileLinks[data.row.index - 2];
-                if (!url) return;
+    //             const url = fileLinks[data.row.index - 2];
+    //             if (!url) return;
 
-                doc.link(data.cell.x, data.cell.y, data.cell.width, data.cell.height, { url });
-            },
-        });
-    }
+    //             doc.link(data.cell.x, data.cell.y, data.cell.width, data.cell.height, { url });
+    //         },
+    //     });
+    // }
 
     const signatureImage = attachments?.signatureLink
         ? await loadPdfImage(toFetchableUrl(toPreviewUrl(attachments.signatureLink)))
