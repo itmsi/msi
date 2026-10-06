@@ -92,6 +92,7 @@ export interface BillPayment {
     location: number;
     custbody_cseg_cn_cfi: number | null;
     total: number;
+    balance?: number | string | null;
     exchangerate: number;
     trandate: string;
     next_approver: string | null;
