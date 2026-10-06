@@ -2,8 +2,8 @@ import jsPDF from 'jspdf';
 import autoTable, { CellHookData, RowInput, UserOptions } from 'jspdf-autotable';
 import { loadCustomFonts, setFontSafe } from '@/utils/fontLoader';
 import { formatDateLocal, formatNumberInput } from '@/helpers/generalHelper';
-import { ApplicantFormListItem, ApplicantFormUpdateRequest } from '../types/applicant';
-import { toDateInputValue } from './applicantForm';
+import { ApplicantFormAttachments, ApplicantFormListItem, ApplicantFormUpdateRequest } from '../types/applicant';
+import { toDateInputValue, toDownloadUrl, toPreviewUrl } from './applicantForm';
 
 type RGB = [number, number, number];
 
@@ -55,6 +55,62 @@ const headerCell = (content: string, extra: { rowSpan?: number; colSpan?: number
 const padRows = <T>(rows: T[], minLength: number, createEmpty: () => T): T[] =>
     rows.length >= minLength ? rows : [...rows, ...Array.from({ length: minLength - rows.length }, createEmpty)];
 
+interface PdfImage {
+    dataUrl: string;
+    format: 'PNG' | 'JPEG';
+}
+
+const FILE_PROXY_PREFIX = '/cloud-files';
+
+// Berkas cloud tidak mengirim header CORS, jadi isinya tidak boleh dibaca browser dari origin
+// aplikasi. Saat dev, request dialihkan ke proxy Vite (VITE_FILE_PROXY_TARGET) supaya satu
+// origin. Di production, path yang sama perlu diproxy di web server/API; kalau tidak, gambar
+// dilewati dan PDF tetap memakai tautan tanda tangan.
+const toFetchableUrl = (url: string): string => {
+    if (!import.meta.env.VITE_FILE_PROXY_TARGET) return url;
+
+    try {
+        const parsed = new URL(url);
+        return `${FILE_PROXY_PREFIX}${parsed.pathname}${parsed.search}`;
+    } catch {
+        return url;
+    }
+};
+
+// jsPDF hanya bisa menyematkan data gambarnya, bukan URL — jadi berkasnya harus bisa dibaca
+// oleh browser. Kalau sumbernya sudah berupa data URL (base64 dari backend) langsung dipakai;
+// kalau masih berupa link cloud, diunduh dulu. Gagal (CORS, link mati, bukan gambar) berarti
+// PDF tetap dibuat tanpa gambar tanda tangan, tidak pernah melempar error.
+const loadPdfImage = async (source: string, timeoutMs = 8000): Promise<PdfImage | null> => {
+    if (source.startsWith('data:')) {
+        return { dataUrl: source, format: source.includes('image/png') ? 'PNG' : 'JPEG' };
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        const response = await fetch(source, { signal: controller.signal });
+        if (!response.ok) return null;
+
+        const blob = await response.blob();
+        if (!blob.type.startsWith('image/')) return null;
+
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result));
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(blob);
+        });
+
+        return { dataUrl, format: blob.type.includes('png') ? 'PNG' : 'JPEG' };
+    } catch {
+        return null;
+    } finally {
+        clearTimeout(timer);
+    }
+};
+
 const buildFileName = (values: ApplicantFormUpdateRequest): string => {
     const safe = (value: string) => value.replace(/[\\/:*?"<>|]+/g, ' ').trim();
     return `Form Applicant - ${safe(values.full_name) || 'Applicant'} - ${safe(values.position_applied_for) || '-'}.pdf`;
@@ -62,7 +118,8 @@ const buildFileName = (values: ApplicantFormUpdateRequest): string => {
 
 export const generateApplicantFormPDF = async (
     values: ApplicantFormUpdateRequest,
-    summary: ApplicantFormListItem
+    summary: ApplicantFormListItem,
+    attachments?: ApplicantFormAttachments | null
 ): Promise<void> => {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
@@ -368,7 +425,47 @@ export const generateApplicantFormPDF = async (
         },
     });
 
-    if (cursorY + 32 > contentBottom) {
+    const attachedFiles = attachments?.files ?? [];
+
+    if (attachedFiles.length) {
+        const fileLinks: string[] = [];
+
+        drawTable({
+            body: [
+                sectionRow('ATTACHMENTS/ LAMPIRAN', 3),
+                [
+                    headerCell('No'),
+                    headerCell('TITLE/ Nama Dokumen'),
+                    headerCell('LINK/ Tautan'),
+                ],
+                ...attachedFiles.map((file, index) => {
+                    const url = toDownloadUrl(file.file);
+                    fileLinks.push(url);
+
+                    return [
+                        { content: String(index + 1), styles: { halign: 'center' as const } },
+                        text(file.file_title),
+                        url,
+                    ];
+                }),
+            ],
+            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 80 }, 2: { cellWidth: 100 } },
+            didDrawCell: (data: CellHookData) => {
+                if (data.section !== 'body' || data.column.index !== 2 || data.row.index < 2) return;
+
+                const url = fileLinks[data.row.index - 2];
+                if (!url) return;
+
+                doc.link(data.cell.x, data.cell.y, data.cell.width, data.cell.height, { url });
+            },
+        });
+    }
+
+    const signatureImage = attachments?.signatureLink
+        ? await loadPdfImage(toFetchableUrl(toPreviewUrl(attachments.signatureLink)))
+        : null;
+
+    if (cursorY + 38 > contentBottom) {
         doc.addPage();
         decorateCurrentPage();
         cursorY = contentTop;
@@ -376,8 +473,17 @@ export const generateApplicantFormPDF = async (
 
     resetTextStyle();
     doc.text('I certified that all answers given herein are true and complete to the best of my knowledge', margin, cursorY + 6);
-    doc.text('Signature of Applicant/ Tanda tangan pelamar', margin, cursorY + 28);
-    doc.text(`Date/ Tanggal: ${summary.completed_at ? date(summary.completed_at) : ''}`, margin + 100, cursorY + 28);
+    if (signatureImage) {
+        try {
+            doc.addImage(signatureImage.dataUrl, signatureImage.format, margin, cursorY + 9, 45, 16);
+        } catch {
+            console.warn('Signature image could not be embedded');
+        }
+    }
+    doc.text(text(values.full_name), margin, cursorY + 28);
+
+    const signedDate = attachments?.signatureDate || summary.completed_at;
+    doc.text(`Date/ Tanggal: ${signedDate ? date(signedDate) : ''}`, margin, cursorY + 33);
 
     doc.save(buildFileName(values));
 };

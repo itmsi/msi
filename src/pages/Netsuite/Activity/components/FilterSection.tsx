@@ -14,9 +14,10 @@ import SearchInput from '@/components/form/input/SearchInput';
 import Button from '@/components/ui/button/Button';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import ModuleNameSelectField from '@/components/form/select/ModuleNameSelectField';
+import AggregateTypeSelectField from '@/components/form/select/AggregateTypeSelectField';
 import { formatDateToYMD, getProfile } from '@/helpers/generalHelper';
 
-export type ActivityFilterField = 'sort_order' | 'type_data' | 'client' | 'status' | 'module_name';
+export type ActivityFilterField = 'sort_order' | 'type_data' | 'client' | 'status' | 'module_name' | 'aggregate_type';
 
 export interface ActivityFilterValues {
     sort_order: 'asc' | 'desc';
@@ -24,6 +25,7 @@ export interface ActivityFilterValues {
     client: string;
     status: string;
     module_name: string;
+    aggregate_type: string;
     start_date: string;
     end_date: string;
 }
@@ -202,6 +204,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                                     isSearchable={false}
                                 />
                             </div>
+
                         </>}
                         <div className="" ref={datePickerRef}>
                             <label htmlFor="client" className="block text-sm font-medium text-gray-700 mb-1">Date</label>
@@ -241,6 +244,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         <ModuleNameSelectField
                             value={filters.module_name}
                             onChange={(option) => onFilterChange('module_name', option?.value || '')}
+                        />
+
+                        <AggregateTypeSelectField
+                            value={filters.aggregate_type}
+                            onChange={(option) => onFilterChange('aggregate_type', option?.value || '')}
                         />
                     </div>
 

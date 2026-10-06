@@ -193,46 +193,6 @@ export const applicantLabels: TranslationMap = {
         en: 'Last Education',
         zh: '最高学历',
     },
-    university: {
-        id: 'Universitas',
-        en: 'University',
-        zh: '大学',
-    },
-    highSchool: {
-        id: 'SMA/SMK',
-        en: 'High School',
-        zh: '高中',
-    },
-    juniorHighSchool: {
-        id: 'SMP',
-        en: 'Junior High School',
-        zh: '初中',
-    },
-    elementarySchool: {
-        id: 'SD',
-        en: 'Elementary School',
-        zh: '小学',
-    },
-    universityName: {
-        id: 'Nama Universitas',
-        en: 'University Name',
-        zh: '大学名称',
-    },
-    highSchoolName: {
-        id: 'Nama SMA/SMK',
-        en: 'High School Name',
-        zh: '高中名称',
-    },
-    juniorHighSchoolName: {
-        id: 'Nama SMP',
-        en: 'Junior High School Name',
-        zh: '初中名称',
-    },
-    elementarySchoolName: {
-        id: 'Nama SD',
-        en: 'Elementary School Name',
-        zh: '小学名称',
-    },
     schoolName: {
         id: 'Nama Sekolah',
         en: 'School Name',
@@ -524,6 +484,48 @@ export const applicantLabels: TranslationMap = {
         id: 'Membuat PDF...',
         en: 'Generating PDF...',
         zh: '正在生成 PDF...',
+    },
+
+    // Attachments & Signature
+    attachments: {
+        id: 'Lampiran',
+        en: 'Attachments',
+        zh: '附件',
+    },
+    cvDocument: {
+        id: 'CV',
+        en: 'CV',
+        zh: '简历',
+    },
+    photo: {
+        id: 'Foto',
+        en: 'Photo',
+        zh: '照片',
+    },
+    otherDocuments: {
+        id: 'Dokumen Lainnya',
+        en: 'Other Documents',
+        zh: '其他文件',
+    },
+    noAttachments: {
+        id: 'Belum ada lampiran',
+        en: 'No attachments yet',
+        zh: '暂无附件',
+    },
+    untitledFile: {
+        id: 'Tanpa judul',
+        en: 'Untitled',
+        zh: '未命名',
+    },
+    signature: {
+        id: 'Tanda Tangan',
+        en: 'Signature',
+        zh: '签名',
+    },
+    signedAt: {
+        id: 'Ditandatangani',
+        en: 'Signed at',
+        zh: '签署日期',
     },
 
     // Validation & Toast Messages

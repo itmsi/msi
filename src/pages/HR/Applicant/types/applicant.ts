@@ -100,6 +100,19 @@ export interface ApplicantAnswer {
     answers: string;
 }
 
+export interface ApplicantFormFile {
+    file: string;
+    file_type: string;
+    file_title: string;
+}
+
+// Lampiran dan tanda tangan hanya dibaca, tidak ikut dikirim pada update form.
+export interface ApplicantFormAttachments {
+    files: ApplicantFormFile[];
+    signatureLink: string;
+    signatureDate: string;
+}
+
 export type ApplicantFormListSections = {
     driver_license: ApplicantDriverLicense[];
     educational_background: ApplicantEducation[];
@@ -133,6 +146,9 @@ export interface ApplicantFormDetail extends ApplicantFormListItem {
     working_experiences: unknown;
     references_old_company: unknown;
     following_answers: unknown;
+    applicant_form_files?: unknown;
+    signature_link?: string | null;
+    signature_date?: string | null;
 }
 
 export interface ApplicantFormDetailResponse {

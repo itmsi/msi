@@ -51,6 +51,7 @@ export type ActivityListRequest = {
     client: string;
     status: string;
     module_name: string;
+    aggregate_type: string;
     start_date: string;
     end_date: string;
 }

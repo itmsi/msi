@@ -14,6 +14,7 @@ type FilterState = {
     client: string;
     status: string;
     module_name: string;
+    aggregate_type: string;
     start_date: string;
     end_date: string;
 };
@@ -39,6 +40,7 @@ export const useActivity = () => {
         client: profileSSOITI === 'MSI' ? (searchParams.get('client') || '') : 'ITI',
         status: searchParams.get('status') || '',
         module_name: searchParams.get('module_name') || '',
+        aggregate_type: searchParams.get('aggregate_type') || '',
         start_date: searchParams.get('start_date') || today(),
         end_date: searchParams.get('end_date') || today(),
     };
@@ -63,6 +65,7 @@ export const useActivity = () => {
         if (currentFilters.client) params.set('client', currentFilters.client);
         if (currentFilters.status) params.set('status', currentFilters.status);
         if (currentFilters.module_name) params.set('module_name', currentFilters.module_name);
+        if (currentFilters.aggregate_type) params.set('aggregate_type', currentFilters.aggregate_type);
         if (currentFilters.start_date) params.set('start_date', currentFilters.start_date);
         if (currentFilters.end_date) params.set('end_date', currentFilters.end_date);
 
@@ -83,6 +86,7 @@ export const useActivity = () => {
                 client: urlFilters.client,
                 status: urlFilters.status,
                 module_name: urlFilters.module_name,
+                aggregate_type: urlFilters.aggregate_type,
                 start_date: toRequestStartDate(urlFilters.start_date),
                 end_date: toRequestEndDate(urlFilters.end_date),
             });
@@ -110,6 +114,7 @@ export const useActivity = () => {
         urlFilters.client,
         urlFilters.status,
         urlFilters.module_name,
+        urlFilters.aggregate_type,
         urlFilters.start_date,
         urlFilters.end_date,
         urlPage,
@@ -150,6 +155,7 @@ export const useActivity = () => {
             client: '',
             status: '',
             module_name: '',
+            aggregate_type: '',
             start_date: today(),
             end_date: today(),
         }, 1, urlLimit);
@@ -166,6 +172,7 @@ export const useActivity = () => {
         urlFilters.client,
         urlFilters.status,
         urlFilters.module_name,
+        urlFilters.aggregate_type,
     ].filter(Boolean).length;
 
     return {

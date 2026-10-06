@@ -1,9 +1,12 @@
 import moment from 'moment';
+import { FormFieldOption, FormFieldType } from '@/types/form';
 import {
     ApplicantAnswer,
     ApplicantEducation,
     ApplicantFamilyMember,
+    ApplicantFormAttachments,
     ApplicantFormDetail,
+    ApplicantFormFile,
     ApplicantFormListItem,
     ApplicantFormListSections,
     ApplicantFormScalarField,
@@ -16,8 +19,8 @@ import {
 export interface ApplicantScalarFieldConfig {
     field: ApplicantFormScalarField;
     labelKey: string;
-    type?: 'text' | 'email' | 'date' | 'textarea' | 'choice' | 'select';
-    options?: { value: string; label: string }[];
+    type?: FormFieldType;
+    options?: FormFieldOption[];
     required?: boolean;
     fullWidth?: boolean;
 }
@@ -134,6 +137,23 @@ const parseRows = (value: unknown): unknown[] => {
     }
 };
 
+// Link cloud mengarah ke halaman share, bukan file. Tambahan /download mengikuti pola
+// yang sudah dipakai di HR/Candidate supaya file dan gambarnya terbuka langsung.
+export const toDownloadUrl = (url: string): string => (url.startsWith('http') ? `${url}/download` : url);
+
+// Tanda tangan dipakai sebagai gambar, jadi /preview yang mengembalikan berkas gambarnya langsung.
+export const toPreviewUrl = (url: string): string => (url.startsWith('http') ? `${url}/preview` : url);
+
+export const toApplicantFormFiles = (value: unknown): ApplicantFormFile[] =>
+    parseRows(value)
+        .filter((row): row is Record<string, unknown> => typeof row === 'object' && row !== null)
+        .map(row => ({
+            file: String(row.file ?? ''),
+            file_type: String(row.file_type ?? ''),
+            file_title: String(row.file_title ?? ''),
+        }))
+        .filter(row => row.file);
+
 const toSectionRows = <K extends ApplicantListSection>(section: K, value: unknown): ApplicantFormListSections[K] => {
     const template = createEmptyRow[section]();
     const keys = Object.keys(template) as (keyof typeof template)[];
@@ -184,8 +204,8 @@ export const EDUCATION_LEVEL_OPTIONS: { value: string; label: string }[] = [
 export interface ApplicantRowFieldConfig<T> {
     key: keyof T & string;
     labelKey: string;
-    type?: 'text' | 'textarea' | 'choice' | 'date' | 'number';
-    options?: { value: string; label: string }[];
+    type?: FormFieldType;
+    options?: FormFieldOption[];
     required?: boolean;
     fullWidth?: boolean;
 }
@@ -378,4 +398,10 @@ export const pickApplicantSummary = (detail: ApplicantFormDetail): ApplicantForm
     city: detail.city,
     working_available_date: detail.working_available_date,
     applicant_form_url: detail.applicant_form_url,
+});
+
+export const pickApplicantAttachments = (detail: ApplicantFormDetail): ApplicantFormAttachments => ({
+    files: toApplicantFormFiles(detail.applicant_form_files),
+    signatureLink: detail.signature_link || '',
+    signatureDate: toDateInputValue(detail.signature_date ?? null),
 });

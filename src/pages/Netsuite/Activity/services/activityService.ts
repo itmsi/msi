@@ -35,6 +35,7 @@ export class ActivityService {
             client: '',
             status: '',
             module_name: '',
+            aggregate_type: '',
             start_date: '',
             end_date: '',
             ...params,

@@ -5,6 +5,7 @@ import { useLanguage } from '@/components/lang/useLanguage';
 import { ApplicantService } from '../services/applicantService';
 import { applicantLabels } from '../language/applicantLabels';
 import {
+    ApplicantFormAttachments,
     ApplicantFormListItem,
     ApplicantFormListSections,
     ApplicantFormScalarField,
@@ -14,8 +15,10 @@ import {
 import {
     createEmptyApplicantForm,
     createEmptyRow,
+    hasRowValue,
     isRequiredFamilyRelationship,
     isRequiredListRow,
+    pickApplicantAttachments,
     pickApplicantSummary,
     REQUIRED_APPLICANT_FIELDS,
     REQUIRED_EDUCATION_FIELDS,
@@ -36,6 +39,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const useApplicantEdit = (id?: string) => {
     const { langField } = useLanguage(applicantLabels);
     const [summary, setSummary] = useState<ApplicantFormListItem | null>(null);
+    const [attachments, setAttachments] = useState<ApplicantFormAttachments | null>(null);
     const [formData, setFormData] = useState<ApplicantFormUpdateRequest>(createEmptyApplicantForm);
     const [savedFormData, setSavedFormData] = useState<ApplicantFormUpdateRequest | null>(null);
     const [errors, setErrors] = useState<ApplicantFormErrors>({});
@@ -56,6 +60,7 @@ export const useApplicantEdit = (id?: string) => {
 
             if (!response?.success || !response?.data) {
                 setSummary(null);
+                setAttachments(null);
                 setError(response?.message || langField('applicantFormNotFound'));
                 return;
             }
@@ -63,6 +68,7 @@ export const useApplicantEdit = (id?: string) => {
             const values = toApplicantFormValues(response.data);
 
             setSummary(pickApplicantSummary(response.data));
+            setAttachments(pickApplicantAttachments(response.data));
             setFormData(values);
             setSavedFormData(values);
             setErrors({});
@@ -70,6 +76,7 @@ export const useApplicantEdit = (id?: string) => {
         } catch (err) {
             const apiError = err as ApiError;
             setSummary(null);
+            setAttachments(null);
             setError(apiError?.message || langField('loadApplicantFormFailed'));
         } finally {
             setLoading(false);
@@ -164,6 +171,10 @@ export const useApplicantEdit = (id?: string) => {
         const nextSectionErrors: ApplicantSectionErrors = {};
 
         formData.educational_background.forEach((row, index) => {
+            // Data lama bisa berisi baris tambahan yang hanya punya jenjang lama dan kosong sisanya;
+            // section ini tidak punya tombol hapus, jadi baris seperti itu tidak boleh menahan submit.
+            if (index > 0 && !hasRowValue({ ...row, type_of_school: '' })) return;
+
             REQUIRED_EDUCATION_FIELDS.forEach(key => {
                 if (!String(row[key] ?? '').trim()) {
                     nextSectionErrors[`educational_background.${index}.${key}`] = 'fieldRequired';
@@ -248,7 +259,7 @@ export const useApplicantEdit = (id?: string) => {
 
         setIsExporting(true);
         try {
-            await generateApplicantFormPDF(savedFormData, summary);
+            await generateApplicantFormPDF(savedFormData, summary, attachments);
             toast.success(langField('exportPdfSuccess'));
         } catch (err) {
             console.error('Error generating applicant form PDF:', err);
@@ -260,6 +271,7 @@ export const useApplicantEdit = (id?: string) => {
 
     return {
         summary,
+        attachments,
         formData,
         errors,
         sectionErrors,

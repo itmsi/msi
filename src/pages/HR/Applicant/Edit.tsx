@@ -13,6 +13,7 @@ import { useApplicantEdit } from './hooks/useApplicantEdit';
 import ApplicantFields from './components/ApplicantFields';
 import ApplicantSections from './components/ApplicantSections';
 import ApplicantSummaryCard from './components/ApplicantSummaryCard';
+import ApplicantAttachmentsCard from './components/ApplicantAttachmentsCard';
 import { DownloadButton } from '@/components/ui/button/DownloadButton';
 
 export default function Edit() {
@@ -29,10 +30,10 @@ export default function Edit() {
 
     const canUpdate = useHasPermission('update');
     const readOnly = !canUpdate;
-    // const readOnly = true;
 
     const {
         summary,
+        attachments,
         formData,
         errors,
         sectionErrors,
@@ -78,7 +79,8 @@ export default function Edit() {
                     actions={
                         <PermissionGate permission="read">
                             <DownloadButton
-                                fileName="Download PDF"
+                                fileName={langField('exportPdf')}
+                                loadingLabel={langField('exportingPdf')}
                                 variant="secondary"
                                 onClick={handleExportPdf}
                                 loading={isExporting}
@@ -111,6 +113,8 @@ export default function Edit() {
                         onRowRemove={handleRowRemove}
                         onRowChange={handleRowChange}
                     />
+
+                    {attachments && <ApplicantAttachmentsCard attachments={attachments} />}
                 </div>
 
 

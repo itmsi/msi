@@ -6,6 +6,7 @@ import Checkbox from '@/components/form/input/Checkbox';
 import Button from '@/components/ui/button/Button';
 import { DatePickerField } from '@/components/datepicker/DatePickerField';
 import { formatDateLocal, formatNumberInput } from '@/helpers/generalHelper';
+import { FormFieldOption, FormFieldType } from '@/types/form';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { parseApplicantDate, toApplicantDateValue, toDateInputValue } from '../utils/applicantForm';
 import { ApplicantSectionErrors } from '../hooks/useApplicantEdit';
@@ -16,8 +17,8 @@ import 'react-date-range/dist/theme/default.css';
 export interface RepeatableField<T> {
     key: keyof T & string;
     label: string | ((row: T) => string);
-    type?: 'text' | 'textarea' | 'choice' | 'date' | 'number';
-    options?: { value: string; label: string }[];
+    type?: FormFieldType;
+    options?: FormFieldOption[];
     required?: boolean | ((row: T, index: number) => boolean);
     fullWidth?: boolean;
 }
