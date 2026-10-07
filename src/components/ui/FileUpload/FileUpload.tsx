@@ -28,7 +28,7 @@ interface FileUploadProps {
     previewSize?: 'sm' | 'md' | 'lg';
     viewMode?: boolean;
     colLength?: number;
-    existingFiles?: Array<{ file_id: string; file_url: string; file_name?: string }>;
+    existingFiles?: Array<{ file_id: string; file_url: string; file_name?: string; file_type?: 'image' | 'document' }>;
     hasDownloadButton?: boolean;
 }
 
@@ -172,6 +172,16 @@ const FileUpload: React.FC<FileUploadProps> = ({
         const documentExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt'];
         const lowerFileName = fileName.toLowerCase();
         return documentExtensions.some(ext => lowerFileName.endsWith(ext));
+    };
+
+    // Jenis file existing ditebak dari ekstensi namanya. Kalau pemanggil sudah tahu jenisnya
+    // (mis. dari response API), `existingFiles[index].file_type` dipakai supaya nama file
+    // tanpa ekstensi tidak salah dianggap gambar lalu gagal dirender.
+    const isExistingImage = (index: number, fileName: string): boolean => {
+        const knownType = existingFiles?.[index]?.file_type;
+        if (knownType) return knownType === 'image';
+
+        return !isDocumentFile(fileName);
     };
 
     // Get document icon based on file type
@@ -396,9 +406,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
     return (
         <div className={`space-y-2 ${className}`}>
-            <Label htmlFor={id} className='font-secondary'>
-                {label} {required && <span className="text-white">*</span>}
-            </Label>
+            {/* htmlFor hanya diisi saat input filenya memang dirender. Pada viewMode inputnya
+                tidak ada, jadi label tanpa pasangan id akan diperingatkan browser. */}
+            {label !== '' && (
+                <Label htmlFor={viewMode ? undefined : id} className='font-secondary'>
+                    {label} {required && <span className="text-white">*</span>}
+                </Label>
+            )}
             {!viewMode && (<>
                 <div
                     className={`
@@ -539,7 +553,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                 const fileName = existingFiles?.[index]?.file_name ||
                                                     imageUrl.split('/').pop() ||
                                                     `attachment-${index + 1}`;
-                                                const isImage = !isDocumentFile(fileName);
+                                                const isImage = isExistingImage(index, fileName);
 
                                                 return (
                                                     <div key={`existing-${index}`} className={`space-y-2 ${getPreviewSizeClasses()} rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm relative group p-5 content-center aspect-square hover:brightness-90`}>
@@ -614,7 +628,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                                         const fileName = existingFiles?.[0]?.file_name ||
                                                             currentExistingImages.split('/').pop() ||
                                                             'attachment';
-                                                        const isImage = !isDocumentFile(fileName);
+                                                        const isImage = isExistingImage(0, fileName);
 
                                                         return isImage ? (<>
                                                             <div
@@ -839,7 +853,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                                 );
                             } else if (imageUrl) {
                                 const fileName = existingFiles?.[0]?.file_name || imageUrl.split('/').pop() || 'attachment';
-                                const isImage = !isDocumentFile(fileName);
+                                const isImage = isExistingImage(0, fileName);
                                 return (
                                     <div className="space-y-2">
                                         {/* Preview */}

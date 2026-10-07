@@ -52,6 +52,15 @@ export default defineConfig(({ mode }) => {
             hmr: env.VITE_HMR === 'true',
             host: env.VITE_HOST === 'true',
             allowedHosts: env.VITE_ALLOWED_HOSTS?.split(',') ?? [],
+            proxy: env.VITE_FILE_PROXY_TARGET
+                ? {
+                    '/cloud-files': {
+                        target: env.VITE_FILE_PROXY_TARGET,
+                        changeOrigin: true,
+                        rewrite: (requestPath: string) => requestPath.replace(/^\/cloud-files/, ''),
+                    },
+                }
+                : undefined,
         },
         build: {
             rollupOptions: {

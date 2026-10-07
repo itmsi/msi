@@ -11,12 +11,16 @@ import {
     MdFilterListAlt,
 } from 'react-icons/md';
 import SearchInput from '@/components/form/input/SearchInput';
+import TimePickerField from '@/components/form/TimePickerField';
 import Button from '@/components/ui/button/Button';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import ModuleNameSelectField from '@/components/form/select/ModuleNameSelectField';
+import AggregateTypeSelectField from '@/components/form/select/AggregateTypeSelectField';
 import { formatDateToYMD, getProfile } from '@/helpers/generalHelper';
 
-export type ActivityFilterField = 'sort_order' | 'type_data' | 'client' | 'status' | 'module_name';
+export type ActivityFilterField = 'sort_order' | 'type_data' | 'client' | 'status' | 'module_name' | 'aggregate_type';
+
+export type ActivityTimeField = 'start_time' | 'end_time';
 
 export interface ActivityFilterValues {
     sort_order: 'asc' | 'desc';
@@ -24,8 +28,11 @@ export interface ActivityFilterValues {
     client: string;
     status: string;
     module_name: string;
+    aggregate_type: string;
     start_date: string;
     end_date: string;
+    start_time: string;
+    end_time: string;
 }
 
 interface FilterSectionProps {
@@ -39,6 +46,7 @@ interface FilterSectionProps {
     clientOptions: { value: string; label: string }[];
     onFilterChange: (field: ActivityFilterField, value: string) => void;
     onDateRangeChange: (startDate: string, endDate: string) => void;
+    onTimeChange: (field: ActivityTimeField, value: string) => void;
     onClearFilters: () => void;
 
     searchPlaceholder?: string;
@@ -65,6 +73,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     clientOptions,
     onFilterChange,
     onDateRangeChange,
+    onTimeChange,
     onClearFilters,
     searchPlaceholder = 'Search... (Press Enter)',
     defaultOpen = false,
@@ -202,11 +211,17 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                                     isSearchable={false}
                                 />
                             </div>
+
                         </>}
+                        <div>
+                            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            {statusFilter}
+                        </div>
                         <div className="" ref={datePickerRef}>
-                            <label htmlFor="client" className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                            <label htmlFor="date_range" className="block text-sm font-medium text-gray-700 mb-1">Date</label>
                             <div className="relative">
                                 <button
+                                    id="date_range"
                                     type="button"
                                     onClick={() => setShowDatePicker(prev => !prev)}
                                     className="h-10.5 flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white hover:bg-gray-50 w-full"
@@ -233,14 +248,27 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                                 )}
                             </div>
                         </div>
-                        <div>
-                            <label htmlFor="client" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            {statusFilter}
-                        </div>
+                        <TimePickerField
+                            id="start_time"
+                            label="Start Time"
+                            value={filters.start_time}
+                            onChange={(value) => onTimeChange('start_time', value)}
+                        />
+                        <TimePickerField
+                            id="end_time"
+                            label="End Time"
+                            value={filters.end_time}
+                            onChange={(value) => onTimeChange('end_time', value)}
+                        />
 
                         <ModuleNameSelectField
                             value={filters.module_name}
                             onChange={(option) => onFilterChange('module_name', option?.value || '')}
+                        />
+
+                        <AggregateTypeSelectField
+                            value={filters.aggregate_type}
+                            onChange={(option) => onFilterChange('aggregate_type', option?.value || '')}
                         />
                     </div>
 

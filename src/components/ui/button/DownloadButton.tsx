@@ -10,6 +10,7 @@ interface DownloadButtonProps {
     disabled?: boolean;
     showIcon?: boolean;
     showLabel?: boolean;
+    loadingLabel?: string;
     onClick?: () => void;
 }
 
@@ -63,6 +64,7 @@ export const DownloadButton = ({
     disabled = false,
     showIcon = true,
     showLabel = true,
+    loadingLabel = "Preparing file...",
     onClick,
 }: DownloadButtonProps) => {
     return (
@@ -77,7 +79,7 @@ export const DownloadButton = ({
             {loading ? (
                 <>
                     <Spinner />
-                    <span>Preparing file...</span>
+                    <span>{loadingLabel}</span>
                 </>
             ) : (
                 <>

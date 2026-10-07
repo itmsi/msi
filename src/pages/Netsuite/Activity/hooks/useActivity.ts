@@ -4,7 +4,15 @@ import moment from 'moment';
 import { ApiError } from '@/helpers/apiHelper';
 import { ActivityService } from '../services/activityService';
 import { ActivityRow, Pagination } from '../types/activity';
-import { toActivityRows, toRequestEndDate, toRequestStartDate } from '../utils/activityFormat';
+import {
+    alignTimeRange,
+    DEFAULT_END_TIME,
+    DEFAULT_START_TIME,
+    isValidTime,
+    toActivityRows,
+    toRequestEndDate,
+    toRequestStartDate,
+} from '../utils/activityFormat';
 import { getProfile } from '@/helpers/generalHelper';
 
 type FilterState = {
@@ -14,13 +22,19 @@ type FilterState = {
     client: string;
     status: string;
     module_name: string;
+    aggregate_type: string;
     start_date: string;
     end_date: string;
+    start_time: string;
+    end_time: string;
 };
 
 const DEFAULT_SORT_ORDER: FilterState['sort_order'] = 'desc';
 
 const today = (): string => moment().format('YYYY-MM-DD');
+
+const readTime = (value: string | null, fallback: string): string =>
+    value && isValidTime(value) ? value : fallback;
 
 export const useActivity = () => {
     const profileSSO = getProfile() as any;
@@ -39,8 +53,11 @@ export const useActivity = () => {
         client: profileSSOITI === 'MSI' ? (searchParams.get('client') || '') : 'ITI',
         status: searchParams.get('status') || '',
         module_name: searchParams.get('module_name') || '',
+        aggregate_type: searchParams.get('aggregate_type') || '',
         start_date: searchParams.get('start_date') || today(),
         end_date: searchParams.get('end_date') || today(),
+        start_time: readTime(searchParams.get('start_time'), DEFAULT_START_TIME),
+        end_time: readTime(searchParams.get('end_time'), DEFAULT_END_TIME),
     };
 
     const [activities, setActivities] = useState<ActivityRow[]>([]);
@@ -63,8 +80,11 @@ export const useActivity = () => {
         if (currentFilters.client) params.set('client', currentFilters.client);
         if (currentFilters.status) params.set('status', currentFilters.status);
         if (currentFilters.module_name) params.set('module_name', currentFilters.module_name);
+        if (currentFilters.aggregate_type) params.set('aggregate_type', currentFilters.aggregate_type);
         if (currentFilters.start_date) params.set('start_date', currentFilters.start_date);
         if (currentFilters.end_date) params.set('end_date', currentFilters.end_date);
+        if (currentFilters.start_time !== DEFAULT_START_TIME) params.set('start_time', currentFilters.start_time);
+        if (currentFilters.end_time !== DEFAULT_END_TIME) params.set('end_time', currentFilters.end_time);
 
         setSearchParams(params);
     }, [setSearchParams]);
@@ -83,8 +103,9 @@ export const useActivity = () => {
                 client: urlFilters.client,
                 status: urlFilters.status,
                 module_name: urlFilters.module_name,
-                start_date: toRequestStartDate(urlFilters.start_date),
-                end_date: toRequestEndDate(urlFilters.end_date),
+                aggregate_type: urlFilters.aggregate_type,
+                start_date: toRequestStartDate(urlFilters.start_date, urlFilters.start_time),
+                end_date: toRequestEndDate(urlFilters.end_date, urlFilters.end_time),
             });
 
             if (!result.success) {
@@ -110,8 +131,11 @@ export const useActivity = () => {
         urlFilters.client,
         urlFilters.status,
         urlFilters.module_name,
+        urlFilters.aggregate_type,
         urlFilters.start_date,
         urlFilters.end_date,
+        urlFilters.start_time,
+        urlFilters.end_time,
         urlPage,
         urlLimit,
     ]);
@@ -121,8 +145,19 @@ export const useActivity = () => {
     }, [urlFilters, urlLimit, updateUrlParams]);
 
     const handleDateRangeChange = useCallback((startDate: string, endDate: string) => {
-        handleFilterChange({ start_date: startDate, end_date: endDate });
-    }, [handleFilterChange]);
+        updateUrlParams(
+            alignTimeRange({ ...urlFilters, start_date: startDate, end_date: endDate }, 'start_time'),
+            1,
+            urlLimit
+        );
+    }, [urlFilters, urlLimit, updateUrlParams]);
+
+    const handleTimeChange = useCallback((field: 'start_time' | 'end_time', value: string) => {
+        const fallback = field === 'start_time' ? DEFAULT_START_TIME : DEFAULT_END_TIME;
+        const nextValue = isValidTime(value) ? value : fallback;
+
+        updateUrlParams(alignTimeRange({ ...urlFilters, [field]: nextValue }, field), 1, urlLimit);
+    }, [urlFilters, urlLimit, updateUrlParams]);
 
     const handlePageChange = useCallback((page: number) => {
         updateUrlParams(urlFilters, page, urlLimit);
@@ -150,8 +185,11 @@ export const useActivity = () => {
             client: '',
             status: '',
             module_name: '',
+            aggregate_type: '',
             start_date: today(),
             end_date: today(),
+            start_time: DEFAULT_START_TIME,
+            end_time: DEFAULT_END_TIME,
         }, 1, urlLimit);
     }, [updateUrlParams, urlLimit]);
 
@@ -166,6 +204,9 @@ export const useActivity = () => {
         urlFilters.client,
         urlFilters.status,
         urlFilters.module_name,
+        urlFilters.aggregate_type,
+        urlFilters.start_time !== DEFAULT_START_TIME ? urlFilters.start_time : '',
+        urlFilters.end_time !== DEFAULT_END_TIME ? urlFilters.end_time : '',
     ].filter(Boolean).length;
 
     return {
@@ -180,6 +221,7 @@ export const useActivity = () => {
         fetchActivities,
         handleFilterChange,
         handleDateRangeChange,
+        handleTimeChange,
         handlePageChange,
         handleRowsPerPageChange,
         handleSearch,

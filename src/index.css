@@ -1157,3 +1157,9 @@ p {
 .rdrMonthAndYearPickers {
     font-family: var(--font-secondary);
 }
+.rm-preview .flex.items-start.justify-between.mb-3 {
+    display: none;
+}
+.rm-preview:not(.rm-multiple) .mt-4.p-4.bg-gray-50.rounded-lg.border.border-gray-200 {
+    padding:0;
+}

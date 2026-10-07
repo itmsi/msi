@@ -52,11 +52,39 @@ export const toActivityRows = (items: ActivityItem[]): ActivityRow[] =>
         activityId: item.id,
     }));
 
-export const toRequestStartDate = (date: string): string =>
-    date ? moment(date, 'YYYY-MM-DD').startOf('day').format('YYYY-MM-DD HH:mm:ss.SSS ZZ') : '';
+export const DEFAULT_START_TIME = '00:00';
+export const DEFAULT_END_TIME = '23:59';
 
-export const toRequestEndDate = (date: string): string =>
-    date ? moment(date, 'YYYY-MM-DD').endOf('day').format('YYYY-MM-DD HH:mm:ss.SSS ZZ') : '';
+const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+export const isValidTime = (value: string): boolean => TIME_PATTERN.test(value);
+
+interface TimeRangeFilters {
+    start_date: string;
+    end_date: string;
+    start_time: string;
+    end_time: string;
+}
+
+// Pada hari yang sama jam mulai tidak boleh melewati jam selesai. Sisi yang bukan sumber
+// perubahan ikut disamakan supaya rentang tidak pernah terbalik. Format HH:mm sudah
+// berurutan secara leksikografis, jadi perbandingan string cukup.
+export const alignTimeRange = <T extends TimeRangeFilters>(
+    filters: T,
+    changed: 'start_time' | 'end_time'
+): T => {
+    if (filters.start_date !== filters.end_date || filters.start_time <= filters.end_time) return filters;
+
+    return changed === 'start_time'
+        ? { ...filters, end_time: filters.start_time }
+        : { ...filters, start_time: filters.end_time };
+};
+
+export const toRequestStartDate = (date: string, time: string = DEFAULT_START_TIME): string =>
+    date ? moment(`${date} ${time}`, 'YYYY-MM-DD HH:mm').startOf('minute').format('YYYY-MM-DD HH:mm:ss.SSS ZZ') : '';
+
+export const toRequestEndDate = (date: string, time: string = DEFAULT_END_TIME): string =>
+    date ? moment(`${date} ${time}`, 'YYYY-MM-DD HH:mm').endOf('minute').format('YYYY-MM-DD HH:mm:ss.SSS ZZ') : '';
 
 export const formatJson = (value: unknown): string => {
     if (value === null || value === undefined) return '';
