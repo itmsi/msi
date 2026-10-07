@@ -289,11 +289,6 @@ export default function View() {
                 <div>
                   <h3 className="text-xl leading-6 font-primary-bold text-gray-900 flex items-center gap-3">
                     Invoice {invoiceData.tranid}
-                    <div className="text-sm">
-                      <Badge color={statusInfo.color} variant="light">
-                        {statusInfo.label}
-                      </Badge>
-                    </div>
                   </h3>
                   <p className="mt-1 text-sm text-gray-500">
                     Last Updated:{" "}
@@ -306,7 +301,12 @@ export default function View() {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex items-center gap-3 sm:ml-auto">
+                <div className="text-sm">
+                  <Badge color={statusInfo.color} variant="light">
+                    {statusInfo.label}
+                  </Badge>
+                </div>
                 {/* Edit functionality can be added later if needed */}
                 {/* <Button
                                     onClick={() => navigate(`/netsuite/invoice-sales-order/edit/${invoiceData.id}`)}

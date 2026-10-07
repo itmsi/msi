@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { MdArrowBack, MdReceiptLong, MdCreditCard, MdHistory, MdOutlineComment } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
@@ -9,6 +9,7 @@ import Button from "@/components/ui/button/Button";
 import { formatDateTime, formatDateLocal } from "@/helpers/generalHelper";
 import CustomDataTable from "@/components/ui/table";
 import { TableColumn } from "react-data-table-component";
+import ModalApproval from "./components/ModalApproval";
 
 type TabType = 'applied_to' | 'credit_applied' | 'workflow_history' | 'user_notes';
 
@@ -48,27 +49,60 @@ export default function View() {
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<TabType>('applied_to');
 
-    useEffect(() => {
-        const fetchDetail = async () => {
-            if (!id) return;
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await BillPaymentService.getBillPaymentById(id);
-                if (response.success && response.data) {
-                    setBillData(response.data);
-                } else {
-                    setError("Bill Payment not found");
-                }
-            } catch (err: any) {
-                console.error("Error fetching bill payment details:", err);
-                setError(err.message || "Failed to load bill payment details");
-            } finally {
-                setLoading(false);
+    const [approvalAction, setApprovalAction] = useState<'approve' | 'reject' | null>(null);
+
+    const fetchDetail = useCallback(async () => {
+        if (!id) return;
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await BillPaymentService.getBillPaymentById(id);
+            if (response.success && response.data) {
+                setBillData(response.data);
+            } else {
+                setError("Bill Payment not found");
             }
-        };
-        fetchDetail();
+        } catch (err: any) {
+            console.error("Error fetching bill payment details:", err);
+            setError(err.message || "Failed to load bill payment details");
+        } finally {
+            setLoading(false);
+        }
     }, [id]);
+
+    useEffect(() => {
+        fetchDetail();
+    }, [fetchDetail]);
+
+    // ID NetSuite user yang login (auth_user.current_approver_netsuite_id), sama seperti filter di list
+    const getLoginApproverId = (): string | null => {
+        try {
+            const authUserStr = localStorage.getItem('auth_user');
+            if (!authUserStr) return null;
+            const value = JSON.parse(authUserStr)?.current_approver_netsuite_id;
+            return value === undefined || value === null || value === '' ? null : String(value);
+        } catch {
+            return null;
+        }
+    };
+
+    // ID NetSuite next approver diambil dari workflow history terbaru (Current Approver Id)
+    const getNextApproverId = (data: BillPayment): string | null => {
+        const history = [...(data.workflow_history || [])].sort((a, b) =>
+            String(a.date_entered || '').localeCompare(String(b.date_entered || '')));
+        for (let i = history.length - 1; i >= 0; i--) {
+            const opts = history[i].options_obj;
+            const parsed: Record<string, any> = typeof opts === 'string'
+                ? (() => { try { return JSON.parse(opts); } catch { return {}; } })()
+                : (opts || {});
+            for (const [key, value] of Object.entries(parsed)) {
+                if (key.replace(/\?/g, '').trim() === 'Current Approver Id' && value !== null && value !== '') {
+                    return String(value);
+                }
+            }
+        }
+        return null;
+    };
 
     const getStatusInfo = (approvalstatus: number) => {
         switch (approvalstatus) {
@@ -108,6 +142,12 @@ export default function View() {
     }
 
     const statusInfo = getStatusInfo(billData.approvalstatus);
+
+    const loginApproverId = getLoginApproverId();
+    const nextApproverId = getNextApproverId(billData);
+    const canApprove = Number(billData.approvalstatus) === 1
+        && !!loginApproverId
+        && loginApproverId === nextApproverId;
 
     // Tab columns
     const appliedToColumns: TableColumn<AppliedToItem>[] = [
@@ -343,23 +383,39 @@ export default function View() {
                                 </button>
                                 <div>
                                     <h3 className="text-xl leading-6 font-primary-bold text-gray-900 flex items-center gap-3">
-                                        {billData.transactionnumber}
-                                        <div className="text-sm">
-                                            <Badge color={statusInfo.color} variant="light">
-                                                {billData.approvalstatus_display || statusInfo.label}
-                                            </Badge>
-                                        </div>
+                                        Bill Payment {billData.transactionnumber}
                                     </h3>
                                     <p className="mt-1 text-sm text-gray-500">
-                                        {billData.entity_display || '-'}
-                                    </p>
-                                    <p className="mt-1 text-xs text-gray-500">
-                                        NetSuite ID: {billData.netsuite_id || '-'}
-                                        {' · '}Last Modified: {billData.last_modified_netsuite ? formatDateTime(billData.last_modified_netsuite) : '-'}
-                                        {' · '}Created At: {billData.created_at ? formatDateTime(billData.created_at) : '-'}
-                                        {' · '}Updated At: {billData.updated_at ? formatDateTime(billData.updated_at) : '-'}
+                                        Last Updated:{" "}
+                                        {billData.last_modified_netsuite
+                                            ? formatDateTime(billData.last_modified_netsuite)
+                                            : "-"}
                                     </p>
                                 </div>
+                            </div>
+                            <div className="flex items-center gap-3 sm:ml-auto">
+                                <div className="text-sm">
+                                    <Badge color={statusInfo.color} variant="light">
+                                        {billData.approvalstatus_display || statusInfo.label}
+                                    </Badge>
+                                </div>
+                                {canApprove && (<>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setApprovalAction('reject')}
+                                        className="px-6 rounded-full ring-1 ring-inset ring-red-600 text-red-600 hover:bg-red-600 hover:text-white hover:ring-red-600"
+                                    >
+                                        Reject
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        onClick={() => setApprovalAction('approve')}
+                                        className="px-6 rounded-full"
+                                    >
+                                        Approve
+                                    </Button>
+                                </>)}
                             </div>
                         </div>
                     </div>
@@ -523,6 +579,17 @@ export default function View() {
                     </div>
                 </div>
             </div>
+
+            <ModalApproval
+                isOpen={approvalAction !== null}
+                onClose={() => setApprovalAction(null)}
+                billPaymentId={billData.netsuite_id ? Number(billData.netsuite_id) : null}
+                action={approvalAction ?? 'approve'}
+                approverNetsuiteId={loginApproverId}
+                onSuccess={fetchDetail}
+                titleModal={approvalAction === 'reject' ? 'Reject' : 'Approve'}
+                descriptionModal={`Masukkan catatan untuk proses ${approvalAction === 'reject' ? 'reject' : 'approve'} ${billData.transactionnumber || ''}`}
+            />
         </>
     );
 }

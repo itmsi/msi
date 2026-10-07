@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from '@/helpers/apiHelper';
-import { BillPaymentRequest, BillPaymentResponse, BillPaymentDetailResponse } from '../types/billPayment';
+import { BillPaymentRequest, BillPaymentResponse, BillPaymentDetailResponse, BillPaymentApprovalRequest, BillPaymentApprovalResponse } from '../types/billPayment';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -27,6 +27,11 @@ export class BillPaymentService {
         );
 
         return response.data as unknown as BillPaymentDetailResponse;
+    }
+
+    static async submitApproval(params: BillPaymentApprovalRequest): Promise<BillPaymentApprovalResponse> {
+        const response = await apiPost(`${API_BASE_URL}/approval-all`, params as Record<string, any>);
+        return response.data as BillPaymentApprovalResponse;
     }
 
     static async syncBillPayments(): Promise<any> {

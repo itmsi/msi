@@ -78,6 +78,28 @@ export default function Manage() {
             pinned: 'left',
         },
         {
+            name: 'Subsidiary',
+            selector: row => row.subsidiary_display || '-',
+            cell: row => (
+                <div className="items-center py-2">
+                    <div className="block text-sm text-gray-900">{row.subsidiary_display || '-'}</div>
+                </div>
+            ),
+            wrap: true,
+            minWidth: '220px',
+        },
+        {
+            name: 'Location',
+            selector: row => row.location_display || '-',
+            cell: row => (
+                <div className="items-center py-2">
+                    <div className="block text-sm text-gray-900">{row.location_display || '-'}</div>
+                </div>
+            ),
+            wrap: true,
+            minWidth: '180px',
+        },
+        {
             name: 'Vendor Name',
             selector: row => row.entity_display || '-',
             cell: row => (

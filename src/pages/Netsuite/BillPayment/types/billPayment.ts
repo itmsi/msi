@@ -109,6 +109,21 @@ export interface BillPayment {
     is_deleted: boolean;
 }
 
+export interface BillPaymentApprovalRequest {
+    id: number;
+    recordType: string;
+    actionId: 'approve' | 'reject';
+    note: string;
+    noteTitle: string | null;
+    custbody_me_wf_next_approver_blank: number;
+}
+
+export interface BillPaymentApprovalResponse {
+    success: boolean;
+    message: string;
+    data: any;
+}
+
 export interface BillPaymentPagination {
     page: number;
     limit: number;
