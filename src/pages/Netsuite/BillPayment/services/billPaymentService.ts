@@ -34,6 +34,14 @@ export class BillPaymentService {
         return response.data as BillPaymentApprovalResponse;
     }
 
+    static async syncBillPaymentById(netsuiteId: string): Promise<{ success: boolean; message: string; data?: any }> {
+        const response = await apiGet<{ success: boolean; message: string; data?: any }>(
+            `${API_BASE_URL}/netsuite/bill-payment/sync/${netsuiteId}`
+        );
+
+        return response.data;
+    }
+
     static async syncBillPayments(): Promise<any> {
         const response = await apiPost<any>(
             `${API_BASE_URL}/netsuite/sync/modules`,
