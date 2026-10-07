@@ -147,6 +147,21 @@ export const useBillPayment = () => {
         }
     }, [fetchBillPayments]);
 
+    const handleSyncById = useCallback(async (row: BillPayment) => {
+        if (isSyncing || !row?.netsuite_id) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi Bill Payment: ${row.transactionnumber || row.netsuite_id}...`);
+        try {
+            await BillPaymentService.syncBillPaymentById(String(row.netsuite_id));
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            fetchBillPayments();
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, fetchBillPayments]);
+
     const executeSearch = useCallback(() => {
         handleSearch(searchValue);
     }, [handleSearch, searchValue]);
@@ -213,5 +228,6 @@ export const useBillPayment = () => {
         handleClearAllFilters,
         isSyncing,
         handleSync,
+        handleSyncById,
     };
 };
