@@ -3,7 +3,7 @@ import autoTable, { CellHookData, RowInput, UserOptions } from 'jspdf-autotable'
 import { loadCustomFonts, setFontSafe } from '@/utils/fontLoader';
 import { formatDateLocal, formatNumberInput } from '@/helpers/generalHelper';
 import { ApplicantFormAttachments, ApplicantFormListItem, ApplicantFormUpdateRequest } from '../types/applicant';
-import { toDateInputValue, toPreviewUrl } from './applicantForm';
+import { formatPlaceDateOfBirth, toDateInputValue, toPreviewUrl } from './applicantForm';
 
 type RGB = [number, number, number];
 
@@ -13,6 +13,25 @@ const SECTION_FILL: RGB = [217, 217, 217];
 const CHECKBOX_SIZE = 2.8;
 
 const DRIVER_LICENSE_OPTIONS = ['SIM A', 'SIM B1', 'SIM B1 Umum', 'SIM B2', 'SIM B2 Umum', 'SIM C', 'SIM D', 'Tidak Punya SIM'];
+
+const INFORMATION_COLUMN_WIDTHS = [40, 55, 40, 55];
+const LICENSE_CELL_WIDTH = INFORMATION_COLUMN_WIDTHS[1] + INFORMATION_COLUMN_WIDTHS[2] + INFORMATION_COLUMN_WIDTHS[3];
+const LICENSE_CELL_PADDING = 2;
+const LICENSE_ROW_HEIGHT = 6;
+const CHECKBOX_LABEL_GAP = 1.5;
+const LICENSE_MIN_GAP = 3;
+const LICENSE_MAX_GAP = 10;
+const LICENSE_LAST_ROW_GAP = 6;
+
+interface CheckboxItem {
+    label: string;
+    width: number;
+}
+
+interface CheckboxRow {
+    items: CheckboxItem[];
+    gap: number;
+}
 
 const SCHOOL_LABELS: Record<string, string> = {
     university: 'UNIVERSITY/ Universitas',
@@ -241,7 +260,51 @@ export const generateApplicantFormPDF = async (
 
     cursorY += 8;
 
+    // Lebar tiap opsi diukur dari teks sebenarnya (font sudah dimuat), bukan dibagi rata:
+    // pembagian rata membuat label panjang seperti "SIM B1 Umum" menimpa opsi di sebelahnya.
+    const layoutCheckboxRows = (labels: string[], availableWidth: number): CheckboxRow[] => {
+        resetTextStyle();
+
+        const rows: CheckboxItem[][] = [[]];
+        let used = 0;
+
+        labels.forEach(label => {
+            const item = { label, width: CHECKBOX_SIZE + CHECKBOX_LABEL_GAP + doc.getTextWidth(label) };
+            const current = rows[rows.length - 1];
+            const needed = current.length ? used + LICENSE_MIN_GAP + item.width : item.width;
+
+            if (current.length && needed > availableWidth) {
+                rows.push([item]);
+                used = item.width;
+                return;
+            }
+
+            current.push(item);
+            used = needed;
+        });
+
+        return rows.map((items, rowIndex) => {
+            const spread = items.length > 1
+                ? (availableWidth - items.reduce((sum, item) => sum + item.width, 0)) / (items.length - 1)
+                : 0;
+            const isTrailingRow = rows.length > 1 && rowIndex === rows.length - 1;
+
+            return { items, gap: Math.min(spread, isTrailingRow ? LICENSE_LAST_ROW_GAP : LICENSE_MAX_GAP) };
+        });
+    };
+
     const ownedLicenses = values.driver_license.map(license => normalize(license.name));
+    const extraLicenses = values.driver_license
+        .map(license => license.name.trim())
+        .filter((name, index, all) =>
+            name
+            && !DRIVER_LICENSE_OPTIONS.some(option => normalize(option) === normalize(name))
+            && all.findIndex(other => normalize(other) === normalize(name)) === index
+        );
+    const licenseRows = layoutCheckboxRows(
+        [...DRIVER_LICENSE_OPTIONS, ...extraLicenses],
+        LICENSE_CELL_WIDTH - LICENSE_CELL_PADDING * 2
+    );
     const informationRows: RowInput[] = [
         sectionRow('APPLICANT INFORMATION/ INFORMASI PELAMAR', 4),
         ['FULL NAME / Nama lengkap', text(values.full_name), 'ADDRESS AS PER ID CARD/ Alamat sesuai KTP', text(values.address_as_per_id_card)],
@@ -251,27 +314,36 @@ export const generateApplicantFormPDF = async (
             'NAME, RELATIONSHIP, AND EMERGENCY CONTACT NUMBER/ Nama, hubungan, nomor kontak darurat',
             text(values.name_relationship_emergency_contact_number),
             'PLACE, DATE OF BIRTH / Tempat, tanggal lahir',
-            text(values.place_date_of_birth),
+            text(formatPlaceDateOfBirth(values.place_date_of_birth)),
         ],
         ['EMAIL / Alamat email', text(values.email), 'BLOOD TYPE/ Golongan Darah', text(values.blood_type)],
         ['ID NUMBER/ No. KTP', text(values.id_number), 'TAX IDENTIFICATION NUMBER/ NPWP', text(values.tax_identification_number)],
         ['POSITION APPLIED FOR/ Posisi yang dilamar', text(values.position_applied_for), 'WORKING AVAILABLE DATE/ Tanggal siap bekerja', date(values.working_available_date)],
         ['MARITAL STATUS/ Status pernikahan', text(values.marital_status), 'RELIGION/ Agama', text(values.relogion)],
         ['HEIGHT & WEIGHT/ Tinggi & berat badan', text(values.height_weight), 'T-SHIRT SIZE/ Ukuran kaos', text(values.tshirt_size)],
-        ["DRIVER's LICENSE/ Izin mengemudi", { content: '', colSpan: 3 }],
+        [
+            "DRIVER's LICENSE/ Izin mengemudi",
+            { content: '', colSpan: 3, styles: { minCellHeight: licenseRows.length * LICENSE_ROW_HEIGHT } },
+        ],
     ];
     const driverLicenseRowIndex = informationRows.length - 1;
 
     drawTable({
         body: informationRows,
-        columnStyles: { 0: { cellWidth: 40 }, 1: { cellWidth: 55 }, 2: { cellWidth: 40 }, 3: { cellWidth: 55 } },
+        columnStyles: Object.fromEntries(INFORMATION_COLUMN_WIDTHS.map((cellWidth, index) => [index, { cellWidth }])),
         didDrawCell: (data: CellHookData) => {
             if (data.section !== 'body' || data.row.index !== driverLicenseRowIndex || data.column.index !== 1) return;
 
-            const slotWidth = data.cell.width / DRIVER_LICENSE_OPTIONS.length;
-            const centerY = data.cell.y + data.cell.height / 2;
-            DRIVER_LICENSE_OPTIONS.forEach((option, index) => {
-                drawCheckbox(data.cell.x + 2 + slotWidth * index, centerY, option, ownedLicenses.includes(normalize(option)));
+            const bandHeight = data.cell.height / licenseRows.length;
+
+            licenseRows.forEach((row, rowIndex) => {
+                const centerY = data.cell.y + bandHeight * (rowIndex + 0.5);
+                let x = data.cell.x + LICENSE_CELL_PADDING;
+
+                row.items.forEach(item => {
+                    drawCheckbox(x, centerY, item.label, ownedLicenses.includes(normalize(item.label)));
+                    x += item.width + row.gap;
+                });
             });
         },
     });

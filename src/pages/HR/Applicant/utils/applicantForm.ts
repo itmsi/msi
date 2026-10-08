@@ -20,7 +20,9 @@ import {
 export interface ApplicantScalarFieldConfig {
     field: ApplicantFormScalarField;
     labelKey: string;
-    type?: FormFieldType;
+    // 'place_date' hanya dikenal feature ini: satu string "Tempat, YYYY-MM-DD" yang diedit
+    // sebagai dua input (tempat + tanggal), jadi bukan bagian dari FormFieldType bersama.
+    type?: FormFieldType | 'place_date';
     options?: FormFieldOption[];
     required?: boolean;
     fullWidth?: boolean;
@@ -38,7 +40,7 @@ export const APPLICANT_FIELD_GROUPS: { titleKey: string; fields: ApplicantScalar
             { field: 'no_mobile', labelKey: 'mobileNumber', required: true },
             { field: 'city', labelKey: 'city' },
             { field: 'name_relationship_emergency_contact_number', labelKey: 'emergencyContact', required: true },
-            { field: 'place_date_of_birth', labelKey: 'placeDateOfBirth', required: true },
+            { field: 'place_date_of_birth', labelKey: 'placeDateOfBirth', type: 'place_date', required: true },
             { field: 'email', labelKey: 'email', type: 'email', required: true },
             {
                 field: 'blood_type',
@@ -327,6 +329,42 @@ export const parseApplicantDate = (value: string): Date | null => {
 };
 
 export const toApplicantDateValue = (date: Date): string => moment(date).format('YYYY-MM-DD');
+
+// Locale dikunci ke 'en': mengimpor 'moment/locale/id' di tempat lain (mis. CandidateProfileSidebar)
+// mengganti locale global moment, sehingga "Oct" bisa berubah menjadi "Okt" di seluruh aplikasi.
+export const formatBirthDate = (date: string): string => {
+    const parsed = moment(date, 'YYYY-MM-DD', true).locale('en');
+    return parsed.isValid() ? parsed.format('DD MMM YYYY') : date;
+};
+
+const PLACE_DATE_PATTERN = /^(.*?)\s*,\s*(\d{4}-\d{2}-\d{2})$/;
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+// Backend menyimpan tempat dan tanggal lahir dalam satu string "Jakarta, 1941-10-03".
+// Teks lama yang tidak mengikuti pola itu dikembalikan utuh sebagai tempat, tanpa tanggal.
+export const parsePlaceDateOfBirth = (value: string): { place: string; date: string } => {
+    const trimmed = value.trim();
+    const match = PLACE_DATE_PATTERN.exec(trimmed);
+
+    if (match) return { place: match[1].trim(), date: match[2] };
+    if (DATE_ONLY_PATTERN.test(trimmed)) return { place: '', date: trimmed };
+
+    return { place: trimmed, date: '' };
+};
+
+export const buildPlaceDateOfBirth = (place: string, date: string): string => {
+    const trimmedPlace = place.trim();
+
+    if (!date) return trimmedPlace;
+    return trimmedPlace ? `${trimmedPlace}, ${date}` : date;
+};
+
+export const formatPlaceDateOfBirth = (value: string): string => {
+    const { place, date } = parsePlaceDateOfBirth(value);
+
+    if (!date) return place;
+    return place ? `${place}, ${formatBirthDate(date)}` : formatBirthDate(date);
+};
 
 export const createEmptyApplicantForm = (): ApplicantFormUpdateRequest => ({
     full_name: '',

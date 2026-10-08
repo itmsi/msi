@@ -11,10 +11,12 @@ import { ApplicantFormErrors } from '../hooks/useApplicantEdit';
 import { applicantLabels } from '../language/applicantLabels';
 import {
     APPLICANT_FIELD_GROUPS,
+    formatPlaceDateOfBirth,
     parseApplicantDate,
     toApplicantDateValue,
     toDateInputValue,
 } from '../utils/applicantForm';
+import PlaceDateOfBirthField from './PlaceDateOfBirthField';
 import { LuChevronDown } from 'react-icons/lu';
 import { useState } from 'react';
 
@@ -60,16 +62,30 @@ const ApplicantFields = ({ values, errors, readOnly, onChange, onDriverLicenseTo
                                 const useDatePicker = type === 'date' && !readOnly;
                                 const useSelect = type === 'select' && !readOnly;
                                 const isReadOnlyDate = type === 'date' && readOnly;
+                                // Editor tempat + tanggal lahir membawa label tiap bagiannya sendiri.
+                                const usePlaceDate = type === 'place_date' && !readOnly;
+                                const readOnlyValue = isReadOnlyDate
+                                    ? formatDateLocal(toDateInputValue(value))
+                                    : type === 'place_date'
+                                        ? formatPlaceDateOfBirth(value)
+                                        : value;
                                 const inputType = type === 'email' ? 'email' : 'text';
 
                                 return (
                                     <div key={field} className={`${fullWidth ? 'md:col-span-2' : ''} ${readOnly ? 'flex items-center gap-5' : ''}`}>
-                                        {!useDatePicker && (
+                                        {!useDatePicker && !usePlaceDate && (
                                             <Label htmlFor={field} className={`${readOnly ? 'w-50' : ''}`}>
                                                 {label} {required && !readOnly && <span className="text-red-500">*</span>}
                                             </Label>
                                         )}
-                                        {useDatePicker ? (
+                                        {usePlaceDate ? (
+                                            <PlaceDateOfBirthField
+                                                value={value}
+                                                required={required}
+                                                hasError={Boolean(errorKey)}
+                                                onChange={(nextValue) => onChange(field, nextValue)}
+                                            />
+                                        ) : useDatePicker ? (
                                             <DatePickerField
                                                 name={field}
                                                 label={label}
@@ -135,7 +151,7 @@ const ApplicantFields = ({ values, errors, readOnly, onChange, onDriverLicenseTo
                                                     name={field}
                                                     autoComplete="off"
                                                     type={inputType}
-                                                    value={isReadOnlyDate ? formatDateLocal(toDateInputValue(value)) : value}
+                                                    value={readOnlyValue}
                                                     placeholder={readOnly ? '-' : label}
                                                     readonly={readOnly}
                                                     error={Boolean(errorKey)}

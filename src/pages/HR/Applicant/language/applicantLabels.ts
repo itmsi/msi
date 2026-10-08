@@ -126,6 +126,16 @@ export const applicantLabels: TranslationMap = {
         en: 'Place, Date of Birth',
         zh: '出生地点及日期',
     },
+    placeOfBirth: {
+        id: 'Tempat Lahir',
+        en: 'Place of Birth',
+        zh: '出生地',
+    },
+    dateOfBirth: {
+        id: 'Tanggal Lahir',
+        en: 'Date of Birth',
+        zh: '出生日期',
+    },
     email: {
         id: 'Email',
         en: 'Email',
