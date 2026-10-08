@@ -6,6 +6,7 @@ import { BillPaymentService } from "./services/billPaymentService";
 import { BillPayment, AppliedToItem, CreditAppliedItem, WorkflowHistoryItem, UserNoteItem } from "./types/billPayment";
 import Badge from "@/components/ui/badge/Badge";
 import Button from "@/components/ui/button/Button";
+import { PermissionGate } from "@/components/common/PermissionComponents";
 import { formatDateTime, formatDateLocal } from "@/helpers/generalHelper";
 import CustomDataTable from "@/components/ui/table";
 import { TableColumn } from "react-data-table-component";
@@ -399,23 +400,6 @@ export default function View() {
                                         {billData.approvalstatus_display || statusInfo.label}
                                     </Badge>
                                 </div>
-                                {canApprove && (<>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => setApprovalAction('reject')}
-                                        className="px-6 rounded-full ring-1 ring-inset ring-red-600 text-red-600 hover:bg-red-600 hover:text-white hover:ring-red-600"
-                                    >
-                                        Reject
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        onClick={() => setApprovalAction('approve')}
-                                        className="px-6 rounded-full"
-                                    >
-                                        Approve
-                                    </Button>
-                                </>)}
                             </div>
                         </div>
                     </div>
@@ -578,6 +562,40 @@ export default function View() {
                         )}
                     </div>
                 </div>
+
+                {/* Form Actions */}
+                {canApprove && (
+                    <div className="flex justify-end gap-4 p-4 bg-white rounded-2xl shadow-sm mb-8">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => navigate("/netsuite/bill-payment")}
+                            className="px-6 rounded-full"
+                        >
+                            Cancel
+                        </Button>
+                        <PermissionGate permission={["create", "update"]}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setApprovalAction('reject')}
+                                className="group px-6 rounded-full ring-1 ring-inset ring-red-600 text-red-600 hover:bg-red-600 hover:text-white hover:ring-red-600"
+                            >
+                                Reject
+                            </Button>
+                        </PermissionGate>
+                        <PermissionGate permission={["create", "update"]}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setApprovalAction('approve')}
+                                className="group px-6 rounded-full ring-1 ring-inset ring-green-600 text-green-600 hover:bg-green-600 hover:text-white hover:ring-green-600"
+                            >
+                                Approve
+                            </Button>
+                        </PermissionGate>
+                    </div>
+                )}
             </div>
 
             <ModalApproval

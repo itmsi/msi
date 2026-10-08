@@ -30,7 +30,7 @@ export class BillPaymentService {
     }
 
     static async submitApproval(params: BillPaymentApprovalRequest): Promise<BillPaymentApprovalResponse> {
-        const response = await apiPost(`${API_BASE_URL}/approval-all`, params as Record<string, any>);
+        const response = await apiPost(`${API_BASE_URL}/netsuite/approval-all`, params as Record<string, any>);
         return response.data as BillPaymentApprovalResponse;
     }
 
