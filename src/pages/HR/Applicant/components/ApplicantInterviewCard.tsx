@@ -19,7 +19,7 @@ const MediaPlayer = ({ kind, url, title }: MediaPlayerProps) => {
     const { langField } = useLanguage(applicantLabels);
     const [failed, setFailed] = useState(false);
     const source = url ? toDownloadUrl(url) : '';
-    const label = langField(kind === 'video' ? 'questionVideo' : 'audioAnswer');
+    // const label = langField(kind === 'video' ? 'questionVideo' : 'audioAnswer');
 
     return (
         <div className="space-y-2 min-w-0">
