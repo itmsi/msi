@@ -11,6 +11,7 @@ import {
     ApplicantFormListSections,
     ApplicantFormScalarField,
     ApplicantFormUpdateRequest,
+    ApplicantInterviewStep,
     ApplicantListSection,
     ApplicantReference,
     ApplicantWorkingExperience,
@@ -19,7 +20,9 @@ import {
 export interface ApplicantScalarFieldConfig {
     field: ApplicantFormScalarField;
     labelKey: string;
-    type?: FormFieldType;
+    // 'place_date' hanya dikenal feature ini: satu string "Tempat, YYYY-MM-DD" yang diedit
+    // sebagai dua input (tempat + tanggal), jadi bukan bagian dari FormFieldType bersama.
+    type?: FormFieldType | 'place_date';
     options?: FormFieldOption[];
     required?: boolean;
     fullWidth?: boolean;
@@ -37,7 +40,7 @@ export const APPLICANT_FIELD_GROUPS: { titleKey: string; fields: ApplicantScalar
             { field: 'no_mobile', labelKey: 'mobileNumber', required: true },
             { field: 'city', labelKey: 'city' },
             { field: 'name_relationship_emergency_contact_number', labelKey: 'emergencyContact', required: true },
-            { field: 'place_date_of_birth', labelKey: 'placeDateOfBirth', required: true },
+            { field: 'place_date_of_birth', labelKey: 'placeDateOfBirth', type: 'place_date', required: true },
             { field: 'email', labelKey: 'email', type: 'email', required: true },
             {
                 field: 'blood_type',
@@ -249,7 +252,6 @@ export const REQUIRED_FAMILY_FIELDS: (keyof ApplicantFamilyMember & string)[] = 
     'name',
     'age',
     'employment',
-    'emergency_contact_number',
 ];
 
 export const isRequiredFamilyRelationship = (relationship: string): boolean =>
@@ -258,10 +260,10 @@ export const isRequiredFamilyRelationship = (relationship: string): boolean =>
 export const REQUIRED_WORKING_EXPERIENCE_FIELDS: (keyof ApplicantWorkingExperience & string)[] = [
     'name_of_company',
     'date_from',
-    'date_final',
-    'name_of_supervisor',
+    // 'date_final',
+    // 'name_of_supervisor',
     'reason_of_leaving',
-    'pay_of_salary'
+    // 'pay_of_salary'
 ];
 
 export const REQUIRED_REFERENCE_FIELDS: (keyof ApplicantReference & string)[] = [
@@ -327,6 +329,42 @@ export const parseApplicantDate = (value: string): Date | null => {
 };
 
 export const toApplicantDateValue = (date: Date): string => moment(date).format('YYYY-MM-DD');
+
+// Locale dikunci ke 'en': mengimpor 'moment/locale/id' di tempat lain (mis. CandidateProfileSidebar)
+// mengganti locale global moment, sehingga "Oct" bisa berubah menjadi "Okt" di seluruh aplikasi.
+export const formatBirthDate = (date: string): string => {
+    const parsed = moment(date, 'YYYY-MM-DD', true).locale('en');
+    return parsed.isValid() ? parsed.format('DD MMM YYYY') : date;
+};
+
+const PLACE_DATE_PATTERN = /^(.*?)\s*,\s*(\d{4}-\d{2}-\d{2})$/;
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+// Backend menyimpan tempat dan tanggal lahir dalam satu string "Jakarta, 1941-10-03".
+// Teks lama yang tidak mengikuti pola itu dikembalikan utuh sebagai tempat, tanpa tanggal.
+export const parsePlaceDateOfBirth = (value: string): { place: string; date: string } => {
+    const trimmed = value.trim();
+    const match = PLACE_DATE_PATTERN.exec(trimmed);
+
+    if (match) return { place: match[1].trim(), date: match[2] };
+    if (DATE_ONLY_PATTERN.test(trimmed)) return { place: '', date: trimmed };
+
+    return { place: trimmed, date: '' };
+};
+
+export const buildPlaceDateOfBirth = (place: string, date: string): string => {
+    const trimmedPlace = place.trim();
+
+    if (!date) return trimmedPlace;
+    return trimmedPlace ? `${trimmedPlace}, ${date}` : date;
+};
+
+export const formatPlaceDateOfBirth = (value: string): string => {
+    const { place, date } = parsePlaceDateOfBirth(value);
+
+    if (!date) return place;
+    return place ? `${place}, ${formatBirthDate(date)}` : formatBirthDate(date);
+};
 
 export const createEmptyApplicantForm = (): ApplicantFormUpdateRequest => ({
     full_name: '',
@@ -400,8 +438,31 @@ export const pickApplicantSummary = (detail: ApplicantFormDetail): ApplicantForm
     applicant_form_url: detail.applicant_form_url,
 });
 
+export const toApplicantInterviewSteps = (value: unknown): ApplicantInterviewStep[] =>
+    parseRows(value)
+        .filter((row): row is Record<string, unknown> => typeof row === 'object' && row !== null)
+        .map(row => {
+            const read = (key: string): string => (row[key] === null || row[key] === undefined ? '' : String(row[key]));
+
+            return {
+                step: read('step'),
+                idQuestion: read('id_question'),
+                questionId: read('question_id'),
+                questionEn: read('question_en'),
+                questionCn: read('question_cn'),
+                focusAssessment: read('focus_assessment'),
+                videoUrl: read('file_video'),
+                videoTitle: read('file_title_video'),
+                audioUrl: read('file_audio'),
+                audioTitle: read('file_title_audio'),
+            };
+        })
+        .filter(item => item.questionId || item.questionEn || item.questionCn || item.videoUrl || item.audioUrl)
+        .sort((a, b) => (Number(a.step) || 0) - (Number(b.step) || 0));
+
 export const pickApplicantAttachments = (detail: ApplicantFormDetail): ApplicantFormAttachments => ({
     files: toApplicantFormFiles(detail.applicant_form_files),
     signatureLink: detail.signature_link || '',
     signatureDate: toDateInputValue(detail.signature_date ?? null),
+    interviewSteps: toApplicantInterviewSteps(detail.applicant_form_contents),
 });

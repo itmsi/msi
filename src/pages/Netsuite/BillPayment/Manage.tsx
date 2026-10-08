@@ -40,6 +40,7 @@ export default function Manage() {
         handleClearAllFilters,
         isSyncing,
         handleSync,
+        handleSyncById,
     } = useBillPayment();
 
     const handlePageChangeSafe = useCallback((newPage: number) => {
@@ -136,10 +137,10 @@ export default function Manage() {
         },
         {
             name: 'Next Approval',
-            selector: row => row.next_approver || row.next_approver_blank || '-',
+            selector: row => row.next_approver_blank || '-',
             cell: row => (
                 <div className="items-center py-2">
-                    <div className="block text-sm text-gray-900">{row.next_approver || row.next_approver_blank || '-'}</div>
+                    <div className="block text-sm text-gray-900">{row.next_approver_blank || '-'}</div>
                 </div>
             ),
             wrap: true,
@@ -180,6 +181,13 @@ export default function Manage() {
                 onClick: (row: BillPayment) => navigate(`/netsuite/bill-payment/view/${row.netsuite_id}`),
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'View Detail',
+                permission: 'read',
+            },
+            {
+                icon: MdOutlineSync,
+                onClick: handleSyncById,
+                className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                tooltip: 'Sync this Bill Payment',
                 permission: 'read',
             },
         ])
