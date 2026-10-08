@@ -14,6 +14,7 @@ import ApplicantFields from './components/ApplicantFields';
 import ApplicantSections from './components/ApplicantSections';
 import ApplicantSummaryCard from './components/ApplicantSummaryCard';
 import ApplicantAttachmentsCard from './components/ApplicantAttachmentsCard';
+import ApplicantInterviewCard from './components/ApplicantInterviewCard';
 import { DownloadButton } from '@/components/ui/button/DownloadButton';
 
 export default function Edit() {
@@ -114,6 +115,7 @@ export default function Edit() {
                         onRowChange={handleRowChange}
                     />
 
+                    {attachments && <ApplicantInterviewCard steps={attachments.interviewSteps} />}
                     {attachments && <ApplicantAttachmentsCard attachments={attachments} />}
                 </div>
 
