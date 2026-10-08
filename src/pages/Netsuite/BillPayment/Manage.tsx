@@ -137,10 +137,10 @@ export default function Manage() {
         },
         {
             name: 'Next Approval',
-            selector: row => row.next_approver || row.next_approver_blank || '-',
+            selector: row => row.next_approver_blank || '-',
             cell: row => (
                 <div className="items-center py-2">
-                    <div className="block text-sm text-gray-900">{row.next_approver || row.next_approver_blank || '-'}</div>
+                    <div className="block text-sm text-gray-900">{row.next_approver_blank || '-'}</div>
                 </div>
             ),
             wrap: true,
