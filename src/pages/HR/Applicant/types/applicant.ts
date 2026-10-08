@@ -106,11 +106,26 @@ export interface ApplicantFormFile {
     file_title: string;
 }
 
-// Lampiran dan tanda tangan hanya dibaca, tidak ikut dikirim pada update form.
+export interface ApplicantInterviewStep {
+    step: string;
+    idQuestion: string;
+    questionId: string;
+    questionEn: string;
+    questionCn: string;
+    focusAssessment: string;
+    videoUrl: string;
+    videoTitle: string;
+    audioUrl: string;
+    audioTitle: string;
+}
+
+// Data tambahan dari detail yang hanya dibaca (lampiran, tanda tangan, jawaban wawancara),
+// tidak ikut dikirim pada update form.
 export interface ApplicantFormAttachments {
     files: ApplicantFormFile[];
     signatureLink: string;
     signatureDate: string;
+    interviewSteps: ApplicantInterviewStep[];
 }
 
 export type ApplicantFormListSections = {
@@ -147,6 +162,7 @@ export interface ApplicantFormDetail extends ApplicantFormListItem {
     references_old_company: unknown;
     following_answers: unknown;
     applicant_form_files?: unknown;
+    applicant_form_contents?: unknown;
     signature_link?: string | null;
     signature_date?: string | null;
 }

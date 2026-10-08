@@ -486,6 +486,43 @@ export const applicantLabels: TranslationMap = {
         zh: '正在生成 PDF...',
     },
 
+    // Interview Answers
+    interviewQuestions: {
+        id: 'Pertanyaan Wawancara',
+        en: 'Interview Questions',
+        zh: '面试问题',
+    },
+    question: {
+        id: 'Pertanyaan',
+        en: 'Question',
+        zh: '问题',
+    },
+    focusAssessment: {
+        id: 'Fokus Penilaian',
+        en: 'Assessment Focus',
+        zh: '评估重点',
+    },
+    questionVideo: {
+        id: 'Video Pertanyaan',
+        en: 'Question Video',
+        zh: '问题视频',
+    },
+    audioAnswer: {
+        id: 'Jawaban Suara',
+        en: 'Audio Answer',
+        zh: '语音回答',
+    },
+    fileUnavailable: {
+        id: 'Berkas tidak tersedia atau tidak dapat diputar',
+        en: 'File is unavailable or cannot be played',
+        zh: '文件不可用或无法播放',
+    },
+    downloadFile: {
+        id: 'Unduh berkas',
+        en: 'Download file',
+        zh: '下载文件',
+    },
+
     // Attachments & Signature
     attachments: {
         id: 'Lampiran',

@@ -11,6 +11,7 @@ import {
     ApplicantFormListSections,
     ApplicantFormScalarField,
     ApplicantFormUpdateRequest,
+    ApplicantInterviewStep,
     ApplicantListSection,
     ApplicantReference,
     ApplicantWorkingExperience,
@@ -249,7 +250,6 @@ export const REQUIRED_FAMILY_FIELDS: (keyof ApplicantFamilyMember & string)[] = 
     'name',
     'age',
     'employment',
-    'emergency_contact_number',
 ];
 
 export const isRequiredFamilyRelationship = (relationship: string): boolean =>
@@ -258,10 +258,10 @@ export const isRequiredFamilyRelationship = (relationship: string): boolean =>
 export const REQUIRED_WORKING_EXPERIENCE_FIELDS: (keyof ApplicantWorkingExperience & string)[] = [
     'name_of_company',
     'date_from',
-    'date_final',
-    'name_of_supervisor',
+    // 'date_final',
+    // 'name_of_supervisor',
     'reason_of_leaving',
-    'pay_of_salary'
+    // 'pay_of_salary'
 ];
 
 export const REQUIRED_REFERENCE_FIELDS: (keyof ApplicantReference & string)[] = [
@@ -400,8 +400,31 @@ export const pickApplicantSummary = (detail: ApplicantFormDetail): ApplicantForm
     applicant_form_url: detail.applicant_form_url,
 });
 
+export const toApplicantInterviewSteps = (value: unknown): ApplicantInterviewStep[] =>
+    parseRows(value)
+        .filter((row): row is Record<string, unknown> => typeof row === 'object' && row !== null)
+        .map(row => {
+            const read = (key: string): string => (row[key] === null || row[key] === undefined ? '' : String(row[key]));
+
+            return {
+                step: read('step'),
+                idQuestion: read('id_question'),
+                questionId: read('question_id'),
+                questionEn: read('question_en'),
+                questionCn: read('question_cn'),
+                focusAssessment: read('focus_assessment'),
+                videoUrl: read('file_video'),
+                videoTitle: read('file_title_video'),
+                audioUrl: read('file_audio'),
+                audioTitle: read('file_title_audio'),
+            };
+        })
+        .filter(item => item.questionId || item.questionEn || item.questionCn || item.videoUrl || item.audioUrl)
+        .sort((a, b) => (Number(a.step) || 0) - (Number(b.step) || 0));
+
 export const pickApplicantAttachments = (detail: ApplicantFormDetail): ApplicantFormAttachments => ({
     files: toApplicantFormFiles(detail.applicant_form_files),
     signatureLink: detail.signature_link || '',
     signatureDate: toDateInputValue(detail.signature_date ?? null),
+    interviewSteps: toApplicantInterviewSteps(detail.applicant_form_contents),
 });

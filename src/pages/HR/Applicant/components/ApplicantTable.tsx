@@ -98,7 +98,7 @@ const ApplicantTable: React.FC<ApplicantTableProps> = ({
             selector: row => row.working_available_date || '-',
             format: row => formatDateLocal(row.working_available_date || undefined),
             wrap: true,
-            width: '170px',
+            width: '200px',
             center: true,
         },
         {

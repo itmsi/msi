@@ -12,7 +12,7 @@ const BLACK: RGB = [0, 0, 0];
 const SECTION_FILL: RGB = [217, 217, 217];
 const CHECKBOX_SIZE = 2.8;
 
-const DRIVER_LICENSE_OPTIONS = ['SIM A', 'SIM B', 'SIM C', 'SIO'];
+const DRIVER_LICENSE_OPTIONS = ['SIM A', 'SIM B1', 'SIM B1 Umum', 'SIM B2', 'SIM B2 Umum', 'SIM C', 'SIM D', 'Tidak Punya SIM'];
 
 const SCHOOL_LABELS: Record<string, string> = {
     university: 'UNIVERSITY/ Universitas',
