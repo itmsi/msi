@@ -4,6 +4,7 @@ import { useLanguage } from '@/components/lang/useLanguage';
 import { ApplicantInterviewStep } from '../types/applicant';
 import { toDownloadUrl } from '../utils/applicantForm';
 import { applicantLabels } from '../language/applicantLabels';
+import { LuChevronDown } from 'react-icons/lu';
 
 interface ApplicantInterviewCardProps {
     steps: ApplicantInterviewStep[];
@@ -73,66 +74,72 @@ const ApplicantInterviewCard = ({ steps }: ApplicantInterviewCardProps) => {
         return byLang || item.questionEn || item.questionId || item.questionCn || '-';
     };
 
+    const [showInformation, setShowInformation] = useState(true);
+    const actionToggle = () => setShowInformation(prev => !prev);
     return (
         <div className="bg-white rounded-2xl shadow-sm p-6 space-y-6">
-            <h3 className="text-lg font-primary-bold text-center pb-3 border-b border-b-gray-300 uppercase text-gray-900">
-                {langField('interviewQuestions')}
+            <h3
+                className={`text-lg font-primary-bold text-center ${showInformation ? 'border-b border-b-gray-300 pb-3' : ''} uppercase text-gray-900 flex justify-center items-center gap-5 cursor-pointer`}
+                onClick={actionToggle}
+            >
+                {langField('interviewQuestions')} <LuChevronDown />
             </h3>
+            {showInformation &&
+                <div className="space-y-4">
+                    {steps.map((item, index) => {
+                        const focusItems = item.focusAssessment
+                            .split(',')
+                            .map(focus => focus.trim())
+                            .filter(Boolean);
 
-            <div className="space-y-4">
-                {steps.map((item, index) => {
-                    const focusItems = item.focusAssessment
-                        .split(',')
-                        .map(focus => focus.trim())
-                        .filter(Boolean);
+                        return (
+                            <div
+                                key={item.idQuestion || `${item.step}-${index}`}
+                                className="border border-gray-200 rounded-xl p-4"
+                            >
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start">
+                                    <div className="space-y-3 min-w-0">
+                                        <div className="flex items-center gap-2">
 
-                    return (
-                        <div
-                            key={item.idQuestion || `${item.step}-${index}`}
-                            className="border border-gray-200 rounded-xl p-4"
-                        >
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start">
-                                <div className="space-y-3 min-w-0">
-                                    <div className="flex items-center gap-2">
-
-                                        <span className="text-xs font-primary-bold uppercase tracking-wide text-brand-600">
-                                            {langField('question')}
-                                        </span>
-                                    </div>
-
-                                    <div className="bg-brand-50 rounded-lg px-4 py-3 text-sm leading-relaxed text-gray-900 flex gap-2 items-center min-h-30">
-                                        <span className="flex items-center justify-center w-7 h-7 rounded-full bg-brand-500 text-white text-xs font-primary-bold shrink-0">
-                                            {item.step || index + 1}
-                                        </span>
-                                        <p className='flex-1'>
-                                            {getQuestion(item)}
-                                        </p>
-                                    </div>
-
-                                    {focusItems.length > 0 && (
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <span className="text-xs text-gray-500">{langField('focusAssessment')}:</span>
-                                            {focusItems.map(focus => (
-                                                <span
-                                                    key={focus}
-                                                    className="px-2 py-0.5 text-xs rounded-full border border-gray-200 bg-gray-50 text-gray-700"
-                                                >
-                                                    {focus}
-                                                </span>
-                                            ))}
+                                            <span className="text-xs font-primary-bold uppercase tracking-wide text-brand-600">
+                                                {langField('question')}
+                                            </span>
                                         </div>
-                                    )}
-                                </div>
 
-                                <div>
-                                    <MediaPlayer kind="video" url={item.videoUrl} title={item.videoTitle} />
-                                    {/* <MediaPlayer kind="audio" url={item.audioUrl} title={item.audioTitle} /> */}
+                                        <div className="bg-brand-50 rounded-lg px-4 py-3 text-sm leading-relaxed text-gray-900 flex gap-2 items-center min-h-30">
+                                            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-brand-500 text-white text-xs font-primary-bold shrink-0">
+                                                {item.step || index + 1}
+                                            </span>
+                                            <p className='flex-1'>
+                                                {getQuestion(item)}
+                                            </p>
+                                        </div>
+
+                                        {focusItems.length > 0 && (
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="text-xs text-gray-500">{langField('focusAssessment')}:</span>
+                                                {focusItems.map(focus => (
+                                                    <span
+                                                        key={focus}
+                                                        className="px-2 py-0.5 text-xs rounded-full border border-gray-200 bg-gray-50 text-gray-700"
+                                                    >
+                                                        {focus}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <MediaPlayer kind="video" url={item.videoUrl} title={item.videoTitle} />
+                                        {/* <MediaPlayer kind="audio" url={item.audioUrl} title={item.audioTitle} /> */}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    );
-                })}
-            </div>
+                        );
+                    })}
+                </div>
+            }
         </div>
     );
 };

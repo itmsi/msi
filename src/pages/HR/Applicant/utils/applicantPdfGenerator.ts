@@ -3,7 +3,7 @@ import autoTable, { CellHookData, RowInput, UserOptions } from 'jspdf-autotable'
 import { loadCustomFonts, setFontSafe } from '@/utils/fontLoader';
 import { formatDateLocal, formatNumberInput } from '@/helpers/generalHelper';
 import { ApplicantFormAttachments, ApplicantFormListItem, ApplicantFormUpdateRequest } from '../types/applicant';
-import { formatPlaceDateOfBirth, toDateInputValue, toPreviewUrl } from './applicantForm';
+import { buildPlaceDateOfBirth, formatPlaceDateOfBirth, toDateInputValue, toPreviewUrl } from './applicantForm';
 
 type RGB = [number, number, number];
 
@@ -314,7 +314,9 @@ export const generateApplicantFormPDF = async (
             'NAME, RELATIONSHIP, AND EMERGENCY CONTACT NUMBER/ Nama, hubungan, nomor kontak darurat',
             text(values.name_relationship_emergency_contact_number),
             'PLACE, DATE OF BIRTH / Tempat, tanggal lahir',
-            text(formatPlaceDateOfBirth(values.place_date_of_birth)),
+            text(formatPlaceDateOfBirth(
+                buildPlaceDateOfBirth(values.place_of_birth, values.date_of_birth) || values.place_date_of_birth
+            )),
         ],
         ['EMAIL / Alamat email', text(values.email), 'BLOOD TYPE/ Golongan Darah', text(values.blood_type)],
         ['ID NUMBER/ No. KTP', text(values.id_number), 'TAX IDENTIFICATION NUMBER/ NPWP', text(values.tax_identification_number)],

@@ -16,6 +16,7 @@ import {
     createEmptyApplicantForm,
     createEmptyRow,
     hasRowValue,
+    isBirthInputField,
     isRequiredFamilyRelationship,
     isRequiredListRow,
     pickApplicantAttachments,
@@ -25,6 +26,7 @@ import {
     REQUIRED_FAMILY_FIELDS,
     REQUIRED_REFERENCE_FIELDS,
     REQUIRED_WORKING_EXPERIENCE_FIELDS,
+    syncPlaceDateOfBirth,
     toApplicantFormValues,
 } from '../utils/applicantForm';
 import { generateApplicantFormPDF } from '../utils/applicantPdfGenerator';
@@ -93,11 +95,17 @@ export const useApplicantEdit = (id?: string) => {
     }, [id, fetchApplicantForm]);
 
     const handleFieldChange = useCallback((field: ApplicantFormScalarField, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData(prev => {
+            const next = { ...prev, [field]: value };
+            return isBirthInputField(field) ? syncPlaceDateOfBirth(next) : next;
+        });
         setErrors(prev => {
-            if (!prev[field]) return prev;
+            // Tempat dan tanggal lahir tampil sebagai satu field, jadi errornya memakai kunci place_date_of_birth.
+            const keys: ApplicantFormScalarField[] = isBirthInputField(field) ? ['place_date_of_birth', field] : [field];
+            if (!keys.some(key => prev[key])) return prev;
+
             const next = { ...prev };
-            delete next[field];
+            keys.forEach(key => delete next[key]);
             return next;
         });
     }, []);
