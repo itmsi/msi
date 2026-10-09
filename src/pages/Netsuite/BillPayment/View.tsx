@@ -455,7 +455,7 @@ export default function View() {
                                 {billData.approvalstatus_display || statusInfo.label}
                             </Badge>
                         </InfoField>
-                        <InfoField label="Next Approver">{billData.next_approver || '-'}</InfoField>
+                        <InfoField label="Next Approver">{billData.next_approver_blank || '-'}</InfoField>
                     </div>
                     <div className="space-y-5">
                         <InfoField label="Delegate Approver">{billData.delegate_approver || '-'}</InfoField>
