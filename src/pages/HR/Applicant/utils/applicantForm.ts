@@ -20,8 +20,6 @@ import {
 export interface ApplicantScalarFieldConfig {
     field: ApplicantFormScalarField;
     labelKey: string;
-    // 'place_date' hanya dikenal feature ini: satu string "Tempat, YYYY-MM-DD" yang diedit
-    // sebagai dua input (tempat + tanggal), jadi bukan bagian dari FormFieldType bersama.
     type?: FormFieldType | 'place_date';
     options?: FormFieldOption[];
     required?: boolean;
@@ -380,6 +378,8 @@ export const createEmptyApplicantForm = (): ApplicantFormUpdateRequest => ({
     present_address: '',
     city: '',
     place_date_of_birth: '',
+    place_of_birth: '',
+    date_of_birth: '',
     blood_type: '',
     tax_identification_number: '',
     working_available_date: '',
@@ -394,7 +394,30 @@ export const createEmptyApplicantForm = (): ApplicantFormUpdateRequest => ({
     following_answers: [],
 });
 
-export const toApplicantFormValues = (detail: ApplicantFormDetail): ApplicantFormUpdateRequest => ({
+// place_of_birth dan date_of_birth adalah sumber utama. place_date_of_birth ("Jakarta, 1991-10-04")
+// hanya cadangan per bagian, untuk data yang belum punya salah satunya.
+export const resolveBirth = (detail: ApplicantFormDetail): { place: string; date: string } => {
+    const fallback = parsePlaceDateOfBirth(detail.place_date_of_birth || '');
+
+    return {
+        place: (detail.place_of_birth || '').trim() || fallback.place,
+        date: toDateInputValue(detail.date_of_birth ?? null) || fallback.date,
+    };
+};
+
+// place_date_of_birth selalu diturunkan dari tempat dan tanggal lahir agar ketiganya tidak pernah berbeda.
+export const syncPlaceDateOfBirth = (values: ApplicantFormUpdateRequest): ApplicantFormUpdateRequest => ({
+    ...values,
+    place_date_of_birth: buildPlaceDateOfBirth(values.place_of_birth, values.date_of_birth),
+});
+
+export const isBirthInputField = (field: string): field is 'place_of_birth' | 'date_of_birth' =>
+    field === 'place_of_birth' || field === 'date_of_birth';
+
+export const toApplicantFormValues = (detail: ApplicantFormDetail): ApplicantFormUpdateRequest => syncPlaceDateOfBirth({
+    place_of_birth: resolveBirth(detail).place,
+    date_of_birth: resolveBirth(detail).date,
+    place_date_of_birth: '',
     full_name: detail.name || '',
     nickname: detail.nickname || '',
     no_mobile: detail.no_mobile || '',
@@ -407,7 +430,6 @@ export const toApplicantFormValues = (detail: ApplicantFormDetail): ApplicantFor
     address_as_per_id_card: detail.address_as_per_id_card || '',
     present_address: detail.present_address || '',
     city: detail.city || '',
-    place_date_of_birth: detail.place_date_of_birth || '',
     blood_type: detail.blood_type || '',
     tax_identification_number: detail.tax_identification_number || '',
     working_available_date: toDateInputValue(detail.working_available_date),

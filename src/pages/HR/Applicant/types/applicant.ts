@@ -149,6 +149,8 @@ export interface ApplicantFormDetail extends ApplicantFormListItem {
     address_as_per_id_card: string | null;
     present_address: string | null;
     place_date_of_birth: string | null;
+    place_of_birth?: string | null;
+    date_of_birth?: string | null;
     blood_type: string | null;
     tax_identification_number: string | null;
     relogion: string | null;
@@ -187,6 +189,8 @@ export type ApplicantFormUpdateRequest = ApplicantFormListSections & {
     present_address: string;
     city: string;
     place_date_of_birth: string;
+    place_of_birth: string;
+    date_of_birth: string;
     blood_type: string;
     tax_identification_number: string;
     working_available_date: string;

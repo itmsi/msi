@@ -80,10 +80,12 @@ const ApplicantFields = ({ values, errors, readOnly, onChange, onDriverLicenseTo
                                         )}
                                         {usePlaceDate ? (
                                             <PlaceDateOfBirthField
-                                                value={value}
+                                                place={values.place_of_birth}
+                                                date={values.date_of_birth}
                                                 required={required}
                                                 hasError={Boolean(errorKey)}
-                                                onChange={(nextValue) => onChange(field, nextValue)}
+                                                onPlaceChange={(nextPlace) => onChange('place_of_birth', nextPlace)}
+                                                onDateChange={(nextDate) => onChange('date_of_birth', nextDate)}
                                             />
                                         ) : useDatePicker ? (
                                             <DatePickerField

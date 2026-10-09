@@ -4,31 +4,34 @@ import Input from '@/components/form/input/InputField';
 import { DatePickerField } from '@/components/datepicker/DatePickerField';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { applicantLabels } from '../language/applicantLabels';
-import {
-    buildPlaceDateOfBirth,
-    formatBirthDate,
-    parseApplicantDate,
-    parsePlaceDateOfBirth,
-    toApplicantDateValue,
-} from '../utils/applicantForm';
+import { formatBirthDate, parseApplicantDate, toApplicantDateValue } from '../utils/applicantForm';
 
 interface PlaceDateOfBirthFieldProps {
-    value: string;
-    onChange: (value: string) => void;
+    place: string;
+    date: string;
+    onPlaceChange: (place: string) => void;
+    onDateChange: (date: string) => void;
     required?: boolean;
     hasError?: boolean;
 }
 
-const PlaceDateOfBirthField = ({ value, onChange, required = false, hasError = false }: PlaceDateOfBirthFieldProps) => {
+const PlaceDateOfBirthField = ({
+    place,
+    date,
+    onPlaceChange,
+    onDateChange,
+    required = false,
+    hasError = false,
+}: PlaceDateOfBirthFieldProps) => {
     const { langField } = useLanguage(applicantLabels);
-    const { place: parsedPlace, date } = parsePlaceDateOfBirth(value);
-    const [place, setPlace] = useState(parsedPlace);
+    const [typedPlace, setTypedPlace] = useState(place);
 
-    // Nilai gabungan di-trim saat dibangun, sedangkan input perlu mempertahankan spasi yang
-    // sedang diketik. Teks lokal hanya diganti kalau nilai berubah dari luar (mis. data dimuat ulang).
+    // Nilai yang disimpan di-trim, sedangkan input perlu mempertahankan spasi yang sedang diketik
+    // ("Nusa " menuju "Nusa Tenggara"). Teks lokal hanya diganti kalau nilai berubah dari luar,
+    // mis. data dimuat ulang setelah disimpan.
     useEffect(() => {
-        if (buildPlaceDateOfBirth(place, date) !== value.trim()) setPlace(parsedPlace);
-    }, [value, place, date, parsedPlace]);
+        if (typedPlace.trim() !== place.trim()) setTypedPlace(place);
+    }, [place, typedPlace]);
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -40,12 +43,12 @@ const PlaceDateOfBirthField = ({ value, onChange, required = false, hasError = f
                     id="place_of_birth"
                     name="place_of_birth"
                     autoComplete="off"
-                    value={place}
+                    value={typedPlace}
                     placeholder={langField('placeOfBirth')}
                     error={hasError}
                     onChange={(e) => {
-                        setPlace(e.target.value);
-                        onChange(buildPlaceDateOfBirth(e.target.value, date));
+                        setTypedPlace(e.target.value);
+                        onPlaceChange(e.target.value.trim());
                     }}
                 />
             </div>
@@ -56,7 +59,7 @@ const PlaceDateOfBirthField = ({ value, onChange, required = false, hasError = f
                 required={required}
                 value={date}
                 placeholder={langField('dateOfBirth')}
-                onChange={(_, nextDate) => onChange(buildPlaceDateOfBirth(place, nextDate))}
+                onChange={(_, nextDate) => onDateChange(nextDate)}
                 parseValueToDate={parseApplicantDate}
                 convertDateToValue={toApplicantDateValue}
                 formatDisplayValue={formatBirthDate}
