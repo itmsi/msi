@@ -101,24 +101,6 @@ export default function View() {
         }
     };
 
-    // ID NetSuite next approver diambil dari workflow history terbaru (Current Approver Id)
-    const getNextApproverId = (data: BillPayment): string | null => {
-        const history = [...(data.workflow_history || [])].sort((a, b) =>
-            String(a.date_entered || '').localeCompare(String(b.date_entered || '')));
-        for (let i = history.length - 1; i >= 0; i--) {
-            const opts = history[i].options_obj;
-            const parsed: Record<string, any> = typeof opts === 'string'
-                ? (() => { try { return JSON.parse(opts); } catch { return {}; } })()
-                : (opts || {});
-            for (const [key, value] of Object.entries(parsed)) {
-                if (key.replace(/\?/g, '').trim() === 'Current Approver Id' && value !== null && value !== '') {
-                    return String(value);
-                }
-            }
-        }
-        return null;
-    };
-
     const getStatusInfo = (approvalstatus: number) => {
         switch (approvalstatus) {
             case 1: return { label: "Pending Approval", color: "warning" as const };
@@ -159,7 +141,7 @@ export default function View() {
     const statusInfo = getStatusInfo(billData.approvalstatus);
 
     const loginApproverId = getLoginApproverId();
-    const nextApproverId = getNextApproverId(billData);
+    const nextApproverId = billData.next_approver ? String(billData.next_approver) : null;
     const canApprove = Number(billData.approvalstatus) === 1
         && !!loginApproverId
         && loginApproverId === nextApproverId;
