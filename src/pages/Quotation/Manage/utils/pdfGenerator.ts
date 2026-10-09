@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import autoTable from 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 import { formatDate } from '@/helpers/generalHelper';
 import { ManageQuotationDataPDF } from '../types/quotation';
 import { loadCustomFonts, setFontSafe, setFontByLanguage } from '@/utils/fontLoader';
@@ -1422,108 +1423,82 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     const hasNotes = (item: any): boolean => !!(item.notes && String(item.notes).trim().length > 0);
 
     // Render HTML dari editor (WYSIWYG) ke PDF: teks, heading, list, dan tabel.
-    const renderHtmlBlock = (html: string, startX: number, startYPos: number, width: number): number => {
-        let blockYPos = startYPos;
-        const htmlDocument = new DOMParser().parseFromString(html, 'text/html');
+    const renderHtmlBlock = async (html: string, startYPos: number, width: number): Promise<number> => {
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = '-10000px';
+        container.style.top = '0';
+        container.style.width = '900px';
+        container.style.backgroundColor = '#ffffff';
+        container.innerHTML = html;
+        container.querySelectorAll('script, style, link, iframe, object, embed').forEach(element => element.remove());
+        document.body.appendChild(container);
 
-        const ensureSpace = (needed: number) => {
-            if (blockYPos + needed > pageHeight - footerHeight - margin) {
-                doc.addPage();
-                addHeader();
-                addFooter();
-                blockYPos = margin + headerHeight + 5;
-            }
-        };
-
-        const renderNode = (node: Node): void => {
-            if (node.nodeType === Node.TEXT_NODE) {
-                const text = node.textContent?.replace(/\s+/g, ' ').trim();
-                if (!text) return;
-
-                doc.setFontSize(9);
-                doc.setTextColor(0, 0, 0);
-                setFontByLanguage(doc, text, 'Futura', 'normal', language);
-                doc.splitTextToSize(text, width - 6).forEach((line: string) => {
-                    ensureSpace(5);
-                    doc.text(line, startX + 3, blockYPos);
-                    blockYPos += 4.5;
-                });
-                return;
+        try {
+            await document.fonts?.ready;
+            const canvas = await html2canvas(container, {
+                backgroundColor: '#ffffff',
+                scale: 2,
+                logging: false,
+                windowWidth: 900
+            });
+            if (!canvas.width || !canvas.height) {
+                throw new Error('Custom product HTML rendered to an empty canvas');
             }
 
-            if (node.nodeType !== Node.ELEMENT_NODE) return;
+            const mmPerPixel = width / canvas.width;
+            const pageStartY = startYPos;
+            let sourceY = 0;
+            let currentPageStartY = pageStartY;
+            let currentSliceHeight = 0;
 
-            const element = node as Element;
-            const tagName = element.tagName.toLowerCase();
+            while (sourceY < canvas.height) {
+                const availableHeight = pageHeight - footerHeight - margin - currentPageStartY;
+                const sliceHeight = Math.min(canvas.height - sourceY, Math.floor(availableHeight / mmPerPixel));
+                if (sliceHeight <= 0) {
+                    doc.addPage();
+                    addHeader();
+                    addFooter();
+                    currentPageStartY = margin + headerHeight + 5;
+                    continue;
+                }
 
-            if (tagName === 'table') {
-                ensureSpace(20);
-                blockYPos = renderHtmlTableToPdf({
-                    doc,
-                    tableElement: element as HTMLTableElement,
-                    startY: blockYPos,
-                    left: startX,
-                    width,
+                currentSliceHeight = sliceHeight;
+                const pageCanvas = document.createElement('canvas');
+                pageCanvas.width = canvas.width;
+                pageCanvas.height = sliceHeight;
+                const context = pageCanvas.getContext('2d');
+                if (!context) {
+                    throw new Error('Unable to create a canvas context for custom product HTML');
+                }
+                context.drawImage(canvas, 0, sourceY, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+
+                doc.addImage(
+                    pageCanvas.toDataURL('image/png'),
+                    'PNG',
                     margin,
-                    pageHeight,
-                    footerHeight,
-                    onPageBreak: () => {
-                        addHeader();
-                        addFooter();
-                    }
-                }) + 4;
-                return;
+                    currentPageStartY,
+                    width,
+                    sliceHeight * mmPerPixel
+                );
+                sourceY += sliceHeight;
+
+                if (sourceY < canvas.height) {
+                    doc.addPage();
+                    addHeader();
+                    addFooter();
+                    currentPageStartY = margin + headerHeight + 5;
+                }
             }
 
-            if (/^h[1-6]$/.test(tagName)) {
-                const headingText = element.textContent?.replace(/\s+/g, ' ').trim();
-                if (!headingText) return;
-
-                doc.setFontSize(tagName === 'h1' ? 13 : 11);
-                doc.setTextColor(23, 26, 31);
-                setFontByLanguage(doc, headingText, 'Futura', 'bold', language);
-                const align = element.getAttribute('style')?.includes('text-align: center') ? 'center' : 'left';
-                const x = align === 'center' ? startX + width / 2 : startX + 3;
-                doc.splitTextToSize(headingText, width - 6).forEach((line: string) => {
-                    ensureSpace(6);
-                    doc.text(line, x, blockYPos, { align });
-                    blockYPos += 5;
-                });
-                blockYPos += 2;
-                return;
-            }
-
-            if (tagName === 'br') {
-                blockYPos += 3;
-                return;
-            }
-
-            if (tagName === 'li') {
-                const listText = element.textContent?.replace(/\s+/g, ' ').trim();
-                if (!listText) return;
-
-                doc.setFontSize(9);
-                doc.setTextColor(0, 0, 0);
-                setFontByLanguage(doc, listText, 'Futura', 'normal', language);
-                doc.splitTextToSize(`• ${listText}`, width - 8).forEach((line: string) => {
-                    ensureSpace(5);
-                    doc.text(line, startX + 3, blockYPos);
-                    blockYPos += 4.5;
-                });
-                return;
-            }
-
-            Array.from(element.childNodes).forEach(renderNode);
-            if (['p', 'div', 'section', 'ul', 'ol'].includes(tagName)) blockYPos += 2;
-        };
-
-        Array.from(htmlDocument.body.childNodes).forEach(renderNode);
-
-        return blockYPos;
+            return currentPageStartY + currentSliceHeight * mmPerPixel;
+        } finally {
+            container.remove();
+        }
     };
 
     // Remark produk tampil di halaman tersendiri tepat setelah halaman produknya.
-    const renderItemCustomPage = (item: any): void => {
+    const renderItemCustomPage = async (item: any): Promise<void> => {
         const customHtml = item?.componen_product_custom;
         if (!customHtml || !String(customHtml).trim().length) return;
 
@@ -1555,7 +1530,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
         doc.line(margin, yPos, pageWidth - margin, yPos);
         yPos += 6;
 
-        yPos = renderHtmlBlock(String(customHtml), margin, yPos, contentWidth);
+        yPos = await renderHtmlBlock(String(customHtml), yPos, contentWidth);
     };
 
     if (itemsWithContent.length > 0) {
@@ -1585,7 +1560,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 renderItemAccessories(current, leftStartX, leftSpecResult.finalY, itemWidth, notesStartX - 5, 1);
 
                 renderItemNotes(current, notesStartX, headerYPos, itemWidth, leftSpecResult.boxHeight);
-                renderItemCustomPage(current);
+                await renderItemCustomPage(current);
 
                 itemIndex += 1;
             } else if (canPairWithNext && next) {
@@ -1612,8 +1587,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                     item2YPos = renderItemAccessories(next, item2StartX, item2YPos, itemWidth, margin);
                 }
 
-                renderItemCustomPage(current);
-                renderItemCustomPage(next);
+                await renderItemCustomPage(current);
+                await renderItemCustomPage(next);
 
                 itemIndex += 2;
             } else {
@@ -1623,7 +1598,7 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
                 let itemYPos = renderItemImageAndName(current, startX, yPos, itemWidth);
                 itemYPos = renderItemSpecifications(current, startX, itemYPos, itemWidth, startX).finalY;
                 renderItemAccessories(current, startX, itemYPos, itemWidth, startX, 1);
-                renderItemCustomPage(current);
+                await renderItemCustomPage(current);
 
                 itemIndex += 1;
             }
