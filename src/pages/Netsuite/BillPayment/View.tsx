@@ -1,5 +1,6 @@
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { MdArrowBack, MdReceiptLong, MdCreditCard, MdHistory, MdOutlineComment } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
 import { BillPaymentService } from "./services/billPaymentService";
@@ -74,6 +75,19 @@ export default function View() {
     useEffect(() => {
         fetchDetail();
     }, [fetchDetail]);
+
+    // Setelah approve/reject: sync data dari NetSuite by id, lalu muat ulang detail
+    const handleAfterApproval = useCallback(async () => {
+        const toastId = toast.loading('Sinkronisasi data...');
+        try {
+            await BillPaymentService.syncBillPaymentById(String(id));
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            await fetchDetail();
+        }
+    }, [id, fetchDetail]);
 
     // ID NetSuite user yang login (auth_user.current_approver_netsuite_id), sama seperti filter di list
     const getLoginApproverId = (): string | null => {
@@ -604,7 +618,7 @@ export default function View() {
                 billPaymentId={billData.netsuite_id ? Number(billData.netsuite_id) : null}
                 action={approvalAction ?? 'approve'}
                 approverNetsuiteId={loginApproverId}
-                onSuccess={fetchDetail}
+                onSuccess={handleAfterApproval}
                 titleModal={approvalAction === 'reject' ? 'Reject' : 'Approve'}
                 descriptionModal={`Masukkan catatan untuk proses ${approvalAction === 'reject' ? 'reject' : 'approve'} ${billData.transactionnumber || ''}`}
             />
