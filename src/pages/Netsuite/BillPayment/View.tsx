@@ -409,7 +409,6 @@ export default function View() {
                         </InfoField>
                         <InfoField label="Payee">{billData.entity_display || '-'}</InfoField>
                         <InfoField label="Account">{billData.account_display || '-'}</InfoField>
-                        <InfoField label="Balance">{formatAmount(billData.balance)}</InfoField>
                         <InfoField label="Amount">
                             <span className="font-medium">{formatAmount(billData.total, true)}</span>
                         </InfoField>
