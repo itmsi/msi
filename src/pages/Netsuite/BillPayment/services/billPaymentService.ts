@@ -43,7 +43,7 @@ export class BillPaymentService {
     }
 
     // List attachment file milik satu bill payment (by netsuite id)
-    static async getAttachmentFiles(billPaymentNetsuiteId: string, search = '', page = 1, limit = 10): Promise<AttachmentFilesResponse> {
+    static async getAttachmentFiles(billPaymentNetsuiteId: string, search = '', page = 1, limit = 10, fileNetsuiteId = ''): Promise<AttachmentFilesResponse> {
         const response = await apiPost<AttachmentFilesResponse>(
             `${API_BASE_URL}/netsuite/bill-payment/attachments-files/get`,
             {
@@ -53,7 +53,7 @@ export class BillPaymentService {
                 sort_order: 'desc',
                 search,
                 bill_payment_netsuite_id: billPaymentNetsuiteId,
-                file_netsuite_id: '',
+                file_netsuite_id: fileNetsuiteId,
                 status: '',
                 is_deleted: false,
             }
