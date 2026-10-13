@@ -1,7 +1,7 @@
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { MdArrowBack, MdReceiptLong, MdCreditCard, MdHistory, MdOutlineComment, MdAttachFile, MdSync, MdOutlineSync, MdDownload, MdRefresh, MdSearch, MdClear } from "react-icons/md";
+import { MdArrowBack, MdReceiptLong, MdCreditCard, MdHistory, MdOutlineComment, MdAttachFile, MdSync, MdDownload, MdSearch, MdClear } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
 import { BillPaymentService } from "./services/billPaymentService";
 import { BillPayment, AppliedToItem, CreditAppliedItem, WorkflowHistoryItem, UserNoteItem, AttachmentFile } from "./types/billPayment";
@@ -69,6 +69,12 @@ export default function View() {
         return () => clearTimeout(timer);
     }, [fileSearchInput]);
     const [downloadingFileId, setDownloadingFileId] = useState<string | null>(null);
+    const isMountedRef = useRef(true);
+
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => { isMountedRef.current = false; };
+    }, []);
     const [syncingFileKey, setSyncingFileKey] = useState<string | null>(null); // 'all' atau file_netsuite_id
 
     const [approvalAction, setApprovalAction] = useState<'approve' | 'reject' | null>(null);
@@ -130,19 +136,14 @@ export default function View() {
         loadFiles();
     }, [loadFiles]);
 
-    // Sync file: semua file bill payment (fileNetsuiteId kosong) atau convert satu file
-    const handleSyncFiles = useCallback(async (fileNetsuiteId?: string) => {
+    // Sync semua file bill payment dari bridge API
+    const handleSyncFiles = useCallback(async () => {
         if (!billNetsuiteId) return;
-        setSyncingFileKey(fileNetsuiteId ?? 'all');
+        setSyncingFileKey('all');
         const toastId = toast.loading('Sinkronisasi file...');
         try {
-            if (fileNetsuiteId) {
-                const res = await BillPaymentService.syncAttachmentFile(billNetsuiteId, fileNetsuiteId);
-                toast.success(res?.message || 'File sedang diproses', { id: toastId });
-            } else {
-                const res = await BillPaymentService.syncAttachmentFiles(billNetsuiteId);
-                toast.success(res?.message || 'Sinkronisasi file berhasil', { id: toastId });
-            }
+            const res = await BillPaymentService.syncAttachmentFiles(billNetsuiteId);
+            toast.success(res?.message || 'Sinkronisasi file berhasil', { id: toastId });
             await loadFiles();
         } catch (err: any) {
             toast.error(err?.message || 'Gagal sinkronisasi file', { id: toastId });
@@ -151,28 +152,62 @@ export default function View() {
         }
     }, [billNetsuiteId, loadFiles]);
 
-    // Ambil link download lalu langsung unduh dari url-nya
-    const handleDownloadFile = useCallback(async (fileNetsuiteId: string) => {
+    // Tunggu hasil convert sampai SUCCESS (poll tiap 3 detik, maksimal ±2 menit)
+    const waitForFileSuccess = useCallback(async (fileNetsuiteId: string) => {
+        if (!billNetsuiteId) throw new Error('Bill payment tidak valid');
+        for (let attempt = 0; attempt < 40; attempt++) {
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            if (!isMountedRef.current) throw new Error('cancelled');
+            const res = await BillPaymentService.getAttachmentFiles(String(billNetsuiteId), '', 1, 1, fileNetsuiteId);
+            const status = res?.data?.items?.[0]?.status?.toUpperCase();
+            if (status === 'SUCCESS') return;
+            if (status && status !== 'PENDING') throw new Error(`Convert gagal (status ${status})`);
+        }
+        throw new Error('Convert masih diproses, coba lagi beberapa saat');
+    }, [billNetsuiteId]);
+
+    // Satu klik: convert (kalau belum SUCCESS) -> tunggu selesai -> langsung download dari url-nya
+    const handleConvertAndDownload = useCallback(async (file: AttachmentFile) => {
+        if (!billNetsuiteId) return;
+        const fileNetsuiteId = file.file_netsuite_id;
         setDownloadingFileId(fileNetsuiteId);
+        const toastId = toast.loading('Memproses file...');
         try {
+            if (file.status?.toUpperCase() !== 'SUCCESS') {
+                // kalau sudah PENDING, convert sedang berjalan — cukup tunggu hasilnya
+                if (file.status?.toUpperCase() !== 'PENDING') {
+                    const convertRes = await BillPaymentService.syncAttachmentFile(billNetsuiteId, fileNetsuiteId);
+                    if (!convertRes?.success) throw new Error(convertRes?.message || 'Gagal memulai convert');
+                }
+                await loadFiles();
+                toast.loading('Convert file sedang diproses...', { id: toastId });
+                await waitForFileSuccess(fileNetsuiteId);
+            }
+
             const res = await BillPaymentService.getAttachmentDownloadLink(fileNetsuiteId);
             const url = res?.data?.url;
-            if (!res?.success || !url) {
-                toast.error(res?.message || 'Link download tidak tersedia');
-                return;
-            }
+            if (!res?.success || !url) throw new Error(res?.message || 'Link download tidak tersedia');
+
             const a = document.createElement('a');
             a.href = url;
             a.download = res.data?.file_name || '';
             document.body.appendChild(a);
             a.click();
             a.remove();
+            toast.success('File berhasil diunduh', { id: toastId });
         } catch (err: any) {
-            toast.error(err?.message || 'Gagal mengunduh file');
+            if (err?.message === 'cancelled') {
+                toast.dismiss(toastId);
+            } else {
+                toast.error(err?.message || 'Gagal mengunduh file', { id: toastId });
+            }
         } finally {
-            setDownloadingFileId(null);
+            if (isMountedRef.current) {
+                setDownloadingFileId(null);
+                await loadFiles();
+            }
         }
-    }, []);
+    }, [billNetsuiteId, loadFiles, waitForFileSuccess]);
 
     // ID NetSuite user yang login (auth_user.current_approver_netsuite_id), sama seperti filter di list
     const getLoginApproverId = (): string | null => {
@@ -483,34 +518,13 @@ export default function View() {
         },
         createActionsColumn([
             {
+                // satu tombol: convert (kalau belum SUCCESS) -> tunggu selesai -> download
                 icon: MdDownload,
-                onClick: (row: AttachmentFile) => handleDownloadFile(row.file_netsuite_id),
+                onClick: (row: AttachmentFile) => handleConvertAndDownload(row),
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
                 tooltip: 'Download File',
                 permission: 'read',
-                // download hanya muncul kalau file sudah berstatus SUCCESS
-                condition: (row: AttachmentFile) => row.status?.toUpperCase() === 'SUCCESS',
-                disable: () => downloadingFileId !== null,
-            },
-            {
-                // proses convert berjalan di background, refresh sampai status jadi SUCCESS
-                icon: MdRefresh,
-                onClick: () => loadFiles(),
-                className: 'text-amber-600 hover:text-amber-700 hover:bg-amber-50',
-                tooltip: 'Refresh status',
-                permission: 'read',
-                condition: (row: AttachmentFile) => row.status?.toUpperCase() === 'PENDING',
-                disable: () => filesLoading,
-            },
-            {
-                icon: MdOutlineSync,
-                onClick: (row: AttachmentFile) => handleSyncFiles(row.file_netsuite_id),
-                className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
-                tooltip: 'Convert / Sync this File',
-                permission: 'read',
-                // saat PENDING, convert sudah berjalan — tunggu hasilnya lewat tombol refresh
-                condition: (row: AttachmentFile) => row.status?.toUpperCase() !== 'PENDING',
-                disable: () => syncingFileKey !== null,
+                disable: () => downloadingFileId !== null || syncingFileKey !== null,
             },
         ]),
     ];
