@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from '@/helpers/apiHelper';
-import { BillPaymentRequest, BillPaymentResponse, BillPaymentDetailResponse, BillPaymentApprovalRequest, BillPaymentApprovalResponse } from '../types/billPayment';
+import { BillPaymentRequest, BillPaymentResponse, BillPaymentDetailResponse, BillPaymentApprovalRequest, BillPaymentApprovalResponse, AttachmentFile, AttachmentFilesResponse, AttachmentSyncResponse, AttachmentDownloadResponse } from '../types/billPayment';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -39,6 +39,51 @@ export class BillPaymentService {
             `${API_BASE_URL}/netsuite/bill-payment/sync/${netsuiteId}`
         );
 
+        return response.data;
+    }
+
+    // List attachment file milik satu bill payment (by netsuite id)
+    static async getAttachmentFiles(billPaymentNetsuiteId: string, search = '', page = 1, limit = 10): Promise<AttachmentFilesResponse> {
+        const response = await apiPost<AttachmentFilesResponse>(
+            `${API_BASE_URL}/netsuite/bill-payment/attachments-files/get`,
+            {
+                page,
+                limit,
+                sort_by: 'created_at',
+                sort_order: 'desc',
+                search,
+                bill_payment_netsuite_id: billPaymentNetsuiteId,
+                file_netsuite_id: '',
+                status: '',
+                is_deleted: false,
+            }
+        );
+        return response.data;
+    }
+
+    // Ambil link download file attachment (hanya untuk file berstatus SUCCESS)
+    static async getAttachmentDownloadLink(fileNetsuiteId: string): Promise<AttachmentDownloadResponse> {
+        const response = await apiGet<AttachmentDownloadResponse>(
+            `${API_BASE_URL}/netsuite/bill-payment/attachments-files/download/${fileNetsuiteId}`
+        );
+        return response.data;
+    }
+
+    // Sync semua attachment satu bill payment dari bridge API
+    static async syncAttachmentFiles(billPaymentNetsuiteId: number): Promise<AttachmentSyncResponse> {
+        const response = await apiPost<AttachmentSyncResponse>(
+            `${API_BASE_URL}/netsuite/bill-payment/attachments-files/sync`,
+            { id: billPaymentNetsuiteId }
+        );
+        return response.data;
+    }
+
+    // Convert satu file attachment (by file netsuite id)
+    static async syncAttachmentFile(billPaymentNetsuiteId: number, fileNetsuiteId: string): Promise<{ success: boolean; message?: string; data?: AttachmentFile }> {
+        const response = await apiPost<{ success: boolean; message?: string; data?: AttachmentFile }>(
+            `${API_BASE_URL}/netsuite/bill-payment/attachments-files/sync/${billPaymentNetsuiteId}`,
+            { file_netsuite_id: fileNetsuiteId }
+        );
         return response.data;
     }
 
