@@ -75,7 +75,7 @@ export default function Manage() {
                 </div>
             ),
             wrap: true,
-            minWidth: '220px',
+            minWidth: '150px',
             pinned: 'left',
         },
         {
