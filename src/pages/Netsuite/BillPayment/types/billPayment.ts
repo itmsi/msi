@@ -9,6 +9,7 @@ export interface BillPaymentRequest {
     currency?: number;
     subsidiary?: number | string;
     approvalstatus?: number | string;
+    next_approver?: string; // filter Next Approver (employee_id_netsuite dari select)
     department?: number;
     location?: number;
     trandate_from?: string;
