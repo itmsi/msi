@@ -4,15 +4,28 @@ import { BillPaymentService } from '../services/billPaymentService';
 import toast from 'react-hot-toast';
 import { SyncInfo } from '../../Quotation/types/quotation';
 
+// Default Next Approver = employee_id_netsuite user yang login (auth_user di localStorage)
+export const getLoginEmployeeNetsuiteId = (): string => {
+    try {
+        const authUser = JSON.parse(localStorage.getItem('auth_user') || 'null');
+        const id = authUser?.employee_id_netsuite;
+        return id !== undefined && id !== null ? String(id) : '';
+    } catch {
+        return '';
+    }
+};
+
 export const useBillPayment = () => {
     const [searchValue, setSearchValue] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
     // Advanced filters
-    const [filterApprovalStatus, setFilterApprovalStatus] = useState<string>('');
+    // Default: Pending Approval (1)
+    const [filterApprovalStatus, setFilterApprovalStatus] = useState<string>('1');
     const [filterStartDate, setFilterStartDate] = useState<string>('');
     const [filterEndDate, setFilterEndDate] = useState<string>('');
     const [filterSubsidiary, setFilterSubsidiary] = useState<string>('');
+    const [filterNextApprover, setFilterNextApprover] = useState<string>(getLoginEmployeeNetsuiteId);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -34,6 +47,7 @@ export const useBillPayment = () => {
 
             const subVal = overrides?.subsidiary !== undefined ? overrides.subsidiary : filterSubsidiary;
             const appVal = overrides?.approvalstatus !== undefined ? overrides.approvalstatus : filterApprovalStatus;
+            const nextApproverVal = overrides?.next_approver !== undefined ? overrides.next_approver : filterNextApprover;
             const startVal = overrides?.trandate_start !== undefined ? overrides.trandate_start : filterStartDate;
             const endVal = overrides?.trandate_end !== undefined ? overrides.trandate_end : filterEndDate;
 
@@ -62,6 +76,7 @@ export const useBillPayment = () => {
                 ...(appVal ? { approvalstatus: isNaN(Number(appVal)) ? appVal : Number(appVal) } : {}),
                 ...(startVal ? { trandate_from: startVal } : {}),
                 ...(endVal ? { trandate_to: endVal } : {}),
+                ...(nextApproverVal ? { next_approver: nextApproverVal } : {}),
                 // Include current approver ID if available
                 ...(currentApproverId !== undefined && currentApproverId !== null ? { current_approver_id: currentApproverId } : {}),
             };
@@ -82,7 +97,7 @@ export const useBillPayment = () => {
         } finally {
             setLoading(false);
         }
-    }, [searchValue, sortOrder, filterApprovalStatus, filterStartDate, filterEndDate, filterSubsidiary, pagination.page, pagination.page_size]);
+    }, [searchValue, sortOrder, filterApprovalStatus, filterStartDate, filterEndDate, filterSubsidiary, filterNextApprover, pagination.page, pagination.page_size]);
 
     const handlePageChange = useCallback((page: number) => {
         setPagination(prev => ({ ...prev, page }));
@@ -110,6 +125,8 @@ export const useBillPayment = () => {
             setFilterEndDate(value);
         } else if (filterType === 'subsidiary') {
             setFilterSubsidiary(value);
+        } else if (filterType === 'next_approver') {
+            setFilterNextApprover(value);
         }
 
         setPagination(prev => ({ ...prev, page: 1 }));
@@ -120,6 +137,7 @@ export const useBillPayment = () => {
         else if (filterType === 'trandate_start') override.trandate_start = value;
         else if (filterType === 'trandate_end') override.trandate_end = value;
         else if (filterType === 'subsidiary') override.subsidiary = value;
+        else if (filterType === 'next_approver') override.next_approver = value;
 
         fetchBillPayments(override);
     }, [fetchBillPayments]);
@@ -183,6 +201,7 @@ export const useBillPayment = () => {
         setFilterStartDate('');
         setFilterEndDate('');
         setFilterSubsidiary('');
+        setFilterNextApprover('');
         setSortOrder('desc');
         setPagination(prev => ({ ...prev, page: 1 }));
         fetchBillPayments({
@@ -193,6 +212,7 @@ export const useBillPayment = () => {
             trandate_start: '',
             trandate_end: '',
             subsidiary: '',
+            next_approver: '',
         });
     }, [fetchBillPayments]);
 
@@ -201,6 +221,7 @@ export const useBillPayment = () => {
         filterStartDate,
         filterEndDate,
         filterSubsidiary,
+        filterNextApprover,
     ].filter(Boolean).length;
 
     return {
@@ -215,6 +236,7 @@ export const useBillPayment = () => {
         filterStartDate,
         filterEndDate,
         filterSubsidiary,
+        filterNextApprover,
         activeFilterCount,
         setSearchValue,
         fetchBillPayments,

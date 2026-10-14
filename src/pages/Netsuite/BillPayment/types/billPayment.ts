@@ -9,6 +9,7 @@ export interface BillPaymentRequest {
     currency?: number;
     subsidiary?: number | string;
     approvalstatus?: number | string;
+    next_approver?: string; // filter Next Approver (employee_id_netsuite dari select)
     department?: number;
     location?: number;
     trandate_from?: string;
@@ -61,6 +62,57 @@ export interface UserNoteItem {
     type?: string;
     type_display?: string | null;
     [key: string]: any;
+}
+
+export interface AttachmentFile {
+    id: string;
+    bill_payment_netsuite_id: string;
+    tran_id: string;
+    status: string;
+    file_netsuite_id: string;
+    file_name: string;
+    file_type: string;
+    file_size: string;
+    file_is_text: boolean;
+    file_skipped: boolean;
+    file_link: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AttachmentDownloadResponse {
+    success: boolean;
+    message?: string;
+    data?: {
+        file_netsuite_id: string;
+        bill_payment_netsuite_id: string;
+        file_name: string;
+        file_type: string;
+        file_size: string;
+        url: string;
+        expires_at: string | null;
+    };
+}
+
+export interface AttachmentFilesResponse {
+    success: boolean;
+    message?: string;
+    data: {
+        items: AttachmentFile[];
+        pagination: { page: number; limit: number; total: number; totalPages: number };
+    };
+}
+
+export interface AttachmentSyncResponse {
+    success: boolean;
+    message?: string;
+    data?: {
+        id: string;
+        tranId: string;
+        count: number;
+        skippedCount: number;
+        files: AttachmentFile[];
+    };
 }
 
 export interface BillPayment {

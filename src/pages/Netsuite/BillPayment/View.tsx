@@ -1,19 +1,20 @@
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { MdArrowBack, MdReceiptLong, MdCreditCard, MdHistory, MdOutlineComment } from "react-icons/md";
+import { MdArrowBack, MdReceiptLong, MdCreditCard, MdHistory, MdOutlineComment, MdAttachFile, MdSync, MdOutlineSync, MdDownload, MdSearch, MdClear } from "react-icons/md";
 import PageMeta from "@/components/common/PageMeta";
 import { BillPaymentService } from "./services/billPaymentService";
-import { BillPayment, AppliedToItem, CreditAppliedItem, WorkflowHistoryItem, UserNoteItem } from "./types/billPayment";
+import { BillPayment, AppliedToItem, CreditAppliedItem, WorkflowHistoryItem, UserNoteItem, AttachmentFile } from "./types/billPayment";
 import Badge from "@/components/ui/badge/Badge";
 import Button from "@/components/ui/button/Button";
+import Input from "@/components/form/input/InputField";
 import { PermissionGate } from "@/components/common/PermissionComponents";
 import { formatDateTime, formatDateLocal } from "@/helpers/generalHelper";
-import CustomDataTable from "@/components/ui/table";
+import CustomDataTable, { createActionsColumn } from "@/components/ui/table";
 import { TableColumn } from "react-data-table-component";
 import ModalApproval from "./components/ModalApproval";
 
-type TabType = 'applied_to' | 'credit_applied' | 'workflow_history' | 'user_notes';
+type TabType = 'applied_to' | 'credit_applied' | 'workflow_history' | 'user_notes' | 'files';
 
 // Section & field dengan susunan 3 kolom seperti form NetSuite
 const InfoSection = ({ title, children }: { title: string; children: ReactNode }) => (
@@ -51,6 +52,33 @@ export default function View() {
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<TabType>('applied_to');
 
+    const [files, setFiles] = useState<AttachmentFile[]>([]);
+    const [filesLoading, setFilesLoading] = useState<boolean>(false);
+    const [fileSearchInput, setFileSearchInput] = useState<string>('');
+    const [fileSearch, setFileSearch] = useState<string>(''); // term yang sudah diterapkan (setelah debounce)
+    const [filePage, setFilePage] = useState<number>(1);
+    const [filePerPage, setFilePerPage] = useState<number>(10);
+    const [fileTotal, setFileTotal] = useState<number>(0);
+
+    // Search otomatis: tunggu user berhenti mengetik 500ms sebelum request
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setFileSearch(fileSearchInput.trim());
+            setFilePage(1);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [fileSearchInput]);
+    const [downloadingFileId, setDownloadingFileId] = useState<string | null>(null);
+    const isMountedRef = useRef(true);
+
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => { isMountedRef.current = false; };
+    }, []);
+    const [syncingFileKey, setSyncingFileKey] = useState<string | null>(null); // 'all' atau file_netsuite_id
+
+    const [isSyncing, setIsSyncing] = useState<boolean>(false);
+    const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false); // approve/reject sudah sukses, tunggu status ter-update
     const [approvalAction, setApprovalAction] = useState<'approve' | 'reject' | null>(null);
 
     const fetchDetail = useCallback(async () => {
@@ -78,6 +106,9 @@ export default function View() {
 
     // Setelah approve/reject: sync data dari NetSuite by id, lalu muat ulang detail
     const handleAfterApproval = useCallback(async () => {
+        // sembunyikan tombol approve/reject langsung agar tidak bisa diklik ulang saat sync berjalan
+        setApprovalSubmitted(true);
+        setIsSyncing(true);
         const toastId = toast.loading('Sinkronisasi data...');
         try {
             await BillPaymentService.syncBillPaymentById(String(id));
@@ -86,8 +117,126 @@ export default function View() {
             toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
         } finally {
             await fetchDetail();
+            setIsSyncing(false);
         }
     }, [id, fetchDetail]);
+
+    // Sync manual data bill payment dari NetSuite
+    const handleSyncById = useCallback(async () => {
+        if (isSyncing || !id) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi Bill Payment: ${id}...`);
+        try {
+            await BillPaymentService.syncBillPaymentById(String(id));
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            await fetchDetail();
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, id, fetchDetail]);
+
+    // Files (attachments) — list dari DB, sync dari bridge API
+    const billNetsuiteId = billData?.netsuite_id ? Number(billData.netsuite_id) : null;
+
+    const loadFiles = useCallback(async () => {
+        if (!billNetsuiteId) return;
+        try {
+            setFilesLoading(true);
+            const res = await BillPaymentService.getAttachmentFiles(String(billNetsuiteId), fileSearch, filePage, filePerPage);
+            setFiles(res?.data?.items ?? []);
+            setFileTotal(res?.data?.pagination?.total ?? res?.data?.items?.length ?? 0);
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal memuat file');
+        } finally {
+            setFilesLoading(false);
+        }
+    }, [billNetsuiteId, fileSearch, filePage, filePerPage]);
+
+    useEffect(() => {
+        loadFiles();
+    }, [loadFiles]);
+
+    // Sync semua file bill payment dari bridge API
+    const handleSyncFiles = useCallback(async () => {
+        if (!billNetsuiteId) return;
+        setSyncingFileKey('all');
+        const toastId = toast.loading('Sinkronisasi file...');
+        try {
+            const res = await BillPaymentService.syncAttachmentFiles(billNetsuiteId);
+            toast.success(res?.message || 'Sinkronisasi file berhasil', { id: toastId });
+            await loadFiles();
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal sinkronisasi file', { id: toastId });
+        } finally {
+            setSyncingFileKey(null);
+        }
+    }, [billNetsuiteId, loadFiles]);
+
+    // Tunggu hasil convert sampai SUCCESS (poll tiap 3 detik, maksimal ±2 menit)
+    const waitForFileSuccess = useCallback(async (fileNetsuiteId: string) => {
+        if (!billNetsuiteId) throw new Error('Bill payment tidak valid');
+        for (let attempt = 0; attempt < 40; attempt++) {
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            if (!isMountedRef.current) throw new Error('cancelled');
+            const res = await BillPaymentService.getAttachmentFiles(String(billNetsuiteId), '', 1, 1, fileNetsuiteId);
+            const status = res?.data?.items?.[0]?.status?.toUpperCase();
+            if (status === 'SUCCESS') return;
+            if (status && status !== 'PENDING') throw new Error(`Convert gagal (status ${status})`);
+        }
+        throw new Error('Convert masih diproses, coba lagi beberapa saat');
+    }, [billNetsuiteId]);
+
+    // Convert file yang belum SUCCESS (tanpa download): trigger convert, tunggu sampai SUCCESS, lalu list di-refresh
+    const handleConvertFile = useCallback(async (file: AttachmentFile) => {
+        if (!billNetsuiteId) return;
+        const fileNetsuiteId = file.file_netsuite_id;
+        setDownloadingFileId(fileNetsuiteId);
+        const toastId = toast.loading('Memproses convert file...');
+        try {
+            // kalau sudah PENDING, convert sedang berjalan — cukup tunggu hasilnya
+            if (file.status?.toUpperCase() !== 'PENDING') {
+                const convertRes = await BillPaymentService.syncAttachmentFile(billNetsuiteId, fileNetsuiteId);
+                if (!convertRes?.success) throw new Error(convertRes?.message || 'Gagal memulai convert');
+                await loadFiles();
+            }
+            await waitForFileSuccess(fileNetsuiteId);
+            toast.success('Convert selesai, file siap diunduh', { id: toastId });
+        } catch (err: any) {
+            if (err?.message === 'cancelled') {
+                toast.dismiss(toastId);
+            } else {
+                toast.error(err?.message || 'Gagal convert file', { id: toastId });
+            }
+        } finally {
+            if (isMountedRef.current) {
+                setDownloadingFileId(null);
+                await loadFiles();
+            }
+        }
+    }, [billNetsuiteId, loadFiles, waitForFileSuccess]);
+
+    // Download file berstatus SUCCESS langsung dari url-nya
+    const handleDownloadFile = useCallback(async (fileNetsuiteId: string) => {
+        setDownloadingFileId(fileNetsuiteId);
+        try {
+            const res = await BillPaymentService.getAttachmentDownloadLink(fileNetsuiteId);
+            const url = res?.data?.url;
+            if (!res?.success || !url) throw new Error(res?.message || 'Link download tidak tersedia');
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = res.data?.file_name || '';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal mengunduh file');
+        } finally {
+            setDownloadingFileId(null);
+        }
+    }, []);
 
     // ID NetSuite user yang login (auth_user.current_approver_netsuite_id), sama seperti filter di list
     const getLoginApproverId = (): string | null => {
@@ -143,6 +292,8 @@ export default function View() {
     const loginApproverId = getLoginApproverId();
     const nextApproverId = billData.next_approver ? String(billData.next_approver) : null;
     const canApprove = Number(billData.approvalstatus) === 1
+        && !approvalSubmitted
+        && !isSyncing
         && !!loginApproverId
         && loginApproverId === nextApproverId;
 
@@ -350,11 +501,82 @@ export default function View() {
         }
     ];
 
+    const formatFileSize = (value: string | number | null | undefined) => {
+        const bytes = Number(value);
+        if (!bytes || isNaN(bytes)) return '-';
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    };
+
+    const getFileStatusColor = (status: string) => {
+        switch (status?.toUpperCase()) {
+            case 'SUCCESS': return 'success' as const;
+            case 'PENDING': return 'warning' as const;
+            case 'FAILED':
+            case 'ERROR': return 'error' as const;
+            default: return 'info' as const;
+        }
+    };
+
+    const filesColumns: TableColumn<AttachmentFile>[] = [
+        {
+            name: 'File Name',
+            selector: row => row.file_name || '-',
+            cell: row => <span className="text-sm">{row.file_name || '-'}</span>,
+            wrap: true,
+            minWidth: '280px',
+            pinned: 'left',
+        },
+        { name: 'Type', selector: row => row.file_type || '-', minWidth: '90px' },
+        { name: 'Size', selector: row => formatFileSize(row.file_size), minWidth: '100px' },
+        {
+            name: 'Status',
+            selector: row => row.status || '-',
+            cell: row => <Badge color={getFileStatusColor(row.status)} variant="light">{row.status || '-'}</Badge>,
+            minWidth: '120px',
+        },
+        {
+            name: 'Updated',
+            selector: row => row.updated_at || '-',
+            cell: row => (
+                <div className="py-1">
+                    <div className="text-sm">{row.updated_at ? formatDateTime(row.updated_at) : '-'}</div>
+                    <div className="text-sm text-gray-500">File ID: {row.file_netsuite_id || '-'}</div>
+                </div>
+            ),
+            minWidth: '170px',
+        },
+        createActionsColumn([
+            {
+                // status SUCCESS: langsung download
+                icon: MdDownload,
+                onClick: (row: AttachmentFile) => handleDownloadFile(row.file_netsuite_id),
+                className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50',
+                tooltip: 'Download File',
+                permission: 'read',
+                condition: (row: AttachmentFile) => row.status?.toUpperCase() === 'SUCCESS',
+                disable: () => downloadingFileId !== null || syncingFileKey !== null,
+            },
+            {
+                // status belum SUCCESS: convert saja (tanpa download), icon berubah jadi download saat selesai
+                icon: MdOutlineSync,
+                onClick: (row: AttachmentFile) => handleConvertFile(row),
+                className: 'text-green-600 hover:text-green-700 hover:bg-green-50',
+                tooltip: 'Convert File',
+                permission: 'read',
+                condition: (row: AttachmentFile) => row.status?.toUpperCase() !== 'SUCCESS',
+                disable: () => downloadingFileId !== null || syncingFileKey !== null,
+            },
+        ]),
+    ];
+
     const tabs: { key: TabType; label: string; icon: ReactNode; count?: number }[] = [
         { key: 'applied_to', label: 'Applied To', icon: <MdReceiptLong />, count: billData.applied_to?.length ?? 0 },
         { key: 'credit_applied', label: 'Credit Applied', icon: <MdCreditCard />, count: billData.credit_applied?.length ?? 0 },
         { key: 'workflow_history', label: 'Workflow History', icon: <MdHistory />, count: billData.workflow_history?.length ?? 0 },
         { key: 'user_notes', label: 'User Notes', icon: <MdOutlineComment />, count: Array.isArray(billData.user_notes) ? billData.user_notes.length : 0 },
+        { key: 'files', label: 'Files', icon: <MdAttachFile />, count: fileTotal },
     ];
 
     return (
@@ -396,6 +618,18 @@ export default function View() {
                                         {billData.approvalstatus_display || statusInfo.label}
                                     </Badge>
                                 </div>
+                                <PermissionGate permission="read">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handleSyncById()}
+                                        disabled={isSyncing}
+                                        className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                    >
+                                        <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                        <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                    </Button>
+                                </PermissionGate>
                             </div>
                         </div>
                     </div>
@@ -551,6 +785,67 @@ export default function View() {
                                     striped={false}
                                     noDataComponent={
                                         <div className="text-center py-8 text-gray-500">No user notes found</div>
+                                    }
+                                />
+                            </TabPanel>
+                        )}
+
+                        {activeTab === 'files' && (
+                            <TabPanel title="Files">
+                                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center mb-4">
+                                    <div className="flex-1 w-full">
+                                        <div className="relative flex">
+                                            <div className="relative flex-1">
+                                                <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                                                <Input
+                                                    type="text"
+                                                    placeholder="Search File Name..."
+                                                    value={fileSearchInput}
+                                                    onChange={(e) => setFileSearchInput(e.target.value)}
+                                                    className={`pl-10 py-2 w-full ${fileSearchInput ? 'pr-10' : 'pr-4'}`}
+                                                />
+                                                {fileSearchInput && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setFileSearchInput(''); setFileSearch(''); }}
+                                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                                    >
+                                                        <MdClear className="h-4 w-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            disabled={syncingFileKey !== null}
+                                            onClick={() => handleSyncFiles()}
+                                            className="h-[42px] px-4 py-2 whitespace-nowrap bg-transparent hover:bg-gray-300 text-gray-700 border border-gray-300"
+                                        >
+                                            <MdSync className={`w-4 h-4 mr-2 ${syncingFileKey === 'all' ? 'animate-spin' : ''}`} />
+                                            Sync All Files
+                                        </Button>
+                                    </div>
+                                </div>
+                                <CustomDataTable
+                                    columns={filesColumns}
+                                    data={files}
+                                    loading={filesLoading}
+                                    pagination={fileTotal > 10}
+                                    paginationServer
+                                    paginationTotalRows={fileTotal}
+                                    paginationPerPage={filePerPage}
+                                    paginationDefaultPage={filePage}
+                                    paginationRowsPerPageOptions={[10, 20, 50, 100]}
+                                    onChangePage={setFilePage}
+                                    onChangeRowsPerPage={(perPage) => { setFilePerPage(perPage); setFilePage(1); }}
+                                    responsive
+                                    highlightOnHover
+                                    striped={false}
+                                    noDataComponent={
+                                        <div className="text-center py-8 text-gray-500">No files found</div>
                                     }
                                 />
                             </TabPanel>
