@@ -77,6 +77,8 @@ export default function View() {
     }, []);
     const [syncingFileKey, setSyncingFileKey] = useState<string | null>(null); // 'all' atau file_netsuite_id
 
+    const [isSyncing, setIsSyncing] = useState<boolean>(false);
+    const [approvalSubmitted, setApprovalSubmitted] = useState<boolean>(false); // approve/reject sudah sukses, tunggu status ter-update
     const [approvalAction, setApprovalAction] = useState<'approve' | 'reject' | null>(null);
 
     const fetchDetail = useCallback(async () => {
@@ -104,6 +106,9 @@ export default function View() {
 
     // Setelah approve/reject: sync data dari NetSuite by id, lalu muat ulang detail
     const handleAfterApproval = useCallback(async () => {
+        // sembunyikan tombol approve/reject langsung agar tidak bisa diklik ulang saat sync berjalan
+        setApprovalSubmitted(true);
+        setIsSyncing(true);
         const toastId = toast.loading('Sinkronisasi data...');
         try {
             await BillPaymentService.syncBillPaymentById(String(id));
@@ -112,8 +117,25 @@ export default function View() {
             toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
         } finally {
             await fetchDetail();
+            setIsSyncing(false);
         }
     }, [id, fetchDetail]);
+
+    // Sync manual data bill payment dari NetSuite
+    const handleSyncById = useCallback(async () => {
+        if (isSyncing || !id) return;
+        setIsSyncing(true);
+        const toastId = toast.loading(`Sinkronisasi Bill Payment: ${id}...`);
+        try {
+            await BillPaymentService.syncBillPaymentById(String(id));
+            toast.success('Sinkronisasi berhasil', { id: toastId });
+            await fetchDetail();
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal melakukan sinkronisasi', { id: toastId });
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [isSyncing, id, fetchDetail]);
 
     // Files (attachments) — list dari DB, sync dari bridge API
     const billNetsuiteId = billData?.netsuite_id ? Number(billData.netsuite_id) : null;
@@ -270,6 +292,8 @@ export default function View() {
     const loginApproverId = getLoginApproverId();
     const nextApproverId = billData.next_approver ? String(billData.next_approver) : null;
     const canApprove = Number(billData.approvalstatus) === 1
+        && !approvalSubmitted
+        && !isSyncing
         && !!loginApproverId
         && loginApproverId === nextApproverId;
 
@@ -594,6 +618,18 @@ export default function View() {
                                         {billData.approvalstatus_display || statusInfo.label}
                                     </Badge>
                                 </div>
+                                <PermissionGate permission="read">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handleSyncById()}
+                                        disabled={isSyncing}
+                                        className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 ring-green-600"
+                                    >
+                                        <MdOutlineSync size={20} className={isSyncing ? 'animate-spin' : ''} />
+                                        <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+                                    </Button>
+                                </PermissionGate>
                             </div>
                         </div>
                     </div>

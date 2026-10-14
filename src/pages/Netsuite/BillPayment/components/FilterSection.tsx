@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import Button from '@/components/ui/button/Button';
+import CustomAsyncSelect from '@/components/form/select/CustomAsyncSelect';
+import { useEmployeeSelect } from '@/hooks/useEmployeeSelect';
 import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
@@ -13,6 +15,7 @@ interface FilterSectionProps {
     filterStartDate?: string;
     filterEndDate?: string;
     filterSubsidiary?: string;
+    filterNextApprover?: string;
     onFilterChange: (field: string, value: string) => void;
     onClearFilters: () => void;
 }
@@ -28,9 +31,50 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     filterStartDate,
     filterEndDate,
     filterSubsidiary,
+    filterNextApprover,
     onFilterChange,
     onClearFilters,
 }) => {
+    // Next approver: daftar employee (is_user_netsuite = true), sama seperti Created By di PO
+    const {
+        employeeOptions,
+        pagination: employeePagination,
+        inputValue: employeeInputValue,
+        setUserNetsuite,
+        handleInputChange: handleEmployeeInputChange,
+        handleMenuScrollToBottom: handleEmployeeMenuScrollToBottom,
+        initializeOptions: initializeEmployeeOptions,
+    } = useEmployeeSelect();
+    const [selectedApprover, setSelectedApprover] = useState<any>(null);
+
+    useEffect(() => {
+        setUserNetsuite(true);
+        initializeEmployeeOptions();
+    }, [initializeEmployeeOptions]);
+
+    // Sinkronkan pilihan dengan filter (termasuk default = employee yang login)
+    useEffect(() => {
+        if (!filterNextApprover) {
+            setSelectedApprover(null);
+            return;
+        }
+        if (selectedApprover?.data?.employee_id_netsuite?.toString() === filterNextApprover) return;
+        const found = employeeOptions.find(
+            (o: any) => String(o.data?.employee_id_netsuite ?? '') === filterNextApprover
+        );
+        if (found) {
+            setSelectedApprover(found);
+            return;
+        }
+        try {
+            const authUser = JSON.parse(localStorage.getItem('auth_user') || 'null');
+            const label = authUser?.employee_name || authUser?.name || authUser?.full_name || authUser?.username || filterNextApprover;
+            setSelectedApprover({ value: filterNextApprover, label, data: { employee_id_netsuite: filterNextApprover } });
+        } catch {
+            setSelectedApprover({ value: filterNextApprover, label: filterNextApprover, data: { employee_id_netsuite: filterNextApprover } });
+        }
+    }, [filterNextApprover, employeeOptions]);
+
     const { subsidiaryOptions, loading: subsidiaryLoading, initializeOptions } = useSubsidiarySelect();
 
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -92,6 +136,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         setSelectedDateRange({ startDate: '', endDate: '' });
         setDateRangeState([{ startDate: new Date(), endDate: new Date(), key: 'selection' }]);
         setShowDatePicker(false);
+        setSelectedApprover(null);
         onClearFilters();
     };
 
@@ -112,7 +157,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
     return (
         <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
                 {/* Subsidiary */}
                 <CustomSelect
@@ -139,6 +184,28 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                     isClearable={true}
                     isSearchable={false}
                     className="w-full"
+                />
+
+                {/* Next Approver */}
+                <CustomAsyncSelect
+                    id="bp_next_approver"
+                    name="next_approver"
+                    placeholder="Next Approver..."
+                    value={selectedApprover}
+                    defaultOptions={employeeOptions}
+                    loadOptions={handleEmployeeInputChange}
+                    onMenuScrollToBottom={handleEmployeeMenuScrollToBottom}
+                    isLoading={employeePagination.loading}
+                    noOptionsMessage={() => 'No employees found'}
+                    loadingMessage={() => 'Loading employees...'}
+                    isSearchable={true}
+                    inputValue={employeeInputValue}
+                    onInputChange={handleEmployeeInputChange}
+                    onChange={(option) => {
+                        setSelectedApprover(option);
+                        const netsuiteId = (option as any)?.data?.employee_id_netsuite;
+                        onFilterChange('next_approver', netsuiteId ? String(netsuiteId) : '');
+                    }}
                 />
 
                 {/* Date Range Picker */}

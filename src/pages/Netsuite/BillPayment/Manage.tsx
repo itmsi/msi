@@ -30,6 +30,7 @@ export default function Manage() {
         filterStartDate,
         filterEndDate,
         filterSubsidiary,
+        filterNextApprover,
         activeFilterCount,
         setSearchValue,
         handlePageChange,
@@ -272,13 +273,14 @@ export default function Manage() {
                         filterStartDate={filterStartDate}
                         filterEndDate={filterEndDate}
                         filterSubsidiary={filterSubsidiary}
+                        filterNextApprover={filterNextApprover}
                         onFilterChange={handleFilterChange}
                         onClearFilters={handleClearAllFilters}
                     />
                 )}
             </>
         );
-    }, [searchValue, sortOrder, filterApprovalStatus, filterStartDate, filterEndDate, filterSubsidiary, activeFilterCount, showAdvancedFilters, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, handleToggleFilter, handleClearAllFilters]);
+    }, [searchValue, sortOrder, filterApprovalStatus, filterStartDate, filterEndDate, filterSubsidiary, filterNextApprover, activeFilterCount, showAdvancedFilters, setSearchValue, handleKeyPress, handleClearSearch, handleFilterChange, handleToggleFilter, handleClearAllFilters]);
 
     return (
         <>
