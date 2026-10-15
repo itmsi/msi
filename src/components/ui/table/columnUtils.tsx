@@ -137,6 +137,7 @@ export const createActionsColumn = (actions: Array<{
     width?: string;
     title?: string;
     disable?: (row: any) => boolean;
+    iconClassName?: (row: any) => string;
     pinned?: 'left' | 'right';
 }>): TableColumn<any> => ({
     name: actions[0]?.title || 'Actions',
@@ -155,7 +156,7 @@ export const createActionsColumn = (actions: Array<{
                                     }`}
                                 disabled={action.disable ? action.disable(row) : false}
                             >
-                                <Icon className="w-4 h-4" />
+                                <Icon className={`w-4 h-4 ${action.iconClassName ? action.iconClassName(row) : ''}`} />
                             </PermissionButton>
                         </Tooltip>
                     );
