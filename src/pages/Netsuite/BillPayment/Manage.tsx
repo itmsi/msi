@@ -125,7 +125,7 @@ export default function Manage() {
                 </div>
             ),
             wrap: true,
-            maxWidth: '300px',
+            maxWidth: '650px',
             minWidth: '260px',
         },
         {
