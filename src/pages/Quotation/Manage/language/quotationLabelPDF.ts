@@ -1100,4 +1100,186 @@ export const quotationLabelPDF: TranslationMap = {
         en: 'Remark',
         zh: '备注'
     },
+
+    // MSI CARE+ (BESS)
+    bessCare_title: {
+        id: 'Dukungan Produk, Garansi & Layanan Purnajual BESS',
+        en: 'BESS Product Support, Warranty & After-Sales Service',
+        zh: 'BESS 产品支持、保修与售后服务'
+    },
+    bessCare_description: {
+        id: 'Motor Sights International menyediakan dukungan garansi, bantuan teknis, pemantauan sistem, serta dukungan suku cadang untuk menunjang operasional BESS.',
+        en: 'Motor Sights International provides warranty support, technical assistance, system monitoring, and spare parts support to keep your BESS operations running.',
+        zh: 'Motor Sights International 提供保修支持、技术协助、系统监控以及备件支持，保障 BESS 的稳定运行。'
+    },
+    bessCare_block1_title: {
+        id: 'BMS Monitoring (Remote Monitoring)',
+        en: 'BMS Monitoring (Remote Monitoring)',
+        zh: 'BMS 监控（远程监控）'
+    },
+    bessCare_block1_item1: {
+        id: 'Pemantauan daya, tegangan, dan arus baterai.',
+        en: 'Monitoring of battery power, voltage, and current.',
+        zh: '监控电池功率、电压和电流。'
+    },
+    bessCare_block1_item2: {
+        id: 'Pemantauan tingkat pengisian baterai (SOC) dan kondisi kesehatan baterai (SOH).',
+        en: 'Monitoring of battery state of charge (SOC) and state of health (SOH).',
+        zh: '监控电池荷电状态（SOC）和健康状态（SOH）。'
+    },
+    bessCare_block1_item3: {
+        id: 'Pemantauan temperatur, alarm, dan status sistem.',
+        en: 'Monitoring of temperature, alarms, and system status.',
+        zh: '监控温度、报警和系统状态。'
+    },
+    bessCare_block1_item4: {
+        id: 'Akses riwayat pengisian dan pengosongan baterai.',
+        en: 'Access to battery charge and discharge history.',
+        zh: '查看电池充放电历史记录。'
+    },
+    bessCare_block1_item5: {
+        id: 'Dukungan diagnosis gangguan jarak jauh.',
+        en: 'Remote fault diagnosis support.',
+        zh: '远程故障诊断支持。'
+    },
+    bessCare_block2_title: {
+        id: 'Quarterly Inspection',
+        en: 'Quarterly Inspection',
+        zh: '季度检查'
+    },
+    bessCare_block2_item1: {
+        id: 'Pemeriksaan sistem pendingin dan kondisi temperatur.',
+        en: 'Inspection of the cooling system and temperature conditions.',
+        zh: '检查冷却系统及温度状况。'
+    },
+    bessCare_block2_item2: {
+        id: 'Pemeriksaan baut, struktur, serta sambungan listrik tegangan tinggi dan rendah.',
+        en: 'Inspection of bolts, structure, and high- and low-voltage electrical connections.',
+        zh: '检查螺栓、结构以及高低压电气连接。'
+    },
+    bessCare_block2_item3: {
+        id: 'Pemeriksaan kelengkapan dan masa berlaku sistem pemadam kebakaran.',
+        en: 'Inspection of fire suppression system completeness and validity.',
+        zh: '检查消防灭火系统的完整性及有效期。'
+    },
+    bessCare_block2_item4: {
+        id: 'Pemeriksaan SOC, SOH, serta alarm baterai.',
+        en: 'Inspection of battery SOC, SOH, and alarms.',
+        zh: '检查电池 SOC、SOH 及报警。'
+    },
+    bessCare_block2_item5: {
+        id: 'Pemeriksaan versi perangkat lunak dan firmware.',
+        en: 'Inspection of software and firmware versions.',
+        zh: '检查软件和固件版本。'
+    },
+    bessCare_block2_item6: {
+        id: 'Pembersihan penukar panas sesuai kondisi lingkungan operasional.',
+        en: 'Heat exchanger cleaning according to operating environment conditions.',
+        zh: '根据运行环境状况清洁换热器。'
+    },
+    bessCare_block3_title: {
+        id: 'DUKUNGAN TEKNIS & PENANGANAN GANGGUAN',
+        en: 'TECHNICAL SUPPORT & FAULT HANDLING',
+        zh: '技术支持与故障处理'
+    },
+    bessCare_block3_item1: {
+        id: 'Evaluasi alarm dan diagnosis awal.',
+        en: 'Alarm evaluation and initial diagnosis.',
+        zh: '报警评估与初步诊断。'
+    },
+    bessCare_block3_item2: {
+        id: 'Dukungan teknisi berkualifikasi.',
+        en: 'Support from qualified technicians.',
+        zh: '合格技术人员支持。'
+    },
+    bessCare_block3_item3: {
+        id: 'Pengiriman teknisi ke lokasi sesuai kebutuhan.',
+        en: 'On-site technician dispatch as needed.',
+        zh: '根据需要派遣技术人员到现场。'
+    },
+    bessCare_block3_item4: {
+        id: 'Perbaikan atau penggantian komponen sesuai ketentuan garansi.',
+        en: 'Component repair or replacement in accordance with warranty terms.',
+        zh: '根据保修条款维修或更换部件。'
+    },
+    bessCare_block3_item5: {
+        id: 'Rekalibrasi baterai',
+        en: 'Battery recalibration',
+        zh: '电池重新校准'
+    },
+    bessCare_block3_item6: {
+        id: 'Pembaruan firmware jarak jauh',
+        en: 'Remote firmware updates',
+        zh: '远程固件更新'
+    },
+    bessCare_block4_title: {
+        id: 'Annual Inspection',
+        en: 'Annual Inspection',
+        zh: '年度检查'
+    },
+    bessCare_block4_item1: {
+        id: 'Pemeriksaan menyeluruh kondisi baterai dan sistem BESS.',
+        en: 'Comprehensive inspection of battery and BESS system condition.',
+        zh: '全面检查电池及 BESS 系统状况。'
+    },
+    bessCare_block4_item2: {
+        id: 'Evaluasi kesehatan baterai (SOH) dan riwayat pengisian/pengosongan.',
+        en: 'Evaluation of battery health (SOH) and charge/discharge history.',
+        zh: '评估电池健康状态（SOH）及充放电历史。'
+    },
+    bessCare_block4_item3: {
+        id: 'Pemeriksaan fungsi BMS, PCS, dan EMS.',
+        en: 'Functional inspection of the BMS, PCS, and EMS.',
+        zh: '检查 BMS、PCS 和 EMS 的功能。'
+    },
+    bessCare_block4_item4: {
+        id: 'Pemeriksaan kondisi struktur, kekencangan baut, serta sambungan listrik.',
+        en: 'Inspection of structural condition, bolt tightness, and electrical connections.',
+        zh: '检查结构状况、螺栓紧固度及电气连接。'
+    },
+    bessCare_block4_item5: {
+        id: 'Pemeriksaan kinerja sistem pendingin dan kondisi sistem pemadam kebakaran.',
+        en: 'Inspection of cooling system performance and fire suppression system condition.',
+        zh: '检查冷却系统性能及消防灭火系统状况。'
+    },
+    bessCare_block4_item6: {
+        id: 'Evaluasi riwayat alarm dan hasil pemeliharaan sebagai dasar rekomendasi tindak lanjut.',
+        en: 'Review of alarm history and maintenance results as the basis for follow-up recommendations.',
+        zh: '评估报警历史和维护结果，作为后续建议的依据。'
+    },
+    bessCare_warranty_title: {
+        id: 'GARANSI BESS 5 TAHUN',
+        en: '5-YEAR BESS WARRANTY',
+        zh: 'BESS 5 年保修'
+    },
+    bessCare_warranty_item1: {
+        id: 'Garansi 5 tahun untuk sistem BESS.',
+        en: '5-year warranty for the BESS system.',
+        zh: 'BESS 系统享有 5 年保修。'
+    },
+    bessCare_warranty_item2: {
+        id: 'Mencakup komponen sistem yang relevan serta pekerjaan instalasi/pengerjaan MSI, sesuai kontrak.',
+        en: 'Covers relevant system components and MSI installation/workmanship, as per the contract.',
+        zh: '涵盖相关系统部件以及 MSI 的安装/施工工作，以合同为准。'
+    },
+    bessCare_warranty_item3: {
+        id: 'Cakupan meliputi cacat manufaktur, cacat terkait desain, dan ketidaksesuaian terhadap spesifikasi kontrak.',
+        en: 'Coverage includes manufacturing defects, design-related defects, and non-conformance with contract specifications.',
+        zh: '保修范围包括制造缺陷、设计相关缺陷以及与合同规格不符的情况。'
+    },
+    bessCare_warranty_item4: {
+        id: 'Perbaikan atau penggantian komponen terdampak sesuai hasil pemeriksaan.',
+        en: 'Repair or replacement of affected components based on inspection results.',
+        zh: '根据检查结果维修或更换受影响的部件。'
+    },
+    bessCare_warranty_item5: {
+        id: 'Pemeriksaan dan penanganan gangguan selama masa garansi sesuai ketentuan yang berlaku.',
+        en: 'Inspection and fault handling during the warranty period in accordance with applicable terms.',
+        zh: '保修期内依据适用条款进行检查和故障处理。'
+    },
+    bessCare_warranty_note: {
+        id: 'Garansi mengikuti Syarat & Ketentuan Garansi resmi, pengecualian, ketentuan OEM yang berlaku, serta ketentuan komponen dalam kontrak komersial.',
+        en: 'The warranty follows the official Warranty Terms & Conditions, exclusions, applicable OEM provisions, and component provisions in the commercial contract.',
+        zh: '保修遵循官方保修条款与条件、除外责任、适用的 OEM 规定以及商业合同中的部件条款。'
+    },
 };

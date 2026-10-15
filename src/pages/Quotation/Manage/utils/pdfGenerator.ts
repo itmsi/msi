@@ -1627,6 +1627,10 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
             item.componen_type.toLowerCase().includes('on road regular') &&
             !item.componen_type.toLowerCase().includes('ev')
         );
+        const hasBESSProduct = data.manage_quotation_items.some((item: any) =>
+            item.componen_type && item.componen_type.toLowerCase().includes('bess')
+        );
+
 
         const headerProduct = (varYPos: number): number => {
             // Title
@@ -2462,6 +2466,231 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
 
             yPos = bagianDeskripsi(yPos - 10, manfaatItems, syaratItems, notesItems, true, language);
             yPos += 5;
+        }
+
+        if (hasBESSProduct) {
+            const contentWidth = pageWidth - 2 * margin;
+            const contentBottom = pageHeight - footerHeight - margin;
+            const cardGap = 5;
+            const cardPadding = 5;
+            const cardWidth = (contentWidth - cardGap) / 2;
+            const noteLineHeight = 3.2;
+            const iconSize = 8;
+            const WARRANTY_ITEM_COUNT = 5;
+
+            // ratio = lebar / tinggi gambar asli, supaya ikon yang tidak persegi (battery 70x55) tidak gepeng.
+            type CareIcon = { path: string; ratio: number };
+            const CARE_BLOCKS: { itemCount: number; icon: CareIcon }[] = [
+                { itemCount: 5, icon: { path: '/pdf/battery.png', ratio: 70 / 55 } },
+                { itemCount: 6, icon: { path: '/pdf/pre-delivery-inspection.png', ratio: 1 } },
+                { itemCount: 6, icon: { path: '/pdf/on-call-service.png', ratio: 1 } },
+                { itemCount: 6, icon: { path: '/pdf/maintenance-service.png', ratio: 1 } },
+            ];
+
+            type Rgb = [number, number, number];
+            type CareCardStyle = {
+                titleSize: number;
+                titleColor: Rgb;
+                titleAlign: 'left' | 'center';
+                titleLineHeight: number;
+                itemSize: number;
+                itemLineHeight: number;
+                itemGap: number;
+                bulletIndent: number;
+            };
+
+            // Mengikuti kotak "Gratis" (bagianGratis): ikon di tengah atas, judul rata tengah.
+            const BLOCK_STYLE: CareCardStyle = {
+                titleSize: 9, titleColor: [0, 48, 97], titleAlign: 'center', titleLineHeight: 4.2,
+                itemSize: 8, itemLineHeight: 3.6, itemGap: 1.2, bulletIndent: 4,
+            };
+
+            // Mengikuti kotak "PARTS AVAILABILTY ASSURANCE PROGRAM" (bagianDeskripsi): judul 10pt gelap
+            // rata kiri, bullet 7pt di x+5 dengan teks di x+10, jarak baris 3.
+            const WARRANTY_STYLE: CareCardStyle = {
+                titleSize: 10, titleColor: [23, 26, 31], titleAlign: 'left', titleLineHeight: 5,
+                itemSize: 7, itemLineHeight: 3, itemGap: 0, bulletIndent: 5,
+            };
+
+            type CareCard = { titleLines: string[]; items: string[][]; noteLines: string[]; style: CareCardStyle; icon?: CareIcon };
+
+            const startCarePage = () => {
+                doc.addPage();
+                addHeaderIEL();
+                addFooter();
+                yPos = margin + headerHeight;
+            };
+
+            // Teks dibungkus dengan font yang benar-benar dipakai saat menggambar, supaya lebar
+            // baris (terutama huruf Mandarin yang memakai NotoSansSC) tidak salah dihitung.
+            const wrapText = (text: string, fontSize: number, fontStyle: 'normal' | 'bold', width: number): string[] => {
+                doc.setFontSize(fontSize);
+                setFontByLanguage(doc, text, 'Futura', fontStyle, language);
+                return doc.splitTextToSize(text, width);
+            };
+
+            const toCareCard = (
+                titleKey: string,
+                itemKeys: string[],
+                width: number,
+                style: CareCardStyle,
+                icon?: CareIcon,
+                noteKey?: string
+            ): CareCard => {
+                const textWidth = width - 2 * cardPadding;
+                return {
+                    titleLines: wrapText(langField(titleKey), style.titleSize, 'bold', textWidth),
+                    items: itemKeys.map(key => wrapText(langField(key), style.itemSize, 'normal', textWidth - style.bulletIndent)),
+                    noteLines: noteKey ? wrapText(langField(noteKey), 7, 'normal', textWidth) : [],
+                    style,
+                    icon,
+                };
+            };
+
+            // Ikon di tengah atas kartu, sama seperti kotak "Gratis". Kalau gambar gagal dimuat,
+            // diganti lingkaran abu-abu seperti fallback di bagianGratis.
+            const drawCareIcon = (icon: CareIcon, centerX: number, top: number) => {
+                const iconWidth = icon.ratio >= 1 ? iconSize : iconSize * icon.ratio;
+                const iconHeight = icon.ratio >= 1 ? iconSize / icon.ratio : iconSize;
+                try {
+                    doc.addImage(icon.path, 'PNG', centerX - iconWidth / 2, top + (iconSize - iconHeight) / 2, iconWidth, iconHeight);
+                } catch {
+                    doc.setFillColor(220, 220, 220);
+                    doc.circle(centerX, top + iconSize / 2, iconSize / 2, 'F');
+                }
+            };
+
+            // Satu jalur untuk mengukur (draw = false) dan menggambar (draw = true), sehingga tinggi
+            // kartu yang dipakai untuk border selalu sama dengan isi yang benar-benar tergambar.
+            const flowCareCard = (card: CareCard, x: number, y: number, width: number, draw: boolean): number => {
+                const { style } = card;
+                const textX = x + cardPadding;
+                const centerX = x + width / 2;
+                let cursorY = y + cardPadding + 3;
+
+                if (card.icon) {
+                    if (draw) drawCareIcon(card.icon, centerX, y + 3);
+                    cursorY = y + 3 + iconSize + 5;
+                }
+
+                let lastBaseline = cursorY;
+
+                doc.setFontSize(style.titleSize);
+                doc.setTextColor(...style.titleColor);
+                card.titleLines.forEach(line => {
+                    if (draw) {
+                        setFontByLanguage(doc, line, 'Futura', 'bold', language);
+                        if (style.titleAlign === 'center') {
+                            doc.text(line, centerX, cursorY, { align: 'center' });
+                        } else {
+                            doc.text(line, textX, cursorY);
+                        }
+                    }
+                    lastBaseline = cursorY;
+                    cursorY += style.titleLineHeight;
+                });
+                cursorY += 1;
+
+                doc.setFontSize(style.itemSize);
+                doc.setTextColor(23, 26, 31);
+                card.items.forEach(lines => {
+                    lines.forEach((line, lineIndex) => {
+                        if (draw) {
+                            setFontByLanguage(doc, line, 'Futura', 'normal', language);
+                            if (lineIndex === 0) doc.text('•', textX, cursorY);
+                            doc.text(line, textX + style.bulletIndent, cursorY);
+                        }
+                        lastBaseline = cursorY;
+                        cursorY += style.itemLineHeight;
+                    });
+                    cursorY += style.itemGap;
+                });
+
+                if (card.noteLines.length) {
+                    cursorY += 1.5;
+                    doc.setFontSize(7);
+                    doc.setTextColor(100, 100, 100);
+                    card.noteLines.forEach(line => {
+                        if (draw) {
+                            setFontByLanguage(doc, line, 'Futura', 'normal', language);
+                            doc.text(line, textX, cursorY);
+                        }
+                        lastBaseline = cursorY;
+                        cursorY += noteLineHeight;
+                    });
+                }
+
+                return lastBaseline + 1.2 + cardPadding - y;
+            };
+
+            startCarePage();
+
+            // Nama program "MSI CARE+" tidak diterjemahkan, ditulis langsung seperti judul
+            // "Motor Sights Fleet" di halaman MSF; judul dan pengantarnya mengikuti bahasa.
+            doc.setFontSize(14);
+            doc.setTextColor(0, 48, 97);
+            setFontSafe(doc, 'Futura', 'bold');
+            doc.text('MSI CARE+', margin, yPos);
+            yPos += 7;
+
+            wrapText(langField('bessCare_title'), 12, 'bold', contentWidth).forEach(line => {
+                doc.text(line, margin, yPos);
+                yPos += 6;
+            });
+
+            doc.setTextColor(0, 0, 0);
+            wrapText(langField('bessCare_description'), 9, 'normal', contentWidth * 0.8).forEach(line => {
+                doc.text(line, margin, yPos);
+                yPos += 4.2;
+            });
+            yPos += 3;
+
+            // BLOK 1-4: dua kolom bergaya kotak "Gratis" (border tipis + ikon), tinggi sebaris disamakan
+            const careCards = CARE_BLOCKS.map((block, blockIndex) => toCareCard(
+                `bessCare_block${blockIndex + 1}_title`,
+                Array.from({ length: block.itemCount }, (_, itemIndex) => `bessCare_block${blockIndex + 1}_item${itemIndex + 1}`),
+                cardWidth,
+                BLOCK_STYLE,
+                block.icon
+            ));
+
+            for (let index = 0; index < careCards.length; index += 2) {
+                const row = careCards.slice(index, index + 2);
+                const rowHeight = Math.max(...row.map(card => flowCareCard(card, 0, 0, cardWidth, false)));
+
+                if (yPos + rowHeight > contentBottom) startCarePage();
+
+                row.forEach((card, column) => {
+                    const cardX = margin + column * (cardWidth + cardGap);
+                    doc.setDrawColor(228, 231, 236);
+                    doc.setLineWidth(0.3);
+                    doc.roundedRect(cardX, yPos, cardWidth, rowHeight, 1, 1, 'S');
+                    flowCareCard(card, cardX, yPos, cardWidth, true);
+                });
+
+                yPos += rowHeight + cardGap;
+            }
+
+            // Garansi BESS 5 tahun: satu kartu penuh dengan bingkai, catatan ketentuan di bagian bawah
+            const warrantyCard = toCareCard(
+                'bessCare_warranty_title',
+                Array.from({ length: WARRANTY_ITEM_COUNT }, (_, itemIndex) => `bessCare_warranty_item${itemIndex + 1}`),
+                contentWidth,
+                WARRANTY_STYLE,
+                undefined,
+                'bessCare_warranty_note'
+            );
+            const warrantyHeight = flowCareCard(warrantyCard, 0, 0, contentWidth, false);
+
+            if (yPos + warrantyHeight > contentBottom) startCarePage();
+
+            // Border sama dengan kotak "PARTS AVAILABILTY ASSURANCE PROGRAM"
+            doc.setDrawColor(228, 231, 236);
+            doc.setLineWidth(0.3);
+            doc.roundedRect(margin, yPos, contentWidth, warrantyHeight, 1, 1, 'S');
+            flowCareCard(warrantyCard, margin, yPos, contentWidth, true);
+
+            yPos += warrantyHeight;
         }
 
     }

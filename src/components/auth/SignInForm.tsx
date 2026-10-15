@@ -8,7 +8,7 @@ import { LoginRequest, LoginFormErrors } from "@/types/auth";
 import { EASE_OUT, fadeUp, groupStagger } from "./login/motionVariants";
 
 const inputClass =
-    "h-11 w-full rounded-lg border bg-white px-4 text-sm text-(--login-primary) placeholder:text-(--login-placeholder) " +
+    "h-11 w-full rounded-lg border bg-white px-4 text-sm text-(--color-black) placeholder:text-(--login-placeholder) " +
     "transition-colors duration-200 focus:outline-none focus-visible:ring-2 " +
     "disabled:cursor-not-allowed disabled:bg-gray-50 disabled:opacity-60";
 

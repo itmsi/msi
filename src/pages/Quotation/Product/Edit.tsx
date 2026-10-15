@@ -361,6 +361,7 @@ export default function EditProduct() {
         { value: 3, label: 'OFF ROAD IRREGULAR' },
         { value: 4, label: 'OFF ROAD EV' },
         { value: 5, label: 'ON ROAD EV' },
+        { value: 6, label: 'BESS' },
     ];
 
     const productOptions = [
