@@ -89,6 +89,7 @@ export default function Manage() {
                 </div>
             ),
             wrap: true,
+            maxWidth: '220px',
             minWidth: '220px',
         },
         {
@@ -100,6 +101,7 @@ export default function Manage() {
                 </div>
             ),
             wrap: true,
+            maxWidth: '180px',
             minWidth: '180px',
         },
         {
@@ -111,6 +113,7 @@ export default function Manage() {
                 </div>
             ),
             wrap: true,
+            maxWidth: '220px',
             minWidth: '220px',
         },
         {
@@ -135,6 +138,7 @@ export default function Manage() {
                 </div>
             ),
             wrap: true,
+            maxWidth: '180px',
             minWidth: '180px',
         },
         {
@@ -146,6 +150,7 @@ export default function Manage() {
                 </div>
             ),
             wrap: true,
+            maxWidth: '220px',
             minWidth: '220px',
         },
         {
@@ -162,6 +167,7 @@ export default function Manage() {
                 );
             },
             center: true,
+            maxWidth: '200px',
             minWidth: '200px',
         },
         {
@@ -175,6 +181,7 @@ export default function Manage() {
                 </div>
             ),
             wrap: true,
+            maxWidth: '300px',
             minWidth: '300px',
         },
         createActionsColumn([
