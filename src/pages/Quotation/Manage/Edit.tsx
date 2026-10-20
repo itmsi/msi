@@ -29,6 +29,7 @@ import { useEditQuotation } from './hooks/useEditQuotation';
 import { useAsyncSelect, SelectOption } from '../hooks/useAsyncSelect';
 import { useTermConditionSelect, TermConditionSelectOption } from '../hooks/useTermConditionSelect';
 import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalInput, handleDecimalInputComma, formatNumberInputwithComma, handlePercentageInputComma, getCompanyName } from '@/helpers/generalHelper';
+import moment from 'moment';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { ItemProductService } from '../Product/services/productService';
 import ProductDetailDrawer from '@/pages/Quotation/Manage/components/ProductDetailDrawer';
@@ -122,7 +123,7 @@ export default function EditQuotation() {
         bank_account_number: '',
         bank_account_type: '',
         bank_account_bank_name: '',
-        manage_quotation_date: new Date().toISOString().split('T')[0],
+        manage_quotation_date: moment().format('YYYY-MM-DD'),
         manage_quotation_valid_date: '',
         manage_quotation_grand_total: '',
         manage_quotation_grand_total_before: '0',
@@ -277,10 +278,10 @@ export default function EditQuotation() {
 
             // Set dates
             if (transformedData.manage_quotation_date) {
-                setInvoiceDate(new Date(transformedData.manage_quotation_date));
+                setInvoiceDate(moment(transformedData.manage_quotation_date, 'YYYY-MM-DD').toDate());
             }
             if (transformedData.manage_quotation_valid_date) {
-                setDueDate(new Date(transformedData.manage_quotation_valid_date));
+                setDueDate(moment(transformedData.manage_quotation_valid_date, 'YYYY-MM-DD').toDate());
             }
             if (transformedData.term_content_directory) {
                 setTermConditionContent(transformedData.term_content_directory);
@@ -411,8 +412,8 @@ export default function EditQuotation() {
 
     useEffect(() => {
         if (formData.manage_quotation_date && !loading) {
-            const newDateString = invoiceDate.toISOString().split('T')[0];
-            const newDueDateString = dueDate.toISOString().split('T')[0];
+            const newDateString = moment(invoiceDate).format('YYYY-MM-DD');
+            const newDueDateString = moment(dueDate).format('YYYY-MM-DD');
 
             // Only update if dates actually changed to prevent infinite loops
             if (formData.manage_quotation_date !== newDateString || formData.manage_quotation_valid_date !== newDueDateString) {
@@ -1209,7 +1210,6 @@ export default function EditQuotation() {
                     ? formatForBackendDownPayment(updatedFormData.manage_quotation_payment_presentase)
                     : '0'
             };
-
             // Clean up number formatting for API
             const finalPayload = resetQuotationFormattedNumbers(apiPayload);
 

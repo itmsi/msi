@@ -29,6 +29,7 @@ import { useCreateQuotation } from './hooks/useCreateQuotation';
 import { useAsyncSelect, SelectOption } from '../hooks/useAsyncSelect';
 import { useTermConditionSelect, TermConditionSelectOption } from '../hooks/useTermConditionSelect';
 import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalInput, handleDecimalInputComma, formatNumberInputwithComma, handlePercentageInputComma, getCompanyName } from '@/helpers/generalHelper';
+import moment from 'moment';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { ItemProductService } from '../Product/services/productService';
 import { QuotationService } from './services/quotationService';
@@ -118,7 +119,7 @@ export default function CreateQuotation() {
         bank_account_number: '',
         bank_account_type: '',
         bank_account_bank_name: '',
-        manage_quotation_date: new Date().toISOString().split('T')[0],
+        manage_quotation_date: moment().format('YYYY-MM-DD'),
         manage_quotation_valid_date: '',
         manage_quotation_grand_total: '',
         manage_quotation_grand_total_before: '0',
@@ -181,8 +182,8 @@ export default function CreateQuotation() {
     useEffect(() => {
         setFormData(prev => ({
             ...prev,
-            manage_quotation_date: invoiceDate.toISOString().split('T')[0],
-            manage_quotation_valid_date: dueDate.toISOString().split('T')[0]
+            manage_quotation_date: moment(invoiceDate).format('YYYY-MM-DD'),
+            manage_quotation_valid_date: moment(dueDate).format('YYYY-MM-DD')
         }));
     }, [invoiceDate, dueDate]);
 
