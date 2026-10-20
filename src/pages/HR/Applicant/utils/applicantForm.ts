@@ -14,6 +14,7 @@ import {
     ApplicantInterviewStep,
     ApplicantListSection,
     ApplicantReference,
+    ApplicantSpeechStatus,
     ApplicantWorkingExperience,
 } from '../types/applicant';
 
@@ -32,8 +33,8 @@ export const APPLICANT_FIELD_GROUPS: { titleKey: string; fields: ApplicantScalar
         withDriverLicense: true,
         fields: [
             { field: 'full_name', labelKey: 'fullName', required: true },
-            { field: 'address_as_per_id_card', labelKey: 'addressIdCard', type: 'textarea', required: true },
             { field: 'nickname', labelKey: 'nickname', required: true },
+            { field: 'address_as_per_id_card', labelKey: 'addressIdCard', type: 'textarea', required: true },
             { field: 'present_address', labelKey: 'presentAddress', type: 'textarea', required: true },
             { field: 'no_mobile', labelKey: 'mobileNumber', required: true },
             { field: 'city', labelKey: 'city' },
@@ -460,31 +461,53 @@ export const pickApplicantSummary = (detail: ApplicantFormDetail): ApplicantForm
     applicant_form_url: detail.applicant_form_url,
 });
 
+const SPEECH_STATUSES: Exclude<ApplicantSpeechStatus, null>[] = ['Success', 'Pending', 'Failed'];
+
+// Status dibandingkan tanpa peduli huruf besar/kecil; nilai di luar daftar dianggap belum ditranskrip.
+const toSpeechStatus = (value: string): ApplicantSpeechStatus =>
+    SPEECH_STATUSES.find(status => status.toLowerCase() === value.trim().toLowerCase()) ?? null;
+
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
+
+const readText = (source: Record<string, unknown>, key: string): string =>
+    source[key] === null || source[key] === undefined ? '' : String(source[key]);
+
+// Teks pertanyaan ada di larik `questions`; dipilih yang step-nya sama dengan baris,
+// atau yang pertama bila tidak ada yang cocok.
+const pickQuestion = (value: unknown, step: string): Record<string, unknown> => {
+    const questions = parseRows(value).filter(isRecord);
+    return questions.find(question => readText(question, 'step') === step) ?? questions[0] ?? {};
+};
+
 export const toApplicantInterviewSteps = (value: unknown): ApplicantInterviewStep[] =>
     parseRows(value)
-        .filter((row): row is Record<string, unknown> => typeof row === 'object' && row !== null)
+        .filter(isRecord)
         .map(row => {
-            const read = (key: string): string => (row[key] === null || row[key] === undefined ? '' : String(row[key]));
+            const read = (key: string): string => readText(row, key);
+            const question = pickQuestion(row.questions, read('step'));
 
             return {
-                step: read('step'),
+                id: read('id'),
+                step: read('step') || readText(question, 'step'),
                 idQuestion: read('id_question'),
-                questionId: read('question_id'),
-                questionEn: read('question_en'),
-                questionCn: read('question_cn'),
-                focusAssessment: read('focus_assessment'),
-                videoUrl: read('file_video'),
+                questionId: readText(question, 'question_id'),
+                questionEn: readText(question, 'question_en'),
+                questionCn: readText(question, 'question_cn'),
+                focusAssessment: readText(question, 'focus_assessment'),
+                videoUrl: read('file_link_video'),
                 videoTitle: read('file_title_video'),
-                audioUrl: read('file_audio'),
+                audioUrl: read('file_link_audio'),
                 audioTitle: read('file_title_audio'),
+                speechText: read('speech_text'),
+                speechStatus: toSpeechStatus(read('status_speech_text')),
+                speechMessage: read('message_speech_text'),
             };
         })
-        .filter(item => item.questionId || item.questionEn || item.questionCn || item.videoUrl || item.audioUrl)
+        .filter(item => item.id || item.videoUrl || item.audioUrl)
         .sort((a, b) => (Number(a.step) || 0) - (Number(b.step) || 0));
 
 export const pickApplicantAttachments = (detail: ApplicantFormDetail): ApplicantFormAttachments => ({
     files: toApplicantFormFiles(detail.applicant_form_files),
     signatureLink: detail.signature_link || '',
     signatureDate: toDateInputValue(detail.signature_date ?? null),
-    interviewSteps: toApplicantInterviewSteps(detail.applicant_form_contents),
 });

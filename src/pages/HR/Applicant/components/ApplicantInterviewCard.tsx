@@ -1,13 +1,21 @@
 import { useState } from 'react';
 import { MdDownload } from 'react-icons/md';
+import { LuAudioLines, LuChevronDown, LuLoaderCircle, LuRefreshCw } from 'react-icons/lu';
+import Badge from '@/components/ui/badge/Badge';
+import Button from '@/components/ui/button/Button';
 import { useLanguage } from '@/components/lang/useLanguage';
-import { ApplicantInterviewStep } from '../types/applicant';
+import { ApplicantInterviewStep, ApplicantSpeechStatus } from '../types/applicant';
 import { toDownloadUrl } from '../utils/applicantForm';
 import { applicantLabels } from '../language/applicantLabels';
-import { LuChevronDown } from 'react-icons/lu';
 
 interface ApplicantInterviewCardProps {
     steps: ApplicantInterviewStep[];
+    loading: boolean;
+    error: string | null;
+    transcribingIds: string[];
+    canTranscribe: boolean;
+    onTranscribe: (step: ApplicantInterviewStep) => void;
+    onRetry: () => void;
 }
 
 interface MediaPlayerProps {
@@ -64,18 +72,95 @@ const MediaPlayer = ({ kind, url, title }: MediaPlayerProps) => {
     );
 };
 
-const ApplicantInterviewCard = ({ steps }: ApplicantInterviewCardProps) => {
-    const { lang, langField } = useLanguage(applicantLabels);
+const SPEECH_STATUS_BADGE: Record<Exclude<ApplicantSpeechStatus, null> | 'none', { color: 'success' | 'warning' | 'error' | 'light'; labelKey: string }> = {
+    Success: { color: 'success', labelKey: 'transcriptSuccess' },
+    Pending: { color: 'warning', labelKey: 'transcriptPending' },
+    Failed: { color: 'error', labelKey: 'transcriptFailed' },
+    none: { color: 'light', labelKey: 'transcriptNotStarted' },
+};
 
-    if (!steps.length) return null;
+interface TranscriptSectionProps {
+    step: ApplicantInterviewStep;
+    transcribing: boolean;
+    canTranscribe: boolean;
+    onTranscribe: (step: ApplicantInterviewStep) => void;
+}
+
+const TranscriptSection = ({ step, transcribing, canTranscribe, onTranscribe }: TranscriptSectionProps) => {
+    const { langField } = useLanguage(applicantLabels);
+    const status = step.speechStatus;
+    const badge = SPEECH_STATUS_BADGE[status ?? 'none'];
+    const isFailed = status === 'Failed';
+
+    return (
+        <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-primary-bold uppercase tracking-wide text-gray-600">
+                    {langField('answerTranscript')}
+                </span>
+                <Badge size="sm" color={badge.color}>{langField(badge.labelKey)}</Badge>
+            </div>
+
+            {status === 'Success' && (
+                <p className="max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm leading-relaxed text-gray-800 whitespace-pre-line">
+                    {step.speechText || '-'}
+                </p>
+            )}
+
+            {status === 'Pending' && (
+                <p className="flex items-center gap-2 text-sm text-gray-500">
+                    <LuLoaderCircle size={14} className="animate-spin shrink-0" />
+                    {langField('transcriptPendingDescription')}
+                </p>
+            )}
+
+            {(status === null || isFailed) && (
+                <div className="flex flex-wrap items-center gap-3">
+                    <p className={`flex-1 min-w-40 text-sm ${isFailed ? 'text-error-600' : 'text-gray-500'}`}>
+                        {isFailed
+                            ? step.speechMessage || langField('transcriptFailedDescription')
+                            : langField('transcriptNotStartedDescription')}
+                    </p>
+                    {canTranscribe && (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={!step.audioUrl || transcribing}
+                            onClick={() => onTranscribe(step)}
+                            startIcon={transcribing
+                                ? <LuLoaderCircle size={14} className="animate-spin" />
+                                : isFailed ? <LuRefreshCw size={14} /> : <LuAudioLines size={14} />}
+                        >
+                            {langField(transcribing ? 'transcribing' : isFailed ? 'retryTranscribe' : 'transcribeAudio')}
+                        </Button>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
+const ApplicantInterviewCard = ({
+    steps,
+    loading,
+    error,
+    transcribingIds,
+    canTranscribe,
+    onTranscribe,
+    onRetry,
+}: ApplicantInterviewCardProps) => {
+    const { lang, langField } = useLanguage(applicantLabels);
+    const [showInformation, setShowInformation] = useState(true);
+
+    if (!loading && !error && !steps.length) return null;
 
     const getQuestion = (item: ApplicantInterviewStep): string => {
         const byLang = { id: item.questionId, en: item.questionEn, zh: item.questionCn }[lang];
-        return byLang || item.questionEn || item.questionId || item.questionCn || '-';
+        return byLang || item.questionEn || item.questionId || item.questionCn;
     };
 
-    const [showInformation, setShowInformation] = useState(true);
     const actionToggle = () => setShowInformation(prev => !prev);
+
     return (
         <div className="bg-white rounded-2xl shadow-sm p-6 space-y-6">
             <h3
@@ -84,9 +169,24 @@ const ApplicantInterviewCard = ({ steps }: ApplicantInterviewCardProps) => {
             >
                 {langField('interviewQuestions')} <LuChevronDown />
             </h3>
-            {showInformation &&
+            {showInformation && loading && !steps.length && (
+                <p className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                    <LuLoaderCircle size={15} className="animate-spin" />
+                    {langField('loadingInterview')}
+                </p>
+            )}
+            {showInformation && error && !steps.length && (
+                <div className="flex flex-col items-center gap-3">
+                    <p className="text-sm text-error-600">{error}</p>
+                    <Button size="sm" variant="outline" onClick={onRetry} startIcon={<LuRefreshCw size={14} />}>
+                        {langField('retry')}
+                    </Button>
+                </div>
+            )}
+            {showInformation && steps.length > 0 &&
                 <div className="space-y-4">
                     {steps.map((item, index) => {
+                        const question = getQuestion(item);
                         const focusItems = item.focusAssessment
                             .split(',')
                             .map(focus => focus.trim())
@@ -94,40 +194,48 @@ const ApplicantInterviewCard = ({ steps }: ApplicantInterviewCardProps) => {
 
                         return (
                             <div
-                                key={item.idQuestion || `${item.step}-${index}`}
+                                key={item.id || `${item.step}-${index}`}
                                 className="border border-gray-200 rounded-xl p-4"
                             >
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start">
-                                    <div className="space-y-3 min-w-0">
-                                        <div className="flex items-center gap-2">
-
-                                            <span className="text-xs font-primary-bold uppercase tracking-wide text-brand-600">
-                                                {langField('question')}
-                                            </span>
-                                        </div>
-
-                                        <div className="bg-brand-50 rounded-lg px-4 py-3 text-sm leading-relaxed text-gray-900 flex gap-2 items-center min-h-30">
-                                            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-brand-500 text-white text-xs font-primary-bold shrink-0">
-                                                {item.step || index + 1}
-                                            </span>
-                                            <p className='flex-1'>
-                                                {getQuestion(item)}
-                                            </p>
-                                        </div>
-
-                                        {focusItems.length > 0 && (
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <span className="text-xs text-gray-500">{langField('focusAssessment')}:</span>
-                                                {focusItems.map(focus => (
-                                                    <span
-                                                        key={focus}
-                                                        className="px-2 py-0.5 text-xs rounded-full border border-gray-200 bg-gray-50 text-gray-700"
-                                                    >
-                                                        {focus}
-                                                    </span>
-                                                ))}
+                                    <div className="space-y-4 min-w-0">
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-primary-bold uppercase tracking-wide text-brand-600">
+                                                    {langField('question')}
+                                                </span>
                                             </div>
-                                        )}
+
+                                            <div className="bg-brand-50 rounded-lg px-4 py-3 text-sm leading-relaxed text-gray-900 flex gap-2 items-center min-h-30">
+                                                <span className="flex items-center justify-center w-7 h-7 rounded-full bg-brand-500 text-white text-xs font-primary-bold shrink-0">
+                                                    {item.step || index + 1}
+                                                </span>
+                                                <p className={`flex-1 ${question ? '' : 'italic text-gray-500'}`}>
+                                                    {question || langField('questionTextUnavailable')}
+                                                </p>
+                                            </div>
+
+                                            {focusItems.length > 0 && (
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <span className="text-xs text-gray-500">{langField('focusAssessment')}:</span>
+                                                    {focusItems.map(focus => (
+                                                        <span
+                                                            key={focus}
+                                                            className="px-2 py-0.5 text-xs rounded-full border border-gray-200 bg-gray-50 text-gray-700"
+                                                        >
+                                                            {focus}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <TranscriptSection
+                                            step={item}
+                                            transcribing={transcribingIds.includes(item.id)}
+                                            canTranscribe={canTranscribe}
+                                            onTranscribe={onTranscribe}
+                                        />
                                     </div>
 
                                     <div>

@@ -10,6 +10,7 @@ import { useHasPermission } from '@/hooks/usePermissions';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { applicantLabels } from './language/applicantLabels';
 import { useApplicantEdit } from './hooks/useApplicantEdit';
+import { useApplicantInterview } from './hooks/useApplicantInterview';
 import ApplicantFields from './components/ApplicantFields';
 import ApplicantSections from './components/ApplicantSections';
 import ApplicantSummaryCard from './components/ApplicantSummaryCard';
@@ -50,6 +51,8 @@ export default function Edit() {
         handleRowChange,
         handleSubmit,
     } = useApplicantEdit(id);
+
+    const interview = useApplicantInterview(id);
 
     if (loading && !summary) {
         return <LoadingOverlay message={langField('loadingApplicantForm')} />;
@@ -115,7 +118,15 @@ export default function Edit() {
                         onRowChange={handleRowChange}
                     />
 
-                    {attachments && <ApplicantInterviewCard steps={attachments.interviewSteps} />}
+                    <ApplicantInterviewCard
+                        steps={interview.steps}
+                        loading={interview.loading}
+                        error={interview.error}
+                        transcribingIds={interview.transcribingIds}
+                        canTranscribe={canUpdate}
+                        onTranscribe={interview.handleTranscribe}
+                        onRetry={interview.refetch}
+                    />
                     {attachments && <ApplicantAttachmentsCard attachments={attachments} />}
                 </div>
 

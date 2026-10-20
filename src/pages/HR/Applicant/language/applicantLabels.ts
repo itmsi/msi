@@ -532,6 +532,91 @@ export const applicantLabels: TranslationMap = {
         en: 'Download file',
         zh: '下载文件',
     },
+    questionTextUnavailable: {
+        id: 'Teks pertanyaan tidak tersedia',
+        en: 'Question text is not available',
+        zh: '问题内容不可用',
+    },
+    loadingInterview: {
+        id: 'Memuat pertanyaan wawancara...',
+        en: 'Loading interview questions...',
+        zh: '正在加载面试问题...',
+    },
+    loadInterviewFailed: {
+        id: 'Gagal memuat pertanyaan wawancara',
+        en: 'Failed to load interview questions',
+        zh: '加载面试问题失败',
+    },
+    retry: {
+        id: 'Coba lagi',
+        en: 'Retry',
+        zh: '重试',
+    },
+    answerTranscript: {
+        id: 'Transkrip Jawaban',
+        en: 'Answer Transcript',
+        zh: '回答文字记录',
+    },
+    transcriptSuccess: {
+        id: 'Berhasil',
+        en: 'Success',
+        zh: '成功',
+    },
+    transcriptPending: {
+        id: 'Diproses',
+        en: 'Processing',
+        zh: '处理中',
+    },
+    transcriptFailed: {
+        id: 'Gagal',
+        en: 'Failed',
+        zh: '失败',
+    },
+    transcriptNotStarted: {
+        id: 'Belum ditranskrip',
+        en: 'Not transcribed',
+        zh: '未转录',
+    },
+    transcriptPendingDescription: {
+        id: 'Transkrip sedang diproses, halaman akan diperbarui otomatis.',
+        en: 'The transcript is being processed; this page will update automatically.',
+        zh: '文字记录正在处理中，页面将自动更新。',
+    },
+    transcriptFailedDescription: {
+        id: 'Transkrip gagal diproses.',
+        en: 'The transcript could not be processed.',
+        zh: '文字记录处理失败。',
+    },
+    transcriptNotStartedDescription: {
+        id: 'Audio jawaban ini belum ditranskrip.',
+        en: 'This answer audio has not been transcribed yet.',
+        zh: '此回答音频尚未转录。',
+    },
+    transcribeAudio: {
+        id: 'Transkrip Audio',
+        en: 'Transcribe Audio',
+        zh: '转录音频',
+    },
+    retryTranscribe: {
+        id: 'Transkrip Ulang',
+        en: 'Transcribe Again',
+        zh: '重新转录',
+    },
+    transcribing: {
+        id: 'Mengirim...',
+        en: 'Sending...',
+        zh: '正在发送...',
+    },
+    transcribeStarted: {
+        id: 'Permintaan transkrip berhasil dikirim',
+        en: 'Transcription request sent',
+        zh: '转录请求已发送',
+    },
+    transcribeFailed: {
+        id: 'Gagal mengirim permintaan transkrip',
+        en: 'Failed to send the transcription request',
+        zh: '发送转录请求失败',
+    },
 
     // Attachments & Signature
     attachments: {
