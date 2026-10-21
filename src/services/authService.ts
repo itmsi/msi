@@ -56,7 +56,7 @@ export class AuthService {
             const response = await apiPost<LoginResponse>(this.ENDPOINT, {
                 email: credentials.email,
                 password: credentials.password
-            });
+            }, { skipSessionRedirect: true });
             
             // Validate response structure
             if (!response.data.success) {

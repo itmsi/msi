@@ -118,6 +118,11 @@ export const applicantManage: TranslationMap = {
         en: 'Contact',
         zh: '联系方式'
     },
+    resend: {
+        id: 'Kirim Ulang Email',
+        en: 'Resend Email',
+        zh: '重新发送邮件'
+    },
     invitedAt: {
         id: 'Tanggal Diundang',
         en: 'Invitation Date',
@@ -240,5 +245,65 @@ export const applicantManage: TranslationMap = {
         id: 'Gagal membuat undangan pelamar',
         en: 'Failed to create applicant invitation',
         zh: '创建申请人邀请失败'
+    },
+    resendUnsuccessful: {
+        id: 'Email undangan tidak berhasil dikirim ulang',
+        en: 'Invitation email was not resent',
+        zh: '邀请邮件未能重新发送'
+    },
+    resendSuccess: {
+        id: 'Email undangan berhasil dikirim ulang',
+        en: 'Invitation email resent successfully',
+        zh: '邀请邮件已重新发送'
+    },
+    resendFailed: {
+        id: 'Gagal mengirim ulang email undangan',
+        en: 'Failed to resend invitation email',
+        zh: '重新发送邀请邮件失败'
+    },
+    emailStatus: {
+        id: 'Status Email',
+        en: 'Email Status',
+        zh: '邮件状态'
+    },
+    emailStatusSuccessLabel: {
+        id: 'Terkirim',
+        en: 'Sent',
+        zh: '已发送'
+    },
+    emailStatusFailedLabel: {
+        id: 'Gagal terkirim',
+        en: 'Failed to send',
+        zh: '发送失败'
+    },
+    emailStatusNotSent: {
+        id: 'Belum dikirim',
+        en: 'Not sent',
+        zh: '未发送'
+    },
+    emailStatusProcess: {
+        id: 'Sedang dikirim',
+        en: 'Sending',
+        zh: '发送中'
+    },
+    invitationNotAvailable: {
+        id: 'Data undangan tidak tersedia',
+        en: 'Invitation data is not available',
+        zh: '邀请数据不可用'
+    },
+    emailStatusUnsuccessful: {
+        id: 'Status email tidak berhasil diperbarui',
+        en: 'Email status was not updated',
+        zh: '邮件状态未能更新'
+    },
+    emailStatusSuccess: {
+        id: 'Status email berhasil diperbarui',
+        en: 'Email status updated successfully',
+        zh: '邮件状态更新成功'
+    },
+    emailStatusFailed: {
+        id: 'Gagal memperbarui status email',
+        en: 'Failed to update email status',
+        zh: '更新邮件状态失败'
     }
 };

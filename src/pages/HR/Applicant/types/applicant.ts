@@ -18,7 +18,20 @@ export interface ApplicantFormListItem {
     position_applied_for: string | null;
     city: string | null;
     working_available_date: string | null;
+    applicant_form_invitation_id: string;
+    status_send_email: ApplicantSendEmailStatus;
     applicant_form_url: string | null;
+}
+
+export type ApplicantSendEmailStatus = 'Success' | 'Process' | 'Failed' | null;
+
+export type ApplicantSendEmailStatusRequest = {
+    status_send_email: Exclude<ApplicantSendEmailStatus, 'Process' | null>;
+}
+
+export interface ApplicantSendEmailStatusResponse {
+    success: boolean;
+    message: string;
 }
 
 export type ApplicantFormListRequest = {
@@ -106,7 +119,11 @@ export interface ApplicantFormFile {
     file_title: string;
 }
 
+// null berarti audio belum pernah ditranskrip.
+export type ApplicantSpeechStatus = 'Success' | 'Pending' | 'Failed' | null;
+
 export interface ApplicantInterviewStep {
+    id: string;
     step: string;
     idQuestion: string;
     questionId: string;
@@ -117,15 +134,40 @@ export interface ApplicantInterviewStep {
     videoTitle: string;
     audioUrl: string;
     audioTitle: string;
+    speechText: string;
+    speechStatus: ApplicantSpeechStatus;
+    speechMessage: string;
 }
 
-// Data tambahan dari detail yang hanya dibaca (lampiran, tanda tangan, jawaban wawancara),
+export type ApplicantFormContentsRequest = {
+    page: number;
+    limit: number;
+    search: string;
+    applicant_form_id: string;
+    sort_by: 'step' | 'created_at';
+    sort_order: 'asc' | 'desc';
+}
+
+export interface ApplicantFormContentsResponse {
+    success: boolean;
+    message: string;
+    data?: {
+        data?: unknown[];
+        pagination?: Pagination;
+    };
+}
+
+export interface ApplicantTranscribeResponse {
+    success: boolean;
+    message: string;
+}
+
+// Data tambahan dari detail yang hanya dibaca (lampiran dan tanda tangan),
 // tidak ikut dikirim pada update form.
 export interface ApplicantFormAttachments {
     files: ApplicantFormFile[];
     signatureLink: string;
     signatureDate: string;
-    interviewSteps: ApplicantInterviewStep[];
 }
 
 export type ApplicantFormListSections = {
@@ -164,7 +206,6 @@ export interface ApplicantFormDetail extends ApplicantFormListItem {
     references_old_company: unknown;
     following_answers: unknown;
     applicant_form_files?: unknown;
-    applicant_form_contents?: unknown;
     signature_link?: string | null;
     signature_date?: string | null;
 }
@@ -209,6 +250,11 @@ export type ApplicantInvitationCreateRequest = {
 export type ApplicantInvitationField = keyof ApplicantInvitationCreateRequest;
 
 export interface ApplicantInvitationCreateResponse {
+    success: boolean;
+    message: string;
+}
+
+export interface ApplicantInvitationResendResponse {
     success: boolean;
     message: string;
 }

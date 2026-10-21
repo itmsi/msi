@@ -3,7 +3,7 @@ import { useHasPermission } from '@/hooks/usePermissions';
 import Button from '../ui/button/Button';
 
 interface PermissionGateProps {
-    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide' | ('create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide')[];
+    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide' | 'update_status' | ('create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide' | 'update_status')[];
     routeName?: string;
     fallback?: React.ReactNode;
     children: React.ReactNode;
@@ -14,15 +14,15 @@ export const PermissionGate: React.FC<PermissionGateProps> = ({
     fallback = null,
     children
 }) => {
-    const hasPermission = Array.isArray(permission) 
+    const hasPermission = Array.isArray(permission)
         ? permission.some(perm => useHasPermission(perm, routeName))
         : useHasPermission(permission, routeName);
-    
+
     return hasPermission ? <>{children}</> : <>{fallback}</>;
 };
 
 interface PermissionButtonProps {
-    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide' | ('create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide')[];
+    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide' | 'update_status' | ('create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide' | 'update_status')[];
     routeName?: string;
     children: React.ReactNode;
     className?: string;
@@ -42,7 +42,7 @@ export const PermissionButton: React.FC<PermissionButtonProps> = ({
     title,
     type = "button"
 }) => {
-    const hasPermission = Array.isArray(permission) 
+    const hasPermission = Array.isArray(permission)
         ? permission.some(perm => useHasPermission(perm, routeName))
         : useHasPermission(permission, routeName);
     return (
@@ -62,7 +62,7 @@ export const PermissionButton: React.FC<PermissionButtonProps> = ({
 };
 
 interface ConditionalRenderProps {
-    condition: 'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canDuplicate' | 'canGuide';
+    condition: 'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canDuplicate' | 'canGuide' | 'canUpdateStatus';
     routeName?: string;
     fallback?: React.ReactNode;
     children: React.ReactNode;
@@ -81,9 +81,10 @@ export const ConditionalRender: React.FC<ConditionalRenderProps> = ({
         canDelete: 'delete' as const,
         canDuplicate: 'duplicate' as const,
         canGuide: 'guide' as const,
+        canUpdateStatus: 'update_status' as const,
     };
-    
+
     const hasPermission = useHasPermission(permissionMap[condition], routeName);
-    
+
     return hasPermission ? <>{children}</> : <>{fallback}</>;
 };

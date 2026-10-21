@@ -17,6 +17,9 @@ export const loginPalette = {
     disabled: "#9FB5CC",
     particle: "#397CB8",
     veil: "#9FB5CC",
+    error: "#FFB4A8",
+    errorAccent: "#FF8A7A",
+    errorSurface: "rgba(255, 138, 122, 0.12)",
     /** Wave fills, back to front. */
     waves: ["#063B70", "var(--color-primary)", "#397CB8", "#9FB5CC", "#FFFFFF"],
 } as const;
@@ -34,6 +37,9 @@ export const loginThemeVars = {
     "--login-placeholder": loginPalette.placeholder,
     "--login-disabled": loginPalette.disabled,
     "--login-veil": loginPalette.veil,
+    "--login-error": loginPalette.error,
+    "--login-error-accent": loginPalette.errorAccent,
+    "--login-error-surface": loginPalette.errorSurface,
     // background: `radial-gradient(120% 80% at 50% 0%, #FFFFFF 0%, #EDF2F8 45%, ${loginPalette.background} 100%)`,
 
     "--bp-950": "#ffffff",

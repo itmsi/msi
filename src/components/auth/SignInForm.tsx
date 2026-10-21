@@ -1,11 +1,11 @@
-import { useState, useEffect, useId, useRef, SubmitEvent } from "react";
+import { useState, useEffect, useId, useRef, SubmitEvent, ReactNode } from "react";
 import { useNavigate } from "react-router";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
 import { useAuth } from "@/context/AuthContext";
 import { AuthService } from "@/services/authService";
 import { LoginRequest, LoginFormErrors } from "@/types/auth";
-import { EASE_OUT, fadeUp, groupStagger } from "./login/motionVariants";
+import { EASE_OUT, fadeUp, groupStagger, ripple } from "./login/motionVariants";
 
 const inputClass =
     "h-11 w-full rounded-lg border bg-white px-4 text-sm text-(--color-black) placeholder:text-(--login-placeholder) " +
@@ -14,8 +14,29 @@ const inputClass =
 
 const fieldStateClass = (hasError: boolean) =>
     hasError
-        ? "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/20"
+        ? "border-(--login-error-accent) ring-2 ring-(--login-error-accent)/25 focus-visible:border-(--login-error-accent) focus-visible:ring-(--login-error-accent)/35"
         : "border-(--login-border) hover:border-(--login-border-hover) focus-visible:border-primary focus-visible:ring-primary/20";
+
+type LoginField = keyof LoginRequest;
+
+function RippleIcon({ className }: { className?: string }) {
+    return (
+        <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={className}>
+            <path d="M2 8.5c1.6-2 3.4-2 5 0s3.4 2 5 0 3.4-2 6 0" />
+            <path d="M2 13.5c1.6-2 3.4-2 5 0s3.4 2 5 0 3.4-2 6 0" opacity="0.55" />
+        </svg>
+    );
+}
+
+function RippleOnError({ trigger, children }: { trigger: number; children: ReactNode }) {
+    const controls = useAnimationControls();
+
+    useEffect(() => {
+        if (trigger > 0) controls.start(ripple);
+    }, [trigger, controls]);
+
+    return <motion.div animate={controls}>{children}</motion.div>;
+}
 
 function FieldError({ id, message }: { id: string; message?: string }) {
     return (
@@ -24,12 +45,13 @@ function FieldError({ id, message }: { id: string; message?: string }) {
                 {message && (
                     <motion.p
                         id={id}
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, x: -6 }}
+                        animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2, ease: EASE_OUT }}
-                        className="text-xs text-red-600"
+                        transition={{ duration: 0.25, ease: EASE_OUT }}
+                        className="flex items-center gap-1.5 text-xs text-(--login-error)"
                     >
+                        <RippleIcon className="size-3.5 shrink-0" />
                         {message}
                     </motion.p>
                 )}
@@ -38,7 +60,11 @@ function FieldError({ id, message }: { id: string; message?: string }) {
     );
 }
 
-export default function SignInForm() {
+interface SignInFormProps {
+    onAuthenticated?: () => Promise<void>;
+}
+
+export default function SignInForm({ onAuthenticated }: SignInFormProps) {
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState<LoginRequest>({
         email: '',
@@ -46,6 +72,7 @@ export default function SignInForm() {
     });
     const [formErrors, setFormErrors] = useState<LoginFormErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [ripples, setRipples] = useState<Record<LoginField, number>>({ email: 0, password: 0 });
 
     const emailRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
@@ -98,6 +125,10 @@ export default function SignInForm() {
         const validationErrors = AuthService.validateLoginForm(formData);
         if (AuthService.hasValidationErrors(validationErrors)) {
             setFormErrors(validationErrors);
+            setRipples(prev => ({
+                email: validationErrors.email ? prev.email + 1 : prev.email,
+                password: validationErrors.password ? prev.password + 1 : prev.password,
+            }));
             (validationErrors.email ? emailRef : passwordRef).current?.focus();
             return;
         }
@@ -105,7 +136,7 @@ export default function SignInForm() {
         setFormErrors({});
         setIsSubmitting(true);
         try {
-            await login(formData);
+            await login(formData, { beforeAuthenticated: onAuthenticated });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Login failed';
             setFormErrors({ general: errorMessage });
@@ -125,21 +156,22 @@ export default function SignInForm() {
                 {displayError && (
                     <motion.div
                         key="auth-error"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 8 }}
                         transition={{ duration: 0.25, ease: EASE_OUT }}
-                        className="overflow-hidden"
+                        className="absolute inset-x-0 bottom-full z-20 mb-3"
                     >
                         <div
                             id={ids.general}
                             role="alert"
-                            className="mb-5 flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700"
+                            className="relative flex items-center gap-3 overflow-hidden rounded-lg border border-white/15 bg-(--login-error-surface) py-3 pr-3.5 pl-4 text-sm text-white/90 shadow-[0px_0px_16px_-6px_#0253a5] backdrop-blur-lg"
                         >
-                            <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 size-4 shrink-0 text-red-500">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clipRule="evenodd" />
-                            </svg>
-                            <p>{displayError}</p>
+                            <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-(--login-error-accent)" />
+                            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-(--login-error-accent)/20 text-(--login-error)">
+                                <RippleIcon className="size-4" />
+                            </span>
+                            <p className="leading-relaxed">{displayError}</p>
                         </div>
                     </motion.div>
                 )}
@@ -147,76 +179,80 @@ export default function SignInForm() {
 
             <motion.div variants={fadeUp}>
                 <label htmlFor={ids.email} className="mb-2 block text-sm text-(--login-text)">
-                    Email <span className="text-red-500" aria-hidden="true">*</span>
+                    Email <span className="text-(--login-error)" aria-hidden="true">*</span>
                 </label>
-                <input
-                    ref={emailRef}
-                    id={ids.email}
-                    name="email"
-                    type="email"
-                    inputMode="email"
-                    autoComplete="username"
-                    placeholder="Enter your email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange('email')}
-                    disabled={authState.isLoading}
-                    aria-invalid={!!formErrors.email}
-                    aria-describedby={formErrors.email ? ids.emailError : undefined}
-                    className={`${inputClass} ${fieldStateClass(!!formErrors.email)}`}
-                />
+                <RippleOnError trigger={ripples.email}>
+                    <input
+                        ref={emailRef}
+                        id={ids.email}
+                        name="email"
+                        type="email"
+                        inputMode="email"
+                        autoComplete="username"
+                        placeholder="Enter your email"
+                        required
+                        value={formData.email}
+                        onChange={handleInputChange('email')}
+                        disabled={isBusy}
+                        aria-invalid={!!formErrors.email}
+                        aria-describedby={formErrors.email ? ids.emailError : undefined}
+                        className={`${inputClass} ${fieldStateClass(!!formErrors.email)}`}
+                    />
+                </RippleOnError>
                 <FieldError id={ids.emailError} message={formErrors.email} />
             </motion.div>
 
             <motion.div variants={fadeUp} className="mt-1">
                 <label htmlFor={ids.password} className="mb-2 block text-sm text-(--login-text)">
-                    Password <span className="text-red-500" aria-hidden="true">*</span>
+                    Password <span className="text-(--login-error)" aria-hidden="true">*</span>
                 </label>
-                <div className="relative">
-                    <input
-                        ref={passwordRef}
-                        id={ids.password}
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        autoComplete="current-password"
-                        placeholder="Enter your password"
-                        required
-                        value={formData.password}
-                        onChange={handleInputChange('password')}
-                        disabled={authState.isLoading}
-                        aria-invalid={!!formErrors.password}
-                        aria-describedby={formErrors.password ? ids.passwordError : undefined}
-                        className={`${inputClass} pr-12 ${fieldStateClass(!!formErrors.password)}`}
-                    />
-                    <span className="absolute inset-y-0 right-1.5 flex items-center">
-                        <motion.button
-                            type="button"
-                            onClick={() => setShowPassword(prev => !prev)}
-                            whileTap={{ scale: 0.88 }}
-                            aria-label={showPassword ? "Hide password" : "Show password"}
-                            aria-pressed={showPassword}
-                            aria-controls={ids.password}
-                            className="grid size-9 place-items-center rounded-md transition-colors hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                        >
-                            <AnimatePresence mode="wait" initial={false}>
-                                <motion.span
-                                    key={showPassword ? "shown" : "hidden"}
-                                    initial={{ opacity: 0, scale: 0.6, rotate: -20 }}
-                                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                                    exit={{ opacity: 0, scale: 0.6, rotate: 20 }}
-                                    transition={{ duration: 0.15 }}
-                                    className="grid place-items-center"
-                                >
-                                    {showPassword ? (
-                                        <EyeIcon className="size-5 fill-gray-500" />
-                                    ) : (
-                                        <EyeCloseIcon className="size-5 fill-gray-500" />
-                                    )}
-                                </motion.span>
-                            </AnimatePresence>
-                        </motion.button>
-                    </span>
-                </div>
+                <RippleOnError trigger={ripples.password}>
+                    <div className="relative">
+                        <input
+                            ref={passwordRef}
+                            id={ids.password}
+                            name="password"
+                            type={showPassword ? "text" : "password"}
+                            autoComplete="current-password"
+                            placeholder="Enter your password"
+                            required
+                            value={formData.password}
+                            onChange={handleInputChange('password')}
+                            disabled={isBusy}
+                            aria-invalid={!!formErrors.password}
+                            aria-describedby={formErrors.password ? ids.passwordError : undefined}
+                            className={`${inputClass} pr-12 ${fieldStateClass(!!formErrors.password)}`}
+                        />
+                        <span className="absolute inset-y-0 right-1.5 flex items-center">
+                            <motion.button
+                                type="button"
+                                onClick={() => setShowPassword(prev => !prev)}
+                                whileTap={{ scale: 0.88 }}
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                aria-pressed={showPassword}
+                                aria-controls={ids.password}
+                                className="grid size-9 place-items-center rounded-md transition-colors hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                            >
+                                <AnimatePresence mode="wait" initial={false}>
+                                    <motion.span
+                                        key={showPassword ? "shown" : "hidden"}
+                                        initial={{ opacity: 0, scale: 0.6, rotate: -20 }}
+                                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                        exit={{ opacity: 0, scale: 0.6, rotate: 20 }}
+                                        transition={{ duration: 0.15 }}
+                                        className="grid place-items-center"
+                                    >
+                                        {showPassword ? (
+                                            <EyeIcon className="size-5 fill-gray-500" />
+                                        ) : (
+                                            <EyeCloseIcon className="size-5 fill-gray-500" />
+                                        )}
+                                    </motion.span>
+                                </AnimatePresence>
+                            </motion.button>
+                        </span>
+                    </div>
+                </RippleOnError>
                 <FieldError id={ids.passwordError} message={formErrors.password} />
             </motion.div>
 

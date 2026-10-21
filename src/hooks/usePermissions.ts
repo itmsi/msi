@@ -9,6 +9,7 @@ export interface PagePermissions {
     canDelete: boolean;
     canDuplicate: boolean;
     canGuide: boolean;
+    canUpdateStatus: boolean;
     permissions: string[];
     routeName: string;
 }
@@ -20,17 +21,17 @@ export interface PagePermissions {
 export const usePermissions = (): PagePermissions => {
     const location = useLocation();
     const { authState } = useAuth();
-    
+
     const routeName = getRouteNameFromPath(location.pathname);
     const userMenu = authState.menu || [];
     const permissions = getMenuPermissions(routeName, userMenu);
-    
+
     // Check if user is admin (bypass all permission checks)
-    const isAdmin = userMenu.some(menu => 
-        menu.name.toUpperCase() === 'ADMIN' || 
+    const isAdmin = userMenu.some(menu =>
+        menu.name.toUpperCase() === 'ADMIN' ||
         menu.name.toUpperCase().includes('ADMINISTRATOR')
     );
-    
+
     return {
         canCreate: isAdmin || permissions.includes('create'),
         canRead: isAdmin || permissions.includes('read'),
@@ -38,6 +39,7 @@ export const usePermissions = (): PagePermissions => {
         canDelete: isAdmin || permissions.includes('delete'),
         canDuplicate: isAdmin || permissions.includes('duplicate'),
         canGuide: isAdmin || permissions.includes('guide'),
+        canUpdateStatus: isAdmin || permissions.includes('update_status'),
         permissions,
         routeName
     };
@@ -52,13 +54,13 @@ export const usePermissionsFor = (targetRouteName: string): PagePermissions => {
     const { authState } = useAuth();
     const userMenu = authState.menu || [];
     const permissions = getMenuPermissions(targetRouteName, userMenu);
-    
+
     // Check if user is admin
-    const isAdmin = userMenu.some(menu => 
-        menu.name.toUpperCase() === 'ADMIN' || 
+    const isAdmin = userMenu.some(menu =>
+        menu.name.toUpperCase() === 'ADMIN' ||
         menu.name.toUpperCase().includes('ADMINISTRATOR')
     );
-    
+
     return {
         canCreate: isAdmin || permissions.includes('create'),
         canRead: isAdmin || permissions.includes('read'),
@@ -66,6 +68,7 @@ export const usePermissionsFor = (targetRouteName: string): PagePermissions => {
         canDelete: isAdmin || permissions.includes('delete'),
         canDuplicate: isAdmin || permissions.includes('duplicate'),
         canGuide: isAdmin || permissions.includes('guide'),
+        canUpdateStatus: isAdmin || permissions.includes('update_status'),
         permissions,
         routeName: targetRouteName
     };
@@ -73,26 +76,26 @@ export const usePermissionsFor = (targetRouteName: string): PagePermissions => {
 
 /**
  * Hook untuk mengecek permission spesifik
- * @param permission - Permission yang ingin dicek ('create', 'read', 'update', 'delete', 'duplicate')
+ * @param permission - Permission yang ingin dicek ('create', 'read', 'update', 'delete', 'duplicate', 'update_status')
  * @param targetRouteName - Optional: nama route tertentu (default: current route)
  * @returns boolean apakah user punya permission tersebut
  */
 export const useHasPermission = (
-    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide',
+    permission: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide' | 'update_status',
     targetRouteName?: string
 ): boolean => {
     const location = useLocation();
     const { authState } = useAuth();
-    
+
     const routeName = targetRouteName || getRouteNameFromPath(location.pathname);
     const userMenu = authState.menu || [];
     const permissions = getMenuPermissions(routeName, userMenu);
-    
+
     // Check if user is admin
-    const isAdmin = userMenu.some(menu => 
-        menu.name.toUpperCase() === 'ADMIN' || 
+    const isAdmin = userMenu.some(menu =>
+        menu.name.toUpperCase() === 'ADMIN' ||
         menu.name.toUpperCase().includes('ADMINISTRATOR')
     );
-    
+
     return isAdmin || permissions.includes(permission);
 };

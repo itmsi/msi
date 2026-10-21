@@ -4,8 +4,9 @@ import toast from 'react-hot-toast';
 import { ApiError } from '@/helpers/apiHelper';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { ApplicantService } from '../services/applicantService';
-import { ApplicantFormListItem, Pagination } from '../types/applicant';
+import { ApplicantFormListItem, ApplicantSendEmailStatus, Pagination } from '../types/applicant';
 import { applicantManage } from '../language/applicantManage';
+import { getApplicantFormStatus } from '../utils/applicantStatus';
 
 type CompletedFilter = '' | 'true' | 'false';
 
@@ -49,6 +50,8 @@ export const useApplicant = () => {
     const [applicants, setApplicants] = useState<ApplicantFormListItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [resendingIds, setResendingIds] = useState<string[]>([]);
+    const [emailStatusUpdatingIds, setEmailStatusUpdatingIds] = useState<string[]>([]);
     const [pagination, setPagination] = useState<Pagination>({
         page: urlPage,
         limit: urlLimit,
@@ -143,6 +146,71 @@ export const useApplicant = () => {
         }
     }, [langField]);
 
+    const handleResendMail = useCallback(async (applicant: ApplicantFormListItem) => {
+        const invitationId = applicant.applicant_form_invitation_id;
+        if (!invitationId) {
+            toast.error(langField('invitationNotAvailable'));
+            return;
+        }
+        if (getApplicantFormStatus(applicant) === 'completed' || resendingIds.includes(applicant.id)) return;
+
+        setResendingIds(prev => [...prev, applicant.id]);
+        try {
+            const response = await ApplicantService.resendApplicantInvitation(invitationId);
+
+            if (!response?.success) {
+                toast.error(response?.message || langField('resendUnsuccessful'));
+                return;
+            }
+
+            toast.success(response.message || langField('resendSuccess'));
+            fetchApplicants();
+        } catch (err) {
+            const apiError = err as ApiError;
+            toast.error(apiError?.message || langField('resendFailed'));
+        } finally {
+            setResendingIds(prev => prev.filter(id => id !== applicant.id));
+        }
+    }, [resendingIds, fetchApplicants, langField]);
+
+    const handleSwitchStatus = useCallback(async (applicant: ApplicantFormListItem, checked: boolean) => {
+        const invitationId = applicant.applicant_form_invitation_id;
+        if (!invitationId) {
+            toast.error(langField('invitationNotAvailable'));
+            return;
+        }
+        if (
+            getApplicantFormStatus(applicant) === 'completed'
+            || applicant.status_send_email === 'Process'
+            || emailStatusUpdatingIds.includes(applicant.id)
+        ) return;
+
+        const previousStatus = applicant.status_send_email;
+        const nextStatus = checked ? 'Success' : 'Failed';
+        const setRowStatus = (status: ApplicantSendEmailStatus) =>
+            setApplicants(prev => prev.map(row => (row.id === applicant.id ? { ...row, status_send_email: status } : row)));
+
+        setRowStatus(nextStatus);
+        setEmailStatusUpdatingIds(prev => [...prev, applicant.id]);
+        try {
+            const response = await ApplicantService.updateInvitationEmailStatus(invitationId, { status_send_email: nextStatus });
+
+            if (!response?.success) {
+                setRowStatus(previousStatus);
+                toast.error(response?.message || langField('emailStatusUnsuccessful'));
+                return;
+            }
+
+            toast.success(response.message || langField('emailStatusSuccess'));
+        } catch (err) {
+            const apiError = err as ApiError;
+            setRowStatus(previousStatus);
+            toast.error(apiError?.message || langField('emailStatusFailed'));
+        } finally {
+            setEmailStatusUpdatingIds(prev => prev.filter(id => id !== applicant.id));
+        }
+    }, [emailStatusUpdatingIds, langField]);
+
     useEffect(() => {
         fetchApplicants();
         setSearchValue(urlFilters.search);
@@ -168,5 +236,8 @@ export const useApplicant = () => {
         handleClearSearch,
         handleClearFilters,
         handleCopyLink,
+        resendingIds,
+        handleResendMail,
+        handleSwitchStatus,
     };
 };

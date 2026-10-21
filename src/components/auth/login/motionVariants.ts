@@ -1,6 +1,14 @@
-import type { Variants } from "framer-motion";
+import type { TargetAndTransition, Variants } from "framer-motion";
 
 export const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+
+export const ripple: TargetAndTransition = {
+    x: [0, -6, 5, -3, 2, 0],
+    transition: { duration: 0.45, ease: "easeOut" },
+};
+
+export const SUCCESS_DURATION = 0.55;
+export const SUCCESS_HOLD_MS = 600;
 
 /**
  * Entrance timeline (seconds):

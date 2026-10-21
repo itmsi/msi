@@ -1,5 +1,5 @@
-import { motion, useReducedMotion } from "framer-motion";
-import { EASE_OUT } from "./motionVariants";
+import { motion, useReducedMotion, Variants } from "framer-motion";
+import { EASE_OUT, SUCCESS_DURATION } from "./motionVariants";
 import { loginPalette } from "./loginTheme";
 
 // Each SVG spans two wave periods so it can sway horizontally without exposing an edge.
@@ -23,13 +23,24 @@ interface WaveLayer {
     className?: string;
 }
 
+const SURGE = 0.8;
+const SURGE_START = 0.15;
+const SURGE_END = 0.6;
+
+function surgeAt(x: number): number {
+    const t = Math.min(Math.max((x / PERIOD - SURGE_START) / (SURGE_END - SURGE_START), 0), 1);
+    const eased = t * t * (3 - 2 * t);
+    return 1 + SURGE * (1 - eased);
+}
+
 function buildWavePath(baseline: number, harmonics: Harmonic[]): string {
     const yAt = (x: number) =>
         baseline +
-        harmonics.reduce(
-            (sum, [cycles, amp, phase]) => sum + amp * Math.sin((2 * Math.PI * cycles * x) / PERIOD + phase),
-            0,
-        );
+        surgeAt(x) *
+            harmonics.reduce(
+                (sum, [cycles, amp, phase]) => sum + amp * Math.sin((2 * Math.PI * cycles * x) / PERIOD + phase),
+                0,
+            );
 
     // Sample one step beyond each edge so Catmull-Rom tangents stay correct at the boundaries.
     const points: [number, number][] = [];
@@ -60,16 +71,27 @@ const LAYERS: (WaveLayer & { path: string })[] = (
     ] satisfies WaveLayer[]
 ).map((layer) => ({ ...layer, path: buildWavePath(layer.baseline, layer.harmonics) }));
 
-export default function AnimatedWaveBackground() {
+const containerVariants: Variants = {
+    hidden: { opacity: 0, y: 30, scaleY: 1 },
+    visible: { opacity: 1, y: 0, scaleY: 1, transition: { delay: 0.15, duration: 0.9, ease: EASE_OUT } },
+    settled: { opacity: 1, y: 0, scaleY: 0.35, transition: { duration: SUCCESS_DURATION, ease: EASE_OUT } },
+};
+
+interface AnimatedWaveBackgroundProps {
+    settled?: boolean;
+}
+
+export default function AnimatedWaveBackground({ settled = false }: AnimatedWaveBackgroundProps) {
     const reduceMotion = useReducedMotion();
 
     return (
         <motion.div
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 bottom-0 h-(--wave-h) overflow-hidden"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.9, ease: EASE_OUT }}
+            style={{ originY: 1 }}
+            variants={containerVariants}
+            initial="hidden"
+            animate={settled ? "settled" : "visible"}
         >
             {LAYERS.map((layer) => {
                 const from = layer.reverse ? `-${layer.sway}%` : "0%";

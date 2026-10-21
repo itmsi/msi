@@ -191,7 +191,8 @@ export default function EditEmployee() {
             'delete': 4,    // Delete
             'remove': 4,     // Delete alternative
             'duplicate': 5,  // Duplicate
-            'guide': 6       // Guide
+            'guide': 6,       // Guide
+            'update_status': 7       // UPDATE STATUS
         };
 
         // First filter to only include CRUD permissions
@@ -300,6 +301,7 @@ export default function EditEmployee() {
         const isCUD = permissionName.includes('write') || permissionName.includes('create') ||
             permissionName.includes('edit') || permissionName.includes('update') ||
             permissionName.includes('delete') || permissionName.includes('remove') ||
+            permissionName.includes('update_status') ||
             permissionName.includes('duplicate') || permissionName.includes('duplicate');
 
         const isRead = permissionName.includes('read') || permissionName.includes('view');
@@ -342,7 +344,7 @@ export default function EditEmployee() {
                                         const pName = permission.permission_name.toLowerCase();
                                         if (pName.includes('write') || pName.includes('create') ||
                                             pName.includes('edit') || pName.includes('update') ||
-                                            pName.includes('delete') || pName.includes('remove') ||
+                                            pName.includes('update_status') ||
                                             pName.includes('duplicate') || pName.includes('duplicate')) {
                                             return {
                                                 ...permission,
@@ -718,7 +720,7 @@ export default function EditEmployee() {
                                                                         {sortPermissionsByCRUD(menu.permission_detail).map((permission: EmployeePermissionDetail) => (
                                                                             <div key={permission.permission_id}>
                                                                                 <Switch
-                                                                                    label={permission.permission_name}
+                                                                                    label={permission.permission_name === 'update_status' ? 'Update Status' : permission.permission_name}
                                                                                     checked={permission.permission_status || false}
                                                                                     className="capitalize font-secondary font-normal"
                                                                                     onChange={(checked) => handlePermissionChange(system.system_id, menu.menu_id, permission.permission_id, checked)}

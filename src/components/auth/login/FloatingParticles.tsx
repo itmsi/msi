@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { loginPalette } from "./loginTheme";
+import { SUCCESS_DURATION } from "./motionVariants";
 
 interface Particle {
     /** Position as a percentage of the particle area. */
@@ -32,7 +33,11 @@ const PARTICLES: Particle[] = [
     { x: 49, y: 86, size: 2, opacity: 0.18, drift: 10, duration: 10, delay: 3.2, desktopOnly: true },
 ];
 
-export default function FloatingParticles() {
+interface FloatingParticlesProps {
+    rising?: boolean;
+}
+
+export default function FloatingParticles({ rising = false }: FloatingParticlesProps) {
     const reduceMotion = useReducedMotion();
 
     return (
@@ -56,9 +61,15 @@ export default function FloatingParticles() {
                         backgroundColor: loginPalette.particle,
                     }}
                     animate={
-                        reduceMotion
-                            ? undefined
-                            : { y: [0, -p.drift, 0], opacity: [p.opacity, p.opacity * 2.2, p.opacity] }
+                        rising
+                            ? {
+                                  y: -(p.drift * 4 + 60),
+                                  opacity: 0,
+                                  transition: { duration: SUCCESS_DURATION, delay: (i % 4) * 0.03, ease: "easeIn" },
+                              }
+                            : reduceMotion
+                              ? undefined
+                              : { y: [0, -p.drift, 0], opacity: [p.opacity, p.opacity * 2.2, p.opacity] }
                     }
                     transition={{
                         duration: p.duration,
