@@ -137,6 +137,8 @@ const CreateInventoryAdjustment = lazy(() => import('@/pages/Netsuite/InventoryA
 const ManageSalesOrder = lazy(() => import('@/pages/Netsuite/SalesOrders/Manage'));
 const ManageBillPayment = lazy(() => import('@/pages/Netsuite/BillPayment/Manage'));
 const ViewBillPayment = lazy(() => import('@/pages/Netsuite/BillPayment/View'));
+const ManageVendorPrepayment = lazy(() => import('@/pages/Netsuite/VendorPrepayment/Manage'));
+const ViewVendorPrepayment = lazy(() => import('@/pages/Netsuite/VendorPrepayment/View'));
 const ManageQuotationNetsuite = lazy(() => import('@/pages/Netsuite/Quotation/Manage'));
 const CreateQuotationNetsuite = lazy(() => import('@/pages/Netsuite/Quotation/Create'));
 const EditQuotationNetsuite = lazy(() => import('@/pages/Netsuite/Quotation/Edit'));
@@ -1183,6 +1185,23 @@ export const routes: TAppRoute[] = [
         roles: ['Bill Payment Netsuite'],
         requiredPermissions: ['read'],
         component: ViewBillPayment,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/vendor-prepayment',
+        name: 'Vendor Prepayment Netsuite',
+        isProtected: true,
+        roles: ['Vendor Prepayment Netsuite'],
+        component: ManageVendorPrepayment,
+        layout: AppLayout,
+    },
+    {
+        path: '/netsuite/vendor-prepayment/view/:id',
+        name: 'Vendor Prepayment Netsuite',
+        isProtected: true,
+        roles: ['Vendor Prepayment Netsuite'],
+        requiredPermissions: ['read'],
+        component: ViewVendorPrepayment,
         layout: AppLayout,
     },
     {

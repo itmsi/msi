@@ -300,6 +300,7 @@ const AppSidebar: React.FC = () => {
                 'Fulfillment Netsuite',
                 'Inventory Adjustment Netsuite',
                 'Bill Payment Netsuite',
+                'Vendor Prepayment Netsuite',
                 'Quotation Netsuite',
                 'Item Netsuite',
                 'Activity Netsuite'
@@ -314,6 +315,7 @@ const AppSidebar: React.FC = () => {
                 { name: "Fulfillments", path: "/netsuite/fulfillments", allowedRoles: ['Fulfillment Netsuite'] },
                 { name: "Inventory Adjustment", path: "/netsuite/inventory-adjustments", allowedRoles: ['Inventory Adjustment Netsuite'] },
                 { name: "Bill Payment", path: "/netsuite/bill-payment", allowedRoles: ['Bill Payment Netsuite'] },
+                { name: "Vendor Prepayment", path: "/netsuite/vendor-prepayment", allowedRoles: ['Vendor Prepayment Netsuite'] },
                 { name: "Quotation", path: "/netsuite/quotation", allowedRoles: ['Quotation Netsuite'] },
                 { name: "Admin Sync", path: "/netsuite/sync", allowedRoles: ['Admin Sync Netsuite'] },
                 { name: "Activity", path: "/netsuite/activity", allowedRoles: ['Activity Netsuite'] },
