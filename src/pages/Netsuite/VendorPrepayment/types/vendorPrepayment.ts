@@ -17,6 +17,7 @@ export interface VendorPrepaymentRequest {
     next_approver_blank?: string; // filter Next Approver (employee_id_netsuite dari select)
     tran_date_from?: string;
     tran_date_to?: string;
+    current_approver_id?: number | string; // filter via workflow history (auth_user.current_approver_netsuite_id)
 }
 
 // Satu baris Applied To (disimpan jsonb di backend)
@@ -29,6 +30,78 @@ export interface AppliedToItem {
     date: string | null;
     original_amount: number | string;
     applied_amount: number | string;
+}
+
+export interface WorkflowHistoryItem {
+    workflow?: string;
+    date_entered?: string;
+    date_exited?: string;
+    options_obj?: string;
+    notes?: string;
+}
+
+export interface UserNoteItem {
+    date?: string;
+    author?: string;
+    author_display?: string;
+    title?: string;
+    memo?: string;
+    direction?: string;
+    direction_display?: string | null;
+    type?: string;
+    type_display?: string | null;
+    [key: string]: any;
+}
+
+export interface AttachmentFile {
+    id: string;
+    vendor_prepayment_netsuite_id: string;
+    tran_id: string;
+    status: string;
+    file_netsuite_id: string;
+    file_name: string;
+    file_type: string;
+    file_size: string;
+    file_is_text: boolean;
+    file_skipped: boolean;
+    file_link: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AttachmentDownloadResponse {
+    success: boolean;
+    message?: string;
+    data?: {
+        file_netsuite_id: string;
+        vendor_prepayment_netsuite_id: string;
+        file_name: string;
+        file_type: string;
+        file_size: string;
+        url: string;
+        expires_at: string | null;
+    };
+}
+
+export interface AttachmentFilesResponse {
+    success: boolean;
+    message?: string;
+    data: {
+        items: AttachmentFile[];
+        pagination: { page: number; limit: number; total: number; totalPages: number };
+    };
+}
+
+export interface AttachmentSyncResponse {
+    success: boolean;
+    message?: string;
+    data?: {
+        id: string;
+        tranId: string;
+        count: number;
+        skippedCount: number;
+        files: AttachmentFile[];
+    };
 }
 
 export interface VendorPrepayment {
@@ -89,6 +162,8 @@ export interface VendorPrepayment {
     // hanya ada di detail
     address?: string | null;
     applied_to?: AppliedToItem[] | null;
+    workflow_history?: WorkflowHistoryItem[] | null;
+    user_notes?: UserNoteItem[] | null;
     data?: any;
 }
 
