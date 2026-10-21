@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from '@/helpers/apiHelper';
-import { VendorPrepaymentRequest, VendorPrepaymentResponse, VendorPrepaymentDetailResponse, VendorPrepaymentApprovalRequest, VendorPrepaymentApprovalResponse } from '../types/vendorPrepayment';
+import { VendorPrepaymentRequest, VendorPrepaymentResponse, VendorPrepaymentDetailResponse, VendorPrepaymentApprovalRequest, VendorPrepaymentApprovalResponse, AttachmentFile, AttachmentFilesResponse, AttachmentSyncResponse, AttachmentDownloadResponse } from '../types/vendorPrepayment';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -40,6 +40,51 @@ export class VendorPrepaymentService {
             `${API_BASE_URL}/netsuite/vendor-prepayment/sync/${netsuiteId}`
         );
 
+        return response.data;
+    }
+
+    // List attachment file milik satu vendor prepayment (by netsuite id)
+    static async getAttachmentFiles(vendorPrepaymentNetsuiteId: string, search = '', page = 1, limit = 10, fileNetsuiteId = ''): Promise<AttachmentFilesResponse> {
+        const response = await apiPost<AttachmentFilesResponse>(
+            `${API_BASE_URL}/netsuite/vendor-prepayment/attachments-files/get`,
+            {
+                page,
+                limit,
+                sort_by: 'updated_at',
+                sort_order: 'desc',
+                search,
+                vendor_prepayment_netsuite_id: vendorPrepaymentNetsuiteId,
+                file_netsuite_id: fileNetsuiteId,
+                status: '',
+                is_deleted: false,
+            }
+        );
+        return response.data;
+    }
+
+    // Ambil link download file attachment (hanya untuk file berstatus SUCCESS)
+    static async getAttachmentDownloadLink(fileNetsuiteId: string): Promise<AttachmentDownloadResponse> {
+        const response = await apiGet<AttachmentDownloadResponse>(
+            `${API_BASE_URL}/netsuite/vendor-prepayment/attachments-files/download/${fileNetsuiteId}`
+        );
+        return response.data;
+    }
+
+    // Sync semua attachment satu vendor prepayment dari bridge API
+    static async syncAttachmentFiles(vendorPrepaymentNetsuiteId: number): Promise<AttachmentSyncResponse> {
+        const response = await apiPost<AttachmentSyncResponse>(
+            `${API_BASE_URL}/netsuite/vendor-prepayment/attachments-files/sync`,
+            { id: vendorPrepaymentNetsuiteId }
+        );
+        return response.data;
+    }
+
+    // Convert satu file attachment (by file netsuite id)
+    static async syncAttachmentFile(vendorPrepaymentNetsuiteId: number, fileNetsuiteId: string): Promise<{ success: boolean; message?: string; data?: AttachmentFile }> {
+        const response = await apiPost<{ success: boolean; message?: string; data?: AttachmentFile }>(
+            `${API_BASE_URL}/netsuite/vendor-prepayment/attachments-files/sync/${vendorPrepaymentNetsuiteId}`,
+            { file_netsuite_id: fileNetsuiteId }
+        );
         return response.data;
     }
 
