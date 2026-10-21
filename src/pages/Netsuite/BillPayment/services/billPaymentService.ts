@@ -49,7 +49,7 @@ export class BillPaymentService {
             {
                 page,
                 limit,
-                sort_by: 'created_at',
+                sort_by: 'updated_at',
                 sort_order: 'desc',
                 search,
                 bill_payment_netsuite_id: billPaymentNetsuiteId,

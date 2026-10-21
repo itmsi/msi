@@ -50,7 +50,7 @@ export class VendorPrepaymentService {
             {
                 page,
                 limit,
-                sort_by: 'created_at',
+                sort_by: 'updated_at',
                 sort_order: 'desc',
                 search,
                 vendor_prepayment_netsuite_id: vendorPrepaymentNetsuiteId,
