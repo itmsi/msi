@@ -91,6 +91,12 @@ const INITIAL_ITEMS: Omit<MasterDataItem, 'status' | 'lastSync' | 'errorMessage'
         icon: 'bill_payment',
     },
     {
+        key: 'vendor_prepayments',
+        label: 'Vendor Prepayment',
+        description: 'Sync vendor prepayments from NetSuite',
+        icon: 'vendor_prepayment',
+    },
+    {
         key: 'receives',
         label: 'Receipts',
         description: 'Sync receipts from NetSuite',

@@ -65,6 +65,18 @@ export const useVendorPrepayment = () => {
             const startVal = overrides?.trandate_start !== undefined ? overrides.trandate_start : filterStartDate;
             const endVal = overrides?.trandate_end !== undefined ? overrides.trandate_end : filterEndDate;
 
+            // Current approver ID dari local storage (auth_user.current_approver_netsuite_id)
+            let currentApproverId: any = undefined;
+            try {
+                const authUserStr = localStorage.getItem('auth_user');
+                if (authUserStr) {
+                    const authUser = JSON.parse(authUserStr);
+                    currentApproverId = authUser?.current_approver_netsuite_id;
+                }
+            } catch (e) {
+                console.warn('Failed to parse auth_user from localStorage', e);
+            }
+
             const requestBody: VendorPrepaymentRequest = {
                 page: overrides?.page ?? pagination.page,
                 page_size: overrides?.limit ?? pagination.page_size,
@@ -78,6 +90,8 @@ export const useVendorPrepayment = () => {
                 ...(startVal ? { tran_date_from: startVal } : {}),
                 ...(endVal ? { tran_date_to: endVal } : {}),
                 ...(nextApproverVal ? { next_approver_blank: nextApproverVal } : {}),
+                // Include current approver ID if available
+                ...(currentApproverId !== undefined && currentApproverId !== null ? { current_approver_id: currentApproverId } : {}),
             };
 
             const response = await VendorPrepaymentService.getVendorPrepayments(requestBody);
