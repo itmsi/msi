@@ -18,7 +18,20 @@ export interface ApplicantFormListItem {
     position_applied_for: string | null;
     city: string | null;
     working_available_date: string | null;
+    applicant_form_invitation_id: string;
+    status_send_email: ApplicantSendEmailStatus;
     applicant_form_url: string | null;
+}
+
+export type ApplicantSendEmailStatus = 'Success' | 'Process' | 'Failed' | null;
+
+export type ApplicantSendEmailStatusRequest = {
+    status_send_email: Exclude<ApplicantSendEmailStatus, 'Process' | null>;
+}
+
+export interface ApplicantSendEmailStatusResponse {
+    success: boolean;
+    message: string;
 }
 
 export type ApplicantFormListRequest = {
@@ -237,6 +250,11 @@ export type ApplicantInvitationCreateRequest = {
 export type ApplicantInvitationField = keyof ApplicantInvitationCreateRequest;
 
 export interface ApplicantInvitationCreateResponse {
+    success: boolean;
+    message: string;
+}
+
+export interface ApplicantInvitationResendResponse {
     success: boolean;
     message: string;
 }

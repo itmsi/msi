@@ -21,8 +21,8 @@ export const createStatusColumn = (
     name: 'Status',
     cell: (row: any) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${row[statusField]
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
+            ? 'bg-green-100 text-green-800'
+            : 'bg-red-100 text-red-800'
             }`}>
             {row[statusField] ? activeText : inactiveText}
         </span>
@@ -50,10 +50,10 @@ export const createStatusToggleColumn = (
                     onClick={() => !isDisabled && onToggle(row, !isActive)}
                     disabled={isDisabled}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isDisabled
-                            ? 'cursor-not-allowed opacity-50 bg-gray-200'
-                            : isActive
-                                ? 'bg-green-500 hover:bg-green-600'
-                                : 'bg-gray-300 hover:bg-gray-400'
+                        ? 'cursor-not-allowed opacity-50 bg-gray-200'
+                        : isActive
+                            ? 'bg-green-500 hover:bg-green-600'
+                            : 'bg-gray-300 hover:bg-gray-400'
                         }`}
                     title={isDisabled ? 'Cannot change status' : `Click to ${isActive ? 'deactivate' : 'activate'}`}
                 >
@@ -130,7 +130,7 @@ export const createByDateColumn = (
 export const createActionsColumn = (actions: Array<{
     icon: React.ComponentType<any>;
     onClick: (row: any) => void;
-    permission?: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide';
+    permission?: 'create' | 'read' | 'update' | 'delete' | 'duplicate' | 'guide' | 'update_status';
     className?: string;
     tooltip?: string;
     condition?: (row: any) => boolean;
@@ -222,10 +222,10 @@ export const StatusToggle: React.FC<{
                     onClick={() => !disabled && onToggle(!status)}
                     disabled={disabled}
                     className={`relative inline-flex ${currentSize.toggle} items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${disabled
-                            ? 'cursor-not-allowed opacity-50 bg-gray-200'
-                            : status
-                                ? 'bg-green-500 hover:bg-green-600'
-                                : 'bg-gray-300 hover:bg-gray-400'
+                        ? 'cursor-not-allowed opacity-50 bg-gray-200'
+                        : status
+                            ? 'bg-green-500 hover:bg-green-600'
+                            : 'bg-gray-300 hover:bg-gray-400'
                         }`}
                     title={disabled ? 'Cannot change status' : `Click to ${status ? 'deactivate' : 'activate'}`}
                 >

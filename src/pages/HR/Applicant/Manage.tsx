@@ -31,6 +31,9 @@ export default function Manage() {
         handleClearSearch,
         handleClearFilters,
         handleCopyLink,
+        resendingIds,
+        handleResendMail,
+        handleSwitchStatus,
         fetchApplicants,
     } = useApplicant();
 
@@ -102,6 +105,9 @@ export default function Manage() {
                             onChangePage={handlePageChange}
                             onChangeRowsPerPage={handleRowsPerPageChange}
                             onCopyLink={handleCopyLink}
+                            resendingIds={resendingIds}
+                            onResendMail={handleResendMail}
+                            onSwitchStatus={handleSwitchStatus}
                         />
                     </div>
                 </div>

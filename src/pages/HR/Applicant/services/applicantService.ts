@@ -10,6 +10,9 @@ import {
     ApplicantFormUpdateResponse,
     ApplicantInvitationCreateRequest,
     ApplicantInvitationCreateResponse,
+    ApplicantInvitationResendResponse,
+    ApplicantSendEmailStatusRequest,
+    ApplicantSendEmailStatusResponse,
     ApplicantTranscribeResponse,
 } from '../types/applicant';
 
@@ -52,6 +55,22 @@ export class ApplicantService {
 
     static async createApplicantInvitation(payload: ApplicantInvitationCreateRequest): Promise<ApplicantInvitationCreateResponse> {
         const response = await apiPost<ApplicantInvitationCreateResponse>(`${API_BASE_URL}/career/applicant-invitations/create`, payload);
+        return response.data;
+    }
+
+    static async updateInvitationEmailStatus(
+        invitationId: string,
+        payload: ApplicantSendEmailStatusRequest
+    ): Promise<ApplicantSendEmailStatusResponse> {
+        const response = await apiPut<ApplicantSendEmailStatusResponse>(
+            `${API_BASE_URL}/career/applicant-invitations/${invitationId}`,
+            payload
+        );
+        return response.data;
+    }
+
+    static async resendApplicantInvitation(id: string): Promise<ApplicantInvitationResendResponse> {
+        const response = await apiPost<ApplicantInvitationResendResponse>(`${API_BASE_URL}/career/applicant-invitations/${id}/resend`);
         return response.data;
     }
 

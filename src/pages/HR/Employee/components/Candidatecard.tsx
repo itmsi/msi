@@ -11,11 +11,14 @@ import {
     MdMoreVert,
     MdSchedule,
     MdDeleteOutline,
+    MdCalendarMonth,
 } from 'react-icons/md';
 import type { CandidateItem } from '../types/Candidate';
 import { getRoleStyle, getRoleLabel } from '../utils/roleStyle';
 import { getAssignRoleArr } from '../utils/interviewFormHelpers';
 import { Link } from 'react-router';
+import Avatar from '@/components/common/Avatar';
+import { toPreviewUrl } from '../../Applicant/utils/applicantForm';
 
 interface CandidateCardProps {
     candidate: CandidateItem;
@@ -189,11 +192,22 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete }: Candidate
             >
                 <div className="flex items-start justify-between mb-4 pr-8">
                     <div className="flex items-center gap-3 min-w-0">
-                        <div
+                        {/* <div
                             className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-[13px] font-secondary font-semibold text-white"
                             style={{ background: cs.fg }}
                         >
                             {initials(candidate.candidate_name)}
+
+                        </div> */}
+                        <div className="relative">
+                            <Avatar
+                                src={candidate?.candidate_foto ? toPreviewUrl(candidate.candidate_foto) : null}
+                                nama={candidate.candidate_name}
+                                size={48}
+                                fontSize={11}
+                                className="border-2 border-gray-200"
+                                alt="Profile Preview"
+                            />
                         </div>
                         <div className="min-w-0">
                             <div className="text-[15px] font-primary-bold truncate leading-tight">
@@ -236,11 +250,13 @@ export function CandidateCard({ candidate, onView, onEdit, onDelete }: Candidate
                     </DetailRow>
                     <DetailRow label="Interview Date">
                         {interviewDate ? (
-                            <span className="inline-flex items-center gap-1">
-                                <MdSchedule size={12} className="text-[#AAB1C6]" />
-                                {interviewDate}
-                                {interviewTime && <span className="text-[#9AA2BA] font-normal">· {interviewTime}</span>}
-                            </span>
+                            <div className='flex flex-col'>
+                                <span className="inline-flex items-center gap-1">
+                                    <MdCalendarMonth size={12} className="text-[#AAB1C6]" />
+                                    {interviewDate}
+                                </span>
+                                {interviewTime && <span className="inline-flex items-center gap-1 font-normal"><MdSchedule size={12} className="text-[#AAB1C6]" /> {interviewTime}</span>}
+                            </div>
                         ) : (
                             <span className="font-normal text-[#C4C9DA] italic">Not scheduled</span>
                         )}

@@ -10,19 +10,18 @@ interface PermissionInfoProps {
  * Component untuk menampilkan informasi permission current page
  * Berguna untuk debugging atau admin interface
  */
-export const PermissionInfo: React.FC<PermissionInfoProps> = ({ 
+export const PermissionInfo: React.FC<PermissionInfoProps> = ({
     className = '',
-    showTitle = true 
+    showTitle = true
 }) => {
     const permissions = usePermissions();
 
     const permissionBadge = (label: string, hasPermission: boolean) => (
         <span
-            className={`px-2 py-1 text-xs font-medium rounded-md ${
-                hasPermission
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-            }`}
+            className={`px-2 py-1 text-xs font-medium rounded-md ${hasPermission
+                ? 'bg-green-100 text-green-800'
+                : 'bg-red-100 text-red-800'
+                }`}
         >
             {label}: {hasPermission ? '✓' : '✗'}
         </span>
@@ -35,7 +34,7 @@ export const PermissionInfo: React.FC<PermissionInfoProps> = ({
                     Page Permissions ({permissions.routeName})
                 </h4>
             )}
-            
+
             <div className="flex flex-wrap gap-2">
                 {permissionBadge('Create', permissions.canCreate)}
                 {permissionBadge('Read', permissions.canRead)}
@@ -43,8 +42,9 @@ export const PermissionInfo: React.FC<PermissionInfoProps> = ({
                 {permissionBadge('Delete', permissions.canDelete)}
                 {permissionBadge('Duplicate', permissions.canDuplicate)}
                 {permissionBadge('Guide', permissions.canGuide)}
+                {permissionBadge('Update Status', permissions.canUpdateStatus)}
             </div>
-            
+
             {permissions.permissions.length > 0 && (
                 <div className="mt-2 text-xs text-gray-600">
                     Available: {permissions.permissions.join(', ')}
@@ -61,10 +61,9 @@ export const PermissionBadges: React.FC<{ className?: string }> = ({ className =
     const permissions = usePermissions();
 
     const badgeClasses = (hasPermission: boolean) =>
-        `inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${
-            hasPermission
-                ? 'bg-green-100 text-green-800'
-                : 'bg-gray-100 text-gray-400'
+        `inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${hasPermission
+            ? 'bg-green-100 text-green-800'
+            : 'bg-gray-100 text-gray-400'
         }`;
 
     return (
@@ -75,6 +74,7 @@ export const PermissionBadges: React.FC<{ className?: string }> = ({ className =
             <span className={badgeClasses(permissions.canDelete)} title="Delete Permission">D</span>
             <span className={badgeClasses(permissions.canDuplicate)} title="Duplicate Permission">Dup</span>
             <span className={badgeClasses(permissions.canGuide)} title="Guide Permission">G</span>
+            <span className={badgeClasses(permissions.canUpdateStatus)} title="Update Status Permission">UPSTATUS</span>
         </div>
     );
 };

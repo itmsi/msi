@@ -459,6 +459,8 @@ export const pickApplicantSummary = (detail: ApplicantFormDetail): ApplicantForm
     city: detail.city,
     working_available_date: detail.working_available_date,
     applicant_form_url: detail.applicant_form_url,
+    applicant_form_invitation_id: detail.applicant_form_invitation_id ?? null,
+    status_send_email: detail.status_send_email ?? null,
 });
 
 const SPEECH_STATUSES: Exclude<ApplicantSpeechStatus, null>[] = ['Success', 'Pending', 'Failed'];
