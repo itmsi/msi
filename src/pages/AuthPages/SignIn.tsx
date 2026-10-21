@@ -1,10 +1,10 @@
-import type { CSSProperties } from "react";
-import { motion, MotionConfig } from "framer-motion";
+import { useCallback, useState, type CSSProperties } from "react";
+import { motion, MotionConfig, useReducedMotion } from "framer-motion";
 import PageMeta from "../../components/common/PageMeta";
 import SignInForm from "../../components/auth/SignInForm";
 import AnimatedWaveBackground from "../../components/auth/login/AnimatedWaveBackground";
 import FloatingParticles from "../../components/auth/login/FloatingParticles";
-import { EASE_OUT, contentStagger, fadeUp } from "../../components/auth/login/motionVariants";
+import { EASE_OUT, SUCCESS_DURATION, SUCCESS_HOLD_MS, contentStagger, fadeUp } from "../../components/auth/login/motionVariants";
 import { loginThemeVars } from "../../components/auth/login/loginTheme";
 
 const pageStyle = {
@@ -13,7 +13,28 @@ const pageStyle = {
     "--wave-h": "clamp(170px, 50vh, 300px)",
 } as CSSProperties;
 
+const successLightStyle = {
+    background:
+        "radial-gradient(circle at 18% 8%, #FFFFFF 0%, #F3F4F6 38%, rgba(243,244,246,0.85) 58%, rgba(243,244,246,0) 80%)",
+    originX: 0.18,
+    originY: 0.08,
+};
+
+const REDUCED_SUCCESS_HOLD_MS = 250;
+
 export default function SignIn() {
+    const reduceMotion = useReducedMotion();
+    const [succeeded, setSucceeded] = useState(false);
+
+    const playSuccess = useCallback(
+        () =>
+            new Promise<void>((resolve) => {
+                setSucceeded(true);
+                window.setTimeout(resolve, reduceMotion ? REDUCED_SUCCESS_HOLD_MS : SUCCESS_HOLD_MS);
+            }),
+        [reduceMotion],
+    );
+
     return (
         <>
             <PageMeta
@@ -32,8 +53,8 @@ export default function SignIn() {
                         animate={{ opacity: 0 }}
                         transition={{ duration: 0.8, ease: EASE_OUT }}
                     />
-                    <FloatingParticles />
-                    <AnimatedWaveBackground />
+                    <FloatingParticles rising={succeeded} />
+                    <AnimatedWaveBackground settled={succeeded} />
 
                     <motion.header
                         className="relative z-10 flex items-center px-4 pt-5 sm:px-8 sm:pt-7 lg:px-12"
@@ -53,25 +74,31 @@ export default function SignIn() {
                     <main className="relative z-10 flex flex-1 items-center justify-center px-4 pb-[calc(var(--wave-h)*0.2)] sm:px-6"
                     >
                         <motion.div
-                            className="w-full max-w-100"
-                            initial="hidden"
-                            animate="visible"
-                            variants={contentStagger}
+                            className="w-full max-w-105"
+                            initial={false}
+                            animate={succeeded ? { opacity: 0, y: -24 } : { opacity: 1, y: 0 }}
+                            transition={{ duration: SUCCESS_DURATION, ease: EASE_OUT }}
                         >
-                            <motion.div className="p-6 shadow-[0px_0px_16px_-6px_#0253a5] bg-[#011d3a]/50 backdrop-blur-lg rounded-xl border border-white/30">
-                                <motion.h1
-                                    variants={fadeUp}
-                                    className="text-center font-main-bold text-[1.75rem] leading-tight tracking-tight sm:text-3xl"
-                                >
-                                    Welcome back
-                                </motion.h1>
-                                <motion.p
-                                    variants={fadeUp}
-                                    className="mt-2 mb-6 text-center text-sm leading-relaxed text-(--login-text)"
-                                >
-                                    Sign in with your Motor Sights International credentials.
-                                </motion.p>
-                                <SignInForm />
+                            <motion.div
+                                initial="hidden"
+                                animate="visible"
+                                variants={contentStagger}
+                            >
+                                <motion.div className="relative p-6 shadow-[0px_0px_16px_-6px_#0253a5] bg-[#011d3a]/50 backdrop-blur-lg rounded-xl border border-white/30">
+                                    <motion.h1
+                                        variants={fadeUp}
+                                        className="text-center font-main-bold text-[1.75rem] leading-tight tracking-tight sm:text-3xl"
+                                    >
+                                        Welcome back
+                                    </motion.h1>
+                                    <motion.p
+                                        variants={fadeUp}
+                                        className="mt-2 mb-6 text-center text-sm leading-relaxed text-(--login-text)"
+                                    >
+                                        Sign in with your Motor Sights International credentials.
+                                    </motion.p>
+                                    <SignInForm onAuthenticated={playSuccess} />
+                                </motion.div>
                             </motion.div>
                         </motion.div>
                     </main>
@@ -84,6 +111,15 @@ export default function SignIn() {
                     >
                         &copy; {new Date().getFullYear()} Motor Sights International. All rights reserved.
                     </motion.footer>
+
+                    <motion.div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 z-20"
+                        style={successLightStyle}
+                        initial={false}
+                        animate={succeeded ? { opacity: 1, scale: 2.6 } : { opacity: 0, scale: 0.5 }}
+                        transition={{ duration: SUCCESS_DURATION, ease: EASE_OUT }}
+                    />
                 </div>
             </MotionConfig>
         </>

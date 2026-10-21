@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
     AuthState, 
     LoginRequest, 
-    LoginFormErrors, 
-    User, 
+    LoginFormErrors,
+    LoginOptions,
+    User,
     Menu
 } from '@/types/auth';
 import { AuthService } from '@/services/authService';
@@ -68,17 +69,16 @@ export const useAuth = () => {
     /**
      * Login function
      */
-    const login = useCallback(async (credentials: LoginRequest) => {
+    const login = useCallback(async (credentials: LoginRequest, options?: LoginOptions) => {
         try {
             // Clear previous errors
             setFormErrors({});
-            setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
+            setAuthState(prev => ({ ...prev, error: null }));
 
             // Validate form
             const validationErrors = AuthService.validateLoginForm(credentials);
             if (AuthService.hasValidationErrors(validationErrors)) {
                 setFormErrors(validationErrors);
-                setAuthState(prev => ({ ...prev, isLoading: false }));
                 return;
             }
 
@@ -87,6 +87,8 @@ export const useAuth = () => {
 
             // Store auth data
             AuthService.storeAuthData(response.data);
+
+            await options?.beforeAuthenticated?.();
 
             // Update state
             setAuthState({

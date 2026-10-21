@@ -1,4 +1,11 @@
 import axios, { AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios';
+
+declare module 'axios' {
+    interface AxiosRequestConfig {
+        skipSessionRedirect?: boolean;
+    }
+}
+
 // Base configuration for axios
 const api = axios.create({
     baseURL: '',
@@ -172,7 +179,8 @@ const handleApiError = (error: AxiosError<ApiErrorResponse>): ApiError => {
     if (error.response) {
         // Server responded with error status
         const errorData = error.response.data;
-        if (errorData?.message === 'Token sudah expired' || error.response.status === 401) {
+        const isSessionExpired = errorData?.message === 'Token sudah expired' || error.response.status === 401;
+        if (isSessionExpired && !error.config?.skipSessionRedirect) {
             // Clear all auth data from localStorage
             localStorage.removeItem('auth_token');
             localStorage.removeItem('auth_user');
