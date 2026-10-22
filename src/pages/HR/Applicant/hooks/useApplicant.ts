@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { ApiError } from '@/helpers/apiHelper';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { ApplicantService } from '../services/applicantService';
-import { ApplicantFormListItem, ApplicantSendEmailStatus, Pagination } from '../types/applicant';
+import { ApplicantFormListItem, Pagination } from '../types/applicant';
 import { applicantManage } from '../language/applicantManage';
 import { getApplicantFormStatus } from '../utils/applicantStatus';
 
@@ -75,10 +75,12 @@ export const useApplicant = () => {
         setSearchParams(params);
     }, [searchParams, setSearchParams]);
 
-    const fetchApplicants = useCallback(async () => {
+    const fetchApplicants = useCallback(async (silent = false) => {
         try {
-            setLoading(true);
-            setError(null);
+            if (!silent) {
+                setLoading(true);
+                setError(null);
+            }
 
             const result = await ApplicantService.getApplicantForms({
                 page: urlPage,
@@ -89,6 +91,7 @@ export const useApplicant = () => {
             });
 
             if (!result.success) {
+                if (silent) return;
                 setApplicants([]);
                 setError(result.message || langField('fetchFailed'));
                 return;
@@ -97,12 +100,13 @@ export const useApplicant = () => {
             setApplicants(result.items);
             setPagination(result.pagination);
         } catch (err) {
+            console.error('Error fetching applicant data:', err);
+            if (silent) return;
             const apiError = err as ApiError;
             setApplicants([]);
             setError(apiError?.message || langField('fetchFailed'));
-            console.error('Error fetching applicant data:', err);
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     }, [urlFilters.search, urlFilters.sort_order, urlFilters.is_completed, urlPage, urlLimit, langField]);
 
@@ -180,36 +184,30 @@ export const useApplicant = () => {
             return;
         }
         if (
-            getApplicantFormStatus(applicant) === 'completed'
-            || applicant.status_send_email === 'Process'
+            !checked
+            || applicant.is_completed
+            || applicant.status_send_email === 'Failed'
             || emailStatusUpdatingIds.includes(applicant.id)
         ) return;
 
-        const previousStatus = applicant.status_send_email;
-        const nextStatus = checked ? 'Success' : 'Failed';
-        const setRowStatus = (status: ApplicantSendEmailStatus) =>
-            setApplicants(prev => prev.map(row => (row.id === applicant.id ? { ...row, status_send_email: status } : row)));
-
-        setRowStatus(nextStatus);
         setEmailStatusUpdatingIds(prev => [...prev, applicant.id]);
         try {
-            const response = await ApplicantService.updateInvitationEmailStatus(invitationId, { status_send_email: nextStatus });
+            const response = await ApplicantService.updateInvitationEmailStatus(invitationId, { status_send_email: 'Failed' });
 
             if (!response?.success) {
-                setRowStatus(previousStatus);
                 toast.error(response?.message || langField('emailStatusUnsuccessful'));
                 return;
             }
 
             toast.success(response.message || langField('emailStatusSuccess'));
+            await fetchApplicants(true);
         } catch (err) {
             const apiError = err as ApiError;
-            setRowStatus(previousStatus);
             toast.error(apiError?.message || langField('emailStatusFailed'));
         } finally {
             setEmailStatusUpdatingIds(prev => prev.filter(id => id !== applicant.id));
         }
-    }, [emailStatusUpdatingIds, langField]);
+    }, [emailStatusUpdatingIds, fetchApplicants, langField]);
 
     useEffect(() => {
         fetchApplicants();
