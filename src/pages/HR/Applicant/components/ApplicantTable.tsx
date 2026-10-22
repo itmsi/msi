@@ -15,7 +15,7 @@ import { useHasPermission } from '@/hooks/usePermissions';
 
 const EMAIL_STATUS_CAPTION: Record<'Success' | 'Failed' | 'none', { labelKey: string; className: string; badgeClassName: string }> = {
     Success: { labelKey: 'emailStatusSuccessLabel', className: 'text-green-600', badgeClassName: 'border-green-200 bg-green-50 text-green-700' },
-    Failed: { labelKey: 'emailStatusFailedLabel', className: 'text-red-600', badgeClassName: 'border-red-200 bg-red-50 text-red-700' },
+    Failed: { labelKey: 'emailStatusFailedLabel', className: 'text-red-600 border-red-200 bg-red-50 text-red-700', badgeClassName: 'border-red-200 bg-red-50 text-red-700' },
     none: { labelKey: 'emailStatusNotSent', className: 'text-gray-500', badgeClassName: 'border-gray-200 bg-gray-50 text-gray-600' },
 };
 
@@ -46,7 +46,6 @@ const ApplicantTable: React.FC<ApplicantTableProps> = ({
 }) => {
     const location = useLocation();
     const canUpdateStatus = useHasPermission('update_status');
-    const canManageEmailStatus = canUpdateStatus;
     const { langField, buildPath } = useLanguage(applicantManage);
 
     const getDetailPath = (row: ApplicantFormListItem) => buildPath(`/hr/applicants/edit/${row.id}`);
@@ -75,34 +74,23 @@ const ApplicantTable: React.FC<ApplicantTableProps> = ({
                 );
             }
 
-            const caption = EMAIL_STATUS_CAPTION[row.status_send_email ?? 'none'];
-            const isEditable = getApplicantFormStatus(row) !== 'completed' && Boolean(row.applicant_form_invitation_id);
-
-            if (!isEditable) {
-                return (
-                    <span className={`${statusBadgeClass} ${caption.badgeClassName}`}>
-                        {langField(caption.labelKey)}
-                    </span>
-                );
-            }
+            if (row.is_completed) return null;
 
             return (
                 <div className="relative flex items-center gap-3">
                     <Switch
                         label=""
-                        checked={row.status_send_email === 'Success'}
+                        checked={row.status_send_email === 'Failed'}
                         onChange={checked => onSwitchStatus(row, checked)}
                         showStatusText={false}
+                        disabled={!canUpdateStatus}
                     />
-                    <span className={`mt-1 text-xs font-medium italic ${caption.className}`}>
-                        {langField(caption.labelKey)}
-                    </span>
                 </div>
             );
         },
         center: true,
         wrap: true,
-        minWidth: '170px',
+        minWidth: '150px',
     };
 
     const columns: TableColumn<ApplicantFormListItem>[] = [
@@ -146,10 +134,15 @@ const ApplicantTable: React.FC<ApplicantTableProps> = ({
             selector: row => langField(APPLICANT_STATUS_DISPLAY[getApplicantFormStatus(row)].labelKey),
             cell: row => {
                 const status = APPLICANT_STATUS_DISPLAY[getApplicantFormStatus(row)];
-
+                const caption = EMAIL_STATUS_CAPTION[
+                    row.status_send_email === 'Success' || row.status_send_email === 'Failed'
+                        ? row.status_send_email
+                        : 'none'
+                ];
+                const statusEmail = (row.status_send_email === 'Failed' && !row.is_completed);
                 return (
-                    <span className={`inline-flex items-center justify-center px-3 py-1 text-xs border rounded-full font-medium ${status.className}`}>
-                        {langField(status.labelKey)}
+                    <span className={`inline-flex items-center justify-center px-3 py-1 text-xs border rounded-full font-medium ${statusEmail ? caption.className : status.className}`}>
+                        {statusEmail ? langField(caption.labelKey) : langField(status.labelKey)}
                     </span>
                 );
             },
@@ -172,7 +165,6 @@ const ApplicantTable: React.FC<ApplicantTableProps> = ({
             width: '200px',
             center: true,
         },
-        ...(canManageEmailStatus ? [emailStatusColumn] : []),
         {
             id: 'contact',
             name: langField('contact'),
@@ -188,16 +180,22 @@ const ApplicantTable: React.FC<ApplicantTableProps> = ({
         },
         createByDateColumn(langField('invitedAt'), 'created_at', 'created_by_name', '320px'),
         createDateColumn(langField('completedAt'), 'completed_at', tableDateFormatTime),
+        emailStatusColumn,
         createActionsColumn([
             {
-                title: 'send',
+                title: 'Re-Send',
                 icon: LuSend,
                 onClick: onResendMail,
                 className: 'text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent',
                 tooltip: langField('resend'),
                 permission: 'create',
-                disable: row => getApplicantFormStatus(row) === 'completed' || !row.applicant_form_invitation_id || resendingIds.includes(row.id),
+                disable: row => getApplicantFormStatus(row) === 'completed' ||
+                    !row.applicant_form_invitation_id ||
+                    resendingIds.includes(row.id) ||
+                    (row.status_send_email !== 'Failed' && !row.is_completed) ||
+                    !canUpdateStatus,
                 iconClassName: row => (resendingIds.includes(row.id) ? 'animate-pulse' : ''),
+                width: '100'
             },
         ]),
 
