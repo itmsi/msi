@@ -4,9 +4,8 @@ import {
     MdExpandLess,
     MdExpandMore,
     MdFilterListAlt,
-    MdSearch,
 } from 'react-icons/md';
-import Input from '@/components/form/input/InputField';
+import SearchInput from '@/components/form/input/SearchInput';
 import Button from '@/components/ui/button/Button';
 import CustomSelect from '@/components/form/select/CustomSelect';
 import { useLanguage } from '@/components/lang/useLanguage';
@@ -22,7 +21,7 @@ export interface ApplicantFilterValues {
 interface FilterSectionProps {
     searchValue: string;
     onSearchChange: (value: string) => void;
-    onSearchKeyPress: (e: React.KeyboardEvent) => void;
+    onSearch: () => void;
     onClearSearch: () => void;
 
     filters: ApplicantFilterValues;
@@ -36,7 +35,7 @@ interface FilterSectionProps {
 const FilterSection: React.FC<FilterSectionProps> = ({
     searchValue,
     onSearchChange,
-    onSearchKeyPress,
+    onSearch,
     onClearSearch,
     filters,
     onFilterChange,
@@ -63,29 +62,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         <>
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
                 <div className="flex-1 w-full">
-                    <div className="relative flex">
-                        <div className="relative flex-1">
-                            <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                            <Input
-                                id="search"
-                                type="text"
-                                placeholder={searchPlaceholder || langField('searchDefaultPlaceholder')}
-                                value={searchValue}
-                                onChange={(e) => onSearchChange(e.target.value)}
-                                onKeyPress={onSearchKeyPress}
-                                className={`pl-10 py-2 w-full ${searchValue ? 'pr-10' : 'pr-4'}`}
-                            />
-                            {searchValue && (
-                                <button
-                                    onClick={onClearSearch}
-                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                                    type="button"
-                                >
-                                    <MdClear className="h-4 w-4" />
-                                </button>
-                            )}
-                        </div>
-                    </div>
+                    <SearchInput
+                        id="applicant_search"
+                        value={searchValue}
+                        onChange={onSearchChange}
+                        onSearch={onSearch}
+                        onClear={onClearSearch}
+                        placeholder={searchPlaceholder || langField('searchDefaultPlaceholder')}
+                    />
                 </div>
 
                 <div className="flex items-center gap-2">

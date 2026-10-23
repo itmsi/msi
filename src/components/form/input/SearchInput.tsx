@@ -23,10 +23,9 @@ const SearchInput: React.FC<SearchInputProps> = ({
     disabled = false,
     className = '',
 }) => {
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key !== 'Enter') return;
-
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (disabled) return;
         onSearch();
     };
 
@@ -40,11 +39,14 @@ const SearchInput: React.FC<SearchInputProps> = ({
     };
 
     return (
-        <div className={`flex items-center gap-2 w-full ${className}`}>
+        <form
+            role="search"
+            onSubmit={handleSubmit}
+            className={`flex items-center gap-2 w-full ${className}`}
+        >
             <div className="relative flex-1 min-w-0">
                 <button
-                    type="button"
-                    onClick={onSearch}
+                    type="submit"
                     disabled={disabled}
                     aria-label="Search"
                     className="absolute left-3 top-1/2 z-1 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed"
@@ -58,7 +60,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                     value={value}
                     disabled={disabled}
                     onChange={(e) => onChange(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    enterKeyHint="search"
                     className={`pl-10 py-2 w-full ${value ? 'pr-10' : 'pr-4'}`}
                 />
                 {value && (
@@ -72,7 +74,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                     </button>
                 )}
             </div>
-        </div>
+        </form>
     );
 };
 
