@@ -16,6 +16,7 @@ export const useApplicantInterview = (applicantFormId?: string) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [transcribingIds, setTranscribingIds] = useState<string[]>([]);
+    const [summarizingIds, setSummarizingIds] = useState<string[]>([]);
     // Bertambah setiap kali fetch selesai (berhasil atau gagal) agar jadwal refetch Pending tetap berjalan.
     const [fetchCount, setFetchCount] = useState(0);
     const requestIdRef = useRef(0);
@@ -94,12 +95,35 @@ export const useApplicantInterview = (applicantFormId?: string) => {
         }
     }, [transcribingIds, fetchSteps, langField]);
 
+    const handleSummarize = useCallback(async (step: ApplicantInterviewStep) => {
+        if (!step.audioUrl || summarizingIds.includes(step.id)) return;
+
+        setSummarizingIds(prev => [...prev, step.id]);
+        try {
+            const response = await ApplicantService.summarizeApplicantAudio({ file_link_audio: step.audioUrl });
+
+            if (!response?.success) {
+                toast.error(response?.message || langField('summarizeFailed'));
+                return;
+            }
+
+            toast.success(response.message || langField('summarizeSuccess'));
+            await fetchSteps(true);
+        } catch (err) {
+            toast.error((err as ApiError)?.message || langField('summarizeFailed'));
+        } finally {
+            setSummarizingIds(prev => prev.filter(id => id !== step.id));
+        }
+    }, [summarizingIds, fetchSteps, langField]);
+
     return {
         steps,
         loading,
         error,
         transcribingIds,
+        summarizingIds,
         refetch,
         handleTranscribe,
+        handleSummarize,
     };
 };

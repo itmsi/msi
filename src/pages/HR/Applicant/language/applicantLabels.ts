@@ -617,6 +617,56 @@ export const applicantLabels: TranslationMap = {
         en: 'Failed to send the transcription request',
         zh: '发送转录请求失败',
     },
+    summaryTab: {
+        id: 'Ringkasan',
+        en: 'Summary',
+        zh: '摘要',
+    },
+    transcriptTab: {
+        id: 'Transkrip',
+        en: 'Transcript',
+        zh: '文字记录',
+    },
+    summaryCopyFailed: {
+        id: 'Gagal menyalin ringkasan',
+        en: 'Failed to copy the summary',
+        zh: '复制摘要失败',
+    },
+    summaryEmpty: {
+        id: 'Belum ada ringkasan untuk jawaban ini.',
+        en: 'There is no summary for this answer yet.',
+        zh: '此回答尚无摘要。',
+    },
+    summaryFailedDescription: {
+        id: 'Ringkasan gagal dibuat.',
+        en: 'The summary could not be generated.',
+        zh: '摘要生成失败。',
+    },
+    generateSummary: {
+        id: 'Buat Ringkasan',
+        en: 'Generate Summary',
+        zh: '生成摘要',
+    },
+    regenerateSummary: {
+        id: 'Ringkas Ulang',
+        en: 'Regenerate Summary',
+        zh: '重新生成摘要',
+    },
+    summarizing: {
+        id: 'Meringkas...',
+        en: 'Summarizing...',
+        zh: '正在生成摘要...',
+    },
+    summarizeSuccess: {
+        id: 'Permintaan ringkasan berhasil dikirim',
+        en: 'Summary request sent',
+        zh: '摘要请求已发送',
+    },
+    summarizeFailed: {
+        id: 'Gagal membuat ringkasan',
+        en: 'Failed to generate summary',
+        zh: '生成摘要失败',
+    },
 
     // Attachments & Signature
     attachments: {

@@ -17,6 +17,7 @@ interface AiSummaryPanelProps {
     copied?: boolean;
     hidePromptInput?: boolean;
     handleCopySummary?: () => void;
+    loadingText?: string;
 }
 
 export function AiSummaryPanel({
@@ -33,7 +34,8 @@ export function AiSummaryPanel({
     showCopyButton = true,
     copied = false,
     hidePromptInput = false,
-    handleCopySummary
+    handleCopySummary,
+    loadingText = "Analyzing survey data...",
 }: AiSummaryPanelProps) {
     // const [prompt, setPrompt] = useState(textPrompt || '');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -112,7 +114,7 @@ export function AiSummaryPanel({
                                         <div className="relative">
                                             <LuLoaderCircle size={22} className="animate-spin text-primary" />
                                         </div>
-                                        <span className="text-sm text-gray-500 font-medium">Analyzing survey data...</span>
+                                        <span className="text-sm text-gray-500 font-medium">{loadingText}</span>
                                     </div>
                                     <div className="space-y-2.5">
                                         {[75, 50, 85].map((w, i) => (
