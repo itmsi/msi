@@ -63,7 +63,8 @@ export const useApplicantInterview = (applicantFormId?: string) => {
 
     const refetch = useCallback(() => fetchSteps(), [fetchSteps]);
 
-    const hasPending = steps.some(step => step.speechStatus === 'Pending');
+    const hasPending = import.meta.env.VITE_FEATURE_INTERVIEW_TRANSCRIPT === 'true'
+        && steps.some(step => step.speechStatus === 'Pending');
 
     useEffect(() => {
         if (!hasPending) return;

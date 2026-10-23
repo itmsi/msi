@@ -24,6 +24,7 @@ interface InputProps {
     hint?: string;
     readonly?: boolean;
     autoComplete?: string;
+    enterKeyHint?: React.InputHTMLAttributes<HTMLInputElement>['enterKeyHint'];
 }
 
 const Input: FC<InputProps> = ({
@@ -47,6 +48,7 @@ const Input: FC<InputProps> = ({
     onFocus,
     hint,
     readonly = false,
+    enterKeyHint,
 }) => {
     let inputClasses = `font-secondary h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3:text-white/30 ${className}`;
 
@@ -79,6 +81,7 @@ const Input: FC<InputProps> = ({
                 disabled={disabled}
                 readOnly={readonly}
                 autoComplete={autoComplete}
+                enterKeyHint={enterKeyHint}
                 className={clsx(
                     twMerge(
                         inputClasses,

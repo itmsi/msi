@@ -27,7 +27,7 @@ export default function Manage() {
         handleFilterChange,
         handlePageChange,
         handleRowsPerPageChange,
-        handleKeyPress,
+        handleSearch,
         handleClearSearch,
         handleClearFilters,
         handleCopyLink,
@@ -80,7 +80,7 @@ export default function Manage() {
                     <FilterSection
                         searchValue={searchValue}
                         onSearchChange={setSearchValue}
-                        onSearchKeyPress={handleKeyPress}
+                        onSearch={handleSearch}
                         onClearSearch={handleClearSearch}
                         searchPlaceholder={langField('searchPlaceholder')}
                         filters={filters}

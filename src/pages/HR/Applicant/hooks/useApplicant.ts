@@ -122,8 +122,8 @@ export const useApplicant = () => {
         updateUrlParams(urlFilters, page, limit);
     }, [urlFilters, updateUrlParams]);
 
-    const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') handleFilterChange({ search: searchValue });
+    const handleSearch = useCallback(() => {
+        handleFilterChange({ search: searchValue });
     }, [handleFilterChange, searchValue]);
 
     const handleClearSearch = useCallback(() => {
@@ -230,7 +230,7 @@ export const useApplicant = () => {
         handleFilterChange,
         handlePageChange,
         handleRowsPerPageChange,
-        handleKeyPress,
+        handleSearch,
         handleClearSearch,
         handleClearFilters,
         handleCopyLink,

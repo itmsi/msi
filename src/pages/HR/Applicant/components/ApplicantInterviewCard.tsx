@@ -23,7 +23,7 @@ interface MediaPlayerProps {
     url: string;
     title: string;
 }
-
+const showTranscriptFeature = import.meta.env.VITE_FEATURE_INTERVIEW_TRANSCRIPT === 'true';
 const MediaPlayer = ({ kind, url, title }: MediaPlayerProps) => {
     const { langField } = useLanguage(applicantLabels);
     const [failed, setFailed] = useState(false);
@@ -162,7 +162,7 @@ const ApplicantInterviewCard = ({
     const actionToggle = () => setShowInformation(prev => !prev);
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm p-6 space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm py-6 space-y-6">
             <h3
                 className={`text-lg font-primary-bold text-center ${showInformation ? 'border-b border-b-gray-300 pb-3' : ''} uppercase text-gray-900 flex justify-center items-center gap-5 cursor-pointer`}
                 onClick={actionToggle}
@@ -195,9 +195,13 @@ const ApplicantInterviewCard = ({
                         return (
                             <div
                                 key={item.id || `${item.step}-${index}`}
-                                className="border border-gray-200 rounded-xl p-4"
+                                className="border-b border-gray-200 p-4"
                             >
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start">
+                                    <div>
+                                        <MediaPlayer kind="video" url={item.videoUrl} title={item.videoTitle} />
+                                        {/* <MediaPlayer kind="audio" url={item.audioUrl} title={item.audioTitle} /> */}
+                                    </div>
                                     <div className="space-y-4 min-w-0">
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2">
@@ -230,17 +234,14 @@ const ApplicantInterviewCard = ({
                                             )}
                                         </div>
 
-                                        <TranscriptSection
-                                            step={item}
-                                            transcribing={transcribingIds.includes(item.id)}
-                                            canTranscribe={canTranscribe}
-                                            onTranscribe={onTranscribe}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <MediaPlayer kind="video" url={item.videoUrl} title={item.videoTitle} />
-                                        {/* <MediaPlayer kind="audio" url={item.audioUrl} title={item.audioTitle} /> */}
+                                        {showTranscriptFeature && (
+                                            <TranscriptSection
+                                                step={item}
+                                                transcribing={transcribingIds.includes(item.id)}
+                                                canTranscribe={canTranscribe}
+                                                onTranscribe={onTranscribe}
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             </div>

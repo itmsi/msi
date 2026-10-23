@@ -15,6 +15,7 @@ interface AiSummaryPanelProps {
     setShowChatHistory?: (value: boolean) => void;
     showCopyButton?: boolean;
     copied?: boolean;
+    hidePromptInput?: boolean;
     handleCopySummary?: () => void;
 }
 
@@ -31,6 +32,7 @@ export function AiSummaryPanel({
     setShowChatHistory,
     showCopyButton = true,
     copied = false,
+    hidePromptInput = false,
     handleCopySummary
 }: AiSummaryPanelProps) {
     // const [prompt, setPrompt] = useState(textPrompt || '');
@@ -45,7 +47,7 @@ export function AiSummaryPanel({
     const borderStateClass = isGenerating ? "ai-border-spinning" : "";
 
     return (
-        <div className={`ai-border-wrapper ai-border-static ${borderStateClass} rounded-lg`} style={{background: '#dbeafe'}}>
+        <div className={`ai-border-wrapper ai-border-static ${borderStateClass} rounded-lg`} style={{ background: '#dbeafe' }}>
             <div className="ai-summary-gradient rounded-[7px] overflow-hidden">
                 {/* Header AI Summary */}
                 <div className="flex items-center justify-between px-4 pt-3 pb-2">
@@ -58,7 +60,7 @@ export function AiSummaryPanel({
                             <span className="text-xs text-primary">· Membuat ringkasan...</span>
                         )}
                     </div>
-                    
+
                     <div className="flex items-center gap-1">
                         {showChatHistory && (sessionId || !isGenerating) && (
                             <div className="flex items-center gap-2.5">
@@ -73,7 +75,7 @@ export function AiSummaryPanel({
                                 </div>
                             </div>
                         )}
-                        
+
                         {showCopyButton && !isGenerating && (
                             <div className="flex items-center gap-2.5">
                                 <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-blue-200/60 rounded-lg shadow-xs">
@@ -101,7 +103,7 @@ export function AiSummaryPanel({
                 {/* Isi ringkasan */}
                 <div className="pt-3">
                     <div className={`bg-white rounded-t-2xl overflow-auto max-h-[55vh] transition-all`}>
-                        
+
                         {/* ── Loading State ── */}
                         {isGenerating && (
                             <div className="px-6 py-8">
@@ -115,7 +117,7 @@ export function AiSummaryPanel({
                                     <div className="space-y-2.5">
                                         {[75, 50, 85].map((w, i) => (
                                             <div key={i} className={`h-3 rounded-full relative overflow-hidden bg-slate-100 mx-auto`} style={{ width: `${w}%` }}>
-                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-200/50 to-transparent animate-shimmer" 
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-200/50 to-transparent animate-shimmer"
                                                     style={{ animationDelay: `${i * 0.15}s` }} />
                                             </div>
                                         ))}
@@ -146,13 +148,13 @@ export function AiSummaryPanel({
                 )}
 
                 {/* Prompt input — jadi satu composer, bukan blok terpisah */}
-                
-                <div className="border-t border-purple-100 bg-white/70 backdrop-blur-sm px-3 py-2.5">
-                    <div className="flex items-start gap-2">
+                {!hidePromptInput && (
+                    <div className="border-t border-purple-100 bg-white/70 backdrop-blur-sm px-3 py-2.5">
+                        <div className="flex items-start gap-2">
                             <div className="flex items-center justify-center w-6 h-11.25 ">
                                 <LuSparkles className="text-primary" size={16} />
                             </div>
-                        
+
                             <textarea
                                 ref={textareaRef}
                                 value={prompt}
@@ -172,8 +174,9 @@ export function AiSummaryPanel({
                                 <LuSparkles size={14} className={isGenerating ? "animate-pulse" : ""} />
                                 {isGenerating ? "Membuat..." : "Generate"}
                             </button>
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );
