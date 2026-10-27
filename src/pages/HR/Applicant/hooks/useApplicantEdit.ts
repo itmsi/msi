@@ -11,16 +11,19 @@ import {
     ApplicantFormScalarField,
     ApplicantFormUpdateRequest,
     ApplicantListSection,
+    ApplicantSummaryAll,
 } from '../types/applicant';
 import {
     createEmptyApplicantForm,
     createEmptyRow,
+    EMPTY_SUMMARY_ALL,
     hasRowValue,
     isBirthInputField,
     isRequiredFamilyRelationship,
     isRequiredListRow,
     pickApplicantAttachments,
     pickApplicantSummary,
+    pickApplicantSummaryAll,
     REQUIRED_APPLICANT_FIELDS,
     REQUIRED_EDUCATION_FIELDS,
     REQUIRED_FAMILY_FIELDS,
@@ -50,6 +53,8 @@ export const useApplicantEdit = (id?: string) => {
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [summaryAll, setSummaryAll] = useState<ApplicantSummaryAll>(EMPTY_SUMMARY_ALL);
+    const [isGeneratingSummaryAll, setIsGeneratingSummaryAll] = useState(false);
 
     const fetchApplicantForm = useCallback(async () => {
         if (!id) return;
@@ -71,6 +76,7 @@ export const useApplicantEdit = (id?: string) => {
 
             setSummary(pickApplicantSummary(response.data));
             setAttachments(pickApplicantAttachments(response.data));
+            setSummaryAll(pickApplicantSummaryAll(response.data));
             setFormData(values);
             setSavedFormData(values);
             setErrors({});
@@ -262,6 +268,40 @@ export const useApplicantEdit = (id?: string) => {
         }
     };
 
+    // Hanya ringkasan yang diperbarui; fetchApplicantForm akan menimpa isian form yang belum disimpan.
+    const refreshSummaryAll = useCallback(async () => {
+        if (!id) return;
+
+        try {
+            const response = await ApplicantService.getApplicantFormById(id);
+            if (response?.success && response.data) setSummaryAll(pickApplicantSummaryAll(response.data));
+        } catch (err) {
+            console.error('Error refreshing interview summary:', err);
+        }
+    }, [id]);
+
+    const handleGenerateSummaryAll = useCallback(async () => {
+        if (!id || isGeneratingSummaryAll) return;
+
+        setIsGeneratingSummaryAll(true);
+        try {
+            const response = await ApplicantService.createSummarizeAll(id);
+
+            if (!response?.success) {
+                toast.error(response?.message || langField('summarizeAllFailed'));
+                return;
+            }
+
+            toast.success(response.message || langField('summarizeAllSuccess'));
+            await refreshSummaryAll();
+        } catch (err) {
+            const apiError = err as ApiError;
+            toast.error(apiError?.message || langField('summarizeAllFailed'));
+        } finally {
+            setIsGeneratingSummaryAll(false);
+        }
+    }, [id, isGeneratingSummaryAll, refreshSummaryAll, langField]);
+
     const handleExportPdf = async () => {
         if (!savedFormData || !summary || isExporting) return;
 
@@ -287,8 +327,11 @@ export const useApplicantEdit = (id?: string) => {
         error,
         isSubmitting,
         isExporting,
+        summaryAll,
+        isGeneratingSummaryAll,
         fetchApplicantForm,
         handleExportPdf,
+        handleGenerateSummaryAll,
         handleFieldChange,
         handleDriverLicenseToggle,
         handleRowAdd,

@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
+import toast from 'react-hot-toast';
 import { MdDownload } from 'react-icons/md';
-import { LuAudioLines, LuChevronDown, LuLoaderCircle, LuRefreshCw } from 'react-icons/lu';
+import { LuAudioLines, LuChevronDown, LuInfo, LuLoaderCircle, LuRefreshCw, LuSparkles } from 'react-icons/lu';
 import Badge from '@/components/ui/badge/Badge';
 import Button from '@/components/ui/button/Button';
 import { useLanguage } from '@/components/lang/useLanguage';
-import { ApplicantInterviewStep, ApplicantSpeechStatus } from '../types/applicant';
+import { AiSummaryPanel } from '@/components/assistant-ui/Aisummarypanel';
+import { ApplicantInterviewStep, ApplicantSpeechStatus, ApplicantSummaryAll } from '../types/applicant';
 import { toDownloadUrl } from '../utils/applicantForm';
 import { applicantLabels } from '../language/applicantLabels';
 
@@ -13,9 +15,14 @@ interface ApplicantInterviewCardProps {
     loading: boolean;
     error: string | null;
     transcribingIds: string[];
+    summarizingIds: string[];
     canTranscribe: boolean;
     onTranscribe: (step: ApplicantInterviewStep) => void;
+    onSummarize: (step: ApplicantInterviewStep) => void;
     onRetry: () => void;
+    summaryAll: ApplicantSummaryAll;
+    generatingSummaryAll: boolean;
+    onGenerateSummaryAll: () => void;
 }
 
 interface MediaPlayerProps {
@@ -55,7 +62,7 @@ const MediaPlayer = ({ kind, url, title }: MediaPlayerProps) => {
                     preload="none"
                     src={source}
                     onError={() => setFailed(true)}
-                    className="w-full aspect-video rounded-lg bg-black"
+                    className="w-full h-[600px] rounded-lg bg-black"
                 />
             ) : (
                 <audio
@@ -140,19 +147,191 @@ const TranscriptSection = ({ step, transcribing, canTranscribe, onTranscribe }: 
     );
 };
 
+interface SummarySectionProps {
+    step: ApplicantInterviewStep;
+    summarizing: boolean;
+    canSummarize: boolean;
+    onSummarize: (step: ApplicantInterviewStep) => void;
+}
+
+const SummarySection = ({ step, summarizing, canSummarize, onSummarize }: SummarySectionProps) => {
+    const { langField } = useLanguage(applicantLabels);
+    const status = step.speechStatus;
+    const [copied, setCopied] = useState(false);
+    const isFailed = step.summaryStatus === 'Failed';
+
+    const handleCopySummary = async () => {
+        try {
+            await navigator.clipboard.writeText(step.summary);
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+        } catch {
+            toast.error(langField('summaryCopyFailed'));
+        }
+    };
+
+    return (
+        <div className="space-y-2">
+            {status === 'Pending' ? (
+                <p className="flex items-center gap-2 text-sm text-gray-500">
+                    <LuLoaderCircle size={14} className="animate-spin shrink-0" />
+                    {langField('transcriptPendingDescription')}
+                </p>
+            ) : (step.summary || summarizing) ? null : (
+                <p className="text-sm text-gray-500">
+                    {langField('summaryEmpty')}
+                </p>
+            )}
+            {(step.summary || summarizing) && (
+                <AiSummaryPanel
+                    summary={step.summary}
+                    setPrompt={() => undefined}
+                    onGenerate={() => onSummarize(step)}
+                    isGenerating={summarizing}
+                    hidePromptInput
+                    showChatHistory={false}
+                    showCopyButton={Boolean(step.summary)}
+                    copied={copied}
+                    handleCopySummary={handleCopySummary}
+                    loadingText={langField('summarizing')}
+                />
+            )}
+
+            {isFailed && (
+                <p className="text-sm text-error-600">
+                    {step.summaryMessage || langField('summaryFailedDescription')}
+                </p>
+            )}
+
+            {canSummarize && (
+                <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!step.audioUrl || summarizing}
+                    onClick={() => onSummarize(step)}
+                    className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-4 py-2.5 rounded-xl shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
+                    startIcon={summarizing
+                        ? <LuLoaderCircle size={14} className="animate-spin" />
+                        : step.summary ? <LuRefreshCw size={14} /> : <LuSparkles size={14} />}
+                >
+                    {langField(summarizing ? 'summarizing' : step.summary ? 'regenerateSummary' : 'generateSummary')}
+                </Button>
+            )}
+        </div>
+    );
+};
+
+type AnswerTab = 'summary' | 'transcript';
+
+interface AnswerTabsProps {
+    step: ApplicantInterviewStep;
+    summarizing: boolean;
+    transcribing: boolean;
+    canProcess: boolean;
+    onSummarize: (step: ApplicantInterviewStep) => void;
+    onTranscribe: (step: ApplicantInterviewStep) => void;
+}
+
+const AnswerTabs = ({ step, summarizing, transcribing, canProcess, onSummarize, onTranscribe }: AnswerTabsProps) => {
+    const { langField } = useLanguage(applicantLabels);
+    const [activeTab, setActiveTab] = useState<AnswerTab>('summary');
+    const id = useId();
+
+    const tabs: { key: AnswerTab; labelKey: string; busy: boolean; icon: React.ReactNode }[] = [
+        { key: 'summary', labelKey: 'summaryTab', busy: summarizing, icon: <LuSparkles size={14} /> },
+        { key: 'transcript', labelKey: 'transcriptTab', busy: transcribing || step.speechStatus === 'Pending', icon: <LuAudioLines size={14} /> },
+    ];
+
+    return (
+        <div className="min-w-0">
+            <div role="tablist" className="flex gap-2 border-b border-gray-200">
+                {tabs.map(tab => {
+                    const isActive = activeTab === tab.key;
+
+                    return (
+                        <button
+                            key={tab.key}
+                            type="button"
+                            role="tab"
+                            id={`${id}-${tab.key}-tab`}
+                            aria-selected={isActive}
+                            aria-controls={`${id}-${tab.key}-panel`}
+                            onClick={() => setActiveTab(tab.key)}
+                            className={`-mb-px flex items-center gap-1.5 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${isActive
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                        >
+                            {tab.busy ? <LuLoaderCircle size={14} className="animate-spin" /> : tab.icon}
+                            {langField(tab.labelKey)}
+                        </button>
+                    );
+                })}
+            </div>
+
+            <div
+                role="tabpanel"
+                id={`${id}-${activeTab}-panel`}
+                aria-labelledby={`${id}-${activeTab}-tab`}
+                className="pt-3"
+            >
+                {activeTab === 'summary' ? (
+                    <SummarySection
+                        step={step}
+                        summarizing={summarizing}
+                        canSummarize={canProcess}
+                        onSummarize={onSummarize}
+                    />
+                ) : (
+                    <TranscriptSection
+                        step={step}
+                        transcribing={transcribing}
+                        canTranscribe={canProcess}
+                        onTranscribe={onTranscribe}
+                    />
+                )}
+            </div>
+        </div>
+    );
+};
+
 const ApplicantInterviewCard = ({
     steps,
     loading,
     error,
     transcribingIds,
+    summarizingIds,
     canTranscribe,
     onTranscribe,
+    onSummarize,
     onRetry,
+    summaryAll,
+    generatingSummaryAll,
+    onGenerateSummaryAll,
 }: ApplicantInterviewCardProps) => {
     const { lang, langField } = useLanguage(applicantLabels);
     const [showInformation, setShowInformation] = useState(true);
+    const [summaryAllCopied, setSummaryAllCopied] = useState(false);
+    const summaryAllHintId = useId();
 
     if (!loading && !error && !steps.length) return null;
+
+    const summarizedCount = steps.filter(step => step.summary).length;
+    const allAnswersSummarized = steps.length > 0 && summarizedCount === steps.length;
+    const canGenerateSummaryAll = allAnswersSummarized && summarizingIds.length === 0 && !generatingSummaryAll;
+    const summaryAllHint = langField('summaryAllRequiresAll')
+        .replace('{done}', String(summarizedCount))
+        .replace('{total}', String(steps.length));
+
+    const handleCopySummaryAll = async () => {
+        try {
+            await navigator.clipboard.writeText(summaryAll.text);
+            setSummaryAllCopied(true);
+            window.setTimeout(() => setSummaryAllCopied(false), 2000);
+        } catch {
+            toast.error(langField('summaryCopyFailed'));
+        }
+    };
 
     const getQuestion = (item: ApplicantInterviewStep): string => {
         const byLang = { id: item.questionId, en: item.questionEn, zh: item.questionCn }[lang];
@@ -162,13 +341,35 @@ const ApplicantInterviewCard = ({
     const actionToggle = () => setShowInformation(prev => !prev);
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm py-6 space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm py-6 space-y-6 relative">
             <h3
-                className={`text-lg font-primary-bold text-center ${showInformation ? 'border-b border-b-gray-300 pb-3' : ''} uppercase text-gray-900 flex justify-center items-center gap-5 cursor-pointer`}
+                className={`text-lg font-primary-bold text-center ${showInformation ? 'border-b border-b-gray-300 pb-3' : 'mb-0'} uppercase text-gray-900 flex justify-center items-center gap-5 cursor-pointer`}
                 onClick={actionToggle}
             >
                 {langField('interviewQuestions')} <LuChevronDown />
             </h3>
+            {showTranscriptFeature && canTranscribe && steps.length > 0 && (
+                <div className="relative text-center overflow-hidden mb-0"
+                    style={{
+                        position: 'absolute',
+                        right: '1.3rem',
+                        top: showInformation ? '.8rem' : '1.2rem',
+                    }}>
+                    <button
+                        type="button"
+                        onClick={onGenerateSummaryAll}
+                        disabled={!canGenerateSummaryAll}
+                        title={allAnswersSummarized ? undefined : summaryAllHint}
+                        aria-describedby={allAnswersSummarized ? undefined : summaryAllHintId}
+                        className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-4 py-2.5 rounded-xl shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
+                    >
+                        {generatingSummaryAll
+                            ? <LuLoaderCircle size={16} className="animate-spin" />
+                            : <LuSparkles size={16} />}
+                        {langField(generatingSummaryAll ? 'summarizingAll' : summaryAll.text ? 'regenerateSummaryAll' : 'generateSummaryAll')}
+                    </button>
+                </div>
+            )}
             {showInformation && loading && !steps.length && (
                 <p className="flex items-center justify-center gap-2 text-sm text-gray-500">
                     <LuLoaderCircle size={15} className="animate-spin" />
@@ -183,6 +384,41 @@ const ApplicantInterviewCard = ({
                     </Button>
                 </div>
             )}
+
+            {showTranscriptFeature && canTranscribe && showInformation && steps.length > 0 && !allAnswersSummarized && (
+                <p
+                    id={summaryAllHintId}
+                    className="mx-4 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-700"
+                >
+                    <LuInfo size={16} className="shrink-0" />
+                    {summaryAllHint}
+                </p>
+            )}
+
+            {showTranscriptFeature && showInformation && (summaryAll.text || generatingSummaryAll || summaryAll.status === 'Failed') && (
+                <div className="px-4 space-y-2">
+                    {(summaryAll.text || generatingSummaryAll) && (
+                        <AiSummaryPanel
+                            summary={summaryAll.text}
+                            setPrompt={() => undefined}
+                            onGenerate={onGenerateSummaryAll}
+                            isGenerating={generatingSummaryAll}
+                            hidePromptInput
+                            showChatHistory={false}
+                            showCopyButton={Boolean(summaryAll.text)}
+                            copied={summaryAllCopied}
+                            handleCopySummary={handleCopySummaryAll}
+                            loadingText={langField('summarizingAll')}
+                        />
+                    )}
+                    {summaryAll.status === 'Failed' && !generatingSummaryAll && (
+                        <p className="text-sm text-error-600">
+                            {summaryAll.message || langField('summaryFailedDescription')}
+                        </p>
+                    )}
+                </div>
+            )}
+
             {showInformation && steps.length > 0 &&
                 <div className="space-y-4">
                     {steps.map((item, index) => {
@@ -195,54 +431,52 @@ const ApplicantInterviewCard = ({
                         return (
                             <div
                                 key={item.id || `${item.step}-${index}`}
-                                className="border-b border-gray-200 p-4"
+                                className="border-b border-gray-200 last:border-b-0 px-4 py-5 space-y-4"
                             >
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start">
-                                    <div>
-                                        <MediaPlayer kind="video" url={item.videoUrl} title={item.videoTitle} />
-                                        {/* <MediaPlayer kind="audio" url={item.audioUrl} title={item.audioTitle} /> */}
-                                    </div>
-                                    <div className="space-y-4 min-w-0">
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-2">
+
+                                <div className={showTranscriptFeature ? 'grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6 items-start' : 'max-w-2xl'}>
+                                    <MediaPlayer kind="video" url={item.videoUrl} title={item.videoTitle} />
+                                    {/* <MediaPlayer kind="audio" url={item.audioUrl} title={item.audioTitle} /> */}
+                                    {showTranscriptFeature && (
+                                        <div className="space-y-2">
+                                            <div className="space-y-2">
                                                 <span className="text-xs font-primary-bold uppercase tracking-wide text-brand-600">
                                                     {langField('question')}
                                                 </span>
-                                            </div>
 
-                                            <div className="bg-brand-50 rounded-lg px-4 py-3 text-sm leading-relaxed text-gray-900 flex gap-2 items-center min-h-30">
-                                                <span className="flex items-center justify-center w-7 h-7 rounded-full bg-brand-500 text-white text-xs font-primary-bold shrink-0">
-                                                    {item.step || index + 1}
-                                                </span>
-                                                <p className={`flex-1 ${question ? '' : 'italic text-gray-500'}`}>
-                                                    {question || langField('questionTextUnavailable')}
-                                                </p>
-                                            </div>
-
-                                            {focusItems.length > 0 && (
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    <span className="text-xs text-gray-500">{langField('focusAssessment')}:</span>
-                                                    {focusItems.map(focus => (
-                                                        <span
-                                                            key={focus}
-                                                            className="px-2 py-0.5 text-xs rounded-full border border-gray-200 bg-gray-50 text-gray-700"
-                                                        >
-                                                            {focus}
-                                                        </span>
-                                                    ))}
+                                                <div className="bg-brand-50 rounded-lg px-4 py-3 text-sm leading-relaxed text-gray-900 flex gap-3 items-start">
+                                                    <span className="flex items-center justify-center w-7 h-7 rounded-full bg-brand-500 text-white text-xs font-primary-bold shrink-0">
+                                                        {item.step || index + 1}
+                                                    </span>
+                                                    <p className={`flex-1 mt-0.5 ${question ? '' : 'italic text-gray-500'}`}>
+                                                        {question || langField('questionTextUnavailable')}
+                                                    </p>
                                                 </div>
-                                            )}
-                                        </div>
 
-                                        {showTranscriptFeature && (
-                                            <TranscriptSection
+                                                {focusItems.length > 0 && (
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <span className="text-xs text-gray-500">{langField('focusAssessment')}:</span>
+                                                        {focusItems.map(focus => (
+                                                            <span
+                                                                key={focus}
+                                                                className="px-2 py-0.5 text-xs rounded-full border border-gray-200 bg-gray-50 text-gray-700"
+                                                            >
+                                                                {focus}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <AnswerTabs
                                                 step={item}
+                                                summarizing={summarizingIds.includes(item.id)}
                                                 transcribing={transcribingIds.includes(item.id)}
-                                                canTranscribe={canTranscribe}
+                                                canProcess={canTranscribe}
+                                                onSummarize={onSummarize}
                                                 onTranscribe={onTranscribe}
                                             />
-                                        )}
-                                    </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         );

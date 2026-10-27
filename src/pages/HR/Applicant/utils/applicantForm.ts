@@ -15,6 +15,8 @@ import {
     ApplicantListSection,
     ApplicantReference,
     ApplicantSpeechStatus,
+    ApplicantSummaryAll,
+    ApplicantSummaryStatus,
     ApplicantWorkingExperience,
 } from '../types/applicant';
 
@@ -469,6 +471,11 @@ const SPEECH_STATUSES: Exclude<ApplicantSpeechStatus, null>[] = ['Success', 'Pen
 const toSpeechStatus = (value: string): ApplicantSpeechStatus =>
     SPEECH_STATUSES.find(status => status.toLowerCase() === value.trim().toLowerCase()) ?? null;
 
+const SUMMARY_STATUSES: Exclude<ApplicantSummaryStatus, null>[] = ['Success', 'Failed'];
+
+const toSummaryStatus = (value: string): ApplicantSummaryStatus =>
+    SUMMARY_STATUSES.find(status => status.toLowerCase() === value.trim().toLowerCase()) ?? null;
+
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
 const readText = (source: Record<string, unknown>, key: string): string =>
@@ -503,6 +510,11 @@ export const toApplicantInterviewSteps = (value: unknown): ApplicantInterviewSte
                 speechText: read('speech_text'),
                 speechStatus: toSpeechStatus(read('status_speech_text')),
                 speechMessage: read('message_speech_text'),
+                transcriptionId: read('transcription_id'),
+                // summary_update (ringkasan manual) didahulukan; summary (otomatis) hanya cadangan.
+                summary: read('summary_update').trim() || read('summary').trim(),
+                summaryStatus: toSummaryStatus(read('status_summary')),
+                summaryMessage: read('message_summary'),
             };
         })
         .filter(item => item.id || item.videoUrl || item.audioUrl)
@@ -512,4 +524,12 @@ export const pickApplicantAttachments = (detail: ApplicantFormDetail): Applicant
     files: toApplicantFormFiles(detail.applicant_form_files),
     signatureLink: detail.signature_link || '',
     signatureDate: toDateInputValue(detail.signature_date ?? null),
+});
+
+export const EMPTY_SUMMARY_ALL: ApplicantSummaryAll = { text: '', status: null, message: '' };
+
+export const pickApplicantSummaryAll = (detail: ApplicantFormDetail): ApplicantSummaryAll => ({
+    text: (detail.summary_all || '').trim(),
+    status: toSummaryStatus(detail.summary_all_status || ''),
+    message: detail.summary_all_message || '',
 });

@@ -708,6 +708,7 @@ const AppSidebar: React.FC = () => {
                             <img
                                 className=""
                                 src="/motor-sights-international-logo.png"
+                                // src="/logo-transparent.png"
                                 alt="Motor Sights International"
                                 width={110}
                             />
@@ -715,6 +716,7 @@ const AppSidebar: React.FC = () => {
                     ) : (
                         <img
                             src="/motor-sights-international-logo.png"
+                            // src="/logo-transparent.png"
                             alt="Motor Sights International"
                             width={32}
                             height={32}

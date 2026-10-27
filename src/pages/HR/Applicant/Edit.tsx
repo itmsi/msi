@@ -44,6 +44,9 @@ export default function Edit() {
         isSubmitting,
         isExporting,
         handleExportPdf,
+        summaryAll,
+        isGeneratingSummaryAll,
+        handleGenerateSummaryAll,
         handleFieldChange,
         handleDriverLicenseToggle,
         handleRowAdd,
@@ -123,9 +126,14 @@ export default function Edit() {
                         loading={interview.loading}
                         error={interview.error}
                         transcribingIds={interview.transcribingIds}
+                        summarizingIds={interview.summarizingIds}
                         canTranscribe={canUpdate}
                         onTranscribe={interview.handleTranscribe}
+                        onSummarize={interview.handleSummarize}
                         onRetry={interview.refetch}
+                        summaryAll={summaryAll}
+                        generatingSummaryAll={isGeneratingSummaryAll}
+                        onGenerateSummaryAll={handleGenerateSummaryAll}
                     />
                     {attachments && <ApplicantAttachmentsCard attachments={attachments} />}
                 </div>

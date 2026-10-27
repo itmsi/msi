@@ -17,6 +17,7 @@ interface AiSummaryPanelProps {
     copied?: boolean;
     hidePromptInput?: boolean;
     handleCopySummary?: () => void;
+    loadingText?: string;
 }
 
 export function AiSummaryPanel({
@@ -33,7 +34,8 @@ export function AiSummaryPanel({
     showCopyButton = true,
     copied = false,
     hidePromptInput = false,
-    handleCopySummary
+    handleCopySummary,
+    loadingText = "Analyzing survey data...",
 }: AiSummaryPanelProps) {
     // const [prompt, setPrompt] = useState(textPrompt || '');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -105,14 +107,14 @@ export function AiSummaryPanel({
                     <div className={`bg-white rounded-t-2xl overflow-auto max-h-[55vh] transition-all`}>
 
                         {/* ── Loading State ── */}
-                        {isGenerating && (
+                        {isGenerating ? (
                             <div className="px-6 py-8">
                                 <div className="max-w-md mx-auto space-y-5">
                                     <div className="flex items-center justify-center gap-3">
                                         <div className="relative">
                                             <LuLoaderCircle size={22} className="animate-spin text-primary" />
                                         </div>
-                                        <span className="text-sm text-gray-500 font-medium">Analyzing survey data...</span>
+                                        <span className="text-sm text-gray-500 font-medium">{loadingText}</span>
                                     </div>
                                     <div className="space-y-2.5">
                                         {[75, 50, 85].map((w, i) => (
@@ -124,10 +126,11 @@ export function AiSummaryPanel({
                                     </div>
                                 </div>
                             </div>
+                        ) : (
+                            <div className="px-4 pt-3">
+                                <MarkdownText content={summary} />
+                            </div>
                         )}
-                        <div className="px-4 pt-3">
-                            <MarkdownText content={summary} />
-                        </div>
                     </div>
                 </div>
 

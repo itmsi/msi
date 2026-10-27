@@ -18,12 +18,24 @@ export default function Home() {
             />
             <h1 className="hidden">{profile?.employee_name || ''}</h1>
             <div className="flex flex-col justify-center items-center h-[70vh] gap-6">
-                <img 
-                    src="/motor-sights-international-logo.png" 
-                    alt="Motor Sights International" 
+                {/* <div className="flex items-center gap-2">
+                    <img
+                        // src="/motor-sights-international-logo.png" 
+                        src="/logo-transparent.png"
+                        alt="Motor Sights International"
+                        className="h-32 object-contain"
+                    />
+                    <div className="text-sm text-black">
+                        <h1 className="text-4xl font-primary-bold text-[#0253a5] text-shadow-[-2px_4px_1px_#a8a5a4]">MSI <span className="font-main-italic">GO</span></h1>
+                        <p className="text-lg font-primary-medium">Leading In Service Innovation</p>
+                    </div>
+                </div> */}
+                <img
+                    src="/motor-sights-international-logo.png"
+                    alt="Motor Sights International"
                     className="h-32 object-contain"
                 />
-                
+
                 <div className="text-center space-y-2">
                     <h1 className="text-2xl font-primary-bold text-gray-800">
                         {langField('welcome_title')}

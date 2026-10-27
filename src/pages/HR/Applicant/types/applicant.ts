@@ -137,6 +137,33 @@ export interface ApplicantInterviewStep {
     speechText: string;
     speechStatus: ApplicantSpeechStatus;
     speechMessage: string;
+    transcriptionId: string;
+    summary: string;
+    summaryStatus: ApplicantSummaryStatus;
+    summaryMessage: string;
+}
+
+export type ApplicantSummaryStatus = 'Success' | 'Failed' | null;
+
+// Ringkasan gabungan seluruh jawaban wawancara, dari detail applicant form.
+export interface ApplicantSummaryAll {
+    text: string;
+    status: ApplicantSummaryStatus;
+    message: string;
+}
+
+export interface ApplicantSummarizeAllResponse {
+    success: boolean;
+    message: string;
+}
+
+export type ApplicantSummarizeRequest = {
+    file_link_audio: string;
+}
+
+export interface ApplicantSummarizeResponse {
+    success: boolean;
+    message: string;
 }
 
 export type ApplicantFormContentsRequest = {
@@ -206,6 +233,9 @@ export interface ApplicantFormDetail extends ApplicantFormListItem {
     references_old_company: unknown;
     following_answers: unknown;
     applicant_form_files?: unknown;
+    summary_all?: string | null;
+    summary_all_status?: string | null;
+    summary_all_message?: string | null;
     signature_link?: string | null;
     signature_date?: string | null;
 }

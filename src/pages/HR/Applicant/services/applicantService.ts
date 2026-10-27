@@ -13,6 +13,9 @@ import {
     ApplicantInvitationResendResponse,
     ApplicantSendEmailStatusRequest,
     ApplicantSendEmailStatusResponse,
+    ApplicantSummarizeAllResponse,
+    ApplicantSummarizeRequest,
+    ApplicantSummarizeResponse,
     ApplicantTranscribeResponse,
 } from '../types/applicant';
 
@@ -50,6 +53,11 @@ export class ApplicantService {
 
     static async getApplicantFormById(id: string): Promise<ApplicantFormDetailResponse> {
         const response = await apiGet<ApplicantFormDetailResponse>(`${API_BASE_URL}/career/applicant-forms/${id}`);
+        return response.data;
+    }
+
+    static async createSummarizeAll(id: string): Promise<ApplicantSummarizeAllResponse> {
+        const response = await apiPost<ApplicantSummarizeAllResponse>(`${API_BASE_URL}/career/applicant-forms/create-summarize-all`, { id });
         return response.data;
     }
 
@@ -94,6 +102,11 @@ export class ApplicantService {
         const response = await apiPost<ApplicantTranscribeResponse>(
             `${FORM_CONTENTS_URL}/audio/${encodeURIComponent(fileLinkAudio)}`
         );
+        return response.data;
+    }
+
+    static async summarizeApplicantAudio(payload: ApplicantSummarizeRequest): Promise<ApplicantSummarizeResponse> {
+        const response = await apiPost<ApplicantSummarizeResponse>(`${FORM_CONTENTS_URL}/summarize`, payload);
         return response.data;
     }
 
