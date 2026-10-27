@@ -264,13 +264,13 @@ export const quotationLabelPDF: TranslationMap = {
         zh: '维护套餐'
     },
     afterSales_maintenanceIncluded: {
-        id: 'Termasuk Spare Part & Oli Mesin',
-        en: 'Including Spare Parts & Engine Oil',
+        id: 'Termasuk Spare Part',
+        en: 'Including Spare Parts',
         zh: '包含备件和机油'
     },
     afterSales_maintenanceIncludedEV: {
-        id: 'Termasuk Spare Part & Oli',
-        en: 'Including Spare Parts & Oil',
+        id: 'Termasuk Spare Part',
+        en: 'Including Spare Parts',
         zh: '包括备件和润滑油'
     },
     afterSales_maintenanceService_onroad: {
