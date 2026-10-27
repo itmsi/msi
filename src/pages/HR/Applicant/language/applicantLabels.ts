@@ -627,6 +627,36 @@ export const applicantLabels: TranslationMap = {
         en: 'Transcript',
         zh: '文字记录',
     },
+    generateSummaryAll: {
+        id: 'Buat Ringkasan Keseluruhan',
+        en: 'Generate Overall Summary',
+        zh: '生成总体摘要',
+    },
+    regenerateSummaryAll: {
+        id: 'Ringkas Ulang Keseluruhan',
+        en: 'Regenerate Overall Summary',
+        zh: '重新生成总体摘要',
+    },
+    summarizingAll: {
+        id: 'Meringkas semua jawaban...',
+        en: 'Summarizing all answers...',
+        zh: '正在汇总所有回答...',
+    },
+    summarizeAllSuccess: {
+        id: 'Permintaan ringkasan keseluruhan berhasil dikirim',
+        en: 'Overall summary request sent',
+        zh: '总体摘要请求已发送',
+    },
+    summarizeAllFailed: {
+        id: 'Gagal membuat ringkasan keseluruhan',
+        en: 'Failed to generate the overall summary',
+        zh: '生成总体摘要失败',
+    },
+    summaryAllRequiresAll: {
+        id: 'Ringkasan gabungan bisa dibuat setelah semua jawaban diringkas ({done} dari {total} sudah).',
+        en: 'The overall summary can be generated once every answer has been summarized ({done} of {total} done).',
+        zh: '所有回答都生成摘要后才能生成总体摘要（已完成 {done}/{total}）。',
+    },
     summaryCopyFailed: {
         id: 'Gagal menyalin ringkasan',
         en: 'Failed to copy the summary',

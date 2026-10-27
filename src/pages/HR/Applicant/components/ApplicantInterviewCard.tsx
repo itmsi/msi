@@ -1,7 +1,7 @@
 import { useId, useState } from 'react';
 import toast from 'react-hot-toast';
 import { MdDownload } from 'react-icons/md';
-import { LuAudioLines, LuChevronDown, LuLoaderCircle, LuRefreshCw, LuSparkles } from 'react-icons/lu';
+import { LuAudioLines, LuChevronDown, LuInfo, LuLoaderCircle, LuRefreshCw, LuSparkles } from 'react-icons/lu';
 import Badge from '@/components/ui/badge/Badge';
 import Button from '@/components/ui/button/Button';
 import { useLanguage } from '@/components/lang/useLanguage';
@@ -156,6 +156,7 @@ interface SummarySectionProps {
 
 const SummarySection = ({ step, summarizing, canSummarize, onSummarize }: SummarySectionProps) => {
     const { langField } = useLanguage(applicantLabels);
+    const status = step.speechStatus;
     const [copied, setCopied] = useState(false);
     const isFailed = step.summaryStatus === 'Failed';
 
@@ -171,7 +172,17 @@ const SummarySection = ({ step, summarizing, canSummarize, onSummarize }: Summar
 
     return (
         <div className="space-y-2">
-            {step.summary || summarizing ? (
+            {status === 'Pending' ? (
+                <p className="flex items-center gap-2 text-sm text-gray-500">
+                    <LuLoaderCircle size={14} className="animate-spin shrink-0" />
+                    {langField('transcriptPendingDescription')}
+                </p>
+            ) : (step.summary || summarizing) ? null : (
+                <p className="text-sm text-gray-500">
+                    {langField('summaryEmpty')}
+                </p>
+            )}
+            {(step.summary || summarizing) && (
                 <AiSummaryPanel
                     summary={step.summary}
                     setPrompt={() => undefined}
@@ -184,8 +195,6 @@ const SummarySection = ({ step, summarizing, canSummarize, onSummarize }: Summar
                     handleCopySummary={handleCopySummary}
                     loadingText={langField('summarizing')}
                 />
-            ) : (
-                <p className="text-sm text-gray-500">{langField('summaryEmpty')}</p>
             )}
 
             {isFailed && (
@@ -303,8 +312,16 @@ const ApplicantInterviewCard = ({
     const { lang, langField } = useLanguage(applicantLabels);
     const [showInformation, setShowInformation] = useState(true);
     const [summaryAllCopied, setSummaryAllCopied] = useState(false);
+    const summaryAllHintId = useId();
 
     if (!loading && !error && !steps.length) return null;
+
+    const summarizedCount = steps.filter(step => step.summary).length;
+    const allAnswersSummarized = steps.length > 0 && summarizedCount === steps.length;
+    const canGenerateSummaryAll = allAnswersSummarized && summarizingIds.length === 0 && !generatingSummaryAll;
+    const summaryAllHint = langField('summaryAllRequiresAll')
+        .replace('{done}', String(summarizedCount))
+        .replace('{total}', String(steps.length));
 
     const handleCopySummaryAll = async () => {
         try {
@@ -341,13 +358,15 @@ const ApplicantInterviewCard = ({
                     <button
                         type="button"
                         onClick={onGenerateSummaryAll}
-                        disabled={generatingSummaryAll}
+                        disabled={!canGenerateSummaryAll}
+                        title={allAnswersSummarized ? undefined : summaryAllHint}
+                        aria-describedby={allAnswersSummarized ? undefined : summaryAllHintId}
                         className="ai-generate-btn flex items-center gap-1.5 text-sm font-medium text-white px-4 py-2.5 rounded-xl shrink-0 transition-all disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none"
                     >
                         {generatingSummaryAll
                             ? <LuLoaderCircle size={16} className="animate-spin" />
                             : <LuSparkles size={16} />}
-                        {langField(generatingSummaryAll ? 'summarizing' : summaryAll.text ? 'regenerateSummary' : 'generateSummary')}
+                        {langField(generatingSummaryAll ? 'summarizingAll' : summaryAll.text ? 'regenerateSummaryAll' : 'generateSummaryAll')}
                     </button>
                 </div>
             )}
@@ -366,6 +385,16 @@ const ApplicantInterviewCard = ({
                 </div>
             )}
 
+            {showTranscriptFeature && canTranscribe && showInformation && steps.length > 0 && !allAnswersSummarized && (
+                <p
+                    id={summaryAllHintId}
+                    className="mx-4 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-700"
+                >
+                    <LuInfo size={16} className="shrink-0" />
+                    {summaryAllHint}
+                </p>
+            )}
+
             {showTranscriptFeature && showInformation && (summaryAll.text || generatingSummaryAll || summaryAll.status === 'Failed') && (
                 <div className="px-4 space-y-2">
                     {(summaryAll.text || generatingSummaryAll) && (
@@ -379,7 +408,7 @@ const ApplicantInterviewCard = ({
                             showCopyButton={Boolean(summaryAll.text)}
                             copied={summaryAllCopied}
                             handleCopySummary={handleCopySummaryAll}
-                            loadingText={langField('summarizing')}
+                            loadingText={langField('summarizingAll')}
                         />
                     )}
                     {summaryAll.status === 'Failed' && !generatingSummaryAll && (

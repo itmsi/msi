@@ -107,7 +107,7 @@ export function AiSummaryPanel({
                     <div className={`bg-white rounded-t-2xl overflow-auto max-h-[55vh] transition-all`}>
 
                         {/* ── Loading State ── */}
-                        {isGenerating && (
+                        {isGenerating ? (
                             <div className="px-6 py-8">
                                 <div className="max-w-md mx-auto space-y-5">
                                     <div className="flex items-center justify-center gap-3">
@@ -126,10 +126,11 @@ export function AiSummaryPanel({
                                     </div>
                                 </div>
                             </div>
+                        ) : (
+                            <div className="px-4 pt-3">
+                                <MarkdownText content={summary} />
+                            </div>
                         )}
-                        <div className="px-4 pt-3">
-                            <MarkdownText content={summary} />
-                        </div>
                     </div>
                 </div>
 

@@ -288,15 +288,15 @@ export const useApplicantEdit = (id?: string) => {
             const response = await ApplicantService.createSummarizeAll(id);
 
             if (!response?.success) {
-                toast.error(response?.message || langField('summarizeFailed'));
+                toast.error(response?.message || langField('summarizeAllFailed'));
                 return;
             }
 
-            toast.success(response.message || langField('summarizeSuccess'));
+            toast.success(response.message || langField('summarizeAllSuccess'));
             await refreshSummaryAll();
         } catch (err) {
             const apiError = err as ApiError;
-            toast.error(apiError?.message || langField('summarizeFailed'));
+            toast.error(apiError?.message || langField('summarizeAllFailed'));
         } finally {
             setIsGeneratingSummaryAll(false);
         }
