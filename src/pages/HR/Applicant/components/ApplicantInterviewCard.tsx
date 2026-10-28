@@ -434,39 +434,40 @@ const ApplicantInterviewCard = ({
                                 className="border-b border-gray-200 last:border-b-0 px-4 py-5 space-y-4"
                             >
 
-                                <div className={showTranscriptFeature ? 'grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6 items-start' : 'max-w-2xl'}>
+                                <div className={'grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6 items-start'}>
                                     <MediaPlayer kind="video" url={item.videoUrl} title={item.videoTitle} />
                                     {/* <MediaPlayer kind="audio" url={item.audioUrl} title={item.audioTitle} /> */}
-                                    {showTranscriptFeature && (
+
+                                    <div className="space-y-2">
                                         <div className="space-y-2">
-                                            <div className="space-y-2">
-                                                <span className="text-xs font-primary-bold uppercase tracking-wide text-brand-600">
-                                                    {langField('question')}
+                                            <span className="text-xs font-primary-bold uppercase tracking-wide text-brand-600">
+                                                {langField('question')}
+                                            </span>
+
+                                            <div className="bg-brand-50 rounded-lg px-4 py-3 text-sm leading-relaxed text-gray-900 flex gap-3 items-start">
+                                                <span className="flex items-center justify-center w-7 h-7 rounded-full bg-brand-500 text-white text-xs font-primary-bold shrink-0">
+                                                    {item.step || index + 1}
                                                 </span>
-
-                                                <div className="bg-brand-50 rounded-lg px-4 py-3 text-sm leading-relaxed text-gray-900 flex gap-3 items-start">
-                                                    <span className="flex items-center justify-center w-7 h-7 rounded-full bg-brand-500 text-white text-xs font-primary-bold shrink-0">
-                                                        {item.step || index + 1}
-                                                    </span>
-                                                    <p className={`flex-1 mt-0.5 ${question ? '' : 'italic text-gray-500'}`}>
-                                                        {question || langField('questionTextUnavailable')}
-                                                    </p>
-                                                </div>
-
-                                                {focusItems.length > 0 && (
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        <span className="text-xs text-gray-500">{langField('focusAssessment')}:</span>
-                                                        {focusItems.map(focus => (
-                                                            <span
-                                                                key={focus}
-                                                                className="px-2 py-0.5 text-xs rounded-full border border-gray-200 bg-gray-50 text-gray-700"
-                                                            >
-                                                                {focus}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                )}
+                                                <p className={`flex-1 mt-0.5 ${question ? '' : 'italic text-gray-500'}`}>
+                                                    {question || langField('questionTextUnavailable')}
+                                                </p>
                                             </div>
+
+                                            {focusItems.length > 0 && (
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <span className="text-xs text-gray-500">{langField('focusAssessment')}:</span>
+                                                    {focusItems.map(focus => (
+                                                        <span
+                                                            key={focus}
+                                                            className="px-2 py-0.5 text-xs rounded-full border border-gray-200 bg-gray-50 text-gray-700"
+                                                        >
+                                                            {focus}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                        {showTranscriptFeature && (
                                             <AnswerTabs
                                                 step={item}
                                                 summarizing={summarizingIds.includes(item.id)}
@@ -475,8 +476,8 @@ const ApplicantInterviewCard = ({
                                                 onSummarize={onSummarize}
                                                 onTranscribe={onTranscribe}
                                             />
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         );
