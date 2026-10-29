@@ -185,7 +185,7 @@ export const useTransferOrderCreate = () => {
         return true;
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (noteApproval: string) => {
         if (!validateForm()) return;
         setIsSubmitting(true);
         try {
@@ -205,6 +205,7 @@ export const useTransferOrderCreate = () => {
                 custbody_me_logistic_vendor: formData.logistic_vendor || undefined,
                 custbody_me_inv_customer: formData.customer || undefined,
                 custbody_msi_createdby_api: formData.custbody_msi_createdby_api || 'T',
+                note_approval: noteApproval,
                 items: formData.items.map(item => ({
                     item: item.itemId,
                     quantity: Number(item.quantity),
@@ -248,6 +249,7 @@ export const useTransferOrderCreate = () => {
         handleRemoveItem,
         handleUpdateItem,
         handleSubmit,
+        validateForm,
         handleAddFiles,
         masterData,
         loadingMasterData,

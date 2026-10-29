@@ -163,6 +163,20 @@ export interface TransferOrderDetail {
     total?: number | null;
     items: TransferOrderDetailLine[];
     files: AttachFileItem[];
+    user_notes?: UserNoteItem[] | null;
+}
+
+export interface UserNoteItem {
+    date?: string;
+    author?: string;
+    author_display?: string;
+    title?: string;
+    memo?: string;
+    direction?: string;
+    direction_display?: string | null;
+    type?: string;
+    type_display?: string | null;
+    [key: string]: any;
 }
 
 export interface TransferOrderDetailResponse {
@@ -203,6 +217,7 @@ export interface TransferOrderCreateRequest {
     custbody_me_logistic_vendor?: number;
     custbody_me_inv_customer?: number;
     custbody_msi_createdby_api?: string;
+    note_approval?: string;
     items: TransferOrderItemRequest[];
     files?: TransferOrderFileRequest[];
 }
@@ -267,6 +282,7 @@ export interface TransferOrderFormData {
     custbody_msi_createdby_api: string;
     items: TransferOrderFormItem[];
     files: AttachFileItem[];
+    user_notes?: UserNoteItem[];
 }
 
 export interface BaseOption {

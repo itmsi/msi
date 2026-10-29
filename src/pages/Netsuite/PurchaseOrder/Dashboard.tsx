@@ -24,19 +24,33 @@ import NavigationPO from './components/NavigationPO';
 use([PieChart, BarChart, CanvasRenderer, TitleComponent, TooltipComponent, LegendComponent, GridComponent]);
 
 // --- Helpers ---
+// Satu sumber warna per subsidiary, dipakai badge tabel dan chart agar warnanya selalu sama.
 const SUBSIDIARY_MAP: Record<string, { label: string; color: string }> = {
-    'PT Indonesia Equipment Line': { label: 'IEL', color: 'bg-[#bf1920] text-white' },
-    'PT Indonesia Equipment Centre': { label: 'IEC', color: 'bg-[#f59e0b] text-white' },
-    'Motor Sights International': { label: 'MSI', color: 'bg-[#0253a5] text-white' },
+    'PT Indonesia Equipment Line': { label: 'IEL', color: '#f29600' },
+    'PT Indonesia Equipment Centre': { label: 'IEC', color: '#BE185D' },
+    'Motor Sights International': { label: 'MSI', color: '#0253a5' },
+    'Motor Sights Overseas': { label: 'MSO', color: '#28a2e6' },
+    'Indonesia Body Maker': { label: 'IBM', color: '#16A34A' },
 };
+
+const SUBSIDIARY_COLOR_BY_LABEL: Record<string, string> = Object.fromEntries(
+    Object.values(SUBSIDIARY_MAP).map(({ label, color }) => [label, color])
+);
+
+// Cadangan untuk subsidiary yang belum terdaftar di SUBSIDIARY_MAP.
+const FALLBACK_CHART_COLORS = ['#bf1920', '#f59e0b', '#0253a5'];
 
 function getSubsidiaryBadge(subsidiaryDisplay: string) {
     const match = Object.keys(SUBSIDIARY_MAP).find(k => subsidiaryDisplay?.includes(k));
-    const { label, color } = match
-        ? SUBSIDIARY_MAP[match]
-        : { label: subsidiaryDisplay || '-', color: 'bg-gray-100 text-gray-600' };
+    const badgeClass = 'inline-flex items-center text-center justify-center px-2 py-0.5 rounded-md text-xs min-w-[3rem] font-medium';
+
+    if (!match) {
+        return <span className={`${badgeClass} bg-gray-100 text-gray-600`}>{subsidiaryDisplay || '-'}</span>;
+    }
+
+    const { label, color } = SUBSIDIARY_MAP[match];
     return (
-        <span className={`inline-flex items-center text-center justify-center px-2 py-0.5 rounded-md text-xs min-w-[3rem] font-medium ${color}`}>
+        <span className={`${badgeClass} text-white`} style={{ backgroundColor: color }}>
             {label}
         </span>
     );
@@ -64,7 +78,6 @@ function StatCard({ icon, label, count, bgClass }: StatCardProps) {
 
 // --- Donut Chart: Pending Approval per Subsidiary ---
 function ApprovalStatusChart({ data, loading }: { data: ChartDataPoint[]; loading: boolean }) {
-    const COLORS = ['#bf1920', '#f59e0b', '#0253a5'];
     const option = {
         tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
         legend: {
@@ -93,7 +106,9 @@ function ApprovalStatusChart({ data, loading }: { data: ChartDataPoint[]; loadin
             data: data.map((d, i) => ({
                 value: d.value,
                 name: d.name,
-                itemStyle: { color: COLORS[i % COLORS.length] },
+                itemStyle: {
+                    color: SUBSIDIARY_COLOR_BY_LABEL[d.name] ?? FALLBACK_CHART_COLORS[i % FALLBACK_CHART_COLORS.length],
+                },
             })),
         }],
     };

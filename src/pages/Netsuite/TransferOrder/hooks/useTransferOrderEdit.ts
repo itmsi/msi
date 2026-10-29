@@ -128,6 +128,7 @@ export const useTransferOrderEdit = (id: string | undefined) => {
                         fileName: file.fileName || file.file_name || '',
                         fileUrl: file.fileUrl || file.file_url || '',
                     })),
+                    user_notes: Array.isArray(to.user_notes) ? to.user_notes : [],
                 }));
             } else {
                 toast.error('Transfer Order tidak ditemukan');
