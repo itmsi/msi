@@ -8,6 +8,7 @@ import { LoadingOverlay } from '@/components/common/Loading';
 import { useTransferOrderCreate } from './hooks/useTransferOrderCreate';
 import TransferOrderFields from './components/TransferOrderFields';
 import TransferOrderItemFields from './components/TransferOrderItemFields';
+import ModalNoteApproval from './components/ModalNoteApproval';
 import FilesTab from './components/tab/FilesTab';
 import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOClassSelect } from '@/hooks/usePOClassSelect';
@@ -41,12 +42,25 @@ export default function Create() {
         handleRemoveItem,
         handleUpdateItem,
         handleSubmit,
+        validateForm,
         handleAddFiles,
         masterData,
         loadingMasterData,
     } = useTransferOrderCreate();
 
     const [activeTab, setActiveTab] = useState<'items' | 'files'>('items');
+    const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+
+    // Validasi dulu, baru minta note sebelum Transfer Order dibuat
+    const handleOpenNoteModal = () => {
+        if (!validateForm()) return;
+        setIsNoteModalOpen(true);
+    };
+
+    const handleSubmitWithNote = (note: string) => {
+        setIsNoteModalOpen(false);
+        handleSubmit(note);
+    };
 
     const subsidiaryId = formData.subsidiary ? Number(formData.subsidiary) : undefined;
 
@@ -426,13 +440,20 @@ export default function Create() {
 
                     {/* Form Actions */}
                     <FormActions
-                        onSubmit={handleSubmit}
+                        onSubmit={handleOpenNoteModal}
                         isSubmitting={isSubmitting}
                         cancelRoute="/netsuite/transfer-orders"
                         submitText="Create Transfer Order"
                         submittingText="Creating..."
                     />
                 </div>
+
+                <ModalNoteApproval
+                    isOpen={isNoteModalOpen}
+                    isSubmitting={isSubmitting}
+                    onClose={() => setIsNoteModalOpen(false)}
+                    onSubmit={handleSubmitWithNote}
+                />
             </div>
         </>
     );

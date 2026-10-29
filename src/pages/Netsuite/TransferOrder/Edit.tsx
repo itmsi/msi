@@ -5,6 +5,7 @@ import {
   MdInventory2,
   MdReceiptLong,
   MdOutlineAttachFile,
+  MdOutlineComment,
 } from "react-icons/md";
 import { TableColumn } from "react-data-table-component";
 import { PermissionGate } from "@/components/common/PermissionComponents";
@@ -28,6 +29,7 @@ import {
   getProfile,
   formatTanggal,
   formatCurrencyDynamic,
+  formatDateTime,
 } from "@/helpers/generalHelper";
 import PageHeader from "@/components/common/PageHeader";
 import FilesTab from "./components/tab/FilesTab";
@@ -36,7 +38,7 @@ import CustomSelect from "@/components/form/select/CustomSelect";
 import Label from "@/components/form/Label";
 import FormActions from "@/components/form/FormActions";
 import CustomDataTable from "@/components/ui/table";
-import { TransferOrderFormItem } from "./types/transferOrder";
+import { TransferOrderFormItem, UserNoteItem } from "./types/transferOrder";
 
 const formatQty = (value: number | string) =>
   new Intl.NumberFormat("en-US", {
@@ -50,7 +52,7 @@ export default function Edit() {
   const profileSSO = getProfile() as any;
   const profileSSOId = profileSSO?.classes_id_netsuite || null;
   const [activeTab, setActiveTab] = useState<
-    "items" | "files" | "fulfillmentreceipt"
+    "items" | "files" | "fulfillmentreceipt" | "user_notes"
   >("items");
 
   const {
@@ -278,6 +280,61 @@ export default function Edit() {
       });
     }
   }, [loadingDetail]);
+
+  const userNotesColumns: TableColumn<UserNoteItem>[] = [
+    {
+      name: "Date",
+      selector: (row) => row.date || "-",
+      cell: (row) => (
+        <span className="text-sm">
+          {row.date ? formatDateTime(row.date) : "-"}
+        </span>
+      ),
+      minWidth: "150px",
+      sortable: true,
+    },
+    {
+      name: "Author",
+      selector: (row) => row.author_display || "-",
+      cell: (row) => (
+        <span className="text-sm font-medium text-blue-600">
+          {row.author_display || "-"}
+        </span>
+      ),
+      wrap: true,
+      minWidth: "300px",
+    },
+    {
+      name: "Title",
+      selector: (row) => row.title || "-",
+      cell: (row) => (
+        <span className="text-sm font-medium">{row.title || "-"}</span>
+      ),
+      wrap: true,
+      minWidth: "300px",
+    },
+    {
+      name: "Memo",
+      selector: (row) => row.memo || "-",
+      cell: (row) => (
+        <div className="py-2 text-sm text-gray-700 whitespace-pre-wrap max-w-[400px]">
+          {row.memo || "-"}
+        </div>
+      ),
+      wrap: true,
+      minWidth: "300px",
+    },
+    {
+      name: "Type",
+      selector: (row) => row.type_display || "-",
+      minWidth: "80px",
+    },
+    {
+      name: "Direction",
+      selector: (row) => row.direction_display || "-",
+      minWidth: "80px",
+    },
+  ];
 
   const readOnlyItemColumns: TableColumn<TransferOrderFormItem>[] = [
     {
@@ -880,6 +937,18 @@ export default function Edit() {
                     >
                       <MdOutlineAttachFile /> Files
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("user_notes")}
+                      className={`py-2 px-4 border-b-2 lg:min-w-auto min-w-25 font-medium text-md transition-colors flex items-center justify-center gap-2 ${
+                        activeTab === "user_notes"
+                          ? "border-blue-500 text-blue-600 bg-white rounded-t-lg shadow-sm"
+                          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      }`}
+                    >
+                      <MdOutlineComment /> User Notes (
+                      {formData.user_notes?.length || 0})
+                    </button>
                   </nav>
                 </div>
 
@@ -955,6 +1024,31 @@ export default function Edit() {
                       tranid={tranid}
                       toNetsuiteId={toInternalId ? String(toInternalId) : null}
                     />
+                  )}
+
+                  {activeTab === "user_notes" && (
+                    <div className="mb-6 space-y-6 p-6">
+                      <h3 className="text-lg font-primary-bold font-medium text-gray-900">
+                        User Notes
+                      </h3>
+                      <div className="font-secondary">
+                        <CustomDataTable
+                          columns={userNotesColumns}
+                          data={formData.user_notes || []}
+                          pagination
+                          paginationPerPage={10}
+                          paginationRowsPerPageOptions={[10, 20, 50]}
+                          responsive
+                          highlightOnHover
+                          striped={false}
+                          noDataComponent={
+                            <div className="text-center py-8 text-gray-500">
+                              No user notes found
+                            </div>
+                          }
+                        />
+                      </div>
+                    </div>
                   )}
 
                   {activeTab === "files" && (
