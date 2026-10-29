@@ -67,15 +67,15 @@ export const usePurchaseOrderDashboard = () => {
                 .map(([subsidiary, total]) => ({
                     name: subsidiary.toUpperCase(),
                     value: Number(total) || 0,
-                }))
-                .filter(item => item.value > 0);
+                }));
+            // .filter(item => item.value > 0);
 
             setChartRaw({
                 pending_approval_per_subsidiary: res.data?.chart_data?.pending_approval_per_subsidiary ?? {},
                 status_po_per_subsidiary: res.data?.chart_data?.status_po_per_subsidiary ?? {},
                 total_po_per_subsidiary: res.data?.chart_data?.total_po_per_subsidiary ?? {},
             });
-            
+
             setChartPendingApproval(dataPendingApproval);
             setItems(res.data?.list_tabel);
             setSummary({
@@ -100,18 +100,24 @@ export const usePurchaseOrderDashboard = () => {
         'PT Indonesia Equipment Line',
         'PT Indonesia Equipment Centre',
         'Motor Sights International',
+        'Motor Sights Overseas',
+        'Indonesia Body Maker',
     ];
 
     const SUBSIDIARY_ABBR: Record<string, string> = {
         'PT Indonesia Equipment Line': 'IEL',
         'PT Indonesia Equipment Centre': 'IEC',
         'Motor Sights International': 'MSI',
+        'Motor Sights Overseas': 'MSO',
+        'Indonesia Body Maker': 'IBM',
     };
 
     const SUBSIDIARY_BY_KEY: Record<string, string> = {
         iel: 'PT Indonesia Equipment Line',
         iec: 'PT Indonesia Equipment Centre',
         msi: 'Motor Sights International',
+        mso: 'Motor Sights Overseas',
+        ibm: 'Indonesia Body Maker',
     };
 
     const resolveSubsidiaryName = (label: string) => {
@@ -152,7 +158,7 @@ export const usePurchaseOrderDashboard = () => {
             name: SUBSIDIARY_ABBR[name] ?? name,
             value: subsidiaryMetrics[name]?.pending_approval || 0,
         })).filter(d => d.value > 0)
-    , [subsidiaryMetrics]);
+        , [subsidiaryMetrics]);
 
     // Grouped bar: Pending Approval + Pending Receipt + Pending Bill per subsidiary
     const poStatusChart = useMemo<MultiSeriesChartData>(() => ({
