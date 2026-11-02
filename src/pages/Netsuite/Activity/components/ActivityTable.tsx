@@ -4,6 +4,8 @@ import CustomDataTable from '@/components/ui/table';
 import { ActivityItem, ActivityRow, Pagination } from '../types/activity';
 import { ActivityService } from '../services/activityService';
 import {
+    formatDuration,
+    getActivityDurationMs,
     getActivityStatus,
     parseActivityTimestamp,
 } from '../utils/activityFormat';
@@ -114,8 +116,8 @@ const ActivityTable: React.FC<ActivityTableProps> = ({
             minWidth: '320px',
         },
         {
-            id: 'timestamp',
-            name: 'Timestamp',
+            id: 'created_at',
+            name: 'Requested At',
             selector: row => row.created_at || '-',
             cell: row => {
                 const { date, time } = parseActivityTimestamp(row.created_at);
@@ -127,7 +129,34 @@ const ActivityTable: React.FC<ActivityTableProps> = ({
                     </div>
                 );
             },
-            width: '210px',
+            width: '190px',
+        },
+        {
+            id: 'updated_at',
+            name: 'Responded At',
+            selector: row => row.updated_at || '-',
+            cell: row => {
+                const { date, time } = parseActivityTimestamp(row.updated_at);
+
+                return (
+                    <div className="flex flex-col py-2">
+                        <span className="font-mono font-medium text-gray-900">{time}</span>
+                        <span className="text-xs text-gray-500">{date}</span>
+                    </div>
+                );
+            },
+            width: '190px',
+        },
+        {
+            id: 'duration',
+            name: 'Duration',
+            selector: row => getActivityDurationMs(row.created_at, row.updated_at) ?? -1,
+            cell: row => (
+                <span className="font-mono font-medium text-gray-900">
+                    {formatDuration(getActivityDurationMs(row.created_at, row.updated_at))}
+                </span>
+            ),
+            width: '120px',
         },
         {
             id: 'status',
