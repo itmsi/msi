@@ -6,8 +6,9 @@ import { usePOLocationSelect } from '@/hooks/usePOLocationSelect';
 import { usePOStatusSelect } from '@/hooks/usePOStatusSelect';
 import { useSubsidiarySelect } from '@/hooks/useSubsidiarySelect';
 import { useEmployeeSelect } from '@/hooks/useEmployeeSelect';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom';
+import { SelectOption } from '@/types/asyncSelect';
 
 interface FilterSectionProps {
     filterApprovalStatus?: string;
@@ -68,11 +69,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         handleInputChange: handleLocationInputChange,
         handleMenuScrollToBottom: handleLocationMenuScrollToBottom,
         initializeOptions: initializeLocationOptions,
+        getLocationById,
         initialized: locationInitialized,
         isLoading: locationLoading
     } = usePOLocationSelect(30, false);
 
-    const [selectedLocation, setSelectedLocation] = useState<any>(null);
+    const [selectedLocation, setSelectedLocation] = useState<SelectOption | null>(null);
     const [locationSelectError, setLocationSelectError] = useState<string>('');
 
     // Initialize hooks only once when not yet initialized
@@ -85,17 +87,31 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     // Sync internal state with filter props
 
     useEffect(() => {
-        if (filterLocation) {
-            const locationOption = POLocationOptions.find(opt => opt.value === filterLocation);
-            if (locationOption) {
-                if (!selectedLocation || selectedLocation.value !== filterLocation) {
-                    setSelectedLocation(locationOption);
-                }
+        let active = true;
+        const loadSelectedLocation = async () => {
+            if (!filterLocation) {
+                setSelectedLocation(null);
+                return;
             }
-        } else if (!filterLocation && selectedLocation) {
-            setSelectedLocation(null);
-        }
-    }, [filterLocation, POLocationOptions]);
+
+            const locationOption = await getLocationById(filterLocation);
+            if (active && locationOption) {
+                setSelectedLocation(locationOption);
+            }
+        };
+
+        loadSelectedLocation();
+
+        return () => {
+            active = false;
+        };
+    }, [filterLocation, getLocationById]);
+
+    const pickedLocation = useMemo(() => {
+        if (!filterLocation) return null;
+        if (selectedLocation?.value === filterLocation) return selectedLocation;
+        return POLocationOptions.find(opt => opt.value === filterLocation) || null;
+    }, [filterLocation, selectedLocation, POLocationOptions]);
 
     const {
         employeeOptions,
@@ -153,7 +169,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                         id="location"
                         name="location"
                         placeholder="All Locations"
-                        value={selectedLocation}
+                        value={pickedLocation}
                         error={locationSelectError}
                         defaultOptions={POLocationOptions}
                         loadOptions={handleLocationInputChange}
