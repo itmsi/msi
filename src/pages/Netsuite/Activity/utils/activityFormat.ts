@@ -23,9 +23,30 @@ export const parseActivityTimestamp = (value?: string | null): ActivityTimestamp
 
     return {
         date: parsed.format('DD MMMM YYYY'),
-        time: parsed.format('HH:mm:ss'),
+        time: parsed.format('HH:mm:ss.SSS'),
         offset: parsed.format('ZZ'),
     };
+};
+
+export const getActivityDurationMs = (start?: string | null, end?: string | null): number | null => {
+    if (!start || !end) return null;
+
+    const from = moment.parseZone(start.trim(), TIMESTAMP_FORMATS);
+    const to = moment.parseZone(end.trim(), TIMESTAMP_FORMATS);
+    if (!from.isValid() || !to.isValid()) return null;
+
+    const diff = to.diff(from);
+    return diff >= 0 ? diff : null;
+};
+
+export const formatDuration = (ms: number | null): string => {
+    if (ms === null) return '-';
+    if (ms < 1000) return `${ms} ms`;
+    if (ms < 60000) return `${(ms / 1000).toFixed(2)} s`;
+
+    const minutes = Math.floor(ms / 60000);
+    const seconds = ((ms % 60000) / 1000).toFixed(1);
+    return `${minutes}m ${seconds}s`;
 };
 
 export const getActivityStatus =(item: ActivityItem): { ok: boolean; label: string } => {
