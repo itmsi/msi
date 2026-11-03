@@ -22,7 +22,6 @@ const ManageQuotations: React.FC = () => {
     const navigate = useNavigate();
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const { lang, langField, buildPath } = useLanguage(quotationManage);
-
     const {
         searchTerm,
         sortOrder,

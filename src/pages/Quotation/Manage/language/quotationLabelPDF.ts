@@ -201,6 +201,11 @@ export const quotationLabelPDF: TranslationMap = {
         en: 'Commercial Control Manager',
         zh: '商业控制经理'
     },
+    jobTitleLC: {
+        id: 'General Manager',
+        en: 'General Manager',
+        zh: '总经理'
+    },
     jobTitleITI: {
         id: 'Chief Technology Officer',
         en: 'Chief Technology Officer',

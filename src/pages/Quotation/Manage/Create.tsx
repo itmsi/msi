@@ -28,7 +28,7 @@ import { ItemProduct } from '../Product/types/product';
 import { useCreateQuotation } from './hooks/useCreateQuotation';
 import { useAsyncSelect, SelectOption } from '../hooks/useAsyncSelect';
 import { useTermConditionSelect, TermConditionSelectOption } from '../hooks/useTermConditionSelect';
-import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalInput, handleDecimalInputComma, formatNumberInputwithComma, handlePercentageInputComma, getCompanyName } from '@/helpers/generalHelper';
+import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalInput, handleDecimalInputComma, formatNumberInputwithComma, handlePercentageInputComma, getCompanyName, getDepartmentName } from '@/helpers/generalHelper';
 import moment from 'moment';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { ItemProductService } from '../Product/services/productService';
@@ -42,12 +42,14 @@ import { FaEye } from 'react-icons/fa6';
 import { IslandSelectOption, useIslandSelect } from '@/hooks/useIslandSelect';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from './language/quotationLabels';
+import { LOGISTIC_CONTAINER_DEPARTMENT, LOGISTIC_CONTAINER_ISLAND_ID, getLogisticContainerIslandOption } from './utils/logisticContainer';
 
 export default function CreateQuotation() {
     const navigate = useNavigate();
     const { langField, buildPath } = useLanguage(quotationLabels);
     const { isCreating, validationErrors, clearFieldError, createQuotation } = useCreateQuotation();
-
+    const department_user = getDepartmentName();
+    const isLogisticContainer = department_user === LOGISTIC_CONTAINER_DEPARTMENT;
     // Use useEmployees hook
     const {
         employeeOptions,
@@ -113,7 +115,7 @@ export default function CreateQuotation() {
     const [formData, setFormData] = useState<QuotationFormData>({
         customer_id: '',
         employee_id: '',
-        island_id: '',
+        island_id: isLogisticContainer ? LOGISTIC_CONTAINER_ISLAND_ID : '',
         bank_account_id: '',
         bank_account_name: '',
         bank_account_number: '',
@@ -398,6 +400,95 @@ export default function CreateQuotation() {
         handleInputChange(field, handlePercentageInputComma(inputValue));
     };
 
+    const handleIslandChange = async (option: IslandSelectOption | null) => {
+        setSelectedIsland(option);
+        handleInputChange('island_id', option?.value || '');
+
+        if (option?.value) {
+            // Fetch new accessories for the selected island
+            try {
+                const response = await QuotationService.getQuotationAccessories(option.value);
+
+                if (response.data && response.data.status && response.data.data) {
+                    const accessories = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
+
+                    // Check if accessories array has items
+                    if (accessories.length > 0) {
+                        // Transform accessories to QuotationItemAccessory format
+                        const transformedAccessories = accessories.map(accessory => ({
+                            accessory_id: accessory.accessory_id,
+                            accessory_part_number: accessory.accessory_part_number,
+                            accessory_part_name: accessory.accessory_part_name,
+                            accessory_brand: accessory.accessory_brand || '',
+                            accessory_specification: accessory.accessory_specification || '',
+                            quantity: accessory.accessories_island_detail_quantity || 1,
+                            description: accessory.accessory_description || '',
+                            accessory_description: accessory.accessory_description || '',
+                            accessory_remark: accessory.accessory_remark || '',
+                            accessory_region: accessory.accessory_region || ''
+                        }));
+
+                        // Update accessories in all existing quotation items AND form level
+                        setFormData(prev => ({
+                            ...prev,
+                            manage_quotation_item_accessories: transformedAccessories,
+                            manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                ...item,
+                                manage_quotation_item_accessories: transformedAccessories
+                            }))
+                        }));
+
+                        toast.success(`${transformedAccessories.length} accessories loaded for selected island`);
+                    } else {
+                        // Clear accessories if data array is empty
+                        setFormData(prev => ({
+                            ...prev,
+                            manage_quotation_item_accessories: [],
+                            manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                ...item,
+                                manage_quotation_item_accessories: []
+                            }))
+                        }));
+                        toast.success('No accessories found for selected island');
+                    }
+                } else {
+                    // Clear accessories if no data
+                    setFormData(prev => ({
+                        ...prev,
+                        manage_quotation_item_accessories: [],
+                        manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                            ...item,
+                            manage_quotation_item_accessories: []
+                        }))
+                    }));
+                    toast.success('No accessories found for selected island');
+                }
+            } catch (error: any) {
+                console.error('Error fetching accessories by island:', error);
+                toast.error('Failed to load accessories for selected island');
+                // Clear accessories on error
+                setFormData(prev => ({
+                    ...prev,
+                    manage_quotation_item_accessories: [],
+                    manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                        ...item,
+                        manage_quotation_item_accessories: []
+                    }))
+                }));
+            }
+        } else {
+            // Clear accessories when no island selected
+            setFormData(prev => ({
+                ...prev,
+                manage_quotation_item_accessories: [],
+                manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                    ...item,
+                    manage_quotation_item_accessories: []
+                }))
+            }));
+        }
+    };
+
     const handleInvoiceDateChange = useCallback((date: Date) => {
         setInvoiceDate(date);
         if (dueDate < date) {
@@ -447,8 +538,20 @@ export default function CreateQuotation() {
     }, [initializeTermConditionOptions]);
 
     useEffect(() => {
-        initializeIslandOptions();
-    }, [initializeIslandOptions]);
+        if (!isLogisticContainer) {
+            initializeIslandOptions();
+        }
+    }, [isLogisticContainer, initializeIslandOptions]);
+
+    // Logistic Container: select pulau dikunci, jadi onChange-nya tidak pernah jalan
+    const logisticIslandApplied = useRef(false);
+    useEffect(() => {
+        if (!isLogisticContainer || logisticIslandApplied.current) return;
+
+        logisticIslandApplied.current = true;
+        getLogisticContainerIslandOption().then(handleIslandChange);
+    }, [isLogisticContainer]);
+
     useEffect(() => {
         const editor = document.getElementById('wysiwyg-editor');
         if (editor && termConditionContent && editor.innerHTML !== termConditionContent) {
@@ -1284,7 +1387,8 @@ export default function CreateQuotation() {
                                             placeholder="Select Island..."
                                             value={selectedIsland}
                                             error={validationErrors.island_id}
-                                            defaultOptions={islandOptions}
+                                            disabled={isLogisticContainer}
+                                            defaultOptions={isLogisticContainer && selectedIsland ? [selectedIsland] : islandOptions}
                                             loadOptions={handleIslandInputChange}
                                             onMenuScrollToBottom={handleIslandMenuScrollToBottom}
                                             isLoading={islandPagination.loading}
@@ -1295,94 +1399,7 @@ export default function CreateQuotation() {
                                             onInputChange={(inputValue) => {
                                                 handleIslandInputChange(inputValue);
                                             }}
-                                            onChange={async (option: any) => {
-                                                setSelectedIsland(option);
-                                                handleInputChange('island_id', option?.value || '');
-
-                                                if (option?.value) {
-                                                    // Fetch new accessories for the selected island
-                                                    try {
-                                                        const response = await QuotationService.getQuotationAccessories(option.value);
-
-                                                        if (response.data && response.data.status && response.data.data) {
-                                                            const accessories = Array.isArray(response.data.data) ? response.data.data : [response.data.data];
-
-                                                            // Check if accessories array has items
-                                                            if (accessories.length > 0) {
-                                                                // Transform accessories to QuotationItemAccessory format
-                                                                const transformedAccessories = accessories.map(accessory => ({
-                                                                    accessory_id: accessory.accessory_id,
-                                                                    accessory_part_number: accessory.accessory_part_number,
-                                                                    accessory_part_name: accessory.accessory_part_name,
-                                                                    accessory_brand: accessory.accessory_brand || '',
-                                                                    accessory_specification: accessory.accessory_specification || '',
-                                                                    quantity: accessory.accessories_island_detail_quantity || 1,
-                                                                    description: accessory.accessory_description || '',
-                                                                    accessory_description: accessory.accessory_description || '',
-                                                                    accessory_remark: accessory.accessory_remark || '',
-                                                                    accessory_region: accessory.accessory_region || ''
-                                                                }));
-
-                                                                // Update accessories in all existing quotation items AND form level
-                                                                setFormData(prev => ({
-                                                                    ...prev,
-                                                                    manage_quotation_item_accessories: transformedAccessories,
-                                                                    manage_quotation_items: prev.manage_quotation_items.map(item => ({
-                                                                        ...item,
-                                                                        manage_quotation_item_accessories: transformedAccessories
-                                                                    }))
-                                                                }));
-
-                                                                toast.success(`${transformedAccessories.length} accessories loaded for selected island`);
-                                                            } else {
-                                                                // Clear accessories if data array is empty
-                                                                setFormData(prev => ({
-                                                                    ...prev,
-                                                                    manage_quotation_item_accessories: [],
-                                                                    manage_quotation_items: prev.manage_quotation_items.map(item => ({
-                                                                        ...item,
-                                                                        manage_quotation_item_accessories: []
-                                                                    }))
-                                                                }));
-                                                                toast.success('No accessories found for selected island');
-                                                            }
-                                                        } else {
-                                                            // Clear accessories if no data
-                                                            setFormData(prev => ({
-                                                                ...prev,
-                                                                manage_quotation_item_accessories: [],
-                                                                manage_quotation_items: prev.manage_quotation_items.map(item => ({
-                                                                    ...item,
-                                                                    manage_quotation_item_accessories: []
-                                                                }))
-                                                            }));
-                                                            toast.success('No accessories found for selected island');
-                                                        }
-                                                    } catch (error: any) {
-                                                        console.error('Error fetching accessories by island:', error);
-                                                        toast.error('Failed to load accessories for selected island');
-                                                        // Clear accessories on error
-                                                        setFormData(prev => ({
-                                                            ...prev,
-                                                            manage_quotation_item_accessories: [],
-                                                            manage_quotation_items: prev.manage_quotation_items.map(item => ({
-                                                                ...item,
-                                                                manage_quotation_item_accessories: []
-                                                            }))
-                                                        }));
-                                                    }
-                                                } else {
-                                                    // Clear accessories when no island selected
-                                                    setFormData(prev => ({
-                                                        ...prev,
-                                                        manage_quotation_item_accessories: [],
-                                                        manage_quotation_items: prev.manage_quotation_items.map(item => ({
-                                                            ...item,
-                                                            manage_quotation_item_accessories: []
-                                                        }))
-                                                    }));
-                                                }
-                                            }}
+                                            onChange={handleIslandChange}
                                         />
                                         {validationErrors.island_id && (
                                             <span className="text-sm text-red-500">{validationErrors.island_id}</span>
