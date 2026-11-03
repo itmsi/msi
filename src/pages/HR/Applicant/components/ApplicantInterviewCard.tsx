@@ -8,6 +8,7 @@ import { useLanguage } from '@/components/lang/useLanguage';
 import { AiSummaryPanel } from '@/components/assistant-ui/Aisummarypanel';
 import { ApplicantInterviewStep, ApplicantSpeechStatus, ApplicantSummaryAll } from '../types/applicant';
 import { toDownloadUrl } from '../utils/applicantForm';
+import { formatAssessmentMarkdown } from '../utils/assessmentSummary';
 import { applicantLabels } from '../language/applicantLabels';
 
 interface ApplicantInterviewCardProps {
@@ -159,10 +160,12 @@ const SummarySection = ({ step, summarizing, canSummarize, onSummarize }: Summar
     const status = step.speechStatus;
     const [copied, setCopied] = useState(false);
     const isFailed = step.summaryStatus === 'Failed';
+    // summary_update berisi JSON penilaian; ditampilkan sebagai Markdown, teks biasa tetap apa adanya
+    const displaySummary = formatAssessmentMarkdown(step.summary, langField);
 
     const handleCopySummary = async () => {
         try {
-            await navigator.clipboard.writeText(step.summary);
+            await navigator.clipboard.writeText(displaySummary);
             setCopied(true);
             window.setTimeout(() => setCopied(false), 2000);
         } catch {
@@ -184,7 +187,7 @@ const SummarySection = ({ step, summarizing, canSummarize, onSummarize }: Summar
             )}
             {(step.summary || summarizing) && (
                 <AiSummaryPanel
-                    summary={step.summary}
+                    summary={displaySummary}
                     setPrompt={() => undefined}
                     onGenerate={() => onSummarize(step)}
                     isGenerating={summarizing}
