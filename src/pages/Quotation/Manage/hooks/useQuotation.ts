@@ -3,10 +3,13 @@ import { ManageQuotationItem, QuotationPagination, QuotationRequest } from '../t
 import { QuotationService } from '../services/quotationService';
 import { generateQuotationPDF } from '../utils/pdfGenerator';
 import { toast } from 'react-hot-toast';
-import { getCompanyName } from '@/helpers/generalHelper';
+import { getCompanyName, getDepartmentName } from '@/helpers/generalHelper';
+import { LOGISTIC_CONTAINER_DEPARTMENT, LOGISTIC_CONTAINER_ISLAND_ID } from '../utils/logisticContainer';
 
 export const useQuotation = () => {
-    
+    // Logistic Container selalu difilter ke pulau statik, termasuk setelah filter di-clear
+    const defaultIslandId = getDepartmentName() === LOGISTIC_CONTAINER_DEPARTMENT ? LOGISTIC_CONTAINER_ISLAND_ID : '';
+
     const [quotations, setQuotations] = useState<ManageQuotationItem[]>([]);
     const [pagination, setPagination] = useState<QuotationPagination>({
         page: 1,
@@ -20,7 +23,7 @@ export const useQuotation = () => {
         search: '',
         sort_order: 'desc' as 'asc' | 'desc',
         quotation_for: '' as 'customer' | 'leasing' | '',
-        island_id: '',
+        island_id: defaultIslandId,
         start_date: '',
         end_date: ''
     });
@@ -107,25 +110,25 @@ export const useQuotation = () => {
     const updateFilters = useCallback((key: keyof typeof filters, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
-    
+
     // Apply filters dengan trigger fetch data
     const applyFilters = useCallback(() => {
         setPagination(prev => ({ ...prev, page: 1 }));
         fetchQuotations(1, pagination.limit);
     }, [fetchQuotations, pagination.limit]);
-    
+
     // Clear all filters
     const clearAllFilters = useCallback(() => {
         setFilters({
             search: '',
             sort_order: 'desc',
             quotation_for: '',
-            island_id: '',
+            island_id: defaultIslandId,
             start_date: '',
             end_date: ''
         });
         setPagination(prev => ({ ...prev, page: 1 }));
-        
+
         // Fetch data dengan filter kosong
         const requestParams: Partial<QuotationRequest> = {
             page: 1,
@@ -133,14 +136,14 @@ export const useQuotation = () => {
             search: '',
             sort_order: 'desc',
             quotation_for: '',
-            island_id: '',
+            island_id: defaultIslandId,
             start_date: '',
             end_date: ''
         };
-        
+
         setLoading(true);
         setError(null);
-        
+
         QuotationService.getQuotation(requestParams)
             .then(response => {
                 if (response.status) {
@@ -157,7 +160,7 @@ export const useQuotation = () => {
             .finally(() => {
                 setLoading(false);
             });
-    }, [pagination.limit]);
+    }, [pagination.limit, defaultIslandId]);
 
     const deleteQuotation = useCallback(async (quotation_id: string) => {
         setLoading(true);
@@ -175,7 +178,6 @@ export const useQuotation = () => {
             setLoading(false);
         }
     }, []);
-
     const downloadQuotation = useCallback(async (quotation_id: string, lang?: string) => {
         setLoading(true);
         setError(null);

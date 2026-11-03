@@ -28,7 +28,7 @@ import { ItemProduct } from '../Product/types/product';
 import { useEditQuotation } from './hooks/useEditQuotation';
 import { useAsyncSelect, SelectOption } from '../hooks/useAsyncSelect';
 import { useTermConditionSelect, TermConditionSelectOption } from '../hooks/useTermConditionSelect';
-import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalInput, handleDecimalInputComma, formatNumberInputwithComma, handlePercentageInputComma, getCompanyName } from '@/helpers/generalHelper';
+import { handleKeyPress, formatNumberInput, handlePercentageInput, parseDecimalInput, handleDecimalInputComma, formatNumberInputwithComma, handlePercentageInputComma, getCompanyName, getDepartmentName } from '@/helpers/generalHelper';
 import moment from 'moment';
 import { TermConditionService } from '../TermCondition/services/termconditionService';
 import { ItemProductService } from '../Product/services/productService';
@@ -43,6 +43,7 @@ import { QuotationService } from './services/quotationService';
 import { PermissionGate } from '@/components/common/PermissionComponents';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { quotationLabels } from './language/quotationLabels';
+import { LOGISTIC_CONTAINER_DEPARTMENT, LOGISTIC_CONTAINER_ISLAND_ID, getLogisticContainerIslandOption } from './utils/logisticContainer';
 // import EditableField from '@/components/form/editor/EditableField';
 
 export default function EditQuotation() {
@@ -51,6 +52,9 @@ export default function EditQuotation() {
     const { langField, buildPath } = useLanguage(quotationLabels);
     const { loading, quotationData, validationErrors, fetchQuotation, updateQuotation, clearFieldError } = useEditQuotation();
     const [isUpdating, setIsUpdating] = useState(false);
+
+    const department_user = getDepartmentName();
+    const isLogisticContainer = department_user === LOGISTIC_CONTAINER_DEPARTMENT;
 
     // Use useEmployees hook
     const {
@@ -191,10 +195,12 @@ export default function EditQuotation() {
         if (!quotationId) return;
         try {
             const data = await fetchQuotation(quotationId);
+            // Logistic Container selalu memakai pulau statik, apa pun pulau yang tersimpan
+            const islandId = isLogisticContainer ? LOGISTIC_CONTAINER_ISLAND_ID : data.island_id;
             const transformedData: QuotationFormData = {
                 customer_id: data.customer_id || '',
                 employee_id: data.employee_id || '',
-                island_id: data.island_id || '',
+                island_id: islandId || '',
                 bank_account_id: data.bank_account_id || '',
                 bank_account_name: data.bank_account_name || '',
                 bank_account_number: data.bank_account_number || '',
@@ -304,15 +310,15 @@ export default function EditQuotation() {
                 });
             }
 
-            if (data.island_id) {
-                setSelectedIsland({
-                    value: data.island_id,
-                    label: apiData.island_name || 'Select Island'
-                });
+            if (islandId) {
+                setSelectedIsland(islandId === data.island_id
+                    ? { value: islandId, label: apiData.island_name || 'Select Island' }
+                    : await getLogisticContainerIslandOption()
+                );
 
                 // Fetch accessories for the loaded island
                 try {
-                    const accessoriesResponse = await QuotationService.getQuotationAccessories(data.island_id);
+                    const accessoriesResponse = await QuotationService.getQuotationAccessories(islandId);
                     if (accessoriesResponse.data && accessoriesResponse.data.status && accessoriesResponse.data.data) {
                         const accessories = Array.isArray(accessoriesResponse.data.data) ? accessoriesResponse.data.data : [accessoriesResponse.data.data];
 
@@ -330,6 +336,18 @@ export default function EditQuotation() {
                         }));
 
                         setCurrentIslandAccessories(transformedAccessories);
+
+                        // Pulau tersimpan berbeda: samakan accessories item, seperti saat pulau diganti manual
+                        if (islandId !== data.island_id) {
+                            setFormData(prev => ({
+                                ...prev,
+                                manage_quotation_item_accessories: transformedAccessories,
+                                manage_quotation_items: prev.manage_quotation_items.map(item => ({
+                                    ...item,
+                                    manage_quotation_item_accessories: transformedAccessories
+                                }))
+                            }));
+                        }
                     }
                 } catch (error) {
                     console.error('Error loading island accessories on edit:', error);
@@ -353,7 +371,7 @@ export default function EditQuotation() {
             toast.error(err.message || 'Failed to load quotation');
             navigate(buildPath(`/quotations/manage`));
         }
-    }, [quotationId, fetchQuotation, navigate, QuotationService]);
+    }, [quotationId, fetchQuotation, navigate, QuotationService, isLogisticContainer]);
 
     useEffect(() => {
         if (quotationId) {
@@ -619,8 +637,10 @@ export default function EditQuotation() {
     }, [initializeTermConditionOptions]);
 
     useEffect(() => {
-        initializeIslandOptions();
-    }, [initializeIslandOptions]);
+        if (!isLogisticContainer) {
+            initializeIslandOptions();
+        }
+    }, [isLogisticContainer, initializeIslandOptions]);
     useEffect(() => {
         const editor = document.getElementById('wysiwyg-editor');
         if (editor && termConditionContent && editor.innerHTML !== termConditionContent) {
@@ -1240,7 +1260,6 @@ export default function EditQuotation() {
             </>
         );
     }
-
     return (
         <>
             <PageMeta
@@ -1472,7 +1491,8 @@ export default function EditQuotation() {
                                             placeholder="Select Island..."
                                             value={selectedIsland}
                                             error={validationErrors.island_id}
-                                            defaultOptions={islandOptions}
+                                            disabled={isLogisticContainer}
+                                            defaultOptions={isLogisticContainer && selectedIsland ? [selectedIsland] : islandOptions}
                                             loadOptions={handleIslandInputChange}
                                             onMenuScrollToBottom={handleIslandMenuScrollToBottom}
                                             isLoading={islandPagination.loading}

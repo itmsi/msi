@@ -7,6 +7,7 @@ import { ManageQuotationDataPDF } from '../types/quotation';
 import { loadCustomFonts, setFontSafe, setFontByLanguage } from '@/utils/fontLoader';
 import { quotationLabelPDF } from '@/pages/Quotation/Manage/language/quotationLabelPDF';
 import type { LangCode } from '../../../../components/lang/useLanguage';
+import { isLogisticContainerDepartment } from './logisticContainer';
 
 // Extend jsPDF type to include autoTable
 declare module 'jspdf' {
@@ -972,7 +973,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     doc.setFontSize(9);
     doc.setTextColor(0, 0, 0);
     setFontSafe(doc, 'OpenSans', 'semibold');
-    doc.text('Oscar Feriady Hadi Saputra', signatureStartX + signatureBoxWidth / 2, signatureYPos + 22, { align: 'center' });
+    const signatureName = isLogisticContainerDepartment() ? 'Yuli Saputro' : 'Oscar Feriady Hadi Saputra';
+    doc.text(signatureName, signatureStartX + signatureBoxWidth / 2, signatureYPos + 22, { align: 'center' });
 
     signatureYPos += 25;
     doc.setDrawColor(0, 0, 0);
@@ -982,7 +984,8 @@ export const generateQuotationPDF = async (data: ManageQuotationDataPDF, languag
     signatureYPos += 5;
     doc.setFontSize(8);
     setFontSafe(doc, 'Futura', 'normal');
-    doc.text(langField('jobTitle'), signatureStartX + signatureBoxWidth / 2, signatureYPos, { align: 'center' });
+    const jabatan = isLogisticContainerDepartment() ? 'jobTitleLC' : 'jobTitle';
+    doc.text(langField(jabatan), signatureStartX + signatureBoxWidth / 2, signatureYPos, { align: 'center' });
 
     // Update yPos berdasarkan yang paling bawah (payment atau signature)
     yPos = Math.max(paymentYPos + 10, signatureYPos + 10);
