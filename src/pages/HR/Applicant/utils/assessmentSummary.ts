@@ -93,10 +93,10 @@ const cell = (value: string): string => value.replace(/\|/g, '/').replace(/\s*\n
 const bullets = (items: string[]): string => items.map(item => `- ${item}`).join('\n');
 
 const STAR_ORDER: Array<[string, string]> = [
-    ['situation', 'S'],
-    ['task', 'T'],
-    ['action', 'A'],
-    ['result', 'R'],
+    ['situation', 'Situation'],
+    ['task', 'Task'],
+    ['action', 'Action'],
+    ['result', 'Result'],
 ];
 
 const RELEVANCE_LABEL_KEY: Record<string, string> = {
@@ -124,7 +124,7 @@ export const formatAssessmentMarkdown = (raw: string, t: Translate): string => {
     const relevanceKey = RELEVANCE_LABEL_KEY[assessment.relevance];
     const meta = [
         relevanceKey && `${t('assessmentRelevance')}: ${t(relevanceKey)}`,
-        assessment.star && `STAR: ${STAR_ORDER.map(([key, letter]) => `${letter} ${assessment.star?.[key] ? '✓' : '✗'}`).join('  ')}`,
+        assessment.star && `STAR: ${STAR_ORDER.map(([key, name]) => `${name} ${assessment.star?.[key] ? '✓' : '✗'}`).join(', ')}`,
     ].filter(Boolean).join(' · ');
     if (headline || meta) blocks.push([headline, meta].filter(Boolean).join('\n\n'));
 
