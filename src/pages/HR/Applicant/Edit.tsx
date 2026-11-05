@@ -5,7 +5,7 @@ import PageHeader from '@/components/common/PageHeader';
 import { LoadingOverlay } from '@/components/common/Loading';
 import Alert from '@/components/ui/alert/Alert';
 import Button from '@/components/ui/button/Button';
-import FormActions from '@/components/form/FormActions';
+// import FormActions from '@/components/form/FormActions';
 import { useHasPermission } from '@/hooks/usePermissions';
 import { useLanguage } from '@/components/lang/useLanguage';
 import { applicantLabels } from './language/applicantLabels';
@@ -41,7 +41,7 @@ export default function Edit() {
         sectionErrors,
         loading,
         error,
-        isSubmitting,
+        // isSubmitting,
         isExporting,
         handleExportPdf,
         summaryAll,
@@ -52,7 +52,7 @@ export default function Edit() {
         handleRowAdd,
         handleRowRemove,
         handleRowChange,
-        handleSubmit,
+        // handleSubmit,
     } = useApplicantEdit(id);
 
     const interview = useApplicantInterview(id);
@@ -139,7 +139,7 @@ export default function Edit() {
                 </div>
 
 
-                {!readOnly && (
+                {/* {!readOnly && (
                     <FormActions
                         onSubmit={handleSubmit}
                         isSubmitting={isSubmitting}
@@ -148,7 +148,7 @@ export default function Edit() {
                         submitText={langField('saveChanges')}
                         submittingText={langField('saving')}
                     />
-                )}
+                )} */}
             </div>
         </>
     );
