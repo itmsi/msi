@@ -1,7 +1,7 @@
 import { useId, useState } from 'react';
 import toast from 'react-hot-toast';
 import { MdDownload } from 'react-icons/md';
-import { LuAudioLines, LuChevronDown, LuInfo, LuLoaderCircle, LuRefreshCw, LuSparkles } from 'react-icons/lu';
+import { LuAudioLines, LuCheck, LuChevronDown, LuCopy, LuInfo, LuLoaderCircle, LuRefreshCw, LuSparkles } from 'react-icons/lu';
 import Badge from '@/components/ui/badge/Badge';
 import Button from '@/components/ui/button/Button';
 import { useLanguage } from '@/components/lang/useLanguage';
@@ -100,20 +100,45 @@ const TranscriptSection = ({ step, transcribing, canTranscribe, onTranscribe }: 
     const badge = SPEECH_STATUS_BADGE[status ?? 'none'];
     const isFailed = status === 'Failed';
 
+    const [copied, setCopied] = useState(false);
+    const handleCopySummary = async () => {
+        try {
+            await navigator.clipboard.writeText(step.speechText || '-');
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+        } catch {
+            toast.error(langField('summaryCopyFailed'));
+        }
+    };
     return (
         <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-primary-bold uppercase tracking-wide text-gray-600">
-                    {langField('answerTranscript')}
-                </span>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-primary-bold uppercase tracking-wide text-gray-600">
+                        {langField('answerTranscript')}
+                    </span>
+                    {status === 'Success' && (<>
+                        <div className="flex items-center gap-2.5">
+                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-blue-200/60 rounded-lg shadow-xs">
+                                <button
+                                    onClick={handleCopySummary}
+                                    className="text-sm font-primary-bold bg-gradient-to-r from-primary via-blue-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-1.5"
+                                    title="Copy"
+                                >
+                                    {copied ? <LuCheck size={16} className="text-green-500" /> : <LuCopy size={16} className="text-primary" />}
+                                </button>
+                            </div>
+                        </div>
+                    </>)}
+                </div>
                 <Badge size="sm" color={badge.color}>{langField(badge.labelKey)}</Badge>
             </div>
 
-            {status === 'Success' && (
-                <p className="max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm leading-relaxed text-gray-800 whitespace-pre-line">
+            {status === 'Success' && (<>
+                <p className="max-h-95 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm leading-relaxed text-gray-800 whitespace-pre-line">
                     {step.speechText || '-'}
                 </p>
-            )}
+            </>)}
 
             {status === 'Pending' && (
                 <p className="flex items-center gap-2 text-sm text-gray-500">
@@ -157,7 +182,7 @@ interface SummarySectionProps {
 
 const SummarySection = ({ step, summarizing, canSummarize, onSummarize }: SummarySectionProps) => {
     const { langField } = useLanguage(applicantLabels);
-    const status = step.speechStatus;
+    // const status = step.speechStatus;
     const [copied, setCopied] = useState(false);
     const isFailed = step.summaryStatus === 'Failed';
     // summary_update berisi JSON penilaian; ditampilkan sebagai Markdown, teks biasa tetap apa adanya
@@ -175,7 +200,7 @@ const SummarySection = ({ step, summarizing, canSummarize, onSummarize }: Summar
 
     return (
         <div className="space-y-2">
-            {status === 'Pending' ? (
+            {/* {status === 'Pending' ? (
                 <p className="flex items-center gap-2 text-sm text-gray-500">
                     <LuLoaderCircle size={14} className="animate-spin shrink-0" />
                     {langField('transcriptPendingDescription')}
@@ -184,8 +209,8 @@ const SummarySection = ({ step, summarizing, canSummarize, onSummarize }: Summar
                 <p className="text-sm text-gray-500">
                     {langField('summaryEmpty')}
                 </p>
-            )}
-            {(step.summary || summarizing) && (
+            )} */}
+            {step.summary || summarizing ? (
                 <AiSummaryPanel
                     summary={displaySummary}
                     setPrompt={() => undefined}
@@ -198,6 +223,10 @@ const SummarySection = ({ step, summarizing, canSummarize, onSummarize }: Summar
                     handleCopySummary={handleCopySummary}
                     loadingText={langField('summarizing')}
                 />
+            ) : (step.summary || summarizing) ? null : (
+                <p className="text-sm text-gray-500">
+                    {langField('summaryEmpty')}
+                </p>
             )}
 
             {isFailed && (
@@ -326,9 +355,12 @@ const ApplicantInterviewCard = ({
         .replace('{done}', String(summarizedCount))
         .replace('{total}', String(steps.length));
 
+    // summary_all juga berisi JSON penilaian (satu atau beberapa audio)
+    const displaySummaryAll = formatAssessmentMarkdown(summaryAll.text, langField);
+
     const handleCopySummaryAll = async () => {
         try {
-            await navigator.clipboard.writeText(summaryAll.text);
+            await navigator.clipboard.writeText(displaySummaryAll);
             setSummaryAllCopied(true);
             window.setTimeout(() => setSummaryAllCopied(false), 2000);
         } catch {
@@ -402,7 +434,7 @@ const ApplicantInterviewCard = ({
                 <div className="px-4 space-y-2">
                     {(summaryAll.text || generatingSummaryAll) && (
                         <AiSummaryPanel
-                            summary={summaryAll.text}
+                            summary={displaySummaryAll}
                             setPrompt={() => undefined}
                             onGenerate={onGenerateSummaryAll}
                             isGenerating={generatingSummaryAll}

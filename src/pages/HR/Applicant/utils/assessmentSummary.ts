@@ -39,22 +39,52 @@ const toScore = (value: unknown): number | null => {
     return typeof number === 'number' && Number.isFinite(number) ? number : null;
 };
 
-// Model kadang membungkus JSON dengan ```json ... ``` atau kalimat pembuka
-const extractJson = (text: string): unknown => {
-    const start = text.indexOf('{');
-    const end = text.lastIndexOf('}');
-    if (start === -1 || end <= start) return null;
+// Mengambil semua objek JSON level atas dari teks. Model kadang membungkus JSON dengan
+// ```json ... ```, kalimat pembuka, atau menggabungkan beberapa objek / array (summary all).
+const extractJsonObjects = (text: string): Record<string, unknown>[] => {
+    const results: Record<string, unknown>[] = [];
+    const collect = (value: unknown) => {
+        if (Array.isArray(value)) value.forEach(collect);
+        else if (isRecord(value)) results.push(value);
+    };
+
     try {
-        return JSON.parse(text.slice(start, end + 1));
+        collect(JSON.parse(text.trim()));
+        if (results.length) return results;
     } catch {
-        return null;
+        // lanjut ke pemindaian manual
     }
+
+    let depth = 0;
+    let start = -1;
+    let inString = false;
+    let escaped = false;
+    for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        if (inString) {
+            if (escaped) escaped = false;
+            else if (char === '\\') escaped = true;
+            else if (char === '"') inString = false;
+        } else if (char === '"') {
+            if (depth > 0) inString = true;
+        } else if (char === '{') {
+            if (depth === 0) start = i;
+            depth += 1;
+        } else if (char === '}' && depth > 0) {
+            depth -= 1;
+            if (depth === 0) {
+                try {
+                    collect(JSON.parse(text.slice(start, i + 1)));
+                } catch {
+                    // bukan JSON valid, abaikan
+                }
+            }
+        }
+    }
+    return results;
 };
 
-export const parseAssessment = (raw: string): Assessment | null => {
-    if (!raw) return null;
-    const data = extractJson(raw);
-    if (!isRecord(data)) return null;
+const toAssessment = (data: Record<string, unknown>): Assessment | null => {
 
     const dimensions = (Array.isArray(data.dimensions) ? data.dimensions : [])
         .filter(isRecord)
@@ -87,6 +117,13 @@ export const parseAssessment = (raw: string): Assessment | null => {
     };
 };
 
+export const parseAssessments = (raw: string): Assessment[] => {
+    if (!raw) return [];
+    return extractJsonObjects(raw)
+        .map(toAssessment)
+        .filter((item): item is Assessment => item !== null);
+};
+
 // Sel tabel Markdown tidak boleh berisi "|" atau baris baru
 const cell = (value: string): string => value.replace(/\|/g, '/').replace(/\s*\n+\s*/g, ' ').trim() || '-';
 
@@ -111,10 +148,7 @@ const CONFIDENCE_LABEL_KEY: Record<string, string> = {
     low: 'assessmentConfidenceLow',
 };
 
-export const formatAssessmentMarkdown = (raw: string, t: Translate): string => {
-    const assessment = parseAssessment(raw);
-    if (!assessment) return raw;
-
+const formatAssessment = (assessment: Assessment, t: Translate): string => {
     const blocks: string[] = [];
 
     const headline = [
@@ -169,4 +203,13 @@ export const formatAssessmentMarkdown = (raw: string, t: Translate): string => {
     }
 
     return blocks.join('\n\n');
+};
+
+export const formatAssessmentMarkdown = (raw: string, t: Translate): string => {
+    const assessments = parseAssessments(raw);
+    if (!assessments.length) return raw;
+    if (assessments.length === 1) return formatAssessment(assessments[0], t);
+
+    // Beberapa penilaian (summary all): dipisah garis, tanpa nomor audio
+    return assessments.map(item => formatAssessment(item, t)).join('\n\n---\n\n');
 };
