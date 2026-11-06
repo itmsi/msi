@@ -355,9 +355,12 @@ const ApplicantInterviewCard = ({
         .replace('{done}', String(summarizedCount))
         .replace('{total}', String(steps.length));
 
+    // summary_all juga berisi JSON penilaian (satu atau beberapa audio)
+    const displaySummaryAll = formatAssessmentMarkdown(summaryAll.text, langField);
+
     const handleCopySummaryAll = async () => {
         try {
-            await navigator.clipboard.writeText(summaryAll.text);
+            await navigator.clipboard.writeText(displaySummaryAll);
             setSummaryAllCopied(true);
             window.setTimeout(() => setSummaryAllCopied(false), 2000);
         } catch {
@@ -431,7 +434,7 @@ const ApplicantInterviewCard = ({
                 <div className="px-4 space-y-2">
                     {(summaryAll.text || generatingSummaryAll) && (
                         <AiSummaryPanel
-                            summary={summaryAll.text}
+                            summary={displaySummaryAll}
                             setPrompt={() => undefined}
                             onGenerate={onGenerateSummaryAll}
                             isGenerating={generatingSummaryAll}
