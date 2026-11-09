@@ -205,7 +205,202 @@ const formatAssessment = (assessment: Assessment, t: Translate): string => {
     return blocks.join('\n\n');
 };
 
+// ---- Ringkasan akhir kandidat (summary_all) ----
+// Bentuk JSON berbeda dari penilaian per jawaban: skor ada di `scores`, ada rekomendasi,
+// kekuatan/kekhawatiran, dan ringkasan eksekutif.
+
+interface CandidateScoreRow {
+    name: string;
+    score: number | null;
+    rating: string;
+}
+
+interface CandidatePillar {
+    pillar: string;
+    score5: number | null;
+    score100: number | null;
+}
+
+interface CandidatePoint {
+    point: string;
+    evidence: string[];
+    severity: string;
+}
+
+interface CandidateSummary {
+    incomplete: boolean;
+    missing: string[];
+    overall5: number | null;
+    overall100: number | null;
+    perQuestion: CandidateScoreRow[];
+    perPillar: CandidatePillar[];
+    recommendation: string;
+    recommendationReason: string;
+    needsHrReview: boolean;
+    strengths: CandidatePoint[];
+    concerns: CandidatePoint[];
+    consistent: boolean | null;
+    consistencyNotes: string;
+    redFlags: string[];
+    jobFit: string;
+    cultureFit: string;
+    interviewFocus: string[];
+    executiveSummary: string;
+}
+
+const toPoints = (value: unknown): CandidatePoint[] =>
+    (Array.isArray(value) ? value : [])
+        .filter(isRecord)
+        .map(item => ({
+            point: toText(item.point),
+            evidence: [...new Set(toStringList(item.evidence_videos))],
+            severity: toText(item.severity).toLowerCase(),
+        }))
+        .filter(item => item.point);
+
+const toCandidateSummary = (data: Record<string, unknown>): CandidateSummary | null => {
+    if (!isRecord(data.scores)) return null;
+    const executiveSummary = toText(data.executive_summary);
+    const recommendation = toText(data.recommendation);
+    if (!executiveSummary && !recommendation) return null;
+
+    const scores = data.scores;
+    const consistency = isRecord(data.consistency_check) ? data.consistency_check : null;
+
+    return {
+        incomplete: toText(data.assessment_status).toLowerCase() === 'incomplete',
+        missing: toStringList(data.missing_videos),
+        overall5: toScore(scores.overall_score_5),
+        overall100: toScore(scores.overall_score_100),
+        perQuestion: (Array.isArray(scores.per_video) ? scores.per_video : [])
+            .filter(isRecord)
+            .map(item => ({
+                name: toText(item.question),
+                score: toScore(item.weighted_score),
+                rating: toText(item.rating),
+            })),
+        perPillar: (Array.isArray(scores.per_pillar) ? scores.per_pillar : [])
+            .filter(isRecord)
+            .map(item => ({
+                pillar: toText(item.pillar),
+                score5: toScore(item.score_5),
+                score100: toScore(item.score_100),
+            }))
+            .filter(item => item.pillar),
+        recommendation,
+        recommendationReason: toText(data.recommendation_reason),
+        needsHrReview: data.needs_hr_review === true,
+        strengths: toPoints(data.top_strengths),
+        concerns: toPoints(data.key_concerns),
+        consistent: consistency && typeof consistency.is_consistent === 'boolean' ? consistency.is_consistent : null,
+        consistencyNotes: consistency ? toText(consistency.notes) : '',
+        redFlags: (Array.isArray(data.red_flags) ? data.red_flags : [])
+            .map(item => {
+                if (!isRecord(item)) return toText(item);
+                const meta = [toText(item.video), toText(item.type)].filter(Boolean).join(' · ');
+                return [toText(item.flag), meta && `(${meta})`].filter(Boolean).join(' ');
+            })
+            .filter(Boolean),
+        jobFit: toText(data.job_fit_summary),
+        cultureFit: toText(data.culture_fit_summary),
+        interviewFocus: toStringList(data.interview_focus),
+        executiveSummary,
+    };
+};
+
+const SEVERITY_LABEL_KEY: Record<string, string> = {
+    high: 'candidateSeverityHigh',
+    medium: 'candidateSeverityMedium',
+    low: 'candidateSeverityLow',
+};
+
+const formatScore = (value: number | null): string => (value === null ? '-' : value.toFixed(2));
+
+const formatPoints = (items: CandidatePoint[], t: Translate, withSeverity: boolean): string =>
+    items.map(item => {
+        const severityKey = SEVERITY_LABEL_KEY[item.severity];
+        const prefix = withSeverity && severityKey ? `**[${t(severityKey)}]** ` : '';
+        const evidence = item.evidence.length ? `\n  _${t('candidateEvidence')}: ${item.evidence.join('; ')}_` : '';
+        return `- ${prefix}${item.point}${evidence}`;
+    }).join('\n');
+
+const formatCandidateSummary = (summary: CandidateSummary, t: Translate): string => {
+    const blocks: string[] = [];
+
+    const overall = summary.overall5 === null
+        ? ''
+        : `**${summary.overall5.toFixed(2)}** / 5${summary.overall100 === null ? '' : ` (${summary.overall100}/100)`}`;
+    const headline = [
+        summary.recommendation && `**${summary.recommendation}**`,
+        overall,
+        summary.incomplete && t('candidateIncomplete'),
+        summary.needsHrReview && `⚠ ${t('candidateNeedsHrReview')}`,
+    ].filter(Boolean).join(' · ');
+    if (headline) blocks.push(headline);
+    if (summary.missing.length) {
+        blocks.push(`${t('candidateMissingVideos')}: ${summary.missing.join('; ')}`);
+    }
+
+    if (summary.executiveSummary) {
+        blocks.push(`### ${t('candidateExecutiveSummary')}\n${summary.executiveSummary}`);
+    }
+    if (summary.recommendationReason) {
+        blocks.push(`### ${t('candidateRecommendationReason')}\n${summary.recommendationReason}`);
+    }
+
+    if (summary.perQuestion.length) {
+        blocks.push([
+            `### ${t('candidatePerQuestion')}`,
+            `| ${t('candidateQuestion')} | ${t('assessmentScoreColumn')} | ${t('candidateRating')} |`,
+            '|---|:-:|:-:|',
+            ...summary.perQuestion.map(item => `| ${cell(item.name)} | ${formatScore(item.score)} | ${cell(item.rating)} |`),
+        ].join('\n'));
+    }
+
+    if (summary.perPillar.length) {
+        blocks.push([
+            `### ${t('candidatePerPillar')}`,
+            `| ${t('candidatePillar')} | ${t('assessmentScoreColumn')} | ${t('candidateScore100')} |`,
+            '|---|:-:|:-:|',
+            ...summary.perPillar.map(item => `| ${cell(item.pillar)} | ${formatScore(item.score5)} | ${item.score100 ?? '-'} |`),
+        ].join('\n'));
+    }
+
+    if (summary.strengths.length) {
+        blocks.push(`### ${t('candidateTopStrengths')}\n${formatPoints(summary.strengths, t, false)}`);
+    }
+    if (summary.concerns.length) {
+        blocks.push(`### ${t('candidateKeyConcerns')}\n${formatPoints(summary.concerns, t, true)}`);
+    }
+
+    if (summary.consistent !== null || summary.consistencyNotes) {
+        const status = summary.consistent === null
+            ? ''
+            : `**${t(summary.consistent ? 'candidateConsistent' : 'candidateInconsistent')}**`;
+        blocks.push(`### ${t('candidateConsistency')}\n${[status, summary.consistencyNotes].filter(Boolean).join('\n\n')}`);
+    }
+
+    blocks.push(`### ${t('assessmentRedFlags')}\n${summary.redFlags.length ? bullets(summary.redFlags) : t('assessmentNoRedFlags')}`);
+
+    if (summary.jobFit) blocks.push(`### ${t('candidateJobFit')}\n${summary.jobFit}`);
+    if (summary.cultureFit) blocks.push(`### ${t('candidateCultureFit')}\n${summary.cultureFit}`);
+    if (summary.interviewFocus.length) {
+        blocks.push([
+            `### ${t('candidateInterviewFocus')}`,
+            ...summary.interviewFocus.map((item, index) => `${index + 1}. ${item}`),
+        ].join('\n'));
+    }
+
+    return blocks.join('\n\n');
+};
+
 export const formatAssessmentMarkdown = (raw: string, t: Translate): string => {
+    // Ringkasan akhir kandidat (summary_all) dicek lebih dulu: bentuknya beda dari penilaian per jawaban
+    const candidates = raw ? extractJsonObjects(raw).map(toCandidateSummary).filter((item): item is CandidateSummary => item !== null) : [];
+    if (candidates.length) {
+        return candidates.map(item => formatCandidateSummary(item, t)).join('\n\n---\n\n');
+    }
+
     const assessments = parseAssessments(raw);
     if (!assessments.length) return raw;
     if (assessments.length === 1) return formatAssessment(assessments[0], t);
