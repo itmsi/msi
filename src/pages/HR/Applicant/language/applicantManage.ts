@@ -261,6 +261,16 @@ export const applicantManage: TranslationMap = {
         en: 'Failed to resend invitation email',
         zh: '重新发送邀请邮件失败'
     },
+    summaryScore: {
+        id: 'Skor',
+        en: 'Score',
+        zh: '得分'
+    },
+    summaryRecommendation: {
+        id: 'Rekomendasi',
+        en: 'Recommendation',
+        zh: '推荐'
+    },
     emailStatus: {
         id: 'Status Email',
         en: 'Email Status',
