@@ -12,11 +12,29 @@ import { applicantManage } from '../language/applicantManage';
 import { LuLoaderCircle, LuSend } from 'react-icons/lu';
 import Switch from '@/components/form/switch/Switch';
 import { useHasPermission } from '@/hooks/usePermissions';
+import Badge from '@/components/ui/badge/Badge';
 
 const EMAIL_STATUS_CAPTION: Record<'Success' | 'Failed' | 'none', { labelKey: string; className: string; badgeClassName: string }> = {
     Success: { labelKey: 'emailStatusSuccessLabel', className: 'text-green-600', badgeClassName: 'border-green-200 bg-green-50 text-green-700' },
     Failed: { labelKey: 'emailStatusFailedLabel', className: 'text-red-600 border-red-200 bg-red-50 text-red-700', badgeClassName: 'border-red-200 bg-red-50 text-red-700' },
     none: { labelKey: 'emailStatusNotSent', className: 'text-gray-500', badgeClassName: 'border-gray-200 bg-gray-50 text-gray-600' },
+};
+
+// Rekomendasi kandidat dari skor. Label lama (Strong/Good/Concern) masih mungkin muncul di data lama
+const RECOMMENDATION_COLOR: Record<string, 'success' | 'info' | 'warning' | 'error'> = {
+    'Strongly Recommended': 'success',
+    Strong: 'success',
+    Recommended: 'info',
+    Good: 'info',
+    Consider: 'warning',
+    'Not Recommended': 'error',
+    Concern: 'error',
+};
+
+const toScoreNumber = (value: number | string | null | undefined): number | null => {
+    if (value === null || value === undefined || value === '') return null;
+    const score = Number(value);
+    return Number.isFinite(score) ? score : null;
 };
 
 const statusBadgeClass = 'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium';
@@ -147,6 +165,30 @@ const ApplicantTable: React.FC<ApplicantTableProps> = ({
                 );
             },
             width: '250px',
+            center: true,
+        },
+        {
+            id: 'summary_score',
+            name: langField('summaryScore'),
+            selector: row => toScoreNumber(row.summary_score) ?? -1,
+            cell: row => {
+                const score = toScoreNumber(row.summary_score);
+                return score === null
+                    ? <span className="text-gray-400">-</span>
+                    : <span className="font-medium text-gray-900">{score.toFixed(2)}<span className="text-xs font-normal text-gray-500"> / 5</span></span>;
+            },
+            width: '120px',
+            center: true,
+        },
+        {
+            id: 'summary_rating',
+            name: langField('summaryRecommendation'),
+            selector: row => row.summary_rating || '-',
+            cell: row => row.summary_rating
+                ? <Badge size="sm" color={RECOMMENDATION_COLOR[row.summary_rating] || 'light'}>{row.summary_rating}</Badge>
+                : <span className="text-gray-400">-</span>,
+            wrap: true,
+            width: '190px',
             center: true,
         },
         {

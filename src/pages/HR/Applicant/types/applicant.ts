@@ -18,6 +18,10 @@ export interface ApplicantFormListItem {
     position_applied_for: string | null;
     city: string | null;
     working_available_date: string | null;
+    // Skor rata-rata (0-5) dan rekomendasi kandidat; kosong sebelum ada penilaian AI.
+    // summary_score bisa berupa string karena kolom numeric dikirim DB sebagai string.
+    summary_score?: number | string | null;
+    summary_rating?: string | null;
     applicant_form_invitation_id: string;
     status_send_email: ApplicantSendEmailStatus;
     applicant_form_url: string | null;
