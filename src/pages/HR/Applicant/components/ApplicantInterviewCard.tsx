@@ -2,6 +2,7 @@ import { useId, useState } from 'react';
 import toast from 'react-hot-toast';
 import { MdDownload } from 'react-icons/md';
 import { LuAudioLines, LuCheck, LuChevronDown, LuCopy, LuInfo, LuLoaderCircle, LuRefreshCw, LuSparkles } from 'react-icons/lu';
+import Alert from '@/components/ui/alert/Alert';
 import Badge from '@/components/ui/badge/Badge';
 import Button from '@/components/ui/button/Button';
 import { useLanguage } from '@/components/lang/useLanguage';
@@ -253,6 +254,16 @@ const SummarySection = ({ step, summarizing, canSummarize, onSummarize }: Summar
     );
 };
 
+// Pesan gagal dari backend ("Transcribe gagal: <alasan>") dalam bahasa Indonesia.
+// Alasan yang sudah dikenal diterjemahkan; selain itu ditampilkan apa adanya tanpa prefix.
+const getSpeechFailureNotice = (message: string, t: (key: string) => string): string => {
+    const reason = (message || '').replace(/^\s*Transcribe gagal:\s*/i, '').trim();
+    const lower = reason.toLowerCase();
+    if (lower.includes('file audio kosong')) return t('speechFailedEmptyAudio');
+    if (lower.includes('tidak ada ucapan')) return t('speechFailedNoSpeech');
+    return reason || t('transcriptFailedDescription');
+};
+
 type AnswerTab = 'summary' | 'transcript';
 
 interface AnswerTabsProps {
@@ -276,6 +287,13 @@ const AnswerTabs = ({ step, summarizing, transcribing, canProcess, onSummarize, 
 
     return (
         <div className="min-w-0">
+            {step.speechStatus === 'Failed' && (
+                <div className="mb-3">
+                    <Alert variant="error" title={langField('transcriptFailedTitle')}>
+                        {getSpeechFailureNotice(step.speechMessage, langField)}
+                    </Alert>
+                </div>
+            )}
             <div role="tablist" className="flex gap-2 border-b border-gray-200">
                 {tabs.map(tab => {
                     const isActive = activeTab === tab.key;
