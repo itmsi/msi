@@ -34,10 +34,10 @@ interface POItemsFieldsProps {
     onProductDelete?: (productId: string) => void;
     onProductCopy?: (productId: string) => void;
     onUpdateProductItem?: (index: number, field: string, value: any) => void;
-    
+
     // Receive status edit
     editReceive?: boolean;
-    
+
     // Location Select Props
     locationOptions?: POLocationSelectOption[];
     locationPagination?: POLocationPaginationState;
@@ -90,7 +90,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 
     // Receive status edit
     editReceive,
-    
+
     // Location props
     locationOptions = [],
     locationPagination = { page: 1, hasMore: true, loading: false },
@@ -104,7 +104,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
     classInputValue = '',
     onClassInputChange,
     onClassMenuScrollToBottom,
-    
+
     // Department props
     departmentOptions = [],
     departmentPagination = { page: 1, hasMore: true, loading: false },
@@ -175,31 +175,31 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             onUpdateProductItem(index, field, value);
         }
     };
-    
+
     // Helper to ensure numeric value
     const toNumber = (value: any): number => {
         if (typeof value === 'string') return parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
         return Number(value) || 0;
     };
-    
+
     // Extract tax percentage from tax code name
     const extractTaxPercentage = (taxCodeName: string): number => {
         const match = taxCodeName.match(/([\d.]+)/);
         return match ? parseFloat(match[1]) : 0;
     };
-    
+
     // Calculate tax amounts
     const calculateTaxAmounts = (amount: number, taxCodeName: string) => {
         const numericAmount = toNumber(amount);
         const taxPercentage = extractTaxPercentage(taxCodeName);
         const taxAmount = (numericAmount * taxPercentage) / 100;
         const grossAmount = numericAmount + taxAmount;
-        return { 
-            taxAmount: taxAmount, 
+        return {
+            taxAmount: taxAmount,
             grossAmount: grossAmount
         };
     };
-    
+
     // Update tax calculations for an item
     const updateTaxCalculation = (index: number, amount: number, taxCodeName?: string) => {
         if (taxCodeName && amount > 0) {
@@ -233,19 +233,19 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         }
 
         onAddProductItem(selectedProduct);
-        
+
         // Clear selection after adding
         setSelectedProduct(null);
     };
-    
+
     // Define product table columns
     const productColumns: TableColumn<TablePOItem>[] = [
         {
             name: 'Product Name',
             selector: (row: TablePOItem) => row.product_name || 'N/A',
-              cell:row => (
+            cell: row => (
                 <div className="items-center gap-3 py-2">
-                    <div className="block text-sm text-gray-500">{row.item_displayname|| '-'}</div>
+                    <div className="block text-sm text-gray-500">{row.item_displayname || '-'}</div>
                     <div className="font-medium text-gray-900">{row.product_name || 'N/A'}</div>
                 </div>
             ),
@@ -256,46 +256,46 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             name: 'Quantity',
             selector: (row: TablePOItem) => row.qty || 0,
             cell: (row, index) => (<>
-                    {((formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null)) && !(editReceive) ? (
-                        <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                            row.qty && row.qty > 0 ? row.qty.toString() : '-'
-                        }</p>
-                    ) : (
-                        <Input
-                            name={`qty_${index}`}
-                            type="text"
-                            maxLength={4}
-                            min='0'
-                            value={row.qty && row.qty > 0 ? row.qty.toString() : ''}
-                            onKeyPress={handleKeyPress}
-                            onChange={(e) => {
-                                const qty = toNumber(e.target.value);
+                {((formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null)) && !(editReceive) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                        row.qty && row.qty > 0 ? row.qty.toString() : '-'
+                    }</p>
+                ) : (
+                    <Input
+                        name={`qty_${index}`}
+                        type="text"
+                        maxLength={4}
+                        min='0'
+                        value={row.qty && row.qty > 0 ? row.qty.toString() : ''}
+                        onKeyPress={handleKeyPress}
+                        onChange={(e) => {
+                            const qty = toNumber(e.target.value);
+                            const rate = toNumber(row.rate);
+                            const amount = qty * rate;
+
+                            updateItemById(index as number, 'qty', qty);
+                            updateItemById(index as number, 'amount', amount);
+                            updateItemById(index as number, 'total', amount);
+
+                            updateTaxCalculation(index as number, amount, row.taxcode_name);
+                        }}
+                        onBlur={(e) => {
+                            const qty = toNumber(e.target.value);
+                            if (qty === 0) {
                                 const rate = toNumber(row.rate);
-                                const amount = qty * rate;
-                                
-                                updateItemById(index as number, 'qty', qty);
+                                const amount = rate; // qty = 1
+
+                                updateItemById(index as number, 'qty', 1);
                                 updateItemById(index as number, 'amount', amount);
                                 updateItemById(index as number, 'total', amount);
-                                
+
                                 updateTaxCalculation(index as number, amount, row.taxcode_name);
-                            }}
-                            onBlur={(e) => {
-                                const qty = toNumber(e.target.value);
-                                if (qty === 0) {
-                                    const rate = toNumber(row.rate);
-                                    const amount = rate; // qty = 1
-                                    
-                                    updateItemById(index as number, 'qty', 1);
-                                    updateItemById(index as number, 'amount', amount);
-                                    updateItemById(index as number, 'total', amount);
-                                    
-                                    updateTaxCalculation(index as number, amount, row.taxcode_name);
-                                }
-                            }}
-                            onFocus={(e) => e.target.select()}
-                            className={`p-1 px-3 w-[80px] text-center ${editReceive ? 'border-1 border-[#14B8A6]' : 'border-1 rounded'}`}
-                        />
-                    )}
+                            }
+                        }}
+                        onFocus={(e) => e.target.select()}
+                        className={`p-1 px-3 w-[80px] text-center ${editReceive ? 'border-1 border-[#14B8A6]' : 'border-1 rounded'}`}
+                    />
+                )}
             </>),
             wrap: true,
             width: '120px',
@@ -304,24 +304,23 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             name: 'Description',
             selector: (row: TablePOItem) => row.description || 'N/A',
             cell: (row, index) => (<>
-                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                        <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                            row.description  || '-'
-                        }</p>
-                    ) : (
-                        <TextArea 
-                            name={`description_${index}`}
-                            value={row.description || ''}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {                                
-                                updateItemById(index as number, 'description', e.target.value);
-                            }}
-                            rows={2} 
-                            placeholder="Enter item description..."
-                            className={`w-full px-3 py-2 my-2 w-[220px] border-0 border-b-1 rounded-none focus:border-b-blue-500 ${
-                                errors[`description_${index}` as keyof PurchaseOrderForm] ? 'border-red-500 ' : 'border-gray-300'
+                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                    <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                        row.description || '-'
+                    }</p>
+                ) : (
+                    <TextArea
+                        name={`description_${index}`}
+                        value={row.description || ''}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                            updateItemById(index as number, 'description', e.target.value);
+                        }}
+                        rows={2}
+                        placeholder="Enter item description..."
+                        className={`w-full px-3 py-2 my-2 w-[220px] border-0 border-b-1 rounded-none focus:border-b-blue-500 ${errors[`description_${index}` as keyof PurchaseOrderForm] ? 'border-red-500 ' : 'border-gray-300'
                             }`}
-                        />
-                    )}
+                    />
+                )}
             </>),
             wrap: true,
             width: '250px',
@@ -335,43 +334,43 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         row.custcol_msi_fob && row.custcol_msi_fob > 0 ? formatNumberUSTyping(String(row.custcol_msi_fob)) : '-'
                     }</p>
                 ) : (
-                <Input
-                    name={`custcol_msi_fob_${index}`}
-                    type="text"
-                    value={row.custcol_msi_fob && row.custcol_msi_fob > 0
-                        ? formatNumberUSTyping(String(row.custcol_msi_fob))
-                        : ''}
-                    // onKeyPress={handleCurrencyKeyPress}
-                    onChange={(e) => {
-                        const rawValue = e.target.value;
-                        const fobVal = parseNumberUS(rawValue);
+                    <Input
+                        name={`custcol_msi_fob_${index}`}
+                        type="text"
+                        value={row.custcol_msi_fob && row.custcol_msi_fob > 0
+                            ? formatNumberUSTyping(String(row.custcol_msi_fob))
+                            : ''}
+                        // onKeyPress={handleCurrencyKeyPress}
+                        onChange={(e) => {
+                            const rawValue = e.target.value;
+                            const fobVal = parseNumberUS(rawValue);
 
-                        handleDecimalInput(
-                            rawValue,
-                            (validValue) => updateItemById(index as number, 'custcol_msi_fob', validValue),
-                            () => updateItemById(index as number, 'custcol_msi_fob', null),
-                            true,
-                            12,
-                            4
-                        );
-                        
-                        const landedCost = parseNumberUS(String(row.custcol_me_landed_cost));
-                        const quantity = toNumber(row.qty) || 1;
-                        
-                        const rate = fobVal + landedCost;
-                        const amount = quantity * Number(rate);
-                        
-                        // updateItemById(index as number, 'custcol_msi_fob', fobVal);
-                        updateItemById(index as number, 'rate', rate);
-                        updateItemById(index as number, 'amount', amount);
-                        updateItemById(index as number, 'total', amount);
-                        
-                        updateTaxCalculation(index as number, amount, row.taxcode_name);
-                    }}
-                    // onFocus={(e) => e.target.select()}
-                    className="border-1 rounded p-1 px-3 w-[285px] text-center"
-                    placeholder="0"
-                />
+                            handleDecimalInput(
+                                rawValue,
+                                (validValue) => updateItemById(index as number, 'custcol_msi_fob', validValue),
+                                () => updateItemById(index as number, 'custcol_msi_fob', null),
+                                true,
+                                12,
+                                4
+                            );
+
+                            const landedCost = parseNumberUS(String(row.custcol_me_landed_cost));
+                            const quantity = toNumber(row.qty) || 1;
+
+                            const rate = fobVal + landedCost;
+                            const amount = quantity * Number(rate);
+
+                            // updateItemById(index as number, 'custcol_msi_fob', fobVal);
+                            updateItemById(index as number, 'rate', rate);
+                            updateItemById(index as number, 'amount', amount);
+                            updateItemById(index as number, 'total', amount);
+
+                            updateTaxCalculation(index as number, amount, row.taxcode_name);
+                        }}
+                        // onFocus={(e) => e.target.select()}
+                        className="border-1 rounded p-1 px-3 w-[285px] text-center"
+                        placeholder="0"
+                    />
                 )}
             </>),
             center: true,
@@ -387,41 +386,41 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatNumberUSTyping(row.custcol_me_landed_cost.toString()) : '-'
                     }</p>
                 ) : (
-                <Input
-                    name={`custcol_me_landed_cost_${index}`}
-                    type="text"
-                    value={row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatNumberUSTyping(String(row.custcol_me_landed_cost)) : '0'}
-                    // onKeyPress={handleCurrencyKeyPress}
-                    onChange={(e) => {
-                        const rawValue = e.target.value;
-                        const costVal = parseNumberUS(String(rawValue));
-                        const fob = parseNumberUS(String(row.custcol_msi_fob));
-                        const quantity = toNumber(row.qty) || 1;
-                        
-                        handleDecimalInput(
-                            rawValue,
-                            (validValue) => updateItemById(index as number, 'custcol_me_landed_cost', validValue),
-                            () => updateItemById(index as number, 'custcol_me_landed_cost', null),
-                            true,
-                            12,
-                            4
-                        );
+                    <Input
+                        name={`custcol_me_landed_cost_${index}`}
+                        type="text"
+                        value={row.custcol_me_landed_cost && row.custcol_me_landed_cost > 0 ? formatNumberUSTyping(String(row.custcol_me_landed_cost)) : '0'}
+                        // onKeyPress={handleCurrencyKeyPress}
+                        onChange={(e) => {
+                            const rawValue = e.target.value;
+                            const costVal = parseNumberUS(String(rawValue));
+                            const fob = parseNumberUS(String(row.custcol_msi_fob));
+                            const quantity = toNumber(row.qty) || 1;
 
-                        const rate = fob + costVal;
-                        const amount = quantity * rate;
-                        
+                            handleDecimalInput(
+                                rawValue,
+                                (validValue) => updateItemById(index as number, 'custcol_me_landed_cost', validValue),
+                                () => updateItemById(index as number, 'custcol_me_landed_cost', null),
+                                true,
+                                12,
+                                4
+                            );
 
-                        // updateItemById(index as number, 'custcol_me_landed_cost', costVal);
-                        updateItemById(index as number, 'rate', rate);
-                        updateItemById(index as number, 'amount', amount);
-                        updateItemById(index as number, 'total', amount);
-                        
-                        updateTaxCalculation(index as number, amount, row.taxcode_name);
-                    }}
-                    // onFocus={(e) => e.target.select()}
-                    className="border-1 rounded p-1 px-3 w-[285px] text-center"
-                    placeholder="0"
-                />
+                            const rate = fob + costVal;
+                            const amount = quantity * rate;
+
+
+                            // updateItemById(index as number, 'custcol_me_landed_cost', costVal);
+                            updateItemById(index as number, 'rate', rate);
+                            updateItemById(index as number, 'amount', amount);
+                            updateItemById(index as number, 'total', amount);
+
+                            updateTaxCalculation(index as number, amount, row.taxcode_name);
+                        }}
+                        // onFocus={(e) => e.target.select()}
+                        className="border-1 rounded p-1 px-3 w-[285px] text-center"
+                        placeholder="0"
+                    />
                 )}
             </>),
             center: true,
@@ -437,15 +436,15 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         row.rate && row.rate > 0 ? formatNumberUSTyping(String(row.rate)) : '-'
                     }</p>
                 ) : (
-                <Input
-                    name={`rate_${index}`}
-                    type="text"
-                    value={row.rate && row.rate > 0 ? formatNumberUSTyping(String(row.rate)) : ''}
-                    disabled={true}
-                    readonly={true}
-                    className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
-                    placeholder="Auto calculated"
-                />
+                    <Input
+                        name={`rate_${index}`}
+                        type="text"
+                        value={row.rate && row.rate > 0 ? formatNumberUSTyping(String(row.rate)) : ''}
+                        disabled={true}
+                        readonly={true}
+                        className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
+                        placeholder="Auto calculated"
+                    />
                 )}
             </>),
             center: true,
@@ -461,15 +460,15 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         row.amount && row.amount > 0 ? formatNumberUSTyping(String(row.amount)) : '-'
                     }</p>
                 ) : (
-                <Input
-                    name={`amount_${index}`}
-                    type="text"
-                    value={row.amount && row.amount > 0 ? formatNumberUSTyping(String(row.amount)) : ''}
-                    disabled={true}
-                    readonly={true}
-                    className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
-                    placeholder="Auto calculated"
-                />
+                    <Input
+                        name={`amount_${index}`}
+                        type="text"
+                        value={row.amount && row.amount > 0 ? formatNumberUSTyping(String(row.amount)) : ''}
+                        disabled={true}
+                        readonly={true}
+                        className="border-0 rounded bg-white p-1 px-3 text-center text-gray cursor-text"
+                        placeholder="Auto calculated"
+                    />
                 )}
             </>),
             center: true,
@@ -482,43 +481,43 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             cell: (row, index) => (<>
                 {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
                     <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                         row.taxcode_name || '-'
+                        row.taxcode_name || '-'
                     }</p>
                 ) : (
-                <div className="w-[250px]">
-                    <CustomSelect
-                        options={masterData?.taxcodes?.map(tax => ({
-                            label: tax.name,
-                            value: tax.id.toString()
-                        })) || []}
-                        value={row.taxcode ? {
-                            label: row.taxcode_name || '',
-                            value: row.taxcode.toString()
-                        } : null}
-                        onChange={(option) => {
-                            if (option) {
-                                updateItemById(index as number, 'taxcode', parseInt(option.value));
-                                updateItemById(index as number, 'taxcode_name', option.label);
-                                updateItemById(index as number, 'tax_rate', option.label);
-                                
-                                const currentAmount = toNumber(row.amount);
-                                updateTaxCalculation(index as number, currentAmount, option.label);
-                            } else {
-                                // Clear tax code
-                                updateItemById(index as number, 'taxcode', 0);
-                                updateItemById(index as number, 'taxcode_name', '');
-                                updateItemById(index as number, 'tax_rate', '');
-                                
-                                const currentAmount = toNumber(row.amount);
-                                updateTaxCalculation(index as number, currentAmount);
-                            }
-                        }}
-                        placeholder="Select tax code"
-                        className="text-xs"
-                        menuPortalTarget={document.body}
-                        menuPosition="fixed"
-                    />
-                </div>
+                    <div className="w-[250px]">
+                        <CustomSelect
+                            options={masterData?.taxcodes?.map(tax => ({
+                                label: tax.name,
+                                value: tax.id.toString()
+                            })) || []}
+                            value={row.taxcode ? {
+                                label: row.taxcode_name || '',
+                                value: row.taxcode.toString()
+                            } : null}
+                            onChange={(option) => {
+                                if (option) {
+                                    updateItemById(index as number, 'taxcode', parseInt(option.value));
+                                    updateItemById(index as number, 'taxcode_name', option.label);
+                                    updateItemById(index as number, 'tax_rate', option.label);
+
+                                    const currentAmount = toNumber(row.amount);
+                                    updateTaxCalculation(index as number, currentAmount, option.label);
+                                } else {
+                                    // Clear tax code
+                                    updateItemById(index as number, 'taxcode', 0);
+                                    updateItemById(index as number, 'taxcode_name', '');
+                                    updateItemById(index as number, 'tax_rate', '');
+
+                                    const currentAmount = toNumber(row.amount);
+                                    updateTaxCalculation(index as number, currentAmount);
+                                }
+                            }}
+                            placeholder="Select tax code"
+                            className="text-xs"
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                        />
+                    </div>
                 )}
             </>),
             center: true,
@@ -566,39 +565,39 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             selector: (row: TablePOItem) => row.department_name || 'N/A',
             cell: (row, index) => (
                 <div className="w-[285px]">
-                {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
-                    <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
-                         row.department_name || '-'
-                    }</p>
-                ) : (
-                    <CustomAsyncSelect
-                        name={`department_${index}`}
-                        placeholder="Select department..."
-                        value={row.department ? {
-                            label: row.department_name || '',
-                            value: row.department.toString()
-                        } : null}
-                        defaultOptions={departmentOptions}
-                        loadOptions={onDepartmentInputChange}
-                        onMenuScrollToBottom={onDepartmentMenuScrollToBottom}
-                        isLoading={departmentPagination.loading}
-                        noOptionsMessage={() => "No departments found"}
-                        loadingMessage={() => "Loading departments..."}
-                        isSearchable={true}
-                        inputValue={departmentInputValue}
-                        onInputChange={onDepartmentInputChange}
-                        onChange={(option) => {
-                            if (option) {
-                                updateItemById(index as number, 'department', parseInt(String(option.value)));
-                                updateItemById(index as number, 'department_name', option.label);
-                            }
-                        }}
-                        error={!row.department && errors?.items_department ? errors.items_department : undefined}
-                        className="w-full text-xs"
-                        menuPortalTarget={document.body}
-                        menuPosition="fixed"
-                    />
-                )}
+                    {(formData.approvalstatus === 2 || formData.approvalstatus === 3) || (formData.approvalstatus === 1 && formData.nextapprover !== null) ? (
+                        <p className="mt-1 text-gray-800 text-md border-0 min-h-[42px] flex items-center">{
+                            row.department_name || '-'
+                        }</p>
+                    ) : (
+                        <CustomAsyncSelect
+                            name={`department_${index}`}
+                            placeholder="Select department..."
+                            value={row.department ? {
+                                label: row.department_name || '',
+                                value: row.department.toString()
+                            } : null}
+                            defaultOptions={departmentOptions}
+                            loadOptions={onDepartmentInputChange}
+                            onMenuScrollToBottom={onDepartmentMenuScrollToBottom}
+                            isLoading={departmentPagination.loading}
+                            noOptionsMessage={() => "No departments found"}
+                            loadingMessage={() => "Loading departments..."}
+                            isSearchable={true}
+                            inputValue={departmentInputValue}
+                            onInputChange={onDepartmentInputChange}
+                            onChange={(option) => {
+                                if (option) {
+                                    updateItemById(index as number, 'department', parseInt(String(option.value)));
+                                    updateItemById(index as number, 'department_name', option.label);
+                                }
+                            }}
+                            error={!row.department && errors?.items_department ? errors.items_department : undefined}
+                            className="w-full text-xs"
+                            menuPortalTarget={document.body}
+                            menuPosition="fixed"
+                        />
+                    )}
                 </div>
             ),
             center: true,
@@ -659,36 +658,36 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
                         }</p>
                     ) : (
                         <>
-                        <CustomAsyncSelect
-                            name={`location_${index}`}
-                            placeholder="Select location..."
-                            value={row.location ? {
-                                label: row.location_name || '',
-                                value: row.location.toString()
-                            } : null}
-                            defaultOptions={locationOptions}
-                            loadOptions={onLocationInputChange}
-                            onMenuScrollToBottom={onLocationMenuScrollToBottom}
-                            isLoading={locationPagination.loading}
-                            noOptionsMessage={() => "No locations found"}
-                            loadingMessage={() => "Loading locations..."}
-                            isSearchable={true}
-                            inputValue={locationInputValue}
-                            onInputChange={onLocationInputChange}
-                            onChange={(option) => {
-                                if (option) {
-                                    updateItemById(index as number, 'location', parseInt(String(option.value)));
-                                    updateItemById(index as number, 'location_name', option.label);
-                                }
-                            }}
-                            error={!row.location && errors?.items_location ? errors.items_location : undefined}
-                            className="text-xs"
-                            menuPortalTarget={document.body}
-                            menuPosition="fixed"
-                        />
-                        {!row.location && errors?.items_location && (
-                            <span className="text-xs text-red-500 mt-1 block">Location wajib dipilih</span>
-                        )}
+                            <CustomAsyncSelect
+                                name={`location_${index}`}
+                                placeholder="Select location..."
+                                value={row.location ? {
+                                    label: row.location_name || '',
+                                    value: row.location.toString()
+                                } : null}
+                                defaultOptions={locationOptions}
+                                loadOptions={onLocationInputChange}
+                                onMenuScrollToBottom={onLocationMenuScrollToBottom}
+                                isLoading={locationPagination.loading}
+                                noOptionsMessage={() => "No locations found"}
+                                loadingMessage={() => "Loading locations..."}
+                                isSearchable={true}
+                                inputValue={locationInputValue}
+                                onInputChange={onLocationInputChange}
+                                onChange={(option) => {
+                                    if (option) {
+                                        updateItemById(index as number, 'location', parseInt(String(option.value)));
+                                        updateItemById(index as number, 'location_name', option.label);
+                                    }
+                                }}
+                                error={!row.location && errors?.items_location ? errors.items_location : undefined}
+                                className="text-xs"
+                                menuPortalTarget={document.body}
+                                menuPosition="fixed"
+                            />
+                            {!row.location && errors?.items_location && (
+                                <span className="text-xs text-red-500 mt-1 block">Location wajib dipilih</span>
+                            )}
                         </>
                     )}
                 </div>
@@ -763,7 +762,7 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
             },
         ])])
     ];
-    
+
     if (loadingMasterData) {
         return (
             <div className="flex justify-center items-center py-12">
@@ -779,60 +778,60 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
         <div className="space-y-6">
             <div className={`mb-6 space-y-6 p-6 ${formData.approvalstatus === 2 || formData.approvalstatus === 3 ? '' : 'min-h-[500px]'}`}>
                 <h3 className="text-lg font-primary-bold font-medium text-gray-900">Purchase Order Items</h3>
-                
+
                 {/* Add Product Section */}
                 {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (formData.approvalstatus !== 1 || formData.nextapprover === null) && (
-                <div className="space-y-4 mb-6">
-                    <div>
-                        <Label>Filter Item Type</Label>
-                        <CustomSelect
-                            name="item_type_filter"
-                            placeholder="All Item Types"
-                            value={itemTypeFilter.length > 0 ? itemTypeOptions.find(o => o.value === itemTypeFilter[0]) : null}
-                            options={itemTypeOptions}
-                            isClearable={true}
-                            onChange={(option) => {
-                                handleItemTypeChange(option);
-                            }}
-                        />
+                    <div className="space-y-4 mb-6">
+                        <div>
+                            <Label>Filter Item Type</Label>
+                            <CustomSelect
+                                name="item_type_filter"
+                                placeholder="All Item Types"
+                                value={itemTypeFilter.length > 0 ? itemTypeOptions.find(o => o.value === itemTypeFilter[0]) : null}
+                                options={itemTypeOptions}
+                                isClearable={true}
+                                onChange={(option) => {
+                                    handleItemTypeChange(option);
+                                }}
+                            />
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="flex-1">
+                                <Label htmlFor='selectProduct'>Select Product to Add</Label>
+                                <CustomAsyncSelect
+                                    name="product_select"
+                                    placeholder="Select product to add..."
+                                    value={selectedProduct}
+                                    error={productSelectError}
+                                    defaultOptions={formattedItemOptions}
+                                    loadOptions={loadFormattedItemOptions}
+                                    onMenuScrollToBottom={handleMenuScrollToBottom}
+                                    isLoading={pagination.loading}
+                                    noOptionsMessage={() => "No products found"}
+                                    loadingMessage={() => "Loading products..."}
+                                    isSearchable={true}
+                                    inputValue={inputValue}
+                                    onInputChange={handleProductInputChange}
+                                    onChange={handleProductChange}
+                                />
+                                {productSelectError && (
+                                    <span className="text-sm text-red-500 mt-1 block">{productSelectError}</span>
+                                )}
+                            </div>
+
+                            <div className="flex flex-col justify-end">
+                                <Button
+                                    type="button"
+                                    onClick={handleAddProduct}
+                                    className="flex items-center gap-2"
+                                    disabled={!selectedProduct || !isFormComplete || formData.items.length >= 300}
+                                >
+                                    <MdAdd size={16} />
+                                    Add Product
+                                </Button>
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex gap-4">
-                    <div className="flex-1">
-                        <Label htmlFor='selectProduct'>Select Product to Add</Label>
-                        <CustomAsyncSelect
-                            name="product_select"
-                            placeholder="Select product to add..."
-                            value={selectedProduct}
-                            error={productSelectError}
-                            defaultOptions={formattedItemOptions}
-                            loadOptions={loadFormattedItemOptions}
-                            onMenuScrollToBottom={handleMenuScrollToBottom}
-                            isLoading={pagination.loading}
-                            noOptionsMessage={() => "No products found"}
-                            loadingMessage={() => "Loading products..."}
-                            isSearchable={true}
-                            inputValue={inputValue}
-                            onInputChange={handleProductInputChange}
-                            onChange={handleProductChange}
-                        />
-                        {productSelectError && (
-                            <span className="text-sm text-red-500 mt-1 block">{productSelectError}</span>
-                        )}
-                    </div>
-                    
-                    <div className="flex flex-col justify-end">
-                        <Button
-                            type="button"
-                            onClick={handleAddProduct}
-                            className="flex items-center gap-2"
-                            disabled={!selectedProduct || !isFormComplete || formData.items.length >= 300}
-                        >
-                            <MdAdd size={16} />
-                            Add Product
-                        </Button>
-                    </div>
-                    </div>
-                </div>
                 )}
 
                 {(formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
@@ -881,18 +880,18 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 
                 {/* Invoice Summary */}
                 {
-                 (formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
-                    formData.items && formData.items.length > 0 && (<>
-                    {/* <div className="grid grid-cols-1 md:grid-cols-3">
+                    (formData.approvalstatus !== 2 && formData.approvalstatus !== 3) && (
+                        formData.items && formData.items.length > 0 && (<>
+                            {/* <div className="grid grid-cols-1 md:grid-cols-3">
                         <div className=" md:col-span-2"></div> */}
-                        <InvoiceSummary 
-                            items={formData.items} 
-                            currency={formData?.currency_symbol || ''} 
-                            serverTotal={serverTotal}
-                        />
-                    {/* </div> */}
-                    </>)
-                )}
+                            <InvoiceSummary
+                                items={formData.items}
+                                currency={formData?.currency_symbol || ''}
+                                serverTotal={serverTotal}
+                            />
+                            {/* </div> */}
+                        </>)
+                    )}
                 {/* {errors?.items && (
                     <span className="text-sm text-red-500">{errors.items}</span>
                 )} */}
@@ -917,33 +916,33 @@ export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string, 
         const totalTax = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.tax_amount)), 0);
         const localGrandTotal = items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
         // serverTotal override kalkulasi lokal; fallback ke lokal jika tidak ada
-        const grandTotal = serverTotal != null ? serverTotal : localGrandTotal;
+        const grandTotal = (serverTotal != null && serverTotal === localGrandTotal) ? serverTotal : localGrandTotal;
         const totalQty = items.reduce((sum, item) => sum + toNumber(item.qty), 0);
-        
+
         return { subtotal, totalTax, grandTotal, totalQty };
     }, [items, serverTotal]);
 
     return (
-            <div className="w-full px-0 space-y-3">
-                <div className="space-y-6">
-                    <div className="flex justify-between text-sm text-gray-600">
-                        <span>Total Items</span>
-                        <span className="font-medium text-gray-800">{items.length} item ({summary.totalQty} qty)</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-600">
-                        <span>Subtotal</span>
-                        <span className="font-medium text-gray-800">{formatCurrencyDynamic(summary.subtotal, currency)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-600">
-                        <span>Tax</span>
-                        <span className="font-medium text-gray-800">{formatCurrencyDynamic(summary.totalTax, currency)}</span>
-                    </div>
-                    <div className="border-t border-gray-300 pt-3 flex justify-between text-sm font-primary-bold">
-                        <span>Grand Total</span>
-                        <span className="text-blue-700">{formatCurrencyDynamic(summary.grandTotal, currency)}</span>
-                    </div>
+        <div className="w-full px-0 space-y-3">
+            <div className="space-y-6">
+                <div className="flex justify-between text-sm text-gray-600">
+                    <span>Total Items</span>
+                    <span className="font-medium text-gray-800">{items.length} item ({summary.totalQty} qty)</span>
+                </div>
+                <div className="flex justify-between text-sm text-gray-600">
+                    <span>Subtotal</span>
+                    <span className="font-medium text-gray-800">{formatCurrencyDynamic(summary.subtotal, currency)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-gray-600">
+                    <span>Tax</span>
+                    <span className="font-medium text-gray-800">{formatCurrencyDynamic(summary.totalTax, currency)}</span>
+                </div>
+                <div className="border-t border-gray-300 pt-3 flex justify-between text-sm font-primary-bold">
+                    <span>Grand Total</span>
+                    <span className="text-blue-700">{formatCurrencyDynamic(summary.grandTotal, currency)}</span>
                 </div>
             </div>
+        </div>
     );
 };
 export default purchaseOrderItemFields
