@@ -39,6 +39,53 @@ const toScore = (value: unknown): number | null => {
     return typeof number === 'number' && Number.isFinite(number) ? number : null;
 };
 
+// Model kadang menulis baris baru / tab literal di dalam nilai string JSON, yang membuat
+// JSON.parse gagal. Karakter kontrol di dalam string diubah jadi escape-nya.
+const escapeControlCharsInStrings = (text: string): string => {
+    let out = '';
+    let inString = false;
+    let escaped = false;
+    for (const char of text) {
+        if (!inString) {
+            if (char === '"') inString = true;
+            out += char;
+        } else if (escaped) {
+            escaped = false;
+            out += char;
+        } else if (char === '\\') {
+            escaped = true;
+            out += char;
+        } else if (char === '"') {
+            inString = false;
+            out += char;
+        } else if (char === '\n') {
+            out += '\\n';
+        } else if (char === '\r') {
+            out += '\\r';
+        } else if (char === '\t') {
+            out += '\\t';
+        } else if (char < ' ') {
+            out += `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`;
+        } else {
+            out += char;
+        }
+    }
+    return out;
+};
+
+// Mengembalikan undefined kalau bukan JSON, termasuk setelah mencoba memperbaiki karakter kontrol.
+const parseJsonLenient = (text: string): unknown => {
+    try {
+        return JSON.parse(text);
+    } catch {
+        try {
+            return JSON.parse(escapeControlCharsInStrings(text));
+        } catch {
+            return undefined;
+        }
+    }
+};
+
 // Mengambil semua objek JSON level atas dari teks. Model kadang membungkus JSON dengan
 // ```json ... ```, kalimat pembuka, atau menggabungkan beberapa objek / array (summary all).
 const extractJsonObjects = (text: string): Record<string, unknown>[] => {
@@ -48,11 +95,12 @@ const extractJsonObjects = (text: string): Record<string, unknown>[] => {
         else if (isRecord(value)) results.push(value);
     };
 
-    try {
-        collect(JSON.parse(text.trim()));
+    let parsed = parseJsonLenient(text.trim());
+    // JSON yang ter-encode dua kali (string berisi JSON)
+    if (typeof parsed === 'string') parsed = parseJsonLenient(parsed.trim());
+    if (parsed !== undefined) {
+        collect(parsed);
         if (results.length) return results;
-    } catch {
-        // lanjut ke pemindaian manual
     }
 
     let depth = 0;
@@ -73,11 +121,9 @@ const extractJsonObjects = (text: string): Record<string, unknown>[] => {
         } else if (char === '}' && depth > 0) {
             depth -= 1;
             if (depth === 0) {
-                try {
-                    collect(JSON.parse(text.slice(start, i + 1)));
-                } catch {
-                    // bukan JSON valid, abaikan
-                }
+                // bukan JSON valid: diabaikan
+                const chunk = parseJsonLenient(text.slice(start, i + 1));
+                if (chunk !== undefined) collect(chunk);
             }
         }
     }
