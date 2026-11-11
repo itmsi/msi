@@ -587,6 +587,21 @@ export const applicantLabels: TranslationMap = {
         en: 'The transcript could not be processed.',
         zh: '文字记录处理失败。',
     },
+    transcriptFailedTitle: {
+        id: 'Transkrip gagal',
+        en: 'Transcription failed',
+        zh: '转录失败',
+    },
+    speechFailedEmptyAudio: {
+        id: 'File audio kosong',
+        en: 'The audio file is empty',
+        zh: '音频文件为空',
+    },
+    speechFailedNoSpeech: {
+        id: 'Tidak ada ucapan yang terdeteksi pada audio',
+        en: 'No speech was detected in the audio',
+        zh: '音频中未检测到语音',
+    },
     transcriptNotStartedDescription: {
         id: 'Audio jawaban ini belum ditranskrip.',
         en: 'This answer audio has not been transcribed yet.',
