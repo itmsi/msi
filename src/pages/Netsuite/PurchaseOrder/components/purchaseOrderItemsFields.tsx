@@ -75,7 +75,7 @@ interface POItemsFieldsProps {
     onProjectSegmentationMenuScrollToBottom?: () => void;
 
     // Grand total dari server (foreigntotal) — override kalkulasi lokal di Edit page
-    serverTotal?: number;
+    serverTotal?: number | string | null;
 }
 
 const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
@@ -901,24 +901,27 @@ const purchaseOrderItemFields: React.FC<POItemsFieldsProps> = ({
 }
 
 // Summary invoice dari items
-export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string, serverTotal?: number }> = ({ items, currency, serverTotal }) => {
-    // Helper to ensure numeric value  
-    const toNumber = (value: any): number => {
+export const InvoiceSummary: React.FC<{ items: TablePOItem[], currency: string, serverTotal?: number | string | null }> = ({ items, currency, serverTotal }) => {
+    const toNumber = (value: number | string | null | undefined): number => {
         if (typeof value === 'string') {
-            // Handle currency formatted strings
-            return parseCurrencyIDR(value);
+            const numericValue = Number(value);
+            return Number.isFinite(numericValue) ? numericValue : parseCurrencyIDR(value);
         }
-        return Number(value) || 0;
+        return typeof value === 'number' && Number.isFinite(value) ? value : 0;
     };
 
     const summary = useMemo(() => {
         const subtotal = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.amount)), 0);
         const totalTax = items.reduce((sum, item) => sum + toNumber(formatNumberPriceKoma(item.tax_amount)), 0);
         const localGrandTotal = items.reduce((sum, item) => sum + toNumber(item.gross_amount || item.amount), 0);
-        // serverTotal override kalkulasi lokal; fallback ke lokal jika tidak ada
-        const grandTotal = (serverTotal != null && serverTotal === localGrandTotal) ? serverTotal : localGrandTotal;
+        const parsedServerTotal = serverTotal == null || (typeof serverTotal === 'string' && !serverTotal.trim())
+            ? null
+            : toNumber(serverTotal);
+        const grandTotal = parsedServerTotal !== null
+            && Math.round(parsedServerTotal * 100) === Math.round(localGrandTotal * 100)
+            ? parsedServerTotal
+            : localGrandTotal;
         const totalQty = items.reduce((sum, item) => sum + toNumber(item.qty), 0);
-
         return { subtotal, totalTax, grandTotal, totalQty };
     }, [items, serverTotal]);
 
