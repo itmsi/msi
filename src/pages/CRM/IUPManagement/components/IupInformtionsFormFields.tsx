@@ -38,6 +38,9 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
         initializeOptions: initializeSegementationOptions
     } = useSegementationSelect();
 
+    // Segmentation states
+    const [selectedSegment, setSelectedSegment] = useState<SegmentSelectOption | null>(null);
+
     useEffect(() => {
         initializeSegementationOptions();
     }, [initializeSegementationOptions]);
@@ -49,9 +52,6 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
     const skDatePickerRef = useRef<HTMLDivElement>(null);
     const skDueDatePickerRef = useRef<HTMLDivElement>(null);
     // Helper function untuk render input field dengan consistent styling
-    
-    // Segmentation states
-    const [selectedSegment, setSelectedSegment] = useState<SegmentSelectOption | null>(null);
 
     const formatDate = (date: Date) => {
         return date.toLocaleDateString('id-ID', {
@@ -76,9 +76,8 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
                 value={formData[name] as string}
                 onKeyPress={type === 'number' ? allowOnlyNumeric : undefined}
                 onChange={onInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors[name] ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors[name] ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 min={type === 'number' ? "1" : "10000"}
             />
             {errors[name] && (
@@ -119,15 +118,24 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
         if (formData.sk_end_date) {
             setDueDate(new Date(formData.sk_end_date));
         }
-        
-        if (formData.segmentation_id) {
-            setSelectedSegment({
-                value: formData.segmentation_id,
-                label: formData.segmentation_name_en || 'Select Segment'
-            });
+
+        if (!formData.segmentation_id) {
+            setSelectedSegment(null);
+            return;
         }
 
-    }, [formData.sk_effective_date, formData.sk_end_date, formData.segmentation_id]);
+        setSelectedSegment((currentSegment) => {
+            if (currentSegment?.value === formData.segmentation_id) {
+                return currentSegment;
+            }
+
+            return {
+                value: formData.segmentation_id,
+                label: formData.segmentation_name_en || 'Select Segment'
+            };
+        });
+
+    }, [formData.sk_effective_date, formData.sk_end_date, formData.segmentation_id, formData.segmentation_name_en]);
 
     // Handle click outside for SK effective date picker
     useEffect(() => {
@@ -198,7 +206,7 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
                 <div>
                     <Label>SK Effective Date</Label>
                     <div className="relative" ref={skDatePickerRef}>
-                        <div 
+                        <div
                             className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500"
                             onClick={() => setShowSkDatePicker(!showSkDatePicker)}
                         >
@@ -209,14 +217,14 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        
+
                         {showSkDatePicker && (
                             <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
                                 <Calendar
                                     date={skDate}
                                     onChange={(date) => handleSkDateChange(date as Date)}
                                     color="#3b82f6"
-                                    minDate={new Date()}
+                                // minDate={new Date()}
                                 />
                             </div>
                         )}
@@ -232,7 +240,7 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
                 <div>
                     <Label>SK End Date</Label>
                     <div className="relative" ref={skDueDatePickerRef}>
-                        <div 
+                        <div
                             className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer bg-white hover:border-gray-400 focus-within:border-blue-500"
                             onClick={() => setShowDueDatePicker(!showDueDatePicker)}
                         >
@@ -243,10 +251,10 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        
+
                         {showDueDatePicker && (
                             <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-                                <div className="p-3 border-b border-gray-200">
+                                {/* <div className="p-3 border-b border-gray-200">
                                     <div className="text-sm text-gray-600 mb-2">Quick Select:</div>
                                     <div className="flex flex-wrap gap-2">
                                         <button
@@ -278,7 +286,7 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
                                             +30 Days
                                         </button>
                                     </div>
-                                </div>
+                                </div> */}
                                 <Calendar
                                     date={dueDate}
                                     onChange={(date) => handleDueDateChange(date as Date)}
@@ -304,8 +312,8 @@ const IupInformtionsFormFields: React.FC<IupFormFieldsProps> = ({
                 {renderInput('mine_location', 'Mine Location', 'text', false)}
                 {renderInput('area_size_ha', 'Area Size (Ha)', 'number', false)}
                 {renderInput('regency_name', 'Regency Name', 'text', false)}
-                
-                
+
+
                 {/* Status Field */}
                 <div>
                     <Label>Status *</Label>
